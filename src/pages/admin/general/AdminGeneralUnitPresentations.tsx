@@ -5,28 +5,22 @@ import { toast } from '@/hooks/use-toast'
 import { useUnitPresentations, UnitPresentation, useDeleteUnitPresentation } from '@/hooks/use-unit-presentations'
 import { useGlobalModalStore } from '@/components/modal'
 import AdminUnitRow from '@/features/materials/components/admin/AdminUnitRow'
-
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-
 import { Table } from '@/components/shared/trees/Table'
-
 import { Plus, Edit, Trash2, Ruler, Package } from 'lucide-react'
-
 const AdminGeneralUnitPresentations = () => {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('name')
   const [filterByUnit, setFilterByUnit] = useState('')
   
   const { openModal } = useGlobalModalStore()
-
   // Fetch unit presentations using the hook
   const { data: unitPresentations = [], isLoading } = useUnitPresentations()
   const deleteUnitPresentationMutation = useDeleteUnitPresentation()
-
   // Get unique units for filters
   const uniqueUnits = unitPresentations
     .filter(up => up.unit)
@@ -36,19 +30,17 @@ const AdminGeneralUnitPresentations = () => {
       }
       return acc
     }, [])
-
   // Apply client-side filtering
   const filteredUnitPresentations = unitPresentations.filter(unitPresentation => {
-    const matchesSearch = searchValue === '' || 
+    const matchesSearch = searchValue === ''|| 
       unitPresentation.name.toLowerCase().includes(searchValue.toLowerCase()) ||
       unitPresentation.unit?.name.toLowerCase().includes(searchValue.toLowerCase()) ||
       unitPresentation.description?.toLowerCase().includes(searchValue.toLowerCase())
     
-    const matchesUnit = filterByUnit === '' || unitPresentation.unit_id === filterByUnit
+    const matchesUnit = filterByUnit === ''|| unitPresentation.unit_id === filterByUnit
     
     return matchesSearch && matchesUnit
   })
-
   // Apply client-side sorting
   const sortedUnitPresentations = [...filteredUnitPresentations].sort((a, b) => {
     if (sortBy === 'name') {
@@ -61,15 +53,12 @@ const AdminGeneralUnitPresentations = () => {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     }
   })
-
   const handleEdit = (unitPresentation: UnitPresentation) => {
     openModal('unit-presentation-form', { editingUnitPresentation: unitPresentation })
   }
-
   const handleCreate = () => {
     openModal('unit-presentation-form', { editingUnitPresentation: null })
   }
-
   const handleDelete = (unitPresentation: UnitPresentation) => {
     openModal('delete-confirmation', {
       mode: 'dangerous',
@@ -81,13 +70,11 @@ const AdminGeneralUnitPresentations = () => {
       isLoading: deleteUnitPresentationMutation.isPending
     })
   }
-
   const clearFilters = () => {
     setSearchValue('')
     setSortBy('name')
     setFilterByUnit('')
   }
-
   const columns = [
     {
       key: 'created_at',
@@ -143,7 +130,6 @@ const AdminGeneralUnitPresentations = () => {
       )
     }
   ]
-
   return (
     <div className="space-y-6">
       {/* Unit Presentations Table */}
@@ -161,7 +147,7 @@ const AdminGeneralUnitPresentations = () => {
             icon: Trash2,
             label: 'Eliminar',
             onClick: () => handleDelete(unitPresentation),
-            variant: 'destructive' as const
+            variant: 'destructive'as const
           }
         ]}
         renderCard={(unitPresentation) => (
@@ -176,7 +162,7 @@ const AdminGeneralUnitPresentations = () => {
           searchValue: searchValue,
           onSearchChange: setSearchValue,
           showFilter: true,
-          isFilterActive: filterByUnit !== '' || sortBy !== 'name',
+          isFilterActive: filterByUnit !== ''|| sortBy !== 'name',
           renderFilterContent: () => (
             <div className="space-y-3 p-2 min-w-[200px]">
               <div>
@@ -224,5 +210,4 @@ const AdminGeneralUnitPresentations = () => {
     </div>
   )
 }
-
 export default AdminGeneralUnitPresentations;

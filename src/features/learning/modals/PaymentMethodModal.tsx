@@ -27,7 +27,6 @@ import mercadoPagoLogo from "/MercadoPago_logo.png";
 import paypalLogo from "/Paypal_2014_logo.png";
 import { useCoursePricing } from "@/features/learning/hooks/use-course-pricing";
 import { getApiBase } from "@/utils/apiBase";
-
 // Helper para hacer fetch con timeout y evitar requests colgadas
 async function fetchWithTimeout(url: string, init: RequestInit = {}, ms = 15000) {
   const ctrl = new AbortController();
@@ -39,14 +38,11 @@ async function fetchWithTimeout(url: string, init: RequestInit = {}, ms = 15000)
     clearTimeout(id);
   }
 }
-
 interface PaymentMethodModalProps {
   courseSlug: string;
   currency: "ARS" | "USD";
 }
-
 type PaymentMethod = "mercadopago" | "paypal" | "transfer";
-
 interface AppliedCoupon {
   coupon_id: string;
   code: string;
@@ -55,7 +51,6 @@ interface AppliedCoupon {
   discount: number;
   final_price: number;
 }
-
 export default function PaymentMethodModal({
   courseSlug,
   currency,
@@ -63,25 +58,20 @@ export default function PaymentMethodModal({
   const { closeModal } = useGlobalModalStore();
   const { setPanel } = useModalPanelStore();
   const { toast } = useToast();
-
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(
     null,
   );
-
   // Provider/currency visibles según método
   const currentProvider =
     selectedMethod === "paypal" ? "paypal" : "mercadopago";
   const currentCurrency = selectedMethod === "paypal" ? "USD" : "ARS";
-
   const { data: priceData, isLoading: priceLoading } = useCoursePricing(
     courseSlug,
     currentCurrency,
     currentProvider,
   );
-
   const [loading, setLoading] = useState(false);
   const [showBankInfo, setShowBankInfo] = useState(false);
-
   // Cupón
   const [couponCode, setCouponCode] = useState("");
   const [validatingCoupon, setValidatingCoupon] = useState(false);
@@ -89,51 +79,42 @@ export default function PaymentMethodModal({
     null,
   );
   const [couponError, setCouponError] = useState<string | null>(null);
-
   useEffect(() => {
     setPanel("edit");
   }, [setPanel]);
-
   const handleValidateCoupon = async () => {
     if (!couponCode.trim()) {
       setCouponError("Ingresá un código de cupón");
       return;
     }
-
     if (!priceData) {
       setCouponError("Esperá a que se cargue el precio del curso");
       return;
     }
-
     try {
       setValidatingCoupon(true);
       setCouponError(null);
-
       const { data: courseData, error: courseError } = await supabase
         .from("courses")
         .select("id")
         .eq("is_deleted", false)
         .eq("slug", courseSlug)
         .single();
-
       if (courseError || !courseData) {
         setCouponError("No se pudo obtener la información del curso");
         return;
       }
-
       const { data, error } = await supabase.rpc("validate_coupon", {
         p_code: couponCode.trim(),
         p_course_id: courseData.id,
         p_price: priceData.price,
         p_currency: priceData.currency,
       });
-
       if (error) {
         console.error("Error validando cupón:", error);
         setCouponError("Error al validar el cupón");
         return;
       }
-
       if (!data || !data.ok) {
         const errorMessages: Record<string, string> = {
           NOT_FOUND_OR_INACTIVE: "Cupón inválido o inactivo",
@@ -147,14 +128,12 @@ export default function PaymentMethodModal({
           CURRENCY_MISMATCH: "El cupón no aplica a esta moneda",
           UNAUTHENTICATED: "Tenés que iniciar sesión para usar un cupón",
         };
-
         const errorMessage =
           errorMessages[data.reason || ""] ||
           "No pudimos aplicar el cupón. Probá de nuevo";
         setCouponError(errorMessage);
         return;
       }
-
       setCouponError(null);
       setAppliedCoupon({
         coupon_id: data.coupon_id,
@@ -164,12 +143,10 @@ export default function PaymentMethodModal({
         discount: data.discount,
         final_price: data.final_price,
       });
-
       toast({
         title: "✓ Cupón aplicado",
         description: `¡Descuento de ${data.type === "percent" ? data.amount + "%" : "$" + data.amount} aplicado!`,
       });
-
       setCouponCode("");
     } catch (error: any) {
       console.error("Error al validar cupón:", error);
@@ -178,7 +155,6 @@ export default function PaymentMethodModal({
       setValidatingCoupon(false);
     }
   };
-
   const handleRemoveCoupon = () => {
     setAppliedCoupon(null);
     setCouponCode("");
@@ -187,12 +163,10 @@ export default function PaymentMethodModal({
       description: "El descuento fue quitado",
     });
   };
-
   // === NUEVO: flujo Mercado Pago contra /api/mp/create-preference ===
   const handleMercadoPagoPayment = async () => {
     try {
       setLoading(true);
-
       // Requiere sesión para obtener user_id de tu tabla "users"
       const {
         data: { session },
@@ -201,7 +175,6 @@ export default function PaymentMethodModal({
       if (sessionError || !session?.access_token) {
         throw new Error("Debes iniciar sesión para comprar un curso");
       }
-
       // Si el cupón deja el precio en 0 → inscripción directa
       const currentFinalPrice = appliedCoupon
         ? appliedCoupon.final_price
@@ -219,47 +192,38 @@ export default function PaymentMethodModal({
             code: appliedCoupon?.code,
           }),
         });
-
         const data = await response.json();
         if (!response.ok) {
           console.error("Error al inscribir con cupón 100%:", data);
           throw new Error(data?.error || "No se pudo completar la inscripción");
         }
-
         toast({
           title: "¡Inscripción exitosa!",
           description:
             "Te inscribiste correctamente al curso. Ya podés acceder al contenido.",
         });
-
         setTimeout(() => {
           window.location.assign(`/learning/courses/${courseSlug}`);
         }, 1500);
         return;
       }
-
       // Obtener user_id (tu UUID interno) desde "users" con auth_id
       const {
         data: { user: authUser },
       } = await supabase.auth.getUser();
       if (!authUser)
         throw new Error("No se pudo obtener el usuario autenticado");
-
       const userRecord = await getUserByAuthId(authUser.id);
-
       if (!userRecord?.id) {
         throw new Error("No se pudo obtener el ID interno del usuario");
       }
-
       const requestBody = {
         user_id: userRecord.id,
         course_slug: courseSlug,
         currency: "ARS",
         months: 12,
       };
-
       console.log("[MP] Creando preferencia…", requestBody);
-
       // Llamada al nuevo endpoint en Vercel con timeout
       const API_BASE = getApiBase();
       console.log("[MP] API_BASE:", API_BASE);
@@ -278,7 +242,6 @@ export default function PaymentMethodModal({
         },
         15000 // timeout de 15 segundos
       );
-
       const text = await res.text();
       let payload: any;
       try {
@@ -286,13 +249,11 @@ export default function PaymentMethodModal({
       } catch {
         payload = { error: text };
       }
-
       console.log("[MP] Respuesta create-preference:", { 
         status: res.status, 
         ok: res.ok,
         data: payload 
       });
-
       if (!res.ok || !payload?.init_point) {
         console.error("[MP] Error al crear preferencia:", payload);
         throw new Error(
@@ -301,7 +262,6 @@ export default function PaymentMethodModal({
             : `create-preference falló: status=${res.status}`
         );
       }
-
       // Redirige al checkout de Mercado Pago
       console.log("[MP] Redirigiendo a:", payload.init_point);
       window.location.assign(payload.init_point);
@@ -316,11 +276,9 @@ export default function PaymentMethodModal({
       setLoading(false);
     }
   };
-
   const handlePayPalPayment = async () => {
     try {
       setLoading(true);
-
       const {
         data: { session },
         error: sessionError,
@@ -328,32 +286,25 @@ export default function PaymentMethodModal({
       if (sessionError || !session?.access_token) {
         throw new Error("Debes iniciar sesión para comprar un curso");
       }
-
       const {
         data: { user: authUser },
       } = await supabase.auth.getUser();
       if (!authUser) {
         throw new Error("No se pudo obtener el usuario");
       }
-
       const userRecord = await getUserByAuthId(authUser.id);
-
       if (!userRecord) {
         throw new Error("No se pudo obtener el ID del usuario");
       }
-
       const courseTitle = (priceData as any)?.courses?.title || courseSlug;
       const description = `${courseTitle} - Suscripción Anual`;
-
       const requestBody = {
         user_id: userRecord.id,
         course_slug: courseSlug,
         ...(appliedCoupon && { code: appliedCoupon.code }),
         description,
       };
-
       console.log("[PayPal] Creando orden…", requestBody);
-
       const API_BASE = getApiBase();
       console.log("[PayPal] API_BASE:", API_BASE);
       console.log("[PayPal] VITE_API_BASE:", import.meta.env.VITE_API_BASE);
@@ -373,7 +324,6 @@ export default function PaymentMethodModal({
         },
         15000 // timeout de 15 segundos
       );
-
       const text = await res.text();
       let payload: any;
       try {
@@ -381,18 +331,15 @@ export default function PaymentMethodModal({
       } catch {
         payload = { ok: false, error: text };
       }
-
       console.log("[PayPal] Respuesta create-order:", {
         status: res.status,
         ok: res.ok,
         data: payload
       });
-
       if (!res.ok || !payload?.ok) {
         console.error("[PayPal] Error al crear orden:", payload);
         throw new Error(payload?.error || `HTTP ${res.status}`);
       }
-
       // Si el cupón da 100% descuento, usar flujo de inscripción gratuita
       if (payload.free_enrollment && appliedCoupon) {
         console.log("[PayPal] Cupón da acceso gratuito, usando free-enroll...");
@@ -408,30 +355,25 @@ export default function PaymentMethodModal({
             code: appliedCoupon.code,
           }),
         });
-
         const freeEnrollData = await freeEnrollResponse.json();
         if (!freeEnrollResponse.ok) {
           console.error("Error al inscribir con cupón 100%:", freeEnrollData);
           throw new Error(freeEnrollData?.error || "No se pudo completar la inscripción");
         }
-
         toast({
           title: "¡Inscripción exitosa!",
           description: "Te inscribiste correctamente al curso. Ya podés acceder al contenido.",
         });
-
         setTimeout(() => {
           window.location.assign(`/learning/courses/${courseSlug}`);
         }, 1500);
         return;
       }
-
       const approvalUrl = payload.approval_url;
       if (!approvalUrl) {
         console.error("[PayPal] No approval URL in payload:", payload);
         throw new Error("No se recibió la URL de aprobación de PayPal");
       }
-
       console.log("[PayPal] Redirigiendo a:", approvalUrl);
       window.location.assign(approvalUrl);
     } catch (error: any) {
@@ -443,21 +385,16 @@ export default function PaymentMethodModal({
       setLoading(false);
     }
   };
-
   const handleTransferPayment = () => {
     setShowBankInfo(true);
   };
-
   const handleCopyBankInfo = async () => {
     const bankInfo = `Banco Galicia - Caja de Ahorro en Pesos
-
 Número de cuenta: 4026691-4 063-1
 CBU: 00700634 30004026691416
 Alias: MATIAS.SUKANEC
 Titular: DNI 32322767
-
 Enviá el comprobante a: pagos@archub.com.ar`;
-
     try {
       await navigator.clipboard.writeText(bankInfo);
       toast({
@@ -472,10 +409,8 @@ Enviá el comprobante a: pagos@archub.com.ar`;
       });
     }
   };
-
   const handleContinue = () => {
     if (!selectedMethod) return;
-
     if (couponCode.trim() && !appliedCoupon) {
       toast({
         title: "Cupón no aplicado",
@@ -485,7 +420,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
       });
       return;
     }
-
     switch (selectedMethod) {
       case "mercadopago":
         handleMercadoPagoPayment();
@@ -498,16 +432,13 @@ Enviá el comprobante a: pagos@archub.com.ar`;
         break;
     }
   };
-
   const handleCancel = () => {
     closeModal();
   };
-
   const finalPrice = appliedCoupon
     ? appliedCoupon.final_price
     : priceData?.price || 0;
   const hasDiscount = appliedCoupon && appliedCoupon.discount > 0;
-
   const headerContent = (
     <FormModalHeader
       title="Elegí cómo pagar"
@@ -515,7 +446,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
       icon={ShoppingCart}
     />
   );
-
   const editPanel = (
     <div className="space-y-6">
       {!showBankInfo ? (
@@ -548,7 +478,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                 compra
               </p>
             </div>
-
             {/* Cupón */}
             {!appliedCoupon ? (
               <div className="space-y-3">
@@ -644,7 +573,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                 </Button>
               </div>
             )}
-
             <RadioGroup
               value={selectedMethod || ""}
               onValueChange={(value) =>
@@ -687,7 +615,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                   />
                 </div>
               </div>
-
               <div
                 className={cn(
                   "relative flex items-start space-x-4 rounded-lg border-2 p-4 cursor-pointer transition-all",
@@ -719,7 +646,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                   />
                 </div>
               </div>
-
               <div
                 className={cn(
                   "relative flex items-start space-x-4 rounded-lg border-2 p-4 cursor-pointer transition-all",
@@ -750,7 +676,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
               </div>
             </RadioGroup>
           </div>
-
           <div className="rounded-lg border border-muted bg-muted/30 p-4">
             <div className="flex items-start gap-3">
               <ShoppingCart className="h-5 w-5 text-muted-foreground mt-0.5" />
@@ -816,7 +741,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
               </p>
             </div>
           </div>
-
           <div className="rounded-lg border border-border bg-muted/30 p-6 space-y-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Banco</p>
@@ -824,7 +748,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                 Banco Galicia - Caja de Ahorro en Pesos
               </p>
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
@@ -839,7 +762,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                 </p>
               </div>
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
@@ -854,7 +776,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
                 <p className="text-base mt-1">DNI 32322767</p>
               </div>
             </div>
-
             <div className="pt-4 border-t border-border">
               <Button
                 variant="outline"
@@ -867,7 +788,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
               </Button>
             </div>
           </div>
-
           <div
             className="rounded-lg p-4"
             style={{
@@ -893,7 +813,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
       )}
     </div>
   );
-
   const footerContent = (
     <FormModalFooter
       cancelText="Cancelar"
@@ -906,7 +825,6 @@ Enviá el comprobante a: pagos@archub.com.ar`;
       showLoadingSpinner={loading}
     />
   );
-
   return (
     <FormModalLayout
       columns={1}

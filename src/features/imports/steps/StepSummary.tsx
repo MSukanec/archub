@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import type { ParsedData, ColumnMapping, TargetField, ValidationError } from '../types';
-
 interface ValidationSummary {
   totalRows: number;
   validRows: number;
@@ -15,7 +14,6 @@ interface ValidationSummary {
   missingRequiredFields: string[];
   unmappedColumns: number[];
 }
-
 interface StepSummaryProps {
   parsedData: ParsedData;
   columnMapping: ColumnMapping;
@@ -26,7 +24,6 @@ interface StepSummaryProps {
   importProgress?: number;
   onImport: () => void;
 }
-
 export function StepSummary({
   parsedData,
   columnMapping,
@@ -41,12 +38,10 @@ export function StepSummary({
   const canImport = validationSummary.missingRequiredFields.length === 0 && 
                     validationSummary.errors === 0 &&
                     validationSummary.validRows > 0;
-
   const getFieldLabel = (fieldName: string): string => {
     const field = targetSchema.find(f => f.field === fieldName);
     return field?.label || fieldName;
   };
-
   if (isImporting) {
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-6">
@@ -63,12 +58,10 @@ export function StepSummary({
             {Math.round(parsedData.totalRows * importProgress / 100)} de {parsedData.totalRows} registros
           </p>
         </div>
-
         <Progress value={importProgress} className="w-64" />
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       <Card className={cn(
@@ -102,7 +95,6 @@ export function StepSummary({
           </div>
         </CardContent>
       </Card>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="pb-3">
@@ -130,7 +122,6 @@ export function StepSummary({
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
@@ -159,7 +150,6 @@ export function StepSummary({
           </CardContent>
         </Card>
       </div>
-
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Resumen de validación</CardTitle>
@@ -183,7 +173,6 @@ export function StepSummary({
               <p className="text-sm text-muted-foreground">Total</p>
             </div>
           </div>
-
           {validationSummary.missingRequiredFields.length > 0 && (
             <div className="mt-4 p-3 rounded-lg bg-destructive/10 border border-destructive/30">
               <p className="text-sm font-medium text-destructive mb-2">
@@ -200,7 +189,6 @@ export function StepSummary({
           )}
         </CardContent>
       </Card>
-
       <div className="flex justify-center pt-4">
         <Button
           size="lg"

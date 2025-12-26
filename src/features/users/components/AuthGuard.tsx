@@ -4,11 +4,9 @@ import { useAuthStore } from '@/stores/authStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectContextInit } from '@/hooks/use-project-context-init';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
-
 interface AuthGuardProps {
   children: ReactNode;
 }
-
 // Define route types for clarity
 const PUBLIC_ROUTES = ['/', '/login', '/register', '/forgot-password', '/privacy', '/precios', '/founders', '/contact'];
 const PUBLIC_ROUTE_PREFIXES = ['/cursos', '/portal'];
@@ -17,7 +15,6 @@ const ONBOARDING_ROUTES = ['/onboarding', '/select-mode'];
 const AUTH_REDIRECT_ROUTES = ['/login', '/register', '/forgot-password'];
 // PWA initial route - redirect authenticated users with completed onboarding
 const PWA_INITIAL_ROUTE = '/';
-
 export function AuthGuard({ children }: AuthGuardProps) {
   const { 
     user, 
@@ -34,25 +31,21 @@ export function AuthGuard({ children }: AuthGuardProps) {
   
   // Initialize project context when organization changes
   useProjectContextInit();
-
   // Force initialization if needed
   useEffect(() => {
     if (!initialized) {
       initialize();
     }
   }, [initialized, initialize]);
-
   // Main routing and auth logic
   useEffect(() => {
     // Wait for initialization, but allow processing when user is null (logged out)
     if (!initialized || (loading && user !== null) || userDataLoading) {
       return;
     }
-
     const isPublicRoute = PUBLIC_ROUTES.includes(location) || 
       PUBLIC_ROUTE_PREFIXES.some(prefix => location.startsWith(prefix));
     const isOnboardingRoute = ONBOARDING_ROUTES.includes(location);
-
     // CASE 1: No user - Handle unauthenticated state
     if (!user) {
       // Allow access to public routes
@@ -67,14 +60,11 @@ export function AuthGuard({ children }: AuthGuardProps) {
       }
       return;
     }
-
     // CASE 2: User exists - Handle authenticated state
-
     // WAIT for userData to load before making any routing decisions
     if (!userData) {
       return;
     }
-
     // CASE 3: Check onboarding status FIRST (before any redirects)
     const onboardingCompleted = userData.preferences?.onboarding_completed;
     const hasPersonalData = userData.user_data?.first_name && userData.user_data?.last_name;
@@ -102,12 +92,10 @@ export function AuthGuard({ children }: AuthGuardProps) {
         return;
       }
     }
-
     // Don't interfere during onboarding completion process
     if (completingOnboarding) {
       return;
     }
-
     // Check if user needs basic onboarding (personal data)
     const needsBasicOnboarding = !onboardingCompleted || !hasPersonalData;
     
@@ -158,12 +146,10 @@ export function AuthGuard({ children }: AuthGuardProps) {
     completingOnboarding,
     setCompletingOnboarding
   ]);
-
   // Loading state
   if (!initialized || loading) {
     return <LoadingSpinner fullScreen size="lg" />;
   }
-
   // Show loading while userData is being fetched for authenticated users on protected routes
   const isPublicRoute = PUBLIC_ROUTES.includes(location) || 
     PUBLIC_ROUTE_PREFIXES.some(prefix => location.startsWith(prefix));
@@ -172,7 +158,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
   if (user && userDataLoading && !isPublicRoute && !isOnboardingRoute) {
     return <LoadingSpinner fullScreen size="lg" />;
   }
-
   // Block rendering if user needs onboarding but is not on onboarding route
   if (user && userData && !isOnboardingRoute) {
     const onboardingCompleted = userData.preferences?.onboarding_completed;
@@ -188,7 +173,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
       return <LoadingSpinner fullScreen size="lg" />;
     }
   }
-
   // Render children
   return <>{children}</>;
 }

@@ -27,14 +27,11 @@
  *   )
  * }
  */
-
 /** Type alias para IDs que pueden ser null o undefined */
 type NullableId = string | null | undefined;
-
 export const organizationKeys = {
   /** Base key para todos los datos de organization */
   all: ['organization'] as const,
-
   // ═══════════════════════════════════════════════════════════════
   // INFORMACIÓN BASE DE ORGANIZACIÓN (organizations table)
   // ═══════════════════════════════════════════════════════════════
@@ -45,7 +42,6 @@ export const organizationKeys = {
   /** Info de organización (de tabla organizations) */
   info: (organizationId: NullableId) => 
     [...organizationKeys.infoBase(), organizationId ?? undefined] as const,
-
   // ═══════════════════════════════════════════════════════════════
   // DATOS EXTENDIDOS DE ORGANIZACIÓN (organization_data table)
   // ═══════════════════════════════════════════════════════════════
@@ -56,7 +52,6 @@ export const organizationKeys = {
   /** Datos extendidos de organización (de tabla organization_data) */
   data: (organizationId: NullableId) => 
     [...organizationKeys.dataBase(), organizationId ?? undefined] as const,
-
   // ═══════════════════════════════════════════════════════════════
   // MIEMBROS
   // ═══════════════════════════════════════════════════════════════
@@ -67,7 +62,6 @@ export const organizationKeys = {
   /** Lista de miembros por organización */
   members: (organizationId: NullableId) => 
     [...organizationKeys.membersBase(), organizationId ?? undefined] as const,
-
   // ═══════════════════════════════════════════════════════════════
   // INVITATIONS
   // ═══════════════════════════════════════════════════════════════
@@ -78,7 +72,6 @@ export const organizationKeys = {
   /** Invitaciones pendientes por organización */
   invitations: (organizationId: NullableId) => 
     [...organizationKeys.invitationsBase(), organizationId ?? undefined] as const,
-
   // ═══════════════════════════════════════════════════════════════
   // FORMER MEMBERS
   // ═══════════════════════════════════════════════════════════════
@@ -89,7 +82,6 @@ export const organizationKeys = {
   /** Ex miembros por organización */
   formerMembers: (organizationId: NullableId) => 
     [...organizationKeys.formerMembersBase(), organizationId ?? undefined] as const,
-
   // ═══════════════════════════════════════════════════════════════
   // ESTADÍSTICAS
   // ═══════════════════════════════════════════════════════════════
@@ -100,7 +92,6 @@ export const organizationKeys = {
   /** Estadísticas por organización */
   stats: (organizationId: NullableId) => 
     [...organizationKeys.statsBase(), organizationId ?? undefined] as const,
-
   // ═══════════════════════════════════════════════════════════════
   // ACTIVIDAD
   // ═══════════════════════════════════════════════════════════════
@@ -111,7 +102,6 @@ export const organizationKeys = {
   /** Actividad por organización */
   activity: (organizationId: NullableId) => 
     [...organizationKeys.activityBase(), organizationId ?? undefined] as const,
-
   // ═══════════════════════════════════════════════════════════════
   // ACTIVITY LOGS
   // ═══════════════════════════════════════════════════════════════
@@ -122,7 +112,6 @@ export const organizationKeys = {
   /** Logs de actividad por organización */
   activityLogs: (organizationId: NullableId) => 
     [...organizationKeys.activityLogsBase(), organizationId ?? undefined] as const,
-
   // ═══════════════════════════════════════════════════════════════
   // WALLETS
   // ═══════════════════════════════════════════════════════════════
@@ -133,7 +122,6 @@ export const organizationKeys = {
   /** Wallets por organización */
   wallets: (organizationId: NullableId) => 
     [...organizationKeys.walletsBase(), organizationId ?? undefined] as const,
-
   // ═══════════════════════════════════════════════════════════════
   // CURRENCIES
   // ═══════════════════════════════════════════════════════════════
@@ -148,7 +136,6 @@ export const organizationKeys = {
   /** Moneda por defecto por organización */
   defaultCurrency: (organizationId: NullableId) => 
     [...organizationKeys.currenciesBase(), 'default', organizationId ?? undefined] as const,
-
   // ═══════════════════════════════════════════════════════════════
   // ROLES & PERMISSIONS
   // ═══════════════════════════════════════════════════════════════
@@ -159,7 +146,6 @@ export const organizationKeys = {
   /** Roles y permisos por organización */
   rolesPermissions: (organizationId: NullableId) => 
     [...organizationKeys.rolesPermissionsBase(), organizationId ?? undefined] as const,
-
   // ═══════════════════════════════════════════════════════════════
   // SUBSCRIPTIONS
   // ═══════════════════════════════════════════════════════════════
@@ -170,7 +156,6 @@ export const organizationKeys = {
   /** Suscripción actual por organización */
   subscription: (organizationId: NullableId) => 
     [...organizationKeys.subscriptionBase(), organizationId ?? undefined] as const,
-
   // ═══════════════════════════════════════════════════════════════
   // PAYMENTS
   // ═══════════════════════════════════════════════════════════════
@@ -181,7 +166,6 @@ export const organizationKeys = {
   /** Pagos por organización */
   payments: (organizationId: NullableId) => 
     [...organizationKeys.paymentsBase(), organizationId ?? undefined] as const,
-
   // ═══════════════════════════════════════════════════════════════
   // BILLING
   // ═══════════════════════════════════════════════════════════════
@@ -197,11 +181,9 @@ export const organizationKeys = {
   billingCycles: (organizationId: NullableId) => 
     [...organizationKeys.billingBase(), 'cycles', organizationId ?? undefined] as const,
 } as const;
-
 export const userOrgPreferencesKeys = {
   /** Base key para preferencias de usuario-organización */
   all: ['user-organization-preferences'] as const,
-
   // ═══════════════════════════════════════════════════════════════
   // DETALLES
   // ═══════════════════════════════════════════════════════════════
@@ -213,7 +195,6 @@ export const userOrgPreferencesKeys = {
   detail: (userId: NullableId, organizationId: NullableId) => 
     [...userOrgPreferencesKeys.details(), userId ?? undefined, organizationId ?? undefined] as const,
 } as const;
-
 /** Tipo de las query keys de organization */
 export type OrganizationQueryKey = readonly (string | undefined)[];
 export type UserOrgPreferencesQueryKey = readonly (string | undefined)[];

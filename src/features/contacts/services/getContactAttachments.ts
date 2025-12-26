@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-
 export interface ContactMediaFile {
   id: string;
   file_name: string;
@@ -10,7 +9,6 @@ export interface ContactMediaFile {
   file_path: string;
   created_at: string;
 }
-
 export interface ContactMediaLink {
   id: string;
   media_file_id: string;
@@ -20,7 +18,6 @@ export interface ContactMediaLink {
   created_at: string;
   media_file: ContactMediaFile;
 }
-
 async function generateSignedUrl(bucket: string, filePath: string): Promise<string | null> {
   try {
     const { data, error } = await supabase.storage
@@ -35,7 +32,6 @@ async function generateSignedUrl(bucket: string, filePath: string): Promise<stri
     return null;
   }
 }
-
 export async function getContactAttachments(
   contactId: string,
   organizationId: string
@@ -43,7 +39,6 @@ export async function getContactAttachments(
   if (!supabase || !contactId || !organizationId) {
     return [];
   }
-
   const { data, error } = await supabase
     .from('media_links')
     .select(`
@@ -67,24 +62,21 @@ export async function getContactAttachments(
     .eq('contact_id', contactId)
     .eq('organization_id', organizationId)
     .order('created_at', { ascending: false });
-
   if (error) {
     console.error('Error fetching contact attachments:', error);
     throw error;
   }
-
   const links = (data || []).map((link: any) => ({
     ...link,
     media_file: Array.isArray(link.media_file) ? link.media_file[0] : link.media_file,
   }));
-
   const linksWithSignedUrls = await Promise.all(
     links.map(async (link: ContactMediaLink) => {
       if (!link.media_file) return link;
       
       const mediaFile = link.media_file;
       
-      if (mediaFile.bucket === 'public-assets' && mediaFile.file_url) {
+      if (mediaFile.bucket === 'public-assets'&& mediaFile.file_url) {
         return link;
       }
       
@@ -99,6 +91,5 @@ export async function getContactAttachments(
       };
     })
   );
-
   return linksWithSignedUrls;
 }

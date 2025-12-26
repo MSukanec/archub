@@ -7,7 +7,6 @@ import { useToast } from '@/hooks/use-toast'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/EmptyState'
-
 const AdminLayoutContentView = () => {
   const { data: heroSections = [], isLoading } = useHeroSections('learning_dashboard')
   const deleteHeroMutation = useDeleteHeroSection()
@@ -15,15 +14,12 @@ const AdminLayoutContentView = () => {
   const { openModal } = useGlobalModalStore()
   const { toast } = useToast()
   const [draggedId, setDraggedId] = useState<string | null>(null)
-
   const handleCreateSection = () => {
-    openModal('hero-section-form', { mode: 'create' })
+    openModal('hero-section-form', { mode: 'create'})
   }
-
   const handleEditSection = (section: any) => {
     openModal('hero-section-form', { mode: 'edit', section })
   }
-
   const handleDeleteSection = (section: any) => {
     openModal('delete-confirmation', {
       mode: 'delete',
@@ -33,37 +29,29 @@ const AdminLayoutContentView = () => {
       onDelete: () => deleteHeroMutation.mutate(section.id)
     })
   }
-
   const handleDragStart = (e: React.DragEvent, sectionId: string) => {
     setDraggedId(sectionId)
     e.dataTransfer.effectAllowed = 'move'
   }
-
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
   }
-
   const handleDrop = (e: React.DragEvent, targetId: string) => {
     e.preventDefault()
     if (!draggedId || draggedId === targetId) return
-
     const draggedIndex = heroSections.findIndex((s: any) => s.id === draggedId)
     const targetIndex = heroSections.findIndex((s: any) => s.id === targetId)
-
     if (draggedIndex === -1 || targetIndex === -1) return
-
     const newSections = [...heroSections]
     ;[newSections[draggedIndex], newSections[targetIndex]] = [
       newSections[targetIndex],
       newSections[draggedIndex]
     ]
-
     const reorderData = newSections.map((s: any, i) => ({
       id: s.id,
       order_index: i
     }))
-
     reorderMutation.mutate(reorderData, {
       onSuccess: () => {
         toast({
@@ -72,10 +60,8 @@ const AdminLayoutContentView = () => {
         })
       }
     })
-
     setDraggedId(null)
   }
-
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -85,7 +71,6 @@ const AdminLayoutContentView = () => {
       </div>
     )
   }
-
   return (
     <div className="space-y-6" data-testid="admin-layout-content-view">
       {heroSections.length > 0 ? (
@@ -102,7 +87,6 @@ const AdminLayoutContentView = () => {
             >
               <div className="flex items-start gap-4">
                 <GripVertical className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-1" />
-
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
                     <h3 className="font-semibold truncate">{section.title}</h3>
@@ -110,16 +94,14 @@ const AdminLayoutContentView = () => {
                       {index + 1}
                     </Badge>
                     {section.is_active && (
-                      <Badge className="text-xs" style={{ backgroundColor: 'var(--accent)' }}>
+                      <Badge className="text-xs" style={{ backgroundColor: 'var(--accent)'}}>
                         Activo
                       </Badge>
                     )}
                   </div>
-
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {section.description || 'Sin descripción'}
                   </p>
-
                   <div className="flex items-center gap-2 mt-3 flex-wrap">
                     {section.media_url && (
                       <Badge
@@ -127,16 +109,14 @@ const AdminLayoutContentView = () => {
                         className="text-xs"
                         data-testid="badge-media-type"
                       >
-                        {section.media_type === 'video' ? '📹 Video' : '🖼️ Imagen'}
+                        {section.media_type === 'video'? '📹 Video': '🖼️ Imagen'}
                       </Badge>
                     )}
-
                     {section.primary_button_text && (
                       <Badge variant="neutral" className="text-xs">
                         {section.primary_button_text}
                       </Badge>
                     )}
-
                     {section.secondary_button_text && (
                       <Badge variant="neutral" className="text-xs">
                         {section.secondary_button_text}
@@ -144,7 +124,6 @@ const AdminLayoutContentView = () => {
                     )}
                   </div>
                 </div>
-
                 <div className="flex gap-2 flex-shrink-0">
                   <Button
                     size="sm"
@@ -183,5 +162,4 @@ const AdminLayoutContentView = () => {
     </div>
   )
 }
-
 export default AdminLayoutContentView

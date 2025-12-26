@@ -2,12 +2,10 @@ import { useOptimisticMutation } from '@/core/save-engine';
 import { generalCostsKeys } from '@/core/query-keys';
 import { replaceGeneralCostCategory } from '../services/generalCostCategories';
 import type { GeneralCostCategory } from '../types';
-
 interface ReplaceParams {
   oldCategoryId: string;
   newCategoryId: string;
 }
-
 export function useReplaceGeneralCostCategory(organizationId: string | null) {
   return useOptimisticMutation({
     mutationFn: ({ oldCategoryId, newCategoryId }: ReplaceParams) =>

@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { LessonMarker } from '../types';
-
 /**
  * Obtiene todos los marcadores de una lección.
  * 
@@ -18,14 +17,12 @@ export async function getLessonMarkers(lessonId: string): Promise<LessonMarker[]
   if (!lessonId) {
     return [];
   }
-
   const { data } = await supabase.auth.getSession();
   const session = data?.session;
   
   if (!session) {
     throw new Error('No active session');
   }
-
   const response = await fetch(`/api/lessons/${lessonId}/markers`, {
     method: 'GET',
     headers: {
@@ -34,11 +31,9 @@ export async function getLessonMarkers(lessonId: string): Promise<LessonMarker[]
     },
     credentials: 'include',
   });
-
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Failed to fetch lesson markers' }));
+    const error = await response.json().catch(() => ({ error: 'Failed to fetch lesson markers'}));
     throw new Error(error.error || 'Failed to fetch lesson markers');
   }
-
   return await response.json();
 }

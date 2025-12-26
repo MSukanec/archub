@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { ClientPaymentSchedule, ClientPaymentScheduleWithRelations } from '../types';
-
 /**
  * Obtiene todos los items del cronograma de pago de un proyecto con sus relaciones.
  * 
@@ -20,23 +19,18 @@ export async function getClientPaymentSchedule(
   if (!supabase || !organizationId || !projectId) {
     return [];
   }
-
   const { data: commitmentsData, error: commitmentsError } = await supabase
     .from('client_commitments')
     .select('id')
     .eq('project_id', projectId)
     .eq('organization_id', organizationId);
-
   if (commitmentsError) {
     throw commitmentsError;
   }
-
   if (!commitmentsData || commitmentsData.length === 0) {
     return [];
   }
-
   const commitmentIds = commitmentsData.map(c => c.id);
-
   const { data: scheduleData, error } = await supabase
     .from('client_payment_schedule')
     .select(`
@@ -120,15 +114,12 @@ export async function getClientPaymentSchedule(
     .eq('organization_id', organizationId)
     .order('due_date', { ascending: true })
     .order('created_at', { ascending: false });
-
   if (error) {
     throw error;
   }
-
   if (!scheduleData || scheduleData.length === 0) {
     return [];
   }
-
   const data = scheduleData.map((schedule: any) => ({
     ...schedule,
     commitment: schedule.commitment?.[0] ? {
@@ -141,10 +132,8 @@ export async function getClientPaymentSchedule(
     } : null,
     currency: schedule.currency?.[0] || null,
   }));
-
   return data;
 }
-
 /**
  * Obtiene un item del cronograma de pago específico por su ID.
  * 
@@ -164,7 +153,6 @@ export async function getClientPaymentScheduleById(
   if (!supabase || !organizationId || !scheduleId) {
     return null;
   }
-
   const { data, error } = await supabase
     .from('client_payment_schedule')
     .select(`
@@ -247,17 +235,13 @@ export async function getClientPaymentScheduleById(
     .eq('id', scheduleId)
     .eq('organization_id', organizationId)
     .maybeSingle();
-
   if (error) {
     throw error;
   }
-
   if (!data) {
     return null;
   }
-
   const typedData = data as any;
-
   return {
     ...typedData,
     commitment: typedData.commitment?.[0] ? {
@@ -271,7 +255,6 @@ export async function getClientPaymentScheduleById(
     currency: typedData.currency?.[0] || null,
   };
 }
-
 /**
  * Crea un nuevo item en el cronograma de pago.
  * 
@@ -281,7 +264,7 @@ export async function getClientPaymentScheduleById(
  * @throws {Error} Si falla la creación
  */
 export async function createClientPaymentSchedule(
-  schedule: Omit<ClientPaymentSchedule, 'id' | 'created_at' | 'updated_at' | 'organization_id'>,
+  schedule: Omit<ClientPaymentSchedule, 'id'| 'created_at'| 'updated_at'| 'organization_id'>,
   organizationId: string
 ): Promise<ClientPaymentScheduleWithRelations> {
   const { data, error } = await supabase
@@ -368,13 +351,10 @@ export async function createClientPaymentSchedule(
       )
     `)
     .single();
-
   if (error) {
     throw error;
   }
-
   const typedData = data as any;
-
   return {
     ...typedData,
     commitment: typedData.commitment?.[0] ? {
@@ -388,7 +368,6 @@ export async function createClientPaymentSchedule(
     currency: typedData.currency?.[0] || null,
   };
 }
-
 /**
  * Actualiza un item del cronograma de pago existente.
  * 
@@ -400,7 +379,7 @@ export async function createClientPaymentSchedule(
  */
 export async function updateClientPaymentSchedule(
   scheduleId: string,
-  updates: Partial<Omit<ClientPaymentSchedule, 'id' | 'created_at' | 'updated_at' | 'organization_id'>>,
+  updates: Partial<Omit<ClientPaymentSchedule, 'id'| 'created_at'| 'updated_at'| 'organization_id'>>,
   organizationId: string
 ): Promise<ClientPaymentScheduleWithRelations> {
   const { data, error } = await supabase
@@ -489,13 +468,10 @@ export async function updateClientPaymentSchedule(
       )
     `)
     .single();
-
   if (error) {
     throw error;
   }
-
   const typedData = data as any;
-
   return {
     ...typedData,
     commitment: typedData.commitment?.[0] ? {
@@ -509,7 +485,6 @@ export async function updateClientPaymentSchedule(
     currency: typedData.currency?.[0] || null,
   };
 }
-
 /**
  * Elimina un item del cronograma de pago.
  * 
@@ -527,10 +502,8 @@ export async function deleteClientPaymentSchedule(
     .delete()
     .eq('id', scheduleId)
     .eq('organization_id', organizationId);
-
   if (error) {
     throw error;
   }
-
   return true;
 }

@@ -1,6 +1,5 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { 
   Building, 
   Users, 
   FileText, 
@@ -22,7 +21,6 @@ import {
 } from "lucide-react";
 import { Header } from "@/layouts/marketing/components/Header";
 import { Footer } from "@/layouts/marketing/components/Footer";
-
 const coreFeatures = [
   {
     icon: Sparkles,
@@ -55,7 +53,6 @@ const coreFeatures = [
     description: "Conecta con las herramientas que ya usas. Integraciones con software de diseño, contabilidad y más."
   }
 ];
-
 const capabilities = [
   {
     category: "Inteligencia Artificial",
@@ -130,7 +127,6 @@ const capabilities = [
     ]
   }
 ];
-
 // Hero Section Component
 function HeroSectionComponent() {
   return (
@@ -174,7 +170,6 @@ function HeroSectionComponent() {
     </section>
   );
 }
-
 const headerNavigation = [
   { label: "Características", href: "#features" },
   { label: "Capacidades", href: "#capabilities" },
@@ -183,7 +178,6 @@ const headerNavigation = [
   { label: "Precios", href: "/precios" },
   { label: "Contacto", href: "/contact" }
 ];
-
 export default function Landing() {
   return (
     <div className="min-h-screen overflow-x-hidden">
@@ -220,7 +214,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Core Features Section */}
       <section id="features" className="py-20 bg-card -mx-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -255,7 +248,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Detailed Capabilities */}
       <section id="capabilities" className="py-20 -mx-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -292,7 +284,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* How it Works */}
       <section className="py-20 bg-card -mx-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -338,7 +329,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* CTA Section */}
       <section className="py-20 -mx-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">

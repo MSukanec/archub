@@ -8,7 +8,6 @@ import { updateCapitalAdjustment } from '../services/updateCapitalAdjustment';
 import { deleteCapitalAdjustment } from '../services/deleteCapitalAdjustment';
 import { capitalKeys } from '@/core/query-keys';
 import type { CapitalAdjustment, CapitalAdjustmentCreateInput, CapitalAdjustmentUpdateInput } from '../types';
-
 export function useCapitalAdjustments(
   organizationId: string | undefined,
   projectId?: string
@@ -19,7 +18,6 @@ export function useCapitalAdjustments(
     enabled: !!organizationId,
   });
 }
-
 export function useCapitalAdjustment(
   adjustmentId: string | undefined,
   organizationId: string | undefined
@@ -30,10 +28,8 @@ export function useCapitalAdjustment(
     enabled: !!adjustmentId && !!organizationId,
   });
 }
-
 export function useCreateCapitalAdjustment() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (input: CapitalAdjustmentCreateInput) => createCapitalAdjustment(input),
     onSuccess: (data) => {
@@ -45,10 +41,8 @@ export function useCreateCapitalAdjustment() {
     },
   });
 }
-
 export function useUpdateCapitalAdjustment() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       adjustmentId,
@@ -71,10 +65,8 @@ export function useUpdateCapitalAdjustment() {
     },
   });
 }
-
 export function useDeleteCapitalAdjustment() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       adjustmentId,

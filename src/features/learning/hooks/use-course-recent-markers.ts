@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCourseRecentMarkers } from '../services';
-
 /**
  * Hook para obtener los marcadores recientes de un curso.
  * 

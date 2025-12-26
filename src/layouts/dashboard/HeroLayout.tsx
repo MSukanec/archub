@@ -1,11 +1,9 @@
 import { type WidthProp, resolveWidthMode, getContainerClasses, getContentPaddingClasses } from "./layoutWidth";
-
 interface HeroLayoutProps {
   children: React.ReactNode;
   wide?: WidthProp;
   noPadding?: boolean;
 }
-
 /**
  * HeroLayout - Layout para páginas SIN header, 100% contenido
  * 
@@ -41,5 +39,4 @@ export function HeroLayout({ children, wide = true, noPadding = false }: HeroLay
     </div>
   );
 }
-
 export default HeroLayout;

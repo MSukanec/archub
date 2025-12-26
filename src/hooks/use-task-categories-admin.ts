@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
-
 export interface TaskCategoryAdmin {
   id: string;
   name: string;
@@ -11,55 +10,45 @@ export interface TaskCategoryAdmin {
   created_at: string;
   children?: TaskCategoryAdmin[];
 }
-
 export interface CreateTaskCategoryData {
   name: string;
   code?: string;
   parent_id?: string | null;
   position?: string;
 }
-
 export interface UpdateTaskCategoryData extends CreateTaskCategoryData {
   id: string;
 }
-
 export function useAllTaskCategories() {
   return useQuery({
     queryKey: ['all-task-categories'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase client not initialized');
-
       const { data: categories, error } = await supabase
         .from('task_categories')
         .select('*')
         .order('name');
-
       if (error) {
         console.error('Error fetching all categories:', error);
         throw error;
       }
-
       return categories || [];
     },
   });
 }
-
 export function useSubcategoriesOnly() {
   return useQuery({
     queryKey: ['subcategories-only'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase client not initialized');
-
       const { data: categories, error } = await supabase
         .from('task_categories')
         .select('*')
         .order('name');
-
       if (error) {
         console.error('Error fetching categories:', error);
         throw error;
       }
-
       // Filter to get only subcategories (items that have a parent_id and their parent also has a parent_id)
       const subcategories = categories?.filter(category => {
         if (!category.parent_id) return false; // Must have a parent
@@ -71,12 +60,10 @@ export function useSubcategoriesOnly() {
         // Parent must also have a parent (making current item a subcategory)
         return parent.parent_id !== null;
       }) || [];
-
       return subcategories;
     },
   });
 }
-
 export function useTaskCategoriesAdmin() {
   return useQuery({
     queryKey: ['task-categories-admin'],
@@ -86,21 +73,17 @@ export function useTaskCategoriesAdmin() {
       if (!supabase) {
         throw new Error('Supabase client not initialized');
       }
-
       // Fetch categories only - simplified without groups and templates
       const { data: categories, error: categoriesError } = await supabase
         .from('task_categories')
         .select('*')
         .order('name');
-
       if (categoriesError) {
         throw categoriesError;
       }
-
       // Build hierarchical structure
       const categoryMap = new Map();
       const rootCategories: TaskCategoryAdmin[] = [];
-
       // First pass: create all categories
       categories.forEach(category => {
         const categoryWithChildren: TaskCategoryAdmin = {
@@ -109,7 +92,6 @@ export function useTaskCategoriesAdmin() {
         };
         categoryMap.set(category.id, categoryWithChildren);
       });
-
       // Second pass: build hierarchy
       categories.forEach(category => {
         const categoryWithChildren = categoryMap.get(category.id);
@@ -122,7 +104,6 @@ export function useTaskCategoriesAdmin() {
           rootCategories.push(categoryWithChildren);
         }
       });
-
       // Sort children recursively
       const sortCategories = (cats: TaskCategoryAdmin[]) => {
         cats.sort((a, b) => a.name.localeCompare(b.name));
@@ -132,16 +113,13 @@ export function useTaskCategoriesAdmin() {
           }
         });
       };
-
       sortCategories(rootCategories);
       return rootCategories;
     },
   });
 }
-
 export function useCreateTaskCategory() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (categoryData: CreateTaskCategoryData) => {
       if (!supabase) throw new Error('Supabase client not initialized');
@@ -151,12 +129,10 @@ export function useCreateTaskCategory() {
         .insert([categoryData])
         .select()
         .single();
-
       if (error) {
         console.error('Error creating category:', error);
         throw error;
       }
-
       return data;
     },
     onSuccess: () => {
@@ -176,10 +152,8 @@ export function useCreateTaskCategory() {
     },
   });
 }
-
 export function useUpdateTaskCategory() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({ id, ...updateData }: UpdateTaskCategoryData) => {
       if (!supabase) throw new Error('Supabase client not initialized');
@@ -190,12 +164,10 @@ export function useUpdateTaskCategory() {
         .eq('id', id)
         .select()
         .single();
-
       if (error) {
         console.error('Error updating category:', error);
         throw error;
       }
-
       return data;
     },
     onSuccess: () => {
@@ -215,10 +187,8 @@ export function useUpdateTaskCategory() {
     },
   });
 }
-
 export function useDeleteTaskCategory() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (id: string) => {
       if (!supabase) throw new Error('Supabase client not initialized');
@@ -227,7 +197,6 @@ export function useDeleteTaskCategory() {
         .from('task_categories')
         .delete()
         .eq('id', id);
-
       if (error) {
         console.error('Error deleting category:', error);
         throw error;

@@ -3,7 +3,6 @@ import * as XLSX from 'xlsx';
 // @ts-ignore - papaparse types handled inline
 import Papa from 'papaparse';
 import type { ParsedData } from '../types';
-
 interface UseFileParserReturn {
   parsedData: ParsedData | null;
   isLoading: boolean;
@@ -11,12 +10,10 @@ interface UseFileParserReturn {
   parseFile: (file: File) => Promise<void>;
   reset: () => void;
 }
-
 export function useFileParser(): UseFileParserReturn {
   const [parsedData, setParsedData] = useState<ParsedData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const parseCSV = useCallback((file: File): Promise<ParsedData> => {
     return new Promise((resolve, reject) => {
       Papa.parse(file, {
@@ -51,7 +48,6 @@ export function useFileParser(): UseFileParserReturn {
       });
     });
   }, []);
-
   const parseExcel = useCallback((file: File): Promise<ParsedData> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -62,7 +58,7 @@ export function useFileParser(): UseFileParserReturn {
           const workbook = XLSX.read(data, { type: 'binary', cellDates: true });
           const sheetName = workbook.SheetNames[0];
           const sheet = workbook.Sheets[sheetName];
-          const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' }) as any[][];
+          const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: ''}) as any[][];
           
           if (jsonData.length < 2) {
             reject(new Error('El archivo debe tener al menos una fila de encabezados y una fila de datos'));
@@ -76,7 +72,7 @@ export function useFileParser(): UseFileParserReturn {
           const headers = filteredData[0].map(h => String(h).trim());
           const rows = filteredData.slice(1);
           
-          const fileType = file.name.endsWith('.xlsx') ? 'xlsx' : 'xls';
+          const fileType = file.name.endsWith('.xlsx') ? 'xlsx': 'xls';
           
           resolve({
             headers,
@@ -94,7 +90,6 @@ export function useFileParser(): UseFileParserReturn {
       reader.readAsBinaryString(file);
     });
   }, []);
-
   const parseFile = useCallback(async (file: File) => {
     setIsLoading(true);
     setError(null);
@@ -106,7 +101,7 @@ export function useFileParser(): UseFileParserReturn {
       
       if (extension === 'csv') {
         result = await parseCSV(file);
-      } else if (extension === 'xlsx' || extension === 'xls') {
+      } else if (extension === 'xlsx'|| extension === 'xls') {
         result = await parseExcel(file);
       } else {
         throw new Error('Formato de archivo no soportado. Use .csv, .xlsx o .xls');
@@ -120,13 +115,11 @@ export function useFileParser(): UseFileParserReturn {
       setIsLoading(false);
     }
   }, [parseCSV, parseExcel]);
-
   const reset = useCallback(() => {
     setParsedData(null);
     setError(null);
     setIsLoading(false);
   }, []);
-
   return {
     parsedData,
     isLoading,

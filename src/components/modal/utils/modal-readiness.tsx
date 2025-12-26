@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { UseQueryResult } from '@tanstack/react-query';
-
 // Tipos de utilidades para readiness
 export interface ReadinessQuery {
   queryKey: string;
@@ -10,7 +9,6 @@ export interface ReadinessQuery {
   refetch?: () => void;
   error?: Error | null;
 }
-
 export interface UseModalReadinessConfig {
   criticalQueries: ReadinessQuery[];
   optionalQueries?: ReadinessQuery[];
@@ -18,7 +16,6 @@ export interface UseModalReadinessConfig {
   onReady?: () => void;
   onError?: (error: Error) => void;
 }
-
 export interface ModalReadinessState {
   isReady: boolean;
   isLoading: boolean;
@@ -27,7 +24,6 @@ export interface ModalReadinessState {
   retryQueries: () => void;
   LoadingGate: React.ComponentType<{ children: React.ReactNode }>;
 }
-
 /**
  * Hook principal para manejar el readiness de modales
  */
@@ -39,41 +35,34 @@ export function useModalReadiness({
   onError,
 }: UseModalReadinessConfig): ModalReadinessState {
   const [retryCount, setRetryCount] = useState(0);
-
   // Verificar IDs requeridos
   const missingIds = Object.entries(requiredIds)
     .filter(([_, value]) => !value)
     .map(([key]) => key);
-
   // Estado de queries críticas
   const criticalLoading = criticalQueries.some(q => q.isLoading);
   const criticalError = criticalQueries.find(q => q.isError);
   const criticalReady = criticalQueries.every(q => q.isSuccess);
-
   // Estado combinado
   const isReady = criticalReady && missingIds.length === 0;
   const isLoading = criticalLoading || (!isReady && !criticalError);
   const hasError = !!criticalError || missingIds.length > 0;
-
   const error = criticalError?.error instanceof Error 
     ? criticalError.error 
     : missingIds.length > 0 
       ? new Error(`Missing required IDs: ${missingIds.join(', ')}`)
       : null;
-
   // Callbacks
   useEffect(() => {
     if (isReady && onReady) {
       onReady();
     }
   }, [isReady, onReady]);
-
   useEffect(() => {
     if (hasError && error && onError) {
       onError(error);
     }
   }, [hasError, error, onError]);
-
   // Función de retry
   const retryQueries = () => {
     criticalQueries.forEach(q => {
@@ -83,13 +72,11 @@ export function useModalReadiness({
     });
     setRetryCount(prev => prev + 1);
   };
-
   // Componente LoadingGate
   const LoadingGate: React.ComponentType<{ children: React.ReactNode }> = ({ children }) => {
     if (isReady) {
       return <>{children}</>;
     }
-
     if (hasError) {
       return (
         <div className="flex flex-col items-center justify-center py-8 space-y-4">
@@ -108,7 +95,6 @@ export function useModalReadiness({
         </div>
       );
     }
-
     return (
       <div className="flex flex-col items-center justify-center py-8 space-y-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -121,7 +107,6 @@ export function useModalReadiness({
       </div>
     );
   };
-
   return {
     isReady,
     isLoading,
@@ -131,7 +116,6 @@ export function useModalReadiness({
     LoadingGate,
   };
 }
-
 /**
  * Hook simplificado para casos simples
  */
@@ -150,14 +134,11 @@ export function useSimpleModalReadiness(
     refetch: query.refetch,
     error: query.error as Error,
   }));
-
   const { isReady, isLoading, LoadingGate } = useModalReadiness({
     criticalQueries: readinessQueries,
   });
-
   return { isReady, isLoading, LoadingGate };
 }
-
 /**
  * Utilidad para crear ReadinessQuery desde UseQueryResult
  */

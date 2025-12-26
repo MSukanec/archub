@@ -10,7 +10,6 @@ import { getContactAvatarUrl } from '@/lib/storage/uploadHelpers';
 import { Loader2 } from 'lucide-react';
 import { NodeObject } from 'react-force-graph-2d';
 import { CoreNode } from '@/components/lab/neural-network/types';
-
 const GROUP_COLORS: Record<string, string> = {
   'albañil': 'hsl(220, 70%, 50%)',
   'cliente': 'hsl(150, 70%, 45%)',
@@ -25,13 +24,11 @@ const GROUP_COLORS: Record<string, string> = {
   'sin tipo': 'hsl(210, 15%, 50%)',
   'default': 'hsl(210, 15%, 50%)',
 };
-
 function getGroupColor(typeName?: string): string {
   if (!typeName) return GROUP_COLORS.default;
   const normalized = typeName.toLowerCase().trim();
   return GROUP_COLORS[normalized] || GROUP_COLORS.default;
 }
-
 function getInitials(label: string): string {
   const words = label.trim().split(/\s+/);
   if (words.length >= 2) {
@@ -39,7 +36,6 @@ function getInitials(label: string): string {
   }
   return label.substring(0, 2).toUpperCase();
 }
-
 const ContactsNodeRenderer: NodeRenderer = {
   renderCore: (
     node: CoreNode & NodeObject,
@@ -49,35 +45,29 @@ const ContactsNodeRenderer: NodeRenderer = {
     const x = node.x ?? 0;
     const y = node.y ?? 0;
     const { globalScale } = context;
-
     const size = 50;
-
     const isDark = document.documentElement.classList.contains('dark');
-    const bgColor = isDark ? 'hsl(210, 20%, 25%)' : 'hsl(210, 20%, 85%)';
-    const borderColor = isDark ? 'hsl(210, 30%, 45%)' : 'hsl(210, 30%, 65%)';
-
-    ctx.shadowColor = isDark ? 'rgba(100, 150, 200, 0.3)' : 'rgba(50, 100, 150, 0.2)';
+    const bgColor = isDark ? 'hsl(210, 20%, 25%)': 'hsl(210, 20%, 85%)';
+    const borderColor = isDark ? 'hsl(210, 30%, 45%)': 'hsl(210, 30%, 65%)';
+    ctx.shadowColor = isDark ? 'rgba(100, 150, 200, 0.3)': 'rgba(50, 100, 150, 0.2)';
     ctx.shadowBlur = 20;
     ctx.fillStyle = bgColor;
     ctx.beginPath();
     ctx.arc(x, y, size, 0, 2 * Math.PI);
     ctx.fill();
     ctx.shadowBlur = 0;
-
     ctx.strokeStyle = borderColor;
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.arc(x, y, size, 0, 2 * Math.PI);
     ctx.stroke();
-
-    const textColor = isDark ? 'hsl(210, 20%, 90%)' : 'hsl(210, 20%, 20%)';
+    const textColor = isDark ? 'hsl(210, 20%, 90%)': 'hsl(210, 20%, 20%)';
     ctx.fillStyle = textColor;
     ctx.font = `bold ${14 / globalScale}px Inter, system-ui, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(node.label.substring(0, 12), x, y);
   },
-
   renderSatellite: (
     node: SatelliteNode & NodeObject,
     ctx: CanvasRenderingContext2D,
@@ -86,15 +76,12 @@ const ContactsNodeRenderer: NodeRenderer = {
     const x = node.x ?? 0;
     const y = node.y ?? 0;
     const { globalScale, imageCache } = context;
-
     const isTypeNode = node.metadata?.isTypeNode as boolean;
     const groupColor = (node.metadata?.groupColor as string) || getGroupColor(node.metadata?.groupType as string);
     const avatarUrl = node.metadata?.avatarUrl as string | undefined;
-
     if (isTypeNode) {
       const size = 30;
       const isDark = document.documentElement.classList.contains('dark');
-
       ctx.shadowColor = groupColor;
       ctx.shadowBlur = 15;
       ctx.fillStyle = groupColor;
@@ -102,35 +89,30 @@ const ContactsNodeRenderer: NodeRenderer = {
       ctx.arc(x, y, size, 0, 2 * Math.PI);
       ctx.fill();
       ctx.shadowBlur = 0;
-
-      ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)';
+      ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.3)': 'rgba(0,0,0,0.2)';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(x, y, size, 0, 2 * Math.PI);
       ctx.stroke();
-
       ctx.fillStyle = '#fff';
       ctx.font = `bold ${11 / globalScale}px Inter, system-ui, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
-      const label = node.label.length > 10 ? node.label.substring(0, 8) + '...' : node.label;
+      const label = node.label.length > 10 ? node.label.substring(0, 8) + '...': node.label;
       ctx.fillText(label, x, y);
-
       const count = node.metadata?.count as number;
       if (count && globalScale > 0.8) {
-        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)';
+        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.7)': 'rgba(0,0,0,0.6)';
         ctx.font = `${9 / globalScale}px Inter, system-ui, sans-serif`;
         ctx.fillText(`(${count})`, x, y + size + 10);
       }
     } else {
       const size = 18;
-
       ctx.save();
       ctx.beginPath();
       ctx.arc(x, y, size, 0, 2 * Math.PI);
       ctx.clip();
-
       let imageLoaded = false;
       if (avatarUrl && imageCache) {
         const cachedImage = imageCache.get(avatarUrl);
@@ -144,13 +126,11 @@ const ContactsNodeRenderer: NodeRenderer = {
           imageCache.set(avatarUrl, img);
         }
       }
-
       if (!imageLoaded) {
         const isDark = document.documentElement.classList.contains('dark');
-        const bgColor = isDark ? 'hsl(220, 15%, 30%)' : 'hsl(220, 15%, 92%)';
+        const bgColor = isDark ? 'hsl(220, 15%, 30%)': 'hsl(220, 15%, 92%)';
         ctx.fillStyle = bgColor;
         ctx.fillRect(x - size, y - size, size * 2, size * 2);
-
         const initials = getInitials(node.label);
         ctx.fillStyle = groupColor;
         ctx.font = `bold ${size * 0.8}px Inter, system-ui, sans-serif`;
@@ -158,25 +138,21 @@ const ContactsNodeRenderer: NodeRenderer = {
         ctx.textBaseline = 'middle';
         ctx.fillText(initials, x, y);
       }
-
       ctx.restore();
-
       ctx.strokeStyle = groupColor;
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.arc(x, y, size, 0, 2 * Math.PI);
       ctx.stroke();
-
       if (globalScale > 1.5) {
         const isDark = document.documentElement.classList.contains('dark');
-        const textColor = isDark ? 'hsl(0, 0%, 85%)' : 'hsl(0, 0%, 25%)';
+        const textColor = isDark ? 'hsl(0, 0%, 85%)': 'hsl(0, 0%, 25%)';
         ctx.fillStyle = textColor;
         ctx.font = `${10 / globalScale}px Inter, system-ui, sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
-        const shortLabel = node.label.split(' ')[0].substring(0, 10);
+        const shortLabel = node.label.split('')[0].substring(0, 10);
         ctx.fillText(shortLabel, x, y + size + 6);
-
         const groupType = node.metadata?.groupType as string;
         if (groupType) {
           ctx.fillStyle = groupColor;
@@ -187,7 +163,6 @@ const ContactsNodeRenderer: NodeRenderer = {
     }
   },
 };
-
 function ContactsLabContent() {
   const { selectedOrgId } = useLab();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -196,20 +171,15 @@ function ContactsLabContent() {
   const [selectedContact, setSelectedContact] = useState<SatelliteNode | null>(null);
   const [avatarUrls, setAvatarUrls] = useState<Record<string, string>>({});
   const [avatarsLoaded, setAvatarsLoaded] = useState(false);
-
   const { data: contacts = [], isLoading } = useContacts(selectedOrgId ?? undefined);
-
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
     const updateDimensions = () => {
       const rect = container.getBoundingClientRect();
       setDimensions({ width: rect.width, height: rect.height });
     };
-
     updateDimensions();
-
     const resizeObserver = new ResizeObserver(() => {
       updateDimensions();
     });
@@ -220,12 +190,10 @@ function ContactsLabContent() {
       resizeObserver.disconnect();
     };
   }, []);
-
   useEffect(() => {
     setAvatarUrls({});
     setAvatarsLoaded(false);
   }, [selectedOrgId]);
-
   useEffect(() => {
     const loadAvatars = async () => {
       const urls: Record<string, string> = {};
@@ -247,14 +215,12 @@ function ContactsLabContent() {
       setAvatarUrls(urls);
       setAvatarsLoaded(true);
     };
-
     if (contacts.length > 0) {
       loadAvatars();
     } else {
       setAvatarsLoaded(true);
     }
   }, [contacts]);
-
   const typeCountMap = useMemo(() => {
     const countMap: Record<string, number> = {};
     contacts.forEach((contact: ContactWithRelations) => {
@@ -268,11 +234,9 @@ function ContactsLabContent() {
     });
     return countMap;
   }, [contacts]);
-
   const graphData: GraphData = useMemo(() => {
     const nodes: GraphData['nodes'] = [];
     const links: GraphData['links'] = [];
-
     const centerX = dimensions.width / 2;
     const centerY = dimensions.height / 2;
     
@@ -283,15 +247,12 @@ function ContactsLabContent() {
       fx: centerX,
       fy: centerY,
     });
-
     const uniqueTypes = Object.keys(typeCountMap);
     const typeRadius = Math.min(dimensions.width, dimensions.height) * 0.22;
-
     uniqueTypes.forEach((typeName, idx) => {
       const angle = (idx / uniqueTypes.length) * 2 * Math.PI - Math.PI / 2;
       const typeX = centerX + Math.cos(angle) * typeRadius;
       const typeY = centerY + Math.sin(angle) * typeRadius;
-
       nodes.push({
         id: `type-${typeName}`,
         label: typeName,
@@ -309,22 +270,18 @@ function ContactsLabContent() {
           count: typeCountMap[typeName],
         },
       });
-
       links.push({
         source: 'core',
         target: `type-${typeName}`,
       });
     });
-
     contacts.forEach((contact: ContactWithRelations) => {
       const types = contact.contact_types || [];
       const primaryType = types.length > 0 ? types[0].name : 'Sin tipo';
-
       const displayName = contact.display_name_override || 
         `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 
         contact.email || 
         'Contacto';
-
       nodes.push({
         id: contact.id,
         label: displayName,
@@ -344,23 +301,19 @@ function ContactsLabContent() {
           company: contact.company_name,
         },
       });
-
       links.push({
         source: `type-${primaryType}`,
         target: contact.id,
       });
     });
-
     return { nodes, links };
   }, [contacts, avatarUrls, dimensions, typeCountMap]);
-
   const handleNodeClick = useCallback((node: SatelliteNode) => {
     if (node.metadata?.isTypeNode) {
       return;
     }
     setSelectedContact(node);
   }, []);
-
   if (isLoading) {
     return (
       <div className="relative h-full w-full bg-[var(--content-bg)] overflow-hidden flex items-center justify-center">
@@ -371,7 +324,6 @@ function ContactsLabContent() {
       </div>
     );
   }
-
   if (contacts.length === 0) {
     return (
       <div className="relative h-full w-full bg-[var(--content-bg)] overflow-hidden flex items-center justify-center">
@@ -383,7 +335,6 @@ function ContactsLabContent() {
       </div>
     );
   }
-
   return (
     <div className="relative h-full w-full bg-[var(--content-bg)] overflow-hidden" ref={containerRef}>
       <NeuralNetworkGraph
@@ -394,7 +345,6 @@ function ContactsLabContent() {
         onNodeClick={handleNodeClick}
         graphRef={graphRef}
       />
-
       {selectedContact && (() => {
         const meta = selectedContact.metadata as Record<string, string | string[]> | undefined;
         const allTypes = (meta?.allTypes as string[]) || [];
@@ -427,7 +377,6 @@ function ContactsLabContent() {
           </div>
         );
       })()}
-
       <div className="absolute top-4 right-4 bg-[var(--card-bg)]/80 backdrop-blur-md rounded-lg border border-[var(--border)] p-3">
         <h4 className="text-xs font-semibold text-[var(--foreground)] mb-2">Tipos de Contacto</h4>
         <div className="space-y-1 max-h-[300px] overflow-y-auto">
@@ -448,7 +397,6 @@ function ContactsLabContent() {
           </p>
         </div>
       </div>
-
       {selectedOrgId && (
         <div className="absolute bottom-4 right-4 text-xs text-[var(--text-subtle)]">
           Org: {selectedOrgId.slice(0, 8)}...
@@ -457,7 +405,6 @@ function ContactsLabContent() {
     </div>
   );
 }
-
 export default function ContactsLabPage() {
   return (
     <DashboardLayout hideHeader wide>

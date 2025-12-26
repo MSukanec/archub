@@ -1,5 +1,4 @@
 import { z } from 'zod';
-
 export const contactSchema = z.object({
   first_name: z.string().min(1, 'El nombre es requerido'),
   last_name: z.string().optional(),
@@ -21,18 +20,13 @@ export const contactSchema = z.object({
   message: 'El nombre es requerido cuando no hay usuario vinculado',
   path: ['first_name'],
 });
-
 export type ContactFormData = z.infer<typeof contactSchema>;
-
 export const contactTypeSchema = z.object({
   name: z.string().min(1, 'El nombre del tipo es requerido'),
 });
-
 export type ContactTypeFormData = z.infer<typeof contactTypeSchema>;
-
 export const contactAttachmentSchema = z.object({
   category: z.enum(['dni_front', 'dni_back', 'document', 'photo', 'other']),
   metadata: z.any().optional(),
 });
-
 export type ContactAttachmentFormData = z.infer<typeof contactAttachmentSchema>;

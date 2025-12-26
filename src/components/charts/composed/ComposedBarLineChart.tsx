@@ -1,12 +1,10 @@
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts'
 import { CHART_COLORS, CHART_AXIS, CHART_TOOLTIP, CHART_STATES, CHART_DIMENSIONS, CHART_SHAPES, formatCompact, getValueColor } from '../theme'
-
 export interface ComposedDataPoint {
   label: string
   barValue: number
   lineValue: number
 }
-
 export interface ComposedBarLineChartProps {
   data: ComposedDataPoint[]
   height?: number
@@ -23,7 +21,6 @@ export interface ComposedBarLineChartProps {
   lineName?: string
   colorBarByValue?: boolean
 }
-
 export function ComposedBarLineChart({
   data,
   height = CHART_DIMENSIONS.height.lg,
@@ -45,7 +42,6 @@ export function ComposedBarLineChart({
       </div>
     )
   }
-
   if (!data || data.length === 0) {
     return (
       <div style={{ height }} className={CHART_STATES.empty.className}>
@@ -53,7 +49,6 @@ export function ComposedBarLineChart({
       </div>
     )
   }
-
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -85,7 +80,7 @@ export function ComposedBarLineChart({
               }
               return null
             }}
-            cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
+            cursor={{ fill: 'rgba(0, 0, 0, 0.05)'}}
           />
           <Bar
             dataKey="barValue"

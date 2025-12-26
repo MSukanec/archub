@@ -3,7 +3,6 @@
  * 
  * All TypeScript interfaces and types for the projects feature.
  */
-
 export interface Project {
   id: string;
   name: string;
@@ -25,7 +24,6 @@ export interface Project {
   project_data?: ProjectData;
   creator?: ProjectCreator;
 }
-
 export interface ProjectData {
   project_type_id?: string;
   project_modality_id?: string;
@@ -44,7 +42,6 @@ export interface ProjectData {
     name: string;
   };
 }
-
 export interface ProjectCreator {
   id: string;
   full_name?: string;
@@ -53,7 +50,6 @@ export interface ProjectCreator {
   email: string;
   avatar_url?: string;
 }
-
 export interface ProjectLite {
   id: string;
   name: string;
@@ -61,11 +57,10 @@ export interface ProjectLite {
   status: string;
   updated_at: string;
 }
-
 export interface CreateProjectData {
   organization_id: string;
   name: string;
-  status: 'active' | 'inactive' | 'completed' | 'paused';
+  status: 'active'| 'inactive'| 'completed'| 'paused';
   created_by: string;
   color?: string;
   use_custom_color?: boolean;
@@ -75,10 +70,9 @@ export interface CreateProjectData {
   project_modality_id?: string | null;
   currency_id?: string | null;
 }
-
 export interface UpdateProjectData {
   name?: string;
-  status?: 'active' | 'inactive' | 'completed' | 'paused';
+  status?: 'active'| 'inactive'| 'completed'| 'paused';
   color?: string;
   use_custom_color?: boolean;
   custom_color_h?: number | null;
@@ -88,7 +82,6 @@ export interface UpdateProjectData {
   currency_id?: string | null;
   organization_id: string;
 }
-
 export interface ProjectStats {
   project: Project & {
     project_data: {
@@ -101,19 +94,16 @@ export interface ProjectStats {
   totalBudgets: number;
   totalMovements: number;
 }
-
 export interface ProjectActivityData {
   date: string;
   documents: number;
   siteLogs: number;
   movements: number;
 }
-
 export interface UploadedProjectImage {
   file_url: string;
   file_path: string;
 }
-
 export interface ProjectModality {
   id: string;
   name: string;
@@ -125,7 +115,6 @@ export interface ProjectModality {
   is_deleted: boolean;
   deleted_at: string | null;
 }
-
 export interface ProjectType {
   id: string;
   name: string;

@@ -9,14 +9,11 @@ import {
   createExchangeRateDescription,
   createMissingPersonnelDescription,
 } from './micro/adapter';
-
 const FEATURE_TAG = 'personnel';
-
 const entityLabels = {
   singular: 'pago',
   plural: 'pagos',
 };
-
 export const personnelPaymentsWithoutPersonnelRule: DataHealthRule<NormalizedPayment> = createFeatureRule({
   ruleId: 'personnel-missing-personnel',
   featureTag: FEATURE_TAG,
@@ -35,7 +32,6 @@ export const personnelPaymentsWithoutPersonnelRule: DataHealthRule<NormalizedPay
     targetIds: affectedIds,
   }),
 });
-
 export const personnelInvalidExchangeRateRule: DataHealthRule<NormalizedPayment> = createFeatureRule({
   ruleId: 'personnel-missing-exchange-rate',
   featureTag: FEATURE_TAG,
@@ -53,7 +49,6 @@ export const personnelInvalidExchangeRateRule: DataHealthRule<NormalizedPayment>
     targetIds: affectedIds,
   }),
 });
-
 export const allPersonnelRules: DataHealthRule<NormalizedPayment>[] = [
   personnelPaymentsWithoutPersonnelRule,
   personnelInvalidExchangeRateRule,

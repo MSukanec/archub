@@ -14,12 +14,10 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
-
 export interface ComboBoxMultiSelectFieldOption {
   value: string;
   label: string;
 }
-
 interface ComboBoxMultiSelectFieldProps {
   options: ComboBoxMultiSelectFieldOption[];
   value: string[];
@@ -30,7 +28,6 @@ interface ComboBoxMultiSelectFieldProps {
   className?: string;
   disabled?: boolean;
 }
-
 export function ComboBoxMultiSelectField({
   options,
   value,
@@ -42,7 +39,6 @@ export function ComboBoxMultiSelectField({
   disabled = false,
 }: ComboBoxMultiSelectFieldProps) {
   const [open, setOpen] = useState(false);
-
   const handleSelect = (optionValue: string) => {
     const newValue = value.includes(optionValue)
       ? value.filter((v) => v !== optionValue)
@@ -52,20 +48,17 @@ export function ComboBoxMultiSelectField({
     // Cerrar el popover después de seleccionar
     setOpen(false);
   };
-
   const handleRemove = (optionValue: string) => {
     const newValue = value.filter((v) => v !== optionValue);
     onChange(newValue);
   };
-
   const getDisplayText = () => {
     if (!value || value.length === 0) {
       return placeholder;
     }
     
-    return `${value.length} tipo${value.length !== 1 ? 's' : ''} seleccionado${value.length !== 1 ? 's' : ''}`;
+    return `${value.length} tipo${value.length !== 1 ? 's': ''} seleccionado${value.length !== 1 ? 's': ''}`;
   };
-
   return (
     <div className={cn("space-y-2", className)}>
       {/* Trigger que se ve como un Input/Select normal */}
@@ -112,7 +105,6 @@ export function ComboBoxMultiSelectField({
           </Command>
         </PopoverContent>
       </Popover>
-
       {/* Badges debajo del componente */}
       {value && value.length > 0 && (
         <div className="flex flex-wrap gap-1">

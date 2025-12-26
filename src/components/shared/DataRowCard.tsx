@@ -2,9 +2,7 @@ import React from 'react';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
-export type Density = 'compact' | 'normal' | 'comfortable';
-
+export type Density = 'compact'| 'normal'| 'comfortable';
 export interface DataRowCardProps {
   /** Contenido de las columnas */
   children: React.ReactNode;
@@ -16,14 +14,12 @@ export interface DataRowCardProps {
   /** Checkbox de selección (opcional) */
   selectable?: boolean;
   selected?: boolean;
-
   /** Layout */
   columns?: 2 | 3;  // por defecto 3 (avatar + content + trailing), si no hay avatar se auto-reduce a 2
   
   /** Visual */
-  borderColor?: 'success' | 'danger' | 'warning' | 'info' | 'neutral';
+  borderColor?: 'success'| 'danger'| 'warning'| 'info'| 'neutral';
   activeBorder?: boolean; // Borde activo con color --accent
-
   /** Comportamiento */
   onClick?: () => void;
   disabled?: boolean;
@@ -32,7 +28,6 @@ export interface DataRowCardProps {
   className?: string;
   'data-testid'?: string;
 }
-
 // Helper para obtener clases de color del borde
 const getBorderColorClass = (color?: string): string => {
   switch (color) {
@@ -50,7 +45,6 @@ const getBorderColorClass = (color?: string): string => {
       return '';
   }
 };
-
 // Mapeo de density a clases
 const getDensityClasses = (density: Density = 'normal') => {
   switch (density) {
@@ -71,14 +65,13 @@ const getDensityClasses = (density: Density = 'normal') => {
       };
   }
 };
-
 const LoadingSkeleton: React.FC<{ density: Density }> = ({ density }) => {
   const classes = getDensityClasses(density);
   
   return (
     <div className={cn('flex items-center gap-3', classes.container)}>
       {/* Avatar */}
-      <div className={classes.avatar} style={{ background: '#f1f5f9', borderRadius: '50%' }}></div>
+      <div className={classes.avatar} style={{ background: '#f1f5f9', borderRadius: '50%'}}></div>
       
       {/* Content */}
       <div className="flex-1 space-y-2">
@@ -94,7 +87,6 @@ const LoadingSkeleton: React.FC<{ density: Density }> = ({ density }) => {
     </div>
   );
 };
-
 export default function DataRowCard({
   children,
   avatarUrl,
@@ -121,12 +113,11 @@ export default function DataRowCard({
   
   // Manejar eventos de teclado para accesibilidad
   const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (isInteractive && (event.key === 'Enter' || event.key === ' ')) {
+    if (isInteractive && (event.key === 'Enter'|| event.key === '')) {
       event.preventDefault();
       onClick();
     }
   };
-
   // Loading state
   if (loading) {
     return (
@@ -141,7 +132,6 @@ export default function DataRowCard({
       </div>
     );
   }
-
   return (
     <div
       className={cn(
@@ -159,8 +149,8 @@ export default function DataRowCard({
         activeBorder && 'border-2 shadow-md',
         className
       )}
-      style={activeBorder ? { borderColor: 'hsl(76, 100%, 40%)' } : undefined}
-      role={isInteractive ? 'button' : undefined}
+      style={activeBorder ? { borderColor: 'hsl(76, 100%, 40%)'} : undefined}
+      role={isInteractive ? 'button': undefined}
       tabIndex={isInteractive ? 0 : undefined}
       onClick={isInteractive ? onClick : undefined}
       onKeyDown={isInteractive ? handleKeyDown : undefined}
@@ -173,14 +163,13 @@ export default function DataRowCard({
             <div className={cn(
               'flex items-center justify-center w-4 h-4 border-2 rounded',
               selected 
-                ? 'bg-accent border-accent text-accent-foreground' 
+                ? 'bg-accent border-accent text-accent-foreground'
                 : 'border-muted-foreground'
             )}>
               {selected && <Check className="h-3 w-3" />}
             </div>
           </div>
         )}
-
         {/* Avatar (primera columna si existe) */}
         {hasAvatar && (
           <Avatar className={classes.avatar}>
@@ -190,7 +179,6 @@ export default function DataRowCard({
             </AvatarFallback>
           </Avatar>
         )}
-
         {/* Contenido - Los hijos manejan su propio layout */}
         {children}
       </div>

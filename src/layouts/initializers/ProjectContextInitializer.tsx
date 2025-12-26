@@ -4,7 +4,6 @@ import { useUserOrganizationPreferences } from '@/features/organization'
 import { useProjectContext } from '@/stores/projectContext'
 import { useHeartbeat } from '@/hooks/use-heartbeat'
 import { updateProjectLastActive } from '@/features/projects'
-
 /**
  * Componente que inicializa automáticamente el proyecto correcto
  * cuando cambia la organización actual usando la nueva tabla
@@ -23,7 +22,6 @@ export function ProjectContextInitializer() {
   
   // Track if we've already initialized for this organization to prevent auto-loading after explicit organization selection
   const initializedForOrg = useRef<string | null>(null)
-
   useEffect(() => {
     // Si tenemos organización y preferencias, pero no proyecto seleccionado
     if (currentOrganizationId && orgPreferences && !selectedProjectId) {
@@ -44,14 +42,12 @@ export function ProjectContextInitializer() {
       }
     }
   }, [currentOrganizationId, orgPreferences, selectedProjectId, setSelectedProject])
-
   // Reset cuando cambia la organización
   useEffect(() => {
     if (currentOrganizationId !== initializedForOrg.current) {
       initializedForOrg.current = null
     }
   }, [currentOrganizationId])
-
   // Este componente no renderiza nada, solo maneja la lógica de inicialización
   return null
 }

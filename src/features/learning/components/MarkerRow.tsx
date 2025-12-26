@@ -1,7 +1,6 @@
 import { Trash2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import DataRowCard from '@/components/shared/DataRowCard';
-
 interface MarkerRowProps {
   marker: {
     id: string;
@@ -13,7 +12,6 @@ interface MarkerRowProps {
   onGoToMarker: (markerId: string) => void;
   onDelete: (markerId: string) => void;
 }
-
 export default function MarkerRow({ marker, onGoToMarker, onDelete }: MarkerRowProps) {
   const formatTime = (seconds: number | null): string => {
     if (seconds === null) return '0:00';
@@ -21,7 +19,6 @@ export default function MarkerRow({ marker, onGoToMarker, onDelete }: MarkerRowP
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
   return (
     <DataRowCard
       data-testid={`marker-row-${marker.id}`}
@@ -38,19 +35,16 @@ export default function MarkerRow({ marker, onGoToMarker, onDelete }: MarkerRowP
             <span className="font-mono font-medium">{formatTime(marker.time_sec)}</span>
           </div>
         </div>
-
         {/* 2. Nombre de Módulo */}
         <p className="text-xs text-muted-foreground">
           {marker.module_title}
         </p>
-
         {/* 3. Texto del marcador */}
         {marker.body && (
           <p className="text-xs text-muted-foreground line-clamp-3 whitespace-pre-wrap">
             {marker.body}
           </p>
         )}
-
         {/* 4. Botones: IR + ELIMINAR */}
         <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border/50">
           {/* Botón IR (2/3) */}
@@ -67,7 +61,6 @@ export default function MarkerRow({ marker, onGoToMarker, onDelete }: MarkerRowP
           >
             Ir
           </Button>
-
           {/* Botón ELIMINAR (1/3) */}
           <Button
             variant="destructive"

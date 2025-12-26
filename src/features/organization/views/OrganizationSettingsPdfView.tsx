@@ -12,7 +12,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import type { PdfTemplate } from '@shared/schema';
-
 function ColorInput({ 
   label, 
   value, 
@@ -44,7 +43,6 @@ function ColorInput({
     </div>
   );
 }
-
 function NumberInput({ 
   label, 
   value, 
@@ -80,7 +78,6 @@ function NumberInput({
     </div>
   );
 }
-
 function SwitchRow({ 
   label, 
   description, 
@@ -108,7 +105,6 @@ function SwitchRow({
     </div>
   );
 }
-
 function HeaderPreview({ formData }: { formData: Partial<PdfTemplate> }) {
   return (
     <div 
@@ -176,7 +172,6 @@ function HeaderPreview({ formData }: { formData: Partial<PdfTemplate> }) {
     </div>
   );
 }
-
 function ClientSectionPreview({ formData }: { formData: Partial<PdfTemplate> }) {
   if (formData.show_client_section === false) return null;
   
@@ -207,7 +202,6 @@ function ClientSectionPreview({ formData }: { formData: Partial<PdfTemplate> }) 
     </div>
   );
 }
-
 function ProjectSectionPreview({ formData }: { formData: Partial<PdfTemplate> }) {
   if (formData.show_project_section === false) return null;
   
@@ -236,7 +230,6 @@ function ProjectSectionPreview({ formData }: { formData: Partial<PdfTemplate> })
     </div>
   );
 }
-
 function DetailsSectionPreview({ formData }: { formData: Partial<PdfTemplate> }) {
   if (formData.show_details_section === false) return null;
   
@@ -262,7 +255,7 @@ function DetailsSectionPreview({ formData }: { formData: Partial<PdfTemplate> })
         <thead>
           <tr 
             className="text-left"
-            style={{ backgroundColor: formData.secondary_color || '#e5e7eb' }}
+            style={{ backgroundColor: formData.secondary_color || '#e5e7eb'}}
           >
             <th className="p-2">Concepto</th>
             <th className="p-2 text-right">Monto</th>
@@ -277,7 +270,7 @@ function DetailsSectionPreview({ formData }: { formData: Partial<PdfTemplate> })
             <td className="p-2 font-bold">TOTAL</td>
             <td 
               className="p-2 text-right font-bold"
-              style={{ color: formData.primary_color || '#4f9eff' }}
+              style={{ color: formData.primary_color || '#4f9eff'}}
             >
               $150.000,00
             </td>
@@ -287,7 +280,6 @@ function DetailsSectionPreview({ formData }: { formData: Partial<PdfTemplate> })
     </div>
   );
 }
-
 function FooterPreview({ formData }: { formData: Partial<PdfTemplate> }) {
   return (
     <div 
@@ -316,7 +308,6 @@ function FooterPreview({ formData }: { formData: Partial<PdfTemplate> }) {
     </div>
   );
 }
-
 function SignaturePreview({ formData }: { formData: Partial<PdfTemplate> }) {
   if (formData.show_signature_section === false || formData.show_signature_fields === false) return null;
   
@@ -332,7 +323,7 @@ function SignaturePreview({ formData }: { formData: Partial<PdfTemplate> }) {
         fontSize: formData.body_size || 12
       }}
     >
-      <div className={isHorizontal ? 'flex gap-8 justify-around' : 'space-y-6'}>
+      <div className={isHorizontal ? 'flex gap-8 justify-around': 'space-y-6'}>
         {['Emisor', 'Receptor'].map((role) => (
           <div key={role} className="text-center">
             <div className="border-b border-gray-400 w-48 mx-auto mb-1" />
@@ -355,11 +346,9 @@ function SignaturePreview({ formData }: { formData: Partial<PdfTemplate> }) {
     </div>
   );
 }
-
 interface OrganizationSettingsPdfViewProps {
   onHasChanges?: (hasChanges: boolean, actions?: React.ReactNode[]) => void;
 }
-
 export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettingsPdfViewProps) {
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
@@ -371,7 +360,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
   
   const [formData, setFormData] = useState<Partial<PdfTemplate>>({});
   const [hasChanges, setHasChanges] = useState(false);
-
   useEffect(() => {
     if (template) {
       setFormData(template);
@@ -379,12 +367,10 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
       setFormData(DEFAULT_PDF_TEMPLATE as Partial<PdfTemplate>);
     }
   }, [template, isLoading]);
-
   const handleChange = (field: keyof PdfTemplate, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };
-
   const handleSave = async () => {
     if (!organizationId) return;
     
@@ -406,7 +392,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
       });
     }
   };
-
   const handleReset = () => {
     if (template) {
       setFormData(template);
@@ -415,7 +400,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
     }
     setHasChanges(false);
   };
-
   useEffect(() => {
     if (!onHasChanges) return;
     
@@ -439,7 +423,7 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
           data-testid="button-save-pdf-settings"
         >
           <Save className="w-4 h-4 mr-1" />
-          {updateTemplate.isPending ? 'Guardando...' : 'Guardar'}
+          {updateTemplate.isPending ? 'Guardando...': 'Guardar'}
         </Button>
       ];
       onHasChanges(true, actions);
@@ -447,7 +431,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
       onHasChanges(false);
     }
   }, [hasChanges, updateTemplate.isPending, onHasChanges]);
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -455,7 +438,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
       </div>
     );
   }
-
   return (
     <div className="space-y-8">
       
@@ -491,7 +473,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
                 testId="input-secondary-color"
               />
             </div>
-
             <div className="grid grid-cols-2 gap-3">
               <ColorInput
                 label="Color de Texto"
@@ -506,7 +487,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
                 testId="input-background-color"
               />
             </div>
-
             <div className="pt-2 border-t">
               <Label className="text-xs font-medium">Tipografía</Label>
               <div className="grid grid-cols-2 gap-3 mt-2">
@@ -558,7 +538,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
                 />
               </div>
             </div>
-
             <div className="pt-2 border-t">
               <Label className="text-xs font-medium">Página</Label>
               <div className="grid grid-cols-2 gap-3 mt-2">
@@ -603,7 +582,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
             </div>
           </CardContent>
         </Card>
-
         <div className="space-y-4">
           <div className="text-sm font-medium text-muted-foreground">Vista previa general</div>
           <div 
@@ -614,7 +592,7 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
             }}
           >
             <div className="text-center text-muted-foreground text-xs mb-4">
-              {formData.page_size || 'A4'} - {formData.page_orientation === 'landscape' ? 'Horizontal' : 'Vertical'}
+              {formData.page_size || 'A4'} - {formData.page_orientation === 'landscape'? 'Horizontal': 'Vertical'}
             </div>
             <div className="space-y-3 transform scale-90 origin-top">
               <HeaderPreview formData={formData} />
@@ -627,7 +605,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
           </div>
         </div>
       </div>
-
       {/* ENCABEZADO */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
@@ -659,7 +636,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
                 testId="input-company-name-color"
               />
             </div>
-
             <div className="grid grid-cols-2 gap-3">
               <NumberInput
                 label="Ancho logo"
@@ -680,7 +656,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
                 suffix="px"
               />
             </div>
-
             <div className="space-y-2">
               <Label className="text-xs">Dirección</Label>
               <Input
@@ -691,7 +666,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
                 data-testid="input-company-address"
               />
             </div>
-
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs">Email</Label>
@@ -715,7 +689,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
                 />
               </div>
             </div>
-
             <NumberInput
               label="Tamaño info empresa"
               value={formData.company_info_size || 10}
@@ -727,13 +700,11 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
             />
           </CardContent>
         </Card>
-
         <div className="space-y-4">
           <div className="text-sm font-medium text-muted-foreground">Vista previa del encabezado</div>
           <HeaderPreview formData={formData} />
         </div>
       </div>
-
       {/* SECCIONES */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
@@ -771,7 +742,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
             />
           </CardContent>
         </Card>
-
         <div className="space-y-4">
           <div className="text-sm font-medium text-muted-foreground">Vista previa de secciones</div>
           <div className="space-y-3">
@@ -781,7 +751,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
           </div>
         </div>
       </div>
-
       {/* PIE DE PÁGINA */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
@@ -800,14 +769,12 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
                 data-testid="textarea-footer-text"
               />
             </div>
-
             <SwitchRow
               label="Mostrar info adicional"
               checked={formData.show_footer_info ?? true}
               onChange={(v) => handleChange('show_footer_info', v)}
               testId="switch-show-footer-info"
             />
-
             {formData.show_footer_info !== false && (
               <div className="space-y-2">
                 <Label className="text-xs">Info adicional</Label>
@@ -820,7 +787,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
                 />
               </div>
             )}
-
             <div className="flex gap-4">
               <SwitchRow
                 label="Mostrar fecha"
@@ -837,13 +803,11 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
             </div>
           </CardContent>
         </Card>
-
         <div className="space-y-4">
           <div className="text-sm font-medium text-muted-foreground">Vista previa del pie de página</div>
           <FooterPreview formData={formData} />
         </div>
       </div>
-
       {/* FIRMAS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
@@ -857,7 +821,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
               onChange={(v) => handleChange('show_signature_fields', v)}
               testId="switch-show-signature-fields"
             />
-
             {formData.show_signature_fields !== false && (
               <>
                 <div className="space-y-1.5">
@@ -875,7 +838,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
                     </SelectContent>
                   </Select>
                 </div>
-
                 <div className="space-y-2">
                   <Label className="text-xs">Texto de firma</Label>
                   <Input
@@ -886,7 +848,6 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
                     data-testid="input-signature-text"
                   />
                 </div>
-
                 <SwitchRow
                   label="Campo de aclaración"
                   checked={formData.show_clarification_field ?? true}
@@ -903,13 +864,11 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
             )}
           </CardContent>
         </Card>
-
         <div className="space-y-4">
           <div className="text-sm font-medium text-muted-foreground">Vista previa de firmas</div>
           <SignaturePreview formData={formData} />
         </div>
       </div>
-
     </div>
   );
 }

@@ -18,9 +18,7 @@
  * 
  * @module currency-visibility
  */
-
 import type { OrgCurrencyContext } from '@/hooks/use-currencies';
-
 /**
  * Determina si debe mostrarse un selector de moneda.
  * 
@@ -32,7 +30,6 @@ import type { OrgCurrencyContext } from '@/hooks/use-currencies';
 export function shouldShowCurrencySelector(context: OrgCurrencyContext): boolean {
   return context.isMultiCurrency;
 }
-
 /**
  * Determina si debe mostrarse el campo de cotización/exchange rate.
  * 
@@ -54,7 +51,6 @@ export function shouldShowExchangeRateField(
   // Si es multimoneda y hay moneda seleccionada, mostrar siempre
   return !!selectedCurrencyId;
 }
-
 /**
  * Determina si debe mostrarse la columna de moneda en una tabla.
  * 
@@ -66,7 +62,6 @@ export function shouldShowExchangeRateField(
 export function shouldShowCurrencyColumn(context: OrgCurrencyContext): boolean {
   return context.isMultiCurrency;
 }
-
 /**
  * Determina si debe mostrarse la columna de cotización en una tabla.
  * 
@@ -80,7 +75,6 @@ export function shouldShowCurrencyColumn(context: OrgCurrencyContext): boolean {
 export function shouldShowExchangeRateColumn(context: OrgCurrencyContext): boolean {
   return context.isMultiCurrency;
 }
-
 /**
  * Determina si debe mostrarse el breakdown de monedas en KPIs.
  * 
@@ -92,7 +86,6 @@ export function shouldShowExchangeRateColumn(context: OrgCurrencyContext): boole
 export function shouldShowKPIBreakdown(context: OrgCurrencyContext): boolean {
   return context.isMultiCurrency;
 }
-
 /**
  * Obtiene las props condicionales para ocultar un campo visualmente.
  * Retorna className para ocultar el campo si no debe mostrarse.
@@ -101,9 +94,8 @@ export function shouldShowKPIBreakdown(context: OrgCurrencyContext): boolean {
  * @returns Props para aplicar al componente
  */
 export function getConditionalFieldProps(shouldShow: boolean): { className?: string } {
-  return shouldShow ? {} : { className: 'hidden' };
+  return shouldShow ? {} : { className: 'hidden'};
 }
-
 /**
  * Tipo de configuración para el wrapper de visibilidad
  */
@@ -117,7 +109,6 @@ export interface CurrencyFieldVisibilityConfig {
   /** Si forzar la visibilidad (override) */
   forceShow?: boolean;
 }
-
 /**
  * Helper completo que retorna todas las decisiones de visibilidad.
  * Útil para componentes que necesitan varias decisiones a la vez.
@@ -163,7 +154,6 @@ export function getCurrencyFieldsVisibility(config: CurrencyFieldVisibilityConfi
     defaultSymbol: context.defaultCurrencySymbol,
   };
 }
-
 /**
  * ============================================================================
  * EJEMPLOS DE USO

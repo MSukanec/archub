@@ -10,7 +10,6 @@
  * - Mappers (transformaciones)
  * - Utils (utilidades)
  */
-
 // ============ SERVICES ============
 export * from './services/getProjects';
 export * from './services/getProjectById';
@@ -33,7 +32,6 @@ export * from './services/createProjectType';
 export * from './services/updateProjectType';
 export * from './services/deleteProjectType';
 export * from './services/replaceProjectType';
-
 // ============ HOOKS ============
 export * from './hooks/use-projects';
 export * from './hooks/use-project';
@@ -49,38 +47,29 @@ export * from './hooks/use-project-activity';
 export * from './hooks/use-project-accent-color';
 export * from './hooks/use-project-modalities';
 export * from './hooks/use-project-types';
-
 // ============ TYPES ============
 export * from './types';
-
 // ============ SCHEMAS ============
 export * from './schemas';
-
 // ============ CONSTANTS ============
 export * from './constants';
-
 // ============ MAPPERS ============
 export * from './mappers/projectMapper';
-
 // ============ UTILS ============
 export * from './utils/colorUtils';
-
 // ============ COMPONENTS ============
 export { ProjectItemCard } from './components/ProjectItemCard';
 export { ProjectColorAdvanced } from './components/ProjectColorAdvanced';
 export { ProjectSelectorField } from './components/ProjectSelectorField';
 export { ProjectRow } from './components/ProjectRow';
-
 // ============ FORMS ============
 export * from './forms/ProjectForm';
 export * from './forms/ProjectModalityForm';
 export * from './forms/ProjectTypeForm';
-
 // ============ MODALS ============
 export { ProjectModal } from './modals/ProjectModal';
 export { ProjectModalityModal } from './modals/ProjectModalityModal';
 export { ProjectTypeModal } from './modals/ProjectTypeModal';
-
 // ============ VIEWS ============
 export { ProjectBasicDataView } from './views/ProjectBasicDataView';
 export { ProjectLocationView } from './views/ProjectLocationView';
@@ -88,7 +77,6 @@ export { ProjectActivesView } from './views/ProjectActivesView';
 export { ProjectListView } from './views/ProjectListView';
 export { ProjectSettingsView } from './views/ProjectSettingsView';
 export { ProjectVisionGeneralView } from './views/ProjectVisionGeneralView';
-
 // ============ LEGACY MODALS (Re-exported for backward compatibility) ============
 // These modals are now in @/features/legacy and will be distributed to appropriate features
 export { GalleryFormModal, DocumentFolderFormModal, DocumentPreviewModal, DocumentUploadFormModal } from '@/features/legacy';

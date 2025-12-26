@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteLessonNote } from '../services';
 import { LEARNING_QUERY_KEYS } from '../constants';
 import { useToast } from '@/hooks/use-toast';
-
 /**
  * Hook para eliminar un marcador de lección.
  * 
@@ -15,7 +14,6 @@ import { useToast } from '@/hooks/use-toast';
 export function useDeleteLessonMarker(lessonId: string) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
   return useMutation({
     mutationFn: (markerId: string) => deleteLessonNote(markerId),
     onSuccess: () => {
@@ -23,7 +21,6 @@ export function useDeleteLessonMarker(lessonId: string) {
       queryClient.invalidateQueries({
         queryKey: LEARNING_QUERY_KEYS.lessonMarkers(lessonId),
       });
-
       toast({
         title: "Marcador eliminado",
         description: "El marcador ha sido eliminado correctamente",

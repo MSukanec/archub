@@ -14,13 +14,11 @@ import { useLocation } from 'wouter'
 import { supabase } from '@/lib/supabase'
 import { queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
-
 // Import tab components  
 import { BudgetItems } from './BudgetItemTab'
 import { EstimatePhases } from './EstimatePhases'
 import { EstimateSchedule } from './EstimateSchedule'
 import { useCreateConstructionTask } from '@/hooks/use-construction-tasks'
-
 export default function Budgets() {
   const [activeTab, setActiveTab] = useState('listado-tareas')
   
@@ -36,16 +34,13 @@ export default function Budgets() {
   const isMobile = useMobile()
   const [, navigate] = useLocation()
   const { toast } = useToast()
-
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('construction')
   }, [setSidebarContext])
-
   // Usar ProjectContext como fuente única de verdad para org/project IDs
   const projectId = selectedProjectId
   const organizationId = currentOrganizationId
-
   // Usar la misma fuente que el cronograma para consistencia
   const { data: tasksView = [], isLoading } = useConstructionTasksView(projectId || '', organizationId || '')
   
@@ -75,15 +70,12 @@ export default function Budgets() {
       rubro_name: task.division_name, // Ahora sí disponible en la vista
     }
   }))
-
   const { data: projectPhases = [] } = useConstructionProjectPhases(projectId || '')
-
   const handleAddTask = () => {
     if (!projectId || !organizationId || !userData?.user?.id) {
       console.error('Missing required data for task creation')
       return
     }
-
     openModal('construction-task', {
       projectId,
       organizationId,
@@ -91,13 +83,11 @@ export default function Budgets() {
       isEditing: false
     })
   }
-
   const handleAddBudget = () => {
     if (!projectId || !organizationId || !userData?.user?.id) {
       console.error('Missing required data for budget creation')
       return
     }
-
     openModal('budget', {
       projectId,
       organizationId,
@@ -105,13 +95,11 @@ export default function Budgets() {
       isEditing: false
     })
   }
-
   const handleAddSingleTask = () => {
     if (!projectId || !organizationId || !userData?.user?.id) {
       console.error('Missing required data for single task creation')
       return
     }
-
     openModal('construction-single-task', {
       projectId,
       organizationId,
@@ -119,13 +107,11 @@ export default function Budgets() {
       isEditing: false
     })
   }
-
   const handleAddPhase = () => {
     if (!projectId || !organizationId || !userData?.user?.id) {
       console.error('Missing required data for phase creation')
       return
     }
-
     openModal('construction-phase', {
       projectId,
       organizationId,
@@ -133,13 +119,11 @@ export default function Budgets() {
       isEditing: false
     })
   }
-
   const handleDuplicateTask = (task: any) => {
     if (!projectId || !organizationId || !userData?.user?.id) {
       console.error('Missing required data for task duplication')
       return
     }
-
     // Duplicar la tarea con los mismos datos pero nueva instancia
     createTask.mutate({
       organization_id: organizationId,
@@ -151,7 +135,6 @@ export default function Budgets() {
       description: task.description || ""
     })
   }
-
   const handleEditTask = (task: any) => {
     openModal('construction-single-task', {
       projectId,
@@ -161,7 +144,6 @@ export default function Budgets() {
       isEditing: true
     })
   }
-
   const handleDeleteTask = (taskId: string) => {
     const task = tasks.find(t => t.id === taskId)
     const taskName = task?.task?.display_name || task?.task?.code || 'Tarea'
@@ -179,7 +161,6 @@ export default function Budgets() {
       }
     })
   }
-
   const handleEditPhase = (phase: any) => {
     openModal('construction-phase', {
       projectId,
@@ -196,7 +177,6 @@ export default function Budgets() {
       isEditing: true
     })
   }
-
   const handleDeletePhase = (phaseId: string) => {
     const phase = projectPhases.find(p => p.project_phase_id === phaseId)
     const phaseName = phase?.name || 'Fase'
@@ -244,7 +224,6 @@ export default function Budgets() {
       }
     })
   }
-
   const handleReorderPhases = (reorderedPhases: any[]) => {
     if (!projectId) return
     
@@ -253,11 +232,9 @@ export default function Budgets() {
       phases: reorderedPhases
     })
   }
-
   // Mobile action bar configuration
   useEffect(() => {
     if (!isMobile) return
-
     const actions = {
       search: {
         id: 'search',
@@ -274,7 +251,7 @@ export default function Budgets() {
         onClick: () => {
           handleAddBudget()
         },
-        variant: 'primary' as const
+        variant: 'primary'as const
       },
       filter: {
         id: 'filter',
@@ -296,7 +273,6 @@ export default function Budgets() {
     
     setActions(actions)
     setShowActionBar(true)
-
     // Configure filters for task list
     const filterConfig = {
       title: 'Filtros de Tareas',
@@ -304,7 +280,7 @@ export default function Budgets() {
         {
           key: 'phase',
           label: 'Fase',
-          type: 'select' as const,
+          type: 'select'as const,
           options: [],
           value: '',
           placeholder: 'Todas las fases'
@@ -312,7 +288,7 @@ export default function Budgets() {
         {
           key: 'category',
           label: 'Rubro',
-          type: 'select' as const,
+          type: 'select'as const,
           options: [],
           value: '',
           placeholder: 'Todos los rubros'
@@ -323,12 +299,10 @@ export default function Budgets() {
     }
     
     setFilterConfig(filterConfig)
-
     return () => {
       clearActions()
     }
   }, [isMobile]) // Solo dependencias primitivas
-
   // Define tabs
   const tabs = [
     {
@@ -337,8 +311,6 @@ export default function Budgets() {
       isActive: activeTab === 'listado-tareas'
     }
   ]
-
-
   const headerProps = {
     title: "Cómputos y Presupuestos",
     icon: CheckSquare,
@@ -354,7 +326,6 @@ export default function Budgets() {
       onClick: handleAddBudget
     }
   }
-
   if (isLoading) {
     return (
       <Layout headerProps={headerProps} wide={false}>
@@ -364,10 +335,9 @@ export default function Budgets() {
       </Layout>
     )
   }
-
   return (
     <Layout headerProps={headerProps} wide={false}>
-      {activeTab === 'listado-tareas' && (
+      {activeTab === 'listado-tareas'&& (
         <BudgetItems 
           onAddTask={handleAddBudget}
         />

@@ -7,17 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Building, Loader2, Mail } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-
 export default function ForgotPassword() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [emailSent, setEmailSent] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`
@@ -46,10 +43,9 @@ export default function ForgotPassword() {
       setIsLoading(false);
     }
   };
-
   if (emailSent) {
     return (
-      <div className="min-h-screen dark flex items-center justify-center p-4" style={{ backgroundColor: 'var(--layout-bg)' }}>
+      <div className="min-h-screen dark flex items-center justify-center p-4" style={{ backgroundColor: 'var(--layout-bg)'}}>
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="text-center mb-8">
@@ -60,7 +56,6 @@ export default function ForgotPassword() {
               </div>
             </Link>
           </div>
-
           {/* Success Card */}
           <Card className="shadow-xl border-0">
             <CardHeader className="text-center space-y-4">
@@ -91,7 +86,6 @@ export default function ForgotPassword() {
                   Enviar a otro email
                 </Button>
               </div>
-
               <div className="text-center text-sm text-muted-foreground">
                 ¿Recordaste tu contraseña?{" "}
                 <Link href="/login">
@@ -102,7 +96,6 @@ export default function ForgotPassword() {
               </div>
             </CardContent>
           </Card>
-
           {/* Back to Home */}
           <div className="text-center mt-6">
             <Link href="/">
@@ -115,9 +108,8 @@ export default function ForgotPassword() {
       </div>
     );
   }
-
   return (
-    <div className="min-h-screen dark flex items-center justify-center p-4" style={{ backgroundColor: 'var(--layout-bg)' }}>
+    <div className="min-h-screen dark flex items-center justify-center p-4" style={{ backgroundColor: 'var(--layout-bg)'}}>
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -128,7 +120,6 @@ export default function ForgotPassword() {
             </div>
           </Link>
         </div>
-
         {/* Forgot Password Card */}
         <Card className="shadow-xl border-0">
           <CardHeader className="text-center space-y-2">
@@ -152,7 +143,6 @@ export default function ForgotPassword() {
                   disabled={isLoading}
                 />
               </div>
-
               <Button type="submit" className="w-full bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-accent-foreground" disabled={isLoading}>
                 {isLoading ? (
                   <>
@@ -164,7 +154,6 @@ export default function ForgotPassword() {
                 )}
               </Button>
             </form>
-
             <div className="text-center text-sm text-muted-foreground">
               ¿Recordaste tu contraseña?{" "}
               <Link href="/login">
@@ -175,7 +164,6 @@ export default function ForgotPassword() {
             </div>
           </CardContent>
         </Card>
-
         {/* Back to Home */}
         <div className="text-center mt-6">
           <Link href="/">

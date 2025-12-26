@@ -2,14 +2,11 @@ import React, { useState } from 'react';
 import { Package } from 'lucide-react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import ProductList from './ProductList';
-
 const Products = () => {
   const [activeTab, setActiveTab] = useState('listado');
-
   const tabs = [
-    { id: 'listado', label: 'Listado', isActive: activeTab === 'listado' }
+    { id: 'listado', label: 'Listado', isActive: activeTab === 'listado'}
   ];
-
   const headerProps = {
     title: "Productos",
     icon: Package,
@@ -19,7 +16,6 @@ const Products = () => {
     onTabChange: setActiveTab,
     actionButton: undefined // No action button for now as requested
   };
-
   const renderTabContent = () => {
     switch (activeTab) {
       case 'listado':
@@ -28,12 +24,10 @@ const Products = () => {
         return <ProductList />;
     }
   };
-
   return (
     <Layout wide headerProps={headerProps}>
       {renderTabContent()}
     </Layout>
   );
 };
-
 export default Products;

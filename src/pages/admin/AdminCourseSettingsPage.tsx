@@ -3,7 +3,6 @@ import { useParams, useLocation } from "wouter";
 import { BookOpen, FolderPlus, FileVideo, Plus, MessageSquare } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import AdminCourseDataView from '@/features/learning/views/admin/AdminCourseDataView';
 import AdminCourseContentView from '@/features/learning/views/admin/AdminCourseContentView';
@@ -12,7 +11,6 @@ import AdminCourseTestimonialsView from '@/features/learning/views/admin/AdminCo
 import AdminCourseForumView from '@/features/learning/views/admin/AdminCourseForumView';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal';
-
 export default function AdminCourseSettingsPage() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
@@ -27,20 +25,17 @@ export default function AdminCourseSettingsPage() {
       
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session');
-
       const res = await fetch(`/api/admin/courses/${id}`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         },
         credentials: 'include'
       });
-
       if (!res.ok) throw new Error('Failed to fetch course');
       return res.json();
     },
     enabled: !!id && !!supabase
   });
-
   const { data: modules = [] } = useQuery({
     queryKey: ['/api/admin/modules', id],
     queryFn: async () => {
@@ -48,20 +43,17 @@ export default function AdminCourseSettingsPage() {
       
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return [];
-
       const res = await fetch(`/api/admin/modules?course_id=${id}`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         },
         credentials: 'include'
       });
-
       if (!res.ok) throw new Error('Failed to fetch modules');
       return res.json();
     },
     enabled: !!id && !!supabase
   });
-
   const { data: lessons = [] } = useQuery({
     queryKey: ['/api/admin/lessons', id],
     queryFn: async () => {
@@ -69,7 +61,6 @@ export default function AdminCourseSettingsPage() {
       
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return [];
-
       const allLessons: any[] = [];
       
       for (const module of modules) {
@@ -79,38 +70,31 @@ export default function AdminCourseSettingsPage() {
           },
           credentials: 'include'
         });
-
         if (res.ok) {
           const moduleLessons = await res.json();
           allLessons.push(...moduleLessons);
         }
       }
-
       return allLessons;
     },
     enabled: !!id && !!supabase && modules.length > 0
   });
-
   const handleCreateModule = () => {
     if (!id) return;
     openModal('course-module', { courseId: id });
   };
-
   const handleCreateLesson = () => {
     if (!id) return;
     openModal('lesson', { courseId: id });
   };
-
   const handleCreateTestimonial = () => {
     if (!id) return;
     openModal('testimonial', { courseId: id });
   };
-
   const handleCreateForumCategory = () => {
     if (!id) return;
-    openModal('course-forum-category', { courseId: id, mode: 'create' });
+    openModal('course-forum-category', { courseId: id, mode: 'create'});
   };
-
   const getHeaderActions = () => {
     if (activeTab === 'Contenido del Curso') {
       return [
@@ -148,7 +132,6 @@ export default function AdminCourseSettingsPage() {
         </Button>
       ];
     }
-
     if (activeTab === 'Foro') {
       return [
         <Button
@@ -165,7 +148,6 @@ export default function AdminCourseSettingsPage() {
     
     return [];
   };
-
   const headerTabs = [
     {
       id: 'Datos del Curso',
@@ -193,7 +175,6 @@ export default function AdminCourseSettingsPage() {
       isActive: activeTab === 'Testimonios'
     }
   ];
-
   const headerProps = {
     icon: BookOpen,
     title: course?.title || "Curso",
@@ -206,7 +187,6 @@ export default function AdminCourseSettingsPage() {
     onTabChange: setActiveTab,
     actions: getHeaderActions()
   };
-
   if (isLoading) {
     return (
       <Layout headerProps={headerProps} wide>
@@ -218,7 +198,6 @@ export default function AdminCourseSettingsPage() {
       </Layout>
     );
   }
-
   if (!course) {
     return (
       <Layout headerProps={headerProps} wide>
@@ -231,7 +210,6 @@ export default function AdminCourseSettingsPage() {
       </Layout>
     );
   }
-
   const renderTabContent = () => {
     switch (activeTab) {
       case 'Datos del Curso':
@@ -248,7 +226,6 @@ export default function AdminCourseSettingsPage() {
         return <AdminCourseDataView courseId={id} />;
     }
   };
-
   return (
     <Layout headerProps={headerProps} wide>
       {renderTabContent()}

@@ -1,13 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-
 interface SidebarState {
   isDocked: boolean
   isHovered: boolean
   setDocked: (docked: boolean) => void
   setHovered: (hovered: boolean) => void
 }
-
 export const useSidebarStore = create<SidebarState>()(
   persist(
     (set) => ({
@@ -22,7 +20,6 @@ export const useSidebarStore = create<SidebarState>()(
     }
   )
 )
-
 // Secondary Sidebar Store
 interface SecondarySidebarState {
   isDocked: boolean
@@ -30,7 +27,6 @@ interface SecondarySidebarState {
   setDocked: (docked: boolean) => void
   setHovered: (hovered: boolean) => void
 }
-
 export const useSecondarySidebarStore = create<SecondarySidebarState>()(
   persist(
     (set) => ({
@@ -45,7 +41,6 @@ export const useSecondarySidebarStore = create<SecondarySidebarState>()(
     }
   )
 )
-
 // Course Sidebar Store
 interface CourseSidebarState {
   isVisible: boolean
@@ -56,7 +51,6 @@ interface CourseSidebarState {
   setData: (modules: any[], lessons: any[]) => void
   setCurrentLesson: (lessonId?: string) => void
 }
-
 export const useCourseSidebarStore = create<CourseSidebarState>()((set) => ({
   isVisible: false,
   modules: [],

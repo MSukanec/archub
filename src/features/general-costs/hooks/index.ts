@@ -9,5 +9,4 @@ export { useGeneralCosts } from './use-general-costs';
 export { useUpdateGeneralCostPayment } from './use-update-general-cost-payment';
 export { useUpdateGeneralCost } from './use-update-general-cost';
 export { useGeneralCostsPayments } from './use-general-costs-payments';
-
 export type { GeneralCostPayment } from './use-general-costs-payments';

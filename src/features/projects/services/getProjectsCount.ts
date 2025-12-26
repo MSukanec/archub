@@ -1,10 +1,8 @@
 import { supabase } from '@/lib/supabase';
-
 export async function getProjectsCount(organizationId: string): Promise<number> {
   if (!supabase || !organizationId) {
     return 0;
   }
-
   const { count, error } = await supabase
     .from('projects')
     .select('*', { count: 'exact', head: true })

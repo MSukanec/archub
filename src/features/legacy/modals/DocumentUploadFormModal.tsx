@@ -7,7 +7,6 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
 import { useOrganizationMembers } from '@/features/organization';
 import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
-
 import { useCreateDesignDocumentFolder } from '@/hooks/use-design-document-folders';
 import { useCreateDesignDocument, useDesignDocuments } from '@/hooks/use-design-documents';
 import { FormModalLayout } from '@/components/modal';
@@ -20,9 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, X, File, FileText, FolderOpen, Plus } from 'lucide-react';
-
 import { supabase } from '@/lib/supabase';
-
 const documentUploadSchema = z.object({
   folder_id: z.string(),
   status: z.string().min(1, 'El estado es obligatorio'),
@@ -42,16 +39,13 @@ const documentUploadSchema = z.object({
   message: 'Debe seleccionar una carpeta existente o crear una nueva',
   path: ['folder_id']
 });
-
 type DocumentUploadFormData = z.infer<typeof documentUploadSchema>;
-
 interface DocumentUploadFormModalProps {
   modalData?: {
     defaultFolderId?: string;
   };
   onClose: () => void;
 }
-
 export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFormModalProps) {
   const { defaultFolderId } = modalData || {};
   const { data: userData } = useCurrentUser();
@@ -65,18 +59,15 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
   const [selectedFolderId, setSelectedFolderId] = useState<string>('');
   const [showNewFolderInput, setShowNewFolderInput] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const { data: organizationMembers } = useOrganizationMembers(userData?.preferences?.last_organization_id || '');
   const { data: folders = [] } = useDesignDocumentFolders();
   const { data: existingDocuments = [] } = useDesignDocuments();
   const createFolderMutation = useCreateDesignDocumentFolder();
   const createDocumentMutation = useCreateDesignDocument();
-
   // Initialize panel to edit mode when modal opens
   useEffect(() => {
     setPanel('edit');
   }, [setPanel]);
-
   const form = useForm<DocumentUploadFormData>({
     resolver: zodResolver(documentUploadSchema),
     defaultValues: {
@@ -86,13 +77,11 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
       parent_folder_id: '',
     },
   });
-
   // Update selectedFolderId when form folder_id changes
   useEffect(() => {
     const folderId = form.watch('folder_id');
     setSelectedFolderId(folderId);
   }, [form.watch('folder_id'), selectedFolderId, form]);
-
   // Reset form when modal opens/closes
   useEffect(() => {
     if (userData) {
@@ -108,7 +97,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
       setShowNewFolderInput(false);
     }
   }, [userData, organizationMembers, defaultFolderId, form]);
-
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     setSelectedFiles(files);
@@ -120,7 +108,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
     });
     setFileNames(newFileNames);
   };
-
   const removeFile = (index: number) => {
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
     setFileNames(prev => {
@@ -138,33 +125,26 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
       return reindexed;
     });
   };
-
   const updateFileName = (index: number, name: string) => {
     setFileNames(prev => ({
       ...prev,
       [index]: name,
     }));
   };
-
   const triggerFileInput = () => {
     fileInputRef.current?.click();
   };
-
   const uploadMutation = useMutation({
     mutationFn: async (data: DocumentUploadFormData) => {
       if (!userData?.preferences?.last_project_id || !userData?.preferences?.last_organization_id) {
         throw new Error('No hay proyecto u organización seleccionada');
       }
-
       if (selectedFiles.length === 0) {
         throw new Error('Debe seleccionar al menos un archivo');
       }
-
       setIsUploading(true);
       setUploadProgress(0);
-
       // Upload documents directly to folder without groups
-
       // Process each file
       const uploads = selectedFiles.map(async (file, index) => {
         const fileName = fileNames[index] || file.name.replace(/\.[^/.]+$/, '');
@@ -180,16 +160,13 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
             cacheControl: '3600',
             upsert: false
           });
-
         if (uploadError) {
           throw new Error(`Error subiendo archivo ${file.name}: ${uploadError.message}`);
         }
-
         // Get public URL
         const { data: urlData } = supabase.storage
           .from('design-documents')
           .getPublicUrl(filePath);
-
         // Create document record in database
         return createDocumentMutation.mutateAsync({
           name: fileName,
@@ -203,22 +180,19 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
           status: data.status,
         });
       });
-
       return Promise.all(uploads);
     },
     onSuccess: () => {
       toast({
         title: 'Éxito',
-        description: `${selectedFiles.length > 1 ? 'Documentos subidos' : 'Documento subido'} correctamente`,
+        description: `${selectedFiles.length > 1 ? 'Documentos subidos': 'Documento subido'} correctamente`,
       });
       // Invalidate all document-related queries
       console.log('Invalidating cache queries after document upload');
       queryClient.invalidateQueries({ queryKey: ['design-documents'] });
       queryClient.invalidateQueries({ queryKey: ['design-documents-folder'] });
       queryClient.invalidateQueries({ queryKey: ['design-document-folders'] });
-
       
-
       handleClose();
     },
     onError: (error) => {
@@ -233,9 +207,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
       setUploadProgress(0);
     },
   });
-
-
-
   const handleClose = () => {
     form.reset();
     setSelectedFiles([]);
@@ -244,7 +215,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
     setShowNewFolderInput(false);
     onClose();
   };
-
   const onSubmit = async (data: DocumentUploadFormData) => {
     if (selectedFiles.length === 0) {
       toast({
@@ -254,7 +224,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
       });
       return;
     }
-
     // If creating a new folder, create it first
     let finalFolderId = data.folder_id;
     
@@ -274,11 +243,9 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
         return;
       }
     }
-
     // Upload documents with the final folder ID
     uploadMutation.mutate({ ...data, folder_id: finalFolderId });
   };
-
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -300,7 +267,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
                       field.onChange(value);
                     }
                   }} 
-                  value={showNewFolderInput ? '__create_new__' : field.value}
+                  value={showNewFolderInput ? '__create_new__': field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -325,7 +292,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="status"
@@ -350,7 +316,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
             )}
           />
         </div>
-
         {/* New Folder Creation Fields */}
         {showNewFolderInput && (
           <div className="space-y-4 p-4 border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)]">
@@ -376,7 +341,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="parent_folder_id"
@@ -405,10 +369,7 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
             </div>
           </div>
         )}
-
         {/* 4. Description Field */}
-
-
         {/* 5. File Upload Section */}
         <div className="space-y-4">
           <div>
@@ -434,7 +395,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
               />
             </div>
           </div>
-
           {/* Selected Files Display */}
           {selectedFiles.length > 0 && (
             <div className="space-y-2">
@@ -476,19 +436,15 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
             </div>
           )}
         </div>
-
-
       </form>
     </Form>
   );
-
   const headerContent = (
     <FormModalHeader
       title="Nueva Entrega de Documentos"
       icon={FolderOpen}
     />
   );
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -498,7 +454,6 @@ export function DocumentUploadFormModal({ modalData, onClose }: DocumentUploadFo
       submitDisabled={selectedFiles.length === 0 || isUploading}
     />
   );
-
   return (
     <FormModalLayout
       columns={1}

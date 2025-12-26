@@ -1,13 +1,11 @@
 import { useOptimisticMutation } from '@/core/save-engine';
 import { apiRequest } from '@/lib/queryClient';
-
 interface InviteMemberInput {
   email: string;
   roleId: string;
   organizationId: string;
   linkedUserId?: string;
 }
-
 export function useInviteMember(organizationId: string, linkedUserId?: string) {
   return useOptimisticMutation({
     mutationFn: async (input: InviteMemberInput) => {

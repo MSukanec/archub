@@ -1,14 +1,12 @@
 import { cn } from "@/lib/utils";
 import { Column } from "./types";
 import { getGridTemplateColumns } from "./utils";
-
 interface TableLoadingSkeletonProps<T> {
   columns: Column<T>[];
   selectable: boolean;
   hasActions: boolean;
   className?: string;
 }
-
 export function TableLoadingSkeleton<T>({
   columns,
   selectable,
@@ -16,7 +14,6 @@ export function TableLoadingSkeleton<T>({
   className,
 }: TableLoadingSkeletonProps<T>) {
   const gridTemplateColumns = getGridTemplateColumns(columns, selectable, hasActions);
-
   return (
     <div className={cn("space-y-3", className)}>
       <div className="hidden lg:block">
@@ -43,7 +40,6 @@ export function TableLoadingSkeleton<T>({
           </div>
         ))}
       </div>
-
       <div className="lg:hidden">
         {Array.from({ length: 3 }).map((_, index) => (
           <div key={index} className="p-4 border rounded-lg mb-2">

@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { CreateSiteLogData } from './createSiteLog';
-
 /**
  * Actualiza una bitácora existente.
  * 
@@ -16,14 +15,12 @@ export async function updateSiteLog(siteLogId: string, data: CreateSiteLogData) 
   if (!supabase) {
     throw new Error('Error de conexión con la base de datos');
   }
-
   const { data: result, error } = await supabase
     .from('site_logs')
     .update(data)
     .eq('id', siteLogId)
     .select()
     .single();
-
   if (error) throw new Error(error.message);
   
   return result;

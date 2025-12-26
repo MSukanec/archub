@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-
 /**
  * Obtiene la duración total de un curso.
  * 
@@ -18,41 +17,33 @@ export async function getCourseDuration(
   if (!courseId || !supabase) {
     return { total_seconds: 0 };
   }
-
   try {
     // Get all modules for this course
     const { data: courseModules, error: modulesError } = await supabase
       .from('course_modules')
       .select('id')
       .eq('course_id', courseId);
-
     if (modulesError) {
       console.error('Error fetching course modules:', modulesError);
       return { total_seconds: 0 };
     }
-
     if (!courseModules || courseModules.length === 0) {
       return { total_seconds: 0 };
     }
-
     const moduleIds = courseModules.map(m => m.id);
-
     // Get all lessons for these modules with their durations
     const { data: courseLessons, error: lessonsError } = await supabase
       .from('course_lessons')
       .select('duration_sec')
       .in('module_id', moduleIds)
       .eq('is_active', true);
-
     if (lessonsError) {
       console.error('Error fetching course lessons:', lessonsError);
       return { total_seconds: 0 };
     }
-
     if (!courseLessons || courseLessons.length === 0) {
       return { total_seconds: 0 };
     }
-
     const totalSeconds = courseLessons.reduce((sum, lesson) => sum + (lesson.duration_sec || 0), 0);
     
     return { total_seconds: totalSeconds };

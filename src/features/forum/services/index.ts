@@ -1,25 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-
 export const FORUM_QUERY_KEYS = {
   categories: ['/api/forum/categories'] as const,
   threads: ['/api/forum/threads'] as const,
   thread: (threadSlug: string) => ['/api/forum/threads', threadSlug] as const,
   threadReactions: (threadId: string) => ['/api/forum/threads', threadId, 'reactions'] as const,
 };
-
 export interface ForumAuthor {
   id: string;
   full_name: string;
   avatar_url: string | null;
 }
-
 export interface ForumOrganization {
   id: string;
   name: string;
   logo_url: string | null;
 }
-
 export interface ForumCategory {
   id: string;
   name: string;
@@ -33,12 +29,10 @@ export interface ForumCategory {
   is_active: boolean;
   created_at: string;
 }
-
 export interface ForumCategoryWithCounts extends ForumCategory {
   thread_count?: number;
   post_count?: number;
 }
-
 export interface ForumThreadWithAuthor {
   id: string;
   category_id: string;
@@ -64,7 +58,6 @@ export interface ForumThreadWithAuthor {
   } | null;
   organization?: ForumOrganization | null;
 }
-
 export interface ForumPostWithAuthor {
   id: string;
   thread_id: string;
@@ -79,7 +72,6 @@ export interface ForumPostWithAuthor {
   organization?: ForumOrganization | null;
   replies?: ForumPostWithAuthor[];
 }
-
 export interface ForumAttachment {
   id: string;
   category: string | null;
@@ -96,12 +88,10 @@ export interface ForumAttachment {
     file_path: string;
   } | null;
 }
-
 export interface ForumThreadWithPosts extends ForumThreadWithAuthor {
   posts: ForumPostWithAuthor[];
   attachments?: ForumAttachment[];
 }
-
 export interface ThreadsResponse {
   threads: ForumThreadWithAuthor[];
   pagination: {
@@ -111,7 +101,6 @@ export interface ThreadsResponse {
     totalPages: number;
   };
 }
-
 export interface ReactionsResponse {
   thread: {
     likes: number;
@@ -119,7 +108,6 @@ export interface ReactionsResponse {
   };
   posts: Record<string, number>;
 }
-
 export function useForumCategories() {
   return useQuery<ForumCategoryWithCounts[]>({
     queryKey: FORUM_QUERY_KEYS.categories,
@@ -132,12 +120,11 @@ export function useForumCategories() {
     gcTime: 5 * 60 * 1000,
   });
 }
-
 export function useForumThreads(categorySlug: string | null, page: number = 1, limit: number = 20) {
   return useQuery<ThreadsResponse>({
     queryKey: [...FORUM_QUERY_KEYS.threads, { category: categorySlug || 'all', page, limit }],
     queryFn: async () => {
-      const categoryParam = categorySlug && categorySlug !== 'all' ? `&category=${categorySlug}` : '';
+      const categoryParam = categorySlug && categorySlug !== 'all'? `&category=${categorySlug}` : '';
       const res = await apiRequest('GET', `/api/forum/threads?page=${page}&limit=${limit}${categoryParam}`);
       if (!res.ok) throw new Error('Failed to fetch threads');
       return res.json();
@@ -146,7 +133,6 @@ export function useForumThreads(categorySlug: string | null, page: number = 1, l
     gcTime: 5 * 60 * 1000,
   });
 }
-
 export function useForumThread(threadSlug: string) {
   return useQuery<ForumThreadWithPosts>({
     queryKey: FORUM_QUERY_KEYS.thread(threadSlug),
@@ -160,7 +146,6 @@ export function useForumThread(threadSlug: string) {
     gcTime: 5 * 60 * 1000,
   });
 }
-
 export function useThreadReactions(threadId: string) {
   return useQuery<ReactionsResponse>({
     queryKey: FORUM_QUERY_KEYS.threadReactions(threadId),
@@ -174,10 +159,8 @@ export function useThreadReactions(threadId: string) {
     gcTime: 5 * 60 * 1000,
   });
 }
-
 export function useCreateThread() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: { category_id: string; title: string; content: string }) => {
       const res = await apiRequest('POST', '/api/forum/threads', data);
@@ -190,15 +173,13 @@ export function useCreateThread() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.categories });
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.threads });
-      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active' });
-      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active' });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active'});
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active'});
     },
   });
 }
-
 export function useUpdateThread() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({ threadId, data }: { threadId: string; data: { title?: string; content?: string } }) => {
       const res = await apiRequest('PATCH', `/api/forum/threads/${threadId}`, data);
@@ -216,15 +197,13 @@ export function useUpdateThread() {
       }
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.categories });
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.threads });
-      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active' });
-      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active' });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active'});
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active'});
     },
   });
 }
-
 export function useDeleteThread() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (threadId: string) => {
       const res = await apiRequest('DELETE', `/api/forum/threads/${threadId}`);
@@ -237,15 +216,13 @@ export function useDeleteThread() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.categories });
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.threads });
-      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active' });
-      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active' });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active'});
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active'});
     },
   });
 }
-
 export function useCreatePost() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: { thread_id: string; thread_slug?: string; content: string; parent_id?: string }) => {
       const res = await apiRequest('POST', '/api/forum/posts', {
@@ -265,10 +242,8 @@ export function useCreatePost() {
     },
   });
 }
-
 export function useUpdatePost() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({ postId, content }: { postId: string; content: string }) => {
       const res = await apiRequest('PATCH', `/api/forum/posts/${postId}`, { content });
@@ -277,15 +252,13 @@ export function useUpdatePost() {
     onSuccess: () => {
       queryClient.invalidateQueries({
         predicate: (query) =>
-          query.queryKey[0] === '/api/forum/threads' && query.queryKey.length >= 2,
+          query.queryKey[0] === '/api/forum/threads'&& query.queryKey.length >= 2,
       });
     },
   });
 }
-
 export function useDeletePost() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (postId: string) => {
       const res = await apiRequest('DELETE', `/api/forum/posts/${postId}`);
@@ -294,17 +267,15 @@ export function useDeletePost() {
     onSuccess: () => {
       queryClient.invalidateQueries({
         predicate: (query) =>
-          query.queryKey[0] === '/api/forum/threads' && query.queryKey.length >= 2,
+          query.queryKey[0] === '/api/forum/threads'&& query.queryKey.length >= 2,
       });
     },
   });
 }
-
 export function useToggleReaction() {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async (data: { item_type: 'thread' | 'post'; item_id: string; reaction_type?: string }) => {
+    mutationFn: async (data: { item_type: 'thread'| 'post'; item_id: string; reaction_type?: string }) => {
       const res = await apiRequest('POST', '/api/forum/reactions', {
         item_type: data.item_type,
         item_id: data.item_id,
@@ -317,11 +288,9 @@ export function useToggleReaction() {
         await queryClient.cancelQueries({
           queryKey: FORUM_QUERY_KEYS.threadReactions(variables.item_id),
         });
-
         const previousData = queryClient.getQueryData<ReactionsResponse>(
           FORUM_QUERY_KEYS.threadReactions(variables.item_id)
         );
-
         if (previousData) {
           const isCurrentlyLiked = previousData.thread.userReaction === 'like';
           queryClient.setQueryData<ReactionsResponse>(
@@ -337,13 +306,12 @@ export function useToggleReaction() {
             }
           );
         }
-
         return { previousData };
       }
       return {};
     },
     onError: (err, variables, context: any) => {
-      if (variables.item_type === 'thread' && context?.previousData) {
+      if (variables.item_type === 'thread'&& context?.previousData) {
         queryClient.setQueryData(
           FORUM_QUERY_KEYS.threadReactions(variables.item_id),
           context.previousData
@@ -359,7 +327,6 @@ export function useToggleReaction() {
     },
   });
 }
-
 export function useIncrementViewCount() {
   return useMutation({
     mutationFn: async (threadId: string) => {
@@ -368,7 +335,6 @@ export function useIncrementViewCount() {
     },
   });
 }
-
 export interface CreateCategoryData {
   name: string;
   description?: string;
@@ -377,10 +343,8 @@ export interface CreateCategoryData {
   allowed_roles?: string[];
   sort_order?: number;
 }
-
 export function useCreateCategory() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: CreateCategoryData) => {
       const res = await apiRequest('POST', '/api/forum/categories', data);
@@ -393,12 +357,11 @@ export function useCreateCategory() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.categories });
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.threads });
-      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active' });
-      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active' });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active'});
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active'});
     },
   });
 }
-
 export interface UpdateCategoryData {
   name?: string;
   description?: string;
@@ -408,10 +371,8 @@ export interface UpdateCategoryData {
   sort_order?: number;
   is_active?: boolean;
 }
-
 export function useUpdateCategory() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({ categoryId, data }: { categoryId: string; data: UpdateCategoryData }) => {
       const res = await apiRequest('PATCH', `/api/forum/categories/${categoryId}`, data);
@@ -424,15 +385,13 @@ export function useUpdateCategory() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.categories });
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.threads });
-      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active' });
-      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active' });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active'});
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active'});
     },
   });
 }
-
 export function useDeleteCategory() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (categoryId: string) => {
       const res = await apiRequest('DELETE', `/api/forum/categories/${categoryId}`);
@@ -445,8 +404,8 @@ export function useDeleteCategory() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.categories });
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.threads });
-      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active' });
-      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active' });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active'});
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active'});
     },
   });
 }

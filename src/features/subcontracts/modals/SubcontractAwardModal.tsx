@@ -8,7 +8,6 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-
 interface SubcontractAwardModalProps {
   modalData?: {
     subcontract: any;
@@ -17,7 +16,6 @@ interface SubcontractAwardModalProps {
   };
   onClose: () => void;
 }
-
 export function SubcontractAwardModal({
   modalData,
   onClose
@@ -25,20 +23,18 @@ export function SubcontractAwardModal({
   const { subcontract, winningBid, onSuccess } = modalData || {};
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
-
   const formatCurrency = (amount: number, currency: string) => {
     if (!amount || !currency) return '—';
     
     const formatter = new Intl.NumberFormat('es-AR', {
       style: 'currency',
-      currency: currency === 'ARS' ? 'ARS' : 'USD',
+      currency: currency === 'ARS'? 'ARS': 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     });
     
     return formatter.format(amount);
   };
-
   const handleConfirmAward = async () => {
     if (!subcontract?.id || !winningBid?.id) {
       toast({
@@ -48,15 +44,12 @@ export function SubcontractAwardModal({
       });
       return;
     }
-
     setIsLoading(true);
-
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
         throw new Error('No hay sesión activa');
       }
-
       const response = await fetch(`/api/subcontracts/${subcontract.id}/award`, {
         method: 'PUT',
         headers: {
@@ -69,12 +62,10 @@ export function SubcontractAwardModal({
           currency_id: winningBid.currency_id
         })
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Error al adjudicar el subcontrato');
       }
-
       const contactName = winningBid.contacts?.company_name || 
                           winningBid.contacts?.full_name || 
                           `${winningBid.contacts?.first_name || ''} ${winningBid.contacts?.last_name || ''}`.trim() ||
@@ -84,11 +75,9 @@ export function SubcontractAwardModal({
         title: "Subcontrato adjudicado",
         description: `El subcontrato ha sido adjudicado exitosamente a ${contactName}`
       });
-
       if (onSuccess) {
         onSuccess();
       }
-
       onClose();
     } catch (error) {
       console.error('Error awarding subcontract:', error);
@@ -101,12 +90,11 @@ export function SubcontractAwardModal({
       setIsLoading(false);
     }
   };
-
   const viewPanel = (
     <div className="space-y-6">
       <div className="bg-muted/30 border rounded-lg p-4">
         <div className="flex items-center gap-2 mb-4">
-          <Trophy className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+          <Trophy className="h-5 w-5" style={{ color: 'var(--accent)'}} />
           <h3 className="font-semibold">Resumen de Adjudicación</h3>
         </div>
         
@@ -123,12 +111,11 @@ export function SubcontractAwardModal({
               </p>
             </div>
           </div>
-
           <div className="flex items-start gap-3">
             <DollarSign className="h-4 w-4 text-muted-foreground mt-0.5" />
             <div>
               <p className="text-sm font-medium">Monto total</p>
-              <p className="text-lg font-bold" style={{ color: 'var(--accent)' }}>
+              <p className="text-lg font-bold" style={{ color: 'var(--accent)'}}>
                 {formatCurrency(winningBid?.amount, winningBid?.currencies?.code)}
               </p>
               <div className="flex items-center gap-2 mt-1">
@@ -143,7 +130,6 @@ export function SubcontractAwardModal({
               </div>
             </div>
           </div>
-
           <div className="flex items-start gap-3">
             <Calendar className="h-4 w-4 text-muted-foreground mt-0.5" />
             <div>
@@ -156,7 +142,6 @@ export function SubcontractAwardModal({
               </p>
             </div>
           </div>
-
           {winningBid?.notes && (
             <div className="flex items-start gap-3">
               <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
@@ -170,9 +155,6 @@ export function SubcontractAwardModal({
           )}
         </div>
       </div>
-
-
-
       <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
         <div className="flex items-center gap-2 mb-2">
           <Trophy className="h-4 w-4 text-destructive flex-shrink-0" />
@@ -185,7 +167,6 @@ export function SubcontractAwardModal({
       </div>
     </div>
   );
-
   const headerContent = (
     <FormModalHeader 
       title="Confirmar Adjudicación"
@@ -193,7 +174,6 @@ export function SubcontractAwardModal({
       icon={Trophy}
     />
   );
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -204,7 +184,6 @@ export function SubcontractAwardModal({
       rightVariant="default"
     />
   );
-
   return (
     <FormModalLayout
       columns={1}

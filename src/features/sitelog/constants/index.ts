@@ -1,4 +1,3 @@
-import { 
   TrendingUp, 
   Users, 
   AlertTriangle, 
@@ -17,18 +16,15 @@ import {
   CloudSun,
   type LucideIcon
 } from "lucide-react";
-
 export interface EntryTypeConfig {
   icon: LucideIcon;
   label: string;
   color: string;
 }
-
 export interface WeatherTypeConfig {
   icon: LucideIcon;
   label: string;
 }
-
 export const ENTRY_TYPES: Record<string, EntryTypeConfig> = {
   avance_de_obra: { 
     icon: TrendingUp, 
@@ -76,7 +72,6 @@ export const ENTRY_TYPES: Record<string, EntryTypeConfig> = {
     color: "bg-teal-100 text-teal-800" 
   }
 } as const;
-
 export const WEATHER_TYPES: Record<string, WeatherTypeConfig> = {
   sunny: { icon: Sun, label: "Soleado" },
   partly_cloudy: { icon: CloudSun, label: "Parcialmente nublado" },
@@ -88,7 +83,6 @@ export const WEATHER_TYPES: Record<string, WeatherTypeConfig> = {
   windy: { icon: Wind, label: "Ventoso" },
   hail: { icon: CloudSnow, label: "Granizo" }
 } as const;
-
 export const ENTRY_TYPE_OPTIONS = [
   { value: "avance_de_obra", label: "Avance de obra" },
   { value: "visita_tecnica", label: "Visita técnica" },
@@ -100,30 +94,27 @@ export const ENTRY_TYPE_OPTIONS = [
   { value: "foto_diaria", label: "Foto diaria" },
   { value: "registro_general", label: "Registro general" }
 ] as const;
-
 export const SEVERITY_OPTIONS = [
-  { value: 'low', label: 'Baja' },
-  { value: 'medium', label: 'Media' },
-  { value: 'high', label: 'Alta' },
-  { value: 'critical', label: 'Crítica' }
+  { value: 'low', label: 'Baja'},
+  { value: 'medium', label: 'Media'},
+  { value: 'high', label: 'Alta'},
+  { value: 'critical', label: 'Crítica'}
 ] as const;
-
 export const STATUS_OPTIONS = [
-  { value: 'pending', label: 'Pendiente' },
-  { value: 'review', label: 'En revisión' },
-  { value: 'approved', label: 'Aprobado' },
-  { value: 'closed', label: 'Cerrado' }
+  { value: 'pending', label: 'Pendiente'},
+  { value: 'review', label: 'En revisión'},
+  { value: 'approved', label: 'Aprobado'},
+  { value: 'closed', label: 'Cerrado'}
 ] as const;
-
 export const WEATHER_OPTIONS = [
-  { value: 'sunny', label: 'Soleado' },
-  { value: 'partly_cloudy', label: 'Parcialmente nublado' },
-  { value: 'cloudy', label: 'Nublado' },
-  { value: 'rain', label: 'Lluvia' },
-  { value: 'storm', label: 'Tormenta' },
-  { value: 'snow', label: 'Nieve' },
-  { value: 'fog', label: 'Niebla' },
-  { value: 'windy', label: 'Ventoso' },
-  { value: 'hail', label: 'Granizo' },
-  { value: 'none', label: 'N/A' }
+  { value: 'sunny', label: 'Soleado'},
+  { value: 'partly_cloudy', label: 'Parcialmente nublado'},
+  { value: 'cloudy', label: 'Nublado'},
+  { value: 'rain', label: 'Lluvia'},
+  { value: 'storm', label: 'Tormenta'},
+  { value: 'snow', label: 'Nieve'},
+  { value: 'fog', label: 'Niebla'},
+  { value: 'windy', label: 'Ventoso'},
+  { value: 'hail', label: 'Granizo'},
+  { value: 'none', label: 'N/A'}
 ] as const;

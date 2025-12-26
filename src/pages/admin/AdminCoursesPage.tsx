@@ -7,27 +7,22 @@ import { useGlobalModalStore } from '@/components/modal'
 import AdminCourseDashboardView from '@/features/learning/views/admin/AdminCourseDashboardView'
 import AdminCourseUsersView from '@/features/learning/views/admin/AdminCourseUsersView'
 import AdminCourseListView from '@/features/learning/views/admin/AdminCourseListView'
-
 export default function AdminCoursesPage() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const { setSidebarLevel, sidebarLevel } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
-
   useEffect(() => {
-    // Only set to 'admin' if not in 'general' mode (respects user's hub selection)
+    // Only set to 'admin'if not in 'general'mode (respects user's hub selection)
     if (sidebarLevel !== 'general') {
       setSidebarLevel('admin')
     }
   }, [setSidebarLevel, sidebarLevel])
-
   const handleCreateEnrollment = () => {
     openModal('course-enrollment', {});
   };
-
   const handleCreateCourse = () => {
     openModal('course', {});
   };
-
   const headerProps = {
     title: "Administración de Cursos",
     icon: BookOpen,
@@ -50,7 +45,7 @@ export default function AdminCoursesPage() {
     ],
     onTabChange: (tabId: string) => setActiveTab(tabId),
     actions: [
-      activeTab === 'users' && (
+      activeTab === 'users'&& (
         <Button
           key="create-enrollment"
           onClick={handleCreateEnrollment}
@@ -61,7 +56,7 @@ export default function AdminCoursesPage() {
           Inscribir Alumno
         </Button>
       ),
-      activeTab === 'courses' && (
+      activeTab === 'courses'&& (
         <Button
           key="create-course"
           onClick={handleCreateCourse}
@@ -74,13 +69,12 @@ export default function AdminCoursesPage() {
       ),
     ].filter(Boolean)
   }
-
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {activeTab === 'dashboard' && <AdminCourseDashboardView />}
-        {activeTab === 'users' && <AdminCourseUsersView />}
-        {activeTab === 'courses' && <AdminCourseListView />}
+        {activeTab === 'dashboard'&& <AdminCourseDashboardView />}
+        {activeTab === 'users'&& <AdminCourseUsersView />}
+        {activeTab === 'courses'&& <AdminCourseListView />}
       </div>
     </Layout>
   )

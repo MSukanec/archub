@@ -1,20 +1,17 @@
 import imageCompression from 'browser-image-compression';
-
 export type ImagePreset = 
   | 'project-cover'
-  | 'sitelog-photo' 
+  | 'sitelog-photo'
   | 'course-cover'
   | 'avatar'
   | 'document'
   | 'default';
-
 interface CompressionPreset {
   maxSizeMB: number;
   maxWidthOrHeight: number;
   quality: number;
   preserveExif: boolean;
 }
-
 const PRESETS: Record<ImagePreset, CompressionPreset> = {
   'project-cover': {
     maxSizeMB: 1,
@@ -53,7 +50,6 @@ const PRESETS: Record<ImagePreset, CompressionPreset> = {
     preserveExif: false
   }
 };
-
 export function shouldCompress(file: File): boolean {
   // Don't compress GIFs - preserve animation
   if (file.type === 'image/gif') {
@@ -61,7 +57,6 @@ export function shouldCompress(file: File): boolean {
   }
   return file.type.startsWith('image/');
 }
-
 export async function compressImage(
   file: File,
   preset: ImagePreset = 'default'
@@ -69,11 +64,9 @@ export async function compressImage(
   if (!shouldCompress(file)) {
     return file;
   }
-
   const presetConfig = PRESETS[preset];
   const originalSizeKB = file.size / 1024;
   const originalSizeMB = originalSizeKB / 1024;
-
   try {
     const compressedBlob = await imageCompression(file, {
       maxSizeMB: presetConfig.maxSizeMB,
@@ -82,7 +75,6 @@ export async function compressImage(
       initialQuality: presetConfig.quality,
       preserveExif: presetConfig.preserveExif
     });
-
     // Ensure the compressed result is a File with the original name preserved
     // browser-image-compression may return a Blob without the name property
     const compressedFile = new File(
@@ -90,14 +82,12 @@ export async function compressImage(
       file.name, 
       { type: compressedBlob.type || file.type }
     );
-
     return compressedFile;
   } catch (error) {
     console.error('[compressImage] Error compressing image:', error);
     return file;
   }
 }
-
 export function formatCompressionStats(originalSize: number, compressedSize: number): string {
   const originalMB = (originalSize / (1024 * 1024)).toFixed(2);
   const compressedMB = (compressedSize / (1024 * 1024)).toFixed(2);

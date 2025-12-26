@@ -22,21 +22,15 @@
  * // En mutaciones:
  * queryClient.setQueryData(projectsKeys.detail(projectId), updatedData)
  */
-
 export { projectsKeys } from './projects.keys';
 export type { ProjectsQueryKey } from './projects.keys';
-
 export { contactsKeys, contactTypesKeys } from './contacts.keys';
 export type { ContactsQueryKey, ContactTypesQueryKey } from './contacts.keys';
-
 export { organizationKeys, userOrgPreferencesKeys } from './organization.keys';
 export type { OrganizationQueryKey, UserOrgPreferencesQueryKey } from './organization.keys';
-
 export { generalCostsKeys } from './general-costs.keys';
 export type { GeneralCostsQueryKey } from './general-costs.keys';
-
 export { usersKeys } from './users.keys';
 export type { UsersQueryKey } from './users.keys';
-
 export { capitalKeys } from './capital.keys';
 export type { CapitalQueryKey } from './capital.keys';

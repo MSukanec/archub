@@ -13,11 +13,10 @@ import AdminCourseCouponRow from '@/features/learning/components/admin/AdminCour
 import { useActionBarMobile } from '@/layouts'
 import { useMobile } from '@/hooks/use-mobile'
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
-
 interface Coupon {
   id: string;
   code: string;
-  type: 'percent' | 'fixed';
+  type: 'percent'| 'fixed';
   amount: number;
   is_active: boolean;
   starts_at?: string;
@@ -30,7 +29,6 @@ interface Coupon {
   created_at: string;
   total_uses?: number;
 }
-
 export default function AdminPaymentCoupons() {
   const { toast } = useToast()
   const { openModal } = useGlobalModalStore()
@@ -44,11 +42,9 @@ export default function AdminPaymentCoupons() {
     searchValue: mobileSearchValue,
     setSearchValue: setMobileSearchValue
   } = useActionBarMobile()
-
   const [searchValue, setSearchValue] = useState("")
   const [filterByStatus, setFilterByStatus] = useState("all")
   const [filterByType, setFilterByType] = useState("all")
-
   // Sync search values between mobile and desktop
   useEffect(() => {
     if (isMobile && mobileSearchValue !== searchValue) {
@@ -77,21 +73,18 @@ export default function AdminPaymentCoupons() {
       })) as Coupon[];
     }
   });
-
   // Get coupon status helper
   const getCouponStatus = (coupon: Coupon) => {
     const now = new Date()
     const isExpired = coupon.expires_at && new Date(coupon.expires_at) < now
     const notStarted = coupon.starts_at && new Date(coupon.starts_at) > now
     const limitReached = coupon.max_redemptions && (coupon.total_uses || 0) >= coupon.max_redemptions
-
     if (!coupon.is_active) return 'inactive'
     if (isExpired) return 'expired'
     if (notStarted) return 'scheduled'
     if (limitReached) return 'limit_reached'
     return 'active'
   }
-
   // Filter coupons
   const filteredCoupons = useMemo(() => {
     return coupons.filter(coupon => {
@@ -104,7 +97,6 @@ export default function AdminPaymentCoupons() {
           return false
         }
       }
-
       // Status filter
       if (filterByStatus !== "all") {
         const status = getCouponStatus(coupon)
@@ -112,30 +104,24 @@ export default function AdminPaymentCoupons() {
           return false
         }
       }
-
       // Type filter
       if (filterByType !== "all" && coupon.type !== filterByType) {
         return false
       }
-
       return true
     })
   }, [coupons, searchValue, filterByStatus, filterByType])
-
   const handleCreateCouponCallback = useCallback(() => {
     openModal('coupon', {});
   }, [openModal]);
-
   const handleClearFilters = useCallback(() => {
     setSearchValue("")
     setMobileSearchValue("")
     setFilterByStatus("all")
     setFilterByType("all")
   }, [setMobileSearchValue]);
-
   // Track if mobile action bar has been configured
   const mobileConfiguredRef = useRef(false);
-
   // Configure mobile action bar - only once when isMobile changes
   useEffect(() => {
     if (isMobile && !mobileConfiguredRef.current) {
@@ -169,7 +155,6 @@ export default function AdminPaymentCoupons() {
       })
       setShowActionBar(true)
     }
-
     // Cleanup when component unmounts
     return () => {
       if (mobileConfiguredRef.current) {
@@ -178,21 +163,18 @@ export default function AdminPaymentCoupons() {
       }
     }
   }, [isMobile, setActions, setShowActionBar, clearActions, handleCreateCouponCallback])
-
   // Memoize filter options to avoid re-creating on each render
   const filterStatusOptions = useMemo(() => [
-    { value: 'active', label: 'Activo' },
-    { value: 'inactive', label: 'Inactivo' },
-    { value: 'expired', label: 'Vencido' },
-    { value: 'scheduled', label: 'Programado' },
-    { value: 'limit_reached', label: 'Límite alcanzado' }
+    { value: 'active', label: 'Activo'},
+    { value: 'inactive', label: 'Inactivo'},
+    { value: 'expired', label: 'Vencido'},
+    { value: 'scheduled', label: 'Programado'},
+    { value: 'limit_reached', label: 'Límite alcanzado'}
   ], []);
-
   const filterTypeOptions = useMemo(() => [
-    { value: 'percent', label: 'Porcentaje' },
-    { value: 'fixed', label: 'Monto Fijo' }
+    { value: 'percent', label: 'Porcentaje'},
+    { value: 'fixed', label: 'Monto Fijo'}
   ], []);
-
   // Separate effect for filter configuration - use ref to track previous values
   const prevFilterValuesRef = useRef({ status: filterByStatus, type: filterByType });
   
@@ -228,15 +210,12 @@ export default function AdminPaymentCoupons() {
       onClearFilters: handleClearFilters
     })
   }, [filterByStatus, filterByType, isMobile, setFilterConfig, filterStatusOptions, filterTypeOptions, handleClearFilters])
-
   const handleCreateCoupon = () => {
     openModal('coupon', {});
   };
-
   const handleEditCoupon = (coupon: Coupon) => {
     openModal('coupon', { coupon, isEditing: true });
   };
-
   const handleDeleteCoupon = (couponId: string) => {
     openModal('delete-confirmation', {
       title: '¿Eliminar cupón?',
@@ -275,7 +254,6 @@ export default function AdminPaymentCoupons() {
       }
     });
   };
-
   const couponColumns = [
     {
       key: 'code',
@@ -289,7 +267,7 @@ export default function AdminPaymentCoupons() {
       label: 'Tipo',
       render: (coupon: Coupon) => (
         <div className="text-sm">
-          {coupon.type === 'percent' ? 'Porcentaje' : 'Monto Fijo'}
+          {coupon.type === 'percent'? 'Porcentaje': 'Monto Fijo'}
         </div>
       )
     },
@@ -298,7 +276,7 @@ export default function AdminPaymentCoupons() {
       label: 'Importe del cupón',
       render: (coupon: Coupon) => (
         <div className="text-sm font-medium">
-          {coupon.type === 'percent' ? `${coupon.amount}%` : `$${coupon.amount}`}
+          {coupon.type === 'percent'? `${coupon.amount}%` : `$${coupon.amount}`}
         </div>
       )
     },
@@ -321,7 +299,6 @@ export default function AdminPaymentCoupons() {
         const isExpired = coupon.expires_at && new Date(coupon.expires_at) < now;
         const notStarted = coupon.starts_at && new Date(coupon.starts_at) > now;
         const limitReached = coupon.max_redemptions && (coupon.total_uses || 0) >= coupon.max_redemptions;
-
         let status = 'Activo';
         let color = 'var(--accent)';
         
@@ -338,9 +315,8 @@ export default function AdminPaymentCoupons() {
           status = 'Límite alcanzado';
           color = '#ef4444';
         }
-
         return (
-          <Badge style={{ backgroundColor: color, color: 'white' }}>
+          <Badge style={{ backgroundColor: color, color: 'white'}}>
             {status}
           </Badge>
         );
@@ -358,7 +334,6 @@ export default function AdminPaymentCoupons() {
       )
     }
   ];
-
   return (
     <>
       {filteredCoupons.length > 0 ? (
@@ -376,7 +351,7 @@ export default function AdminPaymentCoupons() {
               icon: Trash2,
               label: 'Eliminar',
               onClick: () => handleDeleteCoupon(coupon.id),
-              variant: 'destructive' as const
+              variant: 'destructive'as const
             }
           ]}
           renderCard={(coupon) => (

@@ -1,6 +1,5 @@
 import { type Insight, type InsightContext, type InsightRule, type InsightAction } from './types';
 import { detectTrendDirection, projectYearEndSpend, formatProjectionInsight } from '@/lib/analytics';
-
 /**
  * Insight 1 – Crecimiento explicado (narrativo)
  * Explica QUÉ categoría explica la mayor parte del aumento/reducción del gasto
@@ -79,7 +78,6 @@ export const growthExplainedInsight: InsightRule = (context: InsightContext): In
     };
   }
 };
-
 /**
  * Insight 2 – Alta concentración del gasto
  * Indica cuántas categorías concentran la mayor parte del gasto
@@ -149,7 +147,6 @@ export const concentrationNarrativeInsight: InsightRule = (context: InsightConte
     ]
   };
 };
-
 /**
  * Insight 3 – Carga operativa elevada
  * Enfocado en la operación, no en dinero
@@ -181,7 +178,7 @@ export const operationalLoadInsight: InsightRule = (context: InsightContext): In
             id: 'view-payments',
             label: 'Ver pagos',
             type: 'navigate',
-            payload: { tab: 'payments' }
+            payload: { tab: 'payments'}
           }
         ]
       };
@@ -208,7 +205,7 @@ export const operationalLoadInsight: InsightRule = (context: InsightContext): In
           id: 'view-payments',
           label: 'Ver pagos',
           type: 'navigate',
-          payload: { tab: 'payments' }
+          payload: { tab: 'payments'}
         }
       ]
     };
@@ -216,7 +213,6 @@ export const operationalLoadInsight: InsightRule = (context: InsightContext): In
   
   return null;
 };
-
 /**
  * Insight 4 – Patrón repetido en el tiempo
  * Detecta si un patrón (categoría dominante) se repite varios meses seguidos
@@ -240,7 +236,7 @@ export const repeatedPatternInsight: InsightRule = (context: InsightContext): In
             id: 'open-monthly-chart',
             label: 'Ver evolución',
             type: 'open',
-            payload: { panel: 'monthlyChart' }
+            payload: { panel: 'monthlyChart'}
           }
         ]
       };
@@ -257,7 +253,7 @@ export const repeatedPatternInsight: InsightRule = (context: InsightContext): In
   
   let consecutiveAboveMean = 0;
   let maxConsecutive = 0;
-  let currentTrend: 'above' | 'below' | null = null;
+  let currentTrend: 'above'| 'below'| null = null;
   
   for (const value of values) {
     const isAbove = value > mean * 1.1;
@@ -291,7 +287,7 @@ export const repeatedPatternInsight: InsightRule = (context: InsightContext): In
           id: 'open-monthly-chart',
           label: 'Ver evolución',
           type: 'open',
-          payload: { panel: 'monthlyChart' }
+          payload: { panel: 'monthlyChart'}
         }
       ]
     };
@@ -312,7 +308,7 @@ export const repeatedPatternInsight: InsightRule = (context: InsightContext): In
           id: 'open-monthly-chart',
           label: 'Ver evolución',
           type: 'open',
-          payload: { panel: 'monthlyChart' }
+          payload: { panel: 'monthlyChart'}
         }
       ]
     };
@@ -320,7 +316,6 @@ export const repeatedPatternInsight: InsightRule = (context: InsightContext): In
   
   return null;
 };
-
 /**
  * Insight 5 – Oportunidad de consolidación
  * Detecta conceptos con muchos pagos pequeños y frecuentes
@@ -400,32 +395,26 @@ export const consolidationOpportunityInsight: InsightRule = (context: InsightCon
     ]
   };
 };
-
 /**
  * Insight 6 – Tendencia sostenida de gasto
  * Detecta si hay una tendencia clara (ascendente/descendente) en los últimos meses
  */
 export const sustainedTrendInsight: InsightRule = (context: InsightContext): Insight | null => {
   if (context.isShortPeriod || context.monthlyData.length < 3) return null;
-
   const values = context.monthlyData.map(m => m.value);
   const trend = detectTrendDirection(values, { minDataPoints: 3, stableThresholdPercent: 4 });
-
   if (!trend || trend.direction === 'stable') return null;
   if (trend.confidence === 'low') return null;
-
   const changePercent = Math.abs(trend.monthlyChangePercent);
   if (changePercent < 5) return null;
-
   const isIncreasing = trend.direction === 'increasing';
-  const confidenceText = trend.confidence === 'high' ? 'consistente' : 'moderada';
-
+  const confidenceText = trend.confidence === 'high'? 'consistente': 'moderada';
   return {
-    id: isIncreasing ? 'sustained-trend-up' : 'sustained-trend-down',
-    type: isIncreasing ? 'warning' : 'info',
-    title: isIncreasing ? 'Tendencia de aumento sostenido' : 'Tendencia de reducción sostenida',
-    description: `El gasto ${isIncreasing ? 'aumenta' : 'disminuye'} ~${Math.round(changePercent)}% mensual en promedio.`,
-    icon: isIncreasing ? 'TrendingUp' : 'TrendingDown',
+    id: isIncreasing ? 'sustained-trend-up': 'sustained-trend-down',
+    type: isIncreasing ? 'warning': 'info',
+    title: isIncreasing ? 'Tendencia de aumento sostenido': 'Tendencia de reducción sostenida',
+    description: `El gasto ${isIncreasing ? 'aumenta': 'disminuye'} ~${Math.round(changePercent)}% mensual en promedio.`,
+    icon: isIncreasing ? 'TrendingUp': 'TrendingDown',
     priority: 2,
     context: `Tendencia ${confidenceText} basada en ${context.monthlyData.length} meses de datos.`,
     actionHint: isIncreasing 
@@ -436,12 +425,11 @@ export const sustainedTrendInsight: InsightRule = (context: InsightContext): Ins
         id: 'view-monthly-trend',
         label: 'Ver evolución',
         type: 'open',
-        payload: { panel: 'monthlyChart' }
+        payload: { panel: 'monthlyChart'}
       }
     ]
   };
 };
-
 /**
  * Insight 7 – Proyección de cierre anual
  * Proyecta el gasto al cierre del año basándose en la tendencia actual
@@ -449,31 +437,23 @@ export const sustainedTrendInsight: InsightRule = (context: InsightContext): Ins
  */
 export const yearEndProjectionInsight: InsightRule = (context: InsightContext): Insight | null => {
   if (context.isShortPeriod || context.monthlyData.length < 3) return null;
-
   const currentMonth = context.currentMonth ?? new Date().getMonth() + 1;
   
   if (currentMonth >= 11) return null;
-
   const allValues = context.monthlyData.map(m => m.value);
   const currentYearMonths = Math.min(currentMonth, allValues.length);
   const currentYearValues = allValues.slice(-currentYearMonths);
-
   if (currentYearValues.length < 3) return null;
-
   const projection = projectYearEndSpend(currentYearValues, currentMonth, { minDataPoints: 3 });
-
   if (!projection) return null;
   if (projection.direction === 'stable') return null;
-
   const changePercent = Math.abs(projection.changePercent);
   if (changePercent < 5) return null;
-
   const isUp = projection.direction === 'up';
   const projectionText = formatProjectionInsight(projection, 'yearEnd');
-
   return {
-    id: isUp ? 'year-end-projection-up' : 'year-end-projection-down',
-    type: isUp ? 'warning' : 'info',
+    id: isUp ? 'year-end-projection-up': 'year-end-projection-down',
+    type: isUp ? 'warning': 'info',
     title: 'Proyección de cierre anual',
     description: projectionText,
     icon: 'Calendar',
@@ -487,49 +467,39 @@ export const yearEndProjectionInsight: InsightRule = (context: InsightContext): 
         id: 'view-monthly-trend',
         label: 'Ver evolución',
         type: 'open',
-        payload: { panel: 'monthlyChart' }
+        payload: { panel: 'monthlyChart'}
       }
     ]
   };
 };
-
 /**
  * Insight 8 – Alerta de aceleración del gasto
  * Detecta si el gasto está acelerando (aumento del ritmo de crecimiento)
  */
 export const spendAccelerationInsight: InsightRule = (context: InsightContext): Insight | null => {
   if (context.isShortPeriod || context.monthlyData.length < 4) return null;
-
   const values = context.monthlyData.map(m => m.value);
   
   const midPoint = Math.floor(values.length / 2);
   const firstHalf = values.slice(0, midPoint);
   const secondHalf = values.slice(midPoint);
-
   if (firstHalf.length < 2 || secondHalf.length < 2) return null;
-
   const firstHalfTrend = detectTrendDirection(firstHalf, { minDataPoints: 2 });
   const secondHalfTrend = detectTrendDirection(secondHalf, { minDataPoints: 2 });
-
   if (!firstHalfTrend || !secondHalfTrend) return null;
-
   const accelerationDelta = secondHalfTrend.monthlyChangePercent - firstHalfTrend.monthlyChangePercent;
-
   if (Math.abs(accelerationDelta) < 5) return null;
-
   const isAccelerating = accelerationDelta > 0;
-
   if (isAccelerating && secondHalfTrend.direction !== 'increasing') return null;
   if (!isAccelerating && secondHalfTrend.direction !== 'decreasing') return null;
-
   return {
-    id: isAccelerating ? 'spend-accelerating' : 'spend-decelerating',
-    type: isAccelerating ? 'alert' : 'info',
-    title: isAccelerating ? 'El gasto está acelerando' : 'El gasto está desacelerando',
+    id: isAccelerating ? 'spend-accelerating': 'spend-decelerating',
+    type: isAccelerating ? 'alert': 'info',
+    title: isAccelerating ? 'El gasto está acelerando': 'El gasto está desacelerando',
     description: isAccelerating
       ? `El ritmo de aumento pasó de ${Math.round(firstHalfTrend.monthlyChangePercent)}% a ${Math.round(secondHalfTrend.monthlyChangePercent)}% mensual.`
       : `El ritmo de cambio pasó de ${Math.round(firstHalfTrend.monthlyChangePercent)}% a ${Math.round(secondHalfTrend.monthlyChangePercent)}% mensual.`,
-    icon: isAccelerating ? 'Zap' : 'Minus',
+    icon: isAccelerating ? 'Zap': 'Minus',
     priority: isAccelerating ? 1 : 4,
     context: `Comparando la primera y segunda mitad del período seleccionado.`,
     actionHint: isAccelerating 
@@ -540,12 +510,11 @@ export const spendAccelerationInsight: InsightRule = (context: InsightContext): 
         id: 'view-monthly-trend',
         label: 'Ver evolución',
         type: 'open',
-        payload: { panel: 'monthlyChart' }
+        payload: { panel: 'monthlyChart'}
       }
     ]
   };
 };
-
 /**
  * Insight 9 – Balance negativo sostenido
  * Detecta cuando hay déficit financiero en múltiples períodos consecutivos
@@ -589,7 +558,7 @@ export const sustainedNegativeBalanceInsight: InsightRule = (context: InsightCon
           id: 'view-income-expense',
           label: 'Ver ingresos vs egresos',
           type: 'open',
-          payload: { panel: 'incomeExpenseChart' }
+          payload: { panel: 'incomeExpenseChart'}
         }
       ]
     };
@@ -609,12 +578,11 @@ export const sustainedNegativeBalanceInsight: InsightRule = (context: InsightCon
         id: 'view-income-expense',
         label: 'Ver ingresos vs egresos',
         type: 'open',
-        payload: { panel: 'incomeExpenseChart' }
+        payload: { panel: 'incomeExpenseChart'}
       }
     ]
   };
 };
-
 /**
  * Insight 10 – Dependencia de un proyecto
  * Detecta cuando un solo proyecto representa la mayoría de los ingresos o egresos
@@ -638,7 +606,7 @@ export const projectDependencyInsight: InsightRule = (context: InsightContext): 
   if (topIncomePercentage >= 70 && totalIncome > 0) {
     return {
       id: 'project-income-dependency',
-      type: topIncomePercentage >= 85 ? 'alert' : 'warning',
+      type: topIncomePercentage >= 85 ? 'alert': 'warning',
       title: 'Alta dependencia de ingresos',
       description: `El proyecto "${topIncomeProject.projectName}" representa el ${topIncomePercentage}% de los ingresos.`,
       icon: 'Target',
@@ -650,7 +618,7 @@ export const projectDependencyInsight: InsightRule = (context: InsightContext): 
           id: 'view-category-breakdown',
           label: 'Ver distribución',
           type: 'open',
-          payload: { panel: 'categoryBreakdown' }
+          payload: { panel: 'categoryBreakdown'}
         }
       ]
     };
@@ -671,7 +639,7 @@ export const projectDependencyInsight: InsightRule = (context: InsightContext): 
           id: 'view-category-breakdown',
           label: 'Ver distribución',
           type: 'open',
-          payload: { panel: 'categoryBreakdown' }
+          payload: { panel: 'categoryBreakdown'}
         }
       ]
     };
@@ -679,7 +647,6 @@ export const projectDependencyInsight: InsightRule = (context: InsightContext): 
   
   return null;
 };
-
 /**
  * Insight 11 – Ratio ingreso/egreso desfavorable
  * Detecta cuando los egresos son significativamente mayores que los ingresos
@@ -705,7 +672,7 @@ export const incomeExpenseRatioInsight: InsightRule = (context: InsightContext):
           id: 'view-movements',
           label: 'Ver movimientos',
           type: 'navigate',
-          payload: { tab: 'movements' }
+          payload: { tab: 'movements'}
         }
       ]
     };
@@ -729,7 +696,7 @@ export const incomeExpenseRatioInsight: InsightRule = (context: InsightContext):
             id: 'view-category-breakdown',
             label: 'Ver distribución',
             type: 'open',
-            payload: { panel: 'categoryBreakdown' }
+            payload: { panel: 'categoryBreakdown'}
           }
         ]
       };
@@ -750,7 +717,7 @@ export const incomeExpenseRatioInsight: InsightRule = (context: InsightContext):
             id: 'view-monthly-trend',
             label: 'Ver evolución',
             type: 'open',
-            payload: { panel: 'monthlyChart' }
+            payload: { panel: 'monthlyChart'}
           }
         ]
       };
@@ -759,7 +726,6 @@ export const incomeExpenseRatioInsight: InsightRule = (context: InsightContext):
   
   return null;
 };
-
 export const allInsightRules: InsightRule[] = [
   growthExplainedInsight,
   concentrationNarrativeInsight,
@@ -773,7 +739,6 @@ export const allInsightRules: InsightRule[] = [
   projectDependencyInsight,
   incomeExpenseRatioInsight
 ];
-
 export const financialInsightRules: InsightRule[] = [
   sustainedNegativeBalanceInsight,
   projectDependencyInsight,

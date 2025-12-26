@@ -4,7 +4,6 @@ import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Youtube from '@tiptap/extension-youtube';
 import Placeholder from '@tiptap/extension-placeholder';
-import { 
   Bold, 
   Italic, 
   Strikethrough, 
@@ -18,7 +17,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-
 interface RichTextEditorProps {
   value?: string;
   onChange?: (html: string) => void;
@@ -28,7 +26,6 @@ interface RichTextEditorProps {
   className?: string;
   'data-testid'?: string;
 }
-
 export function RichTextEditor({
   value = '',
   onChange,
@@ -42,7 +39,6 @@ export function RichTextEditor({
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [linkOpen, setLinkOpen] = useState(false);
   const [youtubeOpen, setYoutubeOpen] = useState(false);
-
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -73,21 +69,19 @@ export function RichTextEditor({
     editable: !disabled,
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
-      onChange?.(html === '<p></p>' ? '' : html);
+      onChange?.(html === '<p></p>'? '': html);
     },
   });
-
   useEffect(() => {
     if (!editor) return;
     const currentContent = editor.getHTML();
-    const normalizedCurrent = currentContent === '<p></p>' ? '' : currentContent;
+    const normalizedCurrent = currentContent === '<p></p>'? '': currentContent;
     const normalizedValue = value || '';
     
     if (normalizedValue !== normalizedCurrent) {
       editor.commands.setContent(normalizedValue, { emitUpdate: false });
     }
   }, [editor, value]);
-
   const setLink = useCallback(() => {
     if (!editor) return;
     
@@ -95,13 +89,11 @@ export function RichTextEditor({
       editor.chain().focus().extendMarkRange('link').unsetLink().run();
       return;
     }
-
     const url = linkUrl.startsWith('http') ? linkUrl : `https://${linkUrl}`;
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
     setLinkUrl('');
     setLinkOpen(false);
   }, [editor, linkUrl]);
-
   const insertYoutube = useCallback(() => {
     if (!editor || !youtubeUrl) return;
     
@@ -109,11 +101,9 @@ export function RichTextEditor({
     setYoutubeUrl('');
     setYoutubeOpen(false);
   }, [editor, youtubeUrl]);
-
   if (!editor) {
     return null;
   }
-
   const ToolbarButton = ({ 
     onClick, 
     isActive = false, 
@@ -142,7 +132,6 @@ export function RichTextEditor({
       {children}
     </Button>
   );
-
   return (
     <div 
       className={cn(
@@ -160,7 +149,6 @@ export function RichTextEditor({
         >
           <Bold className="h-4 w-4" />
         </ToolbarButton>
-
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleItalic().run()}
           isActive={editor.isActive('italic')}
@@ -168,7 +156,6 @@ export function RichTextEditor({
         >
           <Italic className="h-4 w-4" />
         </ToolbarButton>
-
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleStrike().run()}
           isActive={editor.isActive('strike')}
@@ -176,9 +163,7 @@ export function RichTextEditor({
         >
           <Strikethrough className="h-4 w-4" />
         </ToolbarButton>
-
         <div className="w-px h-6 bg-border mx-1" />
-
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           isActive={editor.isActive('bulletList')}
@@ -186,7 +171,6 @@ export function RichTextEditor({
         >
           <List className="h-4 w-4" />
         </ToolbarButton>
-
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           isActive={editor.isActive('orderedList')}
@@ -194,9 +178,7 @@ export function RichTextEditor({
         >
           <ListOrdered className="h-4 w-4" />
         </ToolbarButton>
-
         <div className="w-px h-6 bg-border mx-1" />
-
         <Popover open={linkOpen} onOpenChange={setLinkOpen}>
           <PopoverTrigger asChild>
             <Button
@@ -217,7 +199,7 @@ export function RichTextEditor({
                 placeholder="https://ejemplo.com"
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && setLink()}
+                onKeyDown={(e) => e.key === 'Enter'&& setLink()}
                 data-testid="input-link-url"
               />
               <div className="flex gap-2">
@@ -248,7 +230,6 @@ export function RichTextEditor({
             </div>
           </PopoverContent>
         </Popover>
-
         <Popover open={youtubeOpen} onOpenChange={setYoutubeOpen}>
           <PopoverTrigger asChild>
             <Button
@@ -269,7 +250,7 @@ export function RichTextEditor({
                 placeholder="https://youtube.com/watch?v=..."
                 value={youtubeUrl}
                 onChange={(e) => setYoutubeUrl(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && insertYoutube()}
+                onKeyDown={(e) => e.key === 'Enter'&& insertYoutube()}
                 data-testid="input-youtube-url"
               />
               <Button 
@@ -284,7 +265,6 @@ export function RichTextEditor({
           </PopoverContent>
         </Popover>
       </div>
-
       <EditorContent
         editor={editor}
         className={cn(

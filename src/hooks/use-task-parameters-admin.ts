@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
-
 export interface TaskParameter {
   id: string;
   slug: string;
@@ -12,7 +11,6 @@ export interface TaskParameter {
   created_at: string;
   updated_at: string;
 }
-
 export interface TaskParameterOption {
   id: string;
   parameter_id: string;
@@ -24,11 +22,9 @@ export interface TaskParameterOption {
   created_at: string;
   updated_at: string;
 }
-
 export interface TaskParameterWithOptions extends TaskParameter {
   options: TaskParameterOption[];
 }
-
 export interface CreateTaskParameterData {
   slug: string;
   label: string;
@@ -36,7 +32,6 @@ export interface CreateTaskParameterData {
   expression_template?: string;
   is_required?: boolean;
 }
-
 export interface UpdateTaskParameterData {
   id: string;
   slug: string;
@@ -45,7 +40,6 @@ export interface UpdateTaskParameterData {
   expression_template?: string;
   is_required?: boolean;
 }
-
 export interface CreateTaskParameterOptionData {
   parameter_id: string;
   name: string;
@@ -54,7 +48,6 @@ export interface CreateTaskParameterOptionData {
   unit_id?: string;
   category_id?: string;
 }
-
 export interface UpdateTaskParameterOptionData {
   id: string;
   parameter_id: string;
@@ -64,11 +57,9 @@ export interface UpdateTaskParameterOptionData {
   unit_id?: string;
   category_id?: string;
 }
-
 export interface UpdateTaskParameterData extends CreateTaskParameterData {
   id: string;
 }
-
 // Hook para obtener todos los parámetros con sus opciones
 export function useTaskParametersAdmin() {
   return useQuery({
@@ -80,16 +71,12 @@ export function useTaskParametersAdmin() {
         .from('task_parameters')
         .select('*')
         .order('slug');
-
       if (parametersError) throw parametersError;
-
       const { data: options, error: optionsError } = await supabase
         .from('task_parameter_options')
         .select('*')
         .order('label');
-
       if (optionsError) throw optionsError;
-
       // Group options by parameter_id
       const optionsByParameter = options?.reduce((acc, option) => {
         if (!acc[option.parameter_id]) {
@@ -98,18 +85,15 @@ export function useTaskParametersAdmin() {
         acc[option.parameter_id].push(option);
         return acc;
       }, {} as Record<string, TaskParameterOption[]>) || {};
-
       // Combine parameters with their options
       const parametersWithOptions: TaskParameterWithOptions[] = parameters?.map(param => ({
         ...param,
         options: optionsByParameter[param.id] || []
       })) || [];
-
       return parametersWithOptions;
     },
   });
 }
-
 // Hook para crear parámetro
 export function useCreateTaskParameter() {
   const queryClient = useQueryClient();
@@ -130,7 +114,6 @@ export function useCreateTaskParameter() {
         }])
         .select()
         .single();
-
       if (paramError) throw paramError;
       return parameter;
     },
@@ -155,7 +138,6 @@ export function useCreateTaskParameter() {
     },
   });
 }
-
 // Hook para actualizar parámetro
 export function useUpdateTaskParameter() {
   const queryClient = useQueryClient();
@@ -177,9 +159,7 @@ export function useUpdateTaskParameter() {
         .eq('id', id)
         .select()
         .single();
-
       if (paramError) throw paramError;
-
       // Recalcular name_rendered de todas las tareas cuando se actualiza un expression_template
       console.log('🔄 Recalculando name_rendered de todas las tareas...');
       
@@ -202,7 +182,6 @@ export function useUpdateTaskParameter() {
         
         console.log(`✅ Nombres de ${tasks.length} tareas recalculados correctamente`);
       }
-
       return parameter;
     },
     onSuccess: () => {
@@ -228,7 +207,6 @@ export function useUpdateTaskParameter() {
     },
   });
 }
-
 // Hook para eliminar parámetro
 export function useDeleteTaskParameter() {
   const queryClient = useQueryClient();
@@ -243,13 +221,11 @@ export function useDeleteTaskParameter() {
         .from('task_parameter_options')
         .delete()
         .eq('parameter_id', parameterId);
-
       // Then delete the parameter
       const { error } = await supabase
         .from('task_parameters')
         .delete()
         .eq('id', parameterId);
-
       if (error) throw error;
     },
     onSuccess: () => {
@@ -273,7 +249,6 @@ export function useDeleteTaskParameter() {
     },
   });
 }
-
 // Hook para crear opción de parámetro
 export function useCreateTaskParameterOption() {
   const queryClient = useQueryClient();
@@ -293,13 +268,11 @@ export function useCreateTaskParameterOption() {
       // Add conditional fields if provided
       if (optionData.unit_id) insertData.unit_id = optionData.unit_id;
       if (optionData.category_id) insertData.category_id = optionData.category_id;
-
       const { data: option, error: optionError } = await supabase
         .from('task_parameter_options')
         .insert([insertData])
         .select()
         .single();
-
       if (optionError) throw optionError;
       return option;
     },
@@ -324,7 +297,6 @@ export function useCreateTaskParameterOption() {
     },
   });
 }
-
 // Hook para actualizar opción de parámetro
 export function useUpdateTaskParameterOption() {
   const queryClient = useQueryClient();
@@ -344,14 +316,12 @@ export function useUpdateTaskParameterOption() {
       // Add conditional fields if provided
       if (updateData.unit_id) updatePayload.unit_id = updateData.unit_id;
       if (updateData.category_id) updatePayload.category_id = updateData.category_id;
-
       const { data: option, error: optionError } = await supabase
         .from('task_parameter_options')
         .update(updatePayload)
         .eq('id', id)
         .select()
         .single();
-
       if (optionError) throw optionError;
       return option;
     },
@@ -376,7 +346,6 @@ export function useUpdateTaskParameterOption() {
     },
   });
 }
-
 // Hook para eliminar opción de parámetro
 export function useDeleteTaskParameterOption() {
   const queryClient = useQueryClient();
@@ -390,7 +359,6 @@ export function useDeleteTaskParameterOption() {
         .from('task_parameter_options')
         .delete()
         .eq('id', optionId);
-
       if (error) throw error;
     },
     onSuccess: () => {
@@ -414,7 +382,6 @@ export function useDeleteTaskParameterOption() {
     },
   });
 }
-
 // Hook para obtener valores/opciones de un parámetro específico
 export function useTaskParameterValues(parameterId: string) {
   return useQuery({
@@ -428,14 +395,12 @@ export function useTaskParameterValues(parameterId: string) {
         .select('*')
         .eq('parameter_id', parameterId)
         .order('name', { ascending: true });
-
       if (error) throw error;
       return data || [];
     },
     enabled: !!parameterId,
   });
 }
-
 // Hook para obtener TODOS los valores de parámetros (sin filtro) con expression_template
 export function useAllTaskParameterValues() {
   return useQuery({
@@ -452,7 +417,6 @@ export function useAllTaskParameterValues() {
           )
         `)
         .order('name', { ascending: true });
-
       if (error) throw error;
       
       // Flatten the data structure to include expression_template at the top level

@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { Course } from '@shared/schema';
-
 /**
  * Obtiene la información básica de un curso con cover_url resuelto.
  * 
@@ -21,7 +20,6 @@ export async function getCourseOverview(
   if (!courseIdOrSlug) {
     return null;
   }
-
   // Intentar primero por ID (UUID format)
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(courseIdOrSlug);
   
@@ -35,29 +33,23 @@ export async function getCourseOverview(
       )
     `)
     .eq('is_deleted', false);
-
   if (isUuid) {
     query = query.eq('id', courseIdOrSlug);
   } else {
     query = query.eq('slug', courseIdOrSlug);
   }
-
   const { data, error } = await query.maybeSingle();
-
   if (error) {
     throw error;
   }
-
   if (!data) {
     return null;
   }
-
   // Resolve cover_url from course_details
   let cover_url: string | null = null;
   const courseDetails = Array.isArray(data.course_details) 
     ? data.course_details[0] 
     : data.course_details;
-
   if (courseDetails?.image_bucket && courseDetails?.image_path) {
     if (courseDetails.image_bucket === 'public-assets') {
       cover_url = supabase.storage
@@ -72,7 +64,6 @@ export async function getCourseOverview(
       }
     }
   }
-
   // Fallback: fetch from media_links if no cover from course_details
   if (!cover_url) {
     const { data: mediaLink } = await supabase
@@ -87,7 +78,6 @@ export async function getCourseOverview(
       .eq('category', 'course_cover')
       .eq('media_files.is_deleted', false)
       .maybeSingle();
-
     const mediaFile = Array.isArray(mediaLink?.media_files) 
       ? mediaLink.media_files[0] 
       : mediaLink?.media_files;
@@ -95,7 +85,6 @@ export async function getCourseOverview(
       cover_url = mediaFile.file_url;
     }
   }
-
   // Remove course_details from result and add resolved cover_url
   const { course_details: _, ...courseWithoutDetails } = data;
   

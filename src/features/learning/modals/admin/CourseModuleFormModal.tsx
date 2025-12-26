@@ -17,16 +17,13 @@ import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
 import { useAdminCourses } from '../../hooks/use-admin-courses';
 import { uploadFile, deleteFile } from '@/lib/storage';
-
 const courseModuleSchema = z.object({
   course_id: z.string().min(1, 'El curso es requerido'),
   title: z.string().min(1, 'El título es requerido'),
   description: z.string().optional(),
   sort_index: z.number().min(0, 'El orden debe ser mayor o igual a 0').default(0),
 });
-
 type CourseModuleFormData = z.infer<typeof courseModuleSchema>;
-
 interface CourseModule {
   id: string;
   course_id: string;
@@ -35,7 +32,6 @@ interface CourseModule {
   sort_index: number;
   created_at: string;
 }
-
 interface CourseModuleFormModalProps {
   modalData?: {
     module?: CourseModule;
@@ -44,7 +40,6 @@ interface CourseModuleFormModalProps {
   };
   onClose: () => void;
 }
-
 export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormModalProps) {
   const { module, courseId, isEditing = false } = modalData || {};
   const { setPanel } = useModalPanelStore();
@@ -54,14 +49,12 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
   const [moduleImageUrl, setModuleImageUrl] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const { data: courses = [] } = useAdminCourses();
-
   // Load module image on mount
   useEffect(() => {
     if (module?.id) {
       loadModuleImage(module.id);
     }
   }, [module?.id]);
-
   const loadModuleImage = async (moduleId: string) => {
     try {
       const { data, error } = await supabase
@@ -75,12 +68,10 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
         .eq('course_module_id', moduleId)
         .eq('category', 'module_image')
         .maybeSingle();
-
       if (error) {
         console.error('Error loading module image:', error);
         return;
       }
-
       if (data && data.media_files) {
         const mediaFile: any = data.media_files;
         // Only show if not deleted
@@ -93,7 +84,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       console.error('Error loading module image:', error);
     }
   };
-
   const form = useForm<CourseModuleFormData>({
     resolver: zodResolver(courseModuleSchema),
     defaultValues: {
@@ -103,7 +93,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       sort_index: module?.sort_index ?? undefined,
     }
   });
-
   useEffect(() => {
     if (module) {
       form.reset({
@@ -122,12 +111,10 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
     }
     setPanel('edit');
   }, [module, form, setPanel]);
-
   const handleClose = () => {
     form.reset();
     onClose();
   };
-
   const createModuleMutation = useMutation({
     mutationFn: async (data: CourseModuleFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -161,7 +148,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       });
     }
   });
-
   const updateModuleMutation = useMutation({
     mutationFn: async (data: CourseModuleFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -197,7 +183,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       });
     }
   });
-
   const handleImageUpload = async (file: File, moduleId: string, courseId: string) => {
     setIsUploadingImage(true);
     
@@ -213,15 +198,12 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
         category: 'module_image',
         description: 'Module image or GIF'
       });
-
       // Refresh the image URL with cache bust
       const urlWithCacheBust = `${result.file_url}?t=${Date.now()}`;
       setModuleImageUrl(urlWithCacheBust);
-
       // Invalidate queries to refetch module data
       queryClient.invalidateQueries({ queryKey: ['all-course-modules'] });
       queryClient.invalidateQueries({ queryKey: ['course-modules'] });
-
       toast({
         title: 'Éxito',
         description: 'Imagen del módulo subida correctamente'
@@ -237,7 +219,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       setIsUploadingImage(false);
     }
   };
-
   const handleImageRemove = async (moduleId: string) => {
     setIsUploadingImage(true);
     
@@ -249,14 +230,11 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
         .eq('course_module_id', moduleId)
         .eq('category', 'module_image')
         .maybeSingle();
-
       if (link?.media_file_id) {
         // Use unified delete function (soft delete)
         await deleteFile(link.media_file_id, false);
       }
-
       setModuleImageUrl(null);
-
       toast({
         title: 'Éxito',
         description: 'Imagen del módulo eliminada correctamente'
@@ -272,7 +250,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       setIsUploadingImage(false);
     }
   };
-
   const onSubmit = async (data: CourseModuleFormData) => {
     setIsLoading(true);
     try {
@@ -285,25 +262,22 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       setIsLoading(false);
     }
   };
-
   const headerContent = (
     <FormModalHeader 
-      title={module ? 'Editar Módulo' : 'Nuevo Módulo'}
+      title={module ? 'Editar Módulo': 'Nuevo Módulo'}
       description="Configura los datos del módulo del curso. Puedes incluir una imagen o GIF que se mostrará en la landing page."
       icon={Layers}
     />
   );
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={module ? 'Actualizar' : 'Crear Módulo'}
+      rightLabel={module ? 'Actualizar': 'Crear Módulo'}
       onRightClick={form.handleSubmit(onSubmit)}
       showLoadingSpinner={isLoading}
     />
   );
-
   const renderImageUploadField = () => {
     return (
       <div className="space-y-2">
@@ -361,7 +335,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
               </p>
             </div>
           )}
-
           {isUploadingImage && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
               <div className="bg-white dark:bg-gray-900 rounded-lg p-4 flex items-center gap-3">
@@ -371,7 +344,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
             </div>
           )}
         </div>
-
         <input
           id="module-image-input"
           type="file"
@@ -387,7 +359,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       </div>
     );
   };
-
   const editContent = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -421,7 +392,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="title"
@@ -435,7 +405,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="sort_index"
@@ -447,7 +416,7 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
                     type="number" 
                     {...field} 
                     value={field.value ?? ''}
-                    onChange={(e) => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value))}
+                    onChange={(e) => field.onChange(e.target.value === ''? undefined : parseInt(e.target.value))}
                     placeholder="Ej: 0, 1, 2..." 
                     data-testid="input-module-sort" 
                   />
@@ -457,7 +426,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
             )}
           />
         </div>
-
         {/* Segunda fila: Descripción */}
         <FormField
           control={form.control}
@@ -472,7 +440,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
             </FormItem>
           )}
         />
-
         {/* Tercera fila: Imagen */}
         {module?.id ? (
           <div>
@@ -497,7 +464,6 @@ export function CourseModuleFormModal({ modalData, onClose }: CourseModuleFormMo
       </form>
     </Form>
   );
-
   return (
     <FormModalLayout
       columns={1}

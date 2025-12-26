@@ -6,7 +6,6 @@ import { createProjectModality, type CreateProjectModalityData } from '../servic
 import { updateProjectModality, type UpdateProjectModalityData } from '../services/updateProjectModality';
 import { deleteProjectModality } from '../services/deleteProjectModality';
 import { replaceProjectModality } from '../services/replaceProjectModality';
-
 export function useProjectModalities(organizationId?: string) {
   return useQuery({
     queryKey: projectsKeys.modalityList(organizationId),
@@ -16,21 +15,19 @@ export function useProjectModalities(organizationId?: string) {
     gcTime: 10 * 60 * 1000,
   });
 }
-
 export function useCreateProjectModality(organizationId?: string) {
   return useOptimisticMutation({
     mutationFn: (data: CreateProjectModalityData) => createProjectModality(data),
     queryKey: projectsKeys.modalityList(organizationId),
     optimisticUpdate: (oldData: any, newModality: CreateProjectModalityData) => {
       if (!oldData) return oldData;
-      if (!Array.isArray(oldData)) return [{ ...newModality, id: 'temp-' + Date.now() }];
-      return [...oldData, { ...newModality, id: 'temp-' + Date.now() }];
+      if (!Array.isArray(oldData)) return [{ ...newModality, id: 'temp-'+ Date.now() }];
+      return [...oldData, { ...newModality, id: 'temp-'+ Date.now() }];
     },
     onSuccessMessage: 'Modalidad de proyecto creada',
     onErrorMessage: 'No se pudo crear la modalidad de proyecto',
   });
 }
-
 export function useUpdateProjectModality(organizationId?: string) {
   return useOptimisticMutation({
     mutationFn: ({ modalityId, organizationId: orgId, data }: { 
@@ -48,7 +45,6 @@ export function useUpdateProjectModality(organizationId?: string) {
     onErrorMessage: 'No se pudo actualizar la modalidad de proyecto',
   });
 }
-
 export function useDeleteProjectModality(organizationId?: string) {
   return useOptimisticMutation({
     mutationFn: ({ modalityId, organizationId: orgId }: { modalityId: string; organizationId: string }) => 
@@ -63,7 +59,6 @@ export function useDeleteProjectModality(organizationId?: string) {
     onErrorMessage: 'No se pudo eliminar la modalidad de proyecto',
   });
 }
-
 export function useReplaceProjectModality(organizationId?: string) {
   return useOptimisticMutation({
     mutationFn: ({ oldModalityId, newModalityId, organizationId: orgId }: { oldModalityId: string; newModalityId: string; organizationId: string }) => 

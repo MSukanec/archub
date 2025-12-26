@@ -1,11 +1,10 @@
 import { supabase } from '@/lib/supabase'
-
 export type Insurance = {
   id: string;
   organization_id: string;
   project_id?: string | null;
   personnel_id: string;  
-  insurance_type: 'ART' | 'vida' | 'accidentes' | 'responsabilidad_civil' | 'salud' | 'otro';
+  insurance_type: 'ART'| 'vida'| 'accidentes'| 'responsabilidad_civil'| 'salud'| 'otro';
   policy_number?: string | null;
   provider?: string | null;
   coverage_start: string; // ISO date
@@ -17,19 +16,17 @@ export type Insurance = {
   created_at?: string;
   updated_at?: string;
 }
-
 export type InsuranceStatusRow = Insurance & {
   days_to_expiry: number;
-  status: 'vigente' | 'por_vencer' | 'vencido';
+  status: 'vigente'| 'por_vencer'| 'vencido';
   contact_id: string;
   first_name?: string;
   last_name?: string;
   full_name?: string;
   avatar_attachment_id?: string | null;
 }
-
 export type InsuranceFilters = {
-  status?: ('vigente' | 'por_vencer' | 'vencido')[];
+  status?: ('vigente'| 'por_vencer'| 'vencido')[];
   type?: string[];
   provider?: string;
   contact_id?: string[];
@@ -37,61 +34,47 @@ export type InsuranceFilters = {
   project_id?: string;
   text_search?: string;
 }
-
 export const listInsurances = async (filters: InsuranceFilters = {}) => {
   let query = supabase
     .from('personnel_insurance_view')
     .select('*')
-
   if (filters.status?.length) {
     query = query.in('status', filters.status)
   }
-
   if (filters.type?.length) {
     query = query.in('insurance_type', filters.type)
   }
-
   if (filters.provider) {
     query = query.ilike('provider', `%${filters.provider}%`)
   }
-
   if (filters.contact_id?.length) {
     query = query.in('contact_id', filters.contact_id)
   }
-
   if (filters.expires_before) {
     query = query.lte('coverage_end', filters.expires_before)
   }
-
   if (filters.project_id) {
     query = query.eq('project_id', filters.project_id)
   }
-
   if (filters.text_search) {
     // Search across contact name, provider, and policy number
     query = query.or(`full_name.ilike.%${filters.text_search}%,provider.ilike.%${filters.text_search}%,policy_number.ilike.%${filters.text_search}%`)
   }
-
   query = query.order('coverage_end', { ascending: true })
-
   const { data, error } = await query
-
   if (error) throw error
   return data as InsuranceStatusRow[]
 }
-
 export const getInsurance = async (id: string) => {
   const { data, error } = await supabase
     .from('personnel_insurances')
     .select('*')
     .eq('id', id)
     .single()
-
   if (error) throw error
   return data as Insurance
 }
-
-export const createInsurance = async (payload: Omit<Insurance, 'id' | 'created_at' | 'updated_at'>) => {
+export const createInsurance = async (payload: Omit<Insurance, 'id'| 'created_at'| 'updated_at'>) => {
   const { data, error } = await supabase
     .from('personnel_insurances')
     .insert({
@@ -101,11 +84,9 @@ export const createInsurance = async (payload: Omit<Insurance, 'id' | 'created_a
     })
     .select()
     .single()
-
   if (error) throw error
   return data as Insurance
 }
-
 export const updateInsurance = async (id: string, payload: Partial<Insurance>) => {
   const { data, error } = await supabase
     .from('personnel_insurances')
@@ -113,20 +94,16 @@ export const updateInsurance = async (id: string, payload: Partial<Insurance>) =
     .eq('id', id)
     .select()
     .single()
-
   if (error) throw error
   return data as Insurance
 }
-
 export const deleteInsurance = async (id: string) => {
   const { error } = await supabase
     .from('personnel_insurances')
     .delete()
     .eq('id', id)
-
   if (error) throw error
 }
-
 export const renewInsurance = async (
   prevId: string, 
   payload: {
@@ -155,16 +132,13 @@ export const renewInsurance = async (
     certificate_attachment_id: payload.certificate_attachment_id,
     notes: payload.notes || previous.notes
   })
-
   return newInsurance
 }
-
 export const uploadCertificate = async (contactId: string, file: File) => {
   // DEPRECATED: contact_attachments no longer exists
   // Use media_files + media_links instead
   throw new Error('uploadCertificate is deprecated. Use media_files + media_links instead.');
 }
-
 export const getCertificatePublicUrl = async (attachmentId: string) => {
   // DEPRECATED: contact_attachments no longer exists
   throw new Error('getCertificatePublicUrl is deprecated. Use media_files + media_links instead.');

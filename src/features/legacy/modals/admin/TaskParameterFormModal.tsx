@@ -3,33 +3,27 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Settings } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
-
 import { FormModalLayout } from '@/components/modal';
 import { FormModalHeader } from '@/components/modal';
 import { FormModalFooter } from '@/components/modal';
 import { useToast } from '@/hooks/use-toast';
-
 import { useCreateTaskParameter, useUpdateTaskParameter, TaskParameter } from '@/hooks/use-task-parameters-admin';
 import { useUnits } from '@/hooks/use-units';
-
 const taskParameterSchema = z.object({
   slug: z.string().min(1, 'El slug es requerido'),
   label: z.string().min(1, 'La etiqueta es requerida'),
   type: z.enum(['text', 'number', 'select', 'boolean'], { 
-    required_error: 'El tipo es requerido' 
+    required_error: 'El tipo es requerido'
   }),
   expression_template: z.string().optional(),
   is_required: z.boolean().default(false),
 });
-
 type TaskParameterFormData = z.infer<typeof taskParameterSchema>;
-
 interface TaskParameterFormModalProps {
   modalData?: {
     parameter?: TaskParameter;
@@ -37,7 +31,6 @@ interface TaskParameterFormModalProps {
   };
   onClose: () => void;
 }
-
 export function TaskParameterFormModal({ modalData, onClose }: TaskParameterFormModalProps) {
   const { parameter, onParameterCreated } = modalData || {};
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,7 +52,6 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
       is_required: false,
     },
   });
-
   // Load parameter data when editing
   useEffect(() => {
     if (parameter) {
@@ -72,9 +64,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
       });
     }
   }, [parameter, form]);
-
   // Group functionality removed - using simplified system
-
   // Submit function
   const handleSubmit = async (data: TaskParameterFormData) => {
     console.log('Creating parameter with data:', data);
@@ -96,10 +86,9 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
       console.log('Parameter created with ID:', result.id);
       
       toast({
-        title: parameter ? 'Parámetro actualizado' : 'Parámetro creado',
-        description: parameter ? 'El parámetro se ha actualizado correctamente' : 'El parámetro se ha creado correctamente'
+        title: parameter ? 'Parámetro actualizado': 'Parámetro creado',
+        description: parameter ? 'El parámetro se ha actualizado correctamente': 'El parámetro se ha creado correctamente'
       });
-
       if (onParameterCreated && result.id) {
         onParameterCreated(result.id);
       }
@@ -116,9 +105,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
       setIsSubmitting(false);
     }
   };
-
   const viewPanel = null; // No view mode needed for this modal
-
   const editPanel = (
     <div className="space-y-6">
       <Form {...form}>
@@ -157,7 +144,6 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="slug"
@@ -179,7 +165,6 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
           <div className="text-sm text-muted-foreground">
             El Slug se genera automáticamente en formato snake_case basado en el nombre. Puedes modificarlo si es necesario.
           </div>
-
           {/* Tipo y Plantilla inline */}
           <div className="grid grid-cols-2 gap-4">
             <FormField
@@ -205,7 +190,6 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="expression_template"
@@ -226,7 +210,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
                       onClick={() => {
                         const currentValue = field.value || '';
                         const cursorPosition = (document.activeElement as HTMLInputElement)?.selectionStart || currentValue.length;
-                        const newValue = currentValue.slice(0, cursorPosition) + '{value}' + currentValue.slice(cursorPosition);
+                        const newValue = currentValue.slice(0, cursorPosition) + '{value}'+ currentValue.slice(cursorPosition);
                         field.onChange(newValue);
                       }}
                     >
@@ -242,7 +226,6 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
           <div className="text-sm text-muted-foreground">
             Usa <code className="bg-muted px-1 py-0.5 rounded text-xs">{'{value}'}</code> donde quieres que aparezca el valor seleccionado. Ejemplo: "de <code className="bg-muted px-1 py-0.5 rounded text-xs">{'{value}'}</code>"
           </div>
-
           {/* Campo is_required */}
           <FormField
             control={form.control}
@@ -268,11 +251,9 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
           />
         </form>
       </Form>
-
       {/* Groups functionality removed - simplified system */}
     </div>
   );
-
   const headerContent = (
     <FormModalHeader 
       title={parameter ? "Editar Parámetro" : "Nuevo Parámetro"}
@@ -280,7 +261,6 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
       icon={Settings}
     />
   );
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -290,7 +270,6 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
       isSubmitting={isSubmitting}
     />
   );
-
   return (
     <FormModalLayout
       columns={1}

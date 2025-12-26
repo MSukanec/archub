@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteLessonNote } from '../services';
 import { LEARNING_QUERY_KEYS } from '../constants';
 import { useToast } from '@/hooks/use-toast';
-
 /**
  * Hook para eliminar una nota de lección.
  * 
@@ -15,7 +14,6 @@ import { useToast } from '@/hooks/use-toast';
 export function useDeleteLessonNote(lessonId: string) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
   return useMutation({
     mutationFn: (noteId: string) => deleteLessonNote(noteId),
     onSuccess: () => {
@@ -23,7 +21,6 @@ export function useDeleteLessonNote(lessonId: string) {
       queryClient.invalidateQueries({
         queryKey: LEARNING_QUERY_KEYS.lessonNotes(lessonId),
       });
-
       toast({
         title: "Nota eliminada",
         description: "La nota ha sido eliminada correctamente",

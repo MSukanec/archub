@@ -1,7 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-
 const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
@@ -143,7 +142,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 });
-
 interface InvoicePDFProps {
   payment: {
     id: string;
@@ -165,13 +163,12 @@ interface InvoicePDFProps {
     logo_url: string | null;
   };
 }
-
 export function InvoicePDF({ payment, subscription, organization }: InvoicePDFProps) {
   const invoiceNumber = payment.provider_payment_id?.slice(0, 12) || payment.id.slice(0, 12);
-  const invoiceDate = format(new Date(payment.created_at), "d 'de' MMMM 'de' yyyy", { locale: es });
+  const invoiceDate = format(new Date(payment.created_at), "d 'de'MMMM 'de'yyyy", { locale: es });
   const planName = subscription?.plans?.name || 'Plan Desconocido';
-  const billingPeriod = subscription?.billing_period === 'monthly' ? 'Mensual' : 'Anual';
-  const provider = payment.provider === 'paypal' ? 'PayPal' : 'MercadoPago';
+  const billingPeriod = subscription?.billing_period === 'monthly'? 'Mensual': 'Anual';
+  const provider = payment.provider === 'paypal'? 'PayPal': 'MercadoPago';
   
   return (
     <Document>
@@ -188,9 +185,7 @@ export function InvoicePDF({ payment, subscription, organization }: InvoicePDFPr
             <Text style={styles.invoiceNumber}>#{invoiceNumber}</Text>
           </View>
         </View>
-
         <View style={styles.divider} />
-
         {/* Customer Info */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Cliente</Text>
@@ -205,7 +200,6 @@ export function InvoicePDF({ payment, subscription, organization }: InvoicePDFPr
             </View>
           )}
         </View>
-
         {/* Invoice Info */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Información de Factura</Text>
@@ -224,30 +218,28 @@ export function InvoicePDF({ payment, subscription, organization }: InvoicePDFPr
             </View>
           </View>
         </View>
-
         {/* Items Table */}
         <View style={styles.table}>
           <View style={styles.tableHeader}>
             <Text style={[styles.tableHeaderCell, { flex: 3 }]}>Descripción</Text>
-            <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right' }]}>Cantidad</Text>
-            <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right' }]}>Precio</Text>
-            <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right' }]}>Total</Text>
+            <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right'}]}>Cantidad</Text>
+            <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right'}]}>Precio</Text>
+            <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right'}]}>Total</Text>
           </View>
           
           <View style={styles.tableRow}>
             <Text style={[styles.tableCell, { flex: 3 }]}>
               Suscripción {planName} - {billingPeriod}
             </Text>
-            <Text style={[styles.tableCell, { flex: 1, textAlign: 'right' }]}>1</Text>
-            <Text style={[styles.tableCell, { flex: 1, textAlign: 'right' }]}>
+            <Text style={[styles.tableCell, { flex: 1, textAlign: 'right'}]}>1</Text>
+            <Text style={[styles.tableCell, { flex: 1, textAlign: 'right'}]}>
               {payment.currency} {payment.amount?.toFixed(2) || '0.00'}
             </Text>
-            <Text style={[styles.tableCell, { flex: 1, textAlign: 'right' }]}>
+            <Text style={[styles.tableCell, { flex: 1, textAlign: 'right'}]}>
               {payment.currency} {payment.amount?.toFixed(2) || '0.00'}
             </Text>
           </View>
         </View>
-
         {/* Totals */}
         <View style={styles.totalsSection}>
           <View style={styles.totalRow}>
@@ -258,12 +250,11 @@ export function InvoicePDF({ payment, subscription, organization }: InvoicePDFPr
           </View>
           <View style={styles.totalRow}>
             <Text style={[styles.totalLabel, { fontSize: 14 }]}>TOTAL:</Text>
-            <Text style={[styles.totalValue, { fontSize: 14, color: '#2563eb' }]}>
+            <Text style={[styles.totalValue, { fontSize: 14, color: '#2563eb'}]}>
               {payment.currency} {payment.amount?.toFixed(2) || '0.00'}
             </Text>
           </View>
         </View>
-
         {/* Footer */}
         <View style={styles.footer}>
           <Text>Gracias por confiar en Seencel</Text>

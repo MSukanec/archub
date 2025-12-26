@@ -10,16 +10,13 @@ import {
 } from '../services';
 import { SUBCONTRACT_QUERY_KEYS } from '../constants';
 import { toast } from '@/hooks/use-toast';
-
 export function useSubcontractTasks(subcontractId: string) {
   const queryClient = useQueryClient();
-
   const { data: subcontractTasks = [], isLoading, error } = useQuery<SubcontractTaskData[]>({
     queryKey: SUBCONTRACT_QUERY_KEYS.tasks(subcontractId),
     queryFn: () => getSubcontractTasks(subcontractId),
     enabled: !!subcontractId,
   });
-
   const createMultipleSubcontractTasks = useMutation({
     mutationFn: (tasks: CreateSubcontractTaskData[]) => 
       createSubcontractTasks(subcontractId, tasks),
@@ -41,7 +38,6 @@ export function useSubcontractTasks(subcontractId: string) {
       });
     },
   });
-
   const deleteSubcontractTaskMutation = useMutation({
     mutationFn: (taskId: string) => deleteSubcontractTask(taskId),
     onSuccess: () => {
@@ -62,7 +58,6 @@ export function useSubcontractTasks(subcontractId: string) {
       });
     },
   });
-
   const updateSubcontractTaskMutation = useMutation({
     mutationFn: ({ taskId, updates }: { taskId: string; updates: UpdateSubcontractTaskData }) => 
       updateSubcontractTask(taskId, updates),
@@ -84,7 +79,6 @@ export function useSubcontractTasks(subcontractId: string) {
       });
     },
   });
-
   return {
     subcontractTasks,
     isLoading,

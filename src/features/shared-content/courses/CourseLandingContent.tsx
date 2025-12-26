@@ -14,21 +14,18 @@ import {
 } from '@/features/learning';
 import { InfiniteCarousel } from '@/components/shared/InfiniteCarousel';
 import type { CourseLandingContentProps } from './types';
-
 export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) {
   const [, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { data, isLoading, error } = useCourseLanding(slug);
   const { data: enrollmentData } = useCourseEnrollment(data?.course?.id, userData?.user?.id);
   const { data: progressData } = useCourseProgress(data?.course?.id);
-
   const isEnrolled = enrollmentData?.isEnrolled || false;
   const progressPercentage = (() => {
     if (!progressData || progressData.length === 0) return 0;
     const completed = progressData.filter(p => p.is_completed).length;
     return Math.round((completed / progressData.length) * 100);
   })();
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -39,7 +36,6 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
       </div>
     );
   }
-
   if (error || !data) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -52,9 +48,7 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
       </div>
     );
   }
-
   const { course, modules, faqs, stats, clientGallery } = data;
-
   const handleCTAClick = () => {
     if (isEnrolled) {
       // Usuario inscrito → ir al curso
@@ -67,15 +61,13 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
       navigate('/register');
     }
   };
-
   // Texto del botón según estado de inscripción
   const ctaButtonText = isEnrolled 
-    ? (progressPercentage > 0 ? 'Continuar Curso' : 'Ver Curso')
+    ? (progressPercentage > 0 ? 'Continuar Curso': 'Ver Curso')
     : 'Inscribirme Ahora';
-
   return (
     <>
-      {mode === 'dashboard' && (
+      {mode === 'dashboard'&& (
         <DashboardCourseHeader 
           course={course}
           stats={stats}
@@ -86,7 +78,7 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
         />
       )}
       
-      <div className={mode === 'dashboard' ? "space-y-8" : "container mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16"}>
+      <div className={mode === 'dashboard'? "space-y-8" : "container mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16"}>
         <InstructorSection course={course} />
         <ModulesSection 
           modules={modules} 
@@ -110,7 +102,7 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
           />
         )}
         
-        {mode === 'public' && (
+        {mode === 'public'&& (
           <PublicCTAFooter 
             course={course}
             isEnrolled={isEnrolled}
@@ -119,7 +111,7 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
           />
         )}
         
-        {mode === 'dashboard' && (
+        {mode === 'dashboard'&& (
           <DashboardCTAFooter 
             onCTAClick={handleCTAClick}
             ctaButtonText={ctaButtonText}
@@ -129,7 +121,6 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
     </>
   );
 }
-
 interface DashboardCourseHeaderProps {
   course: any;
   stats: any;
@@ -138,7 +129,6 @@ interface DashboardCourseHeaderProps {
   onCTAClick: () => void;
   ctaButtonText: string;
 }
-
 function DashboardCourseHeader({ 
   course, 
   stats, 
@@ -200,21 +190,19 @@ function DashboardCourseHeader({
     </div>
   );
 }
-
 interface PublicCTAFooterProps {
   course: any;
   isEnrolled: boolean;
   onCTAClick: () => void;
   ctaButtonText: string;
 }
-
 function PublicCTAFooter({ course, isEnrolled, onCTAClick, ctaButtonText }: PublicCTAFooterProps) {
   return (
     <section className="py-20 bg-gradient-to-br from-primary/10 via-primary/5 to-background rounded-lg">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center space-y-8">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            {isEnrolled ? '¿Listo para continuar?' : '¿Listo para comenzar?'}
+            {isEnrolled ? '¿Listo para continuar?': '¿Listo para comenzar?'}
           </h2>
           <p className="text-xl text-muted-foreground">
             {isEnrolled 
@@ -222,7 +210,6 @@ function PublicCTAFooter({ course, isEnrolled, onCTAClick, ctaButtonText }: Publ
               : 'Únete hoy y transforma tu forma de trabajar'
             }
           </p>
-
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Button size="lg" className="px-8 text-lg" onClick={onCTAClick}>
               {ctaButtonText}
@@ -235,7 +222,6 @@ function PublicCTAFooter({ course, isEnrolled, onCTAClick, ctaButtonText }: Publ
               </div>
             )}
           </div>
-
           <p className="text-sm text-muted-foreground">
             {isEnrolled 
               ? 'Tu progreso se guarda automáticamente'
@@ -247,12 +233,10 @@ function PublicCTAFooter({ course, isEnrolled, onCTAClick, ctaButtonText }: Publ
     </section>
   );
 }
-
 interface DashboardCTAFooterProps {
   onCTAClick: () => void;
   ctaButtonText: string;
 }
-
 function DashboardCTAFooter({ onCTAClick, ctaButtonText }: DashboardCTAFooterProps) {
   return (
     <div className="flex justify-center py-8">
@@ -263,20 +247,17 @@ function DashboardCTAFooter({ onCTAClick, ctaButtonText }: DashboardCTAFooterPro
     </div>
   );
 }
-
 interface ClientsSectionProps {
   images: { id: string; url: string }[];
   title?: string;
   subtitle?: string;
 }
-
 function ClientsSection({ images, title, subtitle }: ClientsSectionProps) {
   const carouselItems = images.map((img) => ({
     id: img.id,
     src: img.url,
     alt: 'Cliente',
   }));
-
   return (
     <section className="space-y-8" data-testid="section-clients">
       <div className="text-center space-y-4">

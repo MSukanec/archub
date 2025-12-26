@@ -10,18 +10,14 @@ import {
   createExchangeRateDescription,
   createMissingWalletDescription,
 } from './micro/adapter';
-
 const FEATURE_TAG = 'capital';
-
 const entityLabels = {
   singular: 'transacción',
   plural: 'transacciones',
 };
-
 interface CapitalTransaction extends NormalizedPayment {
   date?: string | null;
 }
-
 export const capitalMissingExchangeRateRule: DataHealthRule<NormalizedPayment> = createFeatureRule({
   ruleId: 'capital-missing-exchange-rate',
   featureTag: FEATURE_TAG,
@@ -39,7 +35,6 @@ export const capitalMissingExchangeRateRule: DataHealthRule<NormalizedPayment> =
     targetIds: affectedIds,
   }),
 });
-
 export const capitalMissingWalletRule: DataHealthRule<NormalizedPayment> = createFeatureRule({
   ruleId: 'capital-missing-wallet',
   featureTag: FEATURE_TAG,
@@ -56,7 +51,6 @@ export const capitalMissingWalletRule: DataHealthRule<NormalizedPayment> = creat
     targetIds: affectedIds,
   }),
 });
-
 const futureDateMicroRule = createFutureDateRule<CapitalTransaction>();
 export const capitalWithFutureDateRule: DataHealthRule<NormalizedPayment> = createFeatureRule({
   ruleId: 'capital-with-future-date',
@@ -74,7 +68,7 @@ export const capitalWithFutureDateRule: DataHealthRule<NormalizedPayment> = crea
   entityLabels,
   formatTitle: () => 'Transacciones con fecha futura',
   formatDescription: (count, labels) => 
-    `${count} ${pluralize(count, labels.singular, labels.plural)} tiene${count > 1 ? 'n' : ''} fecha posterior a hoy.`,
+    `${count} ${pluralize(count, labels.singular, labels.plural)} tiene${count > 1 ? 'n': ''} fecha posterior a hoy.`,
   getItemLabel: (item) => item.label || `Transacción #${item.id}`,
   getRecommendedAction: (affectedIds) => ({
     label: 'Revisar fechas',
@@ -83,7 +77,6 @@ export const capitalWithFutureDateRule: DataHealthRule<NormalizedPayment> = crea
     targetIds: affectedIds,
   }),
 });
-
 export const allCapitalRules: DataHealthRule<NormalizedPayment>[] = [
   capitalMissingExchangeRateRule,
   capitalMissingWalletRule,

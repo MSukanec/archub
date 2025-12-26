@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { ProjectModality } from '../types';
-
 /**
  * Obtiene las modalidades de proyecto disponibles para una organización.
  * 
@@ -16,14 +15,12 @@ export async function getProjectModalities(organizationId: string): Promise<Proj
   if (!supabase || !organizationId) {
     return [];
   }
-
   const { data, error } = await supabase
     .from('project_modalities')
     .select('*')
     .eq('is_deleted', false)
     .or(`organization_id.eq.${organizationId},organization_id.is.null`)
     .order('name');
-
   if (error) throw error;
   
   return data || [];

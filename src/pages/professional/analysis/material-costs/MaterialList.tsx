@@ -10,7 +10,6 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { useGlobalModalStore } from '@/components/modal'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { cn } from '@/lib/utils'
-
 export default function MaterialList() {
   const [groupingType, setGroupingType] = useState('category')
   const [filterByCategory, setFilterByCategory] = useState("all")
@@ -22,7 +21,6 @@ export default function MaterialList() {
   const deleteMaterialMutation = useDeleteMaterial()
   const { openModal } = useGlobalModalStore()
   const [, navigate] = useLocation()
-
   // Filter materials and add groupKey for grouping
   const filteredMaterials = useMemo(() => {
     let filtered = materials.filter(material => {
@@ -32,17 +30,14 @@ export default function MaterialList() {
           return false;
         }
       }
-
       // Filtro por tipo de material
       if (filterByMaterialType !== "all") {
         if ((material.material_type || 'Sin tipo') !== filterByMaterialType) {
           return false;
         }
       }
-
       return true;
     });
-
     const materialsWithGroupKey = filtered.map(material => {
       let groupKey = '';
       
@@ -62,7 +57,6 @@ export default function MaterialList() {
         groupKey
       };
     });
-
     // Ordenar según el tipo de agrupación
     return materialsWithGroupKey.sort((a, b) => {
       switch (groupingType) {
@@ -79,25 +73,21 @@ export default function MaterialList() {
       }
     });
   }, [materials, groupingType, filterByCategory, filterByMaterialType]);
-
   const handleView = (materialId: string) => {
     navigate(`/analysis/materials/${materialId}`)
   }
-
   const handleEdit = (material: Material) => {
     openModal('material-form', {
       editingMaterial: material,
       isDuplicating: false
     })
   }
-
   const handleDuplicate = (material: Material) => {
     openModal('material-form', {
       editingMaterial: material,
       isDuplicating: true
     })
   }
-
   const handleDelete = (material: Material) => {
     openModal('delete-confirmation', {
       mode: 'dangerous',
@@ -109,7 +99,6 @@ export default function MaterialList() {
       isLoading: deleteMaterialMutation.isPending
     })
   }
-
   // Get unique options for filters
   const categoryOptions = useMemo(() => {
     const categories = new Set<string>();
@@ -118,7 +107,6 @@ export default function MaterialList() {
     });
     return Array.from(categories).sort();
   }, [materials]);
-
   const materialTypeOptions = useMemo(() => {
     const types = new Set<string>();
     materials.forEach(material => {
@@ -126,16 +114,13 @@ export default function MaterialList() {
     });
     return Array.from(types).sort();
   }, [materials]);
-
   // Clear filters function
   const handleClearFilters = () => {
     setFilterByCategory("all");
     setFilterByMaterialType("all");
   };
-
   // Check if any filters are active
   const isFilterActive = filterByCategory !== "all" || filterByMaterialType !== "all";
-
   // Filter content component
   const renderFilterContent = () => (
     <>
@@ -152,7 +137,6 @@ export default function MaterialList() {
           className="w-full"
         />
       </div>
-
       <div>
         <label className="text-xs font-medium mb-2 block">Tipo</label>
         <ComboBoxWriteField
@@ -168,7 +152,6 @@ export default function MaterialList() {
       </div>
     </>
   );
-
   // Base columns definition
   const baseColumns = [
     {
@@ -179,11 +162,11 @@ export default function MaterialList() {
         <Badge 
           variant={material.is_system ? "default" : "secondary"}
           className={`text-xs ${material.is_system 
-            ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
+            ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90'
             : 'bg-[var(--accent-2)] text-white hover:bg-[var(--accent-2)]/90'
           }`}
         >
-          {material.is_system ? 'Sistema' : 'Organización'}
+          {material.is_system ? 'Sistema': 'Organización'}
         </Badge>
       )
     },
@@ -238,7 +221,7 @@ export default function MaterialList() {
           </span>
           {material.product_count && material.product_count > 0 && (
             <span className="text-xs text-muted-foreground">
-              {material.product_count} producto{material.product_count > 1 ? 's' : ''}
+              {material.product_count} producto{material.product_count > 1 ? 's': ''}
             </span>
           )}
         </div>
@@ -249,11 +232,10 @@ export default function MaterialList() {
   // Render grouping popover content
   const renderGroupingContent = () => {
     const groupingOptions = [
-      { value: 'none', label: 'No Agrupar' },
-      { value: 'category', label: 'Agrupar por Categoría' },
-      { value: 'material_type', label: 'Agrupar por Tipo' }
+      { value: 'none', label: 'No Agrupar'},
+      { value: 'category', label: 'Agrupar por Categoría'},
+      { value: 'material_type', label: 'Agrupar por Tipo'}
     ];
-
     return (
       <>
         <div className="text-xs font-medium mb-2 block">Agrupar por</div>
@@ -263,7 +245,7 @@ export default function MaterialList() {
               key={option.value}
               variant={groupingType === option.value ? "secondary" : "ghost"}
               size="sm"
-              onClick={() => setGroupingType(option.value as 'none' | 'category' | 'material_type')}
+              onClick={() => setGroupingType(option.value as 'none'| 'category'| 'material_type')}
               className={cn(
                 "w-full justify-start text-xs font-normal h-8",
                 groupingType === option.value ? "button-secondary-pressed hover:bg-secondary" : ""
@@ -276,7 +258,6 @@ export default function MaterialList() {
       </>
     );
   };
-
   // Select columns based on grouping type
   const materialsColumns = useMemo(() => {
     // For no grouping, use all base columns
@@ -286,12 +267,11 @@ export default function MaterialList() {
     
     // Filter columns for grouping - hide the grouped column
     return baseColumns.filter(column => {
-      if (groupingType === 'category' && column.key === 'category') return false;
-      if (groupingType === 'material_type' && column.key === 'material_type') return false;
+      if (groupingType === 'category'&& column.key === 'category') return false;
+      if (groupingType === 'material_type'&& column.key === 'material_type') return false;
       return true;
     });
   }, [groupingType]);
-
   return (
     <div className="space-y-6">
       {/* Materials Table */}
@@ -310,7 +290,7 @@ export default function MaterialList() {
           <Table
             data={filteredMaterials}
             columns={materialsColumns}
-            groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+            groupBy={groupingType === 'none'? undefined : 'groupKey'}
             rowActions={(material) => {
               const actions = [
                 {
@@ -335,7 +315,7 @@ export default function MaterialList() {
                     icon: Trash2,
                     label: 'Eliminar',
                     onClick: () => handleDelete(material),
-                    variant: 'destructive' as const
+                    variant: 'destructive'as const
                   }
                 );
               }
@@ -348,11 +328,11 @@ export default function MaterialList() {
               isGroupingActive: groupingType !== 'none',
               onClearFilters: handleClearFilters
             }}
-            renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
+            renderGroupHeader={groupingType === 'none'? undefined : (groupKey: string, groupRows: any[]) => {
               return (
                 <>
                   <div className="col-span-full text-sm font-medium">
-                    {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Material' : 'Materiales'})
+                    {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Material': 'Materiales'})
                   </div>
                 </>
               );

@@ -1,11 +1,9 @@
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
 import { CHART_COLORS, CHART_AXIS, CHART_TOOLTIP, CHART_STATES, CHART_DIMENSIONS, formatCompact } from '../theme'
-
 export interface TrendDataPoint {
   label: string
   value: number
 }
-
 export interface TrendLineChartProps {
   data: TrendDataPoint[]
   color?: string
@@ -19,7 +17,6 @@ export interface TrendLineChartProps {
   onClick?: (label: string, value: number) => void
   clickable?: boolean
 }
-
 export function TrendLineChart({
   data,
   color = CHART_COLORS.palette[0],
@@ -40,7 +37,6 @@ export function TrendLineChart({
       </div>
     )
   }
-
   if (!data || data.length === 0) {
     return (
       <div style={{ height }} className={CHART_STATES.empty.className}>
@@ -48,9 +44,7 @@ export function TrendLineChart({
       </div>
     )
   }
-
   const gradientId = `gradient-${Math.random().toString(36).substr(2, 9)}`
-
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -94,7 +88,7 @@ export function TrendLineChart({
             strokeWidth={2}
             fillOpacity={1}
             fill={showGradient ? `url(#${gradientId})` : color}
-            style={clickable ? { cursor: 'pointer' } : undefined}
+            style={clickable ? { cursor: 'pointer'} : undefined}
             onClick={(d: any) => {
               if (clickable && onClick && d?.payload) {
                 onClick(d.payload.label, d.payload.value)

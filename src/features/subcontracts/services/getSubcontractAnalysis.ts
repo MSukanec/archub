@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import { convert } from '@/lib/money';
-
 export interface SubcontractAnalysisData {
   id: string;
   subcontrato: string;
@@ -14,12 +13,10 @@ export interface SubcontractAnalysisData {
   currencySymbol: string;
   exchangeRate: number;
 }
-
 export async function getSubcontractAnalysis(projectId: string): Promise<SubcontractAnalysisData[]> {
   if (!projectId || !supabase) {
     return [];
   }
-
   const { data, error } = await supabase
     .from('subcontracts')
     .select(`
@@ -42,12 +39,10 @@ export async function getSubcontractAnalysis(projectId: string): Promise<Subcont
     `)
     .eq('project_id', projectId)
     .order('created_at', { ascending: false });
-
   if (error) {
     console.error('Error fetching subcontract analysis:', error);
     throw error;
   }
-
   const processedData = data?.map(subcontract => {
     const totalPaid = (subcontract.movement_subcontracts || []).reduce((sum, ms) => {
       const movement = Array.isArray(ms.movement) ? ms.movement[0] : ms.movement;
@@ -63,12 +58,10 @@ export async function getSubcontractAnalysis(projectId: string): Promise<Subcont
       }
       return sum;
     }, 0);
-
     const totalAmountOriginal = subcontract.amount_total || 0;
     const totalAmountUSD = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f'
       ? totalAmountOriginal
-      : convert(totalAmountOriginal, subcontract.exchange_rate, { direction: 'divide' });
-
+      : convert(totalAmountOriginal, subcontract.exchange_rate, { direction: 'divide'});
     const totalPaidUSD = (subcontract.movement_subcontracts || []).reduce((sum, ms) => {
       const movement = Array.isArray(ms.movement) ? ms.movement[0] : ms.movement;
       
@@ -76,20 +69,17 @@ export async function getSubcontractAnalysis(projectId: string): Promise<Subcont
         const movementAmount = movement.amount || 0;
         const movementAmountUSD = movement.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f'
           ? movementAmount
-          : convert(movementAmount, movement.exchange_rate, { direction: 'divide' });
+          : convert(movementAmount, movement.exchange_rate, { direction: 'divide'});
         return sum + movementAmountUSD;
       }
       return sum;
     }, 0);
-
     const balanceOriginal = totalAmountOriginal - totalPaid;
     const balanceUSD = totalAmountUSD - totalPaidUSD;
-
     const contact = Array.isArray(subcontract.contact) ? subcontract.contact[0] : subcontract.contact;
     const proveedorName = !contact 
       ? 'Sin proveedor'
       : contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Sin proveedor';
-
     return {
       id: subcontract.id,
       subcontrato: subcontract.title,
@@ -100,10 +90,9 @@ export async function getSubcontractAnalysis(projectId: string): Promise<Subcont
       pagoALaFechaUSD: totalPaidUSD,
       saldo: balanceOriginal,
       saldoUSD: balanceUSD,
-      currencySymbol: subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS',
+      currencySymbol: subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f'? 'USD': 'ARS',
       exchangeRate: subcontract.exchange_rate || 1
     };
   }) || [];
-
   return processedData;
 }

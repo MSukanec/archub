@@ -1,12 +1,10 @@
 import { Lock } from "lucide-react";
-
 interface EmptyStateBlockProps {
   icon?: React.ReactNode;
   title: string;
   description?: string;
   action?: React.ReactNode;
 }
-
 export function EmptyStateBlock({
   icon = <Lock className="w-6 h-6" />,
   title,

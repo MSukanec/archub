@@ -9,7 +9,6 @@ import {
   deleteGeneralCostCategory,
 } from '../services/generalCostCategories';
 import type { GeneralCostCategory } from '../types';
-
 export function useGeneralCostCategories(organizationId: string | undefined) {
   return useQuery({
     queryKey: generalCostsKeys.categoryList(organizationId),
@@ -21,7 +20,6 @@ export function useGeneralCostCategories(organizationId: string | undefined) {
     staleTime: 30000,
   });
 }
-
 export function useGeneralCostCategory(categoryId: string | undefined, organizationId: string | undefined) {
   return useQuery({
     queryKey: generalCostsKeys.category(categoryId),
@@ -33,12 +31,10 @@ export function useGeneralCostCategory(categoryId: string | undefined, organizat
     staleTime: 30000,
   });
 }
-
 interface CreateCategoryParams {
-  category: Pick<GeneralCostCategory, 'name' | 'description'>;
+  category: Pick<GeneralCostCategory, 'name'| 'description'>;
   organizationId: string;
 }
-
 export function useCreateGeneralCostCategory(organizationId: string | null) {
   return useOptimisticMutation({
     mutationFn: ({ category, organizationId: orgId }: CreateCategoryParams) =>
@@ -63,13 +59,11 @@ export function useCreateGeneralCostCategory(organizationId: string | null) {
     onErrorMessage: 'No se pudo crear la categoría',
   });
 }
-
 interface UpdateCategoryParams {
   categoryId: string;
-  updates: Pick<GeneralCostCategory, 'name' | 'description'>;
+  updates: Pick<GeneralCostCategory, 'name'| 'description'>;
   organizationId: string;
 }
-
 export function useUpdateGeneralCostCategory(organizationId: string | null) {
   return useOptimisticMutation({
     mutationFn: ({ categoryId, updates, organizationId: orgId }: UpdateCategoryParams) =>
@@ -87,12 +81,10 @@ export function useUpdateGeneralCostCategory(organizationId: string | null) {
     onErrorMessage: 'No se pudo actualizar la categoría',
   });
 }
-
 interface DeleteCategoryParams {
   categoryId: string;
   organizationId: string;
 }
-
 export function useDeleteGeneralCostCategory(organizationId: string | null) {
   return useOptimisticMutation({
     mutationFn: ({ categoryId, organizationId: orgId }: DeleteCategoryParams) =>

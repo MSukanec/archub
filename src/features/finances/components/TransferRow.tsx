@@ -1,5 +1,4 @@
 import DataRowCard, { DataRowCardProps } from '@/components/shared/DataRowCard';
-
 interface TransferGroup {
   id: string;
   transfer_group_id: string;
@@ -18,15 +17,13 @@ interface TransferGroup {
   };
   is_transfer_group: true;
 }
-
 interface TransferRowProps {
   transfer: TransferGroup;
   onClick?: () => void;
   selected?: boolean;
-  density?: 'compact' | 'normal' | 'comfortable';
+  density?: 'compact'| 'normal'| 'comfortable';
   className?: string;
 }
-
 export default function TransferRow({ 
   transfer, 
   onClick, 
@@ -40,7 +37,6 @@ export default function TransferRow({
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(Math.abs(transfer.amount));
-
   // Obtener avatar del creador
   const getCreatorAvatar = () => {
     if (transfer.creator?.avatar_url) {
@@ -48,11 +44,10 @@ export default function TransferRow({
     }
     return undefined;
   };
-
   const getCreatorInitials = () => {
     if (transfer.creator?.full_name) {
       return transfer.creator.full_name
-        .split(' ')
+        .split('')
         .map(word => word.charAt(0))
         .join('')
         .toUpperCase()
@@ -60,7 +55,6 @@ export default function TransferRow({
     }
     return 'U';
   };
-
   // Contenido interno del card
   const cardContent = (
     <>
@@ -73,7 +67,6 @@ export default function TransferRow({
           {transfer.from_wallet} → {transfer.to_wallet}
         </div>
       </div>
-
       {/* Columna trailing */}
       <div className="flex flex-col items-end flex-shrink-0">
         {/* Línea 1: Importe */}
@@ -88,7 +81,6 @@ export default function TransferRow({
       </div>
     </>
   );
-
   return (
     <DataRowCard
       avatarUrl={getCreatorAvatar()}
@@ -104,6 +96,5 @@ export default function TransferRow({
     </DataRowCard>
   );
 }
-
 // Export del tipo para uso externo
 export type { TransferGroup };

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-
 import { FormModalLayout } from '@/components/modal'
 import { FormModalHeader } from '@/components/modal'
 import { FormModalFooter } from '@/components/modal'
@@ -10,17 +9,13 @@ import { useModalPanelStore } from '@/components/modal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
-
 import { useCreateProduct, useUpdateProduct, Product, NewProductData } from '@/features/materials'
 import { useMaterials } from '@/features/materials'
 import { useBrands } from '@/hooks/use-brands'
 import { useUnitPresentations } from '@/hooks/use-unit-presentations'
 import { useCurrentUser } from '@/hooks/use-current-user'
-
 import { Package } from 'lucide-react'
-
 const productSchema = z.object({
   material_id: z.string().min(1, 'El material es requerido'),
   brand_id: z.string().optional(),
@@ -30,7 +25,6 @@ const productSchema = z.object({
   image_url: z.string().optional(),
   url: z.string().optional(),
 })
-
 interface AdminProductModalProps {
   modalData: {
     editingProduct?: Product | null
@@ -38,13 +32,11 @@ interface AdminProductModalProps {
   }
   onClose: () => void
 }
-
 export function AdminProductModal({ modalData, onClose }: AdminProductModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   
   const { editingProduct, isDuplicating = false } = modalData
   const isEditing = !!editingProduct && !isDuplicating
-
   // Hooks
   const createMutation = useCreateProduct()
   const updateMutation = useUpdateProduct()
@@ -56,12 +48,10 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
   const { data: materials = [] } = useMaterials(organizationId)
   const { data: brands = [] } = useBrands()
   const { data: unitPresentations = [] } = useUnitPresentations()
-
   // Force edit mode when modal opens
   useEffect(() => {
     setPanel('edit')
   }, [setPanel])
-
   // Form setup
   const form = useForm<z.infer<typeof productSchema>>({
     resolver: zodResolver(productSchema),
@@ -75,7 +65,6 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
       url: '',
     },
   })
-
   // Load editing data (including duplication)
   useEffect(() => {
     console.log('AdminProductModal useEffect triggered:', {
@@ -110,7 +99,6 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
       })
     }
   }, [isEditing, isDuplicating, editingProduct, form])
-
   const onSubmit = async (data: z.infer<typeof productSchema>) => {
     setIsLoading(true)
     
@@ -124,7 +112,6 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
         image_url: data.image_url || undefined,
         url: data.url || undefined,
       }
-
       if (isEditing && editingProduct) {
         await updateMutation.mutateAsync({
           id: editingProduct.id,
@@ -142,10 +129,8 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
       setIsLoading(false)
     }
   }
-
   // View panel (not needed for this modal as it's always in edit mode)
   const viewPanel = null
-
   // Edit panel with form
   const editPanel = (
     <Form {...form}>
@@ -174,7 +159,6 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
             </FormItem>
           )}
         />
-
         {/* Brand Selection */}
         <FormField
           control={form.control}
@@ -187,7 +171,7 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
                   value={field.value || ''}
                   onValueChange={field.onChange}
                   options={[
-                    { value: '', label: 'Sin marca' },
+                    { value: '', label: 'Sin marca'},
                     ...brands.map(brand => ({
                       value: brand.id,
                       label: brand.name
@@ -202,7 +186,6 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
             </FormItem>
           )}
         />
-
         {/* Product Model/Name */}
         <FormField
           control={form.control}
@@ -220,7 +203,6 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
             </FormItem>
           )}
         />
-
         {/* Description */}
         <FormField
           control={form.control}
@@ -240,7 +222,6 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
             </FormItem>
           )}
         />
-
         {/* Unit Presentation - Full Width */}
         <FormField
           control={form.control}
@@ -265,7 +246,6 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
             </FormItem>
           )}
         />
-
         {/* Link */}
         <FormField
           control={form.control}
@@ -284,7 +264,6 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
             </FormItem>
           )}
         />
-
         {/* Image URL */}
         <FormField
           control={form.control}
@@ -302,18 +281,15 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
             </FormItem>
           )}
         />
-
       </form>
     </Form>
   )
-
   const headerContent = (
     <FormModalHeader 
       title={isEditing ? "Editar Producto" : isDuplicating ? "Duplicar Producto" : "Nuevo Producto Personalizado"}
       icon={Package}
     />
   )
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -324,7 +300,6 @@ export function AdminProductModal({ modalData, onClose }: AdminProductModalProps
       showLoadingSpinner={isLoading}
     />
   )
-
   return (
     <FormModalLayout
       columns={1}

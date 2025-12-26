@@ -1,48 +1,40 @@
 import React, { useState, useMemo } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
-
 import { Table } from '@/components/shared/trees/Table'
 import AdminTaskRow from '@/features/legacy/components/admin/AdminTaskRow'
 import { useMobile } from '@/hooks/use-mobile'
-
 import { useGlobalModalStore } from '@/components/modal'
 import { useGeneratedTasks, useDeleteGeneratedTask, useTaskUsageCount, type GeneratedTask } from '@/hooks/use-generated-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
-
 import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronRight, ChevronDown, Eye, Copy } from 'lucide-react'
 import { EditableParametersTable } from '@/features/legacy/components/admin/EditableParametersTable'
 import { exportToExcel, createExportColumns } from '@/lib/export-utils'
 import { TaskCostPopover } from '@/features/legacy/components/tasks/TaskCostPopover'
 import TaskLaborCost from '@/components/shared/construction/TaskLaborCost'
 import { useLocation } from 'wouter'
-
 const AdminTaskList = () => {
   const [activeTab, setActiveTab] = useState('Lista de Tareas')
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
-  const [typeFilter, setTypeFilter] = useState<'all' | 'system' | 'user'>('all')
+  const [typeFilter, setTypeFilter] = useState<'all'| 'system'| 'user'>('all')
   const [expandedParameters, setExpandedParameters] = useState<Set<string>>(new Set())
-  const [groupingType, setGroupingType] = useState<'none' | 'rubros'>('rubros')
-
+  const [groupingType, setGroupingType] = useState<'none'| 'rubros'>('rubros')
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
   const isMobile = useMobile()
   const [, navigate] = useLocation()
-
   // Real data from useGeneratedTasks hook
   const { data: generatedTasks = [], isLoading } = useGeneratedTasks()
   const deleteGeneratedTaskMutation = useDeleteGeneratedTask()
   const { data: parameters = [] } = useTaskParametersAdmin()
   const { data: taskUsageCount = {} } = useTaskUsageCount()
-
   // Filter and sort generated tasks
   const filteredGeneratedTasks = generatedTasks
     .filter((task: GeneratedTask) => {
@@ -61,7 +53,7 @@ const AdminTaskList = () => {
         const rubroB = (b.division || 'Sin rubro').toLowerCase()
         
         // Primero ordenar por rubro alfabéticamente (A-Z)
-        const rubroComparison = rubroA.localeCompare(rubroB, 'es', { sensitivity: 'base' })
+        const rubroComparison = rubroA.localeCompare(rubroB, 'es', { sensitivity: 'base'})
         if (rubroComparison !== 0) {
           return rubroComparison
         }
@@ -69,13 +61,12 @@ const AdminTaskList = () => {
         // Si el rubro es igual, ordenar por nombre de tarea
         const nameA = (a.custom_name || a.name_rendered || '').toLowerCase()
         const nameB = (b.custom_name || b.name_rendered || '').toLowerCase()
-        return nameA.localeCompare(nameB, 'es', { sensitivity: 'base' })
+        return nameA.localeCompare(nameB, 'es', { sensitivity: 'base'})
       }
       
       // Ordenamiento por defecto cuando no está agrupado por rubros
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
-
   // Process tasks for grouping
   const processedTasks = useMemo(() => {
     if (groupingType === 'none') {
@@ -91,19 +82,16 @@ const AdminTaskList = () => {
     
     return filteredGeneratedTasks;
   }, [filteredGeneratedTasks, groupingType])
-
   const handleEdit = (generatedTask: GeneratedTask) => {
     console.log('📝 Editando tarea:', generatedTask);
     const modalData = { task: generatedTask, isEditing: true };
     openModal('parametric-task', modalData)
   }
-
   const handleView = (task: GeneratedTask) => {
     // Marcar que venimos del admin
     localStorage.setItem('taskViewSource', 'admin');
     navigate(`/analysis/${task.id}`)
   }
-
   const handleDuplicate = (task: GeneratedTask) => {
     // Create a duplicate object with " - Copia" added to the name
     const duplicateTask = {
@@ -115,7 +103,6 @@ const AdminTaskList = () => {
     }
     openModal('parametric-task', { task: duplicateTask, isDuplicating: true })
   }
-
   const handleDelete = (task: GeneratedTask) => {
     openModal('delete-confirmation', {
       title: 'Eliminar Tarea',
@@ -127,14 +114,12 @@ const AdminTaskList = () => {
       mode: 'dangerous'
     })
   }
-
   const clearFilters = () => {
     setSearchValue('')
     setSortBy('created_at')
     setTypeFilter('all')
     setGroupingType('none')
   }
-
   // Tree functionality for parameters
   const toggleParameterExpanded = (parameterId: string) => {
     const newExpanded = new Set(expandedParameters)
@@ -145,13 +130,11 @@ const AdminTaskList = () => {
     }
     setExpandedParameters(newExpanded)
   }
-
   // Render parameter tree item
   const renderParameterTreeItem = (parameter: any, level = 0) => {
     const isExpanded = expandedParameters.has(parameter.id)
     const hasOptions = parameter.options && parameter.options.length > 0
     const indentation = level * 24
-
     return (
       <div key={parameter.id} className="w-full">
         {/* Parameter Item */}
@@ -178,7 +161,6 @@ const AdminTaskList = () => {
                 <div className="w-4 h-4" />
               )}
             </Button>
-
             <div className="flex items-center space-x-2 flex-1">
               <TreePine className="w-4 h-4 text-accent" />
               <div>
@@ -189,7 +171,6 @@ const AdminTaskList = () => {
               </div>
             </div>
           </div>
-
           {/* Right side: Actions */}
           <div className="flex items-center space-x-1">
             <Button
@@ -203,7 +184,6 @@ const AdminTaskList = () => {
             </Button>
           </div>
         </div>
-
         {/* Parameter Options - 2nd level */}
         {hasOptions && isExpanded && (
           <div className="mt-1">
@@ -246,8 +226,7 @@ const AdminTaskList = () => {
       </div>
     )
   }
-
-  // Table columns configuration - hide 'Rubro' column when grouped by rubros
+  // Table columns configuration - hide 'Rubro'column when grouped by rubros
   const baseColumns = [
     { 
       key: 'is_completed', 
@@ -272,7 +251,7 @@ const AdminTaskList = () => {
         </div>
       )
     },
-    ...(groupingType !== 'rubros' ? [{ 
+    ...(groupingType !== 'rubros'? [{ 
       key: 'division', 
       label: 'Rubro', 
       width: '12%',
@@ -332,7 +311,7 @@ const AdminTaskList = () => {
       render: (task: GeneratedTask) => (
         <div className="flex justify-center">
           {task.is_system ? (
-            <Badge className="text-xs text-white" style={{ backgroundColor: 'var(--accent)' }}>
+            <Badge className="text-xs text-white" style={{ backgroundColor: 'var(--accent)'}}>
               SISTEMA
             </Badge>
           ) : (
@@ -344,10 +323,8 @@ const AdminTaskList = () => {
       )
     }
   ]
-
   // Dynamic columns based on grouping (using baseColumns which already handles the conditional inclusion)
   const columns = baseColumns;
-
   if (isMobile) {
     return (
       <div className="space-y-4">
@@ -372,7 +349,6 @@ const AdminTaskList = () => {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       <Card>
@@ -381,7 +357,7 @@ const AdminTaskList = () => {
             data={processedTasks}
             columns={columns}
             isLoading={isLoading}
-            groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+            groupBy={groupingType === 'none'? undefined : 'groupKey'}
             rowActions={(task: GeneratedTask) => [
               {
                 icon: Eye,
@@ -402,12 +378,12 @@ const AdminTaskList = () => {
                 icon: Trash2,
                 label: 'Eliminar',
                 onClick: () => handleDelete(task),
-                variant: 'destructive' as const
+                variant: 'destructive'as const
               }
             ]}
             topBar={{
               tabs: ['Sin Agrupar', 'Por Rubros'],
-              activeTab: groupingType === 'none' ? 'Sin Agrupar' : 'Por Rubros',
+              activeTab: groupingType === 'none'? 'Sin Agrupar': 'Por Rubros',
               onTabChange: (tab: string) => {
                 if (tab === 'Sin Agrupar') setGroupingType('none')
                 else if (tab === 'Por Rubros') setGroupingType('rubros')
@@ -419,7 +395,7 @@ const AdminTaskList = () => {
                 <>
                   <div>
                     <Label className="text-xs font-medium mb-2 block">Tipo</Label>
-                    <Select value={typeFilter} onValueChange={(value: 'all' | 'system' | 'user') => setTypeFilter(value)}>
+                    <Select value={typeFilter} onValueChange={(value: 'all'| 'system'| 'user') => setTypeFilter(value)}>
                       <SelectTrigger className="h-8 text-xs">
                         <SelectValue placeholder="Todas las tareas" />
                       </SelectTrigger>
@@ -434,9 +410,9 @@ const AdminTaskList = () => {
               ),
               onClearFilters: clearFilters
             }}
-            renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
+            renderGroupHeader={groupingType === 'none'? undefined : (groupKey: string, groupRows: any[]) => (
               <div className="col-span-full text-sm font-medium">
-                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
+                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea': 'Tareas'})
               </div>
             )}
             emptyState={
@@ -452,5 +428,4 @@ const AdminTaskList = () => {
     </div>
   )
 }
-
 export default AdminTaskList;

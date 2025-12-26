@@ -1,5 +1,4 @@
 import { apiRequest } from '@/lib/queryClient';
-
 export interface CreatePersonnelData {
   organization_id: string;
   project_id: string;
@@ -9,7 +8,6 @@ export interface CreatePersonnelData {
   end_date?: string | null;
   created_by?: string | null;
 }
-
 export async function createPersonnel(data: CreatePersonnelData): Promise<any> {
   const response = await apiRequest('POST', '/api/personnel', {
     organization_id: data.organization_id,
@@ -20,11 +18,9 @@ export async function createPersonnel(data: CreatePersonnelData): Promise<any> {
     end_date: data.end_date,
     created_by: data.created_by || null,
   });
-
   if (response.ok) {
     return await response.json();
   }
-
   const errorData = await response.json();
   throw new Error(errorData.error || 'Failed to create personnel');
 }

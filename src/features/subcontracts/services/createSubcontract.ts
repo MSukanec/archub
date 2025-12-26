@@ -1,6 +1,5 @@
 import { apiRequest } from '@/lib/queryClient';
 import type { Subcontract } from '../types';
-
 export interface CreateSubcontractData {
   organization_id: string;
   project_id: string;
@@ -15,7 +14,6 @@ export interface CreateSubcontractData {
   exchange_rate?: number | null;
   notes?: string | null;
 }
-
 export async function createSubcontract(data: CreateSubcontractData): Promise<Subcontract> {
   const response = await apiRequest('POST', '/api/subcontracts', {
     organization_id: data.organization_id,
@@ -31,12 +29,10 @@ export async function createSubcontract(data: CreateSubcontractData): Promise<Su
     exchange_rate: data.exchange_rate,
     notes: data.notes,
   });
-
   if (response.ok) {
     const subcontract = await response.json();
     return subcontract;
   }
-
   const errorData = await response.json();
   throw new Error(errorData.error || 'Failed to create subcontract');
 }

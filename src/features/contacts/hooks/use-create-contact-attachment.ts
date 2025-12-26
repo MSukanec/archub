@@ -2,14 +2,12 @@ import { useOptimisticMutation } from '@/core/save-engine';
 import { uploadContactAttachment } from '../services';
 import { contactsKeys } from '@/core/query-keys';
 import type { ContactAttachmentInput } from '../types';
-
 interface CreateAttachmentParams {
   file: File;
-  category: 'dni_front' | 'dni_back' | 'document' | 'photo' | 'other';
+  category: 'dni_front'| 'dni_back'| 'document'| 'photo'| 'other';
   createdBy: string;
   metadata?: any;
 }
-
 export function useCreateContactAttachment(contactId: string, organizationId: string) {
   return useOptimisticMutation({
     mutationFn: async ({ file, category, createdBy, metadata }: CreateAttachmentParams) => {

@@ -10,7 +10,6 @@ import {
   Hr,
   Section,
 } from '@react-email/components';
-
 interface ContactEmailProps {
   firstName?: string;
   lastName?: string;
@@ -20,7 +19,6 @@ interface ContactEmailProps {
   country?: string;
   message?: string;
 }
-
 export const ContactEmail = ({
   firstName = 'Usuario',
   lastName = 'Test',
@@ -46,7 +44,6 @@ export const ContactEmail = ({
     US: 'Estados Unidos',
     OTHER: 'Otro país',
   };
-
   return (
     <Html>
       <Head />
@@ -75,16 +72,12 @@ export const ContactEmail = ({
             <Text style={label}>País:</Text>
             <Text style={value}>{countryNames[country] || country}</Text>
           </Section>
-
           <Hr style={hr} />
-
           <Text style={label}>Mensaje:</Text>
           <Section style={messageSection}>
             <Text style={messageText}>{message}</Text>
           </Section>
-
           <Hr style={hr} />
-
           <Text style={footer}>
             Este mensaje fue enviado desde el formulario de contacto de Seencel.
           </Text>
@@ -93,13 +86,11 @@ export const ContactEmail = ({
     </Html>
   );
 };
-
 const main = {
   backgroundColor: '#f6f9fc',
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
   padding: '40px 0',
 };
-
 const container = {
   backgroundColor: '#ffffff',
   margin: '0 auto',
@@ -108,59 +99,50 @@ const container = {
   borderRadius: '8px',
   boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
 };
-
 const h1 = {
   color: '#333',
   fontSize: '24px',
   fontWeight: 'bold',
-  textAlign: 'center' as const,
+  textAlign: 'center'as const,
   margin: '0 0 24px 0',
 };
-
 const infoSection = {
   marginBottom: '16px',
 };
-
 const label = {
   color: '#666',
   fontSize: '12px',
   fontWeight: '600',
-  textTransform: 'uppercase' as const,
+  textTransform: 'uppercase'as const,
   letterSpacing: '0.5px',
   margin: '12px 0 4px 0',
 };
-
 const value = {
   color: '#333',
   fontSize: '16px',
   margin: '0 0 8px 0',
 };
-
 const hr = {
   borderColor: '#e5e5e5',
   margin: '24px 0',
 };
-
 const messageSection = {
   backgroundColor: '#f9f9f9',
   padding: '16px',
   borderRadius: '6px',
   border: '1px solid #e5e5e5',
 };
-
 const messageText = {
   color: '#333',
   fontSize: '14px',
   lineHeight: '1.6',
   margin: '0',
-  whiteSpace: 'pre-wrap' as const,
+  whiteSpace: 'pre-wrap'as const,
 };
-
 const footer = {
   color: '#999',
   fontSize: '12px',
-  textAlign: 'center' as const,
+  textAlign: 'center'as const,
   margin: '0',
 };
-
 export default ContactEmail;

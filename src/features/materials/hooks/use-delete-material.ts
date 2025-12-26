@@ -4,15 +4,12 @@
  * React Query mutation para eliminar un material.
  * Applies dual-cache invalidation strategy: invalidates both legacy and feature-based query keys.
  */
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteMaterial } from '../services/deleteMaterial';
 import { MATERIALS_QUERY_KEYS } from '../constants';
 import { toast } from '@/hooks/use-toast';
-
 export function useDeleteMaterial() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (id: string) => deleteMaterial(id),
     onSuccess: () => {

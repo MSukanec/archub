@@ -4,17 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Users, Search, UserPlus } from 'lucide-react';
 import { useLocation } from 'wouter';
-
 import { FormModalLayout } from '@/components/modal';
 import { FormModalHeader } from '@/components/modal';
 import { FormModalFooter } from '@/components/modal';
 import { useGlobalModalStore } from '@/components/modal';
-
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useContacts } from '@/features/contacts';
 import { useToast } from '@/hooks/use-toast';
@@ -22,17 +19,13 @@ import { getAttachmentPublicUrl } from '@/features/contacts/utils';
 import { useOrganizationMembers } from '@/features/organization/hooks';
 import { useProjectPersonnel, useCreatePersonnel, useContactAttachmentsForPersonnel } from '@/features/personnel/hooks';
 import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
-
 const personnelFormSchema = z.object({
   contact_ids: z.array(z.string()).min(1, "Selecciona al menos un contacto")
 });
-
 type PersonnelFormData = z.infer<typeof personnelFormSchema>;
-
 interface PersonnelAddModalProps {
   data?: any;
 }
-
 export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
   const { toast } = useToast();
   const { closeModal } = useGlobalModalStore();
@@ -46,11 +39,9 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const currentMember = useMemo(() => {
     return members.find(m => m.user_id === currentUser?.user?.id) || null
   }, [members, currentUser?.user?.id]);
-
   // Helper para obtener nombre display
   const getDisplayName = (contact: any): string => {
     if (contact.first_name || contact.last_name) {
@@ -58,7 +49,6 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
     }
     return contact.full_name || 'Sin nombre';
   };
-
   // Helper para obtener initials
   const getInitials = (contact: any): string => {
     if (contact.first_name || contact.last_name) {
@@ -67,7 +57,7 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
       return (first + last).toUpperCase();
     }
     if (contact.full_name) {
-      const parts = contact.full_name.trim().split(' ');
+      const parts = contact.full_name.trim().split('');
       if (parts.length >= 2) {
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
       }
@@ -75,19 +65,16 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
     }
     return '?';
   };
-
   // Use feature hook to get assigned personnel
   const { data: projectPersonnel = [], isLoading: isLoadingAssigned } = useProjectPersonnel(
     projectId,
     organizationId
   );
-
   // Extract contact IDs from project personnel
   const assignedPersonnel = useMemo(
     () => projectPersonnel.map((p: any) => p.contact_id),
     [projectPersonnel]
   );
-
   // Filtrar contactos disponibles (no asignados) y ordenar alfabéticamente
   const availableContacts = useMemo(() => {
     const contactsArray = (contacts || []) as any[];
@@ -100,16 +87,13 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
       return nameA.localeCompare(nameB);
     });
   }, [contacts, assignedPersonnel]);
-
   // Obtener IDs de attachments de avatares
   const avatarAttachmentIds = useMemo(() => {
     const contactsWithAvatars = availableContacts.filter((c: any) => c.avatar_attachment_id);
     return contactsWithAvatars.map((c: any) => c.avatar_attachment_id);
   }, [availableContacts]);
-
   // Use feature hook to get contact attachments
   const { data: contactAttachments = [] } = useContactAttachmentsForPersonnel(avatarAttachmentIds);
-
   // Filtrar por búsqueda y ordenar alfabéticamente
   const filteredContacts = useMemo(() => {
     let result = availableContacts;
@@ -130,24 +114,19 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
       return nameA.localeCompare(nameB);
     });
   }, [availableContacts, searchQuery]);
-
   const form = useForm<PersonnelFormData>({
     resolver: zodResolver(personnelFormSchema),
     defaultValues: {
       contact_ids: []
     }
   });
-
   const createPersonnel = useCreatePersonnel();
-
   const handleSubmit = async (data: PersonnelFormData) => {
     setIsSubmitting(true);
-
     try {
       const projectId = currentUser?.preferences?.last_project_id;
       const organizationId = currentUser?.organization?.id;
       if (!projectId || !organizationId) throw new Error('No hay proyecto seleccionado');
-
       // Create personnel records sequentially using the feature hook
       for (const contact_id of data.contact_ids) {
         const result = await createPersonnel.mutateAsync({
@@ -157,7 +136,6 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
           notes: '',
           created_by: currentMember?.id || null,
         });
-
         const contact = (contacts as any[]).find((c: any) => c.id === contact_id);
         const displayName = contact ? getDisplayName(contact) : 'Personal';
         
@@ -170,7 +148,6 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
           metadata: { full_name: displayName, role: null }
         });
       }
-
       closeModal();
     } catch (error: any) {
       console.error('Error adding personnel:', error);
@@ -183,7 +160,6 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
       setIsSubmitting(false);
     }
   };
-
   const handleContactToggle = (contactId: string, checked: boolean) => {
     let newSelection: string[];
     
@@ -196,7 +172,6 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
     setSelectedContacts(newSelection);
     form.setValue('contact_ids', newSelection);
   };
-
   const formContent = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
@@ -214,7 +189,6 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
-
                   {/* Lista de contactos */}
                   <div className="space-y-2">
                     {isLoadingAssigned ? (
@@ -263,7 +237,6 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
                           : null;
                         const displayName = getDisplayName(contact);
                         const initials = getInitials(contact);
-
                         const isSelected = selectedContacts.includes(contact.id);
                         
                         return (
@@ -272,18 +245,18 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
                             onClick={() => handleContactToggle(contact.id, !isSelected)}
                             className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all ${
                               isSelected 
-                                ? 'bg-[var(--accent)] text-white border-[var(--accent)]' 
+                                ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
                                 : 'hover:bg-muted/50'
                             }`}
                           >
                             <Avatar className="h-8 w-8">
                               {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
-                              <AvatarFallback className={`text-xs ${isSelected ? 'bg-white/20 text-white' : ''}`}>
+                              <AvatarFallback className={`text-xs ${isSelected ? 'bg-white/20 text-white': ''}`}>
                                 {initials}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
-                              <p className={`text-sm font-medium truncate ${isSelected ? 'text-white' : ''}`}>
+                              <p className={`text-sm font-medium truncate ${isSelected ? 'text-white': ''}`}>
                                 {displayName}
                               </p>
                             </div>
@@ -292,11 +265,10 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
                       })
                     )}
                   </div>
-
                   {/* Contador de seleccionados */}
                   {selectedContacts.length > 0 && (
                     <div className="text-sm text-muted-foreground text-center pt-2 border-t">
-                      {selectedContacts.length} contacto{selectedContacts.length !== 1 ? 's' : ''} seleccionado{selectedContacts.length !== 1 ? 's' : ''}
+                      {selectedContacts.length} contacto{selectedContacts.length !== 1 ? 's': ''} seleccionado{selectedContacts.length !== 1 ? 's': ''}
                     </div>
                   )}
                 </div>
@@ -308,7 +280,6 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
       </form>
     </Form>
   );
-
   const headerContent = (
     <FormModalHeader
       title="Asignar Personal al Proyecto"
@@ -316,7 +287,6 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
       icon={Users}
     />
   );
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -327,7 +297,6 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
       showLoadingSpinner={isSubmitting}
     />
   );
-
   return (
     <FormModalLayout
       columns={1}

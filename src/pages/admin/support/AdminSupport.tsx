@@ -8,16 +8,13 @@ import AdminSupportChangelogTab from './AdminSupportChangelogTab';
 import AdminSupportTicketsTab from './AdminSupportTicketsTab';
 import { useUnreadSupportMessages } from '@/hooks/use-unread-support-messages';
 import { useToast } from '@/hooks/use-toast';
-
 const AdminSupport = () => {
   const [activeTab, setActiveTab] = useState('soporte');
   const { openModal } = useGlobalModalStore();
   const { toast } = useToast();
-
   // Obtener badges para cada tab
   const { data: unreadSupportCount = 0 } = useUnreadSupportMessages();
   // TODO: Agregar hooks para anuncios, notificaciones y cambios según sea necesario
-
   const tabs = [
     { 
       id: 'soporte', 
@@ -44,7 +41,6 @@ const AdminSupport = () => {
       // badgeCount: unreadChangelogsCount // Agregar cuando se implemente
     }
   ];
-
   const handleResetAnnouncementView = () => {
     localStorage.removeItem('dismissed-announcements');
     toast({
@@ -52,7 +48,6 @@ const AdminSupport = () => {
       description: 'Ahora podrás ver todos los anuncios activos al recargar la página.',
     });
   };
-
   const getActionButton = () => {
     switch (activeTab) {
       case 'anuncios':
@@ -89,7 +84,6 @@ const AdminSupport = () => {
         return undefined;
     }
   };
-
   const headerProps = {
     title: "Soporte",
     icon: Headphones,
@@ -99,7 +93,6 @@ const AdminSupport = () => {
     onTabChange: setActiveTab,
     actionButton: getActionButton()
   };
-
   const renderTabContent = () => {
     switch (activeTab) {
       case 'anuncios':
@@ -114,12 +107,10 @@ const AdminSupport = () => {
         return <AdminSupportAnnouncementsTab />;
     }
   };
-
   return (
     <Layout wide headerProps={headerProps}>
       {renderTabContent()}
     </Layout>
   );
 };
-
 export default AdminSupport;

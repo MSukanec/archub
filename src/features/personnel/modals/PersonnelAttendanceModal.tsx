@@ -3,12 +3,10 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Users } from 'lucide-react'
-
 import { FormModalLayout, FormModalHeader, FormModalFooter } from '@/components/modal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -16,7 +14,6 @@ import { CalendarIcon } from 'lucide-react'
 import { formatDateForDB, parseLocalDate } from '@/lib/date-utils'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
-
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/features/organization'
@@ -26,7 +23,6 @@ import {
   useUpdatePersonnelAttendance 
 } from '@/features/personnel/hooks'
 import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity'
-
 const attendanceSchema = z.object({
   attendance_date: z.date({
     required_error: 'La fecha es requerida'
@@ -35,13 +31,11 @@ const attendanceSchema = z.object({
   attendance_type: z.string().min(1, 'Selecciona el tipo de asistencia'),
   description: z.string().optional()
 })
-
 type AttendanceForm = z.infer<typeof attendanceSchema>
-
 interface PersonnelAttendanceModalProps {
   modalData?: {
     attendance?: any
-    mode?: 'create' | 'edit'
+    mode?: 'create'| 'edit'
     isEditing?: boolean
     editingData?: {
       personnelId: string
@@ -52,19 +46,16 @@ interface PersonnelAttendanceModalProps {
   }
   onClose: () => void
 }
-
 export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttendanceModalProps) {
   const { toast } = useToast()
   const { data: currentUser } = useCurrentUser()
   const organizationId = currentUser?.organization?.id
   const projectId = currentUser?.preferences?.last_project_id
-
   // Use feature hook to get project personnel
   const { data: projectPersonnel = [] } = useProjectPersonnel(
     projectId,
     organizationId
   )
-
   // Get organization members (siguiendo patrón de SiteLogModal)
   const { data: members = [] } = useOrganizationMembers(organizationId)
   
@@ -73,22 +64,17 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
   useEffect(() => {
     membersRef.current = members
   }, [members])
-
   const attendance = modalData?.attendance || modalData?.editingData?.existingRecord
   // Check if there's actually an existing attendance record (not just editing mode)
   const hasExistingRecord = attendance && (attendance.day || attendance.id || attendance.workerId)
   const isCreatingNew = !hasExistingRecord
-  const isEditing = modalData?.isEditing || (modalData?.mode === 'edit' && hasExistingRecord)
-
-
-
+  const isEditing = modalData?.isEditing || (modalData?.mode === 'edit'&& hasExistingRecord)
   // Get the personnel_id from editingData (contact_id) and map to project_personnel.id
   const getPersonnelIdFromContactId = (contactId: string | undefined) => {
     if (!contactId) return ''
     const matchingPersonnel = projectPersonnel.find((p: any) => p.contact?.id === contactId)
     return matchingPersonnel?.id || ''
   }
-
   const form = useForm<AttendanceForm>({
     resolver: zodResolver(attendanceSchema),
     defaultValues: {
@@ -98,7 +84,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
       description: attendance?.description || ''
     }
   })
-
   // Reset form when attendance data changes (for editing) or when projectPersonnel loads
   useEffect(() => {
     if (projectPersonnel.length > 0) {
@@ -121,10 +106,8 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
       form.reset(mappedData)
     }
   }, [attendance, isEditing, form, modalData, projectPersonnel])
-
   const createAttendance = useCreatePersonnelAttendance()
   const updateAttendance = useUpdatePersonnelAttendance()
-
   // Calculate hours worked based on attendance type
   const getHoursWorked = (type: string) => {
     switch (type) {
@@ -135,7 +118,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
       default: return 8
     }
   }
-
   const handleSubmit = async (data: AttendanceForm) => {
     if (!currentUser?.organization?.id || !projectId) {
       toast({
@@ -145,9 +127,7 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
       })
       return
     }
-
     const hoursWorked = getHoursWorked(data.attendance_type)
-
     try {
       // Use formatDateForDB to avoid timezone issues
       const workDate = formatDateForDB(data.attendance_date)
@@ -159,7 +139,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
         if (!workerContactId || !attendanceDate) {
           throw new Error('No se puede identificar la asistencia a actualizar')
         }
-
         await updateAttendance.mutateAsync({
           workerContactId,
           attendanceDate,
@@ -186,7 +165,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
           organization_id: currentUser.organization.id,
           work_date: workDate,
         })
-
         const personnelName = getContactName()
         await logActivity({
           organization_id: currentUser.organization.id,
@@ -208,16 +186,13 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
       console.error('Error stack:', error?.stack)
     }
   }
-
   const isLoading = createAttendance.isPending || updateAttendance.isPending
-
   const attendanceTypes = [
-    { value: 'full', label: 'Jornada Completa' },
-    { value: 'half', label: 'Media Jornada' },
-    { value: 'absent', label: 'Ausente' },
-    { value: 'sick', label: 'Enfermedad/Accidente' }
+    { value: 'full', label: 'Jornada Completa'},
+    { value: 'half', label: 'Media Jornada'},
+    { value: 'absent', label: 'Ausente'},
+    { value: 'sick', label: 'Enfermedad/Accidente'}
   ]
-
   const viewPanel = (
     <div className="space-y-4">
       <div className="text-sm text-muted-foreground">
@@ -225,7 +200,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
       </div>
     </div>
   )
-
   // Get the contact name for display
   const getContactName = () => {
     const personnelId = form.watch('personnel_id')
@@ -235,7 +209,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
     }
     return modalData?.editingData?.contactName || 'Personal'
   }
-
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -245,7 +218,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
             Asistencia para: <span className="font-medium text-foreground">{getContactName()}</span>
           </div>
         )}
-
         {/* Fecha y Asistencia - Inline */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
@@ -283,7 +255,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="attendance_type"
@@ -309,7 +280,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
             )}
           />
         </div>
-
         {/* Descripción */}
         <FormField
           control={form.control}
@@ -331,7 +301,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
       </form>
     </Form>
   )
-
   const headerContent = (
     <FormModalHeader
       title={isCreatingNew ? "Registrar Asistencia" : "Editar Asistencia"}
@@ -339,7 +308,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
       icon={Users}
     />
   )
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -350,7 +318,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
       showLoadingSpinner={isLoading}
     />
   )
-
   return (
     <FormModalLayout
       columns={1}

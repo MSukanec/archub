@@ -5,30 +5,26 @@ import { Calendar, MapPin, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { ClientPortalProject, ClientPortalStats, ClientPortalClient } from '../types';
-
 interface ProjectOverviewCardProps {
   project: ClientPortalProject;
   stats?: ClientPortalStats;
   client?: ClientPortalClient | null;
 }
-
 export function ProjectOverviewCard({ project, stats, client }: ProjectOverviewCardProps) {
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return null;
     try {
-      return format(new Date(dateStr), "d 'de' MMMM, yyyy", { locale: es });
+      return format(new Date(dateStr), "d 'de'MMMM, yyyy", { locale: es });
     } catch {
       return dateStr;
     }
   };
-
   const formatCurrency = (amount: number, symbol: string = '$') => {
     return `${symbol} ${new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount)}`;
   };
-
   const getClientDisplayName = () => {
     if (!client) return null;
     if (client.full_name) return client.full_name;
@@ -37,7 +33,6 @@ export function ProjectOverviewCard({ project, stats, client }: ProjectOverviewC
     }
     return client.email;
   };
-
   return (
     <div className="space-y-6">
       {project.image_url && (
@@ -59,7 +54,6 @@ export function ProjectOverviewCard({ project, stats, client }: ProjectOverviewC
           </div>
         </div>
       )}
-
       {client && (
         <Card data-testid="card-client-info">
           <CardContent className="p-4">
@@ -86,7 +80,6 @@ export function ProjectOverviewCard({ project, stats, client }: ProjectOverviewC
           </CardContent>
         </Card>
       )}
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card data-testid="card-project-info">
           <CardHeader className="pb-3">
@@ -119,7 +112,6 @@ export function ProjectOverviewCard({ project, stats, client }: ProjectOverviewC
             )}
           </CardContent>
         </Card>
-
         {stats && (
           <Card data-testid="card-financial-summary">
             <CardHeader className="pb-3">
@@ -133,7 +125,6 @@ export function ProjectOverviewCard({ project, stats, client }: ProjectOverviewC
                 </div>
                 <Progress value={stats.project_progress} className="h-2" />
               </div>
-
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Total Comprometido</span>
                 <span className="font-semibold" data-testid="text-total-commitment">

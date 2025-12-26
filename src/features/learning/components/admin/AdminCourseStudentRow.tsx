@@ -1,17 +1,15 @@
 import DataRowCard from '@/components/shared/DataRowCard';
 import { GraduationCap } from 'lucide-react';
-
 interface EnrollmentProgress {
   completed_lessons: number;
   total_lessons: number;
   progress_percentage: number;
 }
-
 interface Enrollment {
   id: string;
   user_id: string;
   course_id: string;
-  status: 'active' | 'completed' | 'expired' | 'cancelled';
+  status: 'active'| 'completed'| 'expired'| 'cancelled';
   started_at: string;
   expires_at?: string | null;
   users?: {
@@ -32,19 +30,17 @@ interface Enrollment {
     provider: string;
   };
 }
-
 interface AdminCourseStudentRowProps {
   enrollment: Enrollment;
   onClick?: () => void;
   selected?: boolean;
-  density?: 'compact' | 'normal' | 'comfortable';
+  density?: 'compact'| 'normal'| 'comfortable';
   className?: string;
 }
-
 const getUserInitials = (enrollment: Enrollment): string => {
   const fullName = enrollment.users?.full_name;
   if (fullName) {
-    const names = fullName.trim().split(' ');
+    const names = fullName.trim().split('');
     if (names.length > 1) {
       return names.slice(0, 2).map(n => n[0]?.toUpperCase()).join('');
     }
@@ -52,7 +48,6 @@ const getUserInitials = (enrollment: Enrollment): string => {
   }
   return enrollment.users?.email?.slice(0, 2).toUpperCase() || 'U';
 };
-
 // Componente para mostrar el progreso del estudiante
 const StudentProgress = ({ progress }: { progress?: EnrollmentProgress }) => {
   const percentage = progress?.progress_percentage || 0;
@@ -68,7 +63,6 @@ const StudentProgress = ({ progress }: { progress?: EnrollmentProgress }) => {
     </div>
   );
 };
-
 export default function AdminCourseStudentRow({ 
   enrollment, 
   onClick, 
@@ -85,14 +79,12 @@ export default function AdminCourseStudentRow({
         <div className="font-semibold text-sm truncate">
           {enrollment.users?.full_name || 'Sin nombre'}
         </div>
-
         {/* Segunda fila - Título del curso */}
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground truncate">
           <GraduationCap className="w-3 h-3 flex-shrink-0" />
           <span className="truncate">{enrollment.courses?.title || 'Sin curso'}</span>
         </div>
       </div>
-
       {/* Trailing Section - Progreso */}
       <div className="flex items-center">
         <StudentProgress progress={enrollment.progress} />
@@ -101,7 +93,6 @@ export default function AdminCourseStudentRow({
       </div>
     </>
   );
-
   return (
     <DataRowCard
       avatarUrl={enrollment.users?.avatar_url}
@@ -116,5 +107,4 @@ export default function AdminCourseStudentRow({
     </DataRowCard>
   );
 }
-
 export type { Enrollment, EnrollmentProgress };

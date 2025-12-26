@@ -4,23 +4,18 @@ import { OrganizationProfileView, OrganizationLocationView } from '@/features/or
 import { Building2 } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
-
 export function OrganizationDataPage() {
   const { setSidebarLevel } = useNavigationStore();
   const { data: userData } = useCurrentUser();
   const [activeTab, setActiveTab] = useState('profile');
-
   useEffect(() => {
     setSidebarLevel('organization');
   }, [setSidebarLevel]);
-
   const organizationId = userData?.organization?.id;
-
   const tabs = [
-    { id: 'profile', label: 'Perfil', isActive: activeTab === 'profile' },
-    { id: 'location', label: 'Ubicación', isActive: activeTab === 'location' }
+    { id: 'profile', label: 'Perfil', isActive: activeTab === 'profile'},
+    { id: 'location', label: 'Ubicación', isActive: activeTab === 'location'}
   ];
-
   const renderTabContent = () => {
     switch (activeTab) {
       case 'profile':
@@ -31,7 +26,6 @@ export function OrganizationDataPage() {
         return <OrganizationProfileView />;
     }
   };
-
   const headerProps = {
     icon: Building2,
     title: "Datos de la Organización",
@@ -41,7 +35,6 @@ export function OrganizationDataPage() {
     tabs,
     onTabChange: setActiveTab
   };
-
   return (
     <Layout headerProps={headerProps} wide={false}>
       {renderTabContent()}

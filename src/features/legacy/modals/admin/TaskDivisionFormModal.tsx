@@ -3,26 +3,21 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Package2 } from "lucide-react";
-
 import { FormModalLayout } from "@/components/modal";
 import { FormModalHeader } from "@/components/modal";
 import { FormModalFooter } from "@/components/modal";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
 import { useCreateTaskDivision, useUpdateTaskDivision, TaskDivisionAdmin, useAllTaskDivisions } from "@/hooks/use-task-divisions-admin";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
 const taskDivisionSchema = z.object({
   parent_id: z.string().optional(),
   code: z.string().optional(),
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
 });
-
 type TaskDivisionFormData = z.infer<typeof taskDivisionSchema>;
-
 interface TaskDivisionFormModalProps {
   modalData?: {
     editingDivision?: TaskDivisionAdmin;
@@ -31,7 +26,6 @@ interface TaskDivisionFormModalProps {
   };
   onClose: () => void;
 }
-
 export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormModalProps) {
   const { editingDivision, isEditing = false, divisionId } = modalData || {};
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,7 +35,6 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
   const createMutation = useCreateTaskDivision();
   const updateMutation = useUpdateTaskDivision();
   const { data: allDivisions = [] } = useAllTaskDivisions(); // For parent selection
-
   const form = useForm<TaskDivisionFormData>({
     resolver: zodResolver(taskDivisionSchema),
     defaultValues: {
@@ -51,7 +44,6 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
       description: editingDivision?.description || '',
     },
   });
-
   // Reset form when modal opens/closes or division changes
   useEffect(() => {
     if (editingDivision) {
@@ -70,13 +62,12 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
       });
     }
   }, [editingDivision, form]);
-
   const onSubmit = async (data: TaskDivisionFormData) => {
     setIsSubmitting(true);
     
     try {
       // Handle parent_id properly - convert empty string to null
-      const parentId = data.parent_id && data.parent_id !== '' ? data.parent_id : null;
+      const parentId = data.parent_id && data.parent_id !== ''? data.parent_id : null;
       
       const submitData = {
         parent_id: parentId,
@@ -88,7 +79,6 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
       };
       
       console.log('🔧 Submit data:', { originalData: data, submitData });
-
       if (editingDivision) {
         await updateMutation.mutateAsync({ 
           id: editingDivision.id, 
@@ -105,9 +95,7 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
       setIsSubmitting(false);
     }
   };
-
   const viewPanel = null; // No view mode needed for this modal
-
   const editPanel = (
     <div className="space-y-6">
       <Form {...form}>
@@ -147,7 +135,6 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
               </FormItem>
             )}
           />
-
           {/* Code field */}
           <FormField
             control={form.control}
@@ -165,7 +152,6 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
               </FormItem>
             )}
           />
-
           {/* Name field */}
           <FormField
             control={form.control}
@@ -183,7 +169,6 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
               </FormItem>
             )}
           />
-
           {/* Description field */}
           <FormField
             control={form.control}
@@ -202,13 +187,11 @@ export function TaskDivisionFormModal({ modalData, onClose }: TaskDivisionFormMo
               </FormItem>
             )}
           />
-
           
         </form>
       </Form>
     </div>
   );
-
   return (
     <FormModalLayout
       isEditing={isEditing}

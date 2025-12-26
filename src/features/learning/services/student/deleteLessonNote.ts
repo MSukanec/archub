@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-
 /**
  * Elimina una nota por su ID.
  * 
@@ -14,14 +13,12 @@ export async function deleteLessonNote(noteId: string): Promise<boolean> {
   if (!noteId) {
     throw new Error('Note ID is required');
   }
-
   const { data } = await supabase.auth.getSession();
   const session = data?.session;
   
   if (!session) {
     throw new Error('No active session');
   }
-
   const response = await fetch(`/api/notes/${noteId}`, {
     method: 'DELETE',
     headers: {
@@ -30,11 +27,9 @@ export async function deleteLessonNote(noteId: string): Promise<boolean> {
     },
     credentials: 'include',
   });
-
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Failed to delete note' }));
+    const error = await response.json().catch(() => ({ error: 'Failed to delete note'}));
     throw new Error(error.error || 'Failed to delete note');
   }
-
   return true;
 }

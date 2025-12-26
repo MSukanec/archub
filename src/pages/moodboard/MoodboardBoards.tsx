@@ -5,22 +5,18 @@ import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
 import { useProjectContext } from '@/stores/projectContext';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Button } from '@/components/ui/button';
-
 interface MoodboardBoardsProps {
   onSelectBoard: (boardId: string | null) => void;
 }
-
 export function MoodboardBoards({ onSelectBoard }: MoodboardBoardsProps) {
   const { selectedProjectId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
   const { data: boards = [], isLoading } = useBoards(selectedProjectId);
-
   const handleCreateBoard = useCallback(() => {
     openModal('new-moodboard-item', {
       projectId: selectedProjectId,
     });
   }, [selectedProjectId, openModal]);
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -31,7 +27,6 @@ export function MoodboardBoards({ onSelectBoard }: MoodboardBoardsProps) {
       </div>
     );
   }
-
   if (boards.length === 0) {
     return (
       <EmptyState
@@ -47,7 +42,6 @@ export function MoodboardBoards({ onSelectBoard }: MoodboardBoardsProps) {
       />
     );
   }
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -77,7 +71,6 @@ export function MoodboardBoards({ onSelectBoard }: MoodboardBoardsProps) {
             </div>
           </button>
         ))}
-
         {/* Add Board Card */}
         <button
           onClick={handleCreateBoard}

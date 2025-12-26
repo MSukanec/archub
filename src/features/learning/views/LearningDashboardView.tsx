@@ -2,17 +2,14 @@ import { useEffect } from 'react'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { CoursesCatalogContent } from '@/features/shared-content/courses/CoursesCatalogContent'
 import { HeroSection } from './components/HeroSection'
-
 export function LearningDashboardView() {
   const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore()
-
   useEffect(() => {
     setSidebarContext('learning')
     if (sidebarLevel !== 'general') {
       setSidebarLevel('learning')
     }
   }, [setSidebarContext, setSidebarLevel, sidebarLevel])
-
   return (
     <div className="h-full overflow-auto">
       <HeroSection />

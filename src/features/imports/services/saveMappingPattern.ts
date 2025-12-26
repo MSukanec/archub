@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-
 /**
  * Saves or updates a single mapping pattern in ia_import_mapping_patterns table.
  * Called when user confirms a mapping to build up memory.
@@ -24,10 +23,8 @@ export async function saveMappingPattern(
   if (!supabase || !organizationId || !entity || !sourceHeader || !targetField) {
     return;
   }
-
   try {
     const normalizedHeader = sourceHeader.toLowerCase().trim();
-
     const { data: existing, error: fetchError } = await supabase
       .from('ia_import_mapping_patterns')
       .select('id, usage_count')
@@ -36,11 +33,9 @@ export async function saveMappingPattern(
       .eq('source_header', normalizedHeader)
       .eq('target_field', targetField)
       .maybeSingle();
-
     if (fetchError) {
       throw fetchError;
     }
-
     if (existing) {
       const { error: updateError } = await supabase
         .from('ia_import_mapping_patterns')
@@ -49,7 +44,6 @@ export async function saveMappingPattern(
           last_used_at: new Date().toISOString()
         })
         .eq('id', existing.id);
-
       if (updateError) {
         throw updateError;
       }
@@ -64,7 +58,6 @@ export async function saveMappingPattern(
           usage_count: 1,
           last_used_at: new Date().toISOString()
         });
-
       if (insertError) {
         throw insertError;
       }
@@ -74,7 +67,6 @@ export async function saveMappingPattern(
     throw error;
   }
 }
-
 /**
  * Batch saves multiple mapping patterns at once.
  * More efficient than calling saveMappingPattern multiple times.
@@ -99,7 +91,6 @@ export async function saveMappingPatternsBatch(
   if (!supabase || !organizationId || !entity || !mappings.length) {
     return;
   }
-
   try {
     const normalizedMappings = mappings
       .filter(m => m.sourceHeader && m.targetField)
@@ -107,24 +98,19 @@ export async function saveMappingPatternsBatch(
         sourceHeader: m.sourceHeader.toLowerCase().trim(),
         targetField: m.targetField
       }));
-
     if (normalizedMappings.length === 0) {
       return;
     }
-
     const normalizedHeaders = normalizedMappings.map(m => m.sourceHeader);
-
     const { data: existingPatterns, error: fetchError } = await supabase
       .from('ia_import_mapping_patterns')
       .select('id, source_header, target_field, usage_count')
       .eq('organization_id', organizationId)
       .eq('entity', entity)
       .in('source_header', normalizedHeaders);
-
     if (fetchError) {
       throw fetchError;
     }
-
     const existingMap = new Map<string, { id: string; usageCount: number }>();
     for (const pattern of existingPatterns || []) {
       const key = `${pattern.source_header}::${pattern.target_field}`;
@@ -133,7 +119,6 @@ export async function saveMappingPatternsBatch(
         usageCount: pattern.usage_count
       });
     }
-
     const toInsert: Array<{
       organization_id: string;
       entity: string;
@@ -142,15 +127,11 @@ export async function saveMappingPatternsBatch(
       usage_count: number;
       last_used_at: string;
     }> = [];
-
     const toUpdate: Array<{ id: string; usage_count: number; last_used_at: string }> = [];
-
     const now = new Date().toISOString();
-
     for (const mapping of normalizedMappings) {
       const key = `${mapping.sourceHeader}::${mapping.targetField}`;
       const existing = existingMap.get(key);
-
       if (existing) {
         toUpdate.push({
           id: existing.id,
@@ -168,17 +149,14 @@ export async function saveMappingPatternsBatch(
         });
       }
     }
-
     if (toInsert.length > 0) {
       const { error: insertError } = await supabase
         .from('ia_import_mapping_patterns')
         .insert(toInsert);
-
       if (insertError) {
         console.error('Error inserting mapping patterns:', insertError);
       }
     }
-
     for (const update of toUpdate) {
       const { error: updateError } = await supabase
         .from('ia_import_mapping_patterns')
@@ -187,7 +165,6 @@ export async function saveMappingPatternsBatch(
           last_used_at: update.last_used_at
         })
         .eq('id', update.id);
-
       if (updateError) {
         console.error('Error updating mapping pattern:', updateError);
       }
@@ -197,7 +174,6 @@ export async function saveMappingPatternsBatch(
     throw error;
   }
 }
-
 /**
  * Deletes a specific mapping pattern.
  * Useful for cleaning up incorrect or outdated patterns.
@@ -209,13 +185,11 @@ export async function deleteMappingPattern(patternId: string): Promise<void> {
   if (!supabase || !patternId) {
     return;
   }
-
   try {
     const { error } = await supabase
       .from('ia_import_mapping_patterns')
       .delete()
       .eq('id', patternId);
-
     if (error) {
       throw error;
     }

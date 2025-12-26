@@ -6,33 +6,27 @@ import { useMaterials, Material, useDeleteMaterial, useMaterialCategories } from
 import AdminMaterialRow from '@/features/materials/components/admin/AdminMaterialRow'
 import { useGlobalModalStore } from '@/components/modal'
 import { useCurrentUser } from '@/hooks/use-current-user'
-
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-
 import { Table } from '@/components/shared/trees/Table'
 import { cn } from '@/lib/utils'
-
 import { Plus, Edit, Trash2, Package, Crown, Copy, Wrench } from 'lucide-react'
-
 const AdminCostMaterials = () => {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('name')
   const [categoryFilter, setCategoryFilter] = useState('all')
-  const [groupingType, setGroupingType] = useState<'none' | 'categories'>('categories')
+  const [groupingType, setGroupingType] = useState<'none'| 'categories'>('categories')
   
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
-
   // Fetch materials and categories using the hooks
   const { data: materials = [], isLoading } = useMaterials(organizationId)
   const { data: categories = [] } = useMaterialCategories(organizationId)
   const deleteMaterialMutation = useDeleteMaterial()
-
   // Function to build category hierarchy path
   const buildCategoryPath = (categoryId: string): string => {
     const findCategoryPath = (cats: any[], targetId: string, path: string[] = []): string[] | null => {
@@ -49,9 +43,8 @@ const AdminCostMaterials = () => {
     }
     
     const path = findCategoryPath(categories, categoryId)
-    return path ? path.join(' / ') : 'Sin categoría'
+    return path ? path.join('/ ') : 'Sin categoría'
   }
-
   // Function to find the top-level category (without parent_id) for a given category
   const findTopLevelCategory = (categoryId: string): string => {
     // First, find all categories in a flat list with their hierarchy info
@@ -78,14 +71,12 @@ const AdminCostMaterials = () => {
     const foundCategory = flatCategories.find(cat => cat.id === categoryId)
     return foundCategory?.topLevelName || 'Sin categoría'
   }
-
   // Apply client-side filtering
   const filteredMaterials = materials.filter(material => {
-    const matchesSearch = searchValue === '' || material.name.toLowerCase().includes(searchValue.toLowerCase())
-    const matchesCategory = categoryFilter === 'all' || material.category_name?.toLowerCase() === categoryFilter
+    const matchesSearch = searchValue === ''|| material.name.toLowerCase().includes(searchValue.toLowerCase())
+    const matchesCategory = categoryFilter === 'all'|| material.category_name?.toLowerCase() === categoryFilter
     return matchesSearch && matchesCategory
   })
-
   // Apply client-side sorting
   const sortedMaterials = [...filteredMaterials].sort((a, b) => {
     if (sortBy === 'name') {
@@ -96,7 +87,6 @@ const AdminCostMaterials = () => {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     }
   })
-
   // Process materials for grouping
   const processedMaterials = useMemo(() => {
     if (groupingType === 'none') {
@@ -129,22 +119,18 @@ const AdminCostMaterials = () => {
     
     return sortedMaterials;
   }, [sortedMaterials, groupingType])
-
   const handleEdit = (material: Material) => {
     openModal('material-form', { editingMaterial: material })
   }
-
   const handleCreate = () => {
     openModal('material-form', { editingMaterial: null })
   }
-
   const handleDuplicate = (material: Material) => {
     openModal('material-form', { 
       editingMaterial: material,
       isDuplicating: true 
     })
   }
-
   const handleDelete = (material: Material) => {
     // Crear lista de materiales disponibles para reemplazo (excluyendo el actual)
     const replacementOptions = materials
@@ -153,7 +139,6 @@ const AdminCostMaterials = () => {
         value: m.id,
         label: m.name
       }))
-
     openModal('delete-confirmation', {
       mode: 'replace',
       title: 'Eliminar Material',
@@ -172,21 +157,18 @@ const AdminCostMaterials = () => {
       isLoading: deleteMaterialMutation.isPending
     })
   }
-
   const clearFilters = () => {
     setSearchValue('')
     setSortBy('name')
     setCategoryFilter('all')
     setGroupingType('categories')
   }
-
   // Render grouping popover content
   const renderGroupingContent = () => {
     const groupingOptions = [
-      { value: 'none', label: 'Sin agrupar' },
-      { value: 'categories', label: 'Por categorías' }
+      { value: 'none', label: 'Sin agrupar'},
+      { value: 'categories', label: 'Por categorías'}
     ];
-
     return (
       <>
         <div className="text-xs font-medium mb-2 block">Agrupar por</div>
@@ -196,7 +178,7 @@ const AdminCostMaterials = () => {
               key={option.value}
               variant={groupingType === option.value ? "secondary" : "ghost"}
               size="sm"
-              onClick={() => setGroupingType(option.value as 'none' | 'categories')}
+              onClick={() => setGroupingType(option.value as 'none'| 'categories')}
               className={cn(
                 "w-full justify-start text-xs font-normal h-8",
                 groupingType === option.value ? "button-secondary-pressed hover:bg-secondary" : ""
@@ -209,8 +191,7 @@ const AdminCostMaterials = () => {
       </>
     );
   };
-
-  // Table columns configuration - hide 'Categoría' column when grouped by categories
+  // Table columns configuration - hide 'Categoría'column when grouped by categories
   const baseColumns = [
     {
       key: 'is_completed',
@@ -240,7 +221,7 @@ const AdminCostMaterials = () => {
         </div>
       )
     },
-    ...(groupingType !== 'categories' ? [{
+    ...(groupingType !== 'categories'? [{
       key: 'category_id',
       label: 'Categoría',
       width: '12%',
@@ -286,24 +267,22 @@ const AdminCostMaterials = () => {
           </span>
           {material.provider_product_count && material.provider_product_count > 0 && (
             <span className="text-xs text-muted-foreground">
-              {material.provider_product_count} proveedor{material.provider_product_count > 1 ? 'es' : ''}
+              {material.provider_product_count} proveedor{material.provider_product_count > 1 ? 'es': ''}
             </span>
           )}
         </div>
       )
     }
   ]
-
   // Dynamic columns based on grouping (using baseColumns which already handles the conditional inclusion)
   const columns = baseColumns;
-
   return (
     <div className="space-y-6">
       <Table
         data={processedMaterials}
         columns={columns}
         isLoading={isLoading}
-        groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+        groupBy={groupingType === 'none'? undefined : 'groupKey'}
         rowActions={(material: Material) => [
           {
             icon: Edit,
@@ -319,7 +298,7 @@ const AdminCostMaterials = () => {
             icon: Trash2,
             label: 'Eliminar',
             onClick: () => handleDelete(material),
-            variant: 'destructive' as const
+            variant: 'destructive'as const
           }
         ]}
         renderCard={(material) => (
@@ -359,9 +338,9 @@ const AdminCostMaterials = () => {
           renderGroupingContent: renderGroupingContent,
           isGroupingActive: groupingType !== 'none'
         }}
-            renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
+            renderGroupHeader={groupingType === 'none'? undefined : (groupKey: string, groupRows: any[]) => (
               <div className="col-span-full text-sm font-medium">
-                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Material' : 'Materiales'})
+                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Material': 'Materiales'})
               </div>
             )}
             emptyState={
@@ -375,5 +354,4 @@ const AdminCostMaterials = () => {
     </div>
   )
 }
-
 export default AdminCostMaterials

@@ -7,7 +7,6 @@
  * - Throw on main queries, console.error on secondary
  * - Complete JSDoc documentation
  */
-
 export {
   getProjectClients,
   getProjectClientById,
@@ -15,7 +14,6 @@ export {
   updateProjectClient,
   deleteProjectClient,
 } from './projectClients';
-
 export {
   getClientCommitments,
   getClientCommitmentById,
@@ -23,7 +21,6 @@ export {
   updateClientCommitment,
   deleteClientCommitment,
 } from './clientCommitments';
-
 export {
   getClientPayments,
   getClientPaymentById,
@@ -31,7 +28,6 @@ export {
   updateClientPayment,
   deleteClientPayment,
 } from './clientPayments';
-
 export {
   getClientPaymentSchedule,
   getClientPaymentScheduleById,
@@ -39,7 +35,6 @@ export {
   updateClientPaymentSchedule,
   deleteClientPaymentSchedule,
 } from './clientPaymentSchedule';
-
 export {
   getClientRoles,
   getClientRoleById,
@@ -47,12 +42,10 @@ export {
   updateClientRole,
   deleteClientRole,
 } from './clientRoles';
-
 export {
   getContacts,
   getContactById,
 } from './contacts';
-
 export {
   getClientDashboardData,
 } from './dashboard';

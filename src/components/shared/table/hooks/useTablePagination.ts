@@ -1,12 +1,10 @@
 import { useState, useCallback, useMemo } from "react";
 import { DEFAULT_ITEMS_PER_PAGE } from "../constants";
 import { paginateData } from "../utils";
-
 interface UseTablePaginationOptions {
   itemsPerPage?: number;
   totalItems: number;
 }
-
 interface UseTablePaginationReturn<T> {
   currentPage: number;
   totalPages: number;
@@ -20,39 +18,31 @@ interface UseTablePaginationReturn<T> {
   getPaginatedData: (data: T[]) => T[];
   resetPagination: () => void;
 }
-
 export function useTablePagination<T>({
   itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
   totalItems,
 }: UseTablePaginationOptions): UseTablePaginationReturn<T> {
   const [currentPage, setCurrentPage] = useState(1);
-
   const totalPages = useMemo(
     () => Math.ceil(totalItems / itemsPerPage),
     [totalItems, itemsPerPage]
   );
-
   const showPagination = useMemo(
     () => totalItems > itemsPerPage,
     [totalItems, itemsPerPage]
   );
-
   const goToNextPage = useCallback(() => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   }, [totalPages]);
-
   const goToPreviousPage = useCallback(() => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
   }, []);
-
   const goToFirstPage = useCallback(() => {
     setCurrentPage(1);
   }, []);
-
   const goToLastPage = useCallback(() => {
     setCurrentPage(totalPages);
   }, [totalPages]);
-
   const getPaginatedData = useCallback(
     (data: T[]): T[] => {
       if (!showPagination) return data;
@@ -60,11 +50,9 @@ export function useTablePagination<T>({
     },
     [currentPage, itemsPerPage, showPagination]
   );
-
   const resetPagination = useCallback(() => {
     setCurrentPage(1);
   }, []);
-
   return {
     currentPage,
     totalPages,

@@ -9,7 +9,6 @@ export interface Pin {
   created_at: string;
   signed_url?: string | null;
 }
-
 export interface PinInput {
   title?: string | null;
   source_url?: string | null;
@@ -17,7 +16,6 @@ export interface PinInput {
   organization_id?: string | null;
   project_id?: string | null;
 }
-
 export interface PinBoard {
   id: string;
   organization_id: string;
@@ -31,7 +29,6 @@ export interface PinBoard {
     pins?: number;
   };
 }
-
 export interface PinBoardItem {
   id: string;
   board_id: string;

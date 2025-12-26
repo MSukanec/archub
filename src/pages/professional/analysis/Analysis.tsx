@@ -9,39 +9,31 @@ import { Button } from '@/components/ui/button'
 import TaskList from './TaskList'
 import MaterialList from './material-costs/MaterialList'
 import LaborList from './LaborList'
-
 const ANALYSIS_TABS = [
-  { id: 'tasks', label: 'Tareas' },
-  { id: 'labor', label: 'Mano de Obra' },
-  { id: 'materials', label: 'Materiales' },
+  { id: 'tasks', label: 'Tareas'},
+  { id: 'labor', label: 'Mano de Obra'},
+  { id: 'materials', label: 'Materiales'},
 ]
-
 export default function Analysis() {
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
   const [activeTab, setActiveTab] = useState("tasks")
-
   const layoutPreference = userData?.preferences?.layout || 'experimental'
   const isLabLayout = layoutPreference === 'lab'
-
   useEffect(() => {
     setSidebarContext('organization')
   }, [setSidebarContext])
-
   const handleNewTask = () => {
     openModal('analysis-task', {})
   }
-
   const handleNewMaterial = () => {
     openModal('material-form', {})
   }
-
   const handleNewLabor = () => {
     console.log('Crear nuevo análisis de mano de obra')
   }
-
   const renderView = () => {
     switch (activeTab) {
       case 'tasks':
@@ -54,10 +46,9 @@ export default function Analysis() {
         return <TaskList />
     }
   }
-
   const secondaryRightContent = (
     <div className="flex items-center gap-3">
-      {activeTab === 'tasks' && (
+      {activeTab === 'tasks'&& (
         <Button
           size="sm"
           onClick={handleNewTask}
@@ -67,7 +58,7 @@ export default function Analysis() {
           Crear Tarea Personalizada
         </Button>
       )}
-      {activeTab === 'materials' && (
+      {activeTab === 'materials'&& (
         <Button
           size="sm"
           onClick={handleNewMaterial}
@@ -77,7 +68,7 @@ export default function Analysis() {
           Nuevo Material
         </Button>
       )}
-      {activeTab === 'labor' && (
+      {activeTab === 'labor'&& (
         <Button
           size="sm"
           onClick={handleNewLabor}
@@ -89,7 +80,6 @@ export default function Analysis() {
       )}
     </div>
   )
-
   if (isLabLayout) {
     return (
       <LabLayout 
@@ -109,7 +99,6 @@ export default function Analysis() {
       </LabLayout>
     )
   }
-
   const getActionButton = () => {
     switch (activeTab) {
       case 'tasks':
@@ -137,7 +126,6 @@ export default function Analysis() {
         return undefined
     }
   }
-
   const headerProps = {
     title: "Análisis de Costos",
     description: "Crea y gestiona análisis de costos para tareas, materiales y mano de obra.",
@@ -151,7 +139,6 @@ export default function Analysis() {
     })),
     onTabChange: setActiveTab
   }
-
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">

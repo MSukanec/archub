@@ -17,10 +17,8 @@ import {
 import { storageHelpers } from '@/lib/supabase/storage';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-
 // Configure PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-
 type PdfViewerProps = {
   bucket: string;
   path: string;
@@ -30,7 +28,6 @@ type PdfViewerProps = {
   onExpand?: () => void;
   height?: number;
 };
-
 type PdfState = {
   loading: boolean;
   error: string | null;
@@ -40,7 +37,6 @@ type PdfState = {
   blob: Blob | null;
   pdfDoc: pdfjsLib.PDFDocumentProxy | null;
 };
-
 export function PdfViewer({ 
   bucket, 
   path, 
@@ -60,19 +56,16 @@ export function PdfViewer({
     blob: null,
     pdfDoc: null
   });
-
   // Container dimensions for fit calculations
   const CONTAINER_WIDTH = 800; // Available width for PDF content
   const CONTAINER_HEIGHT = 450; // Available height for PDF content
   
   // Base scale for fit-to-width calculation (this is the reference scale)
   const [baseScale, setBaseScale] = useState(1.0);
-
   // Load PDF document
   const loadPdf = useCallback(async () => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
-
       let blob: Blob;
       
       if (useSignedUrl) {
@@ -83,17 +76,14 @@ export function PdfViewer({
         const publicUrl = storageHelpers.getPublicUrl(bucket, path);
         blob = await storageHelpers.fetchAsBlob(publicUrl);
       }
-
       const arrayBuffer = await blob.arrayBuffer();
       const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-
       // Calculate base scale to fit width (this will be the rendering scale)
       const firstPage = await pdfDoc.getPage(1);
       const viewport = firstPage.getViewport({ scale: 1.0 });
       const fitToWidthScale = Math.min(1.0, CONTAINER_WIDTH / viewport.width);
       
       setBaseScale(fitToWidthScale);
-
       setState(prev => ({
         ...prev,
         loading: false,
@@ -103,7 +93,6 @@ export function PdfViewer({
         page: Math.min(prev.page, pdfDoc.numPages),
         scale: 1.0 // Start with 100% zoom for display
       }));
-
     } catch (error) {
       console.error('Error loading PDF:', error);
       setState(prev => ({
@@ -113,11 +102,9 @@ export function PdfViewer({
       }));
     }
   }, [bucket, path, useSignedUrl]);
-
   // Render current page
   const renderPage = useCallback(async () => {
     if (!state.pdfDoc || !canvasRef.current) return;
-
     try {
       const page = await state.pdfDoc.getPage(state.page);
       // Render at the actual zoom scale for crisp quality
@@ -127,14 +114,12 @@ export function PdfViewer({
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
       if (!context) return;
-
       // Set canvas size to match viewport exactly
       canvas.width = viewport.width;
       canvas.height = viewport.height;
       
       // Clear canvas
       context.clearRect(0, 0, canvas.width, canvas.height);
-
       // Render page
       const renderContext = {
         canvasContext: context,
@@ -142,22 +127,18 @@ export function PdfViewer({
         canvas: canvas
       };
       await page.render(renderContext).promise;
-
     } catch (error) {
       console.error('Error rendering page:', error);
     }
   }, [state.pdfDoc, state.page, baseScale, state.scale]);
-
   // Navigation functions
   const goToPage = (pageNum: number) => {
     if (pageNum >= 1 && pageNum <= state.numPages) {
       setState(prev => ({ ...prev, page: pageNum }));
     }
   };
-
   const nextPage = () => goToPage(state.page + 1);
   const prevPage = () => goToPage(state.page - 1);
-
   // Zoom functions - 10% increments
   const zoomIn = () => {
     setState(prev => ({ 
@@ -165,23 +146,19 @@ export function PdfViewer({
       scale: Math.min(prev.scale + 0.1, 3.0) 
     }));
   };
-
   const zoomOut = () => {
     setState(prev => ({ 
       ...prev, 
       scale: Math.max(prev.scale - 0.1, 0.1) 
     }));
   };
-
   const zoom100 = () => {
     setState(prev => ({ ...prev, scale: 1.0 }));
   };
-
   const fitToWidth = () => {
     // Reset to 100% zoom (fit to width is already handled by baseScale)
     setState(prev => ({ ...prev, scale: 1.0 }));
   };
-
   // Download function
   const downloadPdf = () => {
     if (!state.blob) return;
@@ -193,7 +170,6 @@ export function PdfViewer({
     link.click();
     URL.revokeObjectURL(url);
   };
-
   // Open in new tab
   const openInNewTab = () => {
     if (!state.blob) return;
@@ -202,7 +178,6 @@ export function PdfViewer({
     window.open(url, '_blank');
     // Note: URL will be revoked when user closes tab
   };
-
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -238,23 +213,19 @@ export function PdfViewer({
           break;
       }
     };
-
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [state.page, state.numPages]);
-
   // Load PDF on mount or when props change
   useEffect(() => {
     loadPdf();
   }, [loadPdf]);
-
   // Render page when page or scale changes
   useEffect(() => {
     if (state.pdfDoc && !state.loading && baseScale > 0) {
       renderPage();
     }
   }, [renderPage, state.pdfDoc, state.loading, baseScale]);
-
   if (state.loading) {
     return (
       <div className={`flex flex-col h-full ${className}`}>
@@ -283,7 +254,6 @@ export function PdfViewer({
       </div>
     );
   }
-
   if (state.error) {
     return (
       <div className={`flex flex-col h-full ${className}`}>
@@ -306,7 +276,6 @@ export function PdfViewer({
       </div>
     );
   }
-
   return (
     <div 
       className={`relative group overflow-auto ${className}`}
@@ -341,9 +310,7 @@ export function PdfViewer({
           >
             <ChevronRight className="w-4 h-4" />
           </Button>
-
           <div className="w-px h-4 bg-border mx-1" />
-
           {/* Zoom */}
           <Button
             variant="ghost"
@@ -373,7 +340,6 @@ export function PdfViewer({
           >
             <ZoomIn className="w-4 h-4" />
           </Button>
-
           <div className="w-px h-4 bg-border mx-1" />
           
           {/* Actions */}
@@ -386,7 +352,6 @@ export function PdfViewer({
           >
             <Maximize className="w-4 h-4" />
           </Button>
-
           <Button 
             variant="ghost" 
             size="sm" 
@@ -406,7 +371,6 @@ export function PdfViewer({
           >
             <ExternalLink className="w-4 h-4" />
           </Button>
-
           {/* Expand Button - Inside action bar */}
           {onExpand && (
             <Button
@@ -421,7 +385,6 @@ export function PdfViewer({
           )}
         </div>
       </div>
-
       {/* PDF Canvas Container - Fixed size with scroll */}
       <div 
         className="flex-1 overflow-auto bg-gray-100 dark:bg-gray-900"

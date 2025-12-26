@@ -10,20 +10,17 @@ import { useUnifiedMovements } from "@/features/finances/hooks/use-unified-movem
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ProjectFinancesView } from "@/features/finances/views/ProjectFinancesView";
 import { calculateAvailablePeriods, type PeriodFilter } from "@/features/finances";
-
 const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
-  { value: '30d', label: 'Últimos 30 días' },
-  { value: '3m', label: 'Últimos 3 meses' },
-  { value: '6m', label: 'Últimos 6 meses' },
-  { value: '1y', label: 'Último año' },
-  { value: 'all', label: 'Histórico' },
+  { value: '30d', label: 'Últimos 30 días'},
+  { value: '3m', label: 'Últimos 3 meses'},
+  { value: '6m', label: 'Últimos 6 meses'},
+  { value: '1y', label: 'Último año'},
+  { value: 'all', label: 'Histórico'},
 ];
-
 const FINANCES_TABS = [
   { id: "dashboard", label: "Visión General" },
   { id: "movements", label: "Movimientos" },
 ];
-
 export function ProjectFinancesPage() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all');
@@ -32,10 +29,8 @@ export function ProjectFinancesPage() {
   const { currentOrganizationId, selectedProjectId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
   const organizationId = currentOrganizationId || userData?.organization?.id;
-
   const layoutPreference = userData?.preferences?.layout || 'experimental';
   const isLabLayout = layoutPreference === 'lab';
-
   const { data: allMovements = [] } = useUnifiedMovements(organizationId, selectedProjectId || undefined);
   const availablePeriods = useMemo(() => calculateAvailablePeriods(allMovements), [allMovements]);
   
@@ -43,7 +38,6 @@ export function ProjectFinancesPage() {
     if (availablePeriods[selectedPeriod]) return selectedPeriod;
     return 'all';
   }, [selectedPeriod, availablePeriods]);
-
   const periodContent = (
     <Popover open={periodPopoverOpen} onOpenChange={setPeriodPopoverOpen}>
       <PopoverTrigger asChild>
@@ -80,7 +74,7 @@ export function ProjectFinancesPage() {
                 data-testid={`option-period-${option.value}`}
               >
                 <span>{option.label}</span>
-                {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
+                {!isAvailable && option.value !== 'all'&& <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
               </button>
             );
           })}
@@ -88,7 +82,6 @@ export function ProjectFinancesPage() {
       </PopoverContent>
     </Popover>
   );
-
   const headerProps = {
     icon: DollarSign,
     title: "Finanzas del Proyecto",
@@ -109,7 +102,6 @@ export function ProjectFinancesPage() {
       }),
     } : undefined,
   };
-
   if (isLabLayout) {
     return (
       <LabLayout 
@@ -127,7 +119,6 @@ export function ProjectFinancesPage() {
       </LabLayout>
     );
   }
-
   return (
     <Layout wide={false} headerProps={headerProps}>
       <ProjectFinancesView activeTab={activeTab} onTabChange={setActiveTab} />

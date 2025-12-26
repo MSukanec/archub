@@ -1,5 +1,4 @@
 import type { ContactWithRelations, ContactType, ContactAttachment, LinkedUser } from '../types';
-
 /**
  * Transforma los datos de contacts_with_relations_view al formato del frontend.
  * Construye el objeto `linked_user` a partir de los campos planos de la vista.
@@ -16,13 +15,11 @@ export function mapViewToContact(viewData: ContactWithRelations): ContactWithRel
         avatar_url: viewData.linked_user_avatar_url,
       }
     : null;
-
   return {
     ...viewData,
     linked_user: linkedUser,
   };
 }
-
 /**
  * Transforma un array de datos de la vista al formato del frontend.
  * 
@@ -32,7 +29,6 @@ export function mapViewToContact(viewData: ContactWithRelations): ContactWithRel
 export function mapViewToContacts(viewDataArray: ContactWithRelations[]): ContactWithRelations[] {
   return viewDataArray.map(mapViewToContact);
 }
-
 /**
  * Filtra contactos no eliminados (soft delete).
  * 
@@ -42,7 +38,6 @@ export function mapViewToContacts(viewDataArray: ContactWithRelations[]): Contac
 export function filterActiveContacts<T extends { is_deleted: boolean }>(contacts: T[]): T[] {
   return contacts.filter(contact => !contact.is_deleted);
 }
-
 /**
  * Filtra tipos de contacto no eliminados (soft delete).
  * 

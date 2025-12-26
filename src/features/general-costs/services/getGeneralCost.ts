@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { GeneralCost } from '../types';
-
 /**
  * Fetches a single general cost by ID.
  * 
@@ -15,11 +14,9 @@ export async function getGeneralCost(generalCostId: string): Promise<GeneralCost
   if (!generalCostId) {
     return null;
   }
-
   if (!supabase) {
     throw new Error('Supabase client not initialized');
   }
-
   const { data, error } = await supabase
     .from('general_costs')
     .select(`
@@ -39,15 +36,12 @@ export async function getGeneralCost(generalCostId: string): Promise<GeneralCost
     `)
     .eq('id', generalCostId)
     .single();
-
   if (error) {
     throw error;
   }
-
   if (!data) {
     return null;
   }
-
   return {
     ...data,
     category: Array.isArray(data.category) ? data.category[0] : data.category

@@ -7,9 +7,7 @@ import { cn } from '@/lib/utils'
 import { PartnerContributionForm } from '../forms/PartnerContributionForm'
 import { PartnerWithdrawalForm } from '../forms/PartnerWithdrawalForm'
 import { CapitalAdjustmentForm } from '../forms/CapitalAdjustmentForm'
-
-type TransactionType = 'contribution' | 'withdrawal' | 'adjustment'
-
+type TransactionType = 'contribution'| 'withdrawal'| 'adjustment'
 interface TransactionTypeConfig {
   id: TransactionType
   label: string
@@ -18,7 +16,6 @@ interface TransactionTypeConfig {
   color: string
   submitLabel: string
 }
-
 const TRANSACTION_TYPES: TransactionTypeConfig[] = [
   {
     id: 'contribution',
@@ -45,7 +42,6 @@ const TRANSACTION_TYPES: TransactionTypeConfig[] = [
     submitLabel: 'Registrar Ajuste',
   },
 ]
-
 interface CapitalTransactionModalProps {
   modalData?: {
     projectId?: string;
@@ -53,34 +49,28 @@ interface CapitalTransactionModalProps {
   };
   onClose: () => void;
 }
-
 export function CapitalTransactionModal({ modalData, onClose }: CapitalTransactionModalProps) {
   const formRef = useRef<HTMLFormElement>(null)
   const [selectedType, setSelectedType] = useState<TransactionType | null>(null)
-
   const selectedConfig = selectedType 
     ? TRANSACTION_TYPES.find(t => t.id === selectedType) 
     : null
-
   const handleSubmit = () => {
     if (formRef.current) {
       formRef.current.requestSubmit()
     }
   }
-
   const renderFormFields = () => {
     if (!selectedType) return null
-
     const commonProps = {
       projectId: modalData?.projectId,
       organizationId: modalData?.organizationId,
-      mode: 'create' as const,
+      mode: 'create'as const,
       onSuccess: onClose,
       onCancel: onClose,
       hideActions: true,
       formRef,
     }
-
     switch (selectedType) {
       case 'contribution':
         return <PartnerContributionForm {...commonProps} />
@@ -92,7 +82,6 @@ export function CapitalTransactionModal({ modalData, onClose }: CapitalTransacti
         return null
     }
   }
-
   return (
     <ModalLayout 
       onClose={onClose} 
@@ -140,7 +129,6 @@ export function CapitalTransactionModal({ modalData, onClose }: CapitalTransacti
             </SelectContent>
           </Select>
         </div>
-
         {selectedType && (
           <div className="pt-4 border-t">
             {renderFormFields()}
@@ -150,5 +138,4 @@ export function CapitalTransactionModal({ modalData, onClose }: CapitalTransacti
     </ModalLayout>
   )
 }
-
 export default CapitalTransactionModal

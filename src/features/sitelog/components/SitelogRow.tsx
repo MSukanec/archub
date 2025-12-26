@@ -4,7 +4,6 @@ import { SwipeableCard } from '@/layouts';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { parseLocalDate } from '@/lib/date-utils';
-import { 
   Star, 
   Edit, 
   Trash2,
@@ -27,7 +26,6 @@ import {
   Thermometer
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-
 // Interfaces
 interface SiteLog {
   id: string;
@@ -44,7 +42,6 @@ interface SiteLog {
   files?: any[];
   attendees?: any[];
 }
-
 interface SitelogRowProps {
   siteLog: SiteLog;
   onClick?: (siteLog: SiteLog) => void;
@@ -52,24 +49,22 @@ interface SitelogRowProps {
   onDelete?: (siteLog: SiteLog) => void;
   onToggleFavorite?: (siteLogId: string) => void;
   selected?: boolean;
-  density?: 'compact' | 'normal' | 'comfortable';
+  density?: 'compact'| 'normal'| 'comfortable';
   enableSwipe?: boolean;
   className?: string;
 }
-
 // Entry type configurations
 const entryTypes = {
-  avance_de_obra: { label: 'Avance de Obra', icon: TrendingUp, color: 'bg-green-100 text-green-800' },
-  visita_tecnica: { label: 'Visita Técnica', icon: Eye, color: 'bg-blue-100 text-blue-800' },
-  problema_detectado: { label: 'Problema', icon: AlertTriangle, color: 'bg-red-100 text-red-800' },
-  pedido_material: { label: 'Pedido Material', icon: Package, color: 'bg-orange-100 text-orange-800' },
-  nota_climatica: { label: 'Nota Climática', icon: StickyNote, color: 'bg-yellow-100 text-yellow-800' },
-  decision: { label: 'Decisión', icon: CheckCircle, color: 'bg-purple-100 text-purple-800' },
-  inspeccion: { label: 'Inspección', icon: Eye, color: 'bg-indigo-100 text-indigo-800' },
-  foto_diaria: { label: 'Foto Diaria', icon: Camera, color: 'bg-gray-100 text-gray-800' },
-  registro_general: { label: 'Registro General', icon: FileText, color: 'bg-teal-100 text-teal-800' }
+  avance_de_obra: { label: 'Avance de Obra', icon: TrendingUp, color: 'bg-green-100 text-green-800'},
+  visita_tecnica: { label: 'Visita Técnica', icon: Eye, color: 'bg-blue-100 text-blue-800'},
+  problema_detectado: { label: 'Problema', icon: AlertTriangle, color: 'bg-red-100 text-red-800'},
+  pedido_material: { label: 'Pedido Material', icon: Package, color: 'bg-orange-100 text-orange-800'},
+  nota_climatica: { label: 'Nota Climática', icon: StickyNote, color: 'bg-yellow-100 text-yellow-800'},
+  decision: { label: 'Decisión', icon: CheckCircle, color: 'bg-purple-100 text-purple-800'},
+  inspeccion: { label: 'Inspección', icon: Eye, color: 'bg-indigo-100 text-indigo-800'},
+  foto_diaria: { label: 'Foto Diaria', icon: Camera, color: 'bg-gray-100 text-gray-800'},
+  registro_general: { label: 'Registro General', icon: FileText, color: 'bg-teal-100 text-teal-800'}
 };
-
 const weatherTypes = {
   sunny: { icon: Sun, label: "Soleado" },
   partly_cloudy: { icon: CloudSun, label: "Parcialmente nublado" },
@@ -81,18 +76,16 @@ const weatherTypes = {
   wind: { icon: Wind, label: "Viento" },
   hot: { icon: Thermometer, label: "Caluroso" }
 };
-
 // Helper para obtener iniciales
 const getInitials = (name: string): string => {
   if (!name) return "U";
   return name
-    .split(' ')
+    .split('')
     .map(n => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
 };
-
 export default function SitelogRow({
   siteLog,
   onClick,
@@ -107,26 +100,22 @@ export default function SitelogRow({
   // Obtener el nombre del tipo desde la relación site_log_type
   const entryTypeName = (siteLog as any).site_log_type?.name || 'Registro General';
   // Ya no usamos un mapeo hardcodeado porque los tipos son configurables
-  const entryTypeConfig = { label: entryTypeName, icon: FileText, color: 'bg-teal-100 text-teal-800' };
+  const entryTypeConfig = { label: entryTypeName, icon: FileText, color: 'bg-teal-100 text-teal-800'};
   const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
-
   // Obtener avatar y nombre del creador
   const creatorName = siteLog.creator?.full_name || 'Usuario';
   const avatarUrl = siteLog.creator?.avatar_url;
   const avatarFallback = getInitials(creatorName);
-
   // Contar elementos adjuntos
   const totalFiles = siteLog.files?.length || 0;
   const totalAttendees = siteLog.attendees?.length || 0;
   
   const hasAttachments = totalFiles > 0 || totalAttendees > 0;
-
   // Filtrar imágenes y videos de los archivos
   const mediaFiles = siteLog.files?.filter(file => 
-    (file.file_type === 'image' || file.file_type === 'video') || 
+    (file.file_type === 'image'|| file.file_type === 'video') || 
     (file.mime_type?.startsWith('image/') || file.mime_type?.startsWith('video/'))
   ) || [];
-
   // Contenido del card usando el nuevo sistema
   const cardContent = (
     <>
@@ -138,7 +127,6 @@ export default function SitelogRow({
             {entryTypeConfig.label}
           </span>
         </div>
-
         {/* Fecha y clima */}
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
           <span>
@@ -154,19 +142,18 @@ export default function SitelogRow({
             </>
           )}
         </div>
-
         {/* Mini-galería de thumbnails (hasta 8 media) */}
         {mediaFiles.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-2">
             {mediaFiles.slice(0, 8).map((file: any, index: number) => (
               <div key={file.id || index} className="relative w-12 h-12 md:w-6 md:h-6 rounded-sm overflow-hidden flex-shrink-0 bg-muted">
-                {file.file_type === 'image' || file.mime_type?.startsWith('image/') ? (
+                {file.file_type === 'image'|| file.mime_type?.startsWith('image/') ? (
                   <img
                     src={file.file_url}
                     alt=""
                     className="w-full h-full object-cover"
                   />
-                ) : file.file_type === 'video' || file.mime_type?.startsWith('video/') ? (
+                ) : file.file_type === 'video'|| file.mime_type?.startsWith('video/') ? (
                   <>
                     <video
                       src={file.file_url}
@@ -189,7 +176,6 @@ export default function SitelogRow({
           </div>
         )}
       </div>
-
       {/* Columna trailing - Estado de favorito */}
       <div className="flex items-center">
         {siteLog.is_favorite && (
@@ -198,29 +184,27 @@ export default function SitelogRow({
       </div>
     </>
   );
-
   // Acciones de swipe para móvil
   const swipeActions = enableSwipe ? [
     ...(onToggleFavorite ? [{
-      label: siteLog.is_favorite ? 'Quitar favorito' : 'Marcar favorito',
+      label: siteLog.is_favorite ? 'Quitar favorito': 'Marcar favorito',
       icon: <Star className="h-4 w-4" />,
-      variant: 'default' as const,
+      variant: 'default'as const,
       onClick: () => onToggleFavorite(siteLog.id)
     }] : []),
     ...(onEdit ? [{
       label: 'Editar',
       icon: <Edit className="h-4 w-4" />,
-      variant: 'default' as const,
+      variant: 'default'as const,
       onClick: () => onEdit(siteLog)
     }] : []),
     ...(onDelete ? [{
       label: 'Eliminar',
       icon: <Trash2 className="h-4 w-4" />,
-      variant: 'destructive' as const,
+      variant: 'destructive'as const,
       onClick: () => onDelete(siteLog)
     }] : [])
   ] : undefined;
-
   if (enableSwipe && swipeActions && swipeActions.length > 0) {
     return (
       <SwipeableCard
@@ -240,7 +224,6 @@ export default function SitelogRow({
       </SwipeableCard>
     );
   }
-
   // Desktop: solo DataRowCard
   return (
     <DataRowCard
@@ -256,6 +239,5 @@ export default function SitelogRow({
     </DataRowCard>
   );
 }
-
 // Export del tipo para uso externo
 export type { SiteLog };

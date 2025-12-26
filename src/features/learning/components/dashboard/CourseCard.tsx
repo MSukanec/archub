@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { PayButton } from '@/features/learning';
-
 type CourseCardProps = {
   course: {
     id: string;
@@ -23,7 +22,6 @@ type CourseCardProps = {
   } | null;
   onViewDetail: (slug: string) => void;
 };
-
 const CourseCard: React.FC<CourseCardProps> = ({ 
   course, 
   progress, 
@@ -32,7 +30,6 @@ const CourseCard: React.FC<CourseCardProps> = ({
 }) => {
   const hasProgress = progress && progress.total > 0;
   const isEnrolled = !!enrollment;
-
   return (
     <div className="bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] rounded-lg shadow-sm border border-[var(--card-border)] p-4 mb-3 transition-colors">
       {/* Header */}
@@ -49,15 +46,14 @@ const CourseCard: React.FC<CourseCardProps> = ({
         </div>
         <Badge 
           style={{ 
-            backgroundColor: course.is_active ? 'var(--accent)' : '#6b7280', 
-            color: 'white' 
+            backgroundColor: course.is_active ? 'var(--accent)': '#6b7280', 
+            color: 'white'
           }}
           className="text-xs shrink-0"
         >
-          {course.is_active ? 'Activo' : 'Inactivo'}
+          {course.is_active ? 'Activo': 'Inactivo'}
         </Badge>
       </div>
-
       {/* Progress Section */}
       {isEnrolled && hasProgress && (
         <div className="mb-3">
@@ -77,14 +73,12 @@ const CourseCard: React.FC<CourseCardProps> = ({
           </div>
         </div>
       )}
-
       {/* Enrollment Info */}
       {isEnrolled && !hasProgress && (
         <div className="mb-3 text-xs text-[var(--muted-fg)]">
           Inscrito
         </div>
       )}
-
       {/* Action Button */}
       <div className="w-full">
         {isEnrolled ? (
@@ -110,5 +104,4 @@ const CourseCard: React.FC<CourseCardProps> = ({
     </div>
   );
 };
-
 export default CourseCard;

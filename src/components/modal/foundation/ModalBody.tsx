@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-
 interface ModalBodyProps {
   children: ReactNode;
   columns?: number;
@@ -8,7 +7,6 @@ interface ModalBodyProps {
   paddingX?: string;
   paddingY?: string;
 }
-
 export default function ModalBody({ 
   children, 
   columns = 1, 
@@ -31,5 +29,4 @@ export default function ModalBody({
     </div>
   );
 }
-
 export { ModalBody as FormModalBody };

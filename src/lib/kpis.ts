@@ -13,10 +13,8 @@
  * - KPIs no-monetarias evitan lógica monetaria
  * - Soporta contexto de moneda (proyecto u organización)
  */
-
 import { convertToBaseCurrency, formatKPI, formatSubValue } from '@/lib/money';
 import type { MoneyItem } from '@/lib/money';
-
 /**
  * Resultado estándar de cualquier KPI
  */
@@ -37,7 +35,6 @@ export interface KPIResult {
     total: number;
   }>;
 }
-
 /**
  * Configuración para KPIs monetarias
  */
@@ -48,7 +45,6 @@ export interface MonetaryKPIConfig {
   locale?: string;
   quoteCurrency?: string;
 }
-
 /**
  * Configuración para KPIs de conteo
  */
@@ -57,7 +53,6 @@ export interface CountKPIConfig {
   label?: string;
   locale?: string;
 }
-
 /**
  * Configuración para KPIs de porcentaje
  */
@@ -67,7 +62,6 @@ export interface PercentageKPIConfig {
   decimals?: number;
   locale?: string;
 }
-
 /**
  * Configuración para KPIs de texto
  */
@@ -75,7 +69,6 @@ export interface TextKPIConfig {
   text: string;
   icon?: string;
 }
-
 /**
  * ============================================================================
  * KPI MONETARIA - El tipo más importante
@@ -173,7 +166,6 @@ export function calculateMonetaryKPI(config: MonetaryKPIConfig): KPIResult {
     breakdown
   };
 }
-
 /**
  * ============================================================================
  * KPI DE CONTEO - Para cantidades simples
@@ -193,7 +185,7 @@ export function calculateMonetaryKPI(config: MonetaryKPIConfig): KPIResult {
  * </div>
  */
 export function calculateCountKPI(config: CountKPIConfig): KPIResult {
-  const { count, label = 'Total', locale = 'es-AR' } = config;
+  const { count, label = 'Total', locale = 'es-AR'} = config;
   
   return {
     value: count,
@@ -203,7 +195,6 @@ export function calculateCountKPI(config: CountKPIConfig): KPIResult {
     }
   };
 }
-
 /**
  * ============================================================================
  * KPI DE PORCENTAJE - Para ratios y variaciones
@@ -227,14 +218,14 @@ export function calculateCountKPI(config: CountKPIConfig): KPIResult {
  * </div>
  */
 export function calculatePercentageKPI(config: PercentageKPIConfig): KPIResult {
-  const { numerator, denominator, decimals = 2, locale = 'es-AR' } = config;
+  const { numerator, denominator, decimals = 2, locale = 'es-AR'} = config;
   
   // Evitar división por cero
   if (denominator === 0) {
     return {
       value: 0,
       formatted: '0%',
-      meta: { unit: '%' }
+      meta: { unit: '%'}
     };
   }
   
@@ -247,10 +238,9 @@ export function calculatePercentageKPI(config: PercentageKPIConfig): KPIResult {
   return {
     value: percentage,
     formatted: `${formattedValue}%`,
-    meta: { unit: '%' }
+    meta: { unit: '%'}
   };
 }
-
 /**
  * ============================================================================
  * KPI DE TEXTO - Para valores no-numéricos
@@ -260,7 +250,7 @@ export function calculatePercentageKPI(config: PercentageKPIConfig): KPIResult {
  * {
  *   value: 0, // No aplica
  *   formatted: "En progreso",
- *   meta: { icon: 'clock' }
+ *   meta: { icon: 'clock'}
  * }
  * 
  * USO EN COMPONENTES:
@@ -281,7 +271,6 @@ export function calculateTextKPI(config: TextKPIConfig): KPIResult {
     meta: { icon }
   };
 }
-
 /**
  * ============================================================================
  * KPI AGREGADA - Sumatoria de múltiples KPIs monetarias
@@ -305,7 +294,7 @@ export function calculateAggregateMonetaryKPI(config: {
   kpis: KPIResult[];
   locale?: string;
 }): KPIResult {
-  const { kpis = [], locale = 'es-AR' } = config;
+  const { kpis = [], locale = 'es-AR'} = config;
   
   // Sumar todos los values
   const totalValue = kpis.reduce((sum, kpi) => sum + kpi.value, 0);
@@ -344,13 +333,11 @@ export function calculateAggregateMonetaryKPI(config: {
     breakdown: breakdown.length > 0 ? breakdown : undefined
   };
 }
-
 /**
  * ============================================================================
  * HELPERS - Funciones auxiliares
  * ============================================================================
  */
-
 /**
  * Obtiene el breakdown formateado como string
  * Útil para mostrar directamente: "USD 100 + ARS 50.000"
@@ -368,14 +355,12 @@ export function formatBreakdown(kpi: KPIResult, locale: string = 'es-AR'): strin
     { locale }
   );
 }
-
 /**
  * Verifica si un KPI tiene multiple monedas
  */
 export function hasMultipleCurrencies(kpi: KPIResult): boolean {
   return (kpi.breakdown?.length || 0) > 1;
 }
-
 /**
  * Obtiene el currency code dominante (el con mayor valor)
  */
@@ -383,7 +368,6 @@ export function getDominantCurrency(kpi: KPIResult): string | null {
   if (!kpi.breakdown || kpi.breakdown.length === 0) return null;
   return kpi.breakdown[0]?.currencyCode || null;
 }
-
 /**
  * ============================================================================
  * PATRÓN DE USO COMPLETO

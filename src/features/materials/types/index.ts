@@ -3,9 +3,7 @@
  * 
  * Interfaces y tipos para la gestión de materiales.
  */
-
 // ============ MATERIAL TYPES ============
-
 export interface Material {
   id: string;
   name: string;
@@ -41,7 +39,6 @@ export interface Material {
     };
   }>;
 }
-
 export interface NewMaterialData {
   name: string;
   material_type?: string;
@@ -51,11 +48,8 @@ export interface NewMaterialData {
   organization_id?: string;
   is_system?: boolean;
 }
-
 export interface UpdateMaterialData extends Partial<NewMaterialData> {}
-
 // ============ CONSTRUCTION MATERIAL TYPES ============
-
 export interface ConstructionMaterial {
   id: string;
   name: string;
@@ -70,21 +64,17 @@ export interface ConstructionMaterial {
   commercial_equivalence?: number;
   commercial_quantity?: number;
 }
-
 export interface ConstructionMaterialsResult {
   materials: ConstructionMaterial[];
   phases: string[];
 }
-
 export interface ConstructionMaterialsParams {
   projectId: string;
   organizationId: string;
   selectedPhase?: string;
   filterTaskIds?: string[];
 }
-
 // ============ MATERIAL CATEGORY TYPES ============
-
 export interface MaterialCategory {
   id: string;
   name: string;
@@ -92,17 +82,13 @@ export interface MaterialCategory {
   created_at: string;
   children?: MaterialCategory[];
 }
-
 export interface NewMaterialCategoryData {
   name: string;
   parent_id?: string | null;
   organization_id?: string;
 }
-
 export interface UpdateMaterialCategoryData extends Partial<NewMaterialCategoryData> {}
-
 // ============ MATERIAL PAYMENT TYPES ============
-
 export interface MaterialPayment {
   id: string;
   project_id: string;
@@ -115,12 +101,11 @@ export interface MaterialPayment {
   notes: string | null;
   reference: string | null;
   wallet_id: string | null;
-  status: 'confirmed' | 'pending' | 'rejected' | 'void';
+  status: 'confirmed'| 'pending'| 'rejected'| 'void';
   created_by: string | null;
   created_at: string;
   updated_at: string;
 }
-
 export interface MaterialPaymentWithRelations extends MaterialPayment {
   currency: {
     id: string;

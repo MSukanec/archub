@@ -1,6 +1,5 @@
 import { apiRequest } from '@/lib/queryClient';
 import type { MediaFileWithLink } from '../types';
-
 export async function getGalleryFilesV2(
   organizationId: string | undefined,
   projectId: string | undefined
@@ -8,14 +7,13 @@ export async function getGalleryFilesV2(
   if (!organizationId) {
     return [];
   }
-
   const queryParams = new URLSearchParams();
   
   if (projectId) {
     queryParams.append('projectId', projectId);
   }
   
-  const url = `/api/media/gallery${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+  const url = `/api/media/gallery${queryParams.toString() ? '?'+ queryParams.toString() : ''}`;
   
   console.log('[getGalleryFilesV2] Calling backend endpoint:', url);
   
@@ -27,13 +25,11 @@ export async function getGalleryFilesV2(
   }
   
   const data = await response.json();
-
   console.log('[getGalleryFilesV2] Primeros 2 items raw:', data?.slice?.(0, 2));
   
   if (!data || !Array.isArray(data)) {
     return [];
   }
-
   const files: MediaFileWithLink[] = data.map((item: any) => {
     const mediaFile = item.media_files;
     
@@ -72,6 +68,5 @@ export async function getGalleryFilesV2(
       created_by: item.created_by || 'Desconocido'
     };
   }).filter(Boolean) as MediaFileWithLink[];
-
   return files.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 }

@@ -5,7 +5,6 @@ import type { PartnerWithdrawalWithRelations } from '../services/getPartnerWithd
 import type { MaterialPaymentWithRelations } from '@/features/materials/types';
 import type { PersonnelPaymentWithRelations } from '@/features/personnel/types';
 import type { GeneralCostPayment } from '@/features/general-costs/types';
-
 export interface LegacyMovementWithRelations {
   id: string;
   description: string;
@@ -37,7 +36,6 @@ export interface LegacyMovementWithRelations {
   profiles?: { full_name?: string; avatar_url?: string };
   indirect_costs?: { id: string; name: string };
 }
-
 /**
  * Transforms a client_payments record into a unified FinancialMovement.
  * This mapper ensures that all payment types share the same structure.
@@ -155,7 +153,6 @@ export function mapClientPaymentToFinancialMovement(
     partner: null,
   };
 }
-
 /**
  * Maps an array of client payments to financial movements.
  * 
@@ -167,7 +164,6 @@ export function mapClientPaymentsToFinancialMovements(
 ): FinancialMovementWithRelations[] {
   return clientPayments.map(mapClientPaymentToFinancialMovement);
 }
-
 /**
  * Transforms a partner_contributions record into a unified FinancialMovement.
  * Partner contributions are capital investments (ingresos).
@@ -279,7 +275,6 @@ export function mapPartnerContributionToFinancialMovement(
     general_cost: null,
   };
 }
-
 /**
  * Transforms a partner_withdrawals record into a unified FinancialMovement.
  * Partner withdrawals are capital removals (egresos).
@@ -391,7 +386,6 @@ export function mapPartnerWithdrawalToFinancialMovement(
     general_cost: null,
   };
 }
-
 /**
  * Maps an array of partner contributions to financial movements.
  * 
@@ -403,7 +397,6 @@ export function mapPartnerContributionsToFinancialMovements(
 ): FinancialMovementWithRelations[] {
   return contributions.map(mapPartnerContributionToFinancialMovement);
 }
-
 /**
  * Maps an array of partner withdrawals to financial movements.
  * 
@@ -415,7 +408,6 @@ export function mapPartnerWithdrawalsToFinancialMovements(
 ): FinancialMovementWithRelations[] {
   return withdrawals.map(mapPartnerWithdrawalToFinancialMovement);
 }
-
 /**
  * Transforms a material_payments record into a unified FinancialMovement.
  * Material payments are expenses (egresos).
@@ -499,7 +491,6 @@ export function mapMaterialPaymentToFinancialMovement(
     partner: null,
   };
 }
-
 /**
  * Maps an array of material payments to financial movements.
  */
@@ -508,7 +499,6 @@ export function mapMaterialPaymentsToFinancialMovements(
 ): FinancialMovementWithRelations[] {
   return payments.map(mapMaterialPaymentToFinancialMovement);
 }
-
 /**
  * Transforms a personnel_payments record into a unified FinancialMovement.
  * Personnel payments are expenses (egresos).
@@ -596,7 +586,6 @@ export function mapPersonnelPaymentToFinancialMovement(
     partner: null,
   };
 }
-
 /**
  * Maps an array of personnel payments to financial movements.
  */
@@ -605,7 +594,6 @@ export function mapPersonnelPaymentsToFinancialMovements(
 ): FinancialMovementWithRelations[] {
   return payments.map(mapPersonnelPaymentToFinancialMovement);
 }
-
 /**
  * Transforms a general_costs_payments record into a unified FinancialMovement.
  * General cost payments are organization-level expenses (egresos).
@@ -689,7 +677,6 @@ export function mapGeneralCostPaymentToFinancialMovement(
     partner: null,
   };
 }
-
 /**
  * Maps an array of general cost payments to financial movements.
  */
@@ -698,7 +685,6 @@ export function mapGeneralCostPaymentsToFinancialMovements(
 ): FinancialMovementWithRelations[] {
   return payments.map(mapGeneralCostPaymentToFinancialMovement);
 }
-
 /**
  * Transforms a legacy movements record into a unified FinancialMovement.
  * Legacy movements include subcontracts and indirect costs.
@@ -800,7 +786,6 @@ export function mapLegacyMovementToFinancialMovement(
     } : null,
   };
 }
-
 /**
  * Maps an array of legacy movements to financial movements.
  */

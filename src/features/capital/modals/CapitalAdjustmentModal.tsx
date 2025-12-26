@@ -2,7 +2,6 @@ import { useRef } from 'react'
 import { Receipt } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { CapitalAdjustmentForm } from '../forms/CapitalAdjustmentForm'
-
 interface CapitalAdjustmentModalProps {
   modalData?: {
     projectId?: string;
@@ -10,12 +9,10 @@ interface CapitalAdjustmentModalProps {
     adjustmentId?: string;
   };
   onClose: () => void;
-  mode?: 'create' | 'edit' | 'view';
+  mode?: 'create'| 'edit'| 'view';
 }
-
-export function CapitalAdjustmentModal({ modalData, onClose, mode = 'create' }: CapitalAdjustmentModalProps) {
+export function CapitalAdjustmentModal({ modalData, onClose, mode = 'create'}: CapitalAdjustmentModalProps) {
   const formRef = useRef<HTMLFormElement>(null)
-
   const getHeader = () => {
     switch (mode) {
       case 'view':
@@ -36,7 +33,6 @@ export function CapitalAdjustmentModal({ modalData, onClose, mode = 'create' }: 
         };
     }
   };
-
   const getSubmitText = () => {
     switch (mode) {
       case 'view':
@@ -48,7 +44,6 @@ export function CapitalAdjustmentModal({ modalData, onClose, mode = 'create' }: 
         return 'Registrar Ajuste';
     }
   };
-
   const handleSubmit = () => {
     if (mode === 'view') {
       onClose();
@@ -56,9 +51,7 @@ export function CapitalAdjustmentModal({ modalData, onClose, mode = 'create' }: 
       formRef.current.requestSubmit();
     }
   };
-
   const header = getHeader();
-
   return (
     <ModalLayout 
       onClose={onClose} 
@@ -94,5 +87,4 @@ export function CapitalAdjustmentModal({ modalData, onClose, mode = 'create' }: 
     </ModalLayout>
   )
 }
-
 export default CapitalAdjustmentModal

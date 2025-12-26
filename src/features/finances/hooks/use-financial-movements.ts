@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getAllFinancialMovements } from '../services/getAllFinancialMovements';
 import { FINANCIAL_QUERY_KEYS } from '../constants';
-
 /**
  * Hook to fetch all financial movements for an organization or project.
  * 

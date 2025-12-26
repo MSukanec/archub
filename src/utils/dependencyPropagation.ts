@@ -1,14 +1,12 @@
 import { format, addDays } from 'date-fns';
 import { ConstructionTask } from '@/hooks/use-construction-tasks';
 import { ConstructionDependencyWithTasks } from '@/hooks/use-construction-dependencies';
-
 export interface TaskUpdate {
   id: string;
   start_date: string;
   end_date: string;
   duration_in_days: number;
 }
-
 /**
  * Propaga automáticamente cambios de fechas a tareas dependientes
  * Cuando una tarea cambia, todas las tareas que dependen de ella se mueven automáticamente
@@ -27,7 +25,7 @@ export function propagateDependencyChanges(
     // Buscar todas las tareas que dependen de esta
     const dependentTasks = dependencies.filter(dep => 
       dep.predecessor_task_id === predecessorTaskId &&
-      dep.type === 'finish-to-start' // Solo finish-to-start por ahora
+      dep.type === 'finish-to-start'// Solo finish-to-start por ahora
     );
     
     dependentTasks.forEach(dependency => {
@@ -83,7 +81,6 @@ export function propagateDependencyChanges(
   
   return updates;
 }
-
 /**
  * Aplica las actualizaciones de propagación al caché optimistamente
  */

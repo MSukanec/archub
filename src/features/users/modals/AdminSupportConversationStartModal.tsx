@@ -7,12 +7,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useSupportConversationStartForm } from '../forms/AdminSupportConversationStartForm';
-
 interface SupportConversationStartModalProps {
   modalData?: {};
   onClose: () => void;
 }
-
 export function AdminSupportConversationStartModal({ onClose }: SupportConversationStartModalProps) {
   const {
     form,
@@ -20,12 +18,10 @@ export function AdminSupportConversationStartModal({ onClose }: SupportConversat
     onSubmit,
     isSubmitting,
   } = useSupportConversationStartForm({ onClose });
-
   const handleClose = () => {
     form.reset();
     onClose();
   };
-
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -53,7 +49,6 @@ export function AdminSupportConversationStartModal({ onClose }: SupportConversat
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="message"
@@ -75,7 +70,6 @@ export function AdminSupportConversationStartModal({ onClose }: SupportConversat
       </form>
     </Form>
   );
-
   const headerContent = (
     <FormModalHeader 
       title="Iniciar Conversación"
@@ -83,7 +77,6 @@ export function AdminSupportConversationStartModal({ onClose }: SupportConversat
       icon={MessageSquarePlus}
     />
   );
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -94,7 +87,6 @@ export function AdminSupportConversationStartModal({ onClose }: SupportConversat
       submitDisabled={isSubmitting}
     />
   );
-
   return (
     <FormModalLayout
       columns={1}

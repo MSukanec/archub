@@ -2,12 +2,10 @@ import { useOptimisticMutation } from '@/core/save-engine';
 import { updateContactType } from '../services';
 import { contactTypesKeys } from '@/core/query-keys';
 import type { ContactTypeInput } from '../types';
-
 interface UpdateContactTypeParams {
   typeId: string;
   input: ContactTypeInput;
 }
-
 export function useUpdateContactType(organizationId: string) {
   return useOptimisticMutation({
     mutationFn: ({ typeId, input }: UpdateContactTypeParams) =>

@@ -1,13 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-
 export interface DesignPhase {
   id: string;
   name: string;
   organization_id: string | null;
   created_at: string;
 }
-
 export function useDesignPhases(organizationId?: string) {
   return useQuery({
     queryKey: ['designPhases', organizationId],
@@ -15,24 +13,20 @@ export function useDesignPhases(organizationId?: string) {
       if (!organizationId) {
         throw new Error('Organization ID is required');
       }
-
       const { data, error } = await supabase
         .from('design_phases')
         .select('*')
         .or(`organization_id.eq.${organizationId},organization_id.is.null`)
         .order('name', { ascending: true });
-
       if (error) {
         console.error('Error fetching design phases:', error);
         throw error;
       }
-
       return data as DesignPhase[];
     },
     enabled: !!organizationId,
   });
 }
-
 export function useDesignProjectPhases(projectId: string) {
   return useQuery({
     queryKey: ['designProjectPhases', projectId],
@@ -40,7 +34,6 @@ export function useDesignProjectPhases(projectId: string) {
       if (!projectId) {
         throw new Error('Project ID is required');
       }
-
       const { data, error } = await supabase
         .from('design_project_phases')
         .select(`
@@ -52,23 +45,17 @@ export function useDesignProjectPhases(projectId: string) {
         `)
         .eq('project_id', projectId)
         .order('position', { ascending: true });
-
       if (error) {
         console.error('Error fetching design project phases:', error);
         throw error;
       }
-
       return data;
     },
     enabled: !!projectId,
   });
 }
-
-
-
 export function useCreateDesignProjectPhase() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: {
       project_id: string;
@@ -83,12 +70,10 @@ export function useCreateDesignProjectPhase() {
         .insert([data])
         .select()
         .single();
-
       if (error) {
         console.error('Error creating design project phase:', error);
         throw error;
       }
-
       return result;
     },
     onSuccess: (_, variables) => {

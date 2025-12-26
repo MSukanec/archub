@@ -1,6 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { BucketName } from './types';
-
 /**
  * Get a URL for a file in a bucket.
  * - For public buckets: returns permanent public URL
@@ -30,7 +29,7 @@ export async function getFileUrl(
   
   // public-assets and social-assets: public buckets, use public URL
   // Note: social-assets bucket must be configured as "Public bucket" in Supabase settings
-  if (bucket === 'public-assets' || bucket === 'social-assets') {
+  if (bucket === 'public-assets'|| bucket === 'social-assets') {
     return client.storage.from(bucket).getPublicUrl(path).data.publicUrl;
   }
   
@@ -45,7 +44,6 @@ export async function getFileUrl(
   
   return data.signedUrl;
 }
-
 /**
  * Helper to get URL from a media_file record.
  * - If file_url exists (public buckets), use it

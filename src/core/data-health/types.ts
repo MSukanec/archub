@@ -1,13 +1,11 @@
-export type DataSeverity = 'info' | 'warning' | 'critical';
-
+export type DataSeverity = 'info'| 'warning'| 'critical';
 export interface CorrectiveAction {
   label: string;
   description?: string;
-  actionType: 'navigate' | 'edit' | 'bulk_edit' | 'manual';
+  actionType: 'navigate'| 'edit'| 'bulk_edit'| 'manual';
   targetPath?: string;
   targetIds?: (string | number)[];
 }
-
 export interface DataIssue {
   id: string;
   ruleId: string;
@@ -19,7 +17,6 @@ export interface DataIssue {
   affectedEntities?: Array<{ id: string | number; label: string }>;
   metadata?: Record<string, unknown>;
 }
-
 export interface DataHealthContext {
   organizationId: string;
   locale?: string;
@@ -29,7 +26,6 @@ export interface DataHealthContext {
   /** Whether the organization has multi-currency enabled (more than 1 active currency) */
   isMultiCurrency?: boolean;
 }
-
 export interface DataHealthRule<TInput = unknown> {
   id: string;
   name: string;
@@ -38,7 +34,6 @@ export interface DataHealthRule<TInput = unknown> {
   appliesTo: string[];
   check: (input: TInput[], ctx: DataHealthContext) => DataIssue | null;
 }
-
 export interface DataHealthResult {
   issues: DataIssue[];
   stats: {
@@ -48,7 +43,6 @@ export interface DataHealthResult {
   };
   checkedAt: Date;
 }
-
 export interface NormalizedPayment {
   id: string | number;
   label: string;

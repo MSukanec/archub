@@ -1,14 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { organizationKeys } from '@/core/query-keys'
-
 export interface Currency {
   id: string
   name: string
   symbol: string
   code: string
 }
-
 export interface OrganizationCurrency {
   id: string
   organization_id: string
@@ -17,7 +15,6 @@ export interface OrganizationCurrency {
   is_active: boolean
   currency: Currency
 }
-
 export const useCurrencies = () => {
   return useQuery({
     queryKey: ['currencies'],
@@ -32,7 +29,6 @@ export const useCurrencies = () => {
     },
   })
 }
-
 export const useOrganizationCurrencies = (organizationId?: string) => {
   return useQuery({
     queryKey: organizationKeys.currencies(organizationId),
@@ -69,7 +65,6 @@ export const useOrganizationCurrencies = (organizationId?: string) => {
     enabled: !!organizationId,
   })
 }
-
 export const useOrganizationDefaultCurrency = (organizationId?: string) => {
   return useQuery({
     queryKey: organizationKeys.defaultCurrency(organizationId),
@@ -98,7 +93,6 @@ export const useOrganizationDefaultCurrency = (organizationId?: string) => {
     enabled: !!organizationId,
   })
 }
-
 /**
  * ============================================================================
  * CONTEXTO GLOBAL DE MONEDA DE ORGANIZACIÓN
@@ -161,7 +155,6 @@ export interface OrgCurrencyContext {
    */
   isDefaultCurrency: (currencyId?: string | null) => boolean
 }
-
 export const useOrgCurrencyContext = (organizationId?: string): OrgCurrencyContext => {
   const { 
     data: orgCurrencies = [], 

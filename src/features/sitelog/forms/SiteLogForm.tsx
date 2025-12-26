@@ -30,39 +30,33 @@ import { useSiteLogFiles } from "../hooks/use-sitelog-files";
 import { FileUploader } from "@/components/shared/fields/FileUploader";
 import { deleteMediaFileV2 } from "@/features/media/services/deleteMediaFileV2";
 import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
-
 interface SiteLogFormProps {
   modalData?: any;
   onClose: () => void;
   mode?: "create" | "edit" | "view";
 }
-
 // Subcomponente: Panel de vista
 function ViewPanel({ data, siteLogFiles }: { data: any; siteLogFiles: any[] }) {
   const imageUrls = siteLogFiles?.filter((file: any) => 
-    file.file_type === 'image' || file.mime_type?.startsWith('image/')
+    file.file_type === 'image'|| file.mime_type?.startsWith('image/')
   ).map((file: any) => file.file_url) || [];
   
   const lightbox = useImageLightbox(imageUrls);
   const imageFiles = siteLogFiles?.filter((file: any) => 
-    file.file_type === 'image' || file.mime_type?.startsWith('image/')
+    file.file_type === 'image'|| file.mime_type?.startsWith('image/')
   ) || [];
-
   const getInitials = (name: string): string => {
     if (!name) return "U";
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name.split('').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
-
   const weatherConfig = {
     sunny: { label: "Soleado", icon: Sun, color: "text-yellow-500" },
     partly_cloudy: { label: "Parcialmente nublado", icon: Cloud, color: "text-yellow-400" },
     cloudy: { label: "Nublado", icon: Cloud, color: "text-gray-500" },
     rain: { label: "Lluvia", icon: CloudRain, color: "text-blue-500" },
   } as any;
-
   const weather = weatherConfig[data?.weather || 'sunny'];
   const WeatherIcon = weather?.icon || Sun;
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -81,20 +75,17 @@ function ViewPanel({ data, siteLogFiles }: { data: any; siteLogFiles: any[] }) {
           </div>
         )}
       </div>
-
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <div className="text-sm font-medium text-muted-foreground">Tipo</div>
           <div className="text-sm">{data?.site_log_type?.name || 'Sin especificar'}</div>
         </div>
-
         <div className="space-y-2">
           <div className="text-sm font-medium text-muted-foreground">Severidad</div>
           <div className="text-sm">
-            {data?.severity === 'low' ? 'Baja' : data?.severity === 'medium' ? 'Media' : data?.severity === 'high' ? 'Alta' : 'Crítica'}
+            {data?.severity === 'low'? 'Baja': data?.severity === 'medium'? 'Media': data?.severity === 'high'? 'Alta': 'Crítica'}
           </div>
         </div>
-
         <div className="space-y-2">
           <div className="text-sm font-medium text-muted-foreground">Clima</div>
           <div className="flex items-center gap-2">
@@ -102,15 +93,13 @@ function ViewPanel({ data, siteLogFiles }: { data: any; siteLogFiles: any[] }) {
             <span className="text-sm">{weather?.label || 'Sin especificar'}</span>
           </div>
         </div>
-
         <div className="space-y-2">
           <div className="text-sm font-medium text-muted-foreground">Estado</div>
           <div className="text-sm">
-            {data?.status === 'pending' ? 'Pendiente' : data?.status === 'review' ? 'En Revisión' : data?.status === 'approved' ? 'Aprobado' : 'Cerrado'}
+            {data?.status === 'pending'? 'Pendiente': data?.status === 'review'? 'En Revisión': data?.status === 'approved'? 'Aprobado': 'Cerrado'}
           </div>
         </div>
       </div>
-
       {data?.comments && (
         <>
           <Separator />
@@ -120,7 +109,6 @@ function ViewPanel({ data, siteLogFiles }: { data: any; siteLogFiles: any[] }) {
           </div>
         </>
       )}
-
       {imageFiles.length > 0 && (
         <>
           <Separator />
@@ -147,7 +135,6 @@ function ViewPanel({ data, siteLogFiles }: { data: any; siteLogFiles: any[] }) {
           </div>
         </>
       )}
-
       <ImageLightbox
         images={imageUrls}
         currentIndex={lightbox.currentIndex}
@@ -157,7 +144,6 @@ function ViewPanel({ data, siteLogFiles }: { data: any; siteLogFiles: any[] }) {
     </div>
   );
 }
-
 // Subcomponente: Panel de formulario
 function FormPanel({
   form,
@@ -192,7 +178,6 @@ function FormPanel({
       </div>
     );
   }
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -237,7 +222,6 @@ function FormPanel({
               );
             }}
           />
-
           <FormField
             control={form.control}
             name="entry_type_id"
@@ -267,7 +251,6 @@ function FormPanel({
             )}
           />
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -294,7 +277,6 @@ function FormPanel({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="severity"
@@ -319,7 +301,6 @@ function FormPanel({
             )}
           />
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -347,7 +328,6 @@ function FormPanel({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="status"
@@ -377,7 +357,6 @@ function FormPanel({
             )}
           />
         </div>
-
         <FormField
           control={form.control}
           name="comments"
@@ -395,7 +374,6 @@ function FormPanel({
             </FormItem>
           )}
         />
-
         <div className="space-y-2">
           <FormLabel>Fotos y Videos</FormLabel>
           <FileUploader
@@ -413,34 +391,27 @@ function FormPanel({
             maxSize={50 * 1024 * 1024}
           />
         </div>
-
-        <button type="submit" style={{ display: 'none' }} />
+        <button type="submit" style={{ display: 'none'}} />
       </form>
     </Form>
   );
 }
-
 export default function SiteLogForm({ modalData, onClose, mode = "create" }: SiteLogFormProps) {
   const { toast } = useToast();
   const { data: currentUser } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
   const { data: members = [] } = useOrganizationMembers(currentOrganizationId || undefined);
   const queryClient = useQueryClient();
-
   const siteLogId = modalData?.id || modalData?.data?.id;
   const isEditing = mode === "edit" || (mode !== "view" && siteLogId);
   const computedMode = mode === "view" ? "view" : (siteLogId ? "edit" : "create");
-
   const currentOrganization = currentUser?.organizations?.find(org => org.id === currentOrganizationId);
   const currentPlanName = currentOrganization?.plan?.name?.toLowerCase() || 'free';
-  const isPro = currentPlanName === 'pro' || currentPlanName === 'teams' || currentPlanName === 'enterprise';
-  const isTeams = currentPlanName === 'teams' || currentPlanName === 'enterprise';
-
+  const isPro = currentPlanName === 'pro'|| currentPlanName === 'teams'|| currentPlanName === 'enterprise';
+  const isTeams = currentPlanName === 'teams'|| currentPlanName === 'enterprise';
   const { data: siteLogTypes = [], isLoading: typesLoading } = useSiteLogTypes(currentOrganizationId || undefined);
   const { data: siteLogFiles = [], isLoading: filesLoading } = useSiteLogFiles(siteLogId, currentOrganizationId || undefined);
-
   const [filesToUpload, setFilesToUpload] = useState<SiteLogFileInput[]>([]);
-
   const form = useForm<SiteLogFormData>({
     resolver: zodResolver(siteLogSchema),
     defaultValues: {
@@ -453,15 +424,12 @@ export default function SiteLogForm({ modalData, onClose, mode = "create" }: Sit
       comments: ""
     }
   });
-
   const defaultType = siteLogTypes.find((t: any) => t.is_default) || siteLogTypes[0];
-
   useEffect(() => {
     if (computedMode !== "create" && defaultType && !form.getValues('entry_type_id')) {
       form.setValue('entry_type_id', defaultType.id);
     }
   }, [defaultType, computedMode, form]);
-
   useEffect(() => {
     if (modalData && (modalData.id || modalData.data?.id)) {
       form.reset({
@@ -475,7 +443,6 @@ export default function SiteLogForm({ modalData, onClose, mode = "create" }: Sit
       });
     }
   }, [modalData, defaultType, form]);
-
   const uploadFilesMutation = useMutation({
     mutationFn: async ({ files, siteLogId }: { files: SiteLogFileInput[], siteLogId: string }) => {
       if (!currentOrganizationId || !selectedProjectId) throw new Error('No hay proyecto u organización seleccionada');
@@ -493,16 +460,13 @@ export default function SiteLogForm({ modalData, onClose, mode = "create" }: Sit
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   });
-
   const siteLogMutation = useMutation({
     mutationFn: async (formData: SiteLogFormData) => {
       if (!currentOrganizationId || !selectedProjectId) throw new Error('No hay proyecto u organización seleccionada');
       const currentMember = members.find((m: any) => m.user_id === currentUser?.user?.id);
       if (!currentMember) throw new Error('No se encontró el miembro');
-
       const entryTypeId = formData.entry_type_id || defaultType?.id;
       if (!entryTypeId) throw new Error('Tipo de bitácora no especificado');
-
       const siteLogData = {
         log_date: formData.log_date,
         created_by: currentMember.id,
@@ -516,11 +480,9 @@ export default function SiteLogForm({ modalData, onClose, mode = "create" }: Sit
         project_id: selectedProjectId,
         organization_id: currentOrganizationId
       };
-
       const savedSiteLog = siteLogId
         ? await updateSiteLog(siteLogId, siteLogData)
         : await createSiteLog(siteLogData);
-
       return savedSiteLog;
     },
     onSuccess: async (savedSiteLog, variables) => {
@@ -538,7 +500,6 @@ export default function SiteLogForm({ modalData, onClose, mode = "create" }: Sit
           project_id: selectedProjectId || ''
         }
       })
-
       queryClient.invalidateQueries({ queryKey: ['site-logs'] });
       if (filesToUpload.length > 0) {
         try {
@@ -554,7 +515,6 @@ export default function SiteLogForm({ modalData, onClose, mode = "create" }: Sit
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   });
-
   const handleExistingFileDelete = async (fileId: string) => {
     try {
       const fileToDelete = siteLogFiles.find(f => f.id === fileId);
@@ -562,13 +522,11 @@ export default function SiteLogForm({ modalData, onClose, mode = "create" }: Sit
         toast({ title: "Error", description: "No se encontró el archivo a eliminar.", variant: "destructive" });
         return;
       }
-
       const linkId = fileToDelete.link_id;
       if (!linkId) {
         toast({ title: "Error", description: "No se puede eliminar este archivo.", variant: "destructive" });
         return;
       }
-
       await deleteMediaFileV2(linkId);
       queryClient.invalidateQueries({ queryKey: ['sitelog-files'] });
       queryClient.invalidateQueries({ queryKey: ['site-logs'] });
@@ -577,13 +535,10 @@ export default function SiteLogForm({ modalData, onClose, mode = "create" }: Sit
       toast({ title: "Error", description: "No se pudo eliminar el archivo.", variant: "destructive" });
     }
   };
-
   const onSubmit = async (formData: SiteLogFormData) => {
     siteLogMutation.mutate(formData);
   };
-
   const isLoading = siteLogMutation.isPending;
-
   if (computedMode === "view") {
     const viewData = modalData?.data || modalData;
     return (
@@ -600,7 +555,6 @@ export default function SiteLogForm({ modalData, onClose, mode = "create" }: Sit
       </ModalLayout>
     );
   }
-
   return (
     <ModalLayout onClose={onClose} size="xl">
       <ModalHeader

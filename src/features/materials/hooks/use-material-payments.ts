@@ -9,7 +9,6 @@ import {
   type UpdateMaterialPaymentData,
 } from '../services/materialPayments';
 import { MATERIAL_PAYMENT_QUERY_KEYS } from '../constants';
-
 export function useMaterialPayments(
   projectId: string | undefined,
   organizationId: string | undefined
@@ -20,7 +19,6 @@ export function useMaterialPayments(
     enabled: !!projectId && !!organizationId,
   });
 }
-
 export function useMaterialPayment(
   projectId: string | undefined,
   paymentId: string | undefined,
@@ -32,10 +30,8 @@ export function useMaterialPayment(
     enabled: !!projectId && !!paymentId && !!organizationId,
   });
 }
-
 export function useCreateMaterialPayment() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       payment,
@@ -59,10 +55,8 @@ export function useCreateMaterialPayment() {
     },
   });
 }
-
 export function useUpdateMaterialPayment() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       projectId,
@@ -91,10 +85,8 @@ export function useUpdateMaterialPayment() {
     },
   });
 }
-
 export function useDeleteMaterialPayment() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       projectId,

@@ -8,7 +8,6 @@ import {
 } from '../services/clientCommitments';
 import { CLIENT_QUERY_KEYS } from '../constants';
 import type { ClientCommitment } from '../types';
-
 export function useClientCommitments(
   projectId: string | undefined,
   organizationId: string | undefined
@@ -19,7 +18,6 @@ export function useClientCommitments(
     enabled: !!projectId && !!organizationId,
   });
 }
-
 export function useClientCommitment(
   commitmentId: string | undefined,
   organizationId: string | undefined
@@ -30,10 +28,8 @@ export function useClientCommitment(
     enabled: !!commitmentId && !!organizationId,
   });
 }
-
 export function useCreateClientCommitment() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       commitment,
@@ -41,7 +37,7 @@ export function useCreateClientCommitment() {
       organizationId,
       createdBy,
     }: {
-      commitment: Omit<ClientCommitment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by' | 'is_deleted' | 'deleted_at'>;
+      commitment: Omit<ClientCommitment, 'id'| 'created_at'| 'updated_at'| 'project_id'| 'organization_id'| 'created_by'| 'is_deleted'| 'deleted_at'>;
       projectId: string;
       organizationId: string;
       createdBy: string;
@@ -56,10 +52,8 @@ export function useCreateClientCommitment() {
     },
   });
 }
-
 export function useUpdateClientCommitment() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       commitmentId,
@@ -67,7 +61,7 @@ export function useUpdateClientCommitment() {
       organizationId,
     }: {
       commitmentId: string;
-      updates: Partial<Omit<ClientCommitment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by' | 'is_deleted' | 'deleted_at'>>;
+      updates: Partial<Omit<ClientCommitment, 'id'| 'created_at'| 'updated_at'| 'project_id'| 'organization_id'| 'created_by'| 'is_deleted'| 'deleted_at'>>;
       organizationId: string;
     }) => updateClientCommitment(commitmentId, updates, organizationId),
     onSuccess: (data) => {
@@ -83,10 +77,8 @@ export function useUpdateClientCommitment() {
     },
   });
 }
-
 export function useDeleteClientCommitment() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       commitmentId,

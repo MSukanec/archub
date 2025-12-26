@@ -1,6 +1,5 @@
 import { DollarSign } from 'lucide-react'
 import { ClientCommitmentForm } from '../forms/ClientCommitmentForm'
-
 interface ClientCommitmentModalProps {
   modalData?: {
     projectId?: string;
@@ -8,10 +7,9 @@ interface ClientCommitmentModalProps {
     commitmentId?: string;
   };
   onClose: () => void;
-  mode?: 'create' | 'edit' | 'view';
+  mode?: 'create'| 'edit'| 'view';
 }
-
-export function ClientCommitmentModal({ modalData, onClose, mode = 'create' }: ClientCommitmentModalProps) {
+export function ClientCommitmentModal({ modalData, onClose, mode = 'create'}: ClientCommitmentModalProps) {
   return (
     <ClientCommitmentForm
       modalData={modalData}
@@ -20,5 +18,4 @@ export function ClientCommitmentModal({ modalData, onClose, mode = 'create' }: C
     />
   )
 }
-
 export default ClientCommitmentModal

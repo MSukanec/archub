@@ -1,12 +1,10 @@
 import { supabase } from '@/lib/supabase';
 import type { MediaFileWithLink, MediaCategory } from '../types';
-
 interface GetCourseMediaInput {
   course_id: string;
   category?: MediaCategory;
   is_cover?: boolean;
 }
-
 /**
  * Obtiene archivos media vinculados a un curso
  * 
@@ -17,9 +15,7 @@ export async function getCourseMedia(input: GetCourseMediaInput): Promise<MediaF
   if (!supabase) {
     throw new Error('Supabase not initialized');
   }
-
   const { course_id, category, is_cover } = input;
-
   let query = supabase
     .from('media_links')
     .select(`
@@ -49,27 +45,21 @@ export async function getCourseMedia(input: GetCourseMediaInput): Promise<MediaF
     .eq('media_files.is_deleted', false)
     .order('position', { ascending: true })
     .order('created_at', { ascending: false });
-
   // Filtros opcionales
   if (category) {
     query = query.eq('category', category);
   }
-
   if (is_cover !== undefined) {
     query = query.eq('is_cover', is_cover);
   }
-
   const { data, error } = await query;
-
   if (error) {
     console.error('Error fetching course media:', error);
     throw error;
   }
-
   if (!data) {
     return [];
   }
-
   // Transformar al formato MediaFileWithLink
   return data.map((item: any) => ({
     // Datos del archivo (media_files)
@@ -100,7 +90,6 @@ export async function getCourseMedia(input: GetCourseMediaInput): Promise<MediaF
     site_log_id: null
   }));
 }
-
 /**
  * Obtiene la imagen de portada de un curso
  */
@@ -110,10 +99,8 @@ export async function getCourseCover(course_id: string): Promise<string | null> 
     category: 'course_cover',
     is_cover: true
   });
-
   return files.length > 0 ? files[0].file_url : null;
 }
-
 /**
  * Obtiene la foto del instructor de un curso
  */
@@ -122,10 +109,8 @@ export async function getCourseInstructorPhoto(course_id: string): Promise<strin
     course_id,
     category: 'instructor_photo'
   });
-
   return files.length > 0 ? files[0].file_url : null;
 }
-
 /**
  * Obtiene la imagen OG para SEO
  */
@@ -134,6 +119,5 @@ export async function getCourseOgImage(course_id: string): Promise<string | null
     course_id,
     category: 'og_image'
   });
-
   return files.length > 0 ? files[0].file_url : null;
 }

@@ -1,7 +1,6 @@
 import { ACTIVITY_ACTIONS } from '@/utils/logActivity';
 import type { ActivityLog, ActivityDisplayInfo } from '../types';
 import type { BadgeVariant } from '@/components/ui/badge';
-
 /**
  * Obtiene información de display para un log de actividad.
  * 
@@ -16,7 +15,6 @@ import type { BadgeVariant } from '@/components/ui/badge';
  */
 export function getActivityDisplayInfo(log: ActivityLog): ActivityDisplayInfo {
   const { action, target_table, metadata } = log;
-
   const getActionBadgeVariant = (color: string): BadgeVariant => {
     const variantMap: Record<string, BadgeVariant> = {
       'blue': 'info',
@@ -28,59 +26,56 @@ export function getActivityDisplayInfo(log: ActivityLog): ActivityDisplayInfo {
     };
     return variantMap[color] || 'neutral';
   };
-
   const actionInfo: Record<string, { icon: string; label: string; color: string }> = {
-    [ACTIVITY_ACTIONS.CREATE_MOVEMENT]: { icon: '💰', label: 'Movimiento Creado', color: 'blue' },
-    [ACTIVITY_ACTIONS.UPDATE_MOVEMENT]: { icon: '✏️', label: 'Movimiento Editado', color: 'yellow' },
-    [ACTIVITY_ACTIONS.DELETE_MOVEMENT]: { icon: '🗑️', label: 'Movimiento Eliminado', color: 'red' },
+    [ACTIVITY_ACTIONS.CREATE_MOVEMENT]: { icon: '💰', label: 'Movimiento Creado', color: 'blue'},
+    [ACTIVITY_ACTIONS.UPDATE_MOVEMENT]: { icon: '✏️', label: 'Movimiento Editado', color: 'yellow'},
+    [ACTIVITY_ACTIONS.DELETE_MOVEMENT]: { icon: '🗑️', label: 'Movimiento Eliminado', color: 'red'},
     
-    [ACTIVITY_ACTIONS.CREATE_SITE_LOG]: { icon: '📝', label: 'Bitácora Creada', color: 'green' },
-    [ACTIVITY_ACTIONS.UPDATE_SITE_LOG]: { icon: '📝', label: 'Bitácora Editada', color: 'yellow' },
-    [ACTIVITY_ACTIONS.DELETE_SITE_LOG]: { icon: '🗑️', label: 'Bitácora Eliminada', color: 'red' },
+    [ACTIVITY_ACTIONS.CREATE_SITE_LOG]: { icon: '📝', label: 'Bitácora Creada', color: 'green'},
+    [ACTIVITY_ACTIONS.UPDATE_SITE_LOG]: { icon: '📝', label: 'Bitácora Editada', color: 'yellow'},
+    [ACTIVITY_ACTIONS.DELETE_SITE_LOG]: { icon: '🗑️', label: 'Bitácora Eliminada', color: 'red'},
     
-    [ACTIVITY_ACTIONS.UPLOAD_DESIGN_DOCUMENT]: { icon: '📄', label: 'Documento Subido', color: 'purple' },
-    [ACTIVITY_ACTIONS.UPDATE_DESIGN_DOCUMENT]: { icon: '📄', label: 'Documento Editado', color: 'yellow' },
-    [ACTIVITY_ACTIONS.DELETE_DESIGN_DOCUMENT]: { icon: '🗑️', label: 'Documento Eliminado', color: 'red' },
+    [ACTIVITY_ACTIONS.UPLOAD_DESIGN_DOCUMENT]: { icon: '📄', label: 'Documento Subido', color: 'purple'},
+    [ACTIVITY_ACTIONS.UPDATE_DESIGN_DOCUMENT]: { icon: '📄', label: 'Documento Editado', color: 'yellow'},
+    [ACTIVITY_ACTIONS.DELETE_DESIGN_DOCUMENT]: { icon: '🗑️', label: 'Documento Eliminado', color: 'red'},
     
-    [ACTIVITY_ACTIONS.CREATE_TASK]: { icon: '✅', label: 'Tarea Creada', color: 'blue' },
-    [ACTIVITY_ACTIONS.UPDATE_TASK]: { icon: '✏️', label: 'Tarea Editada', color: 'yellow' },
-    [ACTIVITY_ACTIONS.DELETE_TASK]: { icon: '🗑️', label: 'Tarea Eliminada', color: 'red' },
-    [ACTIVITY_ACTIONS.COMPLETE_TASK]: { icon: '🎉', label: 'Tarea Completada', color: 'green' },
+    [ACTIVITY_ACTIONS.CREATE_TASK]: { icon: '✅', label: 'Tarea Creada', color: 'blue'},
+    [ACTIVITY_ACTIONS.UPDATE_TASK]: { icon: '✏️', label: 'Tarea Editada', color: 'yellow'},
+    [ACTIVITY_ACTIONS.DELETE_TASK]: { icon: '🗑️', label: 'Tarea Eliminada', color: 'red'},
+    [ACTIVITY_ACTIONS.COMPLETE_TASK]: { icon: '🎉', label: 'Tarea Completada', color: 'green'},
     
-    [ACTIVITY_ACTIONS.ADD_CONTACT]: { icon: '👤', label: 'Contacto Agregado', color: 'blue' },
-    [ACTIVITY_ACTIONS.UPDATE_CONTACT]: { icon: '✏️', label: 'Contacto Editado', color: 'yellow' },
-    [ACTIVITY_ACTIONS.DELETE_CONTACT]: { icon: '🗑️', label: 'Contacto Eliminado', color: 'red' },
+    [ACTIVITY_ACTIONS.ADD_CONTACT]: { icon: '👤', label: 'Contacto Agregado', color: 'blue'},
+    [ACTIVITY_ACTIONS.UPDATE_CONTACT]: { icon: '✏️', label: 'Contacto Editado', color: 'yellow'},
+    [ACTIVITY_ACTIONS.DELETE_CONTACT]: { icon: '🗑️', label: 'Contacto Eliminado', color: 'red'},
     
-    [ACTIVITY_ACTIONS.ADD_MEMBER]: { icon: '👥', label: 'Miembro Agregado', color: 'green' },
-    [ACTIVITY_ACTIONS.UPDATE_MEMBER]: { icon: '✏️', label: 'Miembro Editado', color: 'yellow' },
-    [ACTIVITY_ACTIONS.REMOVE_MEMBER]: { icon: '🚪', label: 'Miembro Removido', color: 'red' },
+    [ACTIVITY_ACTIONS.ADD_MEMBER]: { icon: '👥', label: 'Miembro Agregado', color: 'green'},
+    [ACTIVITY_ACTIONS.UPDATE_MEMBER]: { icon: '✏️', label: 'Miembro Editado', color: 'yellow'},
+    [ACTIVITY_ACTIONS.REMOVE_MEMBER]: { icon: '🚪', label: 'Miembro Removido', color: 'red'},
     
-    [ACTIVITY_ACTIONS.ADD_CLIENT]: { icon: '🤝', label: 'Cliente Agregado', color: 'green' },
-    [ACTIVITY_ACTIONS.UPDATE_CLIENT]: { icon: '✏️', label: 'Cliente Editado', color: 'yellow' },
-    [ACTIVITY_ACTIONS.REMOVE_CLIENT]: { icon: '🚪', label: 'Cliente Removido', color: 'red' },
+    [ACTIVITY_ACTIONS.ADD_CLIENT]: { icon: '🤝', label: 'Cliente Agregado', color: 'green'},
+    [ACTIVITY_ACTIONS.UPDATE_CLIENT]: { icon: '✏️', label: 'Cliente Editado', color: 'yellow'},
+    [ACTIVITY_ACTIONS.REMOVE_CLIENT]: { icon: '🚪', label: 'Cliente Removido', color: 'red'},
     
-    [ACTIVITY_ACTIONS.CREATE_PROJECT]: { icon: '🏗️', label: 'Proyecto Creado', color: 'blue' },
-    [ACTIVITY_ACTIONS.UPDATE_PROJECT]: { icon: '✏️', label: 'Proyecto Editado', color: 'yellow' },
-    [ACTIVITY_ACTIONS.DELETE_PROJECT]: { icon: '🗑️', label: 'Proyecto Eliminado', color: 'red' },
+    [ACTIVITY_ACTIONS.CREATE_PROJECT]: { icon: '🏗️', label: 'Proyecto Creado', color: 'blue'},
+    [ACTIVITY_ACTIONS.UPDATE_PROJECT]: { icon: '✏️', label: 'Proyecto Editado', color: 'yellow'},
+    [ACTIVITY_ACTIONS.DELETE_PROJECT]: { icon: '🗑️', label: 'Proyecto Eliminado', color: 'red'},
     
-    [ACTIVITY_ACTIONS.ADD_PERSONNEL]: { icon: '👷', label: 'Personal Agregado', color: 'green' },
-    [ACTIVITY_ACTIONS.UPDATE_PERSONNEL]: { icon: '✏️', label: 'Personal Editado', color: 'yellow' },
-    [ACTIVITY_ACTIONS.DELETE_PERSONNEL]: { icon: '🗑️', label: 'Personal Eliminado', color: 'red' },
-    [ACTIVITY_ACTIONS.REGISTER_ATTENDANCE]: { icon: '📋', label: 'Asistencia Registrada', color: 'blue' },
+    [ACTIVITY_ACTIONS.ADD_PERSONNEL]: { icon: '👷', label: 'Personal Agregado', color: 'green'},
+    [ACTIVITY_ACTIONS.UPDATE_PERSONNEL]: { icon: '✏️', label: 'Personal Editado', color: 'yellow'},
+    [ACTIVITY_ACTIONS.DELETE_PERSONNEL]: { icon: '🗑️', label: 'Personal Eliminado', color: 'red'},
+    [ACTIVITY_ACTIONS.REGISTER_ATTENDANCE]: { icon: '📋', label: 'Asistencia Registrada', color: 'blue'},
     
-    [ACTIVITY_ACTIONS.CREATE_SUBCONTRACT]: { icon: '📑', label: 'Subcontrato Creado', color: 'blue' },
-    [ACTIVITY_ACTIONS.UPDATE_SUBCONTRACT]: { icon: '✏️', label: 'Subcontrato Editado', color: 'yellow' },
-    [ACTIVITY_ACTIONS.DELETE_SUBCONTRACT]: { icon: '🗑️', label: 'Subcontrato Eliminado', color: 'red' },
+    [ACTIVITY_ACTIONS.CREATE_SUBCONTRACT]: { icon: '📑', label: 'Subcontrato Creado', color: 'blue'},
+    [ACTIVITY_ACTIONS.UPDATE_SUBCONTRACT]: { icon: '✏️', label: 'Subcontrato Editado', color: 'yellow'},
+    [ACTIVITY_ACTIONS.DELETE_SUBCONTRACT]: { icon: '🗑️', label: 'Subcontrato Eliminado', color: 'red'},
     
-    [ACTIVITY_ACTIONS.ADD_MATERIAL]: { icon: '🧱', label: 'Material Agregado', color: 'green' },
-    [ACTIVITY_ACTIONS.UPDATE_MATERIAL]: { icon: '✏️', label: 'Material Editado', color: 'yellow' },
-    [ACTIVITY_ACTIONS.DELETE_MATERIAL]: { icon: '🗑️', label: 'Material Eliminado', color: 'red' },
-    [ACTIVITY_ACTIONS.CREATE_PURCHASE]: { icon: '🛒', label: 'Compra Creada', color: 'blue' }
+    [ACTIVITY_ACTIONS.ADD_MATERIAL]: { icon: '🧱', label: 'Material Agregado', color: 'green'},
+    [ACTIVITY_ACTIONS.UPDATE_MATERIAL]: { icon: '✏️', label: 'Material Editado', color: 'yellow'},
+    [ACTIVITY_ACTIONS.DELETE_MATERIAL]: { icon: '🗑️', label: 'Material Eliminado', color: 'red'},
+    [ACTIVITY_ACTIONS.CREATE_PURCHASE]: { icon: '🛒', label: 'Compra Creada', color: 'blue'}
   };
-
-  const info = actionInfo[action] || { icon: '📊', label: 'Actividad', color: 'gray' };
+  const info = actionInfo[action] || { icon: '📊', label: 'Actividad', color: 'gray'};
   const variant = getActionBadgeVariant(info.color);
-
   let description = '';
   
   switch (action) {
@@ -141,7 +136,6 @@ export function getActivityDisplayInfo(log: ActivityLog): ActivityDisplayInfo {
     default:
       description = `Actividad en ${target_table}`;
   }
-
   return {
     ...info,
     variant,

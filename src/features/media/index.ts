@@ -3,7 +3,6 @@
  * 
  * Exporta todas las funcionalidades del módulo de Media
  */
-
 // Types
 export type { 
   MediaFile, 
@@ -21,7 +20,6 @@ export type {
   UploadMediaInputV2,
   UploadMediaResultV2
 } from './types';
-
 // Constants
 export { 
   FILE_TYPES, 
@@ -30,7 +28,6 @@ export {
   QUERY_KEYS,
   STORAGE_BUCKETS
 } from './constants';
-
 // Schemas
 export { 
   mediaFileSchema,
@@ -38,7 +35,6 @@ export {
   documentFileSchema,
   uploadMediaSchema
 } from './schemas';
-
 // Services
 export { getCurrentProject } from './services/getCurrentProject';
 export { getGalleryFiles } from './services/getGalleryFiles';
@@ -48,13 +44,11 @@ export { uploadMediaFile } from './services/uploadMediaFile';
 export { uploadMediaFileV2 } from './services/uploadMediaFileV2';
 export { getGalleryFilesV2 } from './services/getGalleryFilesV2';
 export { deleteMediaFileV2, deleteMultipleMediaFilesV2 } from './services/deleteMediaFileV2';
-
 // Hooks
 export { useCurrentProject } from './hooks/use-current-project';
 export { useGalleryFiles } from './hooks/use-gallery-files';
 export { useDeleteMediaFile } from './hooks/use-delete-media-file';
 export { useUploadMediaFile } from './hooks/use-upload-media-file';
 export { useMediaMetrics } from './hooks/use-media-metrics';
-
 // Components
 export { MediaStatsSection } from './components/MediaStatsSection';

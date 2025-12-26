@@ -1,9 +1,7 @@
 /**
  * Zod validation schemas for finances feature
  */
-
 import { z } from "zod";
-
 // Ejemplo: Schema de validación para crear un movimiento financiero
 export const financialMovementSchema = z.object({
   movement_type: z.enum(['income', 'expense', 'transfer'], {
@@ -16,5 +14,4 @@ export const financialMovementSchema = z.object({
   description: z.string().min(1, "La descripción es requerida"),
   movement_date: z.string().min(1, "La fecha es requerida"),
 });
-
 export type FinancialMovementFormData = z.infer<typeof financialMovementSchema>;

@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getGalleryFilesV2 } from '../services/getGalleryFilesV2';
 import { QUERY_KEYS } from '../constants';
-
 /**
  * Hook para obtener archivos de galería usando nueva arquitectura (media_files + media_links).
  * 

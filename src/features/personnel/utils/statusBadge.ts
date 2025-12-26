@@ -1,34 +1,31 @@
 import type { BadgeVariant } from '@/components/ui/badge';
-
-export type PersonnelPaymentStatus = 'confirmed' | 'pending' | 'rejected' | 'void';
-
+export type PersonnelPaymentStatus = 'confirmed'| 'pending'| 'rejected'| 'void';
 export interface StatusBadgeConfig {
   label: string;
   variant: BadgeVariant;
   className: string;
 }
-
 export function getPersonnelPaymentStatusBadgeConfig(status: PersonnelPaymentStatus): StatusBadgeConfig {
   const statusConfig: Record<PersonnelPaymentStatus, StatusBadgeConfig> = {
     confirmed: { 
       label: 'Confirmado', 
       variant: 'success', 
-      className: '' 
+      className: ''
     },
     pending: { 
       label: 'Pendiente', 
       variant: 'pending', 
-      className: '' 
+      className: ''
     },
     rejected: { 
       label: 'Rechazado', 
       variant: 'error', 
-      className: '' 
+      className: ''
     },
     void: { 
       label: 'Anulado', 
       variant: 'neutral', 
-      className: '' 
+      className: ''
     },
   };
   

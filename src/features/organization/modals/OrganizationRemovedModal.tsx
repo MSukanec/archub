@@ -11,26 +11,22 @@ import { useAuthStore } from '@/stores/authStore';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-
 export function OrganizationRemovedModal() {
   const { data: userData, isLoading } = useCurrentUser();
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
   const [isSwitching, setIsSwitching] = useState(false);
   const { toast } = useToast();
   const { logout } = useAuthStore();
-
   // Check if user is in an invalid organization
   const currentOrgId = userData?.preferences?.last_organization_id;
   const availableOrgs = userData?.organizations || [];
   const isInvalidOrg = currentOrgId && !availableOrgs.some(org => org.id === currentOrgId);
-
   // Auto-select first organization
   useEffect(() => {
     if (isInvalidOrg && availableOrgs.length > 0 && !selectedOrgId) {
       setSelectedOrgId(availableOrgs[0].id);
     }
   }, [isInvalidOrg, availableOrgs, selectedOrgId]);
-
   const handleSwitch = async () => {
     if (!selectedOrgId) return;
     
@@ -52,16 +48,13 @@ export function OrganizationRemovedModal() {
       setIsSwitching(false);
     }
   };
-
   const handleLogout = async () => {
     await logout();
   };
-
   // Don't show modal if loading or if organization is valid
   if (isLoading || !isInvalidOrg) {
     return null;
   }
-
   // CASE 1: User has no organizations left - Force logout
   if (availableOrgs.length === 0) {
     const editPanel = (
@@ -78,7 +71,6 @@ export function OrganizationRemovedModal() {
         </div>
       </div>
     );
-
     const headerContent = (
       <FormModalHeader 
         title="Acceso Removido"
@@ -86,7 +78,6 @@ export function OrganizationRemovedModal() {
         icon={AlertCircle}
       />
     );
-
     const footerContent = (
       <FormModalFooter
         onSubmit={handleLogout}
@@ -94,7 +85,6 @@ export function OrganizationRemovedModal() {
         submitVariant="destructive"
       />
     );
-
     return (
       <FormModalLayout
         columns={1}
@@ -109,7 +99,6 @@ export function OrganizationRemovedModal() {
       />
     );
   }
-
   // CASE 2: User has other organizations available - Show selector
   const editPanel = (
     <div className="space-y-6">
@@ -125,7 +114,6 @@ export function OrganizationRemovedModal() {
           </p>
         </div>
       </div>
-
       <div className="space-y-3">
         <Label className="text-sm font-medium">Organizaciones disponibles</Label>
         <RadioGroup value={selectedOrgId || ''} onValueChange={setSelectedOrgId}>
@@ -154,14 +142,14 @@ export function OrganizationRemovedModal() {
                   <div className="flex-1 min-w-0">
                     <div className="font-medium truncate">{org.name}</div>
                     <div className="text-xs text-muted-foreground">
-                      {org.members_count} {org.members_count === 1 ? 'miembro' : 'miembros'}
+                      {org.members_count} {org.members_count === 1 ? 'miembro': 'miembros'}
                     </div>
                   </div>
                   
                   <Badge 
                     className="ml-auto"
                   >
-                    {org.plan?.name === 'free' ? 'Gratis' : org.plan?.name === 'pro' ? 'Pro' : 'Teams'}
+                    {org.plan?.name === 'free'? 'Gratis': org.plan?.name === 'pro'? 'Pro': 'Teams'}
                   </Badge>
                 </Label>
               </div>
@@ -171,7 +159,6 @@ export function OrganizationRemovedModal() {
       </div>
     </div>
   );
-
   const headerContent = (
     <FormModalHeader 
       title="Cambiar de Organización"
@@ -179,18 +166,16 @@ export function OrganizationRemovedModal() {
       icon={Building2}
     />
   );
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cerrar sesión"
       onLeftClick={handleLogout}
-      rightLabel={isSwitching ? 'Cambiando...' : 'Cambiar organización'}
+      rightLabel={isSwitching ? 'Cambiando...': 'Cambiar organización'}
       onRightClick={handleSwitch}
       submitDisabled={!selectedOrgId || isSwitching}
       showLoadingSpinner={isSwitching}
     />
   );
-
   return (
     <FormModalLayout
       columns={1}

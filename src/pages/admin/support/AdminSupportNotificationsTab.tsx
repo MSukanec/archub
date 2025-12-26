@@ -8,7 +8,6 @@ import { useToast } from '@/hooks/use-toast'
 import { Edit, Trash2, Bell } from 'lucide-react'
 import { formatDateCompact } from '@/lib/date-utils'
 import { useGlobalModalStore } from '@/components/modal'
-
 interface Notification {
   id: string;
   type: string;
@@ -27,18 +26,15 @@ interface Notification {
   delivery_count?: number;
   read_count?: number;
 }
-
 const AdminSupportNotificationsTab = () => {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { openModal } = useGlobalModalStore()
-
   // Fetch notifications
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ['admin-notifications'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
-
       const { data, error } = await supabase
         .from('notifications')
         .select(`
@@ -52,12 +48,10 @@ const AdminSupportNotificationsTab = () => {
           created_by
         `)
         .order('created_at', { ascending: false });
-
       if (error) {
         console.error('Error fetching notifications:', error);
         throw error;
       }
-
       // Obtener los usuarios creadores
       const creatorIds = Array.from(new Set(data.map(n => n.created_by).filter(Boolean)));
       
@@ -65,7 +59,6 @@ const AdminSupportNotificationsTab = () => {
         .from('users')
         .select('id, full_name, email, avatar_url')
         .in('id', creatorIds) : { data: [], error: null };
-
       // Obtener conteos de entregas y lecturas para cada notificación
       const notificationsWithStats = await Promise.all(
         data.map(async (notification) => {
@@ -80,7 +73,6 @@ const AdminSupportNotificationsTab = () => {
               .eq('notification_id', notification.id)
               .not('read_at', 'is', null)
           ]);
-
           return {
             ...notification,
             creator: usersResult.data?.find(user => user.id === notification.created_by) || null,
@@ -89,15 +81,12 @@ const AdminSupportNotificationsTab = () => {
           };
         })
       );
-
       return notificationsWithStats;
     }
   })
-
   const handleEdit = (notification: Notification) => {
     openModal('notification', { notification, isEditing: true });
   };
-
   const handleDelete = (notification: Notification) => {
     openModal('delete-confirmation', {
       title: 'Eliminar notificación',
@@ -129,7 +118,6 @@ const AdminSupportNotificationsTab = () => {
       }
     });
   };
-
   const getTypeBadgeVariant = (type: string) => {
     switch (type) {
       case 'success':
@@ -144,7 +132,6 @@ const AdminSupportNotificationsTab = () => {
         return 'outline';
     }
   };
-
   const getAudienceLabel = (audience: string) => {
     switch (audience) {
       case 'all':
@@ -159,7 +146,6 @@ const AdminSupportNotificationsTab = () => {
         return audience;
     }
   };
-
   const columns = [
     {
       key: 'title',
@@ -225,7 +211,6 @@ const AdminSupportNotificationsTab = () => {
       )
     }
   ]
-
   return (
     <div className="space-y-6">
       {/* Notifications Table */}
@@ -243,7 +228,7 @@ const AdminSupportNotificationsTab = () => {
             icon: Trash2,
             label: 'Eliminar',
             onClick: () => handleDelete(notification),
-            variant: 'destructive' as const
+            variant: 'destructive'as const
           }
         ]}
         emptyState={
@@ -257,5 +242,4 @@ const AdminSupportNotificationsTab = () => {
     </div>
   )
 }
-
 export default AdminSupportNotificationsTab

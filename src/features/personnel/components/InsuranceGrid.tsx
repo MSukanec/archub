@@ -7,12 +7,10 @@ import { AttachmentBadge } from './AttachmentBadge'
 import { InsuranceStatusRow } from '@/features/personnel/services/insurances'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-
 interface InsuranceGridProps {
   data: InsuranceStatusRow[]
   isLoading: boolean
 }
-
 const INSURANCE_TYPE_LABELS = {
   'ART': 'ART',
   'vida': 'Vida',
@@ -21,7 +19,6 @@ const INSURANCE_TYPE_LABELS = {
   'salud': 'Salud',
   'otro': 'Otro'
 } as const
-
 const getStatusBadge = (status: string, daysToExpiry: number) => {
   switch (status) {
     case 'vigente':
@@ -46,7 +43,6 @@ const getStatusBadge = (status: string, daysToExpiry: number) => {
       return <Badge variant="outline">{status}</Badge>
   }
 }
-
 export function InsuranceGrid({ data, isLoading }: InsuranceGridProps) {
   if (isLoading) {
     return (
@@ -55,7 +51,6 @@ export function InsuranceGrid({ data, isLoading }: InsuranceGridProps) {
       </div>
     )
   }
-
   return (
     <Table
       data={data}

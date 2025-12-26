@@ -10,13 +10,11 @@ import { Receipt, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-
 interface BankTransferReceiptModalProps {
   btpId: string;
   paymentId: string;
   hasReceipt?: boolean;
 }
-
 export default function BankTransferReceiptModal({
   btpId,
   paymentId,
@@ -29,7 +27,6 @@ export default function BankTransferReceiptModal({
   useEffect(() => {
     setPanel('edit');
   }, [setPanel]);
-
   const { data: signedUrlData, isLoading: loadingUrl, error: urlError } = useQuery({
     queryKey: ['/api/admin/bank-transfer/receipt', btpId],
     queryFn: async () => {
@@ -48,9 +45,7 @@ export default function BankTransferReceiptModal({
     enabled: !!btpId && hasReceipt,
     staleTime: 30 * 60 * 1000,
   });
-
   const receiptUrl = signedUrlData?.signed_url || null;
-
   const approvePaymentMutation = useMutation({
     mutationFn: async (paymentId: string) => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -83,27 +78,22 @@ export default function BankTransferReceiptModal({
       });
     },
   });
-
   const handleSubmit = () => {
     approvePaymentMutation.mutate(paymentId);
   };
-
   const handleCancel = () => {
     closeModal();
   };
-
   const isPDF = receiptUrl?.toLowerCase().endsWith('.pdf');
-
   const headerContent = (
     <FormModalHeader 
       title="Comprobante de Transferencia"
       icon={Receipt}
     />
   );
-
   const editPanel = (
     <FormModalBody columns={1} className="p-0">
-      <div className="w-full px-6 py-4" style={{ height: 'calc(100vh - 250px)', minHeight: '500px' }}>
+      <div className="w-full px-6 py-4" style={{ height: 'calc(100vh - 250px)', minHeight: '500px'}}>
         {!hasReceipt ? (
           <div className="w-full h-full border rounded-lg flex items-center justify-center bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800">
             <div className="flex flex-col items-center gap-3 text-center px-8">
@@ -150,7 +140,6 @@ export default function BankTransferReceiptModal({
       </div>
     </FormModalBody>
   );
-
   const isLoadingReceipt = hasReceipt && loadingUrl;
   
   const footerContent = (
@@ -163,7 +152,6 @@ export default function BankTransferReceiptModal({
       showLoadingSpinner={approvePaymentMutation.isPending}
     />
   );
-
   return (
     <FormModalLayout
       wide={true}

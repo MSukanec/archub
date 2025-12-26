@@ -8,7 +8,6 @@ import { updatePartnerContribution } from '../services/updatePartnerContribution
 import { deletePartnerContribution } from '../services/deletePartnerContribution';
 import { capitalKeys } from '@/core/query-keys';
 import type { PartnerContribution, PartnerContributionCreateInput } from '../types';
-
 export function usePartnerContributions(
   organizationId: string | undefined,
   projectId?: string
@@ -19,7 +18,6 @@ export function usePartnerContributions(
     enabled: !!organizationId,
   });
 }
-
 export function usePartnerContribution(
   contributionId: string | undefined,
   organizationId: string | undefined
@@ -30,10 +28,8 @@ export function usePartnerContribution(
     enabled: !!contributionId && !!organizationId,
   });
 }
-
 export function useCreatePartnerContribution() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (input: PartnerContributionCreateInput) => createPartnerContribution(input),
     onSuccess: (data) => {
@@ -45,10 +41,8 @@ export function useCreatePartnerContribution() {
     },
   });
 }
-
 export function useUpdatePartnerContribution() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       contributionId,
@@ -56,7 +50,7 @@ export function useUpdatePartnerContribution() {
       organizationId,
     }: {
       contributionId: string;
-      updates: Partial<Omit<PartnerContribution, 'id' | 'created_at' | 'organization_id' | 'created_by'>>;
+      updates: Partial<Omit<PartnerContribution, 'id'| 'created_at'| 'organization_id'| 'created_by'>>;
       organizationId: string;
     }) => updatePartnerContribution(contributionId, updates, organizationId),
     onSuccess: (data) => {
@@ -71,10 +65,8 @@ export function useUpdatePartnerContribution() {
     },
   });
 }
-
 export function useDeletePartnerContribution() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       contributionId,

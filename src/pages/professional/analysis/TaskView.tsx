@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { CheckSquare, Plus } from 'lucide-react';
-
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { TaskCostsView } from './tabs/TaskCostsView';
 import { TaskBasicDataView } from './tabs/TaskBasicDataView';
 import { useGeneratedTask } from "@/hooks/use-generated-tasks";
 import { useGlobalModalStore } from '@/components/modal';
-
 export default function TaskView() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
@@ -23,16 +21,14 @@ export default function TaskView() {
     const storedSource = localStorage.getItem('taskViewSource');
     const referrer = document.referrer;
     
-    if (storedSource === 'admin' || referrer.includes('/admin/tasks')) {
+    if (storedSource === 'admin'|| referrer.includes('/admin/tasks')) {
       return 'admin';
-    } else if (storedSource === 'budgets' || referrer.includes('/budgets')) {
+    } else if (storedSource === 'budgets'|| referrer.includes('/budgets')) {
       return 'budgets';
     }
     return 'analysis';
   };
-
   const navigationSource = getNavigationSource();
-
   const headerTabs = [
     {
       id: 'Datos Básicos',
@@ -45,9 +41,7 @@ export default function TaskView() {
       isActive: activeTab === 'Costos'
     }
   ];
-
   // Mostrar nombre completo sin truncar
-
   const headerProps = {
     icon: CheckSquare,
     title: task?.custom_name || task?.name_rendered || "Tarea",
@@ -78,7 +72,7 @@ export default function TaskView() {
     isViewMode: true,
     tabs: headerTabs,
     onTabChange: setActiveTab,
-    actionButton: activeTab === 'Costos' ? {
+    actionButton: activeTab === 'Costos'? {
       icon: Plus,
       label: "Agregar Costo",
       onClick: () => {
@@ -86,7 +80,6 @@ export default function TaskView() {
       }
     } : undefined
   };
-
   if (isLoading) {
     return (
       <Layout headerProps={headerProps} wide>
@@ -98,7 +91,6 @@ export default function TaskView() {
       </Layout>
     );
   }
-
   if (!task) {
     return (
       <Layout headerProps={headerProps} wide>
@@ -111,7 +103,6 @@ export default function TaskView() {
       </Layout>
     );
   }
-
   const renderTabContent = () => {
     switch (activeTab) {
       case 'Datos Básicos':
@@ -131,7 +122,6 @@ export default function TaskView() {
         return null;
     }
   };
-
   return (
     <Layout headerProps={headerProps} wide>
       {renderTabContent()}

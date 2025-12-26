@@ -1,7 +1,6 @@
 import { Bell } from 'lucide-react'
 import { FormModalHeader, FormModalFooter, FormModalLayout } from '@/components/modal'
 import { FormPanel, ViewPanel, useAnnouncementForm, type Announcement } from '../forms/AdminAnnouncementForm'
-
 interface AnnouncementModalProps {
   modalData?: {
     announcement?: Announcement
@@ -9,10 +8,8 @@ interface AnnouncementModalProps {
   }
   onClose: () => void
 }
-
 export function AdminAnnouncementModal({ modalData, onClose }: AnnouncementModalProps) {
   const { announcement } = modalData || {}
-
   const {
     form,
     onSubmit,
@@ -21,25 +18,22 @@ export function AdminAnnouncementModal({ modalData, onClose }: AnnouncementModal
     announcement,
     onSuccess: onClose,
   })
-
   const headerContent = (
     <FormModalHeader 
-      title={announcement ? 'Editar Anuncio' : 'Nuevo Anuncio'}
-      description={announcement ? 'Actualiza la información del anuncio global' : 'Crea un nuevo anuncio que aparecerá en todo el sistema'}
+      title={announcement ? 'Editar Anuncio': 'Nuevo Anuncio'}
+      description={announcement ? 'Actualiza la información del anuncio global': 'Crea un nuevo anuncio que aparecerá en todo el sistema'}
       icon={Bell}
     />
   )
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel={announcement ? 'Actualizar' : 'Crear Anuncio'}
+      rightLabel={announcement ? 'Actualizar': 'Crear Anuncio'}
       onRightClick={form.handleSubmit(onSubmit)}
       isSubmitting={isSubmitting}
     />
   )
-
   return (
     <FormModalLayout
       columns={1}

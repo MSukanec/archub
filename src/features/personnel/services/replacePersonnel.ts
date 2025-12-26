@@ -1,5 +1,4 @@
 import { apiRequest } from '@/lib/queryClient';
-
 export async function replacePersonnel(
   oldPersonnelId: string,
   newPersonnelId: string,
@@ -12,7 +11,6 @@ export async function replacePersonnel(
       new_personnel_id: newPersonnelId,
     }
   );
-
   if (response.ok) {
     const result = await response.json();
     if (!result.success) {
@@ -20,7 +18,6 @@ export async function replacePersonnel(
     }
     return { oldId: oldPersonnelId, newId: newPersonnelId };
   }
-
   const errorData = await response.json();
   throw new Error(errorData.error || 'Failed to replace personnel');
 }

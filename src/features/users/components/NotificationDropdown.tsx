@@ -14,18 +14,15 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-
 interface NotificationDropdownProps {
   userId: string;
   onRefresh: () => void;
   onClose: () => void;
 }
-
 export function NotificationDropdown({ userId, onRefresh, onClose }: NotificationDropdownProps) {
   const [, navigate] = useLocation();
   const [notifications, setNotifications] = useState<UserNotificationRow[]>([]);
   const [loading, setLoading] = useState(true);
-
   const loadNotifications = async () => {
     try {
       const data = await fetchNotifications(userId, 30, 0);
@@ -36,11 +33,9 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
       setLoading(false);
     }
   };
-
   useEffect(() => {
     loadNotifications();
   }, [userId]);
-
   const handleNotificationClick = async (notification: UserNotificationRow) => {
     try {
       if (!notification.read_at) {
@@ -48,7 +43,6 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
         onRefresh();
         await loadNotifications();
       }
-
       const href = resolveNotificationHref(notification);
       navigate(href);
       onClose();
@@ -56,7 +50,6 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
       console.error('Error handling notification click:', error);
     }
   };
-
   const handleMarkAllAsRead = async () => {
     try {
       await markAllAsRead(userId);
@@ -66,11 +59,9 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
       console.error('Error marking all as read:', error);
     }
   };
-
   const unreadNotifications = notifications.filter(n => !n.read_at);
   const displayNotifications = notifications.slice(0, 5);
   const hasNotifications = notifications.length > 0;
-
   return (
     <div className="flex flex-col">
       <div className="p-4 pb-3">
@@ -92,7 +83,6 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
       </div>
       
       <Separator />
-
       <div className={cn(!hasNotifications && "max-h-32", hasNotifications && "max-h-[280px]")}>
         {loading ? (
           <div className="p-8 text-center text-sm text-muted-foreground">
@@ -113,7 +103,6 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
                       locale: es,
                     })
                   : '';
-
                 return (
                   <button
                     key={notification.id}
@@ -147,7 +136,6 @@ export function NotificationDropdown({ userId, onRefresh, onClose }: Notificatio
           </ScrollArea>
         )}
       </div>
-
       {/* Botón "Ver todas" al final */}
       {hasNotifications && (
         <>

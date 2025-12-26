@@ -19,14 +19,12 @@ import {
   formatContactName,
   groupContactsByLetter,
 } from '@/features/contacts';
-
 export function ContactsView() {
   const [searchValue, setSearchValue] = useState('');
   const [filterByType, setFilterByType] = useState('all');
   const [showSearch, setShowSearch] = useState(false);
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
-
   const { data: userData, isLoading } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   const { data: contacts = [], isLoading: contactsLoading } = useContacts(organizationId);
@@ -35,7 +33,6 @@ export function ContactsView() {
   const { toast } = useToast();
   const { setActions, setShowActionBar, clearActions, setFilterConfig } = useActionBarMobile();
   const isMobile = useMobile();
-
   useEffect(() => {
     if (isMobile) {
       setActions({
@@ -69,14 +66,12 @@ export function ContactsView() {
       });
       setShowActionBar(true);
     }
-
     return () => {
       if (isMobile) {
         clearActions();
       }
     };
   }, [isMobile, openModal, clearActions, setActions, setShowActionBar]);
-
   useEffect(() => {
     if (isMobile && contactTypes && contactTypes.length > 0) {
       setFilterConfig({
@@ -101,15 +96,12 @@ export function ContactsView() {
       });
     }
   }, [isMobile, contactTypes, filterByType, setFilterConfig]);
-
   useEffect(() => {
     setSearchValue('');
     setFilterByType('all');
   }, [userData?.preferences?.last_organization_id]);
-
   const filteredContacts = useMemo(() => {
     let filtered = [...contacts];
-
     if (searchValue) {
       filtered = filtered.filter(
         (contact) =>
@@ -120,7 +112,6 @@ export function ContactsView() {
           contact.company_name?.toLowerCase().includes(searchValue.toLowerCase())
       );
     }
-
     if (filterByType !== 'all') {
       filtered = filtered.filter(
         (contact) =>
@@ -128,14 +119,11 @@ export function ContactsView() {
           contact.contact_types.some((type) => type.name.toLowerCase() === filterByType)
       );
     }
-
     return filtered;
   }, [contacts, searchValue, filterByType]);
-
   const groupedContacts = useMemo(() => {
     return groupContactsByLetter(filteredContacts);
   }, [filteredContacts]);
-
   const handleViewContact = (contact: any) => {
     openModal('contact', {
       contactId: contact.id,
@@ -143,7 +131,6 @@ export function ContactsView() {
       mode: 'view',
     });
   };
-
   const handleEditContact = (contact: any) => {
     openModal('contact', {
       contactId: contact.id,
@@ -151,7 +138,6 @@ export function ContactsView() {
       mode: 'edit',
     });
   };
-
   const handleDeleteContact = (contact: any) => {
     if (!organizationId) {
       toast({
@@ -161,9 +147,7 @@ export function ContactsView() {
       });
       return;
     }
-
     const contactName = formatContactName(contact);
-
     showDeleteConfirmation({
       mode: 'dangerous',
       title: 'Eliminar contacto',
@@ -177,7 +161,6 @@ export function ContactsView() {
       isLoading: deleteContactMutation.isPending,
     });
   };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -185,7 +168,6 @@ export function ContactsView() {
       </div>
     );
   }
-
   if (contacts.length === 0 && !searchValue && filterByType === 'all') {
     return (
       <div className="p-6">
@@ -203,7 +185,6 @@ export function ContactsView() {
       </div>
     );
   }
-
   if (isMobile) {
     return (
       <div className="h-full overflow-y-auto scrollbar-hide p-6">
@@ -247,7 +228,6 @@ export function ContactsView() {
       </div>
     );
   }
-
   return (
     <ContactList
       contacts={filteredContacts}

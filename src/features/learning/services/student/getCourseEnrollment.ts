@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import { getUserByAuthId } from '@/lib/supabase-helpers';
-
 /**
  * Obtiene el enrollment del usuario para un curso específico.
  * 
@@ -22,7 +21,6 @@ export async function getCourseEnrollment(
   if (!courseId || !userId || !supabase) {
     return null;
   }
-
   // Si el userId es un UUID del usuario, usarlo directamente
   // Si es un auth_id, obtener el user_id primero
   let actualUserId = userId;
@@ -33,17 +31,14 @@ export async function getCourseEnrollment(
   if (userRecord) {
     actualUserId = userRecord.id;
   }
-
   const { data, error } = await supabase
     .from('course_enrollments')
     .select('*')
     .eq('course_id', courseId)
     .eq('user_id', actualUserId)
     .maybeSingle();
-
   if (error) {
     throw error;
   }
-
   return data;
 }

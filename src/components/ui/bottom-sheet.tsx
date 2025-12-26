@@ -1,18 +1,12 @@
 "use client"
-
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
-
 const BottomSheet = DialogPrimitive.Root
-
 const BottomSheetTrigger = DialogPrimitive.Trigger
-
 const BottomSheetPortal = DialogPrimitive.Portal
-
 const BottomSheetClose = DialogPrimitive.Close
-
 const BottomSheetOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
@@ -27,7 +21,6 @@ const BottomSheetOverlay = React.forwardRef<
   />
 ))
 BottomSheetOverlay.displayName = DialogPrimitive.Overlay.displayName
-
 const BottomSheetContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
@@ -59,7 +52,6 @@ const BottomSheetContent = React.forwardRef<
   </BottomSheetPortal>
 ))
 BottomSheetContent.displayName = DialogPrimitive.Content.displayName
-
 const BottomSheetHeader = ({
   className,
   ...props
@@ -70,12 +62,11 @@ const BottomSheetHeader = ({
       "border-b",
       className
     )}
-    style={{ borderColor: 'var(--card-border)' }}
+    style={{ borderColor: 'var(--card-border)'}}
     {...props}
   />
 )
 BottomSheetHeader.displayName = "BottomSheetHeader"
-
 const BottomSheetBody = ({
   className,
   ...props
@@ -86,7 +77,6 @@ const BottomSheetBody = ({
   />
 )
 BottomSheetBody.displayName = "BottomSheetBody"
-
 const BottomSheetFooter = ({
   className,
   ...props
@@ -97,12 +87,11 @@ const BottomSheetFooter = ({
       "border-t",
       className
     )}
-    style={{ borderColor: 'var(--card-border)' }}
+    style={{ borderColor: 'var(--card-border)'}}
     {...props}
   />
 )
 BottomSheetFooter.displayName = "BottomSheetFooter"
-
 const BottomSheetTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
@@ -113,12 +102,11 @@ const BottomSheetTitle = React.forwardRef<
       "text-lg font-semibold",
       className
     )}
-    style={{ color: 'var(--main-sidebar-fg)' }}
+    style={{ color: 'var(--main-sidebar-fg)'}}
     {...props}
   />
 ))
 BottomSheetTitle.displayName = DialogPrimitive.Title.displayName
-
 const BottomSheetDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
@@ -126,12 +114,11 @@ const BottomSheetDescription = React.forwardRef<
   <DialogPrimitive.Description
     ref={ref}
     className={cn("text-sm", className)}
-    style={{ color: 'var(--text-secondary)' }}
+    style={{ color: 'var(--text-secondary)'}}
     {...props}
   />
 ))
 BottomSheetDescription.displayName = DialogPrimitive.Description.displayName
-
 export {
   BottomSheet,
   BottomSheetPortal,

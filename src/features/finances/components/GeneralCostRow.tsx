@@ -3,18 +3,16 @@ import DataRowCard from '@/components/shared/DataRowCard';
 import { SwipeableCard } from '@/layouts';
 import { Edit, Trash2 } from 'lucide-react';
 import type { GeneralCost } from '@/features/general-costs/types';
-
 interface GeneralCostRowProps {
   generalCost: GeneralCost;
   onClick?: (generalCost: GeneralCost) => void;
   onEdit?: (generalCost: GeneralCost) => void;
   onDelete?: (generalCost: GeneralCost) => void;
   selected?: boolean;
-  density?: 'compact' | 'normal' | 'comfortable';
+  density?: 'compact'| 'normal'| 'comfortable';
   showChevron?: boolean;
   enableSwipe?: boolean;
 }
-
 // Utility function to get initials from name
 const getInitials = (name: string): string => {
   if (!name) return "GG";
@@ -25,7 +23,6 @@ const getInitials = (name: string): string => {
     .toUpperCase()
     .slice(0, 2);
 };
-
 export default function GeneralCostRow({ 
   generalCost, 
   onClick, 
@@ -40,10 +37,8 @@ export default function GeneralCostRow({
     name,
     description,
   } = generalCost;
-
   // Get initials for avatar fallback
   const avatarFallback = getInitials(name);
-
   // Contenido interno del card usando el nuevo sistema
   const cardContent = (
     <>
@@ -53,7 +48,6 @@ export default function GeneralCostRow({
         <div className="font-semibold text-sm truncate">
           {name}
         </div>
-
         {/* Description */}
         {description && (
           <div className="text-muted-foreground text-sm truncate mt-1">
@@ -61,7 +55,6 @@ export default function GeneralCostRow({
           </div>
         )}
       </div>
-
       {/* Trailing section - Solo espacio para chevron si es necesario */}
       {(showChevron || onClick) && (
         <div className="flex items-center">
@@ -70,7 +63,6 @@ export default function GeneralCostRow({
       )}
     </>
   );
-
   // Usar el nuevo DataRowCard
   const generalCostCard = (
     <DataRowCard
@@ -82,7 +74,6 @@ export default function GeneralCostRow({
       {cardContent}
     </DataRowCard>
   );
-
   // If swipe is enabled and we have edit/delete handlers, wrap in SwipeableCard
   if (enableSwipe && (onEdit || onDelete)) {
     const swipeActions = [];
@@ -104,13 +95,11 @@ export default function GeneralCostRow({
         onClick: () => onDelete(generalCost),
       });
     }
-
     return (
       <SwipeableCard actions={swipeActions}>
         {generalCostCard}
       </SwipeableCard>
     );
   }
-
   return generalCostCard;
 }

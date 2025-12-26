@@ -2,13 +2,11 @@ import { useState, useMemo, useEffect } from "react";
 import { Plus, Edit, Trash2, Search, Filter, Bell, Layers, CheckCircle, XCircle, DollarSign } from "lucide-react";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { SparklineChart } from '@/components/charts/sparkline/SparklineChart';
-
 import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Button } from "@/components/ui/button";
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard';
-
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/shared/AppCard';
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal';
 import { useGeneralCosts } from "@/features/general-costs/hooks/use-general-costs";
@@ -23,11 +21,9 @@ import { convertToBaseCurrency, format as formatMoneyAmount, formatSubValue } fr
 import { calculateMonetaryKPI, calculateCountKPI } from '@/lib/kpis';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { parseLocalDate } from '@/lib/date-utils';
-
 interface GeneralCostsListProps {
   onNewGeneralCost?: () => void;
 }
-
 export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCostsListProps) {
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
@@ -36,7 +32,6 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
   const replaceGeneralCost = useReplaceGeneralCost(organizationId);
   
   const [searchQuery, setSearchQuery] = useState('');
-
   // Mobile Action Bar
   const {
     setActions,
@@ -46,14 +41,12 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
     setSearchValue: setMobileSearchValue
   } = useActionBarMobile();
   const isMobile = useMobile();
-
   // Sync search values between mobile and desktop
   useEffect(() => {
     if (isMobile && mobileSearchValue !== searchQuery) {
       setSearchQuery(mobileSearchValue);
     }
   }, [mobileSearchValue, isMobile]);
-
   const handleCreateGeneralCost = () => {
     if (onNewGeneralCost) {
       onNewGeneralCost();
@@ -63,15 +56,12 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
       });
     }
   };
-
   const { data: generalCosts = [], isLoading } = useGeneralCosts(organizationId);
   const { data: payments = [] } = useGeneralCostsPayments(organizationId ?? undefined);
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId ?? undefined);
-
   // Configure Mobile Action Bar
   useEffect(() => {
     if (!isMobile) return;
-
     setActions({
       search: {
         id: 'search',
@@ -100,14 +90,12 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
       },
     });
     setShowActionBar(true);
-
     return () => {
       clearActions();
       setShowActionBar(false);
       setMobileSearchValue('');
     };
   }, [isMobile, setActions, setShowActionBar, clearActions, setMobileSearchValue]);
-
   // Calculate KPIs
   const kpis = useMemo(() => {
     const totalConcepts = generalCosts.length;
@@ -116,7 +104,6 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
     ).length;
     const unusedConcepts = totalConcepts - usedConcepts;
     const usagePercent = totalConcepts > 0 ? Math.round((usedConcepts / totalConcepts) * 100) : 0;
-
     // Total pagado en todos los conceptos
     const totalPaid = calculateMonetaryKPI({
       items: payments.map(p => ({
@@ -128,7 +115,6 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol || '$'
     });
-
     return {
       totalConcepts: calculateCountKPI({
         count: totalConcepts,
@@ -146,7 +132,6 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
       totalPaid
     };
   }, [generalCosts, payments, defaultCurrency]);
-
   // Filter and sort
   const filteredGeneralCosts = useMemo(() => {
     return generalCosts
@@ -157,9 +142,8 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
         const categoryMatch = gc.category?.name?.toLowerCase().includes(searchLower);
         return !searchQuery || nameMatch || descriptionMatch || categoryMatch;
       })
-      .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+      .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base'}));
   }, [generalCosts, searchQuery]);
-
   // Build enriched data for table
   const enrichedGeneralCosts = useMemo(() => {
     const now = new Date();
@@ -171,7 +155,6 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
             parseLocalDate(b.payment_date)!.getTime() - parseLocalDate(a.payment_date)!.getTime()
           )[0]
         : null;
-
       // Calculate total paid - pass currency object with code for proper conversion
       const totalPaidKPI = calculateMonetaryKPI({
         items: associatedPayments.map(p => ({
@@ -183,7 +166,6 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
         baseCurrencyId: defaultCurrency?.code,
         symbol: defaultCurrency?.symbol || '$'
       });
-
       // Calculate monthly trend data (last 6 months)
       const trendData: { value: number }[] = [];
       for (let i = 5; i >= 0; i--) {
@@ -209,7 +191,6 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
         
         trendData.push({ value: monthTotal });
       }
-
       return {
         ...gc,
         paymentCount: associatedPayments.length,
@@ -220,13 +201,12 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
       };
     });
   }, [filteredGeneralCosts, payments, defaultCurrency]);
-
   // Column definitions
   const columns: Column<typeof enrichedGeneralCosts[0]>[] = useMemo(() => [
     {
-      key: 'name' as const,
+      key: 'name'as const,
       label: 'Gasto General',
-      type: 'medium-text' as const,
+      type: 'medium-text'as const,
       sortable: false,
       render: (item: typeof enrichedGeneralCosts[0]) => (
         <div className="flex flex-col gap-0.5">
@@ -238,9 +218,9 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
       )
     },
     {
-      key: 'usage' as const,
+      key: 'usage'as const,
       label: 'Uso',
-      type: 'medium-text' as const,
+      type: 'medium-text'as const,
       sortable: false,
       render: (item: typeof enrichedGeneralCosts[0]) => {
         if (item.paymentCount === 0) {
@@ -252,7 +232,7 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
         }
         return (
           <div className="flex flex-col gap-0.5">
-            <div className="text-sm font-bold">Usado {item.paymentCount} {item.paymentCount === 1 ? 'vez' : 'veces'}</div>
+            <div className="text-sm font-bold">Usado {item.paymentCount} {item.paymentCount === 1 ? 'vez': 'veces'}</div>
             {item.lastPaymentDate && (
               <div className="text-xs text-muted-foreground">
                 Último pago: {format(parseLocalDate(item.lastPaymentDate)!, 'dd/MM/yyyy')}
@@ -263,9 +243,9 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
       }
     },
     {
-      key: 'totalPaid' as const,
+      key: 'totalPaid'as const,
       label: 'Total Pagado',
-      type: 'amount' as const,
+      type: 'amount'as const,
       sortable: false,
       render: (item: typeof enrichedGeneralCosts[0]) => {
         if (item.paymentCount === 0) {
@@ -293,9 +273,9 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
       }
     },
     {
-      key: 'trend' as const,
+      key: 'trend'as const,
       label: 'Tendencia (6 meses)',
-      type: 'medium-text' as const,
+      type: 'medium-text'as const,
       sortable: false,
       render: (item: typeof enrichedGeneralCosts[0]) => (
         <SparklineChart 
@@ -305,9 +285,9 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
       )
     },
     {
-      key: 'description' as const,
+      key: 'description'as const,
       label: 'Descripción',
-      type: 'long-text' as const,
+      type: 'long-text'as const,
       sortable: false,
       render: (item: typeof enrichedGeneralCosts[0]) => (
         <span className="text-sm text-muted-foreground line-clamp-2">
@@ -316,7 +296,6 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
       )
     }
   ], [defaultCurrency]);
-
   // Handle edit
   const handleEdit = (gc: GeneralCost) => {
     openModal('general-costs', {
@@ -324,17 +303,16 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
       generalCostId: gc.id
     });
   };
-
   // Handle delete with replace logic
   const handleDelete = (gc: GeneralCost) => {
     const otherGeneralCosts = generalCosts.filter(g => g.id !== gc.id);
     const hasReplacements = otherGeneralCosts.length > 0;
-    const mode = hasReplacements ? 'replace' : 'delete';
+    const mode = hasReplacements ? 'replace': 'delete';
     const associatedPayments = payments.filter(p => p.general_cost_id === gc.id);
     
     const consequences: string[] = [];
     if (associatedPayments.length > 0) {
-      consequences.push(`${associatedPayments.length} pago${associatedPayments.length === 1 ? '' : 's'} está${associatedPayments.length === 1 ? '' : 'n'} asociado${associatedPayments.length === 1 ? '' : 's'}`);
+      consequences.push(`${associatedPayments.length} pago${associatedPayments.length === 1 ? '': 's'} está${associatedPayments.length === 1 ? '': 'n'} asociado${associatedPayments.length === 1 ? '': 's'}`);
       consequences.push('Puedes reemplazarlos con otro concepto o eliminar sin reemplazar');
     }
     
@@ -344,8 +322,8 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
       description: `¿Estás seguro de que quieres eliminar "${gc.name}"?`,
       itemName: gc.name,
       consequences: consequences.length > 0 ? consequences : undefined,
-      replacementOptions: mode === 'replace' ? otherGeneralCosts
-        .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
+      replacementOptions: mode === 'replace'? otherGeneralCosts
+        .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base'}))
         .map(g => ({ label: g.name, value: g.id })) : undefined,
       currentId: gc.id,
       onDelete: () => {
@@ -356,7 +334,6 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
       }
     });
   };
-
   if (isLoading) {
     return (
       <div className="text-center py-8">
@@ -364,7 +341,6 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
       </div>
     );
   }
-
   if (generalCosts.length === 0) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -382,7 +358,6 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* KPIs */}
@@ -399,7 +374,6 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
             Conceptos activos
           </StatCardMeta>
         </StatCard>
-
         <StatCard data-testid="stat-card-used-concepts">
           <StatCardTitle showArrow={false}>
             <CheckCircle className="h-4 w-4" />
@@ -412,7 +386,6 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
             {kpis.usagePercent}% del total
           </StatCardMeta>
         </StatCard>
-
         <StatCard data-testid="stat-card-unused-concepts">
           <StatCardTitle showArrow={false}>
             <XCircle className="h-4 w-4" />
@@ -425,7 +398,6 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
             Conceptos sin pagos
           </StatCardMeta>
         </StatCard>
-
         <StatCard data-testid="stat-card-total-paid">
           <StatCardTitle showArrow={false}>
             <DollarSign className="h-4 w-4" />
@@ -439,7 +411,6 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
           </StatCardMeta>
         </StatCard>
       </div>
-
       {/* Table */}
       <Table
         data={enrichedGeneralCosts}
@@ -454,7 +425,7 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
             icon: Trash2,
             label: 'Eliminar',
             onClick: () => handleDelete(item),
-            variant: 'destructive' as const
+            variant: 'destructive'as const
           }
         ]}
         emptyStateConfig={{

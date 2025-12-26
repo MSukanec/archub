@@ -14,7 +14,6 @@ export interface ProjectPersonnel {
     organization_id: string;
   };
 }
-
 export interface PersonnelWithContact extends ProjectPersonnel {
   contact: {
     id: string;
@@ -24,15 +23,13 @@ export interface PersonnelWithContact extends ProjectPersonnel {
     organization_id: string;
   };
 }
-
 export interface PersonnelAttendance {
   id: string;
   personnel_id: string;
   date: string;
-  status: 'present' | 'absent' | 'half_day';
+  status: 'present'| 'absent'| 'half_day';
   notes?: string;
 }
-
 export interface PersonnelRates {
   id: string;
   personnel_id: string;
@@ -41,7 +38,6 @@ export interface PersonnelRates {
   daily_rate?: number;
   currency_id?: string;
 }
-
 export interface PersonnelInsurance {
   id: string;
   personnel_id: string;
@@ -51,9 +47,7 @@ export interface PersonnelInsurance {
   expiry_date?: string;
   provider?: string;
 }
-
 // ============ PERSONNEL PAYMENT TYPES ============
-
 export interface PersonnelPayment {
   id: string;
   project_id: string;
@@ -66,12 +60,11 @@ export interface PersonnelPayment {
   notes: string | null;
   reference: string | null;
   wallet_id: string | null;
-  status: 'confirmed' | 'pending' | 'rejected' | 'void';
+  status: 'confirmed'| 'pending'| 'rejected'| 'void';
   created_by: string | null;
   created_at: string;
   updated_at: string;
 }
-
 export interface PersonnelPaymentWithRelations extends PersonnelPayment {
   payment_month?: string;
   amount_in_base?: number;

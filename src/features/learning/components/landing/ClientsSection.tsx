@@ -1,16 +1,14 @@
 import { InfiniteCarousel, type CarouselItem } from '@/components/shared/InfiniteCarousel';
 import { SectionHeader } from './SectionHeader';
-
 interface ClientsSectionProps {
   images: CarouselItem[];
   title?: string;
   subtitle?: string;
   description?: string;
   height?: number;
-  direction?: 'left' | 'right';
+  direction?: 'left'| 'right';
   visibleItems?: number;
 }
-
 export function ClientsSection({
   images,
   title = "NUESTROS CLIENTES",
@@ -21,7 +19,6 @@ export function ClientsSection({
   visibleItems = 4
 }: ClientsSectionProps) {
   if (!images || images.length === 0) return null;
-
   return (
     <section className="py-16 sm:py-20" data-testid="clients-section">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

@@ -13,7 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
-import { 
   CalendarIcon, 
   Clock, 
   CheckCircle2, 
@@ -28,14 +27,12 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationCurrencies } from '@/hooks/use-currencies';
 import { formatContactName } from '@/utils/contacts';
 import { cn } from '@/lib/utils';
-import { 
   useClientCommitments,
   useClientPaymentScheduleItem,
   useCreateClientPaymentSchedule,
   useUpdateClientPaymentSchedule,
 } from '@/features/clients/hooks';
 import type { ClientCommitmentWithRelations } from '@/features/clients/types';
-
 const clientScheduleItemSchema = z.object({
   commitment_id: z.string().min(1, 'El compromiso es requerido'),
   due_date: z.string().min(1, 'La fecha de vencimiento es requerida'),
@@ -44,18 +41,14 @@ const clientScheduleItemSchema = z.object({
   status: z.enum(['pending', 'paid', 'cancelled']).default('pending'),
   notes: z.string().nullable().optional(),
 });
-
 type ClientScheduleItemFormData = z.infer<typeof clientScheduleItemSchema>;
-
-type ScheduleStatus = 'pending' | 'paid' | 'overdue' | 'cancelled';
-
+type ScheduleStatus = 'pending'| 'paid'| 'overdue'| 'cancelled';
 const STATUS_CONFIG: Record<ScheduleStatus, { label: string; className: string; icon: typeof Clock }> = {
   pending: { label: 'Pendiente', className: 'border-amber-500/50 text-amber-500 bg-amber-500/10', icon: Clock },
   paid: { label: 'Pagada', className: 'bg-green-500/10 text-green-500 border-green-500/30', icon: CheckCircle2 },
   overdue: { label: 'Vencida', className: 'bg-destructive/10 text-destructive border-destructive/30', icon: AlertCircle },
   cancelled: { label: 'Cancelada', className: 'text-muted-foreground bg-muted', icon: Ban },
 };
-
 function FormPanel({
   form,
   onSubmit,
@@ -73,20 +66,17 @@ function FormPanel({
   currencies: any[];
   currenciesLoading: boolean;
   isLoading: boolean;
-  mode: 'create' | 'edit';
+  mode: 'create'| 'edit';
 }) {
   const selectedCommitmentId = form.watch('commitment_id');
-
   const selectedCommitment = useMemo(() => {
     return commitments?.find(c => c.id === selectedCommitmentId);
   }, [commitments, selectedCommitmentId]);
-
   useEffect(() => {
     if (selectedCommitment && mode === 'create') {
       form.setValue('currency_id', selectedCommitment.currency_id);
     }
   }, [selectedCommitment, form, mode]);
-
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -97,7 +87,6 @@ function FormPanel({
       </div>
     );
   }
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -141,7 +130,6 @@ function FormPanel({
             </FormItem>
           )}
         />
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -180,7 +168,6 @@ function FormPanel({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="status"
@@ -204,7 +191,6 @@ function FormPanel({
             )}
           />
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -239,7 +225,6 @@ function FormPanel({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="amount"
@@ -265,7 +250,6 @@ function FormPanel({
             )}
           />
         </div>
-
         <FormField
           control={form.control}
           name="notes"
@@ -289,17 +273,15 @@ function FormPanel({
     </Form>
   );
 }
-
 function ViewPanel({
   scheduleItem,
 }: {
   scheduleItem: any;
 }) {
-  const isPastDue = scheduleItem.status === 'pending' && parseLocalDate(scheduleItem.due_date)! < new Date();
-  const effectiveStatus: ScheduleStatus = isPastDue ? 'overdue' : (scheduleItem.status as ScheduleStatus);
+  const isPastDue = scheduleItem.status === 'pending'&& parseLocalDate(scheduleItem.due_date)! < new Date();
+  const effectiveStatus: ScheduleStatus = isPastDue ? 'overdue': (scheduleItem.status as ScheduleStatus);
   const statusConfig = STATUS_CONFIG[effectiveStatus];
   const StatusIcon = statusConfig.icon;
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -317,7 +299,6 @@ function ViewPanel({
           </span>
         </div>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1.5">
@@ -345,7 +326,7 @@ function ViewPanel({
             )} 
             data-testid="text-schedule-due-date"
           >
-            {format(parseLocalDate(scheduleItem.due_date)!, "dd 'de' MMMM, yyyy", { locale: es })}
+            {format(parseLocalDate(scheduleItem.due_date)!, "dd 'de'MMMM, yyyy", { locale: es })}
           </span>
           {isPastDue && (
             <p className="text-sm text-destructive mt-0.5">
@@ -354,7 +335,6 @@ function ViewPanel({
           )}
         </div>
       </div>
-
       <div>
         <h4 className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1.5">
           <DollarSign className="h-3 w-3" />
@@ -364,7 +344,6 @@ function ViewPanel({
           {scheduleItem.commitment?.currency?.symbol} {scheduleItem.commitment?.amount?.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </span>
       </div>
-
       {scheduleItem.notes && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1.5">
@@ -376,24 +355,22 @@ function ViewPanel({
           </p>
         </div>
       )}
-
       {scheduleItem.paid_at && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Fecha de Pago</h4>
           <span className="text-base text-green-600" data-testid="text-schedule-paid-at">
-            {format(new Date(scheduleItem.paid_at), "dd 'de' MMMM, yyyy", { locale: es })}
+            {format(new Date(scheduleItem.paid_at), "dd 'de'MMMM, yyyy", { locale: es })}
           </span>
         </div>
       )}
-
       <div className="pt-4 border-t border-border">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground">
           <div data-testid="text-schedule-created-at">
-            <span className="font-medium">Creada:</span> {format(new Date(scheduleItem.created_at), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
+            <span className="font-medium">Creada:</span> {format(new Date(scheduleItem.created_at), "dd/MM/yyyy 'a las'HH:mm", { locale: es })}
           </div>
           {scheduleItem.updated_at && scheduleItem.updated_at !== scheduleItem.created_at && (
             <div data-testid="text-schedule-updated-at">
-              <span className="font-medium">Actualizada:</span> {format(new Date(scheduleItem.updated_at), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
+              <span className="font-medium">Actualizada:</span> {format(new Date(scheduleItem.updated_at), "dd/MM/yyyy 'a las'HH:mm", { locale: es })}
             </div>
           )}
         </div>
@@ -401,7 +378,6 @@ function ViewPanel({
     </div>
   );
 }
-
 interface ClientScheduleItemFormProps {
   modalData?: {
     scheduleId?: string;
@@ -410,9 +386,8 @@ interface ClientScheduleItemFormProps {
     commitmentId?: string;
   };
   onClose: () => void;
-  mode?: 'create' | 'edit' | 'view';
+  mode?: 'create'| 'edit'| 'view';
 }
-
 export function ClientScheduleItemForm({
   modalData,
   onClose,
@@ -420,21 +395,18 @@ export function ClientScheduleItemForm({
 }: ClientScheduleItemFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const projectId = modalData?.projectId;
   const organizationId = modalData?.organizationId;
   const scheduleId = modalData?.scheduleId;
   const preselectedCommitmentId = modalData?.commitmentId;
-
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId);
   const { data: commitments, isLoading: commitmentsLoading } = useClientCommitments(projectId, organizationId);
   const { data: existingItem, isLoading: itemLoading } = useClientPaymentScheduleItem(
-    mode !== 'create' ? scheduleId : undefined,
+    mode !== 'create'? scheduleId : undefined,
     organizationId
   );
   const createMutation = useCreateClientPaymentSchedule();
   const updateMutation = useUpdateClientPaymentSchedule();
-
   const { data: userData } = useCurrentUser();
   
   const defaultCurrencyId = useMemo(() => {
@@ -446,7 +418,6 @@ export function ClientScheduleItemForm({
     if (currencies?.[0]?.currency?.id) return currencies[0].currency.id;
     return '';
   }, [existingItem, userData?.preferences?.default_currency, currencies]);
-
   const form = useForm<ClientScheduleItemFormData>({
     resolver: zodResolver(clientScheduleItemSchema),
     defaultValues: {
@@ -458,7 +429,6 @@ export function ClientScheduleItemForm({
       notes: '',
     },
   });
-
   useEffect(() => {
     if (existingItem && mode !== 'create') {
       form.reset({
@@ -466,14 +436,13 @@ export function ClientScheduleItemForm({
         due_date: existingItem.due_date || '',
         amount: existingItem.amount || 0,
         currency_id: existingItem.currency_id || '',
-        status: (existingItem.status as 'pending' | 'paid' | 'cancelled') || 'pending',
+        status: (existingItem.status as 'pending'| 'paid'| 'cancelled') || 'pending',
         notes: existingItem.notes || '',
       });
     }
   }, [existingItem, form, mode]);
-
   useEffect(() => {
-    if (preselectedCommitmentId && mode === 'create' && commitments?.length) {
+    if (preselectedCommitmentId && mode === 'create'&& commitments?.length) {
       form.setValue('commitment_id', preselectedCommitmentId);
       // Set currency to organization's default, not the commitment's currency
       if (userData?.preferences?.default_currency) {
@@ -481,7 +450,6 @@ export function ClientScheduleItemForm({
       }
     }
   }, [preselectedCommitmentId, mode, commitments, userData?.preferences?.default_currency, form]);
-
   const onSubmit = async (data: ClientScheduleItemFormData) => {
     if (!organizationId || !projectId) {
       toast({
@@ -491,7 +459,6 @@ export function ClientScheduleItemForm({
       });
       return;
     }
-
     setIsSubmitting(true);
     try {
       if (mode === 'create') {
@@ -513,7 +480,7 @@ export function ClientScheduleItemForm({
           title: 'Cuota creada',
           description: 'La cuota ha sido agregada al cronograma',
         });
-      } else if (mode === 'edit' && scheduleId) {
+      } else if (mode === 'edit'&& scheduleId) {
         await updateMutation.mutateAsync({
           scheduleId,
           updates: {
@@ -543,31 +510,28 @@ export function ClientScheduleItemForm({
       setIsSubmitting(false);
     }
   };
-
   const getHeader = () => {
     switch (mode) {
       case 'view':
         return { 
           title: 'Detalle de Cuota', 
-          description: 'Información detallada de la cuota programada' 
+          description: 'Información detallada de la cuota programada'
         };
       case 'edit':
         return { 
           title: 'Editar Cuota', 
-          description: 'Modifica los detalles de la cuota' 
+          description: 'Modifica los detalles de la cuota'
         };
       case 'create':
       default:
         return { 
           title: 'Nueva Cuota', 
-          description: 'Agrega una nueva cuota al cronograma de pagos' 
+          description: 'Agrega una nueva cuota al cronograma de pagos'
         };
     }
   };
-
   const header = getHeader();
-  const isLoading = currenciesLoading || commitmentsLoading || (mode !== 'create' && itemLoading);
-
+  const isLoading = currenciesLoading || commitmentsLoading || (mode !== 'create'&& itemLoading);
   return (
     <ModalLayout onClose={onClose} size="md">
       <ModalHeader 
@@ -577,7 +541,7 @@ export function ClientScheduleItemForm({
       />
       
       <ModalBody>
-        {mode === 'view' && existingItem ? (
+        {mode === 'view'&& existingItem ? (
           <ViewPanel scheduleItem={existingItem} />
         ) : (
           <FormPanel 
@@ -588,16 +552,15 @@ export function ClientScheduleItemForm({
             currencies={currencies || []}
             currenciesLoading={currenciesLoading}
             isLoading={isLoading}
-            mode={mode as 'create' | 'edit'}
+            mode={mode as 'create'| 'edit'}
           />
         )}
       </ModalBody>
-
-      {mode !== 'view' && (
+      {mode !== 'view'&& (
         <ModalFooter
           leftLabel="Cancelar"
           onLeftClick={onClose}
-          rightLabel={mode === 'create' ? 'Crear Cuota' : 'Guardar Cambios'}
+          rightLabel={mode === 'create'? 'Crear Cuota': 'Guardar Cambios'}
           onRightClick={form.handleSubmit(onSubmit)}
           isSubmitting={isSubmitting}
         />
@@ -605,5 +568,4 @@ export function ClientScheduleItemForm({
     </ModalLayout>
   );
 }
-
 export default ClientScheduleItemForm;

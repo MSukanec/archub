@@ -10,27 +10,23 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import type { TargetField, ManualMapping, ValidationError } from '../types';
-
 interface ConflictGroup {
   field: string;
   fieldLabel: string;
   originalValues: string[];
   options: Array<{ label: string; value: string }>;
 }
-
 interface SuccessfulMappingGroup {
   field: string;
   fieldLabel: string;
   mappings: Array<{ originalValue: string; mappedTo: string; mappedLabel: string }>;
   options: Array<{ label: string; value: string }>;
 }
-
 interface FieldHelpMessage {
   message: string;
   linkText: string;
   linkPath: string;
 }
-
 interface StepConflictsProps {
   conflicts: ConflictGroup[];
   successfulMappings?: SuccessfulMappingGroup[];
@@ -41,7 +37,6 @@ interface StepConflictsProps {
   fieldHelpMessages?: Record<string, FieldHelpMessage>;
   onCloseModal?: () => void;
 }
-
 export function StepConflicts({
   conflicts,
   successfulMappings = [],
@@ -56,19 +51,16 @@ export function StepConflicts({
   const [searchTerms, setSearchTerms] = useState<Record<string, string>>({});
   const [expandedConflicts, setExpandedConflicts] = useState<Set<string>>(new Set());
   const [expandedSuccessful, setExpandedSuccessful] = useState<Set<string>>(new Set());
-
   const handleHelpLinkClick = (path: string) => {
     navigate(path);
     if (onCloseModal) {
       setTimeout(() => onCloseModal(), 0);
     }
   };
-
   const getFieldLabel = (fieldName: string): string => {
     const field = targetSchema.find(f => f.field === fieldName);
     return field?.label || fieldName;
   };
-
   const toggleExpanded = (key: string) => {
     setExpandedConflicts(prev => {
       const next = new Set(prev);
@@ -80,7 +72,6 @@ export function StepConflicts({
       return next;
     });
   };
-
   const toggleSuccessfulExpanded = (key: string) => {
     setExpandedSuccessful(prev => {
       const next = new Set(prev);
@@ -92,22 +83,18 @@ export function StepConflicts({
       return next;
     });
   };
-
   const getResolvedCount = (conflict: ConflictGroup): number => {
     return conflict.originalValues.filter(value => {
       const key = `${conflict.field}_${value}`;
       return manualMappings[key] !== undefined;
     }).length;
   };
-
   const isFullyResolved = (conflict: ConflictGroup): boolean => {
     return getResolvedCount(conflict) === conflict.originalValues.length;
   };
-
   const totalSuccessfulMappings = successfulMappings.reduce((sum, g) => sum + g.mappings.length, 0);
   const totalConflicts = conflicts.reduce((sum, c) => sum + c.originalValues.length, 0);
   const resolvedConflicts = conflicts.reduce((sum, c) => sum + getResolvedCount(c), 0);
-
   // If no conflicts and no successful mappings, show empty state
   if (conflicts.length === 0 && successfulMappings.length === 0) {
     return (
@@ -124,7 +111,6 @@ export function StepConflicts({
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
@@ -141,7 +127,6 @@ export function StepConflicts({
             </div>
           </CardContent>
         </Card>
-
         {/* Conflicts Summary */}
         <Card className={cn(
           "border-amber-500/30 bg-amber-500/5",
@@ -172,7 +157,6 @@ export function StepConflicts({
           </CardContent>
         </Card>
       </div>
-
       <ScrollArea className="h-[400px]">
         <div className="space-y-6 pr-4">
           {/* ===== SUCCESSFUL MAPPINGS SECTION ===== */}
@@ -211,7 +195,7 @@ export function StepConflicts({
                           <div>
                             <CardTitle className="text-sm font-medium">{group.fieldLabel}</CardTitle>
                             <p className="text-xs text-muted-foreground">
-                              {group.mappings.length} {group.mappings.length === 1 ? 'valor mapeado' : 'valores mapeados'}
+                              {group.mappings.length} {group.mappings.length === 1 ? 'valor mapeado': 'valores mapeados'}
                             </p>
                           </div>
                         </div>
@@ -221,7 +205,6 @@ export function StepConflicts({
                         </Badge>
                       </div>
                     </CardHeader>
-
                     {isExpanded && (
                       <CardContent className="pt-0 pb-3 px-3 space-y-3">
                         {group.options.length > 10 && (
@@ -235,16 +218,14 @@ export function StepConflicts({
                             />
                           </div>
                         )}
-
                         <div className="space-y-2">
                           {group.mappings.map((mapping, idx) => {
                             const mappingKey = `${group.field}_${mapping.originalValue}`;
                             const currentMapping = manualMappings[mappingKey];
                             // Use manual mapping if set, otherwise use the auto-mapped value
                             const displayValue: string = currentMapping !== undefined 
-                              ? (currentMapping === '' ? 'skip' : (currentMapping || mapping.mappedTo))
+                              ? (currentMapping === ''? 'skip': (currentMapping || mapping.mappedTo))
                               : mapping.mappedTo;
-
                             return (
                               <div 
                                 key={`${mapping.originalValue}-${idx}`}
@@ -255,9 +236,7 @@ export function StepConflicts({
                                     {mapping.originalValue}
                                   </Badge>
                                 </div>
-
                                 <ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-
                                 <div className="w-[180px] flex-shrink-0">
                                   <Select
                                     value={displayValue}
@@ -287,7 +266,6 @@ export function StepConflicts({
                                     </SelectContent>
                                   </Select>
                                 </div>
-
                                 <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
                               </div>
                             );
@@ -300,7 +278,6 @@ export function StepConflicts({
               })}
             </div>
           )}
-
           {/* ===== CONFLICTS SECTION ===== */}
           {conflicts.length > 0 && (
             <div className="space-y-3">
@@ -313,7 +290,6 @@ export function StepConflicts({
                   {resolvedConflicts} / {totalConflicts} resueltos
                 </Badge>
               </div>
-
               {conflicts.map((conflict) => {
                 const isExpanded = expandedConflicts.has(conflict.field) || !isFullyResolved(conflict);
                 const searchTerm = searchTerms[conflict.field] || '';
@@ -321,7 +297,6 @@ export function StepConflicts({
                 const filteredOptions = conflict.options.filter(opt => 
                   opt.label.toLowerCase().includes(searchTerm.toLowerCase())
                 );
-
                 return (
                   <Card key={conflict.field} className={cn(
                     "transition-colors",
@@ -357,7 +332,6 @@ export function StepConflicts({
                         </Badge>
                       </div>
                     </CardHeader>
-
                     {isExpanded && (
                       <CardContent className="pt-0 pb-3 px-3 space-y-3">
                         {conflict.options.length > 10 && (
@@ -371,14 +345,12 @@ export function StepConflicts({
                             />
                           </div>
                         )}
-
                         <div className="space-y-2">
                           {conflict.originalValues.map((originalValue) => {
                             const mappingKey = `${conflict.field}_${originalValue}`;
                             const currentMapping = manualMappings[mappingKey];
                             const isResolved = currentMapping !== undefined;
-                            const displayValue = currentMapping === '' ? 'skip' : (currentMapping ?? 'unresolved');
-
+                            const displayValue = currentMapping === ''? 'skip': (currentMapping ?? 'unresolved');
                             return (
                               <div 
                                 key={originalValue}
@@ -393,9 +365,7 @@ export function StepConflicts({
                                     {originalValue}
                                   </Badge>
                                 </div>
-
                                 <ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-
                                 <div className="w-[180px] flex-shrink-0">
                                   <Select
                                     value={displayValue}
@@ -430,7 +400,6 @@ export function StepConflicts({
                                     </SelectContent>
                                   </Select>
                                 </div>
-
                                 {isResolved ? (
                                   <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
                                 ) : (
@@ -440,7 +409,6 @@ export function StepConflicts({
                             );
                           })}
                         </div>
-
                         {onCreateNew && (
                           <Button
                             variant="outline"
@@ -459,13 +427,12 @@ export function StepConflicts({
                             Crear nuevo {conflict.fieldLabel.toLowerCase()}
                           </Button>
                         )}
-
                         {/* Field-specific help message */}
                         {fieldHelpMessages[conflict.field] && (
                           <Alert className="mt-3 border-blue-500/30 bg-blue-500/5">
                             <Info className="h-4 w-4 text-blue-500" />
                             <AlertDescription className="text-xs text-blue-700 dark:text-blue-300">
-                              {fieldHelpMessages[conflict.field].message}{' '}
+                              {fieldHelpMessages[conflict.field].message}{''}
                               <button
                                 type="button"
                                 onClick={() => handleHelpLinkClick(fieldHelpMessages[conflict.field].linkPath)}

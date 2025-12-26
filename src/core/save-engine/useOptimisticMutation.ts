@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient, QueryKey } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-
 export interface OptimisticMutationOptions<TData, TVariables> {
   mutationFn: (variables: TVariables) => Promise<TData>;
   queryKey: QueryKey;
@@ -10,7 +9,6 @@ export interface OptimisticMutationOptions<TData, TVariables> {
   invalidateOnSuccess?: boolean;
   additionalQueryKeys?: QueryKey[];
 }
-
 export interface OptimisticMutationReturn<TData, TVariables> {
   mutate: (variables: TVariables) => void;
   mutateAsync: (variables: TVariables) => Promise<TData>;
@@ -18,7 +16,6 @@ export interface OptimisticMutationReturn<TData, TVariables> {
   isError: boolean;
   error: Error | null;
 }
-
 export function useOptimisticMutation<TData = unknown, TVariables = unknown>({
   mutationFn,
   queryKey,
@@ -30,18 +27,14 @@ export function useOptimisticMutation<TData = unknown, TVariables = unknown>({
 }: OptimisticMutationOptions<TData, TVariables>): OptimisticMutationReturn<TData, TVariables> {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
   const mutation = useMutation({
     mutationFn,
     onMutate: async (variables: TVariables) => {
       await queryClient.cancelQueries({ queryKey });
-
       const previousData = queryClient.getQueryData(queryKey);
-
       queryClient.setQueryData(queryKey, (oldData: any) => 
         optimisticUpdate(oldData, variables)
       );
-
       return { previousData };
     },
     onError: (error: Error, _variables: TVariables, context: any) => {
@@ -50,7 +43,6 @@ export function useOptimisticMutation<TData = unknown, TVariables = unknown>({
       if (context?.previousData !== undefined) {
         queryClient.setQueryData(queryKey, context.previousData);
       }
-
       toast({
         title: "Error",
         description: onErrorMessage,
@@ -64,7 +56,6 @@ export function useOptimisticMutation<TData = unknown, TVariables = unknown>({
           description: onSuccessMessage,
         });
       }
-
       if (invalidateOnSuccess) {
         queryClient.invalidateQueries({ queryKey });
         additionalQueryKeys.forEach(key => {
@@ -76,7 +67,6 @@ export function useOptimisticMutation<TData = unknown, TVariables = unknown>({
       queryClient.invalidateQueries({ queryKey });
     },
   });
-
   return {
     mutate: mutation.mutate,
     mutateAsync: mutation.mutateAsync,

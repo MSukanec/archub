@@ -1,5 +1,4 @@
 import { type PeriodMeta, type KPILabels } from './types';
-
 export function getPeriodMeta(startDate: Date | null, endDate: Date): PeriodMeta {
   if (!startDate) {
     return {
@@ -9,7 +8,6 @@ export function getPeriodMeta(startDate: Date | null, endDate: Date): PeriodMeta
       periodType: 'years'
     };
   }
-
   const msPerDay = 1000 * 60 * 60 * 24;
   const daysCount = Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / msPerDay));
   
@@ -17,7 +15,7 @@ export function getPeriodMeta(startDate: Date | null, endDate: Date): PeriodMeta
   
   const isShortPeriod = daysCount < 60;
   
-  let periodType: 'days' | 'months' | 'years';
+  let periodType: 'days'| 'months'| 'years';
   if (daysCount <= 60) {
     periodType = 'days';
   } else if (daysCount <= 365) {
@@ -25,7 +23,6 @@ export function getPeriodMeta(startDate: Date | null, endDate: Date): PeriodMeta
   } else {
     periodType = 'years';
   }
-
   return {
     monthsCount,
     daysCount,
@@ -33,7 +30,6 @@ export function getPeriodMeta(startDate: Date | null, endDate: Date): PeriodMeta
     periodType
   };
 }
-
 export function getKPILabels(periodMeta: PeriodMeta): KPILabels {
   if (periodMeta.isShortPeriod) {
     return {
@@ -43,7 +39,6 @@ export function getKPILabels(periodMeta: PeriodMeta): KPILabels {
       averageHelper: `Promedio por día (${periodMeta.daysCount} días)`
     };
   }
-
   return {
     totalTitle: 'Gasto Total',
     totalHelper: `Total acumulado en ${periodMeta.monthsCount} meses`,
@@ -51,7 +46,6 @@ export function getKPILabels(periodMeta: PeriodMeta): KPILabels {
     averageHelper: `Promedio por mes (${periodMeta.monthsCount} meses)`
   };
 }
-
 export function calculatePeriodAverage(
   totalValue: number,
   periodMeta: PeriodMeta
@@ -63,7 +57,6 @@ export function calculatePeriodAverage(
       unit: 'día'
     };
   }
-
   return {
     value: totalValue / periodMeta.monthsCount,
     divisor: periodMeta.monthsCount,

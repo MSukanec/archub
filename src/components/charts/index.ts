@@ -7,10 +7,8 @@
  * @see CATALOG.md for visual reference and usage guide
  * @see theme.ts for styling tokens
  */
-
 // Theme & Utilities
 export * from './theme'
-
 // ═══════════════════════════════════════════════════════════════════════════
 // LINE CHARTS
 // ═══════════════════════════════════════════════════════════════════════════
@@ -18,13 +16,11 @@ export { TrendLineChart } from './line/TrendLineChart'
 export type { TrendDataPoint, TrendLineChartProps } from './line/TrendLineChart'
 export { MultiLineChart } from './line/MultiLineChart'
 export type { MultiLineDataPoint, LineSeriesConfig, MultiLineChartProps } from './line/MultiLineChart'
-
 // ═══════════════════════════════════════════════════════════════════════════
 // SPARKLINE CHARTS
 // ═══════════════════════════════════════════════════════════════════════════
 export { SparklineChart } from './sparkline/SparklineChart'
 export type { SparklineDataPoint, SparklineChartProps } from './sparkline/SparklineChart'
-
 // ═══════════════════════════════════════════════════════════════════════════
 // BAR CHARTS
 // ═══════════════════════════════════════════════════════════════════════════
@@ -36,19 +32,16 @@ export { GroupedBarChart } from './bar/GroupedBarChart'
 export type { GroupedBarDataPoint, BarSeriesConfig, GroupedBarChartProps } from './bar/GroupedBarChart'
 export { SegmentedBarChart } from './bar/SegmentedBarChart'
 export type { SegmentedBarDataPoint, SegmentedBarChartProps } from './bar/SegmentedBarChart'
-
 // ═══════════════════════════════════════════════════════════════════════════
 // PIE CHARTS
 // ═══════════════════════════════════════════════════════════════════════════
 export { DonutChart } from './pie/DonutChart'
 export type { DonutDataPoint, DonutChartProps } from './pie/DonutChart'
-
 // ═══════════════════════════════════════════════════════════════════════════
 // RADIAL CHARTS
 // ═══════════════════════════════════════════════════════════════════════════
 export { ProgressRingChart } from './radial/ProgressRingChart'
 export type { ProgressRingChartProps } from './radial/ProgressRingChart'
-
 // ═══════════════════════════════════════════════════════════════════════════
 // COMPOSED CHARTS
 // ═══════════════════════════════════════════════════════════════════════════
@@ -58,19 +51,16 @@ export { FinancialFlowChart } from './composed/FinancialFlowChart'
 export type { FinancialFlowDataPoint, FinancialFlowChartProps } from './composed/FinancialFlowChart'
 export { BalanceTimelineChart } from './composed/BalanceTimelineChart'
 export type { BalanceTimelineDataPoint, BalanceTimelineChartProps } from './composed/BalanceTimelineChart'
-
 // ═══════════════════════════════════════════════════════════════════════════
 // HEATMAP CHARTS
 // ═══════════════════════════════════════════════════════════════════════════
 export { HeatmapGrid } from './heatmap/HeatmapGrid'
 export type { HeatmapDataPoint, HeatmapGridProps } from './heatmap/HeatmapGrid'
-
 // ═══════════════════════════════════════════════════════════════════════════
 // TABLE CHARTS
 // ═══════════════════════════════════════════════════════════════════════════
 export { CategoryBalanceTable } from './table/CategoryBalanceTable'
 export type { CategoryBalanceRow } from './table/CategoryBalanceTable'
-
 // ═══════════════════════════════════════════════════════════════════════════
 // AREA CHARTS (Line variants with gradient fill)
 // ═══════════════════════════════════════════════════════════════════════════

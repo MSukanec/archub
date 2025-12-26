@@ -5,7 +5,6 @@ import {
   calculateForegroundColor,
 } from '../utils/colorUtils';
 import { DEFAULT_ACCENT } from '../constants';
-
 /**
  * Hook que actualiza dinámicamente el color de acento (--accent).
  * 
@@ -16,13 +15,11 @@ import { DEFAULT_ACCENT } from '../constants';
  */
 export function useProjectAccentColor() {
   const { isDark } = useThemeStore();
-
   useEffect(() => {
     // Siempre usar color por defecto - funcionalidad de color por proyecto desactivada
     applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb, isDark);
   }, [isDark]);
 }
-
 /**
  * Aplica el color de acento a las variables CSS del documento.
  * Genera una paleta completa de colores derivados para identidad visual del proyecto.
@@ -42,7 +39,7 @@ function applyAccentColor(hex: string, hsl: string, rgb: string, isDark: boolean
   root.style.setProperty('--accent-foreground', foregroundColor);
   
   // Parsear HSL para generar paleta completa
-  const hslParts = hsl.split(' ');
+  const hslParts = hsl.split('');
   if (hslParts.length === 3) {
     const h = parseInt(hslParts[0]);
     const s = parseInt(hslParts[1]);

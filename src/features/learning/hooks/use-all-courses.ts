@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getAllPublicCourses } from '../services/public/courseLanding';
 import type { Course } from '@shared/schema';
-
 /**
  * Fetch all public courses for catalog page
  * PUBLIC endpoint - no authentication required

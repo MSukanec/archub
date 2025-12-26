@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 import { Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-
 // Interface para el usuario (usando la estructura real de la app)
 interface User {
   id: string;
@@ -23,19 +22,17 @@ interface User {
   last_activity_at?: string;
   last_seen_at?: string | null;
 }
-
 interface AdminUserRowProps {
   user: User;
   onClick?: () => void;
   selected?: boolean;
-  density?: 'compact' | 'normal' | 'comfortable';
+  density?: 'compact'| 'normal'| 'comfortable';
   className?: string;
 }
-
 // Helper para obtener las iniciales del usuario
 const getUserInitials = (user: User): string => {
   if (user.full_name) {
-    const names = user.full_name.trim().split(' ');
+    const names = user.full_name.trim().split('');
     if (names.length > 1) {
       return names.slice(0, 2).map(n => n[0]?.toUpperCase()).join('');
     }
@@ -43,7 +40,6 @@ const getUserInitials = (user: User): string => {
   }
   return user.email.slice(0, 2).toUpperCase();
 };
-
 // Componente para mostrar fecha de creación del usuario
 const UserCreationDate = ({ createdAt }: { createdAt: string }) => {
   return (
@@ -55,7 +51,6 @@ const UserCreationDate = ({ createdAt }: { createdAt: string }) => {
     </div>
   );
 };
-
 export default function AdminUserRow({ 
   user, 
   onClick, 
@@ -73,13 +68,11 @@ export default function AdminUserRow({
         <div className="font-semibold text-sm truncate">
           {user.full_name || 'Sin nombre'}
         </div>
-
         {/* Segunda fila - Email */}
         <div className="text-xs text-muted-foreground truncate">
           {user.email}
         </div>
       </div>
-
       {/* Trailing Section - Fecha de creación */}
       <div className="flex items-center">
         <UserCreationDate createdAt={user.created_at} />
@@ -88,11 +81,10 @@ export default function AdminUserRow({
       </div>
     </>
   );
-
   // Usar el nuevo DataRowCard
   return (
     <DataRowCard
-      avatarUrl={user.avatar_url && user.avatar_url.trim() !== '' ? user.avatar_url : undefined}
+      avatarUrl={user.avatar_url && user.avatar_url.trim() !== ''? user.avatar_url : undefined}
       avatarFallback={getUserInitials(user)}
       selected={selected}
       density={density}
@@ -104,6 +96,5 @@ export default function AdminUserRow({
     </DataRowCard>
   );
 }
-
 // Export del tipo para uso externo
 export type { User };

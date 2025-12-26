@@ -4,7 +4,6 @@ import { createSiteLogType, type CreateSiteLogTypeData } from '../services/creat
 import { updateSiteLogType, type UpdateSiteLogTypeData } from '../services/updateSiteLogType';
 import { deleteSiteLogType } from '../services/deleteSiteLogType';
 import { replaceSiteLogType } from '../services/replaceSiteLogType';
-
 export function useSiteLogTypes(organizationId?: string) {
   return useQuery({
     queryKey: ['sitelog-types', organizationId],
@@ -14,10 +13,8 @@ export function useSiteLogTypes(organizationId?: string) {
     gcTime: 10 * 60 * 1000,
   });
 }
-
 export function useCreateSiteLogType() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (data: CreateSiteLogTypeData) => createSiteLogType(data),
     onSuccess: (_, variables) => {
@@ -25,10 +22,8 @@ export function useCreateSiteLogType() {
     },
   });
 }
-
 export function useUpdateSiteLogType() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ typeId, organizationId, data }: { 
       typeId: string; 
@@ -40,7 +35,6 @@ export function useUpdateSiteLogType() {
     },
   });
 }
-
 /**
  * Hook para eliminar un tipo de bitácora.
  * 
@@ -51,7 +45,6 @@ export function useUpdateSiteLogType() {
  */
 export function useDeleteSiteLogType(organizationId: string | null) {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (typeId: string) => 
       deleteSiteLogType(typeId, organizationId!),
@@ -60,7 +53,6 @@ export function useDeleteSiteLogType(organizationId: string | null) {
     },
   });
 }
-
 /**
  * Hook para reemplazar un tipo de bitácora con otro.
  * 
@@ -70,7 +62,6 @@ export function useDeleteSiteLogType(organizationId: string | null) {
  */
 export function useReplaceSiteLogType(organizationId: string | null) {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ oldTypeId, newTypeId }: { oldTypeId: string; newTypeId: string }) =>
       replaceSiteLogType(oldTypeId, newTypeId, organizationId!),

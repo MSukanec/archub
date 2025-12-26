@@ -1,12 +1,9 @@
 import { Badge, type BadgeVariant } from '@/components/ui/badge';
-
-export type PaymentStatus = 'confirmed' | 'pending' | 'rejected' | 'void';
-
+export type PaymentStatus = 'confirmed'| 'pending'| 'rejected'| 'void';
 interface PaymentStatusConfig {
   label: string;
   variant: BadgeVariant;
 }
-
 const STATUS_CONFIG: Record<PaymentStatus, PaymentStatusConfig> = {
   confirmed: { 
     label: 'Confirmado', 
@@ -25,13 +22,11 @@ const STATUS_CONFIG: Record<PaymentStatus, PaymentStatusConfig> = {
     variant: 'neutral'
   },
 };
-
 interface PaymentStatusBadgeProps {
   status: PaymentStatus;
   className?: string;
   'data-testid'?: string;
 }
-
 export function PaymentStatusBadge({ 
   status, 
   className,
@@ -49,7 +44,6 @@ export function PaymentStatusBadge({
     </Badge>
   );
 }
-
 export function getPaymentStatusConfig(status: PaymentStatus): PaymentStatusConfig {
   return STATUS_CONFIG[status] || STATUS_CONFIG.pending;
 }

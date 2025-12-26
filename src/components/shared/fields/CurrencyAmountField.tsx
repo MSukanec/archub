@@ -5,13 +5,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Check, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
 interface Currency {
   id: string
   name: string
   symbol: string
 }
-
 interface CurrencyAmountFieldProps {
   value?: number
   currency?: string
@@ -22,7 +20,6 @@ interface CurrencyAmountFieldProps {
   className?: string
   disabled?: boolean
 }
-
 export const CurrencyAmountField = React.forwardRef<HTMLInputElement, CurrencyAmountFieldProps>(
   ({ 
     value, 
@@ -38,16 +35,13 @@ export const CurrencyAmountField = React.forwardRef<HTMLInputElement, CurrencyAm
     const [open, setOpen] = React.useState(false)
     const [inputValue, setInputValue] = React.useState('')
     const [isEditing, setIsEditing] = React.useState(false)
-
     const selectedCurrency = currencies.find(c => c.id === currency)
-
     // Formatear número con separador de miles
     const formatNumber = (num: number): string => {
       return num.toLocaleString('es-AR', { maximumFractionDigits: 2, useGrouping: true })
         .replace(/,/g, '.') // Usar punto como separador de miles
         .replace(/\.(\d{2})$/, ',$1') // Usar coma para decimales
     }
-
     // Extraer número limpio del string formateado
     const parseFormattedNumber = (str: string): number | undefined => {
       if (!str) return undefined
@@ -63,10 +57,10 @@ export const CurrencyAmountField = React.forwardRef<HTMLInputElement, CurrencyAm
         
         if (lastCommaIndex > lastDotIndex) {
           // La coma es el separador decimal: 1.234,56 -> 1234.56
-          cleanStr = cleanStr.slice(0, lastCommaIndex).replace(/[.,]/g, '') + '.' + cleanStr.slice(lastCommaIndex + 1)
+          cleanStr = cleanStr.slice(0, lastCommaIndex).replace(/[.,]/g, '') + '.'+ cleanStr.slice(lastCommaIndex + 1)
         } else {
           // El punto es el separador decimal: 1,234.56 -> 1234.56
-          cleanStr = cleanStr.slice(0, lastDotIndex).replace(/[.,]/g, '') + '.' + cleanStr.slice(lastDotIndex + 1)
+          cleanStr = cleanStr.slice(0, lastDotIndex).replace(/[.,]/g, '') + '.'+ cleanStr.slice(lastDotIndex + 1)
         }
       } else if (cleanStr.includes(',')) {
         // Solo comas: puede ser separador de miles (1,234) o decimal (25570,3)
@@ -95,7 +89,6 @@ export const CurrencyAmountField = React.forwardRef<HTMLInputElement, CurrencyAm
       const num = parseFloat(cleanStr)
       return isNaN(num) ? undefined : num
     }
-
     // Actualizar valor mostrado cuando cambia el valor externo
     React.useEffect(() => {
       if (!isEditing) {
@@ -106,7 +99,6 @@ export const CurrencyAmountField = React.forwardRef<HTMLInputElement, CurrencyAm
         }
       }
     }, [value, isEditing])
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const inputVal = e.target.value
       setInputValue(inputVal)
@@ -124,7 +116,6 @@ export const CurrencyAmountField = React.forwardRef<HTMLInputElement, CurrencyAm
         onValueChange(numericValue)
       }
     }
-
     const handleFocus = () => {
       setIsEditing(true)
       // Al hacer foco, mostrar el número sin formateo para fácil edición
@@ -132,7 +123,6 @@ export const CurrencyAmountField = React.forwardRef<HTMLInputElement, CurrencyAm
         setInputValue(value.toString())
       }
     }
-
     const handleBlur = () => {
       setIsEditing(false)
       // Al perder foco, aplicar el formateo
@@ -140,14 +130,12 @@ export const CurrencyAmountField = React.forwardRef<HTMLInputElement, CurrencyAm
         setInputValue(formatNumber(value))
       }
     }
-
     const handleCurrencySelect = (currencyId: string) => {
       if (onCurrencyChange) {
         onCurrencyChange(currencyId)
       }
       setOpen(false)
     }
-
     return (
       <div className={cn("flex", className)}>
         {/* Currency Selector Button - EXACTAMENTE IDÉNTICO al Input */}
@@ -202,7 +190,6 @@ export const CurrencyAmountField = React.forwardRef<HTMLInputElement, CurrencyAm
             </Command>
           </PopoverContent>
         </Popover>
-
         {/* Amount Input - EXACTAMENTE IDÉNTICO al Input */}
         <input
           {...props}
@@ -225,5 +212,4 @@ export const CurrencyAmountField = React.forwardRef<HTMLInputElement, CurrencyAm
     )
   }
 )
-
 CurrencyAmountField.displayName = 'CurrencyAmountField'

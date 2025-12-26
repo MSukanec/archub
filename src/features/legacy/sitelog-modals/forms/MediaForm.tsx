@@ -3,13 +3,11 @@ import { useToast } from "@/hooks/use-toast";
 import { FileUploader } from "@/components/shared/fields/FileUploader";
 import { deleteMediaFileV2 } from "@/features/media/services/deleteMediaFileV2";
 import type { SiteLogFileInput } from '../../types';
-
 interface MediaFormProps {
   filesToUpload: SiteLogFileInput[];
   setFilesToUpload: (files: SiteLogFileInput[]) => void;
   siteLogFiles: any[];
 }
-
 export function MediaForm({ 
   filesToUpload, 
   setFilesToUpload, 
@@ -17,7 +15,6 @@ export function MediaForm({
 }: MediaFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
   const handleExistingFileDelete = async (fileId: string) => {
     try {
       const fileToDelete = siteLogFiles.find(f => f.id === fileId);
@@ -29,7 +26,6 @@ export function MediaForm({
         });
         return;
       }
-
       // Necesitamos el link_id para eliminar (no el file_id)
       const linkId = fileToDelete.link_id;
       if (!linkId) {
@@ -40,10 +36,8 @@ export function MediaForm({
         });
         return;
       }
-
       // Usar el servicio V2 que maneja la eliminación completa
       await deleteMediaFileV2(linkId);
-
       // Invalidar queries relevantes
       queryClient.invalidateQueries({ queryKey: ['sitelog-files'] });
       queryClient.invalidateQueries({ queryKey: ['site-logs'] });
@@ -62,7 +56,6 @@ export function MediaForm({
       });
     }
   };
-
   return (
     <FileUploader
       mode="multiple"

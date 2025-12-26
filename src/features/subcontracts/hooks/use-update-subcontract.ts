@@ -2,10 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateSubcontract, type UpdateSubcontractData } from '../services';
 import { SUBCONTRACT_QUERY_KEYS } from '../constants';
 import { toast } from '@/hooks/use-toast';
-
 export function useUpdateSubcontract() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ 
       subcontractId, 

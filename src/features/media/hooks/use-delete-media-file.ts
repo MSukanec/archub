@@ -2,11 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteMediaFileV2 } from '../services/deleteMediaFileV2';
 import { QUERY_KEYS } from '../constants';
 import type { MediaFileWithLink } from '../types';
-
 interface DeleteContext {
   previousData: Map<string, MediaFileWithLink[]>;
 }
-
 /**
  * Hook para eliminar un archivo de media usando nueva arquitectura (media_files + media_links).
  * 
@@ -17,7 +15,6 @@ interface DeleteContext {
  */
 export function useDeleteMediaFile() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (linkId: string) => {
       console.log('[useDeleteMediaFile] Deleting linkId:', linkId);
@@ -75,7 +72,7 @@ export function useDeleteMediaFile() {
     // SYNC: Refresh in background after mutation completes (success or error)
     onSettled: () => {
       // Background refetch to ensure data consistency
-      // Use refetchType: 'none' to avoid blocking - data is already correct
+      // Use refetchType: 'none'to avoid blocking - data is already correct
       queryClient.invalidateQueries({ 
         queryKey: [QUERY_KEYS.GALLERY_FILES],
         refetchType: 'none'

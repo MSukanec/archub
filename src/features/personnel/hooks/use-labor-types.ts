@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { getLaborTypes } from '../services/getLaborTypes';
-
 export function useLaborTypes() {
   return useQuery({
     queryKey: ['labor-types'],

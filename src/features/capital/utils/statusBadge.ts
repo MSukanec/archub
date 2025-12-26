@@ -3,14 +3,11 @@
  * 
  * Uses semantic Badge variants for proper color application
  */
-
-export type PartnerTransactionStatus = 'confirmed' | 'pending' | 'rejected' | 'void';
-
+export type PartnerTransactionStatus = 'confirmed'| 'pending'| 'rejected'| 'void';
 export interface PartnerStatusBadgeConfig {
   label: string;
-  variant: 'success' | 'warning' | 'error' | 'neutral';
+  variant: 'success'| 'warning'| 'error'| 'neutral';
 }
-
 /**
  * Get badge configuration for a partner transaction status
  * 
@@ -19,11 +16,11 @@ export interface PartnerStatusBadgeConfig {
  */
 export function getPartnerTransactionStatusBadgeConfig(status: PartnerTransactionStatus): PartnerStatusBadgeConfig {
   const statusConfig: Record<PartnerTransactionStatus, PartnerStatusBadgeConfig> = {
-    confirmed: { label: 'Confirmado', variant: 'success' },
-    pending: { label: 'Pendiente', variant: 'warning' },
-    rejected: { label: 'Rechazado', variant: 'error' },
-    void: { label: 'Anulado', variant: 'neutral' },
+    confirmed: { label: 'Confirmado', variant: 'success'},
+    pending: { label: 'Pendiente', variant: 'warning'},
+    rejected: { label: 'Rechazado', variant: 'error'},
+    void: { label: 'Anulado', variant: 'neutral'},
   };
   
-  return statusConfig[status] || { label: status, variant: 'neutral' };
+  return statusConfig[status] || { label: status, variant: 'neutral'};
 }

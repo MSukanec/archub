@@ -6,14 +6,12 @@ import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
 import type { PendingInvitation } from '@/hooks/use-pending-invitations';
-
 export interface UseInvitationFormProps {
   invitations: PendingInvitation[];
   currentIndex: number;
   onClose: () => void;
   setCurrentIndex: (index: number) => void;
 }
-
 export function useInvitationForm({
   invitations,
   currentIndex,
@@ -24,7 +22,6 @@ export function useInvitationForm({
   const { data: user } = useCurrentUser();
   const [, navigate] = useLocation();
   const setCurrentProject = useNavigationStore((state) => state.setCurrentProject);
-
   const acceptMutation = useMutation({
     mutationFn: async (invitationId: string) => {
       const response = await apiRequest('POST', '/api/accept-invitation', { invitationId });
@@ -65,7 +62,6 @@ export function useInvitationForm({
       });
     },
   });
-
   const rejectMutation = useMutation({
     mutationFn: async (invitationId: string) => {
       const response = await apiRequest('POST', '/api/reject-invitation', { invitationId });
@@ -92,7 +88,6 @@ export function useInvitationForm({
       });
     },
   });
-
   return {
     acceptMutation,
     rejectMutation,

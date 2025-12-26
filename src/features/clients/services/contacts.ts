@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { Contact } from '../types';
-
 /**
  * Obtiene todos los contactos de una organización.
  * 
@@ -17,21 +16,17 @@ export async function getContacts(
   if (!supabase || !organizationId) {
     return [];
   }
-
   const { data, error } = await supabase
     .from('contacts')
     .select('*')
     .eq('organization_id', organizationId)
     .eq('is_deleted', false)
     .order('created_at', { ascending: false });
-
   if (error) {
     throw error;
   }
-
   return data || [];
 }
-
 /**
  * Obtiene un contacto específico por su ID.
  * 
@@ -50,7 +45,6 @@ export async function getContactById(
   if (!supabase || !organizationId || !contactId) {
     return null;
   }
-
   const { data, error } = await supabase
     .from('contacts')
     .select('*')
@@ -58,10 +52,8 @@ export async function getContactById(
     .eq('organization_id', organizationId)
     .eq('is_deleted', false)
     .single();
-
   if (error) {
     throw error;
   }
-
   return data;
 }

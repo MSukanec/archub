@@ -6,7 +6,6 @@ import chroma from 'chroma-js';
 import { useQuery } from '@tanstack/react-query';
 import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';
 import { projectsKeys } from '@/core/query-keys';
-
 interface Project {
   id: string;
   name: string;
@@ -40,7 +39,6 @@ interface Project {
     };
   };
 }
-
 interface ProjectItemCardProps {
   project: Project;
   onClick?: () => void;
@@ -51,7 +49,6 @@ interface ProjectItemCardProps {
   isActive?: boolean;
   projectColor?: string;
 }
-
 const getStatusText = (status: string): string => {
   const statusMap: { [key: string]: string } = {
     'active': 'En proceso',
@@ -63,7 +60,6 @@ const getStatusText = (status: string): string => {
   };
   return statusMap[status] || status;
 };
-
 export function ProjectItemCard({ 
   project, 
   onClick, 
@@ -76,7 +72,6 @@ export function ProjectItemCard({
 }: ProjectItemCardProps) {
   const statusText = getStatusText(project.status);
   const isOverLimit = project.is_over_limit === true;
-
   // Track image load state to prevent flicker
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -125,7 +120,6 @@ export function ProjectItemCard({
       return 'rgba(139, 92, 246, 0.15)';
     }
   };
-
   return (
     <div
       className={`
@@ -135,8 +129,8 @@ export function ProjectItemCard({
         hover:shadow-lg hover:-translate-y-1
         overflow-hidden
         relative
-        ${selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
-        ${isOverLimit ? 'grayscale opacity-70' : ''}
+        ${selected ? 'ring-2 ring-blue-500 ring-offset-2': ''}
+        ${isOverLimit ? 'grayscale opacity-70': ''}
         ${className || ''}
       `}
       style={{ 
@@ -165,7 +159,7 @@ export function ProjectItemCard({
             className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
             style={{ 
               opacity: imageLoaded ? 1 : 0,
-              visibility: imageLoaded ? 'visible' : 'hidden'
+              visibility: imageLoaded ? 'visible': 'hidden'
             }}
             onLoad={handleImageLoad}
             onError={handleImageError}
@@ -193,7 +187,6 @@ export function ProjectItemCard({
           />
         )}
       </div>
-
       {/* Contenido - SIEMPRE en el mismo lugar (parte inferior) */}
       <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
         <div className="space-y-4">
@@ -223,14 +216,12 @@ export function ProjectItemCard({
               </Badge>
             )}
           </div>
-
           {/* Descripción */}
           {project.description && (
             <p className="text-gray-300 text-sm line-clamp-2">
               {project.description}
             </p>
           )}
-
           {/* 3 Badges inline: Tipo, Modalidad, Estado - TODOS IDENTICOS con color del proyecto */}
           <div className="flex flex-wrap gap-2">
             {project.project_data?.project_type?.name && (
@@ -274,7 +265,6 @@ export function ProjectItemCard({
               {statusText}
             </Badge>
           </div>
-
           {/* Botones - abajo - SOLO EN HOVER */}
           <div className="flex justify-end gap-2">
             {!isOverLimit && (
@@ -298,14 +288,14 @@ export function ProjectItemCard({
             <Button 
               size="sm"
               className="text-white border-0 text-sm font-medium shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              style={{ backgroundColor: isOverLimit ? '#d97706' : actualProjectColor }}
+              style={{ backgroundColor: isOverLimit ? '#d97706': actualProjectColor }}
               onClick={(e) => {
                 e.stopPropagation();
                 onNavigateToProject?.();
               }}
               data-testid="button-navigate-project"
             >
-              {isOverLimit ? 'Ver Proyecto' : 'Ir al Proyecto'}
+              {isOverLimit ? 'Ver Proyecto': 'Ir al Proyecto'}
             </Button>
           </div>
         </div>

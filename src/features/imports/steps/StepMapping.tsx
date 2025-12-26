@@ -10,7 +10,6 @@ import { format, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import type { ParsedData, ColumnMapping, TargetField, ProjectContext } from '../types';
-
 interface StepMappingProps {
   parsedData: ParsedData;
   targetSchema: TargetField[];
@@ -50,17 +49,15 @@ interface StepMappingProps {
   /** Callback cuando se selecciona un valor por defecto */
   onDefaultFieldValueChange?: (fieldName: string, value: string) => void;
 }
-
 function getAIBadge(confidence: number) {
   if (confidence >= 0.9) {
-    return { label: 'IA', className: 'bg-green-500/10 text-green-600 border-green-500/30' };
+    return { label: 'IA', className: 'bg-green-500/10 text-green-600 border-green-500/30'};
   }
   if (confidence >= 0.7) {
-    return { label: `IA ${Math.round(confidence * 100)}%`, className: 'bg-blue-500/10 text-blue-600 border-blue-500/30' };
+    return { label: `IA ${Math.round(confidence * 100)}%`, className: 'bg-blue-500/10 text-blue-600 border-blue-500/30'};
   }
-  return { label: 'IA ?', className: 'bg-amber-500/10 text-amber-600 border-amber-500/30' };
+  return { label: 'IA ?', className: 'bg-amber-500/10 text-amber-600 border-amber-500/30'};
 }
-
 export function StepMapping({
   parsedData,
   targetSchema,
@@ -85,23 +82,20 @@ export function StepMapping({
   defaultFieldValues,
   onDefaultFieldValueChange,
 }: StepMappingProps) {
-  const contextName = projectContext?.type === 'project' 
+  const contextName = projectContext?.type === 'project'
     ? projectContext.projectName 
-    : projectContext?.type === 'organization' 
+    : projectContext?.type === 'organization'
       ? projectContext.organizationName 
       : undefined;
   const mappedFields = useMemo(() => {
     return new Set(Object.values(columnMapping).filter(Boolean) as string[]);
   }, [columnMapping]);
-
   const requiredFields = useMemo(() => {
     return targetSchema.filter(f => f.required);
   }, [targetSchema]);
-
   const missingRequiredFields = useMemo(() => {
     return requiredFields.filter(f => !mappedFields.has(f.field));
   }, [requiredFields, mappedFields]);
-
   // Campos obligatorios faltantes que tienen opciones de foreign-key disponibles
   const missingRequiredWithOptions = useMemo(() => {
     return missingRequiredFields.filter(f => 
@@ -110,7 +104,6 @@ export function StepMapping({
       f.foreignKeyConfig.options.length > 0
     );
   }, [missingRequiredFields]);
-
   // Campos obligatorios faltantes SIN opciones (realmente bloqueantes)
   const missingRequiredWithoutOptions = useMemo(() => {
     return missingRequiredFields.filter(f => {
@@ -122,8 +115,7 @@ export function StepMapping({
       return true;
     });
   }, [missingRequiredFields, defaultFieldValues]);
-
-  const getMappingStatus = (columnIndex: number): 'mapped' | 'unmapped' | 'required-missing' => {
+  const getMappingStatus = (columnIndex: number): 'mapped'| 'unmapped'| 'required-missing'=> {
     const field = columnMapping[columnIndex];
     if (!field) return 'unmapped';
     
@@ -132,19 +124,16 @@ export function StepMapping({
     
     return 'mapped';
   };
-
   const getFieldLabel = (fieldName: string): string => {
     const field = targetSchema.find(f => f.field === fieldName);
     return field?.label || fieldName;
   };
-
   const getAvailableFields = (currentColumnIndex: number) => {
     return targetSchema.filter(field => {
       if (columnMapping[currentColumnIndex] === field.field) return true;
       return !mappedFields.has(field.field);
     });
   };
-
   const formatCellValue = (cell: any): string => {
     if (cell === null || cell === undefined) return '-';
     
@@ -152,7 +141,7 @@ export function StepMapping({
       return isValid(cell) ? format(cell, 'dd/MM/yyyy', { locale: es }) : String(cell);
     }
     
-    if (typeof cell === 'number' && cell > 1000000000 && cell < 2000000000000) {
+    if (typeof cell === 'number'&& cell > 1000000000 && cell < 2000000000000) {
       const date = new Date(cell);
       return isValid(date) ? format(date, 'dd/MM/yyyy', { locale: es }) : String(cell);
     }
@@ -171,18 +160,17 @@ export function StepMapping({
     
     return String(cell);
   };
-
   return (
     <div className="space-y-6">
       {/* Contexto de proyecto */}
       {projectContext && (
         <Card className={cn(
           "border-primary/30",
-          projectContext.type === 'project' ? "bg-primary/5" : "bg-purple-500/5 border-purple-500/30"
+          projectContext.type === 'project'? "bg-primary/5" : "bg-purple-500/5 border-purple-500/30"
         )}>
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              {projectContext.type === 'project' ? (
+              {projectContext.type === 'project'? (
                 <FolderKanban className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               ) : (
                 <Building2 className="h-5 w-5 text-purple-500 flex-shrink-0 mt-0.5" />
@@ -191,16 +179,16 @@ export function StepMapping({
                 <div className="flex items-center gap-2">
                   <p className={cn(
                     "font-medium",
-                    projectContext.type === 'project' ? "text-primary" : "text-purple-500"
+                    projectContext.type === 'project'? "text-primary" : "text-purple-500"
                   )}>
-                    {projectContext.type === 'project' 
-                      ? `Importando al proyecto${contextName ? `: ${contextName}` : ' activo'}`
+                    {projectContext.type === 'project'
+                      ? `Importando al proyecto${contextName ? `: ${contextName}` : 'activo'}`
                       : `Importando a nivel organización${contextName ? `: ${contextName}` : ''}`
                     }
                   </p>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {projectContext.type === 'project' 
+                  {projectContext.type === 'project'
                     ? 'Todos los registros serán asignados a este proyecto.'
                     : hasProjectColumn
                       ? 'Mapea la columna "Proyecto" al campo correspondiente para asignar cada registro.'
@@ -209,7 +197,7 @@ export function StepMapping({
                 </p>
                 
                 {/* Project selector for organization context without project column */}
-                {projectContext.type === 'organization' && !hasProjectColumn && availableProjects && availableProjects.length > 0 && (
+                {projectContext.type === 'organization'&& !hasProjectColumn && availableProjects && availableProjects.length > 0 && (
                   <div className="pt-2">
                     <Select
                       value={selectedProjectId || ''}
@@ -248,7 +236,6 @@ export function StepMapping({
           </CardContent>
         </Card>
       )}
-
       {/* Alerta BLOQUEANTE si se detectó columna de proyecto en contexto de proyecto */}
       {hasProjectContextConflict && (
         <Card className="border-destructive bg-destructive/5">
@@ -278,7 +265,6 @@ export function StepMapping({
           </CardContent>
         </Card>
       )}
-
       {/* Selector de cliente cuando no hay columna de cliente en el archivo */}
       {!hasClientColumn && availableClients && availableClients.length > 0 && (
         <Card className="border-orange-500/30 bg-orange-500/5">
@@ -331,7 +317,6 @@ export function StepMapping({
           </CardContent>
         </Card>
       )}
-
       {isLoadingAI && (
         <Card className="border-blue-500/50 bg-blue-500/5">
           <CardContent className="p-4">
@@ -345,7 +330,6 @@ export function StepMapping({
           </CardContent>
         </Card>
       )}
-
       {/* Campos obligatorios faltantes SIN opciones (bloqueantes) */}
       {missingRequiredWithoutOptions.length > 0 && (
         <Card className="border-amber-500/50 bg-amber-500/5">
@@ -366,7 +350,6 @@ export function StepMapping({
           </CardContent>
         </Card>
       )}
-
       {/* Selectores para campos obligatorios faltantes CON opciones */}
       {missingRequiredWithOptions.map(field => {
         const selectedValue = defaultFieldValues?.[field.field];
@@ -440,7 +423,6 @@ export function StepMapping({
           </Card>
         );
       })}
-
       <ScrollArea className="h-[400px] pr-4">
         <div className="space-y-3">
           {parsedData.headers.map((header, index) => {
@@ -451,14 +433,13 @@ export function StepMapping({
               .map(row => row[index])
               .filter(v => v !== null && v !== undefined && String(v).trim() !== '')
               .map(v => String(v).substring(0, 30));
-
             return (
               <Card 
                 key={index} 
                 className={cn(
                   "transition-colors",
-                  status === 'mapped' && "border-green-500/30 bg-green-500/5",
-                  status === 'unmapped' && "border-muted"
+                  status === 'mapped'&& "border-green-500/30 bg-green-500/5",
+                  status === 'unmapped'&& "border-muted"
                 )}
               >
                 <CardContent className="p-4">
@@ -466,10 +447,10 @@ export function StepMapping({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="font-medium truncate">{header}</p>
-                        {status === 'mapped' && (
+                        {status === 'mapped'&& (
                           <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
                         )}
-                        {status === 'mapped' && aiConfidence?.[header] !== undefined && (
+                        {status === 'mapped'&& aiConfidence?.[header] !== undefined && (
                           <Badge 
                             variant="outline" 
                             className={cn(
@@ -493,13 +474,11 @@ export function StepMapping({
                         </p>
                       )}
                     </div>
-
                     <ArrowRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-
                     <div className="w-[220px] flex-shrink-0">
                       <Select
                         value={mappedField || 'no-mapping'}
-                        onValueChange={(value) => onMappingChange(index, value === 'no-mapping' ? null : value)}
+                        onValueChange={(value) => onMappingChange(index, value === 'no-mapping'? null : value)}
                       >
                         <SelectTrigger 
                           className={cn(
@@ -528,7 +507,6 @@ export function StepMapping({
                         </SelectContent>
                       </Select>
                     </div>
-
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -552,7 +530,6 @@ export function StepMapping({
           })}
         </div>
       </ScrollArea>
-
       <div className="flex items-center justify-between pt-4 border-t">
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">

@@ -3,9 +3,7 @@ import { AppCard } from '@/components/shared/AppCard';
 import { Button } from '@/components/ui/button';
 import { Info, AlertTriangle, CheckCircle2, XCircle, LucideIcon, ChevronRight } from 'lucide-react';
 import { type InsightAction } from '@/components/insights/types';
-
-type InsightVariant = 'info' | 'warning' | 'success' | 'danger';
-
+type InsightVariant = 'info'| 'warning'| 'success'| 'danger';
 function highlightValues(text: string): ReactNode {
   const pattern = /(\$[\d.,]+|~?\d+(?:[.,]\d+)?%|~\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?\s*(?:meses?|días?|pagos?|veces?))/gi;
   const parts = text.split(pattern);
@@ -24,7 +22,6 @@ function highlightValues(text: string): ReactNode {
     return part;
   });
 }
-
 export interface InsightItem {
   icon?: ReactNode;
   title: string;
@@ -32,7 +29,6 @@ export interface InsightItem {
   variant?: InsightVariant;
   actions?: InsightAction[];
 }
-
 export interface InsightCardProps {
   title?: string;
   titleIcon?: ReactNode;
@@ -47,7 +43,6 @@ export interface InsightCardProps {
   onDismiss?: (issueId: string) => void;
   'data-testid'?: string;
 }
-
 const variantStyles: Record<InsightVariant, { borderVar: string; icon: LucideIcon; iconClass: string }> = {
   info: {
     borderVar: 'var(--info-neutral)',
@@ -70,7 +65,6 @@ const variantStyles: Record<InsightVariant, { borderVar: string; icon: LucideIco
     iconClass: 'text-red-600 dark:text-red-400',
   },
 };
-
 export function InsightCard({
   title,
   titleIcon,
@@ -107,7 +101,6 @@ export function InsightCard({
             const variant = item.variant || 'info';
             const styles = variantStyles[variant];
             const IconComponent = styles.icon;
-
             return (
               <li
                 key={index}

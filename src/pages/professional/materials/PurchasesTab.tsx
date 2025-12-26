@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/shared/AppCard';
 import {
   useMaterialPurchases,
   useDeleteMaterialPurchase,
@@ -20,12 +20,10 @@ import {
   getMaterialPurchaseStatusBadgeConfig,
   DOCUMENT_TYPES,
 } from '@/features/materials/hooks/use-material-purchases';
-
 interface PurchasesTabProps {
   projectId?: string;
   organizationId?: string;
 }
-
 interface PurchaseMetrics {
   total_count: number;
   count_pending: number;
@@ -35,7 +33,6 @@ interface PurchaseMetrics {
   total_amount: number;
   total_pending_amount: number;
 }
-
 export default function PurchasesTab({ projectId, organizationId: propOrganizationId }: PurchasesTabProps) {
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
@@ -49,16 +46,12 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterProvider, setFilterProvider] = useState<string>('all');
   const [filterDocType, setFilterDocType] = useState<string>('all');
-
   const [selectedPurchases, setSelectedPurchases] = useState<MaterialPurchase[]>([]);
-
   const { data: purchasesData, isLoading } = useMaterialPurchases(activeProjectId || undefined, organizationId);
-
   const allPurchases = useMemo(() => {
     if (!purchasesData) return [];
     return purchasesData;
   }, [purchasesData]);
-
   const metricsData = useMemo<PurchaseMetrics>(() => {
     let countPending = 0;
     let countPartiallyPaid = 0;
@@ -66,7 +59,6 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
     let countCancelled = 0;
     let totalAmount = 0;
     let totalPendingAmount = 0;
-
     allPurchases.forEach(purchase => {
       const amount = Number(purchase.total_amount) || 0;
       
@@ -81,12 +73,10 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
       } else if (purchase.status === 'cancelled') {
         countCancelled++;
       }
-
       if (purchase.status !== 'cancelled') {
         totalAmount += amount;
       }
     });
-
     return {
       total_count: allPurchases.length,
       count_pending: countPending,
@@ -97,35 +87,29 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
       total_pending_amount: totalPendingAmount,
     };
   }, [allPurchases]);
-
   const filterOptions = useMemo(() => {
     const providers = new Set<string>();
-
     allPurchases.forEach(purchase => {
-      const providerName = purchase.provider?.company_name || purchase.provider?.full_name || [purchase.provider?.first_name, purchase.provider?.last_name].filter(Boolean).join(' ');
+      const providerName = purchase.provider?.company_name || purchase.provider?.full_name || [purchase.provider?.first_name, purchase.provider?.last_name].filter(Boolean).join('');
       if (providerName) providers.add(providerName);
     });
-
     return {
       providers: Array.from(providers).sort(),
     };
   }, [allPurchases]);
-
   const filteredPurchases = useMemo(() => {
     return allPurchases.filter(purchase => {
-      if (filterStatus !== 'all' && purchase.status !== filterStatus) return false;
-      if (filterDocType !== 'all' && purchase.document_type !== filterDocType) return false;
+      if (filterStatus !== 'all'&& purchase.status !== filterStatus) return false;
+      if (filterDocType !== 'all'&& purchase.document_type !== filterDocType) return false;
       if (filterProvider !== 'all') {
-        const providerName = purchase.provider?.company_name || purchase.provider?.full_name || [purchase.provider?.first_name, purchase.provider?.last_name].filter(Boolean).join(' ');
+        const providerName = purchase.provider?.company_name || purchase.provider?.full_name || [purchase.provider?.first_name, purchase.provider?.last_name].filter(Boolean).join('');
         if (providerName !== filterProvider) return false;
       }
       
       return true;
     });
   }, [allPurchases, filterStatus, filterProvider, filterDocType]);
-
   const deletePurchaseMutation = useDeleteMaterialPurchase();
-
   const handleEdit = (purchase: MaterialPurchase) => {
     openModal('material-purchase', {
       projectId: activeProjectId,
@@ -134,7 +118,6 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
       mode: 'edit',
     });
   };
-
   const formatDate = (dateString: string | null, formatString: string = 'dd/MM/yyyy') => {
     if (!dateString) return '-';
     try {
@@ -144,15 +127,12 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
       return '-';
     }
   };
-
   const formatCurrency = (amount: number, currency?: { symbol: string } | null) => {
     const symbol = currency?.symbol || '$';
     return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
-
   const handleDeletePurchase = (purchase: MaterialPurchase) => {
     if (!organizationId || !activeProjectId) return;
-
     const purchaseDate = formatDate(purchase.purchase_date, 'dd/MM/yyyy');
     const purchaseLabel = `Compra del ${purchaseDate}${purchase.invoice_number ? ` (#${purchase.invoice_number})` : ''}`;
     
@@ -170,7 +150,6 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
       isLoading: deletePurchaseMutation.isPending
     });
   };
-
   const handleAddPurchase = () => {
     openModal('material-purchase', {
       projectId: activeProjectId,
@@ -178,18 +157,16 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
       mode: 'create'
     });
   };
-
   const handleBulkDelete = () => {
     if (!organizationId || !activeProjectId || selectedPurchases.length === 0) return;
-
     const count = selectedPurchases.length;
     
     showDeleteConfirmation({
       mode: 'simple',
-      title: `Eliminar ${count} ${count === 1 ? 'compra' : 'compras'}`,
-      description: `¿Estás seguro de que querés eliminar ${count === 1 ? 'esta compra' : `estas ${count} compras`}? Esta acción no se puede deshacer.`,
-      itemName: `${count} ${count === 1 ? 'compra seleccionada' : 'compras seleccionadas'}`,
-      destructiveActionText: `Eliminar ${count === 1 ? 'compra' : 'compras'}`,
+      title: `Eliminar ${count} ${count === 1 ? 'compra': 'compras'}`,
+      description: `¿Estás seguro de que querés eliminar ${count === 1 ? 'esta compra': `estas ${count} compras`}? Esta acción no se puede deshacer.`,
+      itemName: `${count} ${count === 1 ? 'compra seleccionada': 'compras seleccionadas'}`,
+      destructiveActionText: `Eliminar ${count === 1 ? 'compra': 'compras'}`,
       onDelete: async () => {
         let successCount = 0;
         let failCount = 0;
@@ -226,7 +203,6 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
       isLoading: deletePurchaseMutation.isPending
     });
   };
-
   const columns: Column<MaterialPurchase>[] = [
     {
       key: 'purchase_date',
@@ -244,7 +220,7 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
       render: (purchase: MaterialPurchase) => {
         if (!purchase.provider) return <span className="text-muted-foreground">Sin proveedor</span>;
         const p = purchase.provider as any;
-        return p.company_name || p.full_name || [p.first_name, p.last_name].filter(Boolean).join(' ') || '-';
+        return p.company_name || p.full_name || [p.first_name, p.last_name].filter(Boolean).join('') || '-';
       },
     },
     {
@@ -294,18 +270,15 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
       },
     },
   ];
-
   const isFilterActive = 
-    filterStatus !== 'all' || 
-    filterProvider !== 'all' ||
+    filterStatus !== 'all'|| 
+    filterProvider !== 'all'||
     filterDocType !== 'all';
-
   const handleClearFilters = () => {
     setFilterStatus('all');
     setFilterProvider('all');
     setFilterDocType('all');
   };
-
   const handleViewPurchase = (purchase: MaterialPurchase) => {
     openModal('material-purchase', {
       projectId: activeProjectId,
@@ -314,7 +287,6 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
       mode: 'view',
     });
   };
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -330,7 +302,6 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
             {formatCurrency(metricsData.total_amount)} en compras activas
           </StatCardMeta>
         </StatCard>
-
         <StatCard data-testid="stat-card-pending">
           <StatCardTitle showArrow={false}>
             <Clock className="w-4 h-4 inline mr-1" />
@@ -343,7 +314,6 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
             {metricsData.count_pending} pendientes, {metricsData.count_partially_paid} parciales
           </StatCardMeta>
         </StatCard>
-
         <StatCard data-testid="stat-card-paid">
           <StatCardTitle showArrow={false}>
             <CheckCircle2 className="w-4 h-4 inline mr-1" />
@@ -357,7 +327,6 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
           </StatCardMeta>
         </StatCard>
       </div>
-
       <Table
         columns={columns}
         data={filteredPurchases}

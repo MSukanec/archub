@@ -17,30 +17,25 @@ import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useGeneralCostsDataHealth, DataHealthAlertMulti } from '@/core/data-health'
 import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/use-currencies'
-
-export type PeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all'
-
+export type PeriodFilter = '30d'| '3m'| '6m'| '1y'| 'all'
 const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
-  { value: '30d', label: 'Últimos 30 días' },
-  { value: '3m', label: 'Últimos 3 meses' },
-  { value: '6m', label: 'Últimos 6 meses' },
-  { value: '1y', label: 'Último año' },
-  { value: 'all', label: 'Histórico' },
+  { value: '30d', label: 'Últimos 30 días'},
+  { value: '3m', label: 'Últimos 3 meses'},
+  { value: '6m', label: 'Últimos 6 meses'},
+  { value: '1y', label: 'Último año'},
+  { value: 'all', label: 'Histórico'},
 ]
-
 const GENERAL_COSTS_TABS = [
-  { id: 'dashboard', label: 'Visión General' },
-  { id: 'conceptos', label: 'Conceptos' },
-  { id: 'pagos', label: 'Pagos' },
-  { id: 'ajustes', label: 'Ajustes' },
+  { id: 'dashboard', label: 'Visión General'},
+  { id: 'conceptos', label: 'Conceptos'},
+  { id: 'pagos', label: 'Pagos'},
+  { id: 'ajustes', label: 'Ajustes'},
 ]
-
 export interface DrillDownFilters {
   filterMonth?: string;
   filterGeneralCost?: string;
   filterCategory?: string;
 }
-
 export default function GeneralCostsPage() {
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
@@ -83,17 +78,14 @@ export default function GeneralCostsPage() {
       setSelectedPeriod(validSelectedPeriod)
     }
   }, [validSelectedPeriod, selectedPeriod])
-
   useEffect(() => {
     setSidebarContext('organization')
   }, [setSidebarContext])
-
   const handleNewGeneralCost = () => {
     openModal('general-costs', {
       organizationId: userData?.organization?.id
     })
   }
-
   const handleNewPayment = () => {
     if (isLabLayout) {
       openDrawer({
@@ -113,7 +105,6 @@ export default function GeneralCostsPage() {
       })
     }
   }
-
   const renderView = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -123,14 +114,14 @@ export default function GeneralCostsPage() {
             onNavigateToPayments={() => setActiveTab('pagos')}
             onNavigateToTab={(tab, filters) => {
               if (tab === 'concepts') setActiveTab('conceptos');
-              else if (tab === 'payments' || tab === 'pagos') {
+              else if (tab === 'payments'|| tab === 'pagos') {
                 setDrillDownFilters(filters || {});
                 setActiveTab('pagos');
               }
             }}
             onScrollToPanel={(panelId) => {
-              const element = document.querySelector(`[data-testid="chart-${panelId === 'monthlyChart' ? 'monthly-trend' : panelId}"]`);
-              element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              const element = document.querySelector(`[data-testid="chart-${panelId === 'monthlyChart'? 'monthly-trend': panelId}"]`);
+              element?.scrollIntoView({ behavior: 'smooth', block: 'center'});
             }}
             selectedPeriod={validSelectedPeriod}
             dismissedIssueIds={dismissedIssueIds}
@@ -159,14 +150,14 @@ export default function GeneralCostsPage() {
             onNavigateToPayments={() => setActiveTab('pagos')}
             onNavigateToTab={(tab, filters) => {
               if (tab === 'concepts') setActiveTab('conceptos');
-              else if (tab === 'payments' || tab === 'pagos') {
+              else if (tab === 'payments'|| tab === 'pagos') {
                 setDrillDownFilters(filters || {});
                 setActiveTab('pagos');
               }
             }}
             onScrollToPanel={(panelId) => {
-              const element = document.querySelector(`[data-testid="chart-${panelId === 'monthlyChart' ? 'monthly-trend' : panelId}"]`);
-              element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              const element = document.querySelector(`[data-testid="chart-${panelId === 'monthlyChart'? 'monthly-trend': panelId}"]`);
+              element?.scrollIntoView({ behavior: 'smooth', block: 'center'});
             }}
             selectedPeriod={validSelectedPeriod}
             dismissedIssueIds={dismissedIssueIds}
@@ -177,7 +168,6 @@ export default function GeneralCostsPage() {
         )
     }
   }
-
   const periodContent = (
     <Popover open={periodPopoverOpen} onOpenChange={setPeriodPopoverOpen}>
       <PopoverTrigger asChild>
@@ -214,7 +204,7 @@ export default function GeneralCostsPage() {
                 data-testid={`option-period-${option.value}`}
               >
                 <span>{option.label}</span>
-                {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
+                {!isAvailable && option.value !== 'all'&& <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
               </button>
             );
           })}
@@ -222,12 +212,10 @@ export default function GeneralCostsPage() {
       </PopoverContent>
     </Popover>
   );
-
   const labTabs = GENERAL_COSTS_TABS.map(tab => ({
     ...tab,
-    disabled: tab.id === 'pagos' && !hasGeneralCosts,
+    disabled: tab.id === 'pagos'&& !hasGeneralCosts,
   }))
-
   if (isLabLayout) {
     return (
       <LabLayout 
@@ -257,12 +245,10 @@ export default function GeneralCostsPage() {
       </LabLayout>
     )
   }
-
   const headerTabs = GENERAL_COSTS_TABS.map(tab => ({
     ...tab,
     isActive: activeTab === tab.id
   }))
-
   const getActionButton = () => {
     if (activeTab === "conceptos") {
       return {
@@ -280,7 +266,6 @@ export default function GeneralCostsPage() {
     }
     return undefined
   }
-
   const getPeriodSelector = () => {
     if (activeTab !== "dashboard") return undefined
     
@@ -320,7 +305,7 @@ export default function GeneralCostsPage() {
                   data-testid={`option-period-${option.value}`}
                 >
                   <span>{option.label}</span>
-                  {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
+                  {!isAvailable && option.value !== 'all'&& <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
                 </button>
               );
             })}
@@ -329,7 +314,6 @@ export default function GeneralCostsPage() {
       </Popover>
     )
   }
-
   const headerProps = {
     title: "Gastos Generales",
     description: "Administra los gastos generales y costos operativos de tu organización.",
@@ -343,7 +327,6 @@ export default function GeneralCostsPage() {
       setActiveTab(tabId)
     },
   }
-
   return (
     <Layout headerProps={headerProps} wide={false}>
       <div className="space-y-6">

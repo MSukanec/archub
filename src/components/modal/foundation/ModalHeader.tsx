@@ -4,14 +4,12 @@ import { LucideIcon, ArrowLeft, Loader2, AlertCircle, CheckCircle, Info, X } fro
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ModalReadinessState } from '../utils/modal-readiness';
-
 interface BreadcrumbItem {
   label: string;
   onClick?: () => void;
   disabled?: boolean;
   current?: boolean;
 }
-
 interface ModalHeaderProps {
   /** Título principal del modal */
   title?: string;
@@ -40,7 +38,7 @@ interface ModalHeaderProps {
   breadcrumbSeparator?: ReactNode;
   
   /** Estado del proceso/formulario */
-  status?: 'idle' | 'loading' | 'success' | 'error' | 'warning';
+  status?: 'idle'| 'loading'| 'success'| 'error'| 'warning';
   
   /** Mensaje de estado personalizado */
   statusMessage?: string;
@@ -62,7 +60,7 @@ interface ModalHeaderProps {
   /** Elementos de estado/badges adicionales */
   statusBadges?: Array<{
     label: string;
-    variant?: 'default' | 'secondary' | 'destructive' | 'outline';
+    variant?: 'default'| 'secondary'| 'destructive'| 'outline';
     icon?: LucideIcon;
   }>;
   
@@ -71,7 +69,7 @@ interface ModalHeaderProps {
     key: string;
     label: string;
     action: () => void;
-    modifiers?: ('ctrl' | 'shift' | 'alt')[];
+    modifiers?: ('ctrl'| 'shift'| 'alt')[];
   }>;
   
   /** Mostrar atajos de teclado en tooltip */
@@ -81,7 +79,7 @@ interface ModalHeaderProps {
   backButtonText?: string;
   
   /** Variante del botón de retroceso */
-  backButtonVariant?: 'default' | 'ghost' | 'outline' | 'secondary';
+  backButtonVariant?: 'default'| 'ghost'| 'outline'| 'secondary';
   
   /** Deshabilitar todas las acciones (durante loading) */
   disabled?: boolean;
@@ -101,7 +99,6 @@ interface ModalHeaderProps {
   /** Mostrar botón de cierre X */
   showCloseButton?: boolean;
 }
-
 export function ModalHeader({
   title,
   description,
@@ -151,7 +148,6 @@ export function ModalHeader({
         return Icon ? <Icon className="h-4 w-4 text-[var(--accent)]" /> : null;
     }
   };
-
   const HeadingComponent = `h${headingLevel}` as keyof JSX.IntrinsicElements;
   
   React.useEffect(() => {
@@ -178,7 +174,6 @@ export function ModalHeader({
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [keyboardActions, disabled]);
-
   return (
     <header 
       className={cn(
@@ -211,7 +206,7 @@ export function ModalHeader({
                       "hover:text-foreground transition-colors",
                       item.current && "text-foreground font-medium"
                     )}
-                    aria-current={item.current ? 'page' : undefined}
+                    aria-current={item.current ? 'page': undefined}
                     disabled={disabled}
                   >
                     {item.label}
@@ -222,7 +217,7 @@ export function ModalHeader({
                       item.current && "text-foreground font-medium",
                       item.disabled && "opacity-50"
                     )}
-                    aria-current={item.current ? 'page' : undefined}
+                    aria-current={item.current ? 'page': undefined}
                   >
                     {item.label}
                   </span>
@@ -232,7 +227,6 @@ export function ModalHeader({
           </ol>
         </nav>
       )}
-
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {showBackButton && onBackClick && (
@@ -249,15 +243,12 @@ export function ModalHeader({
               {backButtonText}
             </Button>
           )}
-
           {leftActions && <div className="shrink-0">{leftActions}</div>}
-
           {title && (
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="shrink-0">
                 {getStatusIcon()}
               </div>
-
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <HeadingComponent 
@@ -292,11 +283,11 @@ export function ModalHeader({
                   <p 
                     className={cn(
                       "text-xs leading-tight mt-1",
-                      status === 'error' && "text-red-600",
-                      status === 'success' && "text-green-600",
-                      status === 'warning' && "text-orange-600",
-                      status === 'loading' && "text-blue-600",
-                      status === 'idle' && "text-muted-foreground"
+                      status === 'error'&& "text-red-600",
+                      status === 'success'&& "text-green-600",
+                      status === 'warning'&& "text-orange-600",
+                      status === 'loading'&& "text-blue-600",
+                      status === 'idle'&& "text-muted-foreground"
                     )}
                   >
                     {statusMessage}
@@ -306,7 +297,6 @@ export function ModalHeader({
             </div>
           )}
         </div>
-
         <div className="flex items-center gap-2 shrink-0">
           {progress && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -324,7 +314,6 @@ export function ModalHeader({
               </div>
             </div>
           )}
-
           {statusBadges.map((badge, index) => (
             <Badge 
               key={index} 
@@ -335,7 +324,6 @@ export function ModalHeader({
               {badge.label}
             </Badge>
           ))}
-
           {onToggleEdit && (
             <Button
               variant="outline"
@@ -344,14 +332,12 @@ export function ModalHeader({
               disabled={disabled}
               className="text-xs"
               data-testid="toggle-edit-button"
-              aria-label={isEditing ? 'Salir del modo edición' : 'Entrar en modo edición'}
+              aria-label={isEditing ? 'Salir del modo edición': 'Entrar en modo edición'}
             >
-              {isEditing ? 'Ver' : 'Editar'}
+              {isEditing ? 'Ver': 'Editar'}
             </Button>
           )}
-
           {rightActions && <div>{rightActions}</div>}
-
           {showKeyboardShortcuts && keyboardActions.length > 0 && (
             <div className="text-xs text-muted-foreground">
               <Button variant="ghost" size="sm" disabled className="text-xs px-2">
@@ -360,7 +346,6 @@ export function ModalHeader({
               </Button>
             </div>
           )}
-
           {showCloseButton && onClose && (
             <Button
               variant="ghost"
@@ -376,7 +361,6 @@ export function ModalHeader({
           )}
         </div>
       </div>
-
       {readinessState?.hasError && (
         <div className="mt-2 flex items-center gap-2 text-xs text-red-600 bg-red-50 dark:bg-red-950/20 px-2 py-1 rounded">
           <AlertCircle className="h-3 w-3" />
@@ -395,5 +379,4 @@ export function ModalHeader({
     </header>
   );
 }
-
 export { ModalHeader as FormModalHeader };

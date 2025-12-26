@@ -8,7 +8,6 @@ import { FormModalLayout } from "@/components/modal";
 import { FormModalHeader } from "@/components/modal";
 import { FormModalFooter } from "@/components/modal";
 import { useModalPanelStore } from "@/components/modal";
-
 import { ComboBox } from "@/components/shared/fields/ComboBoxWriteField";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,8 +18,6 @@ import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
 import { ParametricTaskBuilder } from "@/features/legacy/components/admin/ParametricTaskBuilder";
 import { useCreateGeneratedTask } from "@/hooks/use-generated-tasks";
 import { useTopLevelCategories, useUnits } from "@/hooks/use-task-categories";
-
-
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -30,22 +27,18 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-
 const addTaskSchema = z.object({
   selectedTasks: z.array(z.object({
     task_id: z.string(),
     quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0")
   })).min(1, "Debe seleccionar al menos una tarea")
 });
-
 type AddTaskFormData = z.infer<typeof addTaskSchema>;
-
 interface SelectedTask {
   task_id: string;
   quantity: number;
   project_phase_id?: string;
 }
-
 interface ParameterSelection {
   parameterId: string;
   optionId: string;
@@ -54,7 +47,6 @@ interface ParameterSelection {
   optionName: string;
   optionLabel: string;
 }
-
 interface TaskMultiModalProps {
   modalData: {
     projectId: string;
@@ -65,7 +57,6 @@ interface TaskMultiModalProps {
   };
   onClose: () => void;
 }
-
 export function TaskMultiModal({ 
   modalData, 
   onClose 
@@ -93,12 +84,11 @@ export function TaskMultiModal({
   
   // Query client para invalidar caché
   const queryClient = useQueryClient();
-
   // Panel store para manejar subforms
   const { currentPanel, setPanel, currentSubform, setCurrentSubform } = useModalPanelStore();
   
   // Estado para manejo de tabs dentro del subform
-  const [activeTab, setActiveTab] = useState<'parametric' | 'custom'>('parametric');
+  const [activeTab, setActiveTab] = useState<'parametric'| 'custom'>('parametric');
   
   // Estados para el formulario de tarea personalizada
   const [taskNameText, setTaskNameText] = useState<string>('');
@@ -129,9 +119,6 @@ export function TaskMultiModal({
     },
     enabled: !!userData?.user?.id && !!modalData.organizationId
   });
-
-
-
   // Hook para cargar tareas SOLO de la organización actual o del sistema
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
     queryKey: ['task-library', modalData.organizationId],
@@ -158,7 +145,6 @@ export function TaskMultiModal({
     },
     enabled: !!supabase && !!modalData.organizationId
   });
-
   // Hook para obtener las fases del proyecto
   const { data: projectPhases = [], isLoading: isLoadingProjectPhases } = useConstructionProjectPhases(modalData.projectId);
   
@@ -170,25 +156,20 @@ export function TaskMultiModal({
   useEffect(() => {
     console.log('Project phases loaded:', projectPhases);
   }, [projectPhases]);
-
   // Hook para obtener la fase actual de la tarea cuando se está editando
   // Ya tenemos la información en editingTask.phase_instance_id, no necesitamos query adicional
-
   const form = useForm<AddTaskFormData>({
     resolver: zodResolver(addTaskSchema),
     defaultValues: {
       selectedTasks: []
     }
   });
-
   const { handleSubmit, setValue, watch, formState: { errors } } = form;
-
   // Obtener rubros únicos para el filtro
   const rubroOptions = useMemo(() => {
     const uniqueRubros = Array.from(new Set(tasks.map(task => task.category_name).filter(Boolean)));
     return uniqueRubros.map(rubro => ({ value: rubro, label: rubro }));
   }, [tasks]);
-
   // Filtrar tareas con ambos filtros
   const filteredTasks = useMemo(() => {
     console.log('🔄 Procesando filtros - Tareas totales:', tasks.length, 'Búsqueda:', searchQuery, 'Rubro:', rubroFilter);
@@ -211,12 +192,10 @@ export function TaskMultiModal({
     console.log('🔍 Tareas filtradas:', filtered.length);
     return filtered;
   }, [tasks, searchQuery, rubroFilter]);
-
   // Función para obtener la unidad de una tarea específica
   const getTaskUnit = (task: any) => {
     return task.units?.name || task.unit_name || 'ud';
   };
-
   // Funciones para manejar la selección de tareas
   const handleTaskSelection = (taskId: string, isSelected: boolean) => {
     if (isSelected) {
@@ -225,15 +204,11 @@ export function TaskMultiModal({
       setSelectedTasks(prev => prev.filter(t => t.task_id !== taskId));
     }
   };
-
   const handleQuantityChange = (taskId: string, quantity: number) => {
     setSelectedTasks(prev => 
       prev.map(t => t.task_id === taskId ? { ...t, quantity } : t)
     );
   };
-
-
-
   // Cargar datos cuando está en modo edición
   useEffect(() => {
     if (modalData.isEditing && modalData.editingTask) {
@@ -256,15 +231,12 @@ export function TaskMultiModal({
       });
     }
   }, [modalData.isEditing, modalData.editingTask, form]);
-
   // Sincronizar selectedTasks con el formulario
   useEffect(() => {
     setValue('selectedTasks', selectedTasks);
   }, [selectedTasks, setValue]);
-
   const createTask = useCreateConstructionTask();
   const updateTask = useUpdateConstructionTask();
-
   // Hook para obtener parámetros con información de is_required
   const { data: allParameters = [] } = useQuery({
     queryKey: ['task-parameters-with-required'],
@@ -277,7 +249,6 @@ export function TaskMultiModal({
       return data;
     },
   });
-
   // Función para manejar la creación de tarea paramétrica
   const handleCreateParametricTask = async (taskData?: { selections: ParameterSelection[], preview: string, paramValues: Record<string, string>, paramOrder: string[], availableParameters: string[] }) => {
     // Usar datos del callback si están disponibles, sino usar estados locales
@@ -285,12 +256,10 @@ export function TaskMultiModal({
     const preview = taskData?.preview || parametricTaskPreview;
     const paramOrder = taskData?.paramOrder || parametricParameterOrder;
     const availableParams = taskData?.availableParameters || [];
-
     console.log('🔍 DEBUG: Iniciando handleCreateParametricTask');
     console.log('📊 taskData recibida:', taskData);
     console.log('📊 selections:', selections);
     console.log('📊 availableParams:', availableParams);
-
     if (selections.length === 0) {
       toast({
         title: "Error",
@@ -299,7 +268,6 @@ export function TaskMultiModal({
       });
       return;
     }
-
     // Validar parámetros obligatorios entre los disponibles
     console.log('🔍 DEBUG: Validando parámetros obligatorios');
     console.log('📊 allParameters:', allParameters);
@@ -319,7 +287,6 @@ export function TaskMultiModal({
       !selectedParameterIds.includes(param.id)
     );
     console.log('📊 missingRequiredParams:', missingRequiredParams);
-
     if (missingRequiredParams.length > 0) {
       const missingNames = missingRequiredParams.map(param => param.label).join(', ');
       console.log('❌ VALIDACIÓN FALLÓ - Parámetros faltantes:', missingNames);
@@ -330,11 +297,8 @@ export function TaskMultiModal({
       });
       return;
     }
-
     console.log('✅ VALIDACIÓN EXITOSA - Todos los parámetros obligatorios están presentes');
-
     setIsCreatingParametricTask(true);
-
     try {
       // Usar paramValues del callback si está disponible, sino crear desde selections
       const paramValuesToUse = taskData?.paramValues || (() => {
@@ -344,20 +308,16 @@ export function TaskMultiModal({
         });
         return paramValues;
       })();
-
       console.log('🚀 Creando tarea paramétrica con valores:', {
         paramValues: paramValuesToUse,
         paramOrder: paramOrder,
         preview: preview
       });
-
       const response = await createGeneratedTask.mutateAsync({
         param_values: paramValuesToUse,
         param_order: paramOrder
       });
-
       console.log('✅ Nueva tarea paramétrica creada:', response);
-
       // Agregar la nueva tarea como seleccionada en el formulario principal
       const newTaskId = response.new_task?.id;
       if (newTaskId) {
@@ -366,27 +326,22 @@ export function TaskMultiModal({
           quantity: 1 
         }]);
       }
-
       // Limpiar filtros y búsqueda para mostrar todas las tareas incluyendo la nueva
       setSearchQuery('');
       setRubroFilter('');
       setCategoryFilter('');
-
       // Limpiar el subformulario
       setParametricSelections([]);
       setParametricTaskPreview('');
       setParametricParameterOrder([]);
       setShowParametricTaskCreator(false);
-
       // Volver al panel principal
       setPanel('edit');
       setActiveTab('parametric'); // Reset tab al por defecto
-
       toast({
         title: "Tarea creada",
         description: "La nueva tarea paramétrica se creó y agregó correctamente",
       });
-
     } catch (error) {
       console.error('❌ Error creando tarea paramétrica:', error);
       toast({
@@ -398,7 +353,6 @@ export function TaskMultiModal({
       setIsCreatingParametricTask(false);
     }
   };
-
   // Función para crear tarea personalizada
   const handleCreateCustomTask = async () => {
     // Validación de campos obligatorios
@@ -410,7 +364,6 @@ export function TaskMultiModal({
       });
       return;
     }
-
     if (!selectedUnitId) {
       toast({
         title: "Error",
@@ -419,7 +372,6 @@ export function TaskMultiModal({
       });
       return;
     }
-
     if (!taskNameText.trim()) {
       toast({
         title: "Error",
@@ -428,7 +380,6 @@ export function TaskMultiModal({
       });
       return;
     }
-
     if (!userData?.organization?.id) {
       toast({
         title: "Error",
@@ -437,9 +388,7 @@ export function TaskMultiModal({
       });
       return;
     }
-
     setIsCreatingCustomTask(true);
-
     try {
       console.log('🚀 Creando tarea personalizada con datos:', {
         input_custom_name: taskNameText.trim(),
@@ -447,7 +396,6 @@ export function TaskMultiModal({
         input_category_id: selectedCategoryId,
         input_organization_id: userData.organization.id
       });
-
       // Llamar directamente a la función SQL create_parametric_task usando supabase.rpc
       if (!supabase) {
         throw new Error('Supabase client no está disponible');
@@ -461,23 +409,19 @@ export function TaskMultiModal({
         input_organization_id: userData.organization.id, // ID de la organización activa del usuario
         input_custom_name: taskNameText.trim()     // nombre ingresado por el usuario
       });
-
       if (error) {
         console.error('❌ Error en create_parametric_task:', error);
         throw error;
       }
-
       console.log('✅ Tarea personalizada creada:', result);
-
       // Agregar la nueva tarea a la lista de tareas seleccionadas
       if (result?.new_task) {
         setSelectedTasks(prev => [...prev, {
           task_id: result.new_task.id,
           quantity: 1,
-          project_phase_id: '' // Sin fase por defecto
+          project_phase_id: ''// Sin fase por defecto
         }]);
       }
-
       // Invalidar caché para que la tabla se actualice automáticamente
       await queryClient.invalidateQueries({ queryKey: ['task-library'] });
       
@@ -487,12 +431,10 @@ export function TaskMultiModal({
       setSelectedUnitId('');
       setPanel('edit');
       setActiveTab('parametric');
-
       toast({
         title: "Tarea creada",
         description: "La tarea personalizada se creó y agregó correctamente",
       });
-
     } catch (error) {
       console.error('❌ Error creando tarea personalizada:', error);
       toast({
@@ -504,14 +446,12 @@ export function TaskMultiModal({
       setIsCreatingCustomTask(false);
     }
   };
-
   const onSubmit = async (data: AddTaskFormData) => {
     console.log('🚀 SUBMIT INICIADO - Datos del formulario:', data);
     console.log('🚀 SUBMIT INICIADO - selectedTasks:', selectedTasks);
     console.log('🚀 SUBMIT INICIADO - modalData:', modalData);
     console.log('🚀 SUBMIT INICIADO - userData:', userData?.user);
     console.log('🚀 SUBMIT INICIADO - organizationMember:', organizationMember);
-
     if (!userData?.user?.id) {
       toast({
         title: "Error",
@@ -520,7 +460,6 @@ export function TaskMultiModal({
       });
       return;
     }
-
     // Usar userData.user.id directamente si no hay organizationMember
     const createdBy = organizationMember?.id || userData?.user?.id;
     
@@ -532,7 +471,6 @@ export function TaskMultiModal({
       });
       return;
     }
-
     if (selectedTasks.length === 0) {
       toast({
         title: "Error",
@@ -541,9 +479,7 @@ export function TaskMultiModal({
       });
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       if (modalData.isEditing && modalData.editingTask) {
         // Modo edición - solo editar la primera tarea seleccionada
@@ -556,7 +492,6 @@ export function TaskMultiModal({
           organization_id: modalData.organizationId,
           project_phase_id: firstSelected.project_phase_id || undefined
         });
-
         toast({
           title: "Tarea actualizada",
           description: "La tarea se ha actualizado correctamente",
@@ -574,13 +509,11 @@ export function TaskMultiModal({
             project_phase_id: st.project_phase_id
           }))
         });
-
         const createdById = createdBy;
         console.log('🔧 ID A USAR PARA created_by:', {
           organizationMember: organizationMember?.id,
           finalId: createdById
         });
-
         const promises = selectedTasks.map((selectedTask, index) => {
           console.log(`🔄 Preparando tarea ${index + 1}:`, {
             task_id: selectedTask.task_id,
@@ -603,15 +536,12 @@ export function TaskMultiModal({
             throw error;
           });
         });
-
         await Promise.all(promises);
-
         toast({
           title: "Tareas agregadas",
-          description: `Se agregaron ${selectedTasks.length} tarea${selectedTasks.length > 1 ? 's' : ''} al proyecto`,
+          description: `Se agregaron ${selectedTasks.length} tarea${selectedTasks.length > 1 ? 's': ''} al proyecto`,
         });
       }
-
       onClose();
     } catch (error) {
       console.error('❌ ERROR COMPLETO AL ENVIAR TAREAS:', error);
@@ -621,11 +551,11 @@ export function TaskMultiModal({
       
       let errorMessage = "Error desconocido";
       
-      if (error && typeof error === 'object' && 'message' in error) {
+      if (error && typeof error === 'object'&& 'message'in error) {
         errorMessage = String(error.message);
       } else if (typeof error === 'string') {
         errorMessage = error;
-      } else if (error && typeof error === 'object' && 'details' in error) {
+      } else if (error && typeof error === 'object'&& 'details'in error) {
         errorMessage = String(error.details);
       }
       
@@ -638,20 +568,18 @@ export function TaskMultiModal({
       setIsSubmitting(false);
     }
   };
-
   // Panel de vista (vacío para este modal)
   const viewPanel = (
     <div className="p-4 text-center text-muted-foreground">
       Este modal no tiene vista previa
     </div>
   );
-
   const editPanel = (
     <form 
       onSubmit={handleSubmit(onSubmit)} 
       className="flex flex-col h-full"
       onKeyDown={(e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
+        if (e.key === 'Enter'&& !e.shiftKey) {
           e.preventDefault();
           handleSubmit(onSubmit)();
         }
@@ -659,8 +587,6 @@ export function TaskMultiModal({
     >
       {/* Sección fija superior */}
       <div className="flex-shrink-0 space-y-6">
-
-
         {/* Errores y estado */}
         <div className="space-y-2">
           {errors.selectedTasks && (
@@ -668,7 +594,6 @@ export function TaskMultiModal({
           )}
         </div>
       </div>
-
       {/* Layout de dos columnas */}
       <div className="flex-1 min-h-0 grid grid-cols-2 gap-4">
         {/* Columna Izquierda - Tareas Disponibles */}
@@ -727,7 +652,6 @@ export function TaskMultiModal({
           <div className="py-2 px-3 bg-muted/50 font-medium text-xs border-b">
             <div className="text-xs font-medium">TAREA</div>
           </div>
-
           {/* Table Body */}
           <ScrollArea className="h-[350px]">
             <div className="divide-y">
@@ -751,7 +675,7 @@ export function TaskMultiModal({
                           // Navegar al subform de forma sincronizada
                           setCurrentSubform('parametric-task');
                           setPanel('subform');
-                          console.log('🔍 Estados después de click:', { panel: 'subform', subform: 'parametric-task' });
+                          console.log('🔍 Estados después de click:', { panel: 'subform', subform: 'parametric-task'});
                         }}
                         className="gap-2"
                       >
@@ -769,7 +693,7 @@ export function TaskMultiModal({
                     <div 
                       key={task.id} 
                       className={`p-3 hover:bg-muted/50 cursor-pointer border-b transition-all ${
-                        isSelected ? 'border-l-4 border-l-accent bg-accent/10' : ''
+                        isSelected ? 'border-l-4 border-l-accent bg-accent/10': ''
                       }`}
                       onClick={() => {
                         // Permite agregar la misma tarea múltiples veces
@@ -792,7 +716,6 @@ export function TaskMultiModal({
             </div>
           </ScrollArea>
         </div>
-
         {/* Columna Derecha - Tareas Seleccionadas */}
         <div className="border rounded-lg">
           <div className="p-3 border-b bg-muted">
@@ -806,7 +729,6 @@ export function TaskMultiModal({
             <div className="text-xs font-medium w-20">FASE</div>
             <div className="text-xs font-medium w-8"></div>
           </div>
-
           {/* Selected Tasks Body */}
           <ScrollArea className="h-[350px]">
             <div className="divide-y">
@@ -830,7 +752,6 @@ export function TaskMultiModal({
                           <span className="font-bold">{task.category_name || 'Sin rubro'}</span> - {task.unit_name || 'Sin unidad'}
                         </div>
                       </div>
-
                       {/* Cantidad Input */}
                       <div className="w-16">
                         <Input
@@ -849,7 +770,6 @@ export function TaskMultiModal({
                           step="0.01"
                         />
                       </div>
-
                       {/* Fase Select */}
                       <div className="w-20">
                         <Select 
@@ -874,7 +794,6 @@ export function TaskMultiModal({
                           </SelectContent>
                         </Select>
                       </div>
-
                       {/* Delete Button */}
                       <div className="w-8">
                         <Button
@@ -896,11 +815,8 @@ export function TaskMultiModal({
           </ScrollArea>
         </div>
       </div>
-
-
     </form>
   );
-
   // Función para crear el subform paramétrico
   const getSubform = () => {
     console.log('🔍 getSubform called with currentSubform:', currentSubform);
@@ -938,7 +854,7 @@ export function TaskMultiModal({
                 </div>
               </div>
               
-              {activeTab === 'parametric' && (
+              {activeTab === 'parametric'&& (
                 <div>
                   {/* Título de sección para tarea paramétrica */}
                   <div className="mb-4 px-6">
@@ -967,7 +883,7 @@ export function TaskMultiModal({
                 </div>
               )}
                 
-              {activeTab === 'custom' && (
+              {activeTab === 'custom'&& (
                 <div>
                   {/* Título de sección para tarea personalizada */}
                   <div className="mb-4 px-6">
@@ -1002,7 +918,6 @@ export function TaskMultiModal({
                           disabled={rubrosLoading}
                         />
                       </div>
-
                       {/* Select para Unidades */}
                       <div className="space-y-2">
                         <Label className="text-xs font-medium text-foreground">
@@ -1022,7 +937,6 @@ export function TaskMultiModal({
                         </Select>
                       </div>
                     </div>
-
                     {/* 2. Textarea para Nombre de la Tarea */}
                     <div className="space-y-2">
                       <Label className="text-xs font-medium text-foreground">
@@ -1047,8 +961,7 @@ export function TaskMultiModal({
         return null;
     }
   };
-
-  const headerContent = currentPanel === 'subform' ? (
+  const headerContent = currentPanel === 'subform'? (
     <FormModalHeader
       title="Crear Nueva Tarea Personalizada"
       description="Elige el método para crear tu nueva tarea de construcción"
@@ -1070,9 +983,8 @@ export function TaskMultiModal({
       icon={CheckSquare}
     />
   );
-
-  const footerContent = currentPanel === 'subform' ? (
-    activeTab === 'parametric' ? (
+  const footerContent = currentPanel === 'subform'? (
+    activeTab === 'parametric'? (
       <FormModalFooter
         leftLabel="Cancelar"
         onLeftClick={() => setPanel('edit')}
@@ -1124,7 +1036,7 @@ export function TaskMultiModal({
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel={modalData.isEditing ? "Guardar Cambios" : `Agregar ${selectedTasks.length} Tarea${selectedTasks.length !== 1 ? 's' : ''}`}
+      rightLabel={modalData.isEditing ? "Guardar Cambios" : `Agregar ${selectedTasks.length} Tarea${selectedTasks.length !== 1 ? 's': ''}`}
       onRightClick={() => {
         console.log('🎯 BOTÓN PRESIONADO - Form errors:', form.formState.errors);
         console.log('🎯 BOTÓN PRESIONADO - Form isValid:', form.formState.isValid);
@@ -1135,7 +1047,6 @@ export function TaskMultiModal({
       showLoadingSpinner={isSubmitting}
     />
   );
-
   return (
     <FormModalLayout
       columns={1}

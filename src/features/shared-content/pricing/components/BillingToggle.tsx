@@ -1,11 +1,9 @@
 import { cn } from "@/lib/utils";
 import type { BillingPeriod } from "../types";
-
 interface BillingToggleProps {
   billingPeriod: BillingPeriod;
   onBillingPeriodChange: (period: BillingPeriod) => void;
 }
-
 export function BillingToggle({ billingPeriod, onBillingPeriodChange }: BillingToggleProps) {
   return (
     <div className="flex justify-center">

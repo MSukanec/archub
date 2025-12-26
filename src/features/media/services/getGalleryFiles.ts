@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { GalleryFile } from '../types';
-
 /**
  * Obtiene todos los archivos de galería para una organización y proyecto.
  * 
@@ -25,7 +24,6 @@ export async function getGalleryFiles(
   if (!organizationId || !supabase) {
     return [];
   }
-
   // Get organization files (visibility = 'organization')
   const orgQuery = supabase
     .from('project_media')
@@ -47,7 +45,6 @@ export async function getGalleryFiles(
     `)
     .eq('organization_id', organizationId)
     .eq('visibility', 'organization');
-
   // Get project files if there's a current project (visibility = 'project')
   let projectQuery = null;
   if (projectId) {
@@ -72,19 +69,15 @@ export async function getGalleryFiles(
       .eq('project_id', projectId)
       .eq('visibility', 'project');
   }
-
   try {
     const [orgResult, projectResult] = await Promise.all([
       orgQuery,
       projectQuery
     ]);
-
     if (orgResult.error) throw orgResult.error;
     if (projectResult?.error) throw projectResult.error;
-
     const orgFiles = orgResult.data || [];
     const projectFiles = projectResult?.data || [];
-
     // Combine and format files
     const allFiles: GalleryFile[] = [...orgFiles, ...projectFiles].map((file: any) => ({
       id: file.id,
@@ -95,14 +88,13 @@ export async function getGalleryFiles(
       created_at: file.created_at,
       project_id: file.project_id,
       organization_id: file.organization_id,
-      visibility: file.visibility as 'organization' | 'project' | 'private',
+      visibility: file.visibility as 'organization'| 'project'| 'private',
       created_by: file.created_by || 'Desconocido',
       description: file.description,
       file_path: file.file_path,
       project_name: file.projects?.name || 'Sin proyecto',
       site_log_id: file.site_log_id || null
     }));
-
     // Sort by creation date (newest first)
     return allFiles.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   } catch (error) {

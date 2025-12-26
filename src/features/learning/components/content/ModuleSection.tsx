@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { LessonItem } from './LessonItem';
-
 interface Lesson {
   id: string;
   title: string;
@@ -14,7 +13,6 @@ interface Lesson {
   is_completed: boolean;
   is_favorite: boolean;
 }
-
 interface ModuleSectionProps {
   moduleId: string;
   moduleTitle: string;
@@ -29,7 +27,6 @@ interface ModuleSectionProps {
   onMarkAllComplete?: (lessonIds: string[]) => void;
   isMarkingComplete?: boolean;
 }
-
 export function ModuleSection({
   moduleId,
   moduleTitle,
@@ -46,18 +43,15 @@ export function ModuleSection({
 }: ModuleSectionProps) {
   const [internalExpanded, setInternalExpanded] = useState(isActive);
   const isExpanded = controlledExpanded !== undefined ? controlledExpanded : internalExpanded;
-
   useEffect(() => {
     if (isActive && controlledExpanded === undefined) {
       setInternalExpanded(true);
     }
   }, [isActive, controlledExpanded]);
-
   const completedCount = lessons.filter(l => l.is_completed).length;
   const totalCount = lessons.length;
   const isModuleComplete = completedCount === totalCount && totalCount > 0;
   const progressPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
-
   const totalDuration = lessons.reduce((acc, l) => acc + (l.duration_sec || 0), 0);
   const formatTotalDuration = (seconds: number) => {
     if (seconds < 60) return `${seconds}s`;
@@ -67,14 +61,12 @@ export function ModuleSection({
     const remainingMins = mins % 60;
     return remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours}h`;
   };
-
   const getEffortLabel = (seconds: number) => {
     const hours = seconds / 3600;
     if (hours < 3) return 'Módulo corto';
     if (hours <= 5) return 'Módulo medio';
     return 'Módulo largo';
   };
-
   const handleToggle = () => {
     if (onToggle) {
       onToggle();
@@ -82,7 +74,6 @@ export function ModuleSection({
       setInternalExpanded(!internalExpanded);
     }
   };
-
   return (
     <div 
       className={cn(
@@ -123,7 +114,6 @@ export function ModuleSection({
             <span>{moduleIndex + 1}</span>
           )}
         </div>
-
         {/* Module Info */}
         <div className={cn("flex-1 min-w-0", imageUrl && "text-white")}>
           <div className="flex items-center gap-2">
@@ -135,7 +125,7 @@ export function ModuleSection({
             )}
           </div>
           <div className={cn("flex items-center gap-3 mt-1 text-sm", imageUrl ? "text-white/80" : "text-muted-foreground")}>
-            <span>{totalCount} {totalCount === 1 ? 'lección' : 'lecciones'}</span>
+            <span>{totalCount} {totalCount === 1 ? 'lección': 'lecciones'}</span>
             <span>·</span>
             <span>{formatTotalDuration(totalDuration)}</span>
             <span>·</span>
@@ -151,7 +141,6 @@ export function ModuleSection({
               </>
             )}
           </div>
-
           {/* Progress Bar */}
           {totalCount > 0 && (
             <div className={cn("mt-2 h-1 rounded-full overflow-hidden", imageUrl ? "bg-white/20" : "bg-muted")}>
@@ -164,7 +153,6 @@ export function ModuleSection({
             </div>
           )}
         </div>
-
         {/* Mark All Complete Button - appears on hover */}
         {!isModuleComplete && onMarkAllComplete && (
           <div 
@@ -197,7 +185,6 @@ export function ModuleSection({
             </Button>
           </div>
         )}
-
         {/* Expand Icon */}
         <motion.div
           animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -207,7 +194,6 @@ export function ModuleSection({
           <ChevronDown className={cn("h-5 w-5", imageUrl ? "text-white" : "text-muted-foreground")} />
         </motion.div>
       </button>
-
       {/* Lessons List */}
       <AnimatePresence initial={false}>
         {isExpanded && (

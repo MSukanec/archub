@@ -24,7 +24,6 @@ import { uploadFile, deleteFile } from '@/lib/storage'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Partner } from '../types'
-
 const partnerWithdrawalSchema = z.object({
   withdrawal_date: z.date({
     required_error: "Fecha es requerida",
@@ -38,9 +37,7 @@ const partnerWithdrawalSchema = z.object({
   reference: z.string().optional(),
   notes: z.string().optional(),
 })
-
 type PartnerWithdrawalFormData = z.infer<typeof partnerWithdrawalSchema>
-
 function getPartnerDisplayName(partner: Partner): string {
   if (!partner?.contacts) return 'Socio sin nombre'
   
@@ -60,18 +57,16 @@ function getPartnerDisplayName(partner: Partner): string {
   }
   return 'Socio sin nombre'
 }
-
 export interface PartnerWithdrawalFormProps {
   projectId?: string;
   organizationId?: string;
   withdrawalId?: string;
-  mode: 'create' | 'edit' | 'view';
+  mode: 'create'| 'edit'| 'view';
   onSuccess: () => void;
   onCancel: () => void;
   hideActions?: boolean;
   formRef?: React.RefObject<HTMLFormElement>;
 }
-
 export function PartnerWithdrawalForm({ 
   projectId, 
   organizationId,
@@ -87,23 +82,19 @@ export function PartnerWithdrawalForm({
   const queryClient = useQueryClient()
   const [filesToUpload, setFilesToUpload] = useState<any[]>([])
   const [attachments, setAttachments] = useState<any[]>([])
-
   const { data: partners = [], isLoading: partnersLoading } = usePartners(organizationId, { enabled: !!organizationId })
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId || '')
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
-
   const createMutation = useCreatePartnerWithdrawal()
   const updateMutation = useUpdatePartnerWithdrawal()
   const { data: existingWithdrawal, isLoading: loadingWithdrawal } = usePartnerWithdrawal(
     withdrawalId,
     organizationId
   )
-
   const currentMember = useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
   }, [members, userData?.user?.id])
-
   const partnerOptions = useMemo(() => {
     return partners.map(partner => {
       const linkedUser = Array.isArray(partner.contacts?.linked_user) 
@@ -114,9 +105,8 @@ export function PartnerWithdrawalForm({
         label: getPartnerDisplayName(partner),
         linkedUser,
       };
-    }).sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
+    }).sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base'}))
   }, [partners])
-
   const form = useForm<PartnerWithdrawalFormData>({
     resolver: zodResolver(partnerWithdrawalSchema),
     defaultValues: {
@@ -131,12 +121,10 @@ export function PartnerWithdrawalForm({
       notes: '',
     }
   })
-
   const isLoading = partnersLoading || currenciesLoading || walletsLoading || membersLoading || loadingWithdrawal
-
   // Load existing withdrawal data in edit/view mode
   useEffect(() => {
-    if (existingWithdrawal && (mode === 'edit' || mode === 'view')) {
+    if (existingWithdrawal && (mode === 'edit'|| mode === 'view')) {
       const withdrawalDate = parseLocalDate(existingWithdrawal.withdrawal_date) || new Date()
       
       form.reset({
@@ -152,26 +140,23 @@ export function PartnerWithdrawalForm({
       })
     }
   }, [existingWithdrawal, mode, form])
-
   // Set default wallet and currency when they load (create mode only)
   useEffect(() => {
-    if (mode === 'create' && !withdrawalId) {
+    if (mode === 'create'&& !withdrawalId) {
       if (!currenciesLoading && currencies && currencies.length > 0) {
         form.setValue('currency_id', currencies[0].currency?.id || '')
       }
     }
   }, [currencies, currenciesLoading, mode, withdrawalId, form])
-
   useEffect(() => {
-    if (mode === 'create' && !withdrawalId) {
+    if (mode === 'create'&& !withdrawalId) {
       if (!walletsLoading && wallets && wallets.length > 0) {
         form.setValue('wallet_id', wallets[0].id || '')
       }
     }
   }, [wallets, walletsLoading, mode, withdrawalId, form])
-
   useEffect(() => {
-    if (mode === 'edit' || mode === 'view') {
+    if (mode === 'edit'|| mode === 'view') {
       if (existingWithdrawal?.media_links) {
         setAttachments(existingWithdrawal.media_links)
       } else {
@@ -179,7 +164,6 @@ export function PartnerWithdrawalForm({
       }
     }
   }, [existingWithdrawal, mode])
-
   const existingFiles = useMemo(() => {
     if (!attachments || attachments.length === 0) return []
     
@@ -195,7 +179,6 @@ export function PartnerWithdrawalForm({
       }
     })
   }, [attachments])
-
   const handleExistingFileDelete = async (fileId: string) => {
     try {
       await deleteFile(fileId, false)
@@ -213,7 +196,6 @@ export function PartnerWithdrawalForm({
       })
     }
   }
-
   const onSubmit = async (data: PartnerWithdrawalFormData) => {
     if (!organizationId || !currentMember) {
       toast({
@@ -223,11 +205,10 @@ export function PartnerWithdrawalForm({
       })
       return
     }
-
     try {
       let result;
       
-      if (mode === 'edit' && withdrawalId) {
+      if (mode === 'edit'&& withdrawalId) {
         result = await updateMutation.mutateAsync({
           withdrawalId,
           updates: {
@@ -259,9 +240,7 @@ export function PartnerWithdrawalForm({
           created_by: currentMember.id,
         })
       }
-
       const createdWithdrawalId = result?.id || withdrawalId
-
       if (filesToUpload.length > 0 && createdWithdrawalId) {
         for (const fileInput of filesToUpload) {
           try {
@@ -288,13 +267,11 @@ export function PartnerWithdrawalForm({
         }
         setFilesToUpload([])
       }
-
-      const successMessage = mode === 'edit' ? 'actualizado' : 'registrado';
+      const successMessage = mode === 'edit'? 'actualizado': 'registrado';
       toast({
         title: `Retiro ${successMessage}`,
         description: `El retiro de socio se ha ${successMessage} correctamente`,
       })
-
       onSuccess()
     } catch (error: any) {
       toast({
@@ -304,7 +281,6 @@ export function PartnerWithdrawalForm({
       })
     }
   }
-
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -315,7 +291,6 @@ export function PartnerWithdrawalForm({
       </div>
     )
   }
-
   return (
     <Form {...form}>
       <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -358,7 +333,6 @@ export function PartnerWithdrawalForm({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="partner_id"
@@ -391,7 +365,6 @@ export function PartnerWithdrawalForm({
             )}
           />
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -422,7 +395,6 @@ export function PartnerWithdrawalForm({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="amount"
@@ -448,7 +420,6 @@ export function PartnerWithdrawalForm({
             )}
           />
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -479,7 +450,6 @@ export function PartnerWithdrawalForm({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="exchange_rate"
@@ -502,7 +472,6 @@ export function PartnerWithdrawalForm({
             )}
           />
         </div>
-
         <FormField
           control={form.control}
           name="notes"
@@ -521,7 +490,6 @@ export function PartnerWithdrawalForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="reference"
@@ -539,7 +507,6 @@ export function PartnerWithdrawalForm({
             </FormItem>
           )}
         />
-
         <div>
           <FileUploader
             mode="multiple"
@@ -562,7 +529,6 @@ export function PartnerWithdrawalForm({
             newFileBadgeText="Nuevo"
           />
         </div>
-
         {!hideActions && (
           <div className="flex gap-2 pt-4 border-t">
             <button
@@ -581,7 +547,7 @@ export function PartnerWithdrawalForm({
             >
               {createMutation.isPending || updateMutation.isPending
                 ? 'Guardando...'
-                : mode === 'edit' ? 'Guardar Cambios' : 'Registrar Retiro'}
+                : mode === 'edit'? 'Guardar Cambios': 'Registrar Retiro'}
             </button>
           </div>
         )}

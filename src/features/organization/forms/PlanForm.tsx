@@ -2,18 +2,15 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
-
 export const planSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   slug: z.string().min(1, 'El slug es requerido'),
@@ -26,9 +23,7 @@ export const planSchema = z.object({
   }),
   is_active: z.boolean(),
 })
-
 export type PlanFormData = z.infer<typeof planSchema>
-
 export interface Plan {
   id: string
   name: string
@@ -38,12 +33,10 @@ export interface Plan {
   status?: string
   is_active: boolean
 }
-
 interface FormPanelProps {
   form: ReturnType<typeof useForm<PlanFormData>>
   isEditing?: boolean
 }
-
 export function FormPanel({ form, isEditing = false }: FormPanelProps) {
   return (
     <Form {...form}>
@@ -65,7 +58,6 @@ export function FormPanel({ form, isEditing = false }: FormPanelProps) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="slug"
@@ -87,7 +79,6 @@ export function FormPanel({ form, isEditing = false }: FormPanelProps) {
             </FormItem>
           )}
         />
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -110,7 +101,6 @@ export function FormPanel({ form, isEditing = false }: FormPanelProps) {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="status"
@@ -134,7 +124,6 @@ export function FormPanel({ form, isEditing = false }: FormPanelProps) {
             )}
           />
         </div>
-
         <FormField
           control={form.control}
           name="features"
@@ -156,7 +145,6 @@ export function FormPanel({ form, isEditing = false }: FormPanelProps) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="is_active"
@@ -184,11 +172,9 @@ export function FormPanel({ form, isEditing = false }: FormPanelProps) {
     </Form>
   )
 }
-
 interface ViewPanelProps {
   plan: Plan
 }
-
 export function ViewPanel({ plan }: ViewPanelProps) {
   const getStatusLabel = (status?: string) => {
     switch (status) {
@@ -198,7 +184,6 @@ export function ViewPanel({ plan }: ViewPanelProps) {
       default: return status || 'N/A'
     }
   }
-
   const getBillingTypeLabel = (billingType?: string) => {
     switch (billingType) {
       case 'per_user': return 'Por Usuario'
@@ -206,7 +191,6 @@ export function ViewPanel({ plan }: ViewPanelProps) {
       default: return billingType || 'N/A'
     }
   }
-
   return (
     <div className="space-y-4">
       <div>
@@ -234,7 +218,7 @@ export function ViewPanel({ plan }: ViewPanelProps) {
       <div>
         <p className="text-sm text-muted-foreground mb-1">Activo</p>
         <p className="text-sm" data-testid="text-plan-active">
-          {plan.is_active ? 'Sí' : 'No'}
+          {plan.is_active ? 'Sí': 'No'}
         </p>
       </div>
       {plan.features && (
@@ -248,18 +232,15 @@ export function ViewPanel({ plan }: ViewPanelProps) {
     </div>
   )
 }
-
 interface UsePlanFormOptions {
   plan?: Plan
   isEditing?: boolean
   onSuccess: () => void
 }
-
 export function usePlanForm({ plan, isEditing = false, onSuccess }: UsePlanFormOptions) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
-
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
@@ -267,27 +248,25 @@ export function usePlanForm({ plan, isEditing = false, onSuccess }: UsePlanFormO
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
   }
-
   const form = useForm<PlanFormData>({
     resolver: zodResolver(planSchema),
     defaultValues: {
       name: plan?.name || '',
       slug: plan?.slug || '',
       features: plan?.features ? JSON.stringify(plan.features, null, 2) : '',
-      billing_type: (plan?.billing_type as 'per_user' | 'flat_rate') || 'per_user',
-      status: (plan?.status as 'available' | 'coming_soon' | 'maintenance') || 'available',
+      billing_type: (plan?.billing_type as 'per_user'| 'flat_rate') || 'per_user',
+      status: (plan?.status as 'available'| 'coming_soon'| 'maintenance') || 'available',
       is_active: plan?.is_active ?? true,
     }
   })
-
   useEffect(() => {
     if (plan) {
       form.reset({
         name: plan.name || '',
         slug: plan.slug || '',
         features: plan.features ? JSON.stringify(plan.features, null, 2) : '',
-        billing_type: (plan.billing_type as 'per_user' | 'flat_rate') || 'per_user',
-        status: (plan.status as 'available' | 'coming_soon' | 'maintenance') || 'available',
+        billing_type: (plan.billing_type as 'per_user'| 'flat_rate') || 'per_user',
+        status: (plan.status as 'available'| 'coming_soon'| 'maintenance') || 'available',
         is_active: plan.is_active ?? true,
       })
     } else {
@@ -301,22 +280,18 @@ export function usePlanForm({ plan, isEditing = false, onSuccess }: UsePlanFormO
       })
     }
   }, [plan, form])
-
   const watchName = form.watch('name')
-
   useEffect(() => {
     if (!isEditing && watchName) {
       const slug = generateSlug(watchName)
       form.setValue('slug', slug)
     }
   }, [watchName, isEditing, form])
-
   const createMutation = useMutation({
     mutationFn: async (data: PlanFormData) => {
       if (!supabase || !userData?.user?.id) {
         throw new Error('Supabase not initialized or user not found')
       }
-
       let featuresData = null
       if (data.features && data.features.trim()) {
         try {
@@ -356,11 +331,9 @@ export function usePlanForm({ plan, isEditing = false, onSuccess }: UsePlanFormO
       })
     }
   })
-
   const updateMutation = useMutation({
     mutationFn: async (data: PlanFormData) => {
       if (!supabase) throw new Error('Supabase not initialized')
-
       let featuresData = null
       if (data.features && data.features.trim()) {
         try {
@@ -401,7 +374,6 @@ export function usePlanForm({ plan, isEditing = false, onSuccess }: UsePlanFormO
       })
     }
   })
-
   const onSubmit = async (data: PlanFormData) => {
     if (plan) {
       await updateMutation.mutateAsync(data)
@@ -409,7 +381,6 @@ export function usePlanForm({ plan, isEditing = false, onSuccess }: UsePlanFormO
       await createMutation.mutateAsync(data)
     }
   }
-
   return {
     form,
     onSubmit,

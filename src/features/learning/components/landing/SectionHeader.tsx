@@ -2,10 +2,9 @@ interface SectionHeaderProps {
   title?: string;
   subtitle?: string;
   description?: string;
-  align?: 'left' | 'center';
-  variant?: 'default' | 'dark-bg';
+  align?: 'left'| 'center';
+  variant?: 'default'| 'dark-bg';
 }
-
 export function SectionHeader({ 
   title, 
   subtitle, 
@@ -14,22 +13,20 @@ export function SectionHeader({
   variant = 'default'
 }: SectionHeaderProps) {
   if (!title && !subtitle && !description) return null;
-
-  const alignClass = align === 'center' ? 'text-center' : 'text-left';
-  const descriptionAlignClass = align === 'center' ? 'mx-auto' : '';
+  const alignClass = align === 'center'? 'text-center': 'text-left';
+  const descriptionAlignClass = align === 'center'? 'mx-auto': '';
   
-  const subtitleColor = variant === 'dark-bg' 
-    ? 'text-accent' 
+  const subtitleColor = variant === 'dark-bg'
+    ? 'text-accent'
     : 'text-accent dark:text-accent';
   
-  const titleColor = variant === 'dark-bg' 
-    ? 'text-white' 
+  const titleColor = variant === 'dark-bg'
+    ? 'text-white'
     : 'text-foreground';
   
-  const descriptionColor = variant === 'dark-bg' 
-    ? 'text-gray-300' 
+  const descriptionColor = variant === 'dark-bg'
+    ? 'text-gray-300'
     : 'text-muted-foreground';
-
   return (
     <div className={`mb-12 space-y-4 ${alignClass}`}>
       {subtitle && (

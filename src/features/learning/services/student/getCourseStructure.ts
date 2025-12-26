@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { CourseModuleWithLessons } from '../types';
-
 /**
  * Obtiene la estructura completa de un curso (módulos y lecciones).
  * 
@@ -21,7 +20,6 @@ export async function getCourseStructure(
     console.log('[getCourseStructure] No courseId provided');
     return [];
   }
-
   try {
     const { data } = await supabase.auth.getSession();
     const session = data?.session;
@@ -30,9 +28,7 @@ export async function getCourseStructure(
       console.error('[getCourseStructure] No active session');
       return [];
     }
-
-    console.log('[getCourseStructure] Fetching from /api/courses/' + courseId + '/structure');
-
+    console.log('[getCourseStructure] Fetching from /api/courses/'+ courseId + '/structure');
     const response = await fetch(`/api/courses/${courseId}/structure`, {
       method: 'GET',
       headers: {
@@ -41,14 +37,12 @@ export async function getCourseStructure(
       },
       credentials: 'include',
     });
-
     if (!response.ok) {
       console.error(`[getCourseStructure] Error: ${response.status} ${response.statusText}`);
       const errorText = await response.text();
       console.error('[getCourseStructure] Response:', errorText);
       return [];
     }
-
     const structure = await response.json();
     console.log('[getCourseStructure] Success! Got', structure.length, 'modules');
     return structure;

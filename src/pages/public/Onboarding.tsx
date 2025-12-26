@@ -4,7 +4,6 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
-
 import { useToast } from "@/hooks/use-toast";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useThemeStore } from "@/stores/themeStore";
@@ -12,13 +11,11 @@ import { useAuthStore } from "@/stores/authStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { OnboardingForm } from "@/features/users";
 import { LoadingSpinner } from "@/components/shared/layout/LoadingSpinner";
-
 export default function Onboarding() {
   const [, navigate] = useLocation();
   const { user, loading: authLoading, initialized, setCompletingOnboarding } = useAuthStore();
   const { data: userData, isLoading: userLoading } = useCurrentUser();
   const { setSidebarLevel } = useNavigationStore();
-
   const { toast } = useToast();
   const { setTheme } = useThemeStore();
   const { 
@@ -26,18 +23,15 @@ export default function Onboarding() {
     updateFormData, 
     resetOnboarding
   } = useOnboardingStore();
-
   // Basic auth check without onboarding redirection
   if (!initialized || authLoading) {
     return <LoadingSpinner fullScreen size="lg" />;
   }
-
   if (!user) {
     // Redirect to login if not authenticated
     navigate('/login');
     return <LoadingSpinner fullScreen size="lg" />;
   }
-
   // Initialize form data with existing user data if available
   useEffect(() => {
     if (userData && !userLoading) {
@@ -45,25 +39,20 @@ export default function Onboarding() {
         first_name: userData.user_data?.first_name || '',
         last_name: userData.user_data?.last_name || '',
         organization_name: userData.organization?.name || '',
-        theme: (userData.preferences?.theme === 'dark' ? 'dark' : 'light'),
+        theme: (userData.preferences?.theme === 'dark'? 'dark': 'light'),
         last_user_type: userData.preferences?.last_user_type || null,
       });
     }
   }, [userData, userLoading, updateFormData]);
-
   const handleFinishOnboarding = () => {
     saveOnboardingMutation.mutate();
   };
-
   // Mutation to save all onboarding data
   const saveOnboardingMutation = useMutation({
     mutationFn: async () => {
       if (!userData?.user?.id) throw new Error('Usuario no encontrado');
-
       const userId = userData.user.id;
-
       if (!supabase) throw new Error('Supabase no está configurado');
-
       // Update user_data table  
       const { error: userDataError } = await supabase
         .from('user_data')
@@ -75,9 +64,7 @@ export default function Onboarding() {
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', userId);
-
       if (userDataError) throw userDataError;
-
       // Update user_preferences table - do NOT set user_type here, user will choose in SelectMode
       const { error: preferencesError } = await supabase
         .from('user_preferences')
@@ -88,12 +75,10 @@ export default function Onboarding() {
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', userId);
-
       if (preferencesError) {
         console.error('Error updating user preferences:', preferencesError);
         throw preferencesError;
       }
-
       // Update organization name if provided
       if (formData.organization_name && userData.organization?.id) {
         const { error: orgError } = await supabase
@@ -103,15 +88,10 @@ export default function Onboarding() {
             updated_at: new Date().toISOString(),
           })
           .eq('id', userData.organization.id);
-
         if (orgError) throw orgError;
       }
-
-
-
       // Apply theme immediately
       setTheme(formData.theme === 'dark');
-
       return { success: true };
     },
     onMutate: async () => {
@@ -154,17 +134,14 @@ export default function Onboarding() {
       });
     },
   });
-
   if (userLoading) {
     return <LoadingSpinner fullScreen size="lg" />
   }
-
   const renderCurrentStep = () => {
     return <OnboardingForm onFinish={handleFinishOnboarding} />;
   };
-
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: 'var(--main-sidebar-bg)' }}>
+    <div className="min-h-screen flex" style={{ backgroundColor: 'var(--main-sidebar-bg)'}}>
       {/* Left Panel - Dark */}
       <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 relative">
         <div className="max-w-md space-y-8 text-center">
@@ -176,20 +153,18 @@ export default function Onboarding() {
               className="w-32 h-32 object-contain"
             />
           </div>
-
           {/* Text */}
           <div className="space-y-4">
             <h1 className="text-4xl font-bold !text-white">
               ¡Estás a un paso de
               <br />
-              <span style={{ color: 'var(--accent)' }}>Comenzar!</span>
+              <span style={{ color: 'var(--accent)'}}>Comenzar!</span>
             </h1>
             <p className="text-base !text-gray-400">
               Completa tu perfil para personalizar tu experiencia en Seencel.
               Solo te tomará un momento.
             </p>
           </div>
-
           {/* Dots indicator */}
           <div className="flex justify-center gap-2 pt-8">
             <div className="w-2 h-2 rounded-full bg-white"></div>
@@ -198,11 +173,10 @@ export default function Onboarding() {
           </div>
         </div>
       </div>
-
       {/* Right Panel - Light */}
       <div className="w-full lg:w-1/2 flex flex-col">
         <div className="w-full flex-1 flex items-stretch p-4 lg:p-6">
-          <div className="w-full h-full flex flex-col rounded-3xl px-6 lg:px-16 py-6" style={{ backgroundColor: 'var(--layout-bg)' }}>
+          <div className="w-full h-full flex flex-col rounded-3xl px-6 lg:px-16 py-6" style={{ backgroundColor: 'var(--layout-bg)'}}>
             {/* Logo mobile */}
             <div className="flex items-center justify-between gap-4 mb-8">
               <div className="flex items-center gap-3 lg:hidden">
@@ -213,7 +187,6 @@ export default function Onboarding() {
                 />
               </div>
             </div>
-
             {/* Form Content - Centered vertically */}
             <div className="flex-1 flex items-center justify-center">
               {renderCurrentStep()}

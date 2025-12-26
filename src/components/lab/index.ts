@@ -10,7 +10,6 @@ export {
   DEFAULT_STATUS_COLORS as NETWORK_STATUS_COLORS,
   DEFAULT_CORE_COLOR,
 } from './neural-network';
-
 export { 
   StatusHeatmap, 
   type StatusHeatmapProps,

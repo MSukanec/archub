@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { ProjectLite } from '../types';
-
 /**
  * Obtiene una lista ligera de proyectos (solo campos esenciales).
  * 
@@ -15,7 +14,6 @@ export async function getProjectsLite(organizationId: string): Promise<ProjectLi
   if (!supabase || !organizationId) {
     return [];
   }
-
   const { data, error } = await supabase
     .from('projects')
     .select('id, name, color, status, updated_at')

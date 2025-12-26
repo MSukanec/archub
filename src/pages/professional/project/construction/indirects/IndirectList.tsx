@@ -3,26 +3,22 @@ import { TrendingUp, Plus, Edit, Trash2, Eye, DollarSign, Package } from "lucide
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useLocation } from "wouter";
-
 import { Table, Column } from '@/components/shared/table';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal';
 import { useMobile } from '@/hooks/use-mobile';
 import { useIndirectCosts } from '@/hooks/use-indirect-costs';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
-
 interface IndirectListProps {
   filterByStatus?: string;
   filterByType?: string;
 }
-
-export default function IndirectList({ filterByStatus = 'all', filterByType = 'all' }: IndirectListProps) {
+export default function IndirectList({ filterByStatus = 'all', filterByType = 'all'}: IndirectListProps) {
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
@@ -30,8 +26,7 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
   
   // Estado para controles del TableTopBar
   const [searchQuery, setSearchQuery] = useState('');
-  const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
-
+  const [currencyView, setCurrencyView] = useState<'discriminado'| 'pesificado'| 'dolarizado'>('discriminado');
   // Función para crear costo indirecto
   const handleCreateIndirect = () => {
     openModal('indirect', {
@@ -44,13 +39,10 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
   
   // Datos de costos indirectos usando el hook existente
   const { data: indirects = [], isLoading } = useIndirectCosts(currentOrganizationId || null);
-
   // Cálculos para KPIs de costos indirectos
   const kpiData = useMemo(() => {
     if (indirects.length === 0) return null;
-
     const totalIndirects = indirects.length;
-
     // Calcular valores totales usando el valor más reciente de cada costo indirecto
     const totalValueARS = indirects.reduce((sum, indirect) => {
       const currentValue = indirect.current_value;
@@ -62,14 +54,12 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
     }, 0);
     
     const totalValueUSD = totalValueARS / 1125; // Convertir a USD
-
     // Distribución por categoría
     const categoryDistribution = indirects.reduce((acc, indirect) => {
       const category = indirect.category?.name || 'Sin categoría';
       acc[category] = (acc[category] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-
     return {
       totalIndirects,
       totalValueARS,
@@ -77,19 +67,17 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
       categoryDistribution
     };
   }, [indirects]);
-
   // Función para convertir montos según la vista seleccionada
   const convertAmount = (amountARS: number, amountUSD: number, originalCurrency: string = 'ARS') => {
     if (currencyView === 'discriminado') {
-      return originalCurrency === 'USD' ? amountUSD : amountARS;
+      return originalCurrency === 'USD'? amountUSD : amountARS;
     } else if (currencyView === 'pesificado') {
-      return originalCurrency === 'USD' ? amountUSD * 1125 : amountARS;
+      return originalCurrency === 'USD'? amountUSD * 1125 : amountARS;
     } else if (currencyView === 'dolarizado') {
-      return originalCurrency === 'ARS' ? amountARS / 1125 : amountUSD;
+      return originalCurrency === 'ARS'? amountARS / 1125 : amountUSD;
     }
     return amountARS;
   };
-
   // Función para formatear montos con el símbolo correcto
   const formatSingleCurrency = (amountARS: number, amountUSD: number, originalCurrency: string = 'ARS') => {
     const convertedAmount = convertAmount(amountARS, amountUSD, originalCurrency);
@@ -97,7 +85,7 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
     if (currencyView === 'discriminado') {
       return new Intl.NumberFormat('es-AR', {
         style: 'currency',
-        currency: originalCurrency === 'USD' ? 'USD' : 'ARS',
+        currency: originalCurrency === 'USD'? 'USD': 'ARS',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
       }).format(convertedAmount);
@@ -123,7 +111,6 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
       maximumFractionDigits: 0
     }).format(convertedAmount);
   };
-
   // Filtrar costos indirectos por búsqueda y filtros móviles
   const filteredIndirects = indirects.filter(indirect => {
     // Búsqueda por texto
@@ -136,14 +123,12 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
     const statusMatch = true;
     
     // Filtro por categoría
-    const typeMatch = filterByType === 'all' || indirect.category?.name === filterByType;
+    const typeMatch = filterByType === 'all'|| indirect.category?.name === filterByType;
     
     return searchMatch && statusMatch && typeMatch;
   });
-
   // Router navigation
   const [, setLocation] = useLocation();
-
   // Función para editar costo indirecto
   const handleEdit = (indirect: any) => {
     openModal('indirect', {
@@ -154,7 +139,6 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
       indirectId: indirect.id
     });
   };
-
   // Función para eliminar costo indirecto
   const handleDelete = (indirect: any) => {
     openModal('delete-confirmation', {
@@ -166,18 +150,16 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
       }
     });
   };
-
   // Función para ver detalle
   const handleView = (id: string) => {
     setLocation(`/construction/indirects/${id}`);
   };
-
   // Configuración de las columnas de la tabla
   const columns: Column[] = [
     {
       key: 'name',
       label: 'Costo Indirecto',
-      type: 'long-text' as const,
+      type: 'long-text'as const,
       render: (indirect: any) => (
         <div>
           <div className="font-medium">{indirect.name}</div>
@@ -190,17 +172,17 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
     {
       key: 'category',
       label: 'Categoría',
-      type: 'short-text' as const,
+      type: 'short-text'as const,
       render: (indirect: any) => (
         <div className="text-sm">
-          {indirect.category_id ? 'Categoría asignada' : 'Sin categoría'}
+          {indirect.category_id ? 'Categoría asignada': 'Sin categoría'}
         </div>
       )
     },
     {
       key: 'current_value',
       label: 'Valor Actual',
-      type: 'amount' as const,
+      type: 'amount'as const,
       render: (indirect: any) => {
         const currentValue = indirect.current_value;
         if (!currentValue) return '-';
@@ -219,7 +201,7 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
     {
       key: 'status',
       label: 'Estado',
-      type: 'status' as const,
+      type: 'status'as const,
       render: (indirect: any) => {
         return indirect.is_active ? (
           <Badge variant="success">
@@ -233,7 +215,6 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
       }
     }
   ];
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -241,25 +222,24 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* KPI Cards */}
       {kpiData && (
-        <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'}`}>
+        <div className={`grid ${isMobile ? 'grid-cols-2 gap-3': 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'}`}>
           {/* Total Costos Indirectos */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
-            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
-              <div className={`space-y-${isMobile ? '2' : '4'}`}>
+            <CardContent className={`${isMobile ? 'p-3': 'p-6'}`}>
+              <div className={`space-y-${isMobile ? '2': '4'}`}>
                 <div className="flex items-center justify-between">
-                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Costos' : 'Total Costos'}
+                  <p className={`${isMobile ? 'text-xs': 'text-sm'} text-muted-foreground`}>
+                    {isMobile ? 'Costos': 'Total Costos'}
                   </p>
-                  <TrendingUp className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
+                  <TrendingUp className={`${isMobile ? 'h-4 w-4': 'h-6 w-6'}`} style={{ color: 'var(--accent)'}} />
                 </div>
                 
                 {/* Mini gráfico de barras - altura fija */}
-                <div className={`flex items-end gap-1 ${isMobile ? 'h-6' : 'h-8'}`}>
+                <div className={`flex items-end gap-1 ${isMobile ? 'h-6': 'h-8'}`}>
                   {Array.from({ length: 6 }).map((_, i) => (
                     <div
                       key={i}
@@ -274,28 +254,27 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
                 </div>
                 
                 <div>
-                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>{kpiData.totalIndirects}</p>
-                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
+                  <p className={`${isMobile ? 'text-lg': 'text-2xl'} font-bold`}>{kpiData.totalIndirects}</p>
+                  <p className={`${isMobile ? 'text-xs': 'text-xs'} text-muted-foreground`}>
                     {kpiData.totalIndirects} activos
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
-
           {/* Valor Total */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
-            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
-              <div className={`space-y-${isMobile ? '2' : '4'}`}>
+            <CardContent className={`${isMobile ? 'p-3': 'p-6'}`}>
+              <div className={`space-y-${isMobile ? '2': '4'}`}>
                 <div className="flex items-center justify-between">
-                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Valor Total' : 'Valor Total'}
+                  <p className={`${isMobile ? 'text-xs': 'text-sm'} text-muted-foreground`}>
+                    {isMobile ? 'Valor Total': 'Valor Total'}
                   </p>
-                  <DollarSign className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
+                  <DollarSign className={`${isMobile ? 'h-4 w-4': 'h-6 w-6'}`} style={{ color: 'var(--accent)'}} />
                 </div>
                 
                 {/* Gráfico de línea de tendencia - altura fija */}
-                <div className={`${isMobile ? 'h-6' : 'h-8'} relative`}>
+                <div className={`${isMobile ? 'h-6': 'h-8'} relative`}>
                   <svg className="w-full h-full" viewBox="0 0 100 32">
                     <path
                       d="M 0,24 Q 25,20 50,12 T 100,8"
@@ -309,35 +288,34 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
                 </div>
                 
                 <div>
-                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
-                    {currencyView === 'pesificado' 
+                  <p className={`${isMobile ? 'text-lg': 'text-2xl'} font-bold`}>
+                    {currencyView === 'pesificado'
                       ? `$${kpiData.totalValueARS.toLocaleString('es-AR')}`
                       : currencyView === 'dolarizado'
                       ? `US$${kpiData.totalValueUSD.toLocaleString('es-AR')}`
                       : `$${kpiData.totalValueARS.toLocaleString('es-AR')}`
                     }
                   </p>
-                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
+                  <p className={`${isMobile ? 'text-xs': 'text-xs'} text-muted-foreground`}>
                     100%
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
-
           {/* Costos Activos */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
-            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
-              <div className={`space-y-${isMobile ? '2' : '4'}`}>
+            <CardContent className={`${isMobile ? 'p-3': 'p-6'}`}>
+              <div className={`space-y-${isMobile ? '2': '4'}`}>
                 <div className="flex items-center justify-between">
-                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Activos' : 'Costos Activos'}
+                  <p className={`${isMobile ? 'text-xs': 'text-sm'} text-muted-foreground`}>
+                    {isMobile ? 'Activos': 'Costos Activos'}
                   </p>
-                  <Package className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
+                  <Package className={`${isMobile ? 'h-4 w-4': 'h-6 w-6'}`} style={{ color: 'var(--accent)'}} />
                 </div>
                 
                 {/* Barra de progreso - altura fija */}
-                <div className={`${isMobile ? 'h-6' : 'h-8'} flex items-center`}>
+                <div className={`${isMobile ? 'h-6': 'h-8'} flex items-center`}>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className="h-2 rounded-full transition-all duration-300"
@@ -350,30 +328,29 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
                 </div>
                 
                 <div>
-                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
+                  <p className={`${isMobile ? 'text-lg': 'text-2xl'} font-bold`}>
                     {kpiData.totalIndirects}
                   </p>
-                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
+                  <p className={`${isMobile ? 'text-xs': 'text-xs'} text-muted-foreground`}>
                     de {kpiData.totalIndirects}
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
-
           {/* Estado General */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
-            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
-              <div className={`space-y-${isMobile ? '2' : '4'}`}>
+            <CardContent className={`${isMobile ? 'p-3': 'p-6'}`}>
+              <div className={`space-y-${isMobile ? '2': '4'}`}>
                 <div className="flex items-center justify-between">
-                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Estado' : 'Estado General'}
+                  <p className={`${isMobile ? 'text-xs': 'text-sm'} text-muted-foreground`}>
+                    {isMobile ? 'Estado': 'Estado General'}
                   </p>
-                  <TrendingUp className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
+                  <TrendingUp className={`${isMobile ? 'h-4 w-4': 'h-6 w-6'}`} style={{ color: 'var(--accent)'}} />
                 </div>
                 
                 {/* Gráfico de área llena - altura fija */}
-                <div className={`${isMobile ? 'h-6' : 'h-8'} relative`}>
+                <div className={`${isMobile ? 'h-6': 'h-8'} relative`}>
                   <svg className="w-full h-full" viewBox="0 0 100 32">
                     <defs>
                       <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
@@ -389,8 +366,8 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
                 </div>
                 
                 <div>
-                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>100%</p>
-                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
+                  <p className={`${isMobile ? 'text-lg': 'text-2xl'} font-bold`}>100%</p>
+                  <p className={`${isMobile ? 'text-xs': 'text-xs'} text-muted-foreground`}>
                     Activos
                   </p>
                 </div>
@@ -399,13 +376,12 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
           </Card>
         </div>
       )}
-
       {/* Lista/Tabla de Costos Indirectos */}
       {filteredIndirects.length === 0 ? (
         <EmptyState
           icon={<TrendingUp className="w-12 h-12 text-muted-foreground" />}
           title="No hay costos indirectos"
-          description={searchQuery ? "No se encontraron costos indirectos que coincidan con tu búsqueda." : "Aún no has creado ningún costo indirecto. Haz clic en 'Nuevo Costo Indirecto' para comenzar."}
+          description={searchQuery ? "No se encontraron costos indirectos que coincidan con tu búsqueda." : "Aún no has creado ningún costo indirecto. Haz clic en 'Nuevo Costo Indirecto'para comenzar."}
           action={
             <Button onClick={handleCreateIndirect}>
               <Plus className="h-4 w-4 mr-2" />
@@ -434,7 +410,7 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
               icon: Trash2,
               label: 'Eliminar',
               onClick: () => handleDelete(indirect),
-              variant: 'destructive' as const
+              variant: 'destructive'as const
             }
           ]}
         />

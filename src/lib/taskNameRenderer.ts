@@ -1,5 +1,4 @@
 import { supabase } from './supabase';
-
 /**
  * Renders a task name using the Supabase RPC function with correct parameter order
  * @param paramValues - JSON object containing parameter values
@@ -13,7 +12,6 @@ export async function renderTaskNameFromParams(
   if (!supabase) {
     throw new Error('Supabase not initialized');
   }
-
   try {
     // Call RPC function with CORRECT parameter order:
     // First: input_param_values (jsonb)
@@ -22,19 +20,16 @@ export async function renderTaskNameFromParams(
       input_param_values: paramValues,  // FIRST parameter (jsonb)
       input_param_order: paramOrder     // SECOND parameter (text[])
     });
-
     if (error) {
       console.error('Error calling render_task_name_from_param_values:', error);
       throw error;
     }
-
     return data as string;
   } catch (error) {
     console.error('Failed to render task name from params:', error);
     throw error;
   }
 }
-
 /**
  * Renders task name with fallback to local generation if RPC fails
  * @param paramValues - JSON object containing parameter values
@@ -59,7 +54,7 @@ export async function renderTaskNameWithFallback(
     // Default fallback: create a basic name from parameters
     const paramNames = Object.entries(paramValues)
       .map(([key, value]) => value)
-      .join(' ');
+      .join('');
     
     return paramNames || 'Cómputo sin nombre';
   }

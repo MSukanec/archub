@@ -1,12 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateHomeChecklist } from '@/features/users/services/onboardingChecklist';
 import { usersKeys } from '@/core/query-keys';
-
 interface UpdateChecklistParams {
   key: string;
   value: boolean;
 }
-
 /**
  * Hook para actualizar el checklist de inicio del usuario.
  * 
@@ -26,7 +24,6 @@ interface UpdateChecklistParams {
  */
 export function useUpdateChecklist() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({ key, value }: UpdateChecklistParams) => {
       await updateHomeChecklist(key, value);

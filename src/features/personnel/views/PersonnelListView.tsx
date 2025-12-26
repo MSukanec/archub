@@ -12,23 +12,19 @@ import { useProjectPersonnel, useDeletePersonnel, useReplacePersonnel, usePerson
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
 import { queryClient } from '@/lib/queryClient'
-
 interface InsuranceStatus {
-  status: 'sin_seguro' | 'vigente' | 'por_vencer' | 'vencido'
+  status: 'sin_seguro'| 'vigente'| 'por_vencer'| 'vencido'
   expiryDate: string | null
   daysToExpiry: number | null
 }
-
 function getInsuranceStatus(contactId: string, insuranceData: any[]): InsuranceStatus {
   const contactInsurances = insuranceData.filter(insurance => insurance.contact_id === contactId)
   
   if (contactInsurances.length === 0) {
     return { status: 'sin_seguro', expiryDate: null, daysToExpiry: null }
   }
-
   let nearestExpiry: string | null = null
   let soonestDays = Infinity
-
   contactInsurances.forEach(insurance => {
     if (insurance.coverage_end && insurance.days_to_expiry !== null) {
       if (insurance.days_to_expiry < soonestDays) {
@@ -37,25 +33,21 @@ function getInsuranceStatus(contactId: string, insuranceData: any[]): InsuranceS
       }
     }
   })
-
   if (nearestExpiry === null) {
     return { status: 'sin_seguro', expiryDate: null, daysToExpiry: null }
   }
-
-  let status: 'vigente' | 'por_vencer' | 'vencido' = 'vigente'
+  let status: 'vigente'| 'por_vencer'| 'vencido'= 'vigente'
   if (soonestDays < 0) {
     status = 'vencido'
   } else if (soonestDays <= 30) {
     status = 'por_vencer'
   }
-
   return {
     status,
     expiryDate: nearestExpiry,
     daysToExpiry: soonestDays
   }
 }
-
 function renderInsuranceStatusBadge(status: string, daysToExpiry: number | null) {
   switch (status) {
     case 'vigente':
@@ -89,14 +81,12 @@ function renderInsuranceStatusBadge(status: string, daysToExpiry: number | null)
       )
   }
 }
-
 interface PersonnelListTabProps {
   openModal: any
   handleDeletePersonnel?: (personnelId: string) => Promise<void>
   insuranceData: any[]
   selectedProjectId: string | null
 }
-
 export default function PersonnelListTab({ 
   openModal, 
   insuranceData,
@@ -105,16 +95,13 @@ export default function PersonnelListTab({
   const { data: currentUser } = useCurrentUser()
   const organizationId = currentUser?.organization?.id
   const { toast } = useToast()
-
   const { data: personnelData = [], isLoading: isPersonnelLoading } = useProjectPersonnel(
     selectedProjectId || undefined,
     organizationId
   )
-
   const { data: paymentsData = [] } = usePersonnelPayments(selectedProjectId || undefined, organizationId)
   const deletePersonnelMutation = useDeletePersonnel(organizationId || null)
   const replacePersonnelMutation = useReplacePersonnel(organizationId || null)
-
   const handleEditContact = (record: any) => {
     if (!record.contact) {
       toast({
@@ -124,20 +111,17 @@ export default function PersonnelListTab({
       });
       return;
     }
-
     if (organizationId && record.contact.id) {
       queryClient.prefetchQuery({
         queryKey: [`/api/contacts/${record.contact.id}?organization_id=${organizationId}`],
         staleTime: 2 * 60 * 1000,
       });
     }
-
     openModal('contact', {
       contactId: record.contact.id,
       mode: 'edit',
     });
   }
-
   const getDisplayName = (contact: any) => {
     if (!contact) return 'Sin nombre'
     if (contact.first_name || contact.last_name) {
@@ -145,7 +129,6 @@ export default function PersonnelListTab({
     }
     return contact.full_name || 'Sin nombre'
   }
-
   const processedPersonnelData = useMemo(() => {
     return personnelData.map((item: any) => ({
       ...item,
@@ -153,8 +136,8 @@ export default function PersonnelListTab({
     })).sort((a: any, b: any) => {
       const aStatus = a.status || 'active'
       const bStatus = b.status || 'active'
-      const aIsInactive = aStatus === 'inactive' || aStatus === 'absent'
-      const bIsInactive = bStatus === 'inactive' || bStatus === 'absent'
+      const aIsInactive = aStatus === 'inactive'|| aStatus === 'absent'
+      const bIsInactive = bStatus === 'inactive'|| bStatus === 'absent'
       
       if (aIsInactive !== bIsInactive) {
         return aIsInactive ? 1 : -1
@@ -162,7 +145,6 @@ export default function PersonnelListTab({
       return (a.displayName || '').toLowerCase().localeCompare((b.displayName || '').toLowerCase())
     })
   }, [personnelData])
-
   if (isPersonnelLoading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -170,7 +152,6 @@ export default function PersonnelListTab({
       </div>
     )
   }
-
   if (processedPersonnelData.length === 0) {
     return (
       <EmptyState
@@ -185,7 +166,6 @@ export default function PersonnelListTab({
       />
     )
   }
-
   const handleDelete = (record: any) => {
     if (!organizationId) return
     
@@ -196,7 +176,7 @@ export default function PersonnelListTab({
     const consequences = []
     if (associatedPayments.length > 0) {
       consequences.push(
-        `${associatedPayments.length} pago${associatedPayments.length === 1 ? '' : 's'} será${associatedPayments.length === 1 ? 'á' : 'n'} afectado${associatedPayments.length === 1 ? '' : 's'}`
+        `${associatedPayments.length} pago${associatedPayments.length === 1 ? '': 's'} será${associatedPayments.length === 1 ? 'á': 'n'} afectado${associatedPayments.length === 1 ? '': 's'}`
       )
       if (canReplace) {
         consequences.push('Puedes reemplazarlos con otro o dejarlos sin referencia')
@@ -213,7 +193,7 @@ export default function PersonnelListTab({
       }))
     
     openModal('delete-confirmation', {
-      mode: canReplace ? 'replace' : 'delete',
+      mode: canReplace ? 'replace': 'delete',
       title: 'Eliminar Personal',
       description: `¿Estás seguro de que deseas eliminar a ${record.displayName} del proyecto?`,
       itemName: record.displayName,
@@ -234,7 +214,6 @@ export default function PersonnelListTab({
       }
     })
   }
-
   return (
     <Table
       data={processedPersonnelData}
@@ -244,14 +223,14 @@ export default function PersonnelListTab({
       }}
       getIsInactive={(record: any) => {
         const status = record.status || 'active'
-        return status === 'inactive' || status === 'absent'
+        return status === 'inactive'|| status === 'absent'
       }}
       inactiveSeparatorLabel="Personal Inactivo"
       columns={[
         {
           key: "displayName",
           label: "Nombre",
-          type: 'name' as const,
+          type: 'name'as const,
           sortable: true,
           sortType: "string",
           render: (record: any) => {
@@ -274,7 +253,7 @@ export default function PersonnelListTab({
         {
           key: "start_date",
           label: "Fecha de inicio",
-          type: 'date' as const,
+          type: 'date'as const,
           sortable: true,
           sortType: "date",
           render: (record: any) => {
@@ -291,7 +270,7 @@ export default function PersonnelListTab({
         {
           key: "insurance_status",
           label: "Estado Seguro",
-          type: 'name' as const,
+          type: 'name'as const,
           sortable: true,
           sortType: "string",
           render: (record: any) => {
@@ -315,7 +294,7 @@ export default function PersonnelListTab({
           label: 'Eliminar',
           icon: Trash2,
           onClick: () => handleDelete(record),
-          variant: 'destructive' as const
+          variant: 'destructive'as const
         }
       ]}
       getItemId={(record: any) => record.id}

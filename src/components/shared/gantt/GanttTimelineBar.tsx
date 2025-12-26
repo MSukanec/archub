@@ -6,7 +6,6 @@ import { useUpdateConstructionTaskResize, useUpdateConstructionTaskDrag, Constru
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { propagateDependencyChanges, applyOptimisticPropagation } from '@/utils/dependencyPropagation';
-
 interface GanttTimelineBarProps {
   item: GanttRowProps;
   timelineStart: Date;
@@ -15,11 +14,11 @@ interface GanttTimelineBarProps {
   totalDays: number; // Add this to sync with calendar
   onConnectionDrag?: (dragData: {
     fromTaskId: string;
-    fromPoint: 'start' | 'end';
+    fromPoint: 'start'| 'end';
   } | null, initialPosition?: { x: number; y: number }) => void;
   dragConnectionData?: {
     fromTaskId: string;
-    fromPoint: 'start' | 'end';
+    fromPoint: 'start'| 'end';
   } | null;
   onTaskUpdate?: () => void; // Callback para refrescar después de actualizar
   onDragUpdate?: () => void; // Callback para actualizar flechas durante drag
@@ -28,7 +27,6 @@ interface GanttTimelineBarProps {
   dependencies?: ConstructionDependencyWithTasks[];
   projectId?: string;
 }
-
 export function GanttTimelineBar({ 
   item, 
   timelineStart, 
@@ -45,13 +43,13 @@ export function GanttTimelineBar({
 }: GanttTimelineBarProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
-  const [resizeType, setResizeType] = useState<'start' | 'end' | null>(null);
+  const [resizeType, setResizeType] = useState<'start'| 'end'| null>(null);
   const [isDraggingBar, setIsDraggingBar] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   
   // Estados para línea de conexión temporal
   const [isConnecting, setIsConnecting] = useState(false);
-  const [connectionStart, setConnectionStart] = useState<{x: number, y: number, type: 'start' | 'end'} | null>(null);
+  const [connectionStart, setConnectionStart] = useState<{x: number, y: number, type: 'start'| 'end'} | null>(null);
   const [mousePosition, setMousePosition] = useState<{x: number, y: number}>({x: 0, y: 0});
   const barRef = useRef<HTMLDivElement>(null);
   const createDependency = useCreateConstructionDependency();
@@ -78,7 +76,6 @@ export function GanttTimelineBar({
       }
     };
   }, [onDragUpdate]);
-
   // Throttled callback para optimizar propagación de dependencias en tiempo real
   const throttledPropagation = useMemo(() => {
     let lastCall = 0;
@@ -102,27 +99,22 @@ export function GanttTimelineBar({
   }, [queryClient, item.taskData?.project_id, item.taskData?.organization_id]);
   // Calculate resolved end date using the utility function
   const dateRange = calculateResolvedEndDate(item);
-
   // Validate dates - no mostrar barra si no hay fechas válidas
   if (!dateRange.isValid) {
     return null;
   }
-
   const { startDate, resolvedEndDate } = dateRange;
-
   // Normalize dates to avoid timezone issues - set to start of day
   const normalizedStart = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
   const normalizedEnd = new Date(resolvedEndDate.getFullYear(), resolvedEndDate.getMonth(), resolvedEndDate.getDate());
   const normalizedTimelineStart = new Date(timelineStart.getFullYear(), timelineStart.getMonth(), timelineStart.getDate());
   const normalizedTimelineEnd = new Date(timelineEnd.getFullYear(), timelineEnd.getMonth(), timelineEnd.getDate());
-
   // Calculate total timeline span in milliseconds
   const totalSpan = normalizedTimelineEnd.getTime() - normalizedTimelineStart.getTime();
   
   if (totalSpan <= 0) {
     return null;
   }
-
   // Calculate task position using day-based approach to match calendar
   const dayStartFromTimeline = Math.floor((normalizedStart.getTime() - normalizedTimelineStart.getTime()) / (24 * 60 * 60 * 1000));
   const dayEndFromTimeline = Math.floor((normalizedEnd.getTime() - normalizedTimelineStart.getTime()) / (24 * 60 * 60 * 1000));
@@ -142,13 +134,9 @@ export function GanttTimelineBar({
   
   // Clean up debug logs - alignment is now working perfectly
   // console.log('BAR ALIGNED:', item.name.substring(0, 20), startPixels);
-
-
-
   if (widthPixels <= 0) {
     return null;
   }
-
   // Diferentes estilos según el tipo de elemento - BARRAS MÁS ALTAS
   const getBarStyle = () => {
     switch (item.type) {
@@ -160,16 +148,14 @@ export function GanttTimelineBar({
         return "h-7 border-2 border-gray-400 bg-gray-100 dark:bg-gray-800 rounded-sm shadow-sm flex items-center justify-center text-xs text-gray-600 dark:text-gray-400 font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer";
     }
   };
-
   // Obtener porcentaje de progreso para barras de tarea
   const getProgressPercent = () => {
-    if (item.type !== 'task' || !item.taskData) return 0;
+    if (item.type !== 'task'|| !item.taskData) return 0;
     return item.taskData.progress_percent || 0;
   };
-
   // Handlers para drag & drop de conexiones con línea temporal
-  const handleConnectionStart = (e: React.MouseEvent, point: 'start' | 'end') => {
-    if (item.type !== 'task' || !item.taskData?.id) return;
+  const handleConnectionStart = (e: React.MouseEvent, point: 'start'| 'end') => {
+    if (item.type !== 'task'|| !item.taskData?.id) return;
     
     e.stopPropagation();
     e.preventDefault();
@@ -180,7 +166,7 @@ export function GanttTimelineBar({
     const rect = barRef.current?.getBoundingClientRect();
     if (!rect) return;
     
-    const connectionX = point === 'start' ? rect.left - 30 : rect.right + 30;
+    const connectionX = point === 'start'? rect.left - 30 : rect.right + 30;
     const connectionY = rect.top + rect.height / 2;
     
     // Establecer estado de conexión local
@@ -216,9 +202,8 @@ export function GanttTimelineBar({
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
-
   const handleConnectionEnd = (e: React.MouseEvent) => {
-    if (!dragConnectionData || item.type !== 'task' || !item.taskData?.id) return;
+    if (!dragConnectionData || item.type !== 'task'|| !item.taskData?.id) return;
     
     e.stopPropagation();
     
@@ -257,19 +242,17 @@ export function GanttTimelineBar({
     
     // Debug logs removed
   };
-
   // Solo mostrar puntos de conexión en tareas (no fases)
   const shouldShowConnectionPoints = item.type === 'task';
   
   // Mostrar indicador visual cuando esta tarea puede recibir una conexión
-  const canReceiveConnection = dragConnectionData && item.type === 'task' && 
+  const canReceiveConnection = dragConnectionData && item.type === 'task'&& 
                               item.taskData?.id !== dragConnectionData.fromTaskId;
   
   // Estilos adicionales cuando se está arrastrando una conexión, redimensionando o moviendo barra
-  const dragStyles = canReceiveConnection ? 'ring-2 ring-blue-400 ring-opacity-50' : '';
-  const resizeStyles = isResizing ? 'ring-2 ring-orange-400 ring-opacity-70 shadow-lg' : '';
-  const barDragStyles = isDraggingBar ? 'ring-2 ring-green-400 ring-opacity-70 shadow-xl opacity-80 z-50' : '';
-
+  const dragStyles = canReceiveConnection ? 'ring-2 ring-blue-400 ring-opacity-50': '';
+  const resizeStyles = isResizing ? 'ring-2 ring-orange-400 ring-opacity-70 shadow-lg': '';
+  const barDragStyles = isDraggingBar ? 'ring-2 ring-green-400 ring-opacity-70 shadow-xl opacity-80 z-50': '';
   // Funciones para drag & drop de redimensionamiento
   const calculateDayFromX = useCallback((clientX: number) => {
     // Buscar el contenedor específico del timeline por ID
@@ -283,10 +266,9 @@ export function GanttTimelineBar({
     const dayWidth = timelineWidth / totalDays;
     return Math.round(adjustedX / dayWidth);
   }, [timelineWidth, totalDays]);
-
   // Funciones para drag & drop de barras completas
   const handleBarDragStart = useCallback((e: React.MouseEvent) => {
-    if (item.type !== 'task' || !item.taskData?.id || isResizing) return;
+    if (item.type !== 'task'|| !item.taskData?.id || isResizing) return;
     
     e.stopPropagation();
     e.preventDefault();
@@ -466,9 +448,8 @@ export function GanttTimelineBar({
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   }, [item, isResizing, dragOffset, startPixels, calculateDayFromX, timelineStart, startDate, resolvedEndDate, updateTaskResize]);
-
-  const handleResizeStart = useCallback((e: React.MouseEvent, type: 'start' | 'end') => {
-    if (item.type !== 'task' || !item.taskData?.id) return;
+  const handleResizeStart = useCallback((e: React.MouseEvent, type: 'start'| 'end') => {
+    if (item.type !== 'task'|| !item.taskData?.id) return;
     
     e.stopPropagation();
     e.preventDefault();
@@ -625,10 +606,8 @@ export function GanttTimelineBar({
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   }, [item, timelineStart, timelineWidth, totalDays, calculateDayFromX, updateTaskResize, onTaskUpdate, normalizedStart, normalizedEnd, normalizedTimelineStart]);
-
   // Solo mostrar controles de redimensionamiento en tareas (no fases) y cuando hay hover
-  const shouldShowResizeHandles = item.type === 'task' && isHovered && !isResizing;
-
+  const shouldShowResizeHandles = item.type === 'task'&& isHovered && !isResizing;
   return (
     <div 
       ref={barRef}
@@ -641,11 +620,11 @@ export function GanttTimelineBar({
       title={`${item.name} (${format(startDate, 'dd/MM/yyyy')} - ${format(resolvedEndDate, 'dd/MM/yyyy')})`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onMouseDown={item.type === 'task' && !isResizing ? handleBarDragStart : undefined}
+      onMouseDown={item.type === 'task'&& !isResizing ? handleBarDragStart : undefined}
       onMouseUp={handleConnectionEnd}
     >
       {/* Relleno de progreso para tareas */}
-      {item.type === 'task' && getProgressPercent() > 0 && (
+      {item.type === 'task'&& getProgressPercent() > 0 && (
         <div 
           className="absolute top-0 left-0 h-full rounded-sm transition-all duration-300"
           style={{ 
@@ -682,7 +661,7 @@ export function GanttTimelineBar({
           {/* Handle de redimensionamiento izquierdo - MITAD DE ANCHO y color accent */}
           <div
             className="absolute left-0 top-0 w-1.5 h-full opacity-0 group-hover:opacity-90 cursor-ew-resize transition-opacity rounded-l z-20"
-            style={{ backgroundColor: 'var(--accent)' }}
+            style={{ backgroundColor: 'var(--accent)'}}
             onMouseDown={(e) => handleResizeStart(e, 'start')}
             title="Arrastrar para cambiar fecha de inicio"
           />
@@ -690,7 +669,7 @@ export function GanttTimelineBar({
           {/* Handle de redimensionamiento derecho - MITAD DE ANCHO y color accent */}
           <div
             className="absolute right-0 top-0 w-1.5 h-full opacity-0 group-hover:opacity-90 cursor-ew-resize transition-opacity rounded-r z-20"
-            style={{ backgroundColor: 'var(--accent)' }}
+            style={{ backgroundColor: 'var(--accent)'}}
             onMouseDown={(e) => handleResizeStart(e, 'end')}
             title="Arrastrar para cambiar fecha final"
           />
@@ -724,7 +703,6 @@ export function GanttTimelineBar({
         </>
       )}
       
-
     </div>
   );
 }

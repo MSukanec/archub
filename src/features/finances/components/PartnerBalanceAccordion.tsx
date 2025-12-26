@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
-
 interface PartnerBalanceData {
   partnerId: string;
   partnerName: string;
@@ -11,19 +10,16 @@ interface PartnerBalanceData {
   withdrawals: number;
   linkedUser?: { avatar_url?: string | null } | null;
 }
-
 interface PartnerBalanceAccordionProps {
   partners: PartnerBalanceData[];
   currencySymbol?: string;
 }
-
 interface PartnerBalanceItemProps {
   partner: PartnerBalanceData;
   currencySymbol: string;
   isOpen: boolean;
   onToggle: () => void;
 }
-
 const formatCurrency = (amount: number, symbol: string = '$'): string => {
   const formattedAmount = new Intl.NumberFormat('es-AR', {
     minimumFractionDigits: 0,
@@ -32,17 +28,15 @@ const formatCurrency = (amount: number, symbol: string = '$'): string => {
   
   return `${symbol} ${formattedAmount}`;
 };
-
 const getPartnerInitials = (name: string): string => {
   if (!name || name === 'Sin Socio') return 'SS';
   
-  const words = name.split(' ');
+  const words = name.split('');
   if (words.length > 1) {
     return words.slice(0, 2).map(w => w[0]?.toUpperCase() || '').join('');
   }
   return name.slice(0, 2).toUpperCase();
 };
-
 function PartnerBalanceItem({ 
   partner, 
   currencySymbol,
@@ -55,7 +49,6 @@ function PartnerBalanceItem({
   const balancePercentage = partner.contributions > 0 
     ? Math.min((partner.balance / partner.contributions) * 100, 100) 
     : 0;
-
   return (
     <div 
       className={cn(
@@ -79,7 +72,7 @@ function PartnerBalanceItem({
             size="md"
             layout="row"
             linkedUser={partner.linkedUser}
-            subLabel={!isOpen ? `Balance: ${partner.balance >= 0 ? '' : '-'}${formatCurrency(partner.balance, currencySymbol)}` : undefined}
+            subLabel={!isOpen ? `Balance: ${partner.balance >= 0 ? '': '-'}${formatCurrency(partner.balance, currencySymbol)}` : undefined}
           />
         </div>
         
@@ -87,7 +80,7 @@ function PartnerBalanceItem({
           "text-sm font-bold flex-shrink-0",
           partner.balance >= 0 ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"
         )}>
-          {partner.balance >= 0 ? '+' : ''}{formatCurrency(partner.balance, currencySymbol)}
+          {partner.balance >= 0 ? '+': ''}{formatCurrency(partner.balance, currencySymbol)}
         </div>
         
         <ChevronDown 
@@ -133,7 +126,7 @@ function PartnerBalanceItem({
                   "text-lg font-semibold",
                   partner.balance >= 0 ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"
                 )}>
-                  {partner.balance >= 0 ? '+' : ''}{formatCurrency(partner.balance, currencySymbol)}
+                  {partner.balance >= 0 ? '+': ''}{formatCurrency(partner.balance, currencySymbol)}
                 </div>
               </div>
             </div>
@@ -163,7 +156,6 @@ function PartnerBalanceItem({
     </div>
   );
 }
-
 export default function PartnerBalanceAccordion({ 
   partners,
   currencySymbol = '$',
@@ -171,11 +163,9 @@ export default function PartnerBalanceAccordion({
   const [openId, setOpenId] = useState<string | null>(null);
   
   const sortedPartners = [...partners].sort((a, b) => b.balance - a.balance);
-
   const handleToggle = (id: string) => {
     setOpenId(prev => prev === id ? null : id);
   };
-
   if (sortedPartners.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -185,7 +175,6 @@ export default function PartnerBalanceAccordion({
       </div>
     );
   }
-
   return (
     <div className="space-y-3" data-testid="partner-balance-accordion-list">
       {sortedPartners.map(partner => (
@@ -200,5 +189,4 @@ export default function PartnerBalanceAccordion({
     </div>
   );
 }
-
 export type { PartnerBalanceAccordionProps, PartnerBalanceData };

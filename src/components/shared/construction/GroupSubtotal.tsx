@@ -1,10 +1,8 @@
 import { useQueries } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-
 interface GroupSubtotalProps {
   tasks: any[]
 }
-
 // Hook para obtener materiales de múltiples tareas
 function useGroupTaskMaterials(taskIds: string[]) {
   // Usar useQueries para manejar múltiples queries de forma segura
@@ -50,14 +48,12 @@ function useGroupTaskMaterials(taskIds: string[]) {
   
   return { data: allMaterials, isLoading }
 }
-
 export default function GroupSubtotal({ tasks }: GroupSubtotalProps) {
   // Obtener todos los task_ids
   const taskIds = tasks.map(task => task.task_id).filter(Boolean)
   
   // Obtener materiales para todas las tareas del grupo
   const { data: allMaterials, isLoading } = useGroupTaskMaterials(taskIds)
-
   // Calcular subtotal total del grupo
   const totalSubtotal = tasks.reduce((sum, task) => {
     const materials = allMaterials[task.task_id] || []
@@ -75,7 +71,6 @@ export default function GroupSubtotal({ tasks }: GroupSubtotalProps) {
     
     return sum + taskSubtotal;
   }, 0);
-
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -84,15 +79,12 @@ export default function GroupSubtotal({ tasks }: GroupSubtotalProps) {
       maximumFractionDigits: 0
     }).format(amount)
   }
-
   if (isLoading) {
     return <span className="text-xs text-muted-foreground">...</span>
   }
-
   if (totalSubtotal === 0) {
     return <span className="text-xs text-muted-foreground">–</span>
   }
-
   return (
     <span className="text-xs font-semibold text-white">
       {formatCost(totalSubtotal)}

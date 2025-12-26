@@ -22,7 +22,6 @@ import { es } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-
 const couponSchema = z.object({
   code: z.string()
     .min(1, 'El código es requerido')
@@ -44,13 +43,11 @@ const couponSchema = z.object({
   applies_to_all: z.boolean().default(true),
   applies_to: z.enum(['courses', 'subscriptions', 'all']).default('courses'),
 });
-
 type CouponFormData = z.infer<typeof couponSchema>;
-
 interface Coupon {
   id: string;
   code: string;
-  type: 'percent' | 'fixed';
+  type: 'percent'| 'fixed';
   amount: number;
   is_active: boolean;
   starts_at?: string;
@@ -60,23 +57,20 @@ interface Coupon {
   min_order_total?: number;
   currency?: string;
   applies_to_all: boolean;
-  applies_to?: 'courses' | 'subscriptions' | 'all';
+  applies_to?: 'courses'| 'subscriptions'| 'all';
   created_at: string;
 }
-
 interface Course {
   id: string;
   slug: string;
   title: string;
 }
-
 interface Plan {
   id: string;
   slug: string;
   name: string;
   is_active: boolean;
 }
-
 interface CouponFormModalProps {
   modalData?: {
     coupon?: Coupon;
@@ -84,7 +78,6 @@ interface CouponFormModalProps {
   };
   onClose: () => void;
 }
-
 export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
   const { coupon, isEditing = false } = modalData || {};
   const { setPanel } = useModalPanelStore();
@@ -93,7 +86,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [selectedPlans, setSelectedPlans] = useState<string[]>([]);
-
   const { data: courses = [] } = useQuery({
     queryKey: ['courses'],
     queryFn: async () => {
@@ -109,7 +101,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
       return data as Course[];
     }
   });
-
   const { data: couponCourses = [] } = useQuery({
     queryKey: ['coupon-courses', coupon?.id],
     queryFn: async () => {
@@ -125,7 +116,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
     },
     enabled: !!coupon?.id
   });
-
   const { data: plans = [] } = useQuery({
     queryKey: ['plans'],
     queryFn: async () => {
@@ -141,7 +131,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
       return data as Plan[];
     }
   });
-
   const { data: couponPlans = [] } = useQuery({
     queryKey: ['coupon-plans', coupon?.id],
     queryFn: async () => {
@@ -157,19 +146,16 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
     },
     enabled: !!coupon?.id
   });
-
   useEffect(() => {
     if (couponCourses.length > 0) {
       setSelectedCourses(couponCourses);
     }
   }, [couponCourses]);
-
   useEffect(() => {
     if (couponPlans.length > 0) {
       setSelectedPlans(couponPlans);
     }
   }, [couponPlans]);
-
   const form = useForm<CouponFormData>({
     resolver: zodResolver(couponSchema),
     defaultValues: {
@@ -187,7 +173,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
       applies_to: coupon?.applies_to || 'courses',
     }
   });
-
   useEffect(() => {
     if (coupon) {
       form.reset({
@@ -222,14 +207,12 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
     }
     setPanel('edit');
   }, [coupon, form, setPanel]);
-
   const handleClose = () => {
     form.reset();
     setSelectedCourses([]);
     setSelectedPlans([]);
     onClose();
   };
-
   const togglePlan = (planId: string) => {
     setSelectedPlans(prev =>
       prev.includes(planId)
@@ -237,7 +220,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
         : [...prev, planId]
     );
   };
-
   const createCouponMutation = useMutation({
     mutationFn: async (data: CouponFormData) => {
       const response = await apiRequest('POST', '/api/admin/coupons', {
@@ -265,7 +247,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
       });
     }
   });
-
   const updateCouponMutation = useMutation({
     mutationFn: async (data: CouponFormData) => {
       const response = await apiRequest('PATCH', `/api/admin/coupons/${coupon!.id}`, {
@@ -295,7 +276,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
       });
     }
   });
-
   const onSubmit = async (data: CouponFormData) => {
     setIsLoading(true);
     try {
@@ -308,7 +288,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
       setIsLoading(false);
     }
   };
-
   const toggleCourse = (courseId: string) => {
     setSelectedCourses(prev =>
       prev.includes(courseId)
@@ -316,24 +295,21 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
         : [...prev, courseId]
     );
   };
-
   const headerContent = (
     <FormModalHeader 
-      title={coupon ? 'Editar Cupón' : 'Nuevo Cupón'}
+      title={coupon ? 'Editar Cupón': 'Nuevo Cupón'}
       icon={Tag}
     />
   );
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={coupon ? 'Actualizar' : 'Crear Cupón'}
+      rightLabel={coupon ? 'Actualizar': 'Crear Cupón'}
       onRightClick={form.handleSubmit(onSubmit)}
       showLoadingSpinner={isLoading}
     />
   );
-
   const editContent = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -382,7 +358,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
             )}
           />
         </div>
-
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -402,13 +377,12 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
                   />
                 </FormControl>
                 <FormDescription className="text-xs">
-                  {form.watch('type') === 'percent' ? 'Porcentaje de descuento (ej: 10 = 10%)' : 'Monto fijo de descuento'}
+                  {form.watch('type') === 'percent'? 'Porcentaje de descuento (ej: 10 = 10%)': 'Monto fijo de descuento'}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="currency"
@@ -439,9 +413,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
             )}
           />
         </div>
-
         <Separator />
-
         <div>
           <h3 className="text-sm font-semibold mb-3">Fechas de Validez</h3>
           <div className="grid grid-cols-2 gap-4">
@@ -483,7 +455,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="expires_at"
@@ -524,9 +495,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
             />
           </div>
         </div>
-
         <Separator />
-
         <div>
           <h3 className="text-sm font-semibold mb-3">Límites de Uso</h3>
           <div className="grid grid-cols-2 gap-4">
@@ -554,7 +523,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="per_user_limit"
@@ -581,7 +549,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
             />
           </div>
         </div>
-
         <FormField
           control={form.control}
           name="min_order_total"
@@ -607,9 +574,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
             </FormItem>
           )}
         />
-
         <Separator />
-
         <FormField
           control={form.control}
           name="applies_to"
@@ -635,8 +600,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
             </FormItem>
           )}
         />
-
-        {(form.watch('applies_to') === 'courses' || form.watch('applies_to') === 'all') && (
+        {(form.watch('applies_to') === 'courses'|| form.watch('applies_to') === 'all') && (
           <div>
             <h3 className="text-sm font-semibold mb-3">Cursos Aplicables</h3>
             <p className="text-sm text-muted-foreground mb-4">
@@ -665,8 +629,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
             </div>
           </div>
         )}
-
-        {(form.watch('applies_to') === 'subscriptions' || form.watch('applies_to') === 'all') && (
+        {(form.watch('applies_to') === 'subscriptions'|| form.watch('applies_to') === 'all') && (
           <div>
             <h3 className="text-sm font-semibold mb-3">Planes de Suscripción</h3>
             <p className="text-sm text-muted-foreground mb-4">
@@ -695,7 +658,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
             </div>
           </div>
         )}
-
         <FormField
           control={form.control}
           name="is_active"
@@ -720,7 +682,6 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
       </form>
     </Form>
   );
-
   return (
     <FormModalLayout
       columns={1}

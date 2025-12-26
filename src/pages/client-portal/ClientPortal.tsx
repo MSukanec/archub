@@ -16,14 +16,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
 interface PortalSession {
   projectId: string;
   projectClientId: string;
   contactId: string;
   exp: number;
 }
-
 function getPortalSession(): PortalSession | null {
   try {
     const stored = localStorage.getItem('portal_session');
@@ -38,7 +36,6 @@ function getPortalSession(): PortalSession | null {
     return null;
   }
 }
-
 export default function ClientPortal() {
   const [, params] = useRoute('/portal/:projectId');
   const projectId = params?.projectId;
@@ -46,7 +43,6 @@ export default function ClientPortal() {
   
   const [activeTab, setActiveTab] = useState<ClientPortalTab>('dashboard');
   const [selectedClientId, setSelectedClientId] = useState<string | undefined>();
-
   // Check for client ID from URL params or portal session
   const clientIdFromSession = useMemo(() => {
     const urlParams = new URLSearchParams(searchString);
@@ -59,19 +55,16 @@ export default function ClientPortal() {
     }
     return undefined;
   }, [searchString, projectId]);
-
   // Set initial selected client from session/URL
   useEffect(() => {
     if (clientIdFromSession && !selectedClientId) {
       setSelectedClientId(clientIdFromSession);
     }
   }, [clientIdFromSession]);
-
   const { data, isLoading, isFetching, error } = useClientPortalData({
     projectId: projectId || '',
     clientId: selectedClientId || clientIdFromSession,
   });
-
   if (!projectId) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -89,7 +82,6 @@ export default function ClientPortal() {
       </div>
     );
   }
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -97,7 +89,6 @@ export default function ClientPortal() {
       </div>
     );
   }
-
   if (error || !data) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -115,7 +106,6 @@ export default function ClientPortal() {
       </div>
     );
   }
-
   const getClientDisplayName = (client: ClientPortalClient) => {
     if (client.full_name) return client.full_name;
     if (client.first_name || client.last_name) {
@@ -123,7 +113,6 @@ export default function ClientPortal() {
     }
     return client.email || 'Cliente sin nombre';
   };
-
   const renderTabContent = () => {
     const { settings } = data;
     
@@ -140,7 +129,6 @@ export default function ClientPortal() {
         return null;
     }
   };
-
   return (
     <ClientPortalLayout
       project={data.project}

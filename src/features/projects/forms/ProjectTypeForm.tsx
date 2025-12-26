@@ -1,10 +1,8 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-
 import { useOptimisticMutation } from '@/core/save-engine';
 import { projectsKeys } from '@/core/query-keys';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -13,19 +11,16 @@ import { createProjectType } from '../services/createProjectType';
 import { updateProjectType } from '../services/updateProjectType';
 import { projectTypeSchema, type ProjectTypeFormData } from '../schemas';
 import type { ProjectType } from '../types';
-
 interface ProjectTypeFormCallbacks {
-  onSuccess?: (mode: 'create' | 'edit') => void;
+  onSuccess?: (mode: 'create'| 'edit') => void;
   onError?: (error: Error) => void;
 }
-
 interface UseProjectTypeFormOptions {
   projectType?: ProjectType;
-  mode: 'create' | 'edit' | 'view';
+  mode: 'create'| 'edit'| 'view';
   onSuccess?: () => void;
   callbacks?: ProjectTypeFormCallbacks;
 }
-
 export function ViewPanel({ data }: { data: ProjectType }) {
   return (
     <div className="space-y-4">
@@ -41,7 +36,6 @@ export function ViewPanel({ data }: { data: ProjectType }) {
     </div>
   );
 }
-
 export function FormPanel({
   form,
   onSubmit,
@@ -73,7 +67,6 @@ export function FormPanel({
     </Form>
   );
 }
-
 export function useProjectTypeForm({
   projectType,
   mode,
@@ -83,14 +76,12 @@ export function useProjectTypeForm({
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   const { data: members = [] } = useOrganizationMembers(organizationId);
-
   const form = useForm<ProjectTypeFormData>({
     resolver: zodResolver(projectTypeSchema),
     defaultValues: {
       name: '',
     }
   });
-
   useEffect(() => {
     if (projectType) {
       form.reset({
@@ -102,11 +93,9 @@ export function useProjectTypeForm({
       });
     }
   }, [projectType, form]);
-
   const reset = () => {
     form.reset();
   };
-
   const { mutate: createType, isPending: isCreating } = useOptimisticMutation<
     void,
     { name: string; organizationId: string; createdBy: string }
@@ -115,7 +104,7 @@ export function useProjectTypeForm({
     queryKey: projectsKeys.typeList(organizationId),
     optimisticUpdate: (oldData, variables) => {
       const optimisticType = {
-        id: 'temp-' + Date.now(),
+        id: 'temp-'+ Date.now(),
         name: variables.name,
         organization_id: variables.organizationId,
         created_by: variables.createdBy,
@@ -128,7 +117,6 @@ export function useProjectTypeForm({
     onErrorMessage: "Error al crear tipo",
     additionalQueryKeys: [projectsKeys.types()],
   });
-
   const { mutate: updateType, isPending: isUpdating } = useOptimisticMutation<
     void,
     { typeId: string; organizationId: string; data: { name?: string } }
@@ -146,17 +134,14 @@ export function useProjectTypeForm({
     onErrorMessage: "Error al actualizar tipo",
     additionalQueryKeys: [projectsKeys.types()],
   });
-
   const isSubmitting = isCreating || isUpdating;
-
   const onSubmit = async (data: ProjectTypeFormData) => {
     if (!organizationId) {
       callbacks.onError?.(new Error('Faltan datos de organización'));
       return;
     }
-
     try {
-      if (mode === 'edit' && projectType) {
+      if (mode === 'edit'&& projectType) {
         updateType({
           typeId: projectType.id,
           organizationId,
@@ -170,7 +155,6 @@ export function useProjectTypeForm({
           callbacks.onError?.(new Error('No se encontró el miembro de la organización'));
           return;
         }
-
         createType({
           name: data.name,
           organizationId,
@@ -183,7 +167,6 @@ export function useProjectTypeForm({
       callbacks.onError?.(error as Error);
     }
   };
-
   return {
     form,
     onSubmit,
@@ -192,5 +175,4 @@ export function useProjectTypeForm({
     organizationId,
   };
 }
-
 export type { ProjectType, ProjectTypeFormData };

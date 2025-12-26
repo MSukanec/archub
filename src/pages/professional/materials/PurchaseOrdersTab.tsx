@@ -13,19 +13,17 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { useToast } from '@/hooks/use-toast';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/shared/AppCard';
 import {
   usePurchaseOrders,
   useDeletePurchaseOrder,
   type PurchaseOrder,
   getPurchaseOrderStatusBadgeConfig,
 } from '@/features/materials/hooks/use-purchase-orders';
-
 interface PurchaseOrdersTabProps {
   projectId?: string;
   organizationId?: string;
 }
-
 interface OrderMetrics {
   total_count: number;
   count_draft: number;
@@ -37,7 +35,6 @@ interface OrderMetrics {
   latest_order_date: string | null;
   total_items: number;
 }
-
 export default function PurchaseOrdersTab({ projectId, organizationId: propOrganizationId }: PurchaseOrdersTabProps) {
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
@@ -50,16 +47,12 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
   
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterProvider, setFilterProvider] = useState<string>('all');
-
   const [selectedOrders, setSelectedOrders] = useState<PurchaseOrder[]>([]);
-
   const { data: ordersData, isLoading } = usePurchaseOrders(activeProjectId || undefined, organizationId);
-
   const allOrders = useMemo(() => {
     if (!ordersData) return [];
     return ordersData;
   }, [ordersData]);
-
   const metricsData = useMemo<OrderMetrics>(() => {
     let countDraft = 0;
     let countSent = 0;
@@ -69,7 +62,6 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
     let countConverted = 0;
     let latestOrderDate: string | null = null;
     let totalItems = 0;
-
     allOrders.forEach(order => {
       if (order.status === 'draft') countDraft++;
       else if (order.status === 'sent') countSent++;
@@ -77,14 +69,11 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
       else if (order.status === 'approved') countApproved++;
       else if (order.status === 'rejected') countRejected++;
       else if (order.status === 'converted') countConverted++;
-
       if (!latestOrderDate || order.order_date > latestOrderDate) {
         latestOrderDate = order.order_date;
       }
-
       totalItems += order.items?.length || 0;
     });
-
     return {
       total_count: allOrders.length,
       count_draft: countDraft,
@@ -97,23 +86,19 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
       total_items: totalItems,
     };
   }, [allOrders]);
-
   const filterOptions = useMemo(() => {
     const providers = new Set<string>();
-
     allOrders.forEach(order => {
       const providerName = order.provider?.company_name || order.provider?.full_name;
       if (providerName) providers.add(providerName);
     });
-
     return {
       providers: Array.from(providers).sort(),
     };
   }, [allOrders]);
-
   const purchaseOrders = useMemo(() => {
     return allOrders.filter(order => {
-      if (filterStatus !== 'all' && order.status !== filterStatus) return false;
+      if (filterStatus !== 'all'&& order.status !== filterStatus) return false;
       if (filterProvider !== 'all') {
         const providerName = order.provider?.company_name || order.provider?.full_name;
         if (providerName !== filterProvider) return false;
@@ -122,9 +107,7 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
       return true;
     });
   }, [allOrders, filterStatus, filterProvider]);
-
   const deleteOrderMutation = useDeletePurchaseOrder();
-
   const handleEdit = (order: PurchaseOrder) => {
     openModal('purchase-order', {
       projectId: activeProjectId,
@@ -133,7 +116,6 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
       mode: 'edit',
     });
   };
-
   const formatDate = (dateString: string | null, formatString: string = 'dd/MM/yyyy') => {
     if (!dateString) return '-';
     try {
@@ -143,13 +125,11 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
       return '-';
     }
   };
-
   const handleDeleteOrder = (order: PurchaseOrder) => {
     if (!organizationId || !activeProjectId) return;
-
     const orderDate = formatDate(order.order_date, 'dd/MM/yyyy');
     const itemCount = order.items?.length || 0;
-    const orderLabel = `Orden del ${orderDate} (${itemCount} ${itemCount === 1 ? 'ítem' : 'ítems'})`;
+    const orderLabel = `Orden del ${orderDate} (${itemCount} ${itemCount === 1 ? 'ítem': 'ítems'})`;
     
     showDeleteConfirmation({
       mode: 'simple',
@@ -165,7 +145,6 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
       isLoading: deleteOrderMutation.isPending
     });
   };
-
   const handleAddOrder = () => {
     openModal('purchase-order', {
       projectId: activeProjectId,
@@ -173,18 +152,16 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
       mode: 'create'
     });
   };
-
   const handleBulkDelete = () => {
     if (!organizationId || !activeProjectId || selectedOrders.length === 0) return;
-
     const count = selectedOrders.length;
     
     showDeleteConfirmation({
       mode: 'simple',
-      title: `Eliminar ${count} ${count === 1 ? 'orden' : 'órdenes'}`,
-      description: `¿Estás seguro de que querés eliminar ${count === 1 ? 'esta orden de compra' : `estas ${count} órdenes de compra`}? Esta acción no se puede deshacer.`,
-      itemName: `${count} ${count === 1 ? 'orden seleccionada' : 'órdenes seleccionadas'}`,
-      destructiveActionText: `Eliminar ${count === 1 ? 'orden' : 'órdenes'}`,
+      title: `Eliminar ${count} ${count === 1 ? 'orden': 'órdenes'}`,
+      description: `¿Estás seguro de que querés eliminar ${count === 1 ? 'esta orden de compra': `estas ${count} órdenes de compra`}? Esta acción no se puede deshacer.`,
+      itemName: `${count} ${count === 1 ? 'orden seleccionada': 'órdenes seleccionadas'}`,
+      destructiveActionText: `Eliminar ${count === 1 ? 'orden': 'órdenes'}`,
       onDelete: async () => {
         let successCount = 0;
         let failCount = 0;
@@ -221,19 +198,18 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
       isLoading: deleteOrderMutation.isPending
     });
   };
-
   const columns: Column<PurchaseOrder>[] = [
     {
       key: 'order_date',
       label: 'Fecha',
-      type: 'date' as const,
+      type: 'date'as const,
       sortable: true,
       render: (order: PurchaseOrder) => formatDate(order.order_date, 'dd/MM/yyyy'),
     },
     {
       key: 'requester',
       label: 'Solicitante',
-      type: 'name' as const,
+      type: 'name'as const,
       sortable: true,
       render: (order: PurchaseOrder) => {
         if (!order.requester?.user) return '-';
@@ -250,7 +226,7 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
     {
       key: 'provider',
       label: 'Proveedor',
-      type: 'long-text' as const,
+      type: 'long-text'as const,
       sortable: true,
       render: (order: PurchaseOrder) => {
         if (!order.provider) return <span className="text-muted-foreground">Sin proveedor</span>;
@@ -260,7 +236,7 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
     {
       key: 'notes',
       label: 'Notas',
-      type: 'medium-text' as const,
+      type: 'medium-text'as const,
       sortable: false,
       render: (order: PurchaseOrder) => {
         if (!order.notes) return '-';
@@ -274,14 +250,14 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
     {
       key: 'items_count',
       label: 'Items',
-      type: 'badge' as const,
+      type: 'badge'as const,
       sortable: true,
-      sortType: 'number' as const,
+      sortType: 'number'as const,
       render: (order: PurchaseOrder) => {
         const count = order.items?.length || 0;
         return (
           <Badge variant="neutral" className="font-medium">
-            {count} {count === 1 ? 'ítem' : 'ítems'}
+            {count} {count === 1 ? 'ítem': 'ítems'}
           </Badge>
         );
       },
@@ -289,7 +265,7 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
     {
       key: 'status',
       label: 'Estado',
-      type: 'status' as const,
+      type: 'status'as const,
       sortable: true,
       render: (order: PurchaseOrder) => {
         const statusInfo = getPurchaseOrderStatusBadgeConfig(order.status);
@@ -301,16 +277,13 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
       },
     },
   ];
-
   const isFilterActive = 
-    filterStatus !== 'all' || 
+    filterStatus !== 'all'|| 
     filterProvider !== 'all';
-
   const handleClearFilters = () => {
     setFilterStatus('all');
     setFilterProvider('all');
   };
-
   const handleViewOrder = (order: PurchaseOrder) => {
     openModal('purchase-order', {
       projectId: activeProjectId,
@@ -319,7 +292,6 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
       mode: 'view',
     });
   };
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -332,10 +304,9 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
             {metricsData.total_count}
           </StatCardValue>
           <StatCardMeta>
-            {metricsData.total_items} {metricsData.total_items === 1 ? 'ítem total' : 'ítems totales'}
+            {metricsData.total_items} {metricsData.total_items === 1 ? 'ítem total': 'ítems totales'}
           </StatCardMeta>
         </StatCard>
-
         <StatCard data-testid="stat-card-pending-approval">
           <StatCardTitle showArrow={false}>
             <Clock className="w-4 h-4 inline mr-1" />
@@ -348,7 +319,6 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
             {metricsData.count_draft} borrador, {metricsData.count_sent} enviadas
           </StatCardMeta>
         </StatCard>
-
         <StatCard data-testid="stat-card-approved">
           <StatCardTitle showArrow={false}>
             <CheckCircle2 className="w-4 h-4 inline mr-1" />
@@ -362,7 +332,6 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
           </StatCardMeta>
         </StatCard>
       </div>
-
       <Table
         columns={columns}
         data={purchaseOrders}

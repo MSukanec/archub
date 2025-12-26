@@ -7,28 +7,23 @@ import { Button } from '@/components/ui/button';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
-
 export default function Moodboard() {
   const { setSidebarContext } = useNavigationStore();
   const { currentOrganizationId, selectedProjectId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
-
   useEffect(() => {
     setSidebarContext('project');
   }, [setSidebarContext]);
-
   const handleAddItem = () => {
     openModal('new-moodboard-item', {
       projectId: selectedProjectId,
       organizationId: currentOrganizationId,
     });
   };
-
   const tabs = [
     { id: 'boards', label: 'Tableros', isActive: true },
   ];
-
   const headerProps = {
     icon: Palette,
     title: "Moodboard",
@@ -43,7 +38,6 @@ export default function Moodboard() {
       onClick: handleAddItem,
     },
   };
-
   return (
     <Layout headerProps={headerProps} wide={false}>
       {!selectedBoardId ? (

@@ -1,13 +1,10 @@
 import { useAdminPermissions } from '@/hooks/use-admin-permissions'
 import { AlertTriangle } from 'lucide-react'
-
 interface AdminProtectedRouteProps {
   children: React.ReactNode
 }
-
 export function AuthAdmin({ children }: AdminProtectedRouteProps) {
   const { data, isLoading } = useAdminPermissions()
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -18,7 +15,6 @@ export function AuthAdmin({ children }: AdminProtectedRouteProps) {
       </div>
     )
   }
-
   if (!data?.isAdmin) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -39,6 +35,5 @@ export function AuthAdmin({ children }: AdminProtectedRouteProps) {
       </div>
     )
   }
-
   return <>{children}</>
 }

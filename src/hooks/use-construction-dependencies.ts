@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
-
 export interface ConstructionDependency {
   id: string;
   predecessor_task_id: string;
@@ -10,7 +9,6 @@ export interface ConstructionDependency {
   lag_days?: number;
   created_at: string;
 }
-
 export interface ConstructionDependencyWithTasks extends ConstructionDependency {
   predecessor_task?: {
     id: string;
@@ -29,7 +27,6 @@ export interface ConstructionDependencyWithTasks extends ConstructionDependency 
     };
   };
 }
-
 export function useConstructionDependencies(projectId: string) {
   return useQuery({
     queryKey: ['construction-dependencies', projectId],
@@ -57,21 +54,17 @@ export function useConstructionDependencies(projectId: string) {
         `)
         .eq('predecessor_task.project_id', projectId)
         .eq('successor_task.project_id', projectId);
-
       if (error) {
         console.error('Error fetching construction dependencies:', error);
         throw error;
       }
-
       return data || [];
     },
     enabled: !!projectId,
   });
 }
-
 export function useCreateConstructionDependency() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (dependencyData: {
       predecessor_task_id: string;
@@ -80,7 +73,6 @@ export function useCreateConstructionDependency() {
       lag_days?: number;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
-
       const { data, error } = await supabase
         .from('construction_dependencies')
         .insert({
@@ -91,12 +83,10 @@ export function useCreateConstructionDependency() {
         })
         .select()
         .single();
-
       if (error) {
         console.error('Error creating construction dependency:', error);
         throw error;
       }
-
       return data;
     },
     onSuccess: (data) => {
@@ -117,10 +107,8 @@ export function useCreateConstructionDependency() {
     },
   });
 }
-
 export function useUpdateConstructionDependency() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({ 
       id, 
@@ -133,19 +121,16 @@ export function useUpdateConstructionDependency() {
       lag_days?: number;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
-
       const { data, error } = await supabase
         .from('construction_dependencies')
         .update(updateData)
         .eq('id', id)
         .select()
         .single();
-
       if (error) {
         console.error('Error updating construction dependency:', error);
         throw error;
       }
-
       return data;
     },
     onSuccess: () => {
@@ -166,24 +151,19 @@ export function useUpdateConstructionDependency() {
     },
   });
 }
-
 export function useDeleteConstructionDependency() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (id: string) => {
       if (!supabase) throw new Error('Supabase not initialized');
-
       const { error } = await supabase
         .from('construction_dependencies')
         .delete()
         .eq('id', id);
-
       if (error) {
         console.error('Error deleting construction dependency:', error);
         throw error;
       }
-
       return id;
     },
     onSuccess: () => {
@@ -204,7 +184,6 @@ export function useDeleteConstructionDependency() {
     },
   });
 }
-
 // Función para detectar dependencias circulares
 export function detectCircularDependency(
   newPredecessorId: string,
@@ -215,7 +194,6 @@ export function detectCircularDependency(
   if (newPredecessorId === newSuccessorId) {
     return true;
   }
-
   // Crear un mapa de dependencias
   const dependencyMap = new Map<string, string[]>();
   
@@ -226,17 +204,14 @@ export function detectCircularDependency(
     }
     dependencyMap.get(dep.predecessor_task_id)!.push(dep.successor_task_id);
   });
-
   // Agregar la nueva dependencia propuesta
   if (!dependencyMap.has(newPredecessorId)) {
     dependencyMap.set(newPredecessorId, []);
   }
   dependencyMap.get(newPredecessorId)!.push(newSuccessorId);
-
   // Verificar si hay ciclo usando DFS
   const visited = new Set<string>();
   const recursionStack = new Set<string>();
-
   function hasCycle(taskId: string): boolean {
     if (recursionStack.has(taskId)) {
       return true; // Ciclo detectado
@@ -244,21 +219,17 @@ export function detectCircularDependency(
     if (visited.has(taskId)) {
       return false; // Ya procesado
     }
-
     visited.add(taskId);
     recursionStack.add(taskId);
-
     const dependencies = dependencyMap.get(taskId) || [];
     for (const dep of dependencies) {
       if (hasCycle(dep)) {
         return true;
       }
     }
-
     recursionStack.delete(taskId);
     return false;
   }
-
   // Verificar desde el nuevo predecesor
   return hasCycle(newPredecessorId);
 }

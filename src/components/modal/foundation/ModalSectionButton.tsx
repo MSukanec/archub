@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
 interface ModalSectionButtonProps {
   icon: React.ReactNode;
   title: string;
@@ -10,10 +9,9 @@ interface ModalSectionButtonProps {
   onClick: () => void;
   className?: string;
   disabled?: boolean;
-  variant?: 'default' | 'destructive';
+  variant?: 'default'| 'destructive';
   showPlusIcon?: boolean;
 }
-
 export function ModalSectionButton({
   icon,
   title,
@@ -25,7 +23,6 @@ export function ModalSectionButton({
   showPlusIcon = false
 }: ModalSectionButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
-
   return (
     <div 
       className={cn(
@@ -46,32 +43,31 @@ export function ModalSectionButton({
         className={cn(
           "w-full flex items-center gap-3 p-3 rounded-lg border transition-all duration-200",
           "text-left bg-transparent",
-          variant === 'destructive' ? "hover:bg-destructive/5" : "hover:bg-accent/5",
+          variant === 'destructive'? "hover:bg-destructive/5" : "hover:bg-accent/5",
           "border-solid border-foreground/20",
-          variant === 'destructive' ? "hover:border-destructive" : "hover:border-accent",
+          variant === 'destructive'? "hover:border-destructive" : "hover:border-accent",
           "focus:outline-none focus:ring-2 focus:ring-offset-2",
-          variant === 'destructive' ? "focus:ring-destructive" : "focus:ring-accent",
+          variant === 'destructive'? "focus:ring-destructive" : "focus:ring-accent",
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-foreground/20",
-          isHovered && !disabled && (variant === 'destructive' ? "border-destructive shadow-sm" : "border-accent shadow-sm")
+          isHovered && !disabled && (variant === 'destructive'? "border-destructive shadow-sm" : "border-accent shadow-sm")
         )}
       >
         <div className={cn(
           "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center",
-          variant === 'destructive' ? "bg-destructive/10" : "bg-accent/10"
+          variant === 'destructive'? "bg-destructive/10" : "bg-accent/10"
         )}>
           <div className={cn(
             "w-4 h-4 [&>svg]:w-4 [&>svg]:h-4",
-            variant === 'destructive' ? "text-destructive" : "text-accent"
+            variant === 'destructive'? "text-destructive" : "text-accent"
           )}>
             {icon}
           </div>  
         </div>
-
         <div className="flex-1 min-w-0">
           <div className={cn(
             "font-medium text-sm transition-colors duration-200",
-            variant === 'destructive' ? "text-destructive" : "text-foreground",
-            isHovered && !disabled && (variant === 'destructive' ? "text-destructive/80" : "text-accent")
+            variant === 'destructive'? "text-destructive" : "text-foreground",
+            isHovered && !disabled && (variant === 'destructive'? "text-destructive/80" : "text-accent")
           )}>
             {title}
           </div>
@@ -79,7 +75,6 @@ export function ModalSectionButton({
             {description}
           </div>
         </div>
-
         {showPlusIcon && (
           <div className="flex-shrink-0">
             <Plus className={cn(
@@ -92,5 +87,4 @@ export function ModalSectionButton({
     </div>
   );
 }
-
 export { ModalSectionButton as FormSubsectionButton };

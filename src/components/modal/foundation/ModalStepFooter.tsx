@@ -1,24 +1,20 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { StepModalFooterConfig } from '../factory/types';
-
 interface ModalStepFooterProps {
   config: StepModalFooterConfig;
   className?: string;
 }
-
 export function ModalStepFooter({
   config,
   className = ""
 }: ModalStepFooterProps) {
   const { cancelAction, previousAction, nextAction, submitAction, customActions } = config;
-
   const hasCancel = !!cancelAction;
   const hasPrevious = !!previousAction;
   const hasNext = !!nextAction;
   const hasSubmit = !!submitAction;
   const hasCustomActions = customActions && customActions.length > 0;
-
   return (
     <div className={`p-2 border-t border-[var(--card-border)] mt-auto ${className}`}>
       <div className="flex gap-2 w-full">
@@ -29,7 +25,7 @@ export function ModalStepFooter({
             disabled={cancelAction.disabled}
             className="w-1/4"
           >
-            {cancelAction.loading ? 'Cargando...' : cancelAction.label}
+            {cancelAction.loading ? 'Cargando...': cancelAction.label}
           </Button>
         )}
         
@@ -41,7 +37,7 @@ export function ModalStepFooter({
               disabled={previousAction.disabled}
               className="flex-1"
             >
-              {previousAction.loading ? 'Cargando...' : previousAction.label}
+              {previousAction.loading ? 'Cargando...': previousAction.label}
             </Button>
           )}
           
@@ -52,7 +48,7 @@ export function ModalStepFooter({
               disabled={nextAction.disabled}
               className="flex-1"
             >
-              {nextAction.loading ? 'Cargando...' : nextAction.label}
+              {nextAction.loading ? 'Cargando...': nextAction.label}
             </Button>
           )}
           
@@ -63,10 +59,9 @@ export function ModalStepFooter({
               disabled={submitAction.disabled}
               className="flex-1"
             >
-              {submitAction.loading ? 'Cargando...' : submitAction.label}
+              {submitAction.loading ? 'Cargando...': submitAction.label}
             </Button>
           )}
-
           {hasCustomActions && customActions.map((action, index) => (
             <Button
               key={index}
@@ -75,7 +70,7 @@ export function ModalStepFooter({
               disabled={action.disabled}
               className="flex-1"
             >
-              {action.loading ? 'Cargando...' : action.label}
+              {action.loading ? 'Cargando...': action.label}
             </Button>
           ))}
         </div>
@@ -83,5 +78,4 @@ export function ModalStepFooter({
     </div>
   );
 }
-
 export { ModalStepFooter as FormModalStepFooter };

@@ -1,7 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { ContactWithRelations } from '../types';
 import { mapViewToContact } from '../mappers';
-
 /**
  * Obtiene un contacto específico por ID usando la vista contacts_with_relations_view.
  * 
@@ -21,20 +20,17 @@ export async function getContactById(
   if (!supabase || !contactId || !organizationId) {
     return null;
   }
-
   const { data, error } = await supabase
     .from('contacts_with_relations_view')
     .select('*')
     .eq('id', contactId)
     .eq('organization_id', organizationId)
     .single();
-
   if (error) {
     if (error.code === 'PGRST116') {
       return null;
     }
     throw error;
   }
-
   return data ? mapViewToContact(data) : null;
 }

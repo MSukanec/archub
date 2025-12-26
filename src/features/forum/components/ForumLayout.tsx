@@ -6,7 +6,6 @@ import { Menu, MessageSquare } from 'lucide-react';
 import type { ForumCategoryWithCounts } from '../services';
 import { getIconComponent } from './CategoryList';
 import { cn } from '@/lib/utils';
-
 interface ForumLayoutProps {
   children: React.ReactNode;
   categories: ForumCategoryWithCounts[];
@@ -14,7 +13,6 @@ interface ForumLayoutProps {
   onCategorySelect: (categorySlug: string | null) => void;
   sidebar?: React.ReactNode;
 }
-
 export function ForumLayout({
   children,
   categories,
@@ -23,16 +21,13 @@ export function ForumLayout({
   sidebar,
 }: ForumLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   const handleMobileSelect = (slug: string | null) => {
     onCategorySelect(slug);
     setMobileMenuOpen(false);
   };
-
   const selectedCategoryName = selectedCategory 
     ? categories.find(c => c.slug === selectedCategory)?.name || 'Categoría'
     : 'Todas las categorías';
-
   return (
     <div className="flex flex-col md:flex-row h-full min-h-0" data-testid="forum-layout">
       {/* Mobile Category Selector */}
@@ -68,11 +63,9 @@ export function ForumLayout({
                   <MessageSquare className="h-4 w-4 flex-shrink-0" />
                   <span className="flex-1 text-left">Todos</span>
                 </button>
-
                 {categories.map((category) => {
                   const Icon = getIconComponent(category.icon);
                   const isSelected = selectedCategory === category.slug;
-
                   return (
                     <button
                       key={category.id}
@@ -93,7 +86,7 @@ export function ForumLayout({
                       {(category.thread_count ?? 0) > 0 && (
                         <span className={cn(
                           'text-xs px-1.5 py-0.5 rounded',
-                          isSelected ? 'bg-white/20' : 'bg-muted'
+                          isSelected ? 'bg-white/20': 'bg-muted'
                         )}>
                           {category.thread_count}
                         </span>
@@ -106,7 +99,6 @@ export function ForumLayout({
           </SheetContent>
         </Sheet>
       </div>
-
       {/* Desktop Sidebar */}
       {sidebar && (
         <aside className="hidden md:flex w-1/3 min-w-[240px] max-w-[400px] flex-shrink-0 border-r border-[var(--card-border)] bg-[var(--sidebar-bg)]">
@@ -117,7 +109,6 @@ export function ForumLayout({
           </ScrollArea>
         </aside>
       )}
-
       {/* Main Content */}
       <main className="flex-1 min-w-0 overflow-hidden">
         <ScrollArea className="h-full">

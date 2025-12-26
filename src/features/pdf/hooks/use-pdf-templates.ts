@@ -1,12 +1,10 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import type { PdfTemplate, InsertPdfTemplate } from '@shared/schema';
-
 export const PDF_TEMPLATE_QUERY_KEYS = {
   all: ['pdf-templates'] as const,
   detail: (organizationId: string) => ['pdf-templates', organizationId] as const,
 };
-
 /**
  * Hook to fetch the PDF template for an organization
  */
@@ -34,7 +32,6 @@ export function usePdfTemplate(organizationId: string | undefined) {
     staleTime: 1000 * 60 * 5,
   });
 }
-
 /**
  * Hook to create a PDF template for an organization
  */
@@ -51,7 +48,6 @@ export function useCreatePdfTemplate() {
     },
   });
 }
-
 /**
  * Hook to update the PDF template for an organization
  */
@@ -68,7 +64,6 @@ export function useUpdatePdfTemplate() {
     },
   });
 }
-
 /**
  * Default PDF template values
  */

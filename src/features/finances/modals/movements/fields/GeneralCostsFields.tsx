@@ -3,19 +3,16 @@ import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { CreditCard } from 'lucide-react'
 import { useGeneralCosts } from '@/features/general-costs/hooks/use-general-costs'
 import { useCurrentUser } from '@/hooks/use-current-user'
-
 // General cost item interface
 export interface GeneralCostItem {
   general_cost_id: string
 }
-
 // Props interface
 interface GeneralCostsFieldsProps {
   selectedGeneralCosts: GeneralCostItem[]
   onGeneralCostsChange: (generalCostsList: GeneralCostItem[]) => void
   projectId?: string
 }
-
 export const GeneralCostsFields: React.FC<GeneralCostsFieldsProps> = ({
   selectedGeneralCosts,
   onGeneralCostsChange,
@@ -29,10 +26,8 @@ export const GeneralCostsFields: React.FC<GeneralCostsFieldsProps> = ({
   // Get current user data to access organization info
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
-
   // Get general costs for this organization
   const { data: generalCosts = [], isLoading } = useGeneralCosts(organizationId || null)
-
   // Transform general costs data for ComboBox  
   const generalCostsOptions = generalCosts.map((generalCost: any) => {
     return {
@@ -40,10 +35,8 @@ export const GeneralCostsFields: React.FC<GeneralCostsFieldsProps> = ({
       label: generalCost.name || 'Sin nombre'
     }
   })
-
   const handleGeneralCostChange = (value: string) => {
     setGeneralCostId(value)
-
     if (value) {
       onGeneralCostsChange([{
         general_cost_id: value
@@ -52,7 +45,6 @@ export const GeneralCostsFields: React.FC<GeneralCostsFieldsProps> = ({
       onGeneralCostsChange([])
     }
   }
-
   // Sync external changes with internal state
   useEffect(() => {
     const expectedGeneralCostId = selectedGeneralCosts.length > 0 ? selectedGeneralCosts[0].general_cost_id : ''
@@ -61,7 +53,6 @@ export const GeneralCostsFields: React.FC<GeneralCostsFieldsProps> = ({
       setGeneralCostId(expectedGeneralCostId)
     }
   }, [selectedGeneralCosts, generalCostId, generalCosts])
-
   return (
     <div className="space-y-4">
       {/* Header */}

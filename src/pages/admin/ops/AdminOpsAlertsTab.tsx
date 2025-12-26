@@ -33,7 +33,6 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-
 interface RepairAction {
   id: string;
   label: string;
@@ -41,13 +40,12 @@ interface RepairAction {
   dangerous: boolean;
   requiredEvidence?: string[];
 }
-
 interface OpsAlert {
   id: string;
   created_at: string;
   updated_at: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  status: 'open' | 'ack' | 'resolved' | 'dismissed';
+  severity: 'low'| 'medium'| 'high'| 'critical';
+  status: 'open'| 'ack'| 'resolved'| 'dismissed';
   alert_type: string;
   title: string;
   description: string | null;
@@ -68,7 +66,6 @@ interface OpsAlert {
   payments?: { id: string; amount: number; currency: string; status: string } | null;
   payment_events?: { id: string; provider_event_type: string; status: string } | null;
 }
-
 interface OpsStats {
   open: number;
   ack: number;
@@ -83,7 +80,6 @@ interface OpsStats {
     stats: Record<string, any>;
   } | null;
 }
-
 function getSeverityBadge(severity: string) {
   switch (severity) {
     case 'critical':
@@ -96,7 +92,6 @@ function getSeverityBadge(severity: string) {
       return <Badge variant="neutral">Bajo</Badge>;
   }
 }
-
 function getStatusBadge(status: string) {
   switch (status) {
     case 'open':
@@ -111,7 +106,6 @@ function getStatusBadge(status: string) {
       return <Badge variant="neutral">{status}</Badge>;
   }
 }
-
 function AlertCard({ 
   alert, 
   onAction,
@@ -125,14 +119,11 @@ function AlertCard({
   const [showRepairActions, setShowRepairActions] = useState(false);
   const [confirmAction, setConfirmAction] = useState<RepairAction | null>(null);
   const { toast } = useToast();
-
   const { data: repairActionsData, isLoading: loadingActions } = useQuery<{ actions: RepairAction[] }>({
     queryKey: [`/api/admin/ops/repair-actions/${encodeURIComponent(alert.alert_type)}`],
     enabled: showRepairActions,
   });
-
   const repairActions = repairActionsData?.actions || [];
-
   const handleConfirmRepair = () => {
     if (confirmAction) {
       onExecuteRepair(alert.id, confirmAction.id);
@@ -140,13 +131,12 @@ function AlertCard({
       setShowRepairActions(false);
     }
   };
-
   return (
     <>
       <Card className={`border-l-4 ${
-        alert.severity === 'critical' ? 'border-l-red-600' :
-        alert.severity === 'high' ? 'border-l-red-500' :
-        alert.severity === 'medium' ? 'border-l-yellow-500' : 'border-l-gray-400'
+        alert.severity === 'critical'? 'border-l-red-600':
+        alert.severity === 'high'? 'border-l-red-500':
+        alert.severity === 'medium'? 'border-l-yellow-500': 'border-l-gray-400'
       }`} data-testid={`alert-card-${alert.id}`}>
         <CardContent className="p-4">
           <div className="flex items-start justify-between gap-4">
@@ -169,7 +159,7 @@ function AlertCard({
               )}
             </div>
             <div className="flex items-center gap-1">
-              {(alert.status === 'open' || alert.status === 'ack') && (
+              {(alert.status === 'open'|| alert.status === 'ack') && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -190,7 +180,7 @@ function AlertCard({
               >
                 <Eye className="h-4 w-4" />
               </Button>
-              {alert.status === 'open' && (
+              {alert.status === 'open'&& (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -201,7 +191,7 @@ function AlertCard({
                   <Check className="h-4 w-4" />
                 </Button>
               )}
-              {(alert.status === 'open' || alert.status === 'ack') && (
+              {(alert.status === 'open'|| alert.status === 'ack') && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -212,7 +202,7 @@ function AlertCard({
                   <CheckCircle2 className="h-4 w-4" />
                 </Button>
               )}
-              {(alert.status === 'open' || alert.status === 'ack') && (
+              {(alert.status === 'open'|| alert.status === 'ack') && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -223,7 +213,7 @@ function AlertCard({
                   <X className="h-4 w-4" />
                 </Button>
               )}
-              {(alert.status === 'resolved' || alert.status === 'dismissed') && (
+              {(alert.status === 'resolved'|| alert.status === 'dismissed') && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -236,7 +226,6 @@ function AlertCard({
               )}
             </div>
           </div>
-
           {showRepairActions && (
             <div className="mt-4 pt-4 border-t border-amber-200 bg-amber-50 dark:bg-amber-950/20 -mx-4 px-4 pb-4 rounded-b-lg">
               <div className="flex items-center gap-2 mb-3">
@@ -273,28 +262,27 @@ function AlertCard({
               )}
             </div>
           )}
-
           {expanded && (
             <div className="mt-4 pt-4 border-t">
               <div className="text-xs space-y-2">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-muted-foreground">Tipo:</span>{' '}
+                    <span className="text-muted-foreground">Tipo:</span>{''}
                     <code className="bg-muted px-1 rounded">{alert.alert_type}</code>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Provider:</span>{' '}
+                    <span className="text-muted-foreground">Provider:</span>{''}
                     {alert.provider || '-'}
                   </div>
                   {alert.provider_payment_id && (
                     <div>
-                      <span className="text-muted-foreground">Payment ID:</span>{' '}
+                      <span className="text-muted-foreground">Payment ID:</span>{''}
                       <code className="bg-muted px-1 rounded text-xs">{alert.provider_payment_id}</code>
                     </div>
                   )}
                   {alert.fingerprint && (
                     <div>
-                      <span className="text-muted-foreground">Fingerprint:</span>{' '}
+                      <span className="text-muted-foreground">Fingerprint:</span>{''}
                       <code className="bg-muted px-1 rounded text-xs">{alert.fingerprint.slice(0, 12)}...</code>
                     </div>
                   )}
@@ -312,7 +300,6 @@ function AlertCard({
           )}
         </CardContent>
       </Card>
-
       <AlertDialog open={!!confirmAction} onOpenChange={() => setConfirmAction(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -339,11 +326,9 @@ function AlertCard({
     </>
   );
 }
-
 interface AdminOpsAlertsTabProps {
   stats?: OpsStats;
 }
-
 export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<string>('open');
@@ -351,7 +336,6 @@ export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
   
   const currentLayout = currentUser?.preferences?.layout || 'experimental';
   const isLabLayout = currentLayout === 'lab';
-
   const updateLayoutMutation = useMutation({
     mutationFn: async (newLayout: string) => {
       if (!currentUser?.user?.id) throw new Error('User not found');
@@ -365,27 +349,24 @@ export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       toast({ 
         title: 'Layout actualizado', 
-        description: `Ahora estás usando el layout "${isLabLayout ? 'experimental' : 'lab'}"` 
+        description: `Ahora estás usando el layout "${isLabLayout ? 'experimental': 'lab'}"` 
       });
     },
     onError: (error: any) => {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: 'Error', description: error.message, variant: 'destructive'});
     },
   });
-
   const handleLayoutToggle = (checked: boolean) => {
-    const newLayout = checked ? 'lab' : 'experimental';
+    const newLayout = checked ? 'lab': 'experimental';
     updateLayoutMutation.mutate(newLayout);
   };
-
-  const alertsUrl = statusFilter && statusFilter !== 'all' 
+  const alertsUrl = statusFilter && statusFilter !== 'all'
     ? `/api/admin/ops/alerts?status=${statusFilter}`
     : '/api/admin/ops/alerts';
     
   const { data: alerts = [], isLoading, refetch } = useQuery<OpsAlert[]>({
     queryKey: [alertsUrl],
   });
-
   const updateAlertMutation = useMutation({
     mutationFn: async ({ id, action }: { id: string; action: string }) => {
       const res = await apiRequest('PATCH', `/api/admin/ops/alerts/${id}`, { action });
@@ -396,10 +377,9 @@ export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/ops/stats'] });
     },
     onError: (error: any) => {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: 'Error', description: error.message, variant: 'destructive'});
     },
   });
-
   const executeRepairMutation = useMutation({
     mutationFn: async ({ alertId, actionId }: { alertId: string; actionId: string }) => {
       const res = await apiRequest('POST', `/api/admin/ops/alerts/${alertId}/repair`, { actionId });
@@ -415,25 +395,22 @@ export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
         toast({ 
           title: 'Error', 
           description: data.message, 
-          variant: 'destructive' 
+          variant: 'destructive'
         });
       }
       queryClient.invalidateQueries({ queryKey: [alertsUrl] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/ops/stats'] });
     },
     onError: (error: any) => {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: 'Error', description: error.message, variant: 'destructive'});
     },
   });
-
   const handleAction = (id: string, action: string) => {
     updateAlertMutation.mutate({ id, action });
   };
-
   const handleExecuteRepair = (alertId: string, actionId: string) => {
     executeRepairMutation.mutate({ alertId, actionId });
   };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -473,7 +450,7 @@ export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
                   Layout Mode
                 </Label>
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs ${!isLabLayout ? 'font-medium' : 'text-muted-foreground'}`}>
+                  <span className={`text-xs ${!isLabLayout ? 'font-medium': 'text-muted-foreground'}`}>
                     Exp
                   </span>
                   <Switch
@@ -483,7 +460,7 @@ export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
                     disabled={updateLayoutMutation.isPending}
                     data-testid="switch-layout-mode"
                   />
-                  <span className={`text-xs ${isLabLayout ? 'font-medium' : 'text-muted-foreground'}`}>
+                  <span className={`text-xs ${isLabLayout ? 'font-medium': 'text-muted-foreground'}`}>
                     Lab
                   </span>
                 </div>
@@ -492,11 +469,10 @@ export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
           </CardContent>
         </Card>
       </div>
-
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button
-            variant={statusFilter === 'open' ? 'default' : 'outline'}
+            variant={statusFilter === 'open'? 'default': 'outline'}
             size="sm"
             onClick={() => setStatusFilter('open')}
             data-testid="filter-open"
@@ -504,7 +480,7 @@ export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
             Abiertas {stats?.open ? `(${stats.open})` : ''}
           </Button>
           <Button
-            variant={statusFilter === 'ack' ? 'default' : 'outline'}
+            variant={statusFilter === 'ack'? 'default': 'outline'}
             size="sm"
             onClick={() => setStatusFilter('ack')}
             data-testid="filter-ack"
@@ -512,7 +488,7 @@ export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
             Reconocidas {stats?.ack ? `(${stats.ack})` : ''}
           </Button>
           <Button
-            variant={statusFilter === 'all' ? 'default' : 'outline'}
+            variant={statusFilter === 'all'? 'default': 'outline'}
             size="sm"
             onClick={() => setStatusFilter('all')}
             data-testid="filter-all"
@@ -537,14 +513,13 @@ export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
           </Button>
         </div>
       </div>
-
       {isLoading ? (
         <div className="text-center py-8 text-muted-foreground">Cargando alertas...</div>
       ) : alerts.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center">
             <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-2" />
-            <p className="text-muted-foreground">No hay alertas {statusFilter === 'open' ? 'abiertas' : ''}</p>
+            <p className="text-muted-foreground">No hay alertas {statusFilter === 'open'? 'abiertas': ''}</p>
           </CardContent>
         </Card>
       ) : (

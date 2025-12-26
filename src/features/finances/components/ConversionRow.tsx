@@ -1,5 +1,4 @@
 import DataRowCard, { DataRowCardProps } from '@/components/shared/DataRowCard';
-
 interface ConversionGroup {
   id: string;
   conversion_group_id: string;
@@ -19,15 +18,13 @@ interface ConversionGroup {
   };
   is_conversion_group: true;
 }
-
 interface ConversionRowProps {
   conversion: ConversionGroup;
   onClick?: () => void;
   selected?: boolean;
-  density?: 'compact' | 'normal' | 'comfortable';
+  density?: 'compact'| 'normal'| 'comfortable';
   className?: string;
 }
-
 export default function ConversionRow({ 
   conversion, 
   onClick, 
@@ -41,12 +38,10 @@ export default function ConversionRow({
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(Math.abs(conversion.from_amount));
-
   const toAmountFormatted = new Intl.NumberFormat('es-AR', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(Math.abs(conversion.to_amount));
-
   // Obtener avatar del creador
   const getCreatorAvatar = () => {
     if (conversion.creator?.avatar_url) {
@@ -54,11 +49,10 @@ export default function ConversionRow({
     }
     return undefined;
   };
-
   const getCreatorInitials = () => {
     if (conversion.creator?.full_name) {
       return conversion.creator.full_name
-        .split(' ')
+        .split('')
         .map(word => word.charAt(0))
         .join('')
         .toUpperCase()
@@ -66,7 +60,6 @@ export default function ConversionRow({
     }
     return 'U';
   };
-
   // Contenido interno del card
   const cardContent = (
     <>
@@ -79,7 +72,6 @@ export default function ConversionRow({
           {conversion.from_currency} - {conversion.to_currency}
         </div>
       </div>
-
       {/* Columna trailing */}
       <div className="flex flex-col items-end flex-shrink-0">
         {/* Línea 1: Importes de conversión */}
@@ -94,7 +86,6 @@ export default function ConversionRow({
       </div>
     </>
   );
-
   return (
     <DataRowCard
       avatarUrl={getCreatorAvatar()}
@@ -110,6 +101,5 @@ export default function ConversionRow({
     </DataRowCard>
   );
 }
-
 // Export del tipo para uso externo
 export type { ConversionGroup };

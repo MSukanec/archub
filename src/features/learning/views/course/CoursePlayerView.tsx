@@ -10,7 +10,6 @@ import { apiRequest, queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { LessonSummaryNote, LessonMarkers, FavoriteButton, useCourseStructure, useCourseProgress, useUpdateLessonProgress, useCoursePlayerStore } from '@/features/learning'
 import Player from '@vimeo/player'
-
 interface CoursePlayerTabProps {
   courseId?: string;
   onNavigationStateChange?: (state: {
@@ -25,7 +24,6 @@ interface CoursePlayerTabProps {
   initialLessonId?: string;
   initialSeekTime?: number;
 }
-
 export default function CoursePlayerTab({ courseId, onNavigationStateChange, initialLessonId, initialSeekTime }: CoursePlayerTabProps) {
   const { setData, setCurrentLesson, currentLessonId: sidebarLessonId } = useCourseSidebarStore();
   const storeLessonId = useCoursePlayerStore(s => s.currentLessonId);
@@ -72,15 +70,12 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
   
   const modulesLoading = structureLoading;
   const lessonsLoading = structureLoading;
-
   // Get progress for all lessons using the learning feature hook
   const { data: progressData = [] } = useCourseProgress(courseId);
-
   // Create a map of lesson progress for quick lookup
   const progressMap = useMemo(() => {
     return new Map((progressData || []).map((p: any) => [p.lesson_id, p]));
   }, [progressData]);
-
   // Create ordered flat list of lessons based on module and lesson sort_index
   const orderedLessons = useMemo(() => {
     if (modules.length === 0 || lessons.length === 0) return [];
@@ -95,7 +90,6 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
     
     return ordered;
   }, [modules, lessons]);
-
   // Find current lesson index and navigation info
   const navigationInfo = useMemo(() => {
     if (!activeLessonId || orderedLessons.length === 0) {
@@ -112,7 +106,6 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
       nextLesson: currentIndex < orderedLessons.length - 1 ? orderedLessons[currentIndex + 1] : null,
     };
   }, [activeLessonId, orderedLessons]);
-
   // Use the learning feature hook for updating lesson progress
   const updateProgressMutation = useUpdateLessonProgress(courseId);
   
@@ -133,11 +126,9 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
     },
     isPending: updateProgressMutation.isPending
   }), [updateProgressMutation, courseId]);
-
   // Throttle progress saves to avoid too many requests
   const lastSaveTime = useRef(0);
   const SAVE_THROTTLE_MS = 8000; // Save every 8 seconds max
-
   const handleVideoProgress = useCallback((sec: number, pct: number) => {
     if (!activeLessonId) return;
     
@@ -150,7 +141,6 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
       saveProgressMutation.mutate({ lessonId: activeLessonId, sec, pct });
     }
   }, [activeLessonId, saveProgressMutation]);
-
   // Create marker mutation
   const createMarkerMutation = useMutation({
     mutationFn: async (time_sec: number) => {
@@ -177,13 +167,11 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
       });
     }
   });
-
   const formatTimeForMarker = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
   const handleAddMarkerFromVideo = async () => {
     if (!vimeoPlayer) return;
     
@@ -195,7 +183,6 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
       console.error('Error getting video time:', error);
     }
   };
-
   // Mark lesson as complete mutation (toggle) using the same update progress mutation
   const markCompleteMutation = useMemo(() => ({
     mutate: (params: { lessonId: string; isCompleted: boolean }) => {
@@ -209,15 +196,14 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
         onSuccess: () => {
           // Show custom toast for manual completion toggle
           toast({
-            title: params.isCompleted ? 'Lección completada' : 'Lección desmarcada',
-            description: params.isCompleted ? 'Has marcado esta lección como completa' : 'Has desmarcado esta lección'
+            title: params.isCompleted ? 'Lección completada': 'Lección desmarcada',
+            description: params.isCompleted ? 'Has marcado esta lección como completa': 'Has desmarcado esta lección'
           });
         }
       });
     },
     isPending: updateProgressMutation.isPending
   }), [updateProgressMutation, toast]);
-
   // Sincronizar datos con el sidebar store (para otros tabs que lo leen)
   // Use JSON.stringify comparison to prevent unnecessary updates
   const modulesJson = JSON.stringify(modules.map(m => m.id));
@@ -236,7 +222,6 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
       setVimeoPlayer(null);
     };
   }, []);
-
   // Seleccionar automáticamente la lección (inicial, última vista, o primera) cuando se cargan las lecciones
   // IMPORTANTE: Solo se ejecuta una vez cuando las lecciones se cargan y no hay lección activa
   const hasAutoSelectedRef = useRef(false);
@@ -276,21 +261,17 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
       goToLesson(targetLesson.id, null);
     }
   }, [orderedLessons.length, activeLessonId, initialLessonId]);
-
-
   // Navigation handlers with useCallback - use goToLesson from store
   const handlePrevious = useCallback(() => {
     if (navigationInfo.prevLesson) {
       goToLesson(navigationInfo.prevLesson.id, null);
     }
   }, [navigationInfo.prevLesson, goToLesson]);
-
   const handleNext = useCallback(() => {
     if (navigationInfo.nextLesson) {
       goToLesson(navigationInfo.nextLesson.id, null);
     }
   }, [navigationInfo.nextLesson, goToLesson]);
-
   const handleMarkComplete = useCallback(() => {
     if (activeLessonId) {
       const progress = progressMap.get(activeLessonId);
@@ -298,7 +279,6 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
       markCompleteMutation.mutate({ lessonId: activeLessonId, isCompleted: !isCurrentlyCompleted });
     }
   }, [activeLessonId, markCompleteMutation, progressMap]);
-
   // Actualizar targetSeekTime cuando cambia initialSeekTime (para navegación desde marcadores)
   useEffect(() => {
     if (initialSeekTime !== undefined) {
@@ -320,7 +300,6 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
       setTargetSeekTime(undefined);
     }
   }, [activeLessonId, initialLessonId, targetSeekTime]);
-
   // Update navigation state whenever it changes
   useEffect(() => {
     if (onNavigationStateChange) {
@@ -343,20 +322,16 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeLessonId, navigationInfo.hasPrev, navigationInfo.hasNext, orderedLessons.length, markCompleteMutation.isPending]);
-
   // Group lessons by module
   const getLessonsForModule = (moduleId: string) => {
     return lessons.filter(lesson => lesson.module_id === moduleId);
   }
-
   const formatDuration = (seconds: number | null) => {
     if (!seconds) return 'Sin duración';
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
-
-
   if (!courseId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -364,7 +339,6 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
       </div>
     )
   }
-
   if (modulesLoading || lessonsLoading) {
     return (
       <div className="space-y-4">
@@ -374,7 +348,6 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
       </div>
     )
   }
-
   // Encontrar la lección actual
   const currentLesson = lessons.find(l => l.id === activeLessonId);
   
@@ -389,7 +362,6 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
   const initialPosition = targetSeekTime !== undefined 
     ? targetSeekTime 
     : (isPlayingRef.current ? 0 : (currentProgress?.last_position_sec || 0));
-
   return (
     <div className="space-y-6">
         {currentLesson?.vimeo_video_id ? (
@@ -432,12 +404,11 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
                     className={currentProgress?.is_completed ? "text-positive hover:text-positive gap-2" : "gap-2"}
                   >
                     <CheckCircle className="w-4 h-4" />
-                    <span>{currentProgress?.is_completed ? 'Completada' : 'Marcar completa'}</span>
+                    <span>{currentProgress?.is_completed ? 'Completada': 'Marcar completa'}</span>
                   </Button>
                 </div>
               </div>
             </div>
-
             {/* Video Player with Marker Overlay */}
             <div className="relative group">
               <VimeoPlayer 
@@ -462,7 +433,6 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
                 <span>Marcar {formatTimeForMarker(currentVideoTime)}</span>
               </Button>
             </div>
-
             {/* Notes and Markers Section */}
             {activeLessonId && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -476,7 +446,6 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
                   </p>
                   <LessonSummaryNote lessonId={activeLessonId} />
                 </div>
-
                 <div className="bg-card border rounded-lg p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <Bookmark className="h-5 w-5 text-[var(--accent)]" />
@@ -498,7 +467,7 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
             <div className="text-center">
               <Play className="h-16 w-16 mx-auto mb-4 text-muted-foreground/40" />
               <p className="text-lg font-medium text-muted-foreground">
-                {activeLessonId ? 'Esta lección no tiene video disponible' : 'Selecciona una lección para comenzar'}
+                {activeLessonId ? 'Esta lección no tiene video disponible': 'Selecciona una lección para comenzar'}
               </p>
             </div>
           </div>

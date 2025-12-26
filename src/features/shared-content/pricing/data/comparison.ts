@@ -1,16 +1,13 @@
 import type { ComparisonCategory, PlanFeatures } from "../types";
-
 export function formatLimit(value: number | null | undefined, suffix?: string): string {
   if (value === null || value === undefined || value >= 9999) return 'Ilimitados';
   if (value === 1) return '1';
   return suffix ? `${value} ${suffix}` : String(value);
 }
-
 export function formatMembers(value: number | null | undefined): string {
   if (value === null || value === undefined || value >= 9999) return 'Ilimitados';
   return String(value);
 }
-
 export function formatStorage(mb: number | null | undefined): string {
   if (mb === null || mb === undefined) return '—';
   if (mb >= 1024) {
@@ -19,7 +16,6 @@ export function formatStorage(mb: number | null | undefined): string {
   }
   return `${mb} MB`;
 }
-
 export function formatFileSize(mb: number | null | undefined): string {
   if (mb === null || mb === undefined) return '—';
   if (mb >= 1024) {
@@ -28,7 +24,6 @@ export function formatFileSize(mb: number | null | undefined): string {
   }
   return `${mb} MB`;
 }
-
 export function formatTokens(tokens: number | null | undefined): string {
   if (tokens === null || tokens === undefined) return '—';
   if (tokens === -1 || tokens >= 999999) return 'Ilimitados';
@@ -37,7 +32,6 @@ export function formatTokens(tokens: number | null | undefined): string {
   if (tokens >= 1000000) return `${(tokens / 1000000).toFixed(1)}M`;
   return `${(tokens / 1000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}k`;
 }
-
 export function buildComparisonData(
   freeFeatures: PlanFeatures,
   proFeatures: PlanFeatures,

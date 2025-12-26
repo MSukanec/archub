@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-
 // Hook para obtener todos los costos de una tarea (materiales + mano de obra)
 export function useTaskCosts(taskId: string | null) {
   return useQuery({
@@ -9,7 +8,6 @@ export function useTaskCosts(taskId: string | null) {
       if (!supabase || !taskId) {
         throw new Error("Supabase client not initialized or no task ID provided");
       }
-
       console.log('Fetching task costs for task:', taskId);
       
       // Obtener materiales
@@ -29,12 +27,10 @@ export function useTaskCosts(taskId: string | null) {
           )
         `)
         .eq("task_id", taskId);
-
       if (materialsError) {
         console.error("Error fetching task materials:", materialsError);
         throw materialsError;
       }
-
       // Obtener mano de obra básico
       const { data: laborBasic, error: laborError } = await supabase
         .from("task_labor")
@@ -46,7 +42,6 @@ export function useTaskCosts(taskId: string | null) {
           organization_id
         `)
         .eq("task_id", taskId);
-
       if (laborError) {
         console.error("Error fetching task labor:", laborError);
         throw laborError;
@@ -69,7 +64,6 @@ export function useTaskCosts(taskId: string | null) {
           return { ...laborItem, labor_view: laborView }
         })
       )
-
       // Combinar ambos tipos de costos
       const combinedCosts = [
         ...(materials || []).map(material => {
@@ -109,7 +103,6 @@ export function useTaskCosts(taskId: string | null) {
           };
         })
       ];
-
       return combinedCosts;
     },
     enabled: !!taskId && !!supabase

@@ -4,48 +4,43 @@ import { CalendarClock, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
 import { format, isPast, isToday, addDays, isBefore } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { ClientPortalScheduleItem } from '../types';
-
 interface UpcomingInstallmentsProps {
   schedules: ClientPortalScheduleItem[];
   isLoading?: boolean;
 }
-
 export function UpcomingInstallments({ schedules, isLoading }: UpcomingInstallmentsProps) {
   const formatDate = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
       if (isToday(date)) return 'Hoy';
-      return format(date, "d 'de' MMMM", { locale: es });
+      return format(date, "d 'de'MMMM", { locale: es });
     } catch {
       return dateStr;
     }
   };
-
   const formatCurrency = (amount: number, symbol: string = '$') => {
     return `${symbol} ${new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount)}`;
   };
-
   const getStatus = (schedule: ClientPortalScheduleItem) => {
-    if (schedule.status === 'paid' || schedule.paid_at) {
-      return { label: 'Pagado', icon: CheckCircle, className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' };
+    if (schedule.status === 'paid'|| schedule.paid_at) {
+      return { label: 'Pagado', icon: CheckCircle, className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'};
     }
     if (schedule.status === 'cancelled') {
-      return { label: 'Cancelado', icon: Clock, className: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' };
+      return { label: 'Cancelado', icon: Clock, className: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'};
     }
     
     const dueDate = new Date(schedule.due_date);
     if (isPast(dueDate) && !isToday(dueDate)) {
-      return { label: 'Vencido', icon: AlertTriangle, className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' };
+      return { label: 'Vencido', icon: AlertTriangle, className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'};
     }
     if (isToday(dueDate) || isBefore(dueDate, addDays(new Date(), 7))) {
-      return { label: 'Próximo', icon: CalendarClock, className: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200' };
+      return { label: 'Próximo', icon: CalendarClock, className: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'};
     }
-    return { label: 'Pendiente', icon: Clock, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' };
+    return { label: 'Pendiente', icon: Clock, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'};
   };
-
   if (isLoading) {
     return (
       <Card>
@@ -69,9 +64,7 @@ export function UpcomingInstallments({ schedules, isLoading }: UpcomingInstallme
       </Card>
     );
   }
-
-  const pendingSchedules = schedules.filter(s => s.status !== 'paid' && !s.paid_at && s.status !== 'cancelled');
-
+  const pendingSchedules = schedules.filter(s => s.status !== 'paid'&& !s.paid_at && s.status !== 'cancelled');
   if (pendingSchedules.length === 0) {
     return (
       <Card>
@@ -88,7 +81,6 @@ export function UpcomingInstallments({ schedules, isLoading }: UpcomingInstallme
       </Card>
     );
   }
-
   return (
     <Card data-testid="card-upcoming-installments">
       <CardHeader>
@@ -99,7 +91,6 @@ export function UpcomingInstallments({ schedules, isLoading }: UpcomingInstallme
           {pendingSchedules.map((schedule) => {
             const status = getStatus(schedule);
             const StatusIcon = status.icon;
-
             return (
               <div
                 key={schedule.id}

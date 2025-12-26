@@ -12,25 +12,21 @@ import { useToast } from '@/hooks/use-toast'
 import { useCreatePin } from '../hooks/use-create-pin'
 import { useBoards } from '../hooks/use-boards'
 import { cn } from '@/lib/utils'
-
 const pinSchema = z.object({
   title: z.string().min(1, 'El título es requerido').max(200, 'Máximo 200 caracteres'),
   source_url: z.string().url('URL inválida').optional().or(z.literal('')),
   board_id: z.string().optional(),
 })
-
 type PinFormData = z.infer<typeof pinSchema>
-
 export interface PinFormFieldsProps {
   projectId?: string
   organizationId?: string
-  mode?: 'create' | 'edit' | 'view'
+  mode?: 'create'| 'edit'| 'view'
   onSuccess: () => void
   onCancel: () => void
   hideActions?: boolean
   formRef?: React.RefObject<HTMLFormElement>
 }
-
 export function PinFormFields({
   projectId,
   mode = 'create',
@@ -44,7 +40,6 @@ export function PinFormFields({
   const { data: boards = [] } = useBoards(projectId)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
-
   const form = useForm<PinFormData>({
     resolver: zodResolver(pinSchema),
     defaultValues: {
@@ -53,7 +48,6 @@ export function PinFormFields({
       board_id: '',
     },
   })
-
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0]
     if (file) {
@@ -65,7 +59,6 @@ export function PinFormFields({
       reader.readAsDataURL(file)
     }
   }, [])
-
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
@@ -74,25 +67,20 @@ export function PinFormFields({
     maxFiles: 1,
     maxSize: 10 * 1024 * 1024,
   })
-
   const removeImage = () => {
     setSelectedFile(null)
     setPreview(null)
   }
-
   const isSubmitting = createMutation.isPending
-
   const onSubmit = async (data: PinFormData) => {
     if (!projectId) {
-      toast({ variant: 'destructive', title: 'Error', description: 'No hay proyecto seleccionado' })
+      toast({ variant: 'destructive', title: 'Error', description: 'No hay proyecto seleccionado'})
       return
     }
-
     if (!selectedFile) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Debes seleccionar una imagen' })
+      toast({ variant: 'destructive', title: 'Error', description: 'Debes seleccionar una imagen'})
       return
     }
-
     try {
       await createMutation.mutateAsync({
         title: data.title,
@@ -111,7 +99,6 @@ export function PinFormFields({
       toast({ variant: 'destructive', title: 'Error al crear pin', description: error.message })
     }
   }
-
   if (mode === 'view') {
     return (
       <div className="w-full space-y-6">
@@ -125,7 +112,6 @@ export function PinFormFields({
       </div>
     )
   }
-
   return (
     <Form {...form}>
       <form
@@ -176,7 +162,7 @@ export function PinFormFields({
                   ) : (
                     <>
                       <span className="font-medium text-foreground">Haz clic para subir</span>
-                      {' '}o arrastra una imagen
+                      {''}o arrastra una imagen
                     </>
                   )}
                 </div>
@@ -187,7 +173,6 @@ export function PinFormFields({
             </div>
           )}
         </div>
-
         <FormField
           control={form.control}
           name="title"
@@ -205,7 +190,6 @@ export function PinFormFields({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="source_url"
@@ -223,7 +207,6 @@ export function PinFormFields({
             </FormItem>
           )}
         />
-
         {boards.length > 0 && (
           <FormField
             control={form.control}
@@ -250,14 +233,13 @@ export function PinFormFields({
             )}
           />
         )}
-
         {!hideActions && (
           <div className="flex gap-2 pt-4 border-t">
             <Button type="button" variant="secondary" onClick={onCancel} className="flex-1">
               Cancelar
             </Button>
             <Button type="submit" disabled={isSubmitting || !selectedFile} className="flex-[3]">
-              {isSubmitting ? 'Creando...' : 'Crear Pin'}
+              {isSubmitting ? 'Creando...': 'Crear Pin'}
             </Button>
           </div>
         )}

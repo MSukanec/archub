@@ -13,7 +13,6 @@ import { useDesignDocuments } from '@/hooks/use-design-documents';
 import { FileText, FolderOpen, Clock, Upload, Plus, BookOpen } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-
 export function MediaDocumentation() {
   const { openModal } = useGlobalModalStore();
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
@@ -22,28 +21,23 @@ export function MediaDocumentation() {
   // Get recent documents for history
   const { data: allDocuments } = useDesignDocuments();
   const recentDocuments = allDocuments?.slice(0, 10) || [];
-
   // Auto-select the most recent document when data loads
   useEffect(() => {
     if (recentDocuments.length > 0 && !selectedDocument) {
       setSelectedDocument(recentDocuments[0]);
     }
   }, [recentDocuments, selectedDocument]);
-
   const handleDocumentSelect = (document: any) => {
     setSelectedDocument(document);
     setIsPreviewOpen(false);
   };
-
   const handleClosePreview = () => {
     setIsPreviewOpen(false);
     setSelectedDocument(null);
   };
-
   const handleExpandPdf = () => {
     setIsPreviewOpen(true);
   };
-
   // Check if there are any documents in the system
   if (!allDocuments || allDocuments.length === 0) {
     return (
@@ -60,7 +54,6 @@ export function MediaDocumentation() {
       />
     );
   }
-
   return (
     <>
       {/* Desktop: Vertical Layout */}
@@ -71,7 +64,7 @@ export function MediaDocumentation() {
           <div className="w-2/3 min-w-0">
             <div 
               className="rounded-lg overflow-hidden border-2 border-dashed h-full"
-              style={{ borderColor: 'var(--accent)' }}
+              style={{ borderColor: 'var(--accent)'}}
             >
               {selectedDocument ? (
                 <UnifiedViewer 
@@ -96,7 +89,6 @@ export function MediaDocumentation() {
               )}
             </div>
           </div>
-
           {/* Right: Document Info (1/3) */}
           <div className="w-1/3">
             <DocumentInfo 
@@ -108,7 +100,6 @@ export function MediaDocumentation() {
             />
           </div>
         </div>
-
         {/* Bottom: Two Cards Side by Side */}
         <div className="flex gap-4 h-80">
           {/* Left: Document Explorer (2/3) */}
@@ -124,7 +115,6 @@ export function MediaDocumentation() {
               </CardContent>
             </Card>
           </div>
-
           {/* Right: Recent Files History (1/3) */}
           <div className="w-1/3">
             <Card className="h-full flex flex-col">
@@ -168,7 +158,6 @@ export function MediaDocumentation() {
           </div>
         </div>
       </div>
-
       {/* Mobile: Single Column Layout */}
       <div className="lg:hidden">
         <DocumentExplorer onDocumentSelect={handleDocumentSelect} />
@@ -180,7 +169,6 @@ export function MediaDocumentation() {
           onClose={handleClosePreview}
         />
       </div>
-
       {/* Document Preview Modal for Desktop (expand button) */}
       <div className="hidden lg:block">
         <DocumentPreviewModal 

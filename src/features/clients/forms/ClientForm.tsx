@@ -20,7 +20,6 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
-
 const clientSchema = z.object({
   contactId: z.string().min(1, 'Debe seleccionar un contacto'),
   clientRoleId: z.string().optional(),
@@ -28,9 +27,7 @@ const clientSchema = z.object({
   isPrimary: z.enum(['yes', 'no']).optional(),
   notes: z.string().optional(),
 });
-
 type ClientFormData = z.infer<typeof clientSchema>;
-
 // Subcomponente: Formulario para create/edit
 function FormPanel({
   form,
@@ -74,7 +71,6 @@ function FormPanel({
       };
     })
     .sort((a, b) => (a.label || '').localeCompare(b.label || '', 'es'));
-
   if (isLoadingExisting) {
     return (
       <div className="space-y-4 p-8 text-center">
@@ -83,7 +79,6 @@ function FormPanel({
       </div>
     );
   }
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -133,7 +128,6 @@ function FormPanel({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="clientRoleId"
@@ -162,7 +156,6 @@ function FormPanel({
             )}
           />
         </div>
-
         {/* Row 2: Estado / Cliente Principal (2 columns on desktop, 1 on mobile) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
@@ -190,7 +183,6 @@ function FormPanel({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="isPrimary"
@@ -213,7 +205,6 @@ function FormPanel({
             )}
           />
         </div>
-
         {/* Row 3: Notas (full width) */}
         <FormField
           control={form.control}
@@ -238,7 +229,6 @@ function FormPanel({
     </Form>
   );
 }
-
 // Subcomponente: Vista de lectura
 function ViewPanel({
   existingClient,
@@ -269,11 +259,9 @@ function ViewPanel({
             </AvatarFallback>
           </Avatar>
         </div>
-
         <h2 className="text-2xl font-bold text-foreground mb-2" data-testid="text-client-name">
           {contactInfo?.fullName || 'Sin nombre'}
         </h2>
-
         {/* Rol del cliente */}
         {roleInfo && (
           <div className="flex flex-wrap gap-2 justify-center mb-4">
@@ -282,7 +270,6 @@ function ViewPanel({
             </Badge>
           </div>
         )}
-
         {/* Estado */}
         <div className="flex items-center justify-center gap-1">
           <Badge variant={statusBadge.variant} data-testid="badge-client-status">
@@ -295,9 +282,7 @@ function ViewPanel({
           )}
         </div>
       </div>
-
       <Separator />
-
       {/* Información de contacto */}
       <div className="grid grid-cols-1 gap-4">
         {contactInfo?.email && (
@@ -313,7 +298,6 @@ function ViewPanel({
             </div>
           </div>
         )}
-
         {contactInfo?.phone && (
           <div className="flex items-start gap-3 p-3 rounded-lg border bg-card" data-testid="card-client-phone">
             <div className="p-2 bg-accent/10 rounded-lg">
@@ -328,7 +312,6 @@ function ViewPanel({
           </div>
         )}
       </div>
-
       {/* Notas */}
       {existingClient?.notes && (
         <>
@@ -349,49 +332,42 @@ function ViewPanel({
     </div>
   );
 }
-
 interface ClientFormProps {
   modalData?: {
     projectId?: string;
     clientId?: string;
   };
   onClose: () => void;
-  mode?: 'create' | 'edit' | 'view';
+  mode?: 'create'| 'edit'| 'view';
 }
-
-export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormProps) {
+export function ClientForm({ modalData, onClose, mode = 'create'}: ClientFormProps) {
   const { projectId, clientId } = modalData || {};
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [, setLocation] = useLocation();
-
   const organizationId = userData?.organization?.id;
   const isEditing = mode === 'edit';
   const isViewMode = mode === 'view';
-
   // Query to get available contacts - use LIGHT mode for fast loading
   const { data: allContacts = [], isLoading: contactsLoading } = useQuery<any[]>({
     queryKey: [`/api/contacts?organization_id=${organizationId}&mode=light`],
     enabled: !!organizationId,
     staleTime: 5 * 60 * 1000,
   });
-
   // Query to get existing project clients (to filter them from contact selector)
   const { data: existingProjectClients = [], refetch: refetchProjectClients } = useQuery<any[]>({
     queryKey: CLIENT_QUERY_KEYS.projectClients(projectId),
     enabled: !!organizationId && !!projectId && !isEditing && !isViewMode,
     staleTime: 0, // Always fresh to prevent showing already-added clients
   });
-
   // Query to get client roles
   const { data: clientRoles = [], isLoading: clientRolesLoading } = useQuery<any[]>({
     queryKey: [`/api/client-roles`],
     enabled: !!organizationId,
     staleTime: 60 * 1000, // 1 minute
   });
-
   // Query to get existing client data when editing
   // Use URL as queryKey so default fetcher works correctly
   const clientQueryUrl = `/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`;
@@ -400,7 +376,6 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
     enabled: !!clientId && !!projectId && !!organizationId && (isEditing || isViewMode),
     staleTime: 0, // Always fetch fresh data when editing
   });
-
   // Filter out contacts that are already clients of this project (only in create mode)
   // In edit mode, ensure the current client's contact is always included in the list
   const contacts = useMemo(() => {
@@ -431,7 +406,6 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
     
     return allContacts.filter((contact: any) => !existingContactIds.has(contact.id));
   }, [allContacts, existingProjectClients, isEditing, isViewMode, existingClient]);
-
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
     defaultValues: {
@@ -442,7 +416,6 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
       notes: '',
     },
   });
-
   // Load existing data when editing or viewing
   useEffect(() => {
     if (existingClient && (isEditing || isViewMode)) {
@@ -450,16 +423,14 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
         contactId: existingClient.contact_id || '',
         clientRoleId: existingClient.client_role_id || '',
         status: existingClient.status || 'active',
-        isPrimary: existingClient.is_primary ? 'yes' : 'no',
+        isPrimary: existingClient.is_primary ? 'yes': 'no',
         notes: existingClient.notes || '',
       });
     }
   }, [existingClient, isEditing, isViewMode, form]);
-
   const saveClientMutation = useMutation({
     mutationFn: async (data: ClientFormData) => {
       if (!organizationId || !projectId) throw new Error('Missing organization or project ID');
-
       const payload: any = {
         organization_id: organizationId,
         client_role_id: (data.clientRoleId && data.clientRoleId !== '') ? data.clientRoleId : null,
@@ -467,7 +438,6 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
         is_primary: data.isPrimary === 'yes',
         notes: data.notes || null,
       };
-
       if (isEditing) {
         return await apiRequest('PATCH', `/api/projects/${projectId}/clients/${clientId}`, payload);
       } else {
@@ -500,7 +470,7 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
       ]);
       
       toast({
-        title: isEditing ? 'Cliente actualizado' : 'Cliente agregado',
+        title: isEditing ? 'Cliente actualizado': 'Cliente agregado',
         description: isEditing 
           ? 'El cliente ha sido actualizado correctamente'
           : 'El cliente ha sido agregado al proyecto correctamente',
@@ -509,23 +479,20 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
     },
     onError: (error: any) => {
       toast({
-        title: isEditing ? 'Error al actualizar cliente' : 'Error al agregar cliente',
+        title: isEditing ? 'Error al actualizar cliente': 'Error al agregar cliente',
         description: error.message,
         variant: 'destructive',
       });
     },
   });
-
   const handleClose = () => {
     form.reset();
     onClose();
   };
-
   const handleGoToContacts = () => {
     handleClose();
     setLocation('/contacts');
   };
-
   const handleSubmit = async (data: ClientFormData) => {
     setIsLoading(true);
     try {
@@ -534,36 +501,32 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
       setIsLoading(false);
     }
   };
-
   // Helper para obtener datos del contacto actual
   const contactInfo = useMemo(() => {
     if (!existingClient?.contacts) return null;
     const contact = existingClient.contacts;
     const fullName = contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
-    const initials = fullName.split(' ').map((n: string) => n.charAt(0)).join('').toUpperCase().slice(0, 2);
+    const initials = fullName.split('').map((n: string) => n.charAt(0)).join('').toUpperCase().slice(0, 2);
     return { ...contact, fullName, initials };
   }, [existingClient]);
-
   // Helper para obtener rol del cliente
   const roleInfo = useMemo(() => {
     if (!existingClient?.client_role_id) return null;
     return clientRoles.find((r: any) => r.id === existingClient.client_role_id);
   }, [existingClient, clientRoles]);
-
   // Helper para obtener badge de estado
   const statusBadge = useMemo(() => {
     const status = existingClient?.status || 'active';
-    const badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-      active: { label: 'Activo', variant: 'default' },
-      inactive: { label: 'Inactivo', variant: 'secondary' },
-      potential: { label: 'Potencial', variant: 'outline' },
-      rejected: { label: 'Rechazado', variant: 'destructive' },
-      completed: { label: 'Completado', variant: 'default' },
-      deleted: { label: 'Eliminado', variant: 'destructive' },
+    const badges: Record<string, { label: string; variant: 'default'| 'secondary'| 'destructive'| 'outline'}> = {
+      active: { label: 'Activo', variant: 'default'},
+      inactive: { label: 'Inactivo', variant: 'secondary'},
+      potential: { label: 'Potencial', variant: 'outline'},
+      rejected: { label: 'Rechazado', variant: 'destructive'},
+      completed: { label: 'Completado', variant: 'default'},
+      deleted: { label: 'Eliminado', variant: 'destructive'},
     };
     return badges[status] || badges.active;
   }, [existingClient]);
-
   const getHeader = () => {
     switch (mode) {
       case 'view':
@@ -584,10 +547,8 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
         };
     }
   };
-
   const header = getHeader();
   const isLoadingData = existingClientLoading || contactsLoading || clientRolesLoading;
-
   return (
     <ModalLayout onClose={handleClose} size="lg">
       <ModalHeader
@@ -595,9 +556,8 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
         description={header.description}
         icon={Users}
       />
-
       <ModalBody>
-        {mode === 'view' ? (
+        {mode === 'view'? (
           existingClientLoading ? (
             <div className="space-y-4 p-8 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
@@ -626,12 +586,11 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
           />
         )}
       </ModalBody>
-
-      {mode !== 'view' && (
+      {mode !== 'view'&& (
         <ModalFooter
           leftLabel="Cancelar"
           onLeftClick={handleClose}
-          rightLabel={isEditing ? 'Guardar Cambios' : 'Agregar Cliente'}
+          rightLabel={isEditing ? 'Guardar Cambios': 'Agregar Cliente'}
           onRightClick={form.handleSubmit(handleSubmit)}
           isSubmitting={isLoading || isLoadingData}
           submitDisabled={isLoading || isLoadingData}
@@ -639,7 +598,7 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
         />
       )}
       
-      {mode === 'view' && (
+      {mode === 'view'&& (
         <ModalFooter
           leftLabel="Cerrar"
           onLeftClick={handleClose}

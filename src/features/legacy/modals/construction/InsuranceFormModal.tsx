@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { CalendarIcon, Shield, Upload } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-
 import { FormModalLayout } from '@/components/modal'
 import { FormModalHeader } from '@/components/modal'
 import { FormModalFooter } from '@/components/modal'
@@ -17,14 +16,12 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/features/organization'
 import { useCreateInsurance, useUpdateInsurance, useUploadCertificate } from '@/features/personnel'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Insurance } from '@/features/personnel/services/insurances'
-
 const insuranceSchema = z.object({
   personnel_id: z.string().uuid('Selecciona una persona'),
   insurance_type: z.enum(['ART', 'vida', 'accidentes', 'responsabilidad_civil', 'salud', 'otro'], {
@@ -44,20 +41,16 @@ const insuranceSchema = z.object({
   message: "La fecha de fin debe ser posterior a la de inicio",
   path: ["coverage_end"]
 })
-
 type InsuranceForm = z.infer<typeof insuranceSchema>
-
 interface InsuranceFormModalProps {
   modalData?: {
     insurance?: Insurance
-    mode?: 'create' | 'edit'
+    mode?: 'create'| 'edit'
     defaultContactId?: string
   }
   onClose: () => void
 }
-
 const DEFAULT_REMINDER_DAYS = [30, 15, 7]
-
 export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalProps) {
   const { data: currentUser } = useCurrentUser()
   const { data: organizationMembers = [] } = useOrganizationMembers(currentUser?.organization?.id)
@@ -65,9 +58,8 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   
-  const isEdit = modalData?.mode === 'edit' && modalData?.insurance
+  const isEdit = modalData?.mode === 'edit'&& modalData?.insurance
   const projectId = currentUser?.preferences?.last_project_id
-
   // Get project personnel for insurance
   const { data: projectPersonnel = [] } = useQuery({
     queryKey: ['project-personnel-for-insurance', projectId],
@@ -87,12 +79,10 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
             )
           `)
           .eq('project_id', projectId)
-
         if (error) {
           console.error('Error fetching project personnel:', error)
           return []
         }
-
         // Filter and ensure data integrity
         const validPersonnel = data
           .filter(item => {
@@ -117,11 +107,9 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
     },
     enabled: !!projectId && !!currentUser?.organization?.id
   })
-
   const createInsurance = useCreateInsurance()
   const updateInsurance = useUpdateInsurance()
   const uploadCertificate = useUploadCertificate()
-
   const form = useForm<InsuranceForm>({
     resolver: zodResolver(insuranceSchema),
     defaultValues: {
@@ -135,13 +123,11 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
       notes: modalData?.insurance?.notes || ''
     }
   })
-
   useEffect(() => {
     if (modalData?.insurance?.reminder_days) {
       setReminderDays(modalData.insurance.reminder_days)
     }
   }, [modalData?.insurance?.reminder_days])
-
   const onSubmit = async (data: InsuranceForm) => {
     try {
       // Obtener el organization_member.id del usuario actual - mismo patrón que SiteLogFormModal
@@ -149,9 +135,7 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
       if (!currentMember) {
         throw new Error(`No se encontró el miembro de la organización para el usuario actual. User ID: ${currentUser?.user?.id}`)
       }
-
       let certificateAttachmentId: string | null = modalData?.insurance?.certificate_attachment_id || null
-
       // Upload certificate if a new file was selected
       if (selectedFile) {
         certificateAttachmentId = await uploadCertificate.mutateAsync({
@@ -159,7 +143,6 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
           file: selectedFile
         })
       }
-
       const payload = {
         organization_id: currentUser?.organization?.id!,
         project_id: projectId,
@@ -174,7 +157,6 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
         notes: data.notes || null,
         created_by: currentMember.id  // Usar exactamente el mismo patrón que SiteLogFormModal
       }
-
       if (isEdit) {
         await updateInsurance.mutateAsync({
           id: modalData?.insurance?.id || '',
@@ -183,13 +165,11 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
       } else {
         await createInsurance.mutateAsync(payload)
       }
-
       onClose()
     } catch (error) {
       console.error('Error saving insurance:', error)
     }
   }
-
   const handleReminderToggle = (days: number) => {
     if (reminderDays.includes(days)) {
       setReminderDays(reminderDays.filter(d => d !== days))
@@ -197,14 +177,12 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
       setReminderDays([...reminderDays, days].sort((a, b) => b - a))
     }
   }
-
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
       setSelectedFile(file)
     }
   }
-
   const editPanel = (
     <Form {...form}>
       <div className="space-y-4">
@@ -240,7 +218,6 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="insurance_type"
@@ -267,7 +244,6 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
             )}
           />
         </div>
-
         {/* Información de la póliza */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
@@ -283,7 +259,6 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="provider"
@@ -298,7 +273,6 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
             )}
           />
         </div>
-
         {/* Fechas de cobertura */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
@@ -344,7 +318,6 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
               );
             }}
           />
-
           <FormField
             control={form.control}
             name="coverage_end"
@@ -389,7 +362,6 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
             }}
           />
         </div>
-
         {/* Notas */}
         <FormField
           control={form.control}
@@ -409,7 +381,6 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
             </FormItem>
           )}
         />
-
         {/* Subir certificado */}
         <div>
           <FormLabel>Certificado de Cobertura</FormLabel>
@@ -440,7 +411,6 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
             )}
           </div>
         </div>
-
         {/* Recordatorios - Movidos al final */}
         <div>
           <FormLabel>Recordatorios de Vencimiento</FormLabel>
@@ -462,25 +432,22 @@ export function InsuranceFormModal({ modalData, onClose }: InsuranceFormModalPro
       </div>
     </Form>
   )
-
   const headerContent = (
     <FormModalHeader 
-      title={isEdit ? 'Editar Seguro' : 'Nuevo Seguro'}
+      title={isEdit ? 'Editar Seguro': 'Nuevo Seguro'}
       icon={Shield}
     />
   )
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel={isEdit ? 'Actualizar' : 'Crear'}
+      rightLabel={isEdit ? 'Actualizar': 'Crear'}
       onRightClick={form.handleSubmit(onSubmit)}
       submitDisabled={createInsurance.isPending || updateInsurance.isPending}
       showLoadingSpinner={createInsurance.isPending || updateInsurance.isPending}
     />
   )
-
   return (
     <FormModalLayout
       columns={1}

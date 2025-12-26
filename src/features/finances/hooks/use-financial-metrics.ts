@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { convertToBaseCurrency } from '@/lib/money';
 import type { FinancialMovementWithRelations } from '../types';
-
 interface FinancialMetrics {
   totalInPrimaryCurrency: number;
   balanceByCurrency: Array<{
@@ -16,7 +15,6 @@ interface FinancialMetrics {
     value: number;
   }>;
 }
-
 export function useFinancialMetrics(
   movements: FinancialMovementWithRelations[],
   primaryCurrencyCode?: string
@@ -29,7 +27,6 @@ export function useFinancialMetrics(
       income: number;
       expense: number;
     }>();
-
     movements.forEach(movement => {
       const code = movement.currency?.code || 'N/A';
       const symbol = movement.currency?.symbol || '$';
@@ -42,7 +39,6 @@ export function useFinancialMetrics(
           expense: 0,
         });
       }
-
       const curr = currencyMap.get(code)!;
       if (movement.amount >= 0) {
         curr.income += movement.amount;
@@ -50,24 +46,20 @@ export function useFinancialMetrics(
         curr.expense += Math.abs(movement.amount);
       }
     });
-
     const balanceByCurrency = Array.from(currencyMap.values()).map(curr => ({
       ...curr,
       balance: curr.income - curr.expense,
     }));
-
     // Calcular total en moneda principal (convertir TODOS los movimientos)
     const totalInPrimaryCurrency = movements.reduce((sum, movement) => {
       return sum + convertToBaseCurrency(movement, primaryCurrencyCode);
     }, 0);
-
     // Crear timeline (últimos 14 días) - convertir a moneda principal
     const last14Days = Array.from({ length: 14 }, (_, i) => {
       const date = new Date();
       date.setDate(date.getDate() - (13 - i));
       return date.toISOString().split('T')[0];
     });
-
     const dailyTotals = new Map<string, number>();
     movements.forEach(movement => {
       const date = movement.payment_date.split('T')[0];
@@ -75,12 +67,10 @@ export function useFinancialMetrics(
       const convertedAmount = convertToBaseCurrency(movement, primaryCurrencyCode);
       dailyTotals.set(date, current + convertedAmount);
     });
-
     const timeline = last14Days.map(date => ({
       date,
       value: dailyTotals.get(date) || 0,
     }));
-
     return {
       totalInPrimaryCurrency,
       balanceByCurrency,

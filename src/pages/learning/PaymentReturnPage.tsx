@@ -6,13 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
-
 export default function PaymentReturn() {
   const [, navigate] = useLocation();
-  const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
+  const [status, setStatus] = useState<'processing'| 'success'| 'error'>('processing');
   const [error, setError] = useState<string | null>(null);
   const [courseSlug, setCourseSlug] = useState<string>('');
-
   // Remove initial loader cuando el componente se monta
   useEffect(() => {
     const initialLoader = document.getElementById('initial-loader');
@@ -23,28 +21,23 @@ export default function PaymentReturn() {
       }, 300);
     }
   }, []);
-
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const course = params.get('course') || '';
     setCourseSlug(course);
-
     if (!course) {
       setStatus('error');
       setError('No se especificó el curso');
       return;
     }
-
     // 🚀 OPTIMIZACIÓN CRÍTICA: Invalidar cache INMEDIATAMENTE (optimistic update)
     // Esto hace que CourseList se refresque ANTES de confirmar el enrollment
     queryClient.invalidateQueries({ queryKey: ['/api/learning/courses-full'] });
     queryClient.invalidateQueries({ queryKey: ['/api/user/enrollments'] });
     queryClient.invalidateQueries({ queryKey: ['/api/learning/dashboard'] });
-
     let timeoutId: NodeJS.Timeout;
     let attempts = 0;
     const maxAttempts = 60; // 30 seconds maximum (60 * 500ms)
-
     const checkEnrollment = async () => {
       try {
         if (!supabase) {
@@ -52,7 +45,6 @@ export default function PaymentReturn() {
           setError('Error de conexión');
           return;
         }
-
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
@@ -60,21 +52,17 @@ export default function PaymentReturn() {
           setError('No hay sesión activa');
           return;
         }
-
         // Check enrollment status
         const response = await fetch('/api/user/enrollments', {
           headers: {
             'Authorization': `Bearer ${session.access_token}`
           }
         });
-
         if (!response.ok) {
           throw new Error('Error al verificar inscripción');
         }
-
         const enrollments = await response.json();
         const enrollment = enrollments.find((e: any) => e.course_slug === course && e.is_active);
-
         if (enrollment) {
           setStatus('success');
           // 🚀 CRÍTICO: Invalidar TODOS los caches para refresh instantáneo
@@ -91,7 +79,6 @@ export default function PaymentReturn() {
           
           return;
         }
-
         // Continue polling if not found yet
         attempts++;
         if (attempts < maxAttempts) {
@@ -105,36 +92,30 @@ export default function PaymentReturn() {
         setError(err.message || 'Error al verificar el estado del pago');
       }
     };
-
     checkEnrollment();
-
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
   }, []);
-
   const handleGoToCourse = () => {
     if (courseSlug) {
       navigate(`/learning/courses`);
     }
   };
-
   const handleBackToCourses = () => {
     navigate('/learning/courses');
   };
-
   const headerProps = {
     title: "Estado del Pago",
     showBackButton: false,
     isViewMode: true
   };
-
   return (
     <Layout headerProps={headerProps} wide>
       <div className="flex items-center justify-center min-h-[60vh]">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            {status === 'processing' && (
+            {status === 'processing'&& (
               <>
                 <div className="mx-auto mb-4">
                   <Loader2 className="h-16 w-16 animate-spin text-accent" />
@@ -146,7 +127,7 @@ export default function PaymentReturn() {
               </>
             )}
             
-            {status === 'success' && (
+            {status === 'success'&& (
               <>
                 <div className="mx-auto mb-4">
                   <CheckCircle className="h-16 w-16 text-green-500" />
@@ -158,7 +139,7 @@ export default function PaymentReturn() {
               </>
             )}
             
-            {status === 'error' && (
+            {status === 'error'&& (
               <>
                 <div className="mx-auto mb-4">
                   <XCircle className="h-16 w-16 text-red-500" />
@@ -172,7 +153,7 @@ export default function PaymentReturn() {
           </CardHeader>
           
           <CardContent className="flex flex-col gap-3">
-            {status === 'success' && (
+            {status === 'success'&& (
               <Button
                 variant="default"
                 onClick={handleGoToCourse}
@@ -183,7 +164,7 @@ export default function PaymentReturn() {
               </Button>
             )}
             
-            {status === 'error' && (
+            {status === 'error'&& (
               <Button
                 variant="default"
                 onClick={handleBackToCourses}
@@ -194,7 +175,7 @@ export default function PaymentReturn() {
               </Button>
             )}
             
-            {status === 'processing' && (
+            {status === 'processing'&& (
               <div className="text-center text-sm text-muted-foreground">
                 Esto puede tomar unos segundos...
               </div>

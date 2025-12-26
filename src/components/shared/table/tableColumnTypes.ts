@@ -16,7 +16,6 @@ export type TableColumnType =
   | 'avatar'
   | 'checkbox'
   | 'icon';
-
 export const COLUMN_TYPE_WIDTHS: Record<TableColumnType, string> = {
   'date': '110px',
   'datetime': '150px',
@@ -36,14 +35,11 @@ export const COLUMN_TYPE_WIDTHS: Record<TableColumnType, string> = {
   'checkbox': '40px',
   'icon': '40px',
 };
-
 export const DEFAULT_COLUMN_TYPE: TableColumnType = 'short-text';
-
 export function getColumnWidth(type?: TableColumnType): string {
   if (!type) return COLUMN_TYPE_WIDTHS[DEFAULT_COLUMN_TYPE];
   return COLUMN_TYPE_WIDTHS[type] || COLUMN_TYPE_WIDTHS[DEFAULT_COLUMN_TYPE];
 }
-
 export function buildGridTemplateColumns(
   columnTypes: (TableColumnType | undefined)[],
   options?: {
@@ -71,5 +67,5 @@ export function buildGridTemplateColumns(
     parts.push(COLUMN_TYPE_WIDTHS['actions']);
   }
   
-  return parts.join(' ');
+  return parts.join('');
 }

@@ -29,7 +29,6 @@ import { ProjectReadOnlyProvider } from "@/contexts/ProjectReadOnlyContext";
 import { GlobalAnnouncementBanner, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, ANNOUNCEMENT_HEIGHT_MOBILE, AnnouncementProvider } from "@/features/users/components/GlobalAnnouncementBanner";
 import { useLocation } from "wouter";
 import { type WidthProp, resolveWidthMode, getContainerClasses, getContentPaddingClasses } from "./layoutWidth";
-
 interface Tab {
   id: string;
   label: string;
@@ -38,7 +37,6 @@ interface Tab {
   badge?: string;
   disabled?: boolean;
 }
-
 interface LayoutProps {
   children: React.ReactNode;
   wide?: WidthProp;
@@ -95,7 +93,6 @@ interface LayoutProps {
     isViewMode?: boolean;
   };
 }
-
 export function Layout({ children, wide = false, hideHeader = false, headerProps }: LayoutProps) {
   const { isDark, setTheme } = useThemeStore();
   const { data } = useCurrentUser();
@@ -105,8 +102,6 @@ export function Layout({ children, wide = false, hideHeader = false, headerProps
   const { isDocked, isHovered } = useSidebarStore();
   const { sidebarLevel } = useNavigationStore();
   const [location] = useLocation();
-
-
   // Hook para color dinámico del accent basado en el proyecto activo
   useProjectAccentColor();
   
@@ -135,30 +130,26 @@ export function Layout({ children, wide = false, hideHeader = false, headerProps
       '/analysis',            // Analysis
       '/admin',               // Admin panel
       '/providers',           // Providers (English)
-      '/proveedor'            // Providers (Spanish)
+      '/proveedor'           // Providers (Spanish)
     ];
     
     // Verificar si la ruta actual coincide con alguna ruta de trabajo
     return workRoutes.some(route => location.startsWith(route));
   })();
-
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
   }, [isDark]);
-
   // Sincronizar tema desde la base de datos cuando se carga el usuario (solo una vez)
   useEffect(() => {
     if (data?.preferences?.theme) {
       const dbTheme = data.preferences.theme;
       const shouldBeDark = dbTheme === "dark";
-
       // Solo actualizar si es diferente al estado actual
       if (shouldBeDark !== isDark) {
         setTheme(shouldBeDark);
       }
     }
   }, [data?.preferences?.theme]);
-
   return (
     <AnnouncementProvider>
       <LayoutContent 
@@ -177,7 +168,6 @@ export function Layout({ children, wide = false, hideHeader = false, headerProps
     </AnnouncementProvider>
   );
 }
-
 // Componente interno que lee el contexto
 function LayoutContent({ 
   children, 
@@ -193,21 +183,17 @@ function LayoutContent({
   userMode
 }: any) {
   const { hasActiveAnnouncement } = useAnnouncementBanner();
-
   // Project read-only state for soft-locked projects
   const { isReadOnly: isProjectReadOnly, project } = useProjectReadOnly();
-
   // Pending invitations modal state
   const [hasShownInvitationsModal, setHasShownInvitationsModal] = useState(false);
   const { data: pendingInvitations, isLoading: isLoadingInvitations } = usePendingInvitations();
   
   const hasPendingInvitations = !isLoadingInvitations && pendingInvitations && pendingInvitations.length > 0;
   const shouldShowInvitationsModal = hasPendingInvitations && !hasShownInvitationsModal;
-
   const handleCloseInvitationsModal = () => {
     setHasShownInvitationsModal(true);
   };
-
   return (
     <>
       {/* Global Announcements Banner - Fixed at top */}
@@ -249,17 +235,15 @@ function LayoutContent({
           <div className="flex-shrink-0 p-1 sticky top-0 h-screen overflow-hidden">
             <LeftSidebar />
           </div>
-
           {/* Main Content Area - MainHeader + Page Content */}
           <div className="flex-1 flex flex-col min-h-0 min-w-0">
             {/* Main Header for Desktop - COMENTADO PARA TESTING */}
             {/* <MainHeader icon={headerProps?.icon} title={headerProps?.title} /> */}
-
             {/* Page Content with rounded corners and framing effect */}
-            <div className={`flex-1 flex min-h-0 min-w-0 relative ${isDocked ? 'gap-3' : ''}`}>
+            <div className={`flex-1 flex min-h-0 min-w-0 relative ${isDocked ? 'gap-3': ''}`}>
               <div className="flex-1 py-1 min-w-0">
                 <main
-                  className={`h-full flex flex-col rounded-lg min-w-0 ${!isDocked ? 'w-full' : ''}`}
+                  className={`h-full flex flex-col rounded-lg min-w-0 ${!isDocked ? 'w-full': ''}`}
                   style={{
                     background: contentBackground
                   }}
@@ -309,26 +293,21 @@ function LayoutContent({
                 </ProjectReadOnlyProvider>
               </main>
               </div>
-
             </div>
           </div>
-
           {/* Course Player Drawer Host */}
           <div className="flex-shrink-0 p-1">
             <CoursePlayerDrawerHost />
           </div>
         </div>
       )}
-
       {/* Floating AI Chat - Desktop y Mobile en rutas de trabajo */}
       {shouldShowAIChat && <FloatingAIChat />}
-
       {/* Mobile Action Bar - Only visible on mobile when enabled */}
       {isMobile && <ActionBarMobile />}
       
       {/* Floating Course Lessons - Mobile cuando hay curso activo */}
       {isMobile && <FloatingCourseLessons />}
-
       {/* Pending Invitations Modal - Shows once per session when user has pending invitations */}
       {shouldShowInvitationsModal && (
         <InvitationModal
@@ -337,7 +316,6 @@ function LayoutContent({
           onClose={handleCloseInvitationsModal}
         />
       )}
-
       {/* Organization Removed Modal - Shows when user no longer belongs to current organization */}
       <OrganizationRemovedModal />
         </div>

@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { getProjectStats } from '../services/getProjectStats';
 import { projectsKeys } from '@/core/query-keys';
 import { useCurrentUser } from '@/hooks/use-current-user';
-
 /**
  * Hook para obtener las estadísticas de un proyecto.
  * 
@@ -15,7 +14,6 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 export function useProjectStats(projectId: string | null) {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.preferences?.last_organization_id;
-
   return useQuery({
     queryKey: projectsKeys.stats(organizationId, projectId ?? undefined),
     queryFn: () => getProjectStats(projectId!, organizationId!),

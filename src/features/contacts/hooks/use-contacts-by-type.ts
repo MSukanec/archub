@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getContactsByType } from '../services';
 import { contactsKeys } from '@/core/query-keys';
-
 /**
  * Hook para obtener recuento de contactos agrupados por tipo.
  * Usa la vista contacts_by_type_view.

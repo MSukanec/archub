@@ -8,22 +8,18 @@ import { useToast } from '@/hooks/use-toast';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { FileText, DollarSign, Save } from 'lucide-react';
 import { CourseHeroImageUpload } from '@/features/learning/components';
-
 interface AdminCourseDataTabProps {
   courseId: string;
 }
-
 export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
   // Form states
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [shortDescription, setShortDescription] = useState('');
   const [coverUrl, setCoverUrl] = useState('');
   const [price, setPrice] = useState('');
-
   // Get course data
   const { data: courseData } = useQuery({
     queryKey: ['/api/admin/courses', courseId],
@@ -32,20 +28,17 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
       
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return null;
-
       const res = await fetch(`/api/admin/courses/${courseId}`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         },
         credentials: 'include'
       });
-
       if (!res.ok) throw new Error('Failed to fetch course');
       return res.json();
     },
     enabled: !!courseId && !!supabase
   });
-
   // Load course data into form when available
   useEffect(() => {
     if (courseData) {
@@ -56,15 +49,12 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
       setPrice(courseData.price?.toString() || '0');
     }
   }, [courseData]);
-
   // Auto-save mutation for course data
   const saveCourseDataMutation = useMutation({
     mutationFn: async (dataToSave: any) => {
       if (!courseId || !supabase) return;
-
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session');
-
       const res = await fetch(`/api/admin/courses/${courseId}`, {
         method: 'PATCH',
         headers: {
@@ -77,7 +67,6 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
           updated_at: new Date().toISOString()
         })
       });
-
       if (!res.ok) throw new Error('Failed to update course');
       return res.json();
     },
@@ -99,7 +88,6 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
       });
     }
   });
-
   // Auto-save hook
   const { isSaving } = useAutoSave({
     data: {
@@ -119,7 +107,6 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
     delay: 1000,
     enabled: !!courseData
   });
-
   return (
     <div className="p-6 space-y-8" data-testid="admin-course-data-tab">
       {isSaving && (
@@ -128,7 +115,6 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
           <span>Guardando cambios...</span>
         </div>
       )}
-
       {/* Sección: Información Básica */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column - Descripción */}
@@ -141,7 +127,6 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
             Configura los datos fundamentales del curso como título, URL amigable, descripción y la imagen de portada que se mostrará en las listas y landing pages.
           </p>
         </div>
-
         {/* Right Column - Contenido */}
         <div className="space-y-4">
           <div>
@@ -154,7 +139,6 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
               data-testid="input-course-title"
             />
           </div>
-
           <div>
             <Label htmlFor="slug">Slug (URL amigable)</Label>
             <Input
@@ -165,7 +149,6 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
               data-testid="input-course-slug"
             />
           </div>
-
           <div>
             <Label htmlFor="short_description">Descripción Corta</Label>
             <Textarea
@@ -177,7 +160,6 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
               data-testid="textarea-course-description"
             />
           </div>
-
           <div>
             <Label>Imagen de Portada</Label>
             <CourseHeroImageUpload
@@ -189,7 +171,6 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
           </div>
         </div>
       </div>
-
       {/* Sección: Precio */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column - Descripción */}
@@ -202,7 +183,6 @@ export default function AdminCourseDataTab({ courseId }: AdminCourseDataTabProps
             Define el precio del curso en USD. El sistema lo convertirá automáticamente a otras monedas según los tipos de cambio configurados.
           </p>
         </div>
-
         {/* Right Column - Contenido */}
         <div className="space-y-4">
           <div>

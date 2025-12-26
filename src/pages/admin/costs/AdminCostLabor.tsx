@@ -6,18 +6,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal'
 import { useCurrentUser } from '@/hooks/use-current-user'
-
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-
 import { Table } from '@/components/shared/trees/Table'
 import { cn } from '@/lib/utils'
-
 import { Plus, Edit, Trash2, Users, Crown, Copy, Wrench } from 'lucide-react'
-
 interface LaborType {
   labor_id: string
   labor_name: string
@@ -36,7 +32,6 @@ interface LaborType {
   created_at?: string
   updated_at?: string | null
 }
-
 interface LaborPrice {
   id: string
   unit_price: number
@@ -44,7 +39,6 @@ interface LaborPrice {
     symbol: string
   }
 }
-
 // Component to display average labor cost
 function AverageLaborCost({ laborType }: { laborType: LaborType }) {
   const formatCost = (amount: number | null, currencySymbol: string = '$') => {
@@ -53,32 +47,28 @@ function AverageLaborCost({ laborType }: { laborType: LaborType }) {
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
       useGrouping: true
-    }).format(amount).replace(/,/g, '.') + ' ' + currencySymbol
+    }).format(amount).replace(/,/g, '.') + ''+ currencySymbol
   }
-
   if (!laborType.avg_price) {
     return <span className="text-xs text-muted-foreground">Sin datos</span>
   }
-
   return (
     <span className="text-xs font-medium">
       {formatCost(laborType.avg_price, '$')}
     </span>
   )
 }
-
 const AdminCostLabor = () => {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('name')
-  const [groupingType, setGroupingType] = useState<'none' | 'system'>('system')
+  const [groupingType, setGroupingType] = useState<'none'| 'system'>('system')
   
   const { openModal } = useGlobalModalStore()
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
   
   // Check if user is admin
-  const isAdmin = userData?.role?.name === 'Administrador' || userData?.role?.name === 'Admin'
-
+  const isAdmin = userData?.role?.name === 'Administrador'|| userData?.role?.name === 'Admin'
   // Fetch labor types from LABOR_VIEW
   const { data: laborTypes = [], isLoading } = useQuery({
     queryKey: ['labor-view'],
@@ -91,11 +81,9 @@ const AdminCostLabor = () => {
       if (error) {
         throw error
       }
-
       return data || []
     }
   })
-
   // Delete mutation
   const deleteLaborTypeMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -122,13 +110,11 @@ const AdminCostLabor = () => {
       })
     }
   })
-
   // Apply client-side filtering
   const filteredLaborTypes = laborTypes.filter(laborType => {
-    const matchesSearch = searchValue === '' || laborType.labor_name.toLowerCase().includes(searchValue.toLowerCase())
+    const matchesSearch = searchValue === ''|| laborType.labor_name.toLowerCase().includes(searchValue.toLowerCase())
     return matchesSearch
   })
-
   // Apply client-side sorting
   const sortedLaborTypes = [...filteredLaborTypes].sort((a, b) => {
     if (sortBy === 'name') {
@@ -137,7 +123,6 @@ const AdminCostLabor = () => {
       return new Date(b.updated_at || b.created_at || '').getTime() - new Date(a.updated_at || a.created_at || '').getTime()
     }
   })
-
   // Process labor types for grouping
   const processedLaborTypes = useMemo(() => {
     if (groupingType === 'none') {
@@ -147,13 +132,12 @@ const AdminCostLabor = () => {
     if (groupingType === 'system') {
       return sortedLaborTypes.map(laborType => ({
         ...laborType,
-        groupKey: laborType.is_system ? 'Sistema' : 'Organización'
+        groupKey: laborType.is_system ? 'Sistema': 'Organización'
       }));
     }
     
     return sortedLaborTypes;
   }, [sortedLaborTypes, groupingType])
-
   const handleEdit = (laborType: LaborType) => {
     openModal('labor-type-form', { editingLaborType: { 
       id: laborType.labor_id,
@@ -163,11 +147,9 @@ const AdminCostLabor = () => {
       is_system: laborType.is_system
     }})
   }
-
   const handleCreate = () => {
     openModal('labor-type-form', { editingLaborType: null })
   }
-
   const handleDuplicate = (laborType: LaborType) => {
     openModal('labor-type-form', { 
       editingLaborType: {
@@ -180,7 +162,6 @@ const AdminCostLabor = () => {
       isDuplicating: true 
     })
   }
-
   const handleDelete = (laborType: LaborType) => {
     openModal('delete-confirmation', {
       mode: 'dangerous',
@@ -192,20 +173,17 @@ const AdminCostLabor = () => {
       isLoading: deleteLaborTypeMutation.isPending
     })
   }
-
   const clearFilters = () => {
     setSearchValue('')
     setSortBy('name')
     setGroupingType('system')
   }
-
   // Render grouping popover content
   const renderGroupingContent = () => {
     const groupingOptions = [
-      { value: 'none', label: 'Sin agrupar' },
-      { value: 'system', label: 'Por origen (Sistema/Organización)' }
+      { value: 'none', label: 'Sin agrupar'},
+      { value: 'system', label: 'Por origen (Sistema/Organización)'}
     ];
-
     return (
       <>
         <div className="text-xs font-medium mb-2 block">Agrupar por</div>
@@ -215,7 +193,7 @@ const AdminCostLabor = () => {
               key={option.value}
               variant={groupingType === option.value ? "secondary" : "ghost"}
               size="sm"
-              onClick={() => setGroupingType(option.value as 'none' | 'system')}
+              onClick={() => setGroupingType(option.value as 'none'| 'system')}
               className={cn(
                 "w-full justify-start text-xs font-normal h-8",
                 groupingType === option.value ? "button-secondary-pressed hover:bg-secondary" : ""
@@ -228,7 +206,6 @@ const AdminCostLabor = () => {
       </>
     );
   };
-
   // Definir columnas de la tabla
   const columns = [
     {
@@ -279,22 +256,21 @@ const AdminCostLabor = () => {
         <Badge 
           variant={laborType.is_system ? "default" : "secondary"}
           className={`text-xs ${laborType.is_system 
-            ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
+            ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90'
             : 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
           }`}
         >
-          {laborType.is_system ? 'Sistema' : 'Organización'}
+          {laborType.is_system ? 'Sistema': 'Organización'}
         </Badge>
       )
     }
   ];
-
   return (
     <Table
       columns={columns}
       data={processedLaborTypes}
       isLoading={isLoading}
-      groupBy={groupingType === 'none' ? undefined : 'groupKey'}
+      groupBy={groupingType === 'none'? undefined : 'groupKey'}
       rowActions={isAdmin ? (laborType: LaborType) => [
         {
           icon: Edit,
@@ -310,7 +286,7 @@ const AdminCostLabor = () => {
           icon: Trash2,
           label: 'Eliminar',
           onClick: () => handleDelete(laborType),
-          variant: 'destructive' as const
+          variant: 'destructive'as const
         }
       ] : undefined}
       topBar={{
@@ -319,7 +295,7 @@ const AdminCostLabor = () => {
         onSearchChange: setSearchValue,
         renderGroupingContent: renderGroupingContent,
         isGroupingActive: groupingType !== 'none',
-        showClearFilters: searchValue !== '' || groupingType !== 'system',
+        showClearFilters: searchValue !== ''|| groupingType !== 'system',
         onClearFilters: clearFilters
       }}
       renderCard={(laborType: LaborType) => (
@@ -331,11 +307,11 @@ const AdminCostLabor = () => {
                 <Badge 
                   variant={laborType.is_system ? "default" : "secondary"}
                   className={`text-xs ${laborType.is_system 
-                    ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
+                    ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90'
                     : 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
                   }`}
                 >
-                  {laborType.is_system ? 'Sistema' : 'Organización'}
+                  {laborType.is_system ? 'Sistema': 'Organización'}
                 </Badge>
               </div>
               {laborType.labor_description && (
@@ -407,5 +383,4 @@ const AdminCostLabor = () => {
     />
   )
 }
-
 export default AdminCostLabor

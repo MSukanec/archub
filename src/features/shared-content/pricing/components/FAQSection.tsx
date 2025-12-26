@@ -2,10 +2,8 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { pricingFAQs } from "../data/faqs";
-
 export function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-
   return (
     <div className="mt-20 max-w-3xl mx-auto">
       <h2 className="text-3xl font-bold text-center mb-10 text-[var(--text-default)]">
@@ -35,7 +33,7 @@ export function FAQSection() {
             </button>
             {openIndex === idx && (
               <div className="px-6 pb-4 text-sm text-[var(--text-muted)] leading-relaxed">
-                {typeof faq.a === 'function' ? faq.a() : faq.a}
+                {typeof faq.a === 'function'? faq.a() : faq.a}
               </div>
             )}
           </div>

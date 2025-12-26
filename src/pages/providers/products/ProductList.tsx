@@ -12,7 +12,6 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { ImageLightbox, useImageLightbox } from '@/components/shared/viewers/ImageLightbox'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useProviderProducts, useToggleProviderProduct } from '@/features/materials'
-
 export default function ProductList() {
   const [dataType, setDataType] = useState("todos")
   const [lightboxImages, setLightboxImages] = useState<string[]>([])
@@ -26,13 +25,11 @@ export default function ProductList() {
   const { showDeleteConfirmation } = useDeleteConfirmation()
   const { data: userData } = useCurrentUser()
   const { isOpen, currentIndex, openLightbox, closeLightbox } = useImageLightbox(lightboxImages)
-
   // Función para verificar si un producto está seleccionado
   const isProductSelected = (productId: string) => {
     const providerProduct = providerProducts.find(pp => pp.product_id === productId)
     return providerProduct?.is_active || false
   }
-
   // Función para manejar el toggle del checkbox
   const handleToggleProduct = async (productId: string, currentState: boolean) => {
     try {
@@ -47,7 +44,6 @@ export default function ProductList() {
       console.error('Error toggling product:', error)
     }
   }
-
   // Filter products and add groupKey for grouping
   const filteredProducts = useMemo(() => {
     const productsWithGroupKey = products.map(product => {
@@ -60,7 +56,7 @@ export default function ProductList() {
         case 'category':
           const hierarchy = product.category_hierarchy || 'Sin categoría';
           // Extraer solo la primera categoría (antes del primer " > ")
-          groupKey = hierarchy.split(' > ')[0];
+          groupKey = hierarchy.split('> ')[0];
           break;
         default:
           groupKey = '';
@@ -79,7 +75,6 @@ export default function ProductList() {
         providerCurrency: currentPrice?.currencies?.symbol
       };
     });
-
     // Ordenar según el tipo de agrupación
     return productsWithGroupKey.sort((a, b) => {
       switch (groupingType) {
@@ -96,16 +91,13 @@ export default function ProductList() {
       }
     });
   }, [products, groupingType, providerProducts]);
-
   // Data type selector options
   const dataTypeOptions = [
     { value: "todos", label: "Todos" }
   ]
-
   const handleEdit = (product: Product) => {
     openModal('provider-product', { product: product })
   }
-
   const handleDuplicate = (product: Product) => {
     // Create a duplicate object with "Copia" added to the name
     const duplicateProduct = {
@@ -117,7 +109,6 @@ export default function ProductList() {
     }
     openModal('product-form', { editingProduct: duplicateProduct, isDuplicating: true })
   }
-
   const handleDelete = (product: Product) => {
     openModal('delete-confirmation', {
       mode: 'dangerous',
@@ -129,8 +120,6 @@ export default function ProductList() {
       isLoading: deleteProductMutation.isPending
     })
   }
-
-
   // Base columns definition
   const baseColumns = [
     {
@@ -169,7 +158,7 @@ export default function ProductList() {
           {(() => {
             const hierarchy = product.category_hierarchy || 'Sin categoría';
             // Extraer solo la primera categoría (antes del primer " > ")
-            return hierarchy.split(' > ')[0];
+            return hierarchy.split('> ')[0];
           })()}
         </span>
       )
@@ -303,12 +292,11 @@ export default function ProductList() {
     
     // Filter columns for grouping - hide the grouped column
     return baseColumns.filter(column => {
-      if (groupingType === 'material' && column.key === 'material') return false;
-      if (groupingType === 'category' && column.key === 'category') return false;
+      if (groupingType === 'material'&& column.key === 'material') return false;
+      if (groupingType === 'category'&& column.key === 'category') return false;
       return true;
     });
   }, [groupingType]);
-
   return (
     <div className="space-y-6">
       {/* Products Table */}
@@ -327,8 +315,8 @@ export default function ProductList() {
           <Table
             data={filteredProducts}
             columns={productsColumns}
-            groupBy={groupingType === 'none' ? undefined : 'groupKey'}
-            getRowClassName={(product: any) => !product.isSelected ? 'opacity-40' : 'opacity-100'}
+            groupBy={groupingType === 'none'? undefined : 'groupKey'}
+            getRowClassName={(product: any) => !product.isSelected ? 'opacity-40': 'opacity-100'}
             rowActions={(product: any) => !product.isSelected ? [] : [
               {
                 icon: Edit,
@@ -339,12 +327,12 @@ export default function ProductList() {
             topBar={{
               // 🆕 NUEVA FORMA SIMPLIFICADA - Solo props, sin función personalizada
               groupingOptions: [
-                { value: 'none', label: 'No Agrupar' },
-                { value: 'category', label: 'Agrupar por Categoría' },
-                { value: 'material', label: 'Agrupar por Material' }
+                { value: 'none', label: 'No Agrupar'},
+                { value: 'category', label: 'Agrupar por Categoría'},
+                { value: 'material', label: 'Agrupar por Material'}
               ],
               currentGrouping: groupingType,
-              onGroupingChange: (value: string) => setGroupingType(value as 'none' | 'category' | 'material'),
+              onGroupingChange: (value: string) => setGroupingType(value as 'none'| 'category'| 'material'),
               isGroupingActive: groupingType !== 'none'
             }}
             renderCard={(product: any) => (
@@ -357,7 +345,7 @@ export default function ProductList() {
                 category: (() => {
                   const hierarchy = product.category_hierarchy || 'Sin categoría';
                   // Extraer solo la primera categoría (antes del primer " > ")
-                  return hierarchy.split(' > ')[0];
+                  return hierarchy.split('> ')[0];
                 })(),
                 unit: product.unit,
                 price: product.default_price,
@@ -367,14 +355,14 @@ export default function ProductList() {
               }}
               onClick={() => handleEdit(product)}
               density="normal"
-              className={!product.isSelected ? 'opacity-40' : 'opacity-100'}
+              className={!product.isSelected ? 'opacity-40': 'opacity-100'}
               />
             )}
-            renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => {
+            renderGroupHeader={groupingType === 'none'? undefined : (groupKey: string, groupRows: any[]) => {
               return (
                 <>
                   <div className="col-span-full text-sm font-medium">
-                    {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Producto' : 'Productos'})
+                    {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Producto': 'Productos'})
                   </div>
                 </>
               );
@@ -390,7 +378,6 @@ export default function ProductList() {
           />
         )}
       </div>
-
       {/* Image Lightbox */}
       <ImageLightbox
         isOpen={isOpen}

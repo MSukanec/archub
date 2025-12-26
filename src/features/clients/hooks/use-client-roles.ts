@@ -8,7 +8,6 @@ import {
 import { CLIENT_QUERY_KEYS } from '../constants';
 import { apiRequest } from '@/lib/queryClient';
 import type { ClientRole } from '../types';
-
 export function useClientRoles(organizationId: string | undefined) {
   return useQuery({
     queryKey: CLIENT_QUERY_KEYS.roles(organizationId),
@@ -16,7 +15,6 @@ export function useClientRoles(organizationId: string | undefined) {
     enabled: !!organizationId,
   });
 }
-
 export function useClientRole(
   roleId: string | undefined,
   organizationId: string | undefined
@@ -27,16 +25,14 @@ export function useClientRole(
     enabled: !!roleId && !!organizationId,
   });
 }
-
 export function useCreateClientRole() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       role,
       organizationId,
     }: {
-      role: Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id'>;
+      role: Omit<ClientRole, 'id'| 'created_at'| 'updated_at'| 'organization_id'>;
       organizationId: string;
     }) => createClientRole(role, organizationId),
     onSuccess: (data) => {
@@ -49,10 +45,8 @@ export function useCreateClientRole() {
     },
   });
 }
-
 export function useUpdateClientRole() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       roleId,
@@ -60,7 +54,7 @@ export function useUpdateClientRole() {
       organizationId,
     }: {
       roleId: string;
-      updates: Partial<Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id'>>;
+      updates: Partial<Omit<ClientRole, 'id'| 'created_at'| 'updated_at'| 'organization_id'>>;
       organizationId: string;
     }) => updateClientRole(roleId, updates, organizationId),
     onSuccess: (data) => {
@@ -76,10 +70,8 @@ export function useUpdateClientRole() {
     },
   });
 }
-
 export function useDeleteClientRole() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({
       roleId,

@@ -3,17 +3,14 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { DollarSign } from 'lucide-react'
-
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-
 import { FormModalLayout } from '@/components/modal'
 import { FormModalHeader } from '@/components/modal'
 import { FormModalFooter } from '@/components/modal'
-
 import { CascadingSelect } from '@/components/shared/fields/CascadingSelectField'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -38,7 +35,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMovementSubcontracts } from '@/features/subcontracts'
 import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity'
-
 // Schema de movimiento básico - proyecto siempre requerido
 const basicMovementSchema = z.object({
   movement_date: z.date(),
@@ -51,16 +47,15 @@ const basicMovementSchema = z.object({
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Cantidad debe ser mayor a 0'),
   exchange_rate: z.number().optional(),
-  project_id: z.string().nullable().refine((val) => val !== '', { message: 'Proyecto es requerido' })
+  project_id: z.string().nullable().refine((val) => val !== '', { message: 'Proyecto es requerido'})
 })
-
 // Schema para conversión - proyecto siempre requerido
 const conversionSchema = z.object({
   movement_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
   type_id: z.string().min(1, 'Tipo es requerido'),
-  project_id: z.string().nullable().refine((val) => val !== '', { message: 'Proyecto es requerido' }),
+  project_id: z.string().nullable().refine((val) => val !== '', { message: 'Proyecto es requerido'}),
   // Campos de origen (egreso)
   currency_id_from: z.string().min(1, 'Moneda origen es requerida'),
   wallet_id_from: z.string().min(1, 'Billetera origen es requerida'),
@@ -75,14 +70,13 @@ const conversionSchema = z.object({
   message: "Las monedas de origen y destino deben ser diferentes",
   path: ["currency_id_to"]
 })
-
 // Schema para transferencia interna - proyecto siempre requerido
 const transferSchema = z.object({
   movement_date: z.date(),
   created_by: z.string().min(1, 'Creador es requerido'),
   description: z.string().optional(),
   type_id: z.string().min(1, 'Tipo es requerido'),
-  project_id: z.string().nullable().refine((val) => val !== '', { message: 'Proyecto es requerido' }),
+  project_id: z.string().nullable().refine((val) => val !== '', { message: 'Proyecto es requerido'}),
   currency_id: z.string().min(1, 'Moneda es requerida'),
   wallet_id_from: z.string().min(1, 'Billetera origen es requerida'),
   wallet_id_to: z.string().min(1, 'Billetera destino es requerida'),
@@ -91,11 +85,9 @@ const transferSchema = z.object({
   message: "Las billeteras de origen y destino deben ser diferentes",
   path: ["wallet_id_to"]
 })
-
 type BasicMovementForm = z.infer<typeof basicMovementSchema>
 type ConversionForm = z.infer<typeof conversionSchema>
 type TransferForm = z.infer<typeof transferSchema>
-
 // Function to transform organization concepts to CascadingSelect format
 const transformConceptsToOptions = (concepts: any[]): any[] => {
   return concepts.map(concept => ({
@@ -111,21 +103,18 @@ const transformConceptsToOptions = (concepts: any[]): any[] => {
     })) : undefined
   }))
 }
-
 interface MovementModalProps {
   modalData?: any
   onClose: () => void
   editingMovement?: any // Movement data when editing
   isEditing?: boolean
 }
-
 export function MovementModal({ modalData, onClose, editingMovement: propEditingMovement, isEditing: propIsEditing }: MovementModalProps) {
   // Extract editing and viewing data from modalData or props
   const editingMovement = propEditingMovement || modalData?.editingMovement
   const viewingMovement = modalData?.viewingMovement
   const movementData = editingMovement || viewingMovement
   const isEditing = propIsEditing || !!editingMovement
-
   // Hooks - Always get fresh data for modal to ensure latest organization preferences
   const { data: userData } = useCurrentUser(true) // Force fresh data
   const { data: currencies = [] } = useOrganizationCurrencies(userData?.organization?.id)
@@ -171,16 +160,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   
   // Selector de proyecto siempre visible
   const showProjectSelector = true
-
   // Mutaciones para subcontratos
   const createMovementSubcontractsMutation = useCreateMovementSubcontracts()
   const updateMovementSubcontractsMutation = useUpdateMovementSubcontracts()
-
   // Lazy-loaded queries for associations - only enabled when needed
   const { data: existingSubcontracts, refetch: refetchSubcontracts } = useMovementSubcontracts(
     isEditing && editingMovement?.id ? editingMovement.id : undefined
   )
-
   // States for hierarchical selection are now defined above with synchronous initialization
   
   // Infer movementType synchronously from editing data or default to 'normal'
@@ -200,7 +186,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     return 'normal'
   }, [editingMovement?.view_mode, editingMovement?.type_id, movementConcepts])
   
-  const [movementType, setMovementType] = React.useState<'normal' | 'conversion' | 'transfer'>(inferMovementType)
+  const [movementType, setMovementType] = React.useState<'normal'| 'conversion'| 'transfer'>(inferMovementType)
   const [selectedPersonnel, setSelectedPersonnel] = React.useState<Array<{personnel_id: string, contact_name: string}>>([])
   const [selectedSubcontracts, setSelectedSubcontracts] = React.useState<Array<{subcontract_id: string, contact_name: string}>>([])
   const [selectedIndirects, setSelectedIndirects] = React.useState<Array<{indirect_id: string, indirect_name: string}>>([])
@@ -211,7 +197,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   
   // Simplified flag for initial data loading
   const [hasLoadedInitialData, setHasLoadedInitialData] = React.useState(false)
-
   // Synchronous initialization of hierarchical selection states
   const [selectedTypeId, setSelectedTypeId] = React.useState(editingMovement?.type_id || '')
   const [selectedCategoryId, setSelectedCategoryId] = React.useState(() => {
@@ -240,7 +225,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       setSelectedSubcontracts(transformedSubcontracts)
     }
   }, [existingSubcontracts])
-
   // Process indirects synchronously from movementData
   React.useEffect(() => {
     if (editingMovement?.indirect_id && editingMovement?.indirect) {
@@ -250,8 +234,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       }])
     }
   }, [editingMovement?.indirect_id, editingMovement?.indirect])
-
-
   // Extract default values with fallbacks to prevent blocking
   const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies[0]?.currency?.id || ''
   const defaultWallet = userData?.organization?.preferences?.default_wallet || wallets[0]?.id || ''
@@ -260,7 +242,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const currentMember = React.useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
   }, [members, userData?.user?.id])
-
   // Calculate categories and subcategories like the original modal
   const categories = React.useMemo(() => {
     if (!movementConcepts || !selectedTypeId) return []
@@ -281,14 +262,12 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     
     return selectedType?.children || []
   }, [movementConcepts, selectedTypeId])
-
   const subcategories = React.useMemo(() => {
     if (!selectedCategoryId || !categories) return []
     
     const selectedCategory = categories.find((cat: any) => cat.id === selectedCategoryId)
     return selectedCategory?.children || []
   }, [categories, selectedCategoryId])
-
   // Helper function para manejar fechas correctamente evitando problemas de timezone
   const parseMovementDate = (dateString: string | undefined): Date => {
     if (!dateString) return new Date()
@@ -305,7 +284,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     // Fallback para otras formas de fecha
     return new Date(dateString)
   }
-
   // Synchronous form initialization - no waiting for async data
   const form = useForm<BasicMovementForm>({
     resolver: zodResolver(basicMovementSchema),
@@ -323,7 +301,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       project_id: editingMovement?.project_id || (userData?.preferences?.last_project_id || null)
     }
   })
-
   // Update form defaults when better data becomes available (non-blocking)
   React.useEffect(() => {
     // Skip if we're editing (editing movement already has all values)
@@ -356,7 +333,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       setHasLoadedInitialData(true)
     }
   }, [userData?.user?.id, currentMember?.id, currencies.length, wallets.length, defaultCurrency, defaultWallet, isEditing, editingMovement?.created_by, form])
-
   // Synchronous conversion form initialization
   const conversionForm = useForm<ConversionForm>({
     resolver: zodResolver(conversionSchema),
@@ -375,7 +351,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       exchange_rate: editingMovement?.exchange_rate || undefined
     }
   })
-
   // Update conversion form defaults when data becomes available
   React.useEffect(() => {
     if (isEditing && editingMovement?.created_by) return
@@ -391,7 +366,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       conversionForm.reset({ ...currentValues, ...updatedDefaults }, { keepDirtyValues: false })
     }
   }, [currentMember?.id, currencies.length, wallets.length, defaultCurrency, defaultWallet, isEditing, editingMovement?.created_by, conversionForm])
-
   // Synchronous transfer form initialization
   const transferForm = useForm<TransferForm>({
     resolver: zodResolver(transferSchema),
@@ -407,7 +381,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       amount: editingMovement?.amount || 0
     }
   })
-
   // Update transfer form defaults when data becomes available
   React.useEffect(() => {
     if (isEditing && editingMovement?.created_by) return
@@ -423,7 +396,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       transferForm.reset({ ...currentValues, ...updatedDefaults }, { keepDirtyValues: false })
     }
   }, [currentMember?.id, currencies.length, wallets.length, defaultCurrency, defaultWallet, isEditing, editingMovement?.created_by, transferForm])
-
   // Handle type change para detectar conversión (como en el modal original) - MOVED AFTER FORMS
   const handleTypeChange = React.useCallback((newTypeId: string) => {
     if (!newTypeId || !movementConcepts) return
@@ -432,8 +404,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     if (newTypeId === selectedTypeId) {
       const selectedConcept = movementConcepts.find((concept: any) => concept.id === newTypeId)
       const viewMode = (selectedConcept?.view_mode ?? "normal").trim()
-      const expectedMovementType = viewMode.includes("conversion") ? 'conversion' : 
-                                  viewMode.includes("transfer") ? 'transfer' : 'normal'
+      const expectedMovementType = viewMode.includes("conversion") ? 'conversion': 
+                                  viewMode.includes("transfer") ? 'transfer': 'normal'
       
       if (expectedMovementType === movementType) {
         // Already in correct state - no action needed
@@ -494,8 +466,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     transferForm.setValue('created_by', commonValues.created_by, formOptions)
     
     // Cambiar tipo de movimiento DESPUÉS de sincronizar - con comparación más robusta
-    const newMovementType = viewMode.includes("conversion") ? 'conversion' : 
-                           viewMode.includes("transfer") ? 'transfer' : 'normal'
+    const newMovementType = viewMode.includes("conversion") ? 'conversion': 
+                           viewMode.includes("transfer") ? 'transfer': 'normal'
     
     if (newMovementType !== movementType) {
       setMovementType(newMovementType)
@@ -505,14 +477,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     const currentCategoryId = selectedCategoryId
     const currentSubcategoryId = selectedSubcategoryId
     
-    if (currentCategoryId !== '' || currentSubcategoryId !== '') {
+    if (currentCategoryId !== ''|| currentSubcategoryId !== '') {
       setSelectedCategoryId('')
       setSelectedSubcategoryId('')
       form.setValue('category_id', '', formOptions)
       form.setValue('subcategory_id', '', formOptions)
     }
   }, [movementConcepts, form, conversionForm, transferForm, movementType, selectedTypeId, selectedCategoryId, selectedSubcategoryId])
-
   // Effect adicional para sincronización cuando cambia movementType (solo durante carga inicial)
   React.useEffect(() => {
     if (!movementType || hasLoadedInitialData) return
@@ -533,22 +504,18 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       conversionForm.setValue('created_by', commonValues.created_by, formOptions)
       conversionForm.setValue('type_id', selectedTypeId || commonValues.type_id, formOptions)
       conversionForm.setValue('project_id', form.getValues('project_id'), formOptions)
-
     } else if (movementType === 'transfer') {
       transferForm.setValue('movement_date', commonValues.movement_date, formOptions)
       transferForm.setValue('description', commonValues.description, formOptions)
       transferForm.setValue('created_by', commonValues.created_by, formOptions)
       transferForm.setValue('type_id', commonValues.type_id, formOptions)
-
     }
     
     // Mark as complete after first successful synchronization
     setHasLoadedInitialData(true)
   }, [movementType, form, conversionForm, transferForm, hasLoadedInitialData, selectedTypeId])
-
   // Función para cargar datos específicos de conversión
   const loadConversionData = async (movement: any) => {
-
     
     try {
       // Obtener TODOS los movimientos del grupo de conversión y ordenar por amount descendente
@@ -557,14 +524,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         .select('*')
         .eq('conversion_group_id', movement.conversion_group_id)
         .order('amount', { ascending: false })
-
       if (error || !allGroupMovements || allGroupMovements.length !== 2) {
         console.error('Error al buscar grupo de conversión:', error)
         return
       }
-
-
-
       // Buscar tipos de egreso e ingreso en los conceptos de movimiento
       const egressType = movementConcepts?.find((concept: any) => 
         concept.name?.toLowerCase().includes('egreso')
@@ -572,7 +535,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       const ingressType = movementConcepts?.find((concept: any) => 
         concept.name?.toLowerCase().includes('ingreso')
       )
-
       // Identificar movimientos por TIPO, no por amount
       const originMovement = allGroupMovements.find(m => m.type_id === egressType?.id)
       const destinationMovement = allGroupMovements.find(m => m.type_id === ingressType?.id)
@@ -582,8 +544,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         return
       }
       
-
-
       // Llenar formulario de conversión
       conversionForm.setValue('movement_date', new Date(movement.movement_date))
       conversionForm.setValue('description', movement.description)
@@ -601,23 +561,18 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       conversionForm.setValue('wallet_id_to', destinationMovement.wallet_id)
       conversionForm.setValue('amount_to', destinationMovement.amount) // Ya no necesito Math.abs
       
-
       
       // Cotización
       if (movement.exchange_rate) {
         conversionForm.setValue('exchange_rate', movement.exchange_rate)
       }
-
-
       
     } catch (error) {
       console.error('Error al cargar datos de conversión:', error)
     }
   }
-
   // Función para cargar datos específicos de transferencia
   const loadTransferData = async (movement: any) => {
-
     
     try {
       // Buscar el movimiento complementario de la transferencia
@@ -627,19 +582,14 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         .eq('transfer_group_id', movement.transfer_group_id)
         .neq('id', movement.id)
         .single()
-
       if (error) {
         console.error('Error al buscar movimiento complementario:', error)
         return
       }
-
-
-
       // Determinar si el movimiento actual es origen o destino
       const isOrigin = movement.amount < 0 // Los egresos son negativos (origen)
       const originMovement = isOrigin ? movement : transferMovements
       const destinationMovement = isOrigin ? transferMovements : movement
-
       // Llenar formulario de transferencia
       transferForm.setValue('movement_date', new Date(movement.movement_date))
       transferForm.setValue('description', movement.description)
@@ -651,20 +601,15 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       transferForm.setValue('wallet_id_from', originMovement.wallet_id)
       transferForm.setValue('wallet_id_to', destinationMovement.wallet_id)
       transferForm.setValue('amount', Math.abs(originMovement.amount))
-
-
       
     } catch (error) {
       console.error('Error al cargar datos de transferencia:', error)
     }
   }
-
   // ALL EFFECTS THAT DEPEND ON handleTypeChange ARE MOVED TO AFTER ITS DEFINITION
-
   // Effect para sincronizar estados cuando se está editando (una sola vez)
   React.useEffect(() => {
     if (!isEditing || !editingMovement || !movementConcepts || hasLoadedInitialData) return
-
     // Llenar formulario principal con los datos básicos del movimiento
     form.setValue('movement_date', parseMovementDate(editingMovement.movement_date))
     form.setValue('description', editingMovement.description || '')
@@ -675,7 +620,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     form.setValue('currency_id', editingMovement.currency_id)
     form.setValue('wallet_id', editingMovement.wallet_id)
     form.setValue('amount', editingMovement.amount)
-
     // DETECTAR TIPO DE MOVIMIENTO CORRECTO AL EDITAR
     if (editingMovement.is_conversion || editingMovement.conversion_group_id) {
       // Es una conversión - buscar el tipo "Conversión"
@@ -726,19 +670,14 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         form.setValue('subcategory_id', editingMovement.subcategory_id)
       }, 200)
     }
-
     // Cargar asignaciones existentes
     if (editingMovement.id) {
       loadMovementSubcontracts(editingMovement.id)
       loadMovementIndirects(editingMovement.id)
     }
-
     // Finalizar carga inicial
     setHasLoadedInitialData(true)
-
   }, [isEditing, editingMovement, movementConcepts, handleTypeChange, form, loadConversionData, loadTransferData, hasLoadedInitialData])
-
-
   // Función para cargar subcontratos asignados del movimiento
   const loadMovementSubcontracts = React.useCallback(async (movementId: string) => {
     try {
@@ -755,29 +694,24 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           )
         `)
         .eq('movement_id', movementId)
-
       if (error) throw error
-
       if (subcontractAssignments && subcontractAssignments.length > 0) {
         const formattedSubcontracts = subcontractAssignments.map((assignment: any) => {
           const contact = assignment.subcontracts?.contact
           const contactName = contact 
             ? `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Sin nombre'
             : 'Sin nombre'
-
           return {
             subcontract_id: assignment.subcontract_id,
             contact_name: contactName
           }
         })
-
         setSelectedSubcontracts(formattedSubcontracts)
       }
     } catch (error) {
       console.error('Error loading subcontract assignments:', error)
     }
   }, [])
-
   // Función para cargar costos indirectos asignados al movimiento
   const loadMovementIndirects = React.useCallback(async (movementId: string) => {
     try {
@@ -791,41 +725,33 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           )
         `)
         .eq('movement_id', movementId)
-
       if (error) throw error
-
       if (indirectAssignments && indirectAssignments.length > 0) {
         const formattedIndirects = indirectAssignments.map((assignment: any) => {
           const indirectName = assignment.indirect_costs?.name || 'Sin nombre'
-
           return {
             indirect_id: assignment.indirect_id,
             indirect_name: indirectName
           }
         })
-
         setSelectedIndirects(formattedIndirects)
       }
     } catch (error) {
       console.error('Error loading indirect cost assignments:', error)
     }
   }, [])
-
   // Mutation para crear/editar el movimiento normal
   const createMovementMutation = useMutation({
     mutationFn: async (data: BasicMovementForm) => {
-
-
       if (!userData?.organization?.id) {
         throw new Error('Organization ID not found')
       }
-
       // Preparar datos del movimiento según la estructura de la tabla
       const movementData = {
         organization_id: userData.organization.id,
         project_id: data.project_id || null,
-        movement_date: data.movement_date.getFullYear() + '-' + 
-          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+        movement_date: data.movement_date.getFullYear() + '-'+ 
+          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-'+ 
           String(data.movement_date.getDate()).padStart(2, '0'),
         created_by: data.created_by,
         description: data.description,
@@ -839,9 +765,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         is_conversion: false,
         is_favorite: false
       }
-
       let result;
-
       if (isEditing && editingMovement?.id) {
         // Actualizar movimiento existente
         const { data: updateResult, error } = await supabase
@@ -850,24 +774,19 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           .eq('id', editingMovement.id)
           .select()
           .single()
-
         if (error) throw error
         result = updateResult
-
         // Actualizar subcontratos asignados - eliminar existentes y crear nuevos
         const { error: deleteSubcontractsError } = await supabase
           .from('movement_subcontracts')
           .delete()
           .eq('movement_id', editingMovement.id)
-
         if (deleteSubcontractsError) throw deleteSubcontractsError
-
         // Actualizar costos indirectos asignados - eliminar existentes y crear nuevos
         const { error: deleteIndirectsError } = await supabase
           .from('movement_indirects')
           .delete()
           .eq('movement_id', editingMovement.id)
-
         if (deleteIndirectsError) throw deleteIndirectsError
       } else {
         // Crear nuevo movimiento
@@ -876,11 +795,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           .insert(movementData)
           .select()
           .single()
-
         if (error) throw error
         result = insertResult
       }
-
       // Si hay subcontratos seleccionados, usar hook unificado
       if (selectedSubcontracts && selectedSubcontracts.length > 0) {
         if (isEditing) {
@@ -897,7 +814,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           })
         }
       }
-
       // Si hay costos indirectos seleccionados, guardar las asignaciones en movement_indirects
       if (selectedIndirects && selectedIndirects.length > 0) {
         // Primero eliminar registros existentes si es edición
@@ -906,7 +822,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             .from('movement_indirects')
             .delete()
             .eq('movement_id', editingMovement.id)
-
           if (deleteError) throw deleteError
         }
         
@@ -914,14 +829,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           movement_id: result.id,
           indirect_id: indirect.indirect_id
         }))
-
         const { error: indirectsError } = await supabase
           .from('movement_indirects')
           .insert(indirectsData)
-
         if (indirectsError) throw indirectsError
       }
-
       return result
     },
     onSuccess: async (result, variables) => {
@@ -939,7 +851,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           concept_name: conceptName
         }
       })
-
       // Si estamos creando un nuevo movimiento (no editando), marcar checklist
       if (!isEditing) {
         try {
@@ -955,7 +866,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           console.error('Error calling tick_home_checklist:', error);
         }
       }
-
       // Invalidar todas las queries relacionadas
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movements-view'] })
@@ -995,8 +905,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       await new Promise(resolve => setTimeout(resolve, 300))
       
       toast({
-        title: isEditing ? 'Movimiento actualizado' : 'Movimiento creado',
-        description: isEditing ? 'El movimiento ha sido actualizado correctamente' : 'El movimiento ha sido creado correctamente',
+        title: isEditing ? 'Movimiento actualizado': 'Movimiento creado',
+        description: isEditing ? 'El movimiento ha sido actualizado correctamente': 'El movimiento ha sido creado correctamente',
       })
       onClose()
     },
@@ -1004,25 +914,21 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Error al ${isEditing ? 'actualizar' : 'crear'} el movimiento: ${error.message}`,
+        description: `Error al ${isEditing ? 'actualizar': 'crear'} el movimiento: ${error.message}`,
       })
     }
   })
-
   // Mutation para crear conversión (como en el modal original)
   const createConversionMutation = useMutation({
     mutationFn: async (data: ConversionForm) => {
       if (!userData?.organization?.id) {
         throw new Error('Organization ID not found')
       }
-
       // Si estamos editando, usar el conversion_group_id existente
       const conversionGroupId = isEditing && editingMovement?.conversion_group_id 
         ? editingMovement.conversion_group_id 
         : crypto.randomUUID()
       
-
-
       // Buscar tipos de egreso e ingreso
       const egressType = movementConcepts?.find((concept: any) => 
         concept.name?.toLowerCase().includes('egreso')
@@ -1030,9 +936,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       const ingressType = movementConcepts?.find((concept: any) => 
         concept.name?.toLowerCase().includes('ingreso')
       )
-
       if (isEditing && editingMovement?.conversion_group_id) {
-
         
         // Buscar ambos movimientos de la conversión
         const { data: conversionMovements, error: fetchError } = await supabase
@@ -1040,13 +944,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           .select('*')
           .eq('conversion_group_id', editingMovement.conversion_group_id)
           .order('created_at')
-
         if (fetchError) throw fetchError
-
         if (!conversionMovements || conversionMovements.length !== 2) {
           throw new Error('Error: no se encontraron ambos movimientos de la conversión')
         }
-
         // Buscar tipos de egreso e ingreso
         const egressType = movementConcepts?.find((concept: any) => 
           concept.name?.toLowerCase().includes('egreso')
@@ -1054,23 +955,18 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         const ingressType = movementConcepts?.find((concept: any) => 
           concept.name?.toLowerCase().includes('ingreso')
         )
-
         // Identificar cuál es origen y destino POR TIPO
         const originMovement = conversionMovements.find(m => m.type_id === egressType?.id)
         const destMovement = conversionMovements.find(m => m.type_id === ingressType?.id)
-
         if (!originMovement || !destMovement) {
           throw new Error('Error: no se pudieron identificar los movimientos de origen y destino por tipo')
         }
-
-
-
         // Actualizar movimiento de origen (egreso)
         const { error: updateOriginError } = await supabase
           .from('movements')
           .update({
-            movement_date: data.movement_date.getFullYear() + '-' + 
-              String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+            movement_date: data.movement_date.getFullYear() + '-'+ 
+              String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-'+ 
               String(data.movement_date.getDate()).padStart(2, '0'),
             description: data.description || 'Conversión - Salida',
             amount: data.amount_from,
@@ -1080,15 +976,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             updated_at: new Date().toISOString()
           })
           .eq('id', originMovement.id)
-
         if (updateOriginError) throw updateOriginError
-
         // Actualizar movimiento de destino (ingreso)
         const { error: updateDestError } = await supabase
           .from('movements')
           .update({
-            movement_date: data.movement_date.getFullYear() + '-' + 
-              String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+            movement_date: data.movement_date.getFullYear() + '-'+ 
+              String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-'+ 
               String(data.movement_date.getDate()).padStart(2, '0'),
             description: data.description ? data.description.replace('Salida', 'Entrada') : 'Conversión - Entrada',
             amount: data.amount_to,
@@ -1098,21 +992,16 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             updated_at: new Date().toISOString()
           })
           .eq('id', destMovement.id)
-
         if (updateDestError) throw updateDestError
-
-
         return { id: editingMovement.id, updated: true, isUpdate: true, amount_from: data.amount_from, amount_to: data.amount_to, description: data.description }
-
       } else {
-
         
         // Crear movimiento de egreso
         const egressMovementData = {
           organization_id: userData.organization.id,
           project_id: data.project_id || null,
-          movement_date: data.movement_date.getFullYear() + '-' + 
-            String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+          movement_date: data.movement_date.getFullYear() + '-'+ 
+            String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-'+ 
             String(data.movement_date.getDate()).padStart(2, '0'),
           created_by: data.created_by,
           description: data.description || 'Conversión - Salida',
@@ -1125,13 +1014,12 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           is_conversion: true,
           is_favorite: false
         }
-
         // Crear movimiento de ingreso
         const ingressMovementData = {
           organization_id: userData.organization.id,
           project_id: data.project_id || null,
-          movement_date: data.movement_date.getFullYear() + '-' + 
-            String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+          movement_date: data.movement_date.getFullYear() + '-'+ 
+            String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-'+ 
             String(data.movement_date.getDate()).padStart(2, '0'),
           created_by: data.created_by,
           description: data.description ? data.description.replace('Salida', 'Entrada') : 'Conversión - Entrada',
@@ -1144,15 +1032,12 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           is_conversion: true,
           is_favorite: false
         }
-
         // Insertar ambos movimientos
         const { data: results, error } = await supabase
           .from('movements')
           .insert([egressMovementData, ingressMovementData])
           .select()
-
         if (error) throw error
-
         return { ...results[0], amount_from: data.amount_from, amount_to: data.amount_to, description: data.description }
       }
     },
@@ -1171,7 +1056,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           concept_name: conceptName
         }
       })
-
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movements-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
@@ -1179,8 +1063,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
       queryClient.invalidateQueries({ queryKey: ['installments'] })
       toast({
-        title: isEditing ? 'Conversión actualizada' : 'Conversión creada',
-        description: isEditing ? 'La conversión ha sido actualizada correctamente' : 'La conversión ha sido creada correctamente',
+        title: isEditing ? 'Conversión actualizada': 'Conversión creada',
+        description: isEditing ? 'La conversión ha sido actualizada correctamente': 'La conversión ha sido creada correctamente',
       })
       onClose()
     },
@@ -1188,21 +1072,18 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Error al ${isEditing ? 'actualizar' : 'crear'} la conversión: ${error.message}`,
+        description: `Error al ${isEditing ? 'actualizar': 'crear'} la conversión: ${error.message}`,
       })
     }
   })
-
   // Mutation para crear transferencia interna
   const createTransferMutation = useMutation({
     mutationFn: async (data: TransferForm) => {
       if (!userData?.organization?.id) {
         throw new Error('Organization ID not found')
       }
-
       // Crear nueva transferencia con grupo UUID
       const transferGroupId = crypto.randomUUID()
-
       // Buscar tipos de egreso e ingreso
       const egressType = movementConcepts?.find((concept: any) => 
         concept.name?.toLowerCase().includes('egreso')
@@ -1210,13 +1091,12 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       const ingressType = movementConcepts?.find((concept: any) => 
         concept.name?.toLowerCase().includes('ingreso')
       )
-
       // Crear movimiento de egreso (salida)
       const egressMovementData = {
         organization_id: userData.organization.id,
         project_id: data.project_id || null,
-        movement_date: data.movement_date.getFullYear() + '-' + 
-          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+        movement_date: data.movement_date.getFullYear() + '-'+ 
+          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-'+ 
           String(data.movement_date.getDate()).padStart(2, '0'),
         created_by: data.created_by,
         description: data.description || 'Transferencia - Salida',
@@ -1228,13 +1108,12 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         is_conversion: false,
         is_favorite: false
       }
-
       // Crear movimiento de ingreso (entrada)
       const ingressMovementData = {
         organization_id: userData.organization.id,
         project_id: data.project_id || null,
-        movement_date: data.movement_date.getFullYear() + '-' + 
-          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-' + 
+        movement_date: data.movement_date.getFullYear() + '-'+ 
+          String(data.movement_date.getMonth() + 1).padStart(2, '0') + '-'+ 
           String(data.movement_date.getDate()).padStart(2, '0'),
         created_by: data.created_by,
         description: data.description || 'Transferencia - Entrada',
@@ -1246,15 +1125,12 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         is_conversion: false,
         is_favorite: false
       }
-
       // Insertar ambos movimientos
       const { data: results, error } = await supabase
         .from('movements')
         .insert([egressMovementData, ingressMovementData])
         .select()
-
       if (error) throw error
-
       return { ...results[0], amount: data.amount, description: data.description }
     },
     onSuccess: async (result, variables) => {
@@ -1272,7 +1148,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           concept_name: conceptName
         }
       })
-
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movements-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
@@ -1293,33 +1168,28 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       })
     }
   })
-
   // Función de envío que ejecuta la mutación apropiada
   const onSubmit = (values: BasicMovementForm) => {
     createMovementMutation.mutate(values)
   }
-
   const onSubmitConversion = (values: ConversionForm) => {
     createConversionMutation.mutate(values)
   }
-
   const onSubmitTransfer = (values: TransferForm) => {
     createTransferMutation.mutate(values)
   }
-
   // Effect para manejar ENTER key para submit
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Solo procesar ENTER
       if (
-        event.key === 'Enter' && 
+        event.key === 'Enter'&& 
         event.ctrlKey === false && 
         event.altKey === false
       ) {
         // Evitar el comportamiento por defecto
         event.preventDefault()
         event.stopPropagation()
-
         // Hacer submit según el tipo de movimiento
         if (movementType === 'conversion') {
           conversionForm.handleSubmit(onSubmitConversion)()
@@ -1330,10 +1200,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         }
       }
     }
-
     // Agregar event listener
     document.addEventListener('keydown', handleKeyDown)
-
     // Cleanup
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
@@ -1347,8 +1215,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     onSubmitConversion,
     onSubmitTransfer
   ])
-
-
   // Renderizar panel para conversiones
   const conversionPanel = (
     <Form {...conversionForm} key={`conversion-${movementType}`}>
@@ -1374,7 +1240,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             </FormItem>
           )}
         />
-
         {/* Fecha */}
         <FormField
           control={conversionForm.control}
@@ -1410,7 +1275,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             </FormItem>
           )}
         />
-
         {/* Tipo de Movimiento */}
         <FormField
           control={conversionForm.control}
@@ -1442,7 +1306,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             </FormItem>
           )}
         />
-
         {/* Descripción */}
         <FormField
           control={conversionForm.control}
@@ -1460,7 +1323,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             </FormItem>
           )}
         />
-
         {/* CAMPOS ESPECÍFICOS DE CONVERSIÓN */}
         <ConversionFields
           form={conversionForm}
@@ -1474,7 +1336,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       </form>
     </Form>
   )
-
   // Renderizar panel para transferencias internas
   const transferPanel = (
     <Form {...transferForm} key={`transfer-${movementType}`}>
@@ -1499,7 +1360,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             </FormItem>
           )}
         />
-
         {/* 1. FECHA */}
         <FormField
           control={transferForm.control}
@@ -1535,7 +1395,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             </FormItem>
           )}
         />
-
         {/* 2. TIPO DE MOVIMIENTO */}
         <FormField
           control={transferForm.control}
@@ -1567,7 +1426,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             </FormItem>
           )}
         />
-
         {/* 3. DESCRIPCIÓN (TEXTAREA) */}
         <FormField
           control={transferForm.control}
@@ -1585,7 +1443,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             </FormItem>
           )}
         />
-
         {/* 4. CAMPOS ESPECÍFICOS DE TRANSFERENCIA */}
         <TransferFields
           form={transferForm}
@@ -1597,7 +1454,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       </form>
     </Form>
   )
-
   // Renderizar panel para movimientos normales
   const normalPanel = (
     <Form {...form} key={`normal-${movementType}`}>
@@ -1639,13 +1495,11 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
               </FormItem>
             )}
           />
-
           {/* 2. TIPO DE MOVIMIENTO - USAR EL DE commonFields */}
           <div className="md:col-span-2">
             <p className="text-sm text-muted-foreground">El selector de tipo se renderiza en commonFields</p>
           </div>
         </div>
-
         {/* 3. DESCRIPCIÓN (TEXTAREA) */}
         <FormField
           control={form.control}
@@ -1663,8 +1517,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             </FormItem>
           )}
         />
-
-
         {/* 4. CAMPOS ESPECÍFICOS DE MOVIMIENTO NORMAL */}
         <DefaultMovementFields
           form={form}
@@ -1688,7 +1540,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       </form>
     </Form>
   )
-
   // Campos comunes (siempre los mismos)
   const commonFields = (
     <div className="space-y-4">
@@ -1750,7 +1601,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             </FormItem>
           )}
         />
-
         {/* 2. TIPO DE MOVIMIENTO CON CASCADINGSELECT - OCUPA 2 COLUMNAS */}
         <FormItem className="md:col-span-2">
           <FormLabel>Tipo de Movimiento *</FormLabel>
@@ -1806,7 +1656,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           <FormMessage />
         </FormItem>
       </div>
-
       {/* 3. DESCRIPCIÓN (TEXTAREA) */}
       <FormField
         control={form.control}
@@ -1817,7 +1666,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             <FormControl>
               <Textarea
                 placeholder={
-                  movementType === 'conversion' 
+                  movementType === 'conversion'
                     ? "Descripción de la conversión..." 
                     : movementType === 'transfer'
                       ? "Descripción de la transferencia..."
@@ -1839,10 +1688,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           </FormItem>
         )}
       />
-
     </div>
   )
-
   // Panel unificado con campos comunes arriba y específicos abajo
   const editPanel = (
     <Form {...form} key={`unified-${movementType}`}>
@@ -1859,9 +1706,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         
         {/* CAMPOS COMUNES (siempre iguales) */}
         {commonFields}
-
         {/* CAMPOS ESPECÍFICOS según tipo */}
-        {movementType === 'conversion' && (
+        {movementType === 'conversion'&& (
           <ConversionFields
             form={conversionForm}
             currencies={currencies}
@@ -1872,8 +1718,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             showExchangeRate={showExchangeRate}
           />
         )}
-
-        {movementType === 'transfer' && (
+        {movementType === 'transfer'&& (
           <TransferFields
             form={transferForm}
             currencies={currencies}
@@ -1882,8 +1727,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
             concepts={movementConcepts}
           />
         )}
-
-        {movementType === 'normal' && (
+        {movementType === 'normal'&& (
           <DefaultMovementFields
             form={form}
             currencies={currencies}
@@ -1909,14 +1753,10 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       </form>
     </Form>
   )
-
   // Panel de vista (por ahora igual al de edición)
   const viewPanel = editPanel
-
-
   // Panel a mostrar siempre es editPanel
   const currentPanel = editPanel
-
   // Header del modal
   const headerContent = (
     <FormModalHeader 
@@ -1925,26 +1765,24 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       icon={DollarSign}
     />
   )
-
   // Footer del modal
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
       rightLabel={isEditing ? "Actualizar" : "Guardar"}
-      onRightClick={movementType === 'conversion' 
+      onRightClick={movementType === 'conversion'
         ? conversionForm.handleSubmit(onSubmitConversion)
         : movementType === 'transfer'
           ? transferForm.handleSubmit(onSubmitTransfer)
           : form.handleSubmit(onSubmit)}
-      showLoadingSpinner={movementType === 'conversion' 
+      showLoadingSpinner={movementType === 'conversion'
         ? createConversionMutation.isPending 
         : movementType === 'transfer'
           ? createTransferMutation.isPending
           : createMovementMutation.isPending}
     />
   )
-
   return (
     <FormModalLayout
       columns={1}

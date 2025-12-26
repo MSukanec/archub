@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-
 export interface TaskLibraryItem {
   id: string;
   code: string;
@@ -22,7 +21,6 @@ export interface TaskLibraryItem {
   rubro_code: string;
   display_name: string;
 }
-
 export function useTaskLibrary(organizationId: string) {
   return useQuery({
     queryKey: ['task-library', organizationId],

@@ -47,7 +47,6 @@ import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useLocation } from "wouter";
 import { type WidthProp, resolveWidthMode, getContainerClasses, getHeaderPaddingClasses, getContentPaddingClasses } from "./layoutWidth";
-
 // Mapeo de rutas a nombres e iconos de páginas (exactamente como en el sidebar)
 const PAGE_CONFIG: Record<string, { name: string; icon: any }> = {
   // Home
@@ -88,7 +87,6 @@ const PAGE_CONFIG: Record<string, { name: string; icon: any }> = {
   '/learning/dashboard': { name: 'Dashboard', icon: Home },
   '/learning/courses': { name: 'Cursos', icon: GraduationCap },
 };
-
 // Mapeo de sidebar level a nombre de sección
 const SECTION_NAMES: Record<string, string> = {
   'general': 'Inicio',
@@ -97,7 +95,6 @@ const SECTION_NAMES: Record<string, string> = {
   'learning': 'Capacitaciones',
   'admin': 'Administración',
 };
-
 // Mapeo de sidebar level a dashboard route
 const SECTION_DASHBOARDS: Record<string, string> = {
   'general': '/home',
@@ -106,7 +103,6 @@ const SECTION_DASHBOARDS: Record<string, string> = {
   'learning': '/learning/dashboard',
   'admin': '/admin/dashboard',
 };
-
 interface Tab {
   id: string;
   label: string;
@@ -117,7 +113,6 @@ interface Tab {
   isRestricted?: boolean;
   restrictionReason?: string;
 }
-
 interface PageLayoutProps {
   // Título e icono de la página
   icon?: React.ComponentType<any> | React.ReactNode;
@@ -174,8 +169,8 @@ interface PageLayoutProps {
   
   // Selector de vista de moneda
   showCurrencySelector?: boolean;
-  currencyView?: 'discriminado' | 'pesificado' | 'dolarizado';
-  onCurrencyViewChange?: (view: 'discriminado' | 'pesificado' | 'dolarizado') => void;
+  currencyView?: 'discriminado'| 'pesificado'| 'dolarizado';
+  onCurrencyViewChange?: (view: 'discriminado'| 'pesificado'| 'dolarizado') => void;
   
   // Control de ancho - debe coincidir con el contenido
   wide?: WidthProp;
@@ -187,7 +182,6 @@ interface PageLayoutProps {
   // Contenido de la página
   children: React.ReactNode;
 }
-
 export function PageLayout({
   icon,
   title,
@@ -235,12 +229,10 @@ export function PageLayout({
   
   // Ref para el contenedor de scroll (para el Footer)
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
   const handleHeaderSearchChange = (value: string) => {
     setSearchInputValue(value);
     onHeaderSearchChange?.(value);
   };
-
   const hasTabs = tabs.length > 0;
   
   // Determinar si hay botones de acción para mostrar en la segunda fila
@@ -255,7 +247,6 @@ export function PageLayout({
   
   // Mostrar segunda fila si hay tabs O botones de acción
   const showSecondRow = hasTabs || hasActionButtons;
-
   // Actualizar posición del subrayado animado
   useEffect(() => {
     const updateUnderlinePosition = () => {
@@ -297,7 +288,6 @@ export function PageLayout({
     updateUnderlinePosition();
     requestAnimationFrame(updateUnderlinePosition);
   }, [tabs, hasTabs]);
-
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Page Content - HEADER Y CONTENIDO juntos para que se muevan con scroll */}
@@ -308,7 +298,7 @@ export function PageLayout({
             return `${getContainerClasses(mode)} ${getHeaderPaddingClasses(mode)} pt-0 pb-0`;
           })()}>
           {/* FILA 1: Icono + Título + Descripción a la izquierda + Selector a la derecha */}
-          <div className={`min-h-[50px] flex items-center justify-between ${!showSecondRow ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
+          <div className={`min-h-[50px] flex items-center justify-between ${!showSecondRow ? 'border-b border-[var(--main-sidebar-border)]': ''}`}>
           <div className="flex items-center gap-4 py-2">
             {showBackButton && (
               <Button
@@ -355,7 +345,6 @@ export function PageLayout({
               </div>
             </div>
           </div>
-
           {/* Right side: Members and/or Project Selector */}
           <div className="flex items-center gap-3">
             {showMembers && organizationId && (
@@ -369,13 +358,12 @@ export function PageLayout({
             )}
           </div>
         </div>
-
           {/* FILA 2: Tabs a la izquierda + Botones de acción a la derecha */}
           {showSecondRow && (
             <div className="h-[45px] flex items-center justify-between border-b border-border relative overflow-hidden">
               {/* Left: Tabs */}
               {hasTabs && (
-                <div ref={tabsContainerRef} className="flex items-center relative" style={{ gap: '24px' }}>
+                <div ref={tabsContainerRef} className="flex items-center relative" style={{ gap: '24px'}}>
                   {tabs.map((tab) => {
                     const tabContent = (
                       <button
@@ -408,7 +396,6 @@ export function PageLayout({
                         )}
                       </button>
                     );
-
                     // Si la tab está restringida, envolverla con PlanRestricted
                     if (tab.isRestricted && tab.restrictionReason) {
                       return (
@@ -417,7 +404,6 @@ export function PageLayout({
                         </PlanRestricted>
                       );
                     }
-
                     return tabContent;
                   })}
                   
@@ -433,7 +419,6 @@ export function PageLayout({
                   />
                 </div>
               )}
-
               {/* Right: Action Buttons */}
               {hasActionButtons && (
                 <div className="flex items-center gap-1">
@@ -495,7 +480,6 @@ export function PageLayout({
                       </div>
                     </div>
                   )}
-
                   {/* Currency Selector */}
                   {showCurrencySelector && onCurrencyViewChange && (
                     <Popover>
@@ -512,7 +496,7 @@ export function PageLayout({
                       <PopoverContent className="w-40" align="end">
                         <div className="space-y-1">
                           <Button
-                            variant={currencyView === 'discriminado' ? 'default' : 'ghost'}
+                            variant={currencyView === 'discriminado'? 'default': 'ghost'}
                             size="sm"
                             className="w-full justify-start h-8"
                             onClick={() => onCurrencyViewChange('discriminado')}
@@ -520,7 +504,7 @@ export function PageLayout({
                             Discriminado
                           </Button>
                           <Button
-                            variant={currencyView === 'pesificado' ? 'default' : 'ghost'}
+                            variant={currencyView === 'pesificado'? 'default': 'ghost'}
                             size="sm"
                             className="w-full justify-start h-8"
                             onClick={() => onCurrencyViewChange('pesificado')}
@@ -528,7 +512,7 @@ export function PageLayout({
                             Pesificado
                           </Button>
                           <Button
-                            variant={currencyView === 'dolarizado' ? 'default' : 'ghost'}
+                            variant={currencyView === 'dolarizado'? 'default': 'ghost'}
                             size="sm"
                             className="w-full justify-start h-8"
                             onClick={() => onCurrencyViewChange('dolarizado')}
@@ -539,7 +523,6 @@ export function PageLayout({
                       </PopoverContent>
                     </Popover>
                   )}
-
                   {/* Header Filter Button */}
                   {showHeaderFilter && renderHeaderFilterContent && (
                     <Popover>
@@ -557,7 +540,6 @@ export function PageLayout({
                       </PopoverContent>
                     </Popover>
                   )}
-
                   {/* Header Clear Filters Button */}
                   {showHeaderClearFilters && (
                     <Button
@@ -570,12 +552,10 @@ export function PageLayout({
                       <X className="h-4 w-4" />
                     </Button>
                   )}
-
                   {/* Separator if there are header actions and main action buttons */}
                   {(showCurrencySelector || showHeaderSearch || showHeaderFilter || showHeaderClearFilters) && (actionButton?.additionalButton || actionButton || actions.length > 0) && (
                     <div className="w-px h-6 bg-[var(--card-border)] mx-1" />
                   )}
-
                   {/* Secondary Button (left - green) */}
                   {actionButton?.additionalButton && (
                     <Button
@@ -590,14 +570,12 @@ export function PageLayout({
                       {actionButton.additionalButton.label}
                     </Button>
                   )}
-
                   {/* Custom Actions (like PlanRestricted) */}
                   {actions.map((action, index) => (
                     <div key={index}>
                       {action}
                     </div>
                   ))}
-
                   {/* Main Action Button (right - accent/yellow) */}
                   {actionButton && (
                     <>
@@ -645,7 +623,6 @@ export function PageLayout({
           )}
           </div>
         </div>
-
         {/* Page Content */}
         <div className={(() => {
           const mode = resolveWidthMode(wide);

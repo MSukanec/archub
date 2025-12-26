@@ -1,7 +1,6 @@
 /**
  * Constants for the Learning module
  */
-
 // ========== QUERY KEYS ==========
 export const LEARNING_QUERY_KEYS = {
   // Dashboard
@@ -31,33 +30,26 @@ export const LEARNING_QUERY_KEYS = {
   lessonSummaryNote: (lessonId: string) => ['learning', 'lessons', lessonId, 'summary-note'] as const,
   lessonMarkers: (lessonId: string) => ['learning', 'lessons', lessonId, 'markers'] as const,
 } as const;
-
 // ========== NOTE TYPES ==========
 export const NOTE_TYPES = {
   SUMMARY: 'summary',
   MARKER: 'marker',
   GENERAL: 'general',
 } as const;
-
 export type NoteType = typeof NOTE_TYPES[keyof typeof NOTE_TYPES];
-
 // ========== LESSON STATUS ==========
 export const LESSON_STATUS = {
   NOT_STARTED: 'not_started',
   IN_PROGRESS: 'in_progress',
   COMPLETED: 'completed',
 } as const;
-
 export type LessonStatus = typeof LESSON_STATUS[keyof typeof LESSON_STATUS];
-
 // ========== COURSE STATUS ==========
 export const COURSE_STATUS = {
   DRAFT: 'draft',
   PUBLISHED: 'published',
   ARCHIVED: 'archived',
 } as const;
-
 export type CourseStatus = typeof COURSE_STATUS[keyof typeof COURSE_STATUS];
-
 // ========== AUTO-COMPLETION THRESHOLD ==========
 export const AUTO_COMPLETE_THRESHOLD = 95; // Auto-complete lesson when >= 95% progress

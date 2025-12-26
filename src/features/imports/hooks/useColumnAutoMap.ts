@@ -1,7 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import { normalizeText, calculateSimilarity } from '../utils/normalize';
 import type { TargetField, ColumnMapping } from '../types';
-
 const DEFAULT_SMART_MAPPING: Record<string, string[]> = {
   description: ['descripcion', 'descripción', 'concepto', 'detalle', 'nombre', 'name'],
   amount: ['cantidad', 'monto', 'importe', 'total', 'valor', 'price', 'precio', 'monto pagado', 'montopagado'],
@@ -22,20 +21,17 @@ const DEFAULT_SMART_MAPPING: Record<string, string[]> = {
   unit: ['unidad', 'unit', 'medida'],
   quantity: ['cantidad', 'qty', 'quantity', 'unidades'],
 };
-
 interface UseColumnAutoMapProps {
   headers: string[];
   targetSchema: TargetField[];
   customMapping?: Record<string, string>;
 }
-
 interface UseColumnAutoMapReturn {
   autoMapping: ColumnMapping;
   unmappedHeaders: number[];
   unmappedFields: string[];
   getSuggestions: (headerIndex: number) => Array<{ field: string; label: string; similarity: number }>;
 }
-
 export function useColumnAutoMap({
   headers,
   targetSchema,
@@ -57,7 +53,6 @@ export function useColumnAutoMap({
     
     return combined;
   }, [customMapping]);
-
   const autoMapping = useMemo(() => {
     const mapping: ColumnMapping = {};
     const usedFields = new Set<string>();
@@ -115,20 +110,17 @@ export function useColumnAutoMap({
     
     return mapping;
   }, [headers, targetSchema, smartMapping]);
-
   const unmappedHeaders = useMemo(() => {
     return headers
       .map((_, index) => index)
       .filter(index => autoMapping[index] === undefined);
   }, [headers, autoMapping]);
-
   const unmappedFields = useMemo(() => {
     const mappedFields = new Set(Object.values(autoMapping).filter(Boolean));
     return targetSchema
       .filter(field => !mappedFields.has(field.field))
       .map(field => field.field);
   }, [targetSchema, autoMapping]);
-
   const getSuggestions = useCallback((headerIndex: number): Array<{ field: string; label: string; similarity: number }> => {
     const header = headers[headerIndex];
     if (!header) return [];
@@ -151,7 +143,6 @@ export function useColumnAutoMap({
     
     return suggestions;
   }, [headers, targetSchema, autoMapping]);
-
   return {
     autoMapping,
     unmappedHeaders,

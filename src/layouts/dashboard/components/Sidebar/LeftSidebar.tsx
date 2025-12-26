@@ -76,7 +76,6 @@ import { ComingSoonRestricted } from "@/components/shared/restrictions/guards/Co
 import { NotificationBell } from "@/features/users";
 import { useAuthStore } from "@/stores/authStore";
 import { FounderBadge } from "@/components/shared/FounderBadge";
-
 interface SidebarItem {
   id: string;
   label: string;
@@ -85,26 +84,21 @@ interface SidebarItem {
   adminOnly?: boolean;
   restricted?: "coming_soon" | string;
 }
-
 interface SidebarSection {
   type: 'section';
   title: string;
   items: SidebarItem[];
 }
-
 interface SidebarSpacer {
   type: 'spacer';
   id: string;
 }
-
 interface SidebarSectionHeader {
   type: 'section-header';
   id: string;
   label: string;
 }
-
 type NavigationItem = SidebarItem | SidebarSection | SidebarSpacer | SidebarSectionHeader;
-
 export function LeftSidebar() {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
@@ -140,7 +134,6 @@ export function LeftSidebar() {
   
   // Estados simples
   const isExpanded = isDocked || isHovered;
-
   // Get projects data
   const { data: projectsLite = [] } = useProjectsLite(currentOrganizationId || undefined);
   const { data: currentProject } = useProject(selectedProjectId || undefined);
@@ -151,7 +144,6 @@ export function LeftSidebar() {
   
   // Helper to check if there are projects available
   const hasProjects = projectsLite.length > 0;
-
   // PROJECT CHANGE MUTATION
   const selectProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
@@ -191,7 +183,6 @@ export function LeftSidebar() {
       })
     }
   });
-
   const handleProjectChange = (projectId: string) => {
     selectProjectMutation.mutate(projectId);
   };
@@ -221,47 +212,45 @@ export function LeftSidebar() {
       }
     }
   }, [hasProjects, selectedProjectId, selectProjectMutation.isPending, projectsLite, userData?.user?.id, userPreferences, preferencesLoading]);
-
   // Organización y usuario para settings sections
   const organizationName = userData?.organization?.name || 'Organización';
   const isFounder = userData?.organization?.settings?.is_founder === true;
-
   // Navegación según el nivel del sidebar
   const getNavigationItems = (): NavigationItem[] => {
-    if (sidebarLevel === 'general' || sidebarLevel === 'organization') {
+    if (sidebarLevel === 'general'|| sidebarLevel === 'organization') {
       return [
-        { type: 'section-header', id: 'section-gestion', label: 'Gestión' },
-        { id: 'dashboard', label: 'Visión General', icon: Home, href: '/organization/dashboard' },
-        { id: 'basic-data', label: 'Datos Básicos', icon: Building, href: '/organization/basic-data' },
-        { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects' },
-        { id: 'contacts', label: 'Contactos', icon: LuContact, href: '/contacts' },
-        { id: 'settings', label: 'Ajustes', icon: Settings, href: '/organization/settings' },
-        { type: 'section-header', id: 'section-finanzas', label: 'Finanzas' },
-        { id: 'finances-unified', label: 'Finanzas', icon: DollarSign, href: '/finances' },
-        { id: 'capital', label: 'Capital', icon: HandHeart, href: '/organization/capital' },
-        { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs' },
-        { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', restricted: 'lab_user' },
+        { type: 'section-header', id: 'section-gestion', label: 'Gestión'},
+        { id: 'dashboard', label: 'Visión General', icon: Home, href: '/organization/dashboard'},
+        { id: 'basic-data', label: 'Datos Básicos', icon: Building, href: '/organization/basic-data'},
+        { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects'},
+        { id: 'contacts', label: 'Contactos', icon: LuContact, href: '/contacts'},
+        { id: 'settings', label: 'Ajustes', icon: Settings, href: '/organization/settings'},
+        { type: 'section-header', id: 'section-finanzas', label: 'Finanzas'},
+        { id: 'finances-unified', label: 'Finanzas', icon: DollarSign, href: '/finances'},
+        { id: 'capital', label: 'Capital', icon: HandHeart, href: '/organization/capital'},
+        { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs'},
+        { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', restricted: 'lab_user'},
       ];
-    } else if (sidebarLevel === 'project' && selectedProjectId) {
+    } else if (sidebarLevel === 'project'&& selectedProjectId) {
       return [
-        { type: 'section-header', id: 'section-gestion', label: 'Gestión' },
-        { id: 'dashboard', label: 'Visión General', icon: Home, href: '/project/dashboard' },
-        { id: 'basic-data', label: 'Datos Básicos', icon: FileText, href: '/project' },
-        { id: 'media', label: 'Archivos y Media', icon: FolderOpen, href: '/media' },
-        { id: 'finances', label: 'Finanzas', icon: DollarSign, href: '/project/finances', restricted: 'coming_soon' },
-        { type: 'section-header', id: 'section-diseño', label: 'Diseño' },
-        { id: 'moodboard', label: 'Moodboard', icon: Palette, href: '/project/moodboard', restricted: 'coming_soon' },
-        { type: 'section-header', id: 'section-construccion', label: 'Construcción' },
-        { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets', restricted: 'coming_soon' },
-        { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel' },
-        { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials' },
-        { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'coming_soon' },
-        { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon' },
-        { id: 'logs', label: 'Bitácora de Obra', icon: BookOpen, href: '/construction/logs' },
-        { type: 'section-header', id: 'section-comercializacion', label: 'Comercialización y Venta' },
-        { id: 'clients', label: 'Clientes', icon: LuHandshake, href: '/clients' },
+        { type: 'section-header', id: 'section-gestion', label: 'Gestión'},
+        { id: 'dashboard', label: 'Visión General', icon: Home, href: '/project/dashboard'},
+        { id: 'basic-data', label: 'Datos Básicos', icon: FileText, href: '/project'},
+        { id: 'media', label: 'Archivos y Media', icon: FolderOpen, href: '/media'},
+        { id: 'finances', label: 'Finanzas', icon: DollarSign, href: '/project/finances', restricted: 'coming_soon'},
+        { type: 'section-header', id: 'section-diseño', label: 'Diseño'},
+        { id: 'moodboard', label: 'Moodboard', icon: Palette, href: '/project/moodboard', restricted: 'coming_soon'},
+        { type: 'section-header', id: 'section-construccion', label: 'Construcción'},
+        { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets', restricted: 'coming_soon'},
+        { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel'},
+        { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials'},
+        { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'coming_soon'},
+        { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon'},
+        { id: 'logs', label: 'Bitácora de Obra', icon: BookOpen, href: '/construction/logs'},
+        { type: 'section-header', id: 'section-comercializacion', label: 'Comercialización y Venta'},
+        { id: 'clients', label: 'Clientes', icon: LuHandshake, href: '/clients'},
       ];
-    } else if (sidebarLevel === 'admin' && isAdmin) {
+    } else if (sidebarLevel === 'admin'&& isAdmin) {
       return ADMIN_NAVIGATION;
     } else if (sidebarLevel === 'community') {
       return COMMUNITY_NAVIGATION;
@@ -271,9 +260,7 @@ export function LeftSidebar() {
     
     return [];
   };
-
   const navigationItems = getNavigationItems();
-
   // SIDEBAR DOCK MUTATION - Save sidebar_docked state to backend with optimistic updates
   const saveSidebarDockedMutation = useMutation({
     onMutate: async (dockedState: boolean) => {
@@ -325,7 +312,6 @@ export function LeftSidebar() {
       });
     }
   });
-
   const handleDockToggle = () => {
     if (!userData?.user?.id) {
       toast({
@@ -339,7 +325,6 @@ export function LeftSidebar() {
     const newDockedState = !isDocked;
     saveSidebarDockedMutation.mutate(newDockedState);
   };
-
   // Helper to get context title
   const getContextTitle = () => {
     switch (sidebarLevel) {
@@ -352,7 +337,6 @@ export function LeftSidebar() {
       default: return '';
     }
   };
-
   // Handle logout
   const handleLogout = async () => {
     try {
@@ -362,7 +346,6 @@ export function LeftSidebar() {
       console.error('Logout error:', error);
     }
   };
-
   // Fetch notification unread count
   const fetchNotificationUnreadCount = async () => {
     if (!userId) return;
@@ -374,37 +357,27 @@ export function LeftSidebar() {
       console.error('Error fetching unread count:', error);
     }
   };
-
   useEffect(() => {
     if (!userId) return;
-
     fetchNotificationUnreadCount();
-
     const unsubscribe = subscribeUserNotifications(userId, () => {
       fetchNotificationUnreadCount();
     });
-
     return () => {
       unsubscribe();
     };
   }, [userId]);
-
   // 🔥 SUPABASE REALTIME - Suscripción para mensajes de soporte (para badges)
   useEffect(() => {
     if (!supabase || !userId) return;
-
     let channel: any = null;
-
     const setupRealtimeSubscription = async () => {
       // Obtener el user_id de la tabla users
       const userData = await getUserByAuthId(userId);
-
       if (!userData) return;
-
       const dbUserId = userData.id;
-
       // Crear canal único para este usuario/admin
-      const channelName = isAdmin ? 'admin_support_badge' : `user_support_badge_${dbUserId}`;
+      const channelName = isAdmin ? 'admin_support_badge': `user_support_badge_${dbUserId}`;
       
       channel = supabase
         .channel(channelName)
@@ -432,16 +405,13 @@ export function LeftSidebar() {
         )
         .subscribe();
     };
-
     setupRealtimeSubscription();
-
     return () => {
       if (channel) {
         supabase.removeChannel(channel);
       }
     };
   }, [userId, isAdmin]);
-
   return (
     <div className="flex flex-row h-full">
       {/* WRAPPER CON FRAME EFFECT */}
@@ -463,16 +433,14 @@ export function LeftSidebar() {
                       className="h-8 w-auto object-contain"
                     />
                   </div>
-
                   {/* Espacio vacío del tamaño de un botón */}
                   <div className="h-[32px]" />
-
                   {/* BOTONES DE CONTEXTO - Renderizados según el modo del usuario */}
                   {(() => {
                     // Descriptor de botones de contexto con sus configuraciones
                     const contextButtons = [
                       {
-                        id: 'organization' as const,
+                        id: 'organization'as const,
                         icon: <Building className="h-5 w-5" />,
                         onClick: () => {
                           setSidebarLevel('organization');
@@ -481,7 +449,7 @@ export function LeftSidebar() {
                         shouldRender: () => true,
                       },
                       {
-                        id: 'project' as const,
+                        id: 'project'as const,
                         icon: <FolderOpen className="h-5 w-5" />,
                         onClick: () => {
                           setSidebarLevel('project');
@@ -490,12 +458,12 @@ export function LeftSidebar() {
                         shouldRender: () => hasProjects && !!selectedProjectId,
                       },
                       {
-                        id: 'spacer-1' as const,
+                        id: 'spacer-1'as const,
                         isSpacer: true,
                         shouldRender: () => true,
                       },
                       {
-                        id: 'founders' as const,
+                        id: 'founders'as const,
                         icon: <Award className="h-5 w-5" />,
                         testId: 'button-sidebar-founders',
                         onClick: () => {
@@ -508,7 +476,7 @@ export function LeftSidebar() {
                         ),
                       },
                       {
-                        id: 'community' as const,
+                        id: 'community'as const,
                         icon: <Globe className="h-5 w-5" />,
                         testId: 'button-sidebar-community',
                         onClick: () => {
@@ -522,7 +490,7 @@ export function LeftSidebar() {
                         ),
                       },
                       {
-                        id: 'learning' as const,
+                        id: 'learning'as const,
                         icon: <GraduationCap className="h-5 w-5" />,
                         onClick: () => {
                           setSidebarLevel('learning');
@@ -531,7 +499,6 @@ export function LeftSidebar() {
                         shouldRender: () => true,
                       },
                     ];
-
                     // Renderizar los botones de contexto usando el sistema normal
                     return contextButtons
                       .filter((button) => {
@@ -545,7 +512,6 @@ export function LeftSidebar() {
                         if (button.isSpacer) {
                           return <div key={button.id} className="h-[32px]" />;
                         }
-
                         const buttonElement = (
                           <SidebarIconButton
                             icon={button.icon}
@@ -562,7 +528,6 @@ export function LeftSidebar() {
                       });
                   })()}
               </div>
-
             {/* SECCIÓN INFERIOR: Administración, Notificaciones y Avatar del usuario */}
             <div className="px-0 pt-3 pb-3 flex flex-col gap-[2px] items-center">
               {/* Botón Administración - solo si es admin */}
@@ -578,13 +543,10 @@ export function LeftSidebar() {
                   testId="sidebar-button-administration"
                 />
               )}
-
               {/* Badge de Organización Fundadora */}
               <FounderBadge isFounder={userData?.organization?.settings?.is_founder} size="md" />
-
               {/* Botón del Plan Actual */}
               <PlanBadge isExpanded={false} />
-
               {/* Botón de Ayuda con Popover */}
               <Popover open={helpPopoverOpen} onOpenChange={setHelpPopoverOpen}>
                 <PopoverTrigger asChild>
@@ -617,7 +579,6 @@ export function LeftSidebar() {
                       <Mail className="h-4 w-4" />
                       <span>Contacto</span>
                     </button>
-
                     {/* Botón Comunidad Discord */}
                     <button
                       onClick={() => {
@@ -650,16 +611,15 @@ export function LeftSidebar() {
                       {unreadSupportCount > 0 && (
                         <span 
                           className="ml-auto text-white text-xs rounded-full h-5 min-w-[20px] flex items-center justify-center px-1.5 font-bold border-0"
-                          style={{ backgroundColor: 'var(--accent)' }}
+                          style={{ backgroundColor: 'var(--accent)'}}
                         >
-                          {unreadSupportCount > 99 ? '99+' : unreadSupportCount}
+                          {unreadSupportCount > 99 ? '99+': unreadSupportCount}
                         </span>
                       )}
                     </button>
                   </div>
                 </PopoverContent>
               </Popover>
-
               {/* Botón de Notificaciones con Popover */}
               <Popover open={notificationPopoverOpen} onOpenChange={setNotificationPopoverOpen}>
                 <PopoverTrigger asChild>
@@ -688,7 +648,6 @@ export function LeftSidebar() {
                   )}
                 </PopoverContent>
               </Popover>
-
               {/* Avatar del usuario con Popover */}
               <Popover open={avatarPopoverOpen} onOpenChange={setAvatarPopoverOpen}>
                 <PopoverTrigger asChild>
@@ -740,7 +699,6 @@ export function LeftSidebar() {
                       <Home className="h-4 w-4" />
                       <span>Página de Inicio</span>
                     </button>
-
                     {/* Contacto */}
                     <button
                       onClick={() => {
@@ -784,9 +742,8 @@ export function LeftSidebar() {
               </Popover>
             </div>
           </div>
-
           {/* SIDEBAR DERECHO - NAVEGACIÓN ESPECÍFICA (240px, aparece en hover) */}
-          {isHovered && sidebarLevel !== 'general' && (
+          {isHovered && sidebarLevel !== 'general'&& (
             <div className="w-[240px] h-full px-[9px] pt-6 pb-6 flex flex-col">
               {/* Título del contexto con botón de anclar */}
               <div className="mb-6 flex items-center justify-between px-2">
@@ -807,15 +764,14 @@ export function LeftSidebar() {
                   )}
                 </button>
               </div>
-
               {/* Botones de navegación */}
               <div className="flex flex-col gap-[2px] flex-1 overflow-y-auto">
                 {navigationItems.map((navItem) => {
-                    if ('type' in navItem && navItem.type === 'spacer') {
+                    if ('type'in navItem && navItem.type === 'spacer') {
                       return <div key={navItem.id} className="h-9" />;
                     }
                     
-                    if ('type' in navItem && navItem.type === 'section-header') {
+                    if ('type'in navItem && navItem.type === 'section-header') {
                       return (
                         <div key={navItem.id} className="h-9 flex items-center px-2">
                           <span className="text-xs font-semibold text-[var(--main-sidebar-button-fg)] uppercase tracking-wide">
@@ -825,7 +781,7 @@ export function LeftSidebar() {
                       );
                     }
                     
-                    if ('type' in navItem && navItem.type === 'section') return null;
+                    if ('type'in navItem && navItem.type === 'section') return null;
                     
                     const item = navItem as SidebarItem;
                     if (item.adminOnly && !isAdmin) return null;
@@ -848,7 +804,7 @@ export function LeftSidebar() {
                         }}
                         href={item.href}
                         variant="secondary"
-                        badgeCount={item.id === 'support' && isAdmin ? unreadCount : undefined}
+                        badgeCount={item.id === 'support'&& isAdmin ? unreadCount : undefined}
                       />
                     );
                     
@@ -873,7 +829,6 @@ export function LeftSidebar() {
           )}
         </div>
       </div>
-
       {/* SUPPORT MODAL */}
       {userId && (
         <SupportModal

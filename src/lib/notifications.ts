@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-
 export interface NotificationRow {
   id: string;
   type: string;
@@ -8,7 +7,6 @@ export interface NotificationRow {
   data: any;
   created_at: string;
 }
-
 export interface UserNotificationRow {
   id: string;
   user_id: string;
@@ -18,31 +16,25 @@ export interface UserNotificationRow {
   clicked_at: string | null;
   notifications: NotificationRow | null;
 }
-
 export async function getUnreadCount(userId: string): Promise<number> {
   if (!supabase) throw new Error('Supabase not initialized');
-
   const { count, error } = await supabase
     .from('user_notifications')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId)
     .is('read_at', null);
-
   if (error) {
     console.error('Error getting unread count:', error);
     return 0;
   }
-
   return count || 0;
 }
-
 export async function fetchNotifications(
   userId: string,
   limit: number = 30,
   offset: number = 0
 ): Promise<UserNotificationRow[]> {
   if (!supabase) throw new Error('Supabase not initialized');
-
   const { data, error } = await supabase
     .from('user_notifications')
     .select(`
@@ -64,45 +56,36 @@ export async function fetchNotifications(
     .eq('user_id', userId)
     .order('delivered_at', { ascending: false })
     .range(offset, offset + limit - 1);
-
   if (error) {
     console.error('Error fetching notifications:', error);
     throw error;
   }
-
   return (data as any[]) || [];
 }
-
 export async function markAsRead(deliveryId: string, userId: string): Promise<void> {
   if (!supabase) throw new Error('Supabase not initialized');
-
   const { error } = await supabase
     .from('user_notifications')
     .update({ read_at: new Date().toISOString() })
     .eq('id', deliveryId)
     .eq('user_id', userId);
-
   if (error) {
     console.error('Error marking notification as read:', error);
     throw error;
   }
 }
-
 export async function markAllAsRead(userId: string): Promise<void> {
   if (!supabase) throw new Error('Supabase not initialized');
-
   const { error } = await supabase
     .from('user_notifications')
     .update({ read_at: new Date().toISOString() })
     .eq('user_id', userId)
     .is('read_at', null);
-
   if (error) {
     console.error('Error marking all notifications as read:', error);
     throw error;
   }
 }
-
 export function subscribeUserNotifications(
   userId: string,
   callback: () => void
@@ -111,7 +94,6 @@ export function subscribeUserNotifications(
     console.error('Supabase not initialized');
     return () => {};
   }
-
   const channel = supabase
     .channel(`notifications:${userId}`)
     .on(
@@ -127,12 +109,10 @@ export function subscribeUserNotifications(
       }
     )
     .subscribe();
-
   return () => {
     supabase.removeChannel(channel);
   };
 }
-
 export function resolveNotificationHref(n: UserNotificationRow): string {
   const d = n.notifications?.data || {};
   

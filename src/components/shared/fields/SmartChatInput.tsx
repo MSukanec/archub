@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 import { Search, ArrowUp, Mic, MicOff } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 interface SmartChatInputProps {
   value: string;
   onChange: (value: string) => void;
@@ -10,7 +9,6 @@ interface SmartChatInputProps {
   disabled?: boolean;
   className?: string;
 }
-
 export function SmartChatInput({
   value,
   onChange,
@@ -23,12 +21,10 @@ export function SmartChatInput({
   const recognitionRef = useRef<any>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [isListening, setIsListening] = useState(false);
-
   // Auto-resize textarea al escribir
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
-
     // Reset height to auto para recalcular
     textarea.style.height = 'auto';
     
@@ -36,7 +32,6 @@ export function SmartChatInput({
     const newHeight = Math.min(textarea.scrollHeight, 150);
     textarea.style.height = `${newHeight}px`;
   }, [value]);
-
   // Inicializar Web Speech API
   useEffect(() => {
     // Verificar si el navegador soporta Web Speech API
@@ -46,20 +41,16 @@ export function SmartChatInput({
       console.warn("🎤 Web Speech API no está soportada en este navegador");
       return;
     }
-
     // Crear instancia de reconocimiento de voz solo una vez
     if (!recognitionRef.current) {
       const recognition = new SpeechRecognition();
       recognition.continuous = false; // Se detiene automáticamente después de detectar silencio
       recognition.interimResults = true; // Mostrar resultados parciales mientras habla
       recognition.lang = "es-AR"; // Español (Argentina)
-
       recognitionRef.current = recognition;
     }
-
     // Actualizar los event handlers con las últimas referencias
     const recognition = recognitionRef.current;
-
     // Evento cuando se detecta voz
     recognition.onresult = (event: any) => {
       let transcript = "";
@@ -74,19 +65,16 @@ export function SmartChatInput({
       // Actualizar el input con el texto transcripto
       onChange(value + (value ? " " : "") + transcript);
     };
-
     // Evento cuando termina de escuchar
     recognition.onend = () => {
       console.log("🎤 Reconocimiento de voz finalizado");
       setIsListening(false);
     };
-
     // Evento de error
     recognition.onerror = (event: any) => {
       console.error("🎤 Error en reconocimiento de voz:", event.error);
       setIsListening(false);
     };
-
     // Cleanup al desmontar
     return () => {
       if (recognitionRef.current && isListening) {
@@ -94,23 +82,20 @@ export function SmartChatInput({
       }
     };
   }, [value, onChange, isListening]);
-
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter'&& !e.shiftKey) {
       e.preventDefault();
       if (value.trim() && !disabled) {
         onSubmit();
       }
     }
   };
-
   // Toggle reconocimiento de voz
   const toggleVoiceRecognition = () => {
     if (!recognitionRef.current) {
       console.warn("🎤 Reconocimiento de voz no disponible");
       return;
     }
-
     if (isListening) {
       console.log("🎤 Deteniendo reconocimiento de voz...");
       recognitionRef.current.stop();
@@ -125,7 +110,6 @@ export function SmartChatInput({
       }
     }
   };
-
   return (
     <div 
       className={cn(
@@ -151,7 +135,6 @@ export function SmartChatInput({
       <div className="flex-shrink-0 text-muted-foreground/60">
         <Search className="w-4 h-4 sm:w-5 sm:h-5" />
       </div>
-
       {/* Textarea expansible */}
       <textarea
         ref={textareaRef}
@@ -177,7 +160,6 @@ export function SmartChatInput({
         }}
         data-testid="input-chat-message"
       />
-
       {/* Botón de micrófono */}
       <button
         type="button"
@@ -200,7 +182,6 @@ export function SmartChatInput({
           <Mic className="w-4 h-4" />
         )}
       </button>
-
       {/* Botón de enviar (derecha) */}
       <button
         type="button"

@@ -2,7 +2,6 @@ import { useOptimisticMutation } from '@/core/save-engine';
 import { deleteGeneralCost } from '../services/deleteGeneralCost';
 import { generalCostsKeys } from '@/core/query-keys';
 import type { GeneralCost } from '../types';
-
 export function useDeleteGeneralCost(organizationId: string | null) {
   return useOptimisticMutation({
     mutationFn: (generalCostId: string) => deleteGeneralCost(generalCostId),

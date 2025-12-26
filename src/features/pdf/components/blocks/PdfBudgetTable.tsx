@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import { PdfBlockProps } from '../types';
-
 const styles = StyleSheet.create({
   table: {
     marginBottom: 20,
@@ -69,11 +68,9 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
 });
-
 interface BudgetData {
   tasks: any[];
 }
-
 export const PdfBudgetTable: React.FC<PdfBlockProps<BudgetData>> = ({ data, config }) => {
   const tasks = data?.tasks || [];
   
@@ -86,7 +83,6 @@ export const PdfBudgetTable: React.FC<PdfBlockProps<BudgetData>> = ({ data, conf
     groupBy: config?.groupBy || 'none'
   };
   
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -95,28 +91,26 @@ export const PdfBudgetTable: React.FC<PdfBlockProps<BudgetData>> = ({ data, conf
       maximumFractionDigits: 0
     }).format(amount);
   };
-
   const calculateTaskCost = (task: any) => {
     // Lógica simple para calcular el costo - puedes ajustar según tu estructura de datos
     const quantity = task.quantity || 0;
     const unitCost = task.unit_cost || 0;
     return quantity * unitCost;
   };
-
   // Create dynamic styles based on configuration
   const dynamicStyles = {
     tableHeader: {
       ...styles.tableHeader,
       borderWidth: tableConfig.showTableBorder ? 1 : undefined,
       borderBottomWidth: tableConfig.showRowDividers ? 1 : undefined,
-      borderColor: tableConfig.showTableBorder ? '#000' : undefined,
+      borderColor: tableConfig.showTableBorder ? '#000': undefined,
     },
     tableRow: {
       ...styles.tableRow,
       borderLeftWidth: tableConfig.showTableBorder ? 1 : undefined,
       borderRightWidth: tableConfig.showTableBorder ? 1 : undefined,
       borderBottomWidth: tableConfig.showRowDividers ? 1 : undefined,
-      borderColor: tableConfig.showTableBorder || tableConfig.showRowDividers ? '#000' : undefined,
+      borderColor: tableConfig.showTableBorder || tableConfig.showRowDividers ? '#000': undefined,
     },
     headerText: {
       fontWeight: 'bold',
@@ -128,9 +122,8 @@ export const PdfBudgetTable: React.FC<PdfBlockProps<BudgetData>> = ({ data, conf
   };
   
   // Determine which columns to show based on groupBy setting
-  const showPhase = tableConfig.groupBy !== 'fase' && tableConfig.groupBy !== 'fases-y-rubros';
-  const showRubro = tableConfig.groupBy !== 'rubro' && tableConfig.groupBy !== 'fases-y-rubros';
-
+  const showPhase = tableConfig.groupBy !== 'fase'&& tableConfig.groupBy !== 'fases-y-rubros';
+  const showRubro = tableConfig.groupBy !== 'rubro'&& tableConfig.groupBy !== 'fases-y-rubros';
   return (
     <View style={styles.table}>
       {/* Header */}
@@ -143,7 +136,6 @@ export const PdfBudgetTable: React.FC<PdfBlockProps<BudgetData>> = ({ data, conf
         <Text style={[styles.tableCellCost, dynamicStyles.headerText]}>Costo Unitario</Text>
         <Text style={[styles.tableCellSubtotal, dynamicStyles.headerText]}>Subtotal</Text>
       </View>
-
       {/* Rows */}
       {tasks.map((task, index) => {
         const customName = task.custom_name || task.task?.display_name;
@@ -154,7 +146,6 @@ export const PdfBudgetTable: React.FC<PdfBlockProps<BudgetData>> = ({ data, conf
         const unitCost = task.unit_cost || 0;
         const quantity = task.quantity || 0;
         const subtotal = calculateTaskCost(task);
-
         return (
           <View key={index} style={dynamicStyles.tableRow}>
             {showPhase && <Text style={[styles.tableCellPhase, dynamicStyles.bodyText]}>{task.phase_name || 'Sin fase'}</Text>}

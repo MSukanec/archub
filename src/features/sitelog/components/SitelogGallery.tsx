@@ -3,7 +3,6 @@ import { startOfWeek, endOfWeek, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Gallery } from '@/components/shared/viewers/Gallery';
 import type { SitelogGalleryFile } from '../types';
-
 // GalleryFile type compatible with Gallery component
 interface GalleryFile {
   id: string;
@@ -20,20 +19,17 @@ interface GalleryFile {
   created_by: string;
   site_log_id?: string | null;
 }
-
 interface SitelogGalleryProps {
   files: SitelogGalleryFile[];
   onDelete?: (file: SitelogGalleryFile) => void;
   onDownload?: (file: SitelogGalleryFile) => void;
   onEdit?: (file: SitelogGalleryFile) => void;
 }
-
 interface GroupedFiles {
   weekLabel: string;
   weekStart: Date;
   files: GalleryFile[];
 }
-
 export function SitelogGallery({ files, onDelete, onDownload, onEdit }: SitelogGalleryProps) {
   // Mapear MediaFileWithLink a GalleryFile compatible con Gallery component
   const galleryFiles: GalleryFile[] = useMemo(() => 
@@ -54,11 +50,9 @@ export function SitelogGallery({ files, onDelete, onDownload, onEdit }: SitelogG
     })),
     [files]
   );
-
   // Agrupar archivos por semana (usa la fecha de la bitácora, no la fecha de subida)
   const groupedByWeek = useMemo(() => {
     const groups = new Map<string, GroupedFiles>();
-
     // Primero ordenar archivos por fecha de bitácora (más recientes primero)
     const sortedFiles = [...galleryFiles].sort((a, b) => {
       const originalA = files.find(f => f.id === a.id);
@@ -73,7 +67,6 @@ export function SitelogGallery({ files, onDelete, onDownload, onEdit }: SitelogG
       
       return dateB - dateA; // Más recientes primero
     });
-
     sortedFiles.forEach(file => {
       // Obtener el archivo original para acceder a site_log.date
       const originalFile = files.find(f => f.id === file.id);
@@ -87,7 +80,6 @@ export function SitelogGallery({ files, onDelete, onDownload, onEdit }: SitelogG
       const weekLabelRaw = `semana del ${format(weekStart, 'd', { locale: es })}-${format(weekEnd, 'd MMM', { locale: es })}`;
       const weekLabel = weekLabelRaw.charAt(0).toUpperCase() + weekLabelRaw.slice(1);
       const weekKey = weekStart.toISOString();
-
       if (!groups.has(weekKey)) {
         groups.set(weekKey, {
           weekLabel,
@@ -95,20 +87,16 @@ export function SitelogGallery({ files, onDelete, onDownload, onEdit }: SitelogG
           files: []
         });
       }
-
       groups.get(weekKey)!.files.push(file);
     });
-
     // Convertir a array y ordenar por fecha (más recientes primero)
     return Array.from(groups.values()).sort((a, b) => 
       b.weekStart.getTime() - a.weekStart.getTime()
     );
   }, [galleryFiles, files]);
-
   if (files.length === 0) {
     return null;
   }
-
   return (
     <div className="space-y-8">
       {groupedByWeek.map((group, index) => (
@@ -122,7 +110,6 @@ export function SitelogGallery({ files, onDelete, onDownload, onEdit }: SitelogG
             </div>
             <div className="flex-grow border-t border-border/40"></div>
           </div>
-
           {/* Gallery component reutilizado para cada grupo */}
           <Gallery
             files={group.files}

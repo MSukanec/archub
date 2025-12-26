@@ -3,7 +3,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2 } from 'lucide-react';
 import { useTaskCosts } from '@/hooks/use-task-costs';
-
 // Interface para la tarea de análisis
 interface AnalysisTask {
   id: string;
@@ -15,17 +14,15 @@ interface AnalysisTask {
   created_at?: string;
   updated_at?: string;
 }
-
 interface AnalysisTaskRowProps {
   task: AnalysisTask;
   onEdit?: () => void;
   onDelete?: () => void;
   onClick?: () => void;
   selected?: boolean;
-  density?: 'compact' | 'normal' | 'comfortable';
+  density?: 'compact'| 'normal'| 'comfortable';
   className?: string;
 }
-
 export default function AnalysisTaskRow({
   task,
   onEdit,
@@ -64,7 +61,6 @@ export default function AnalysisTaskRow({
     density,
     className
   };
-
   return (
     <DataRowCard {...rowProps}>
       {/* DIV SUPERIOR - Información completa */}
@@ -89,7 +85,7 @@ export default function AnalysisTaskRow({
               MO:
             </span>
             <span className="text-xs text-[var(--text-secondary)]">
-              {isLoading ? '...' : formatCurrency(laborTotal)}
+              {isLoading ? '...': formatCurrency(laborTotal)}
             </span>
           </div>
           <div className="flex flex-col text-center">
@@ -97,7 +93,7 @@ export default function AnalysisTaskRow({
               MAT:
             </span>
             <span className="text-xs text-[var(--text-secondary)]">
-              {isLoading ? '...' : formatCurrency(materialTotal)}
+              {isLoading ? '...': formatCurrency(materialTotal)}
             </span>
           </div>
           <div className="flex flex-col text-center">
@@ -105,7 +101,7 @@ export default function AnalysisTaskRow({
               TOT:
             </span>
             <span className="text-xs text-[var(--text-secondary)]">
-              {isLoading ? '...' : formatCurrency(grandTotal)}
+              {isLoading ? '...': formatCurrency(grandTotal)}
             </span>
           </div>
         </div>

@@ -17,10 +17,8 @@ import { PdfBlock } from '../types/types';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-
 // Configure PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-
 interface PDFExporterModalProps {
   modalData?: {
     blocks?: PdfBlock[];
@@ -28,7 +26,6 @@ interface PDFExporterModalProps {
   };
   onClose: () => void;
 }
-
 export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { data: userData } = useCurrentUser();
@@ -41,14 +38,12 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     numPages: 0,
     scale: 1.0,
   });
-
   // PDF general configuration
   const [pdfConfig, setPdfConfig] = useState({
-    pageSize: 'A4' as 'A4' | 'LETTER',
-    orientation: 'portrait' as 'portrait' | 'landscape',
+    pageSize: 'A4'as 'A4'| 'LETTER',
+    orientation: 'portrait'as 'portrait'| 'landscape',
     margin: 20, // mm
   });
-
   // PDF sections configuration
   const [sections, setSections] = useState({
     coverPage: true,
@@ -56,11 +51,9 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     constructionTasks: true,
     footer: true,
   });
-
   // Get blocks from modal data
   const blocks = modalData?.blocks || [];
   const baseFilename = modalData?.filename || `documento-${new Date().toISOString().split('T')[0]}.pdf`;
-
   // Footer configuration - Initialize with text from blocks if available
   const [footerConfig, setFooterConfig] = useState(() => {
     const footerBlock = blocks.find(block => block.type === 'footer');
@@ -69,16 +62,14 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       showDivider: true,
     };
   });
-
   // Construction tasks table configuration
   const [tableConfig, setTableConfig] = useState({
     titleSize: 12, // int4 for header text size
     bodySize: 10,  // int4 for body text size
     showTableBorder: true, // bool for complete table border
     showRowDividers: true, // bool for lines between items
-    groupBy: 'fases-y-rubros' as 'fase' | 'rubro' | 'fases-y-rubros', // grouping option
+    groupBy: 'fases-y-rubros'as 'fase'| 'rubro'| 'fases-y-rubros', // grouping option
   });
-
   // Header configuration with pre-populated data
   const [headerConfig, setHeaderConfig] = useState({
     title: 'Presupuesto',
@@ -95,14 +86,11 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     logoUrl: userData?.organization?.logo_url || '',
     logoSize: 60,
     showDivider: true,
-    layout: 'row' as 'row' | 'column',
+    layout: 'row'as 'row'| 'column',
   });
-
   const filename = baseFilename;
-
   // Expanded section for accordion (only one at a time)
   const [expandedSection, setExpandedSection] = useState<string>('general');
-
   // Custom hook for debouncing text inputs
   const useDebounce = (value: any, delay: number) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -119,7 +107,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     
     return debouncedValue;
   };
-
   // Debounce text inputs and number inputs
   const debouncedFooterText = useDebounce(footerConfig.text, 500);
   const debouncedMargin = useDebounce(pdfConfig.margin, 400);
@@ -154,7 +141,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     titleSize: debouncedTitleSize,
     bodySize: debouncedBodySize
   }), [tableConfig.showTableBorder, tableConfig.showRowDividers, tableConfig.groupBy, debouncedTitleSize, debouncedBodySize]);
-
   const debouncedHeaderConfig = useMemo(() => ({
     ...headerConfig,
     title: debouncedHeaderTitle,
@@ -184,7 +170,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     debouncedHeaderEmail,
     debouncedHeaderLogoSize,
   ]);
-
   // Generate PDF blob from blocks using react-pdf with debounced configurations
   const generatePdfBlob = useCallback(async (): Promise<Blob> => {
     try {
@@ -222,7 +207,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       throw error;
     }
   }, [blocks, sections, debouncedPdfConfig, debouncedFooterConfig, debouncedTableConfig, debouncedHeaderConfig]);
-
   // Load PDF using pdfjs-dist
   const loadPdf = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
@@ -249,11 +233,9 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       }));
     }
   }, [generatePdfBlob]);
-
   // Render current page
   const renderPage = useCallback(async () => {
     if (!state.pdfDoc || !canvasRef.current) return;
-
     try {
       const page = await state.pdfDoc.getPage(state.page);
       const scale = state.scale;
@@ -262,34 +244,28 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
       if (!context) return;
-
       canvas.width = viewport.width;
       canvas.height = viewport.height;
       
       context.clearRect(0, 0, canvas.width, canvas.height);
-
       const renderContext = {
         canvasContext: context,
         viewport: viewport,
         canvas: canvas
       };
       await page.render(renderContext).promise;
-
     } catch (error) {
       console.error('Error rendering page:', error);
     }
   }, [state.pdfDoc, state.page, state.scale]);
-
   // Navigation functions
   const goToPage = (pageNum: number) => {
     if (pageNum >= 1 && pageNum <= state.numPages) {
       setState(prev => ({ ...prev, page: pageNum }));
     }
   };
-
   const nextPage = () => goToPage(state.page + 1);
   const prevPage = () => goToPage(state.page - 1);
-
   // Zoom functions
   const zoomIn = () => {
     setState(prev => ({ 
@@ -297,35 +273,29 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       scale: Math.min(prev.scale + 0.1, 3.0) 
     }));
   };
-
   const zoomOut = () => {
     setState(prev => ({ 
       ...prev, 
       scale: Math.max(prev.scale - 0.1, 0.5) 
     }));
   };
-
   const zoom100 = () => {
     setState(prev => ({ ...prev, scale: 1.0 }));
   };
-
   // Load PDF on mount
   useEffect(() => {
     loadPdf();
   }, [loadPdf]);
-
   // Reload PDF when debounced configurations change
   useEffect(() => {
     loadPdf();
   }, [debouncedPdfConfig, debouncedFooterConfig, debouncedTableConfig, sections, loadPdf]);
-
   // Render page when page or scale changes
   useEffect(() => {
     if (state.pdfDoc && !state.loading) {
       renderPage();
     }
   }, [renderPage, state.pdfDoc, state.loading]);
-
   // Toggle section
   const toggleSection = (section: keyof typeof sections) => {
     setSections(prev => ({
@@ -333,12 +303,10 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       [section]: !prev[section]
     }));
   };
-
   // Toggle expanded section (only one at a time)
   const toggleExpanded = (section: string) => {
-    setExpandedSection(prev => prev === section ? '' : section);
+    setExpandedSection(prev => prev === section ? '': section);
   };
-
   // Section component - prepared for drag & drop
   interface SectionItemProps {
     id: string;
@@ -350,7 +318,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
     isExpanded: boolean;
     description?: string;
   }
-
   const SectionItem: React.FC<SectionItemProps> = ({ 
     id, 
     label, 
@@ -411,7 +378,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       )}
     </div>
   );
-
   // Sections configuration panel
   const sectionsPanel = (
     <div className="h-full flex flex-col">
@@ -447,7 +413,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
               {/* No switch for general section */}
               
               {/* Expand Chevron */}
-              {expandedSection === 'general' ? (
+              {expandedSection === 'general'? (
                 <ChevronUp className="h-4 w-4 text-muted-foreground" />
               ) : (
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -456,7 +422,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           </div>
           
           {/* Expanded Content */}
-          {expandedSection === 'general' && (
+          {expandedSection === 'general'&& (
             <div className="px-3 pb-3 pt-0 border-t border-border/50">
               <div className="mt-3 space-y-4">
                 {/* Page Size */}
@@ -464,7 +430,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
                   <Label className="text-xs font-medium">Tamaño de Página</Label>
                   <Select 
                     value={pdfConfig.pageSize} 
-                    onValueChange={(value: 'A4' | 'LETTER') => setPdfConfig(prev => ({ ...prev, pageSize: value }))}
+                    onValueChange={(value: 'A4'| 'LETTER') => setPdfConfig(prev => ({ ...prev, pageSize: value }))}
                   >
                     <SelectTrigger className="h-8">
                       <SelectValue />
@@ -475,13 +441,12 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
                     </SelectContent>
                   </Select>
                 </div>
-
                 {/* Orientation */}
                 <div className="space-y-2">
                   <Label className="text-xs font-medium">Orientación</Label>
                   <Select 
                     value={pdfConfig.orientation} 
-                    onValueChange={(value: 'portrait' | 'landscape') => setPdfConfig(prev => ({ ...prev, orientation: value }))}
+                    onValueChange={(value: 'portrait'| 'landscape') => setPdfConfig(prev => ({ ...prev, orientation: value }))}
                   >
                     <SelectTrigger className="h-8">
                       <SelectValue />
@@ -492,7 +457,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
                     </SelectContent>
                   </Select>
                 </div>
-
                 {/* Margins */}
                 <div className="space-y-2">
                   <Label className="text-xs font-medium">Márgenes (mm)</Label>
@@ -510,7 +474,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
             </div>
           )}
         </div>
-
         <SectionItem
           id="coverPage"
           label="Portada"
@@ -554,7 +517,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
               />
               
               {/* Expand Chevron */}
-              {expandedSection === 'header' ? (
+              {expandedSection === 'header'? (
                 <ChevronUp className="h-4 w-4 text-muted-foreground" />
               ) : (
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -563,7 +526,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           </div>
           
           {/* Expanded Content with Header Controls */}
-          {expandedSection === 'header' && (
+          {expandedSection === 'header'&& (
             <div className="px-3 pb-3 pt-0 border-t border-border/50">
               <p className="text-xs text-muted-foreground mt-2 mb-4">
                 Configura la información del encabezado, logo y datos del proyecto
@@ -575,7 +538,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
                   <Label className="text-xs">Disposición</Label>
                   <Select 
                     value={headerConfig.layout} 
-                    onValueChange={(value: 'row' | 'column') => setHeaderConfig(prev => ({ ...prev, layout: value }))}
+                    onValueChange={(value: 'row'| 'column') => setHeaderConfig(prev => ({ ...prev, layout: value }))}
                   >
                     <SelectTrigger className="h-8">
                       <SelectValue />
@@ -761,7 +724,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
               />
               
               {/* Expand Chevron */}
-              {expandedSection === 'constructionTasks' ? (
+              {expandedSection === 'constructionTasks'? (
                 <ChevronUp className="h-4 w-4 text-muted-foreground" />
               ) : (
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -770,7 +733,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           </div>
           
           {/* Expanded Content with Table Controls */}
-          {expandedSection === 'constructionTasks' && (
+          {expandedSection === 'constructionTasks'&& (
             <div className="px-3 pb-3 pt-0 border-t border-border/50">
               <p className="text-xs text-muted-foreground mt-2 mb-4">
                 Tabla completa con todas las tareas, costos y totales del presupuesto
@@ -843,7 +806,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
                 <Label htmlFor="groupBy" className="text-xs">Agrupar por</Label>
                 <Select 
                   value={tableConfig.groupBy} 
-                  onValueChange={(value: 'fase' | 'rubro' | 'fases-y-rubros') => setTableConfig(prev => ({ ...prev, groupBy: value }))}
+                  onValueChange={(value: 'fase'| 'rubro'| 'fases-y-rubros') => setTableConfig(prev => ({ ...prev, groupBy: value }))}
                 >
                   <SelectTrigger className="h-8 text-xs mt-1">
                     <SelectValue />
@@ -892,7 +855,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
               />
               
               {/* Expand Chevron */}
-              {expandedSection === 'footer' ? (
+              {expandedSection === 'footer'? (
                 <ChevronUp className="h-4 w-4 text-muted-foreground" />
               ) : (
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -901,7 +864,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           </div>
           
           {/* Expanded Content */}
-          {expandedSection === 'footer' && (
+          {expandedSection === 'footer'&& (
             <div className="px-3 pb-3 pt-0 border-t border-border/50">
               <div className="mt-3 space-y-4">
                 {/* Footer Text */}
@@ -914,7 +877,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
                     placeholder="Texto que aparecerá en el pie de página..."
                   />
                 </div>
-
                 {/* Divider Line */}
                 <div className="flex items-center justify-between">
                   <Label className="text-xs font-medium">Línea Divisoria</Label>
@@ -931,7 +893,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       </div>
     </div>
   );
-
   // Action bar with controls
   const actionBar = (
     <div className="flex items-center justify-center gap-2 p-3 bg-muted/30 border-b">
@@ -961,9 +922,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           >
             <ChevronRight className="w-4 h-4" />
           </Button>
-
           <div className="w-px h-4 bg-border mx-1" />
-
           {/* Zoom controls */}
           <Button
             variant="ghost"
@@ -995,7 +954,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       )}
     </div>
   );
-
   // PDF canvas only
   const pdfCanvas = (
     <div className="h-full overflow-auto bg-gray-100 dark:bg-gray-900">
@@ -1005,7 +963,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           <p className="text-sm text-muted-foreground">Generando PDF...</p>
         </div>
       )}
-
       {state.error && (
         <div className="h-full flex flex-col items-center justify-center">
           <FileText className="h-12 w-12 text-red-500 mb-4" />
@@ -1015,7 +972,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
           </Button>
         </div>
       )}
-
       {!state.loading && !state.error && (
         <div className="p-4 flex justify-center">
           <div className="bg-white shadow-lg rounded border">
@@ -1028,9 +984,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       )}
     </div>
   );
-
   const editPanel = null;
-
   // New layout: Action bar + Two columns
   const viewPanel = (
     <div className="h-full flex flex-col">
@@ -1051,7 +1005,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       </div>
     </div>
   );
-
   const headerContent = (
     <FormModalHeader 
       title="Exportar PDF"
@@ -1059,7 +1012,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       icon={FileText}
     />
   );
-
   const footerContent = (
     <div className="p-2 border-t border-[var(--card-border)] mt-auto relative z-0">
       <div className="flex gap-2 w-full">
@@ -1107,7 +1059,7 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
                 className="w-full"
               >
                 <Download className="h-4 w-4 mr-2" />
-                {loading ? 'Generando PDF...' : 'Descargar PDF'}
+                {loading ? 'Generando PDF...': 'Descargar PDF'}
               </Button>
             )}
           </PDFDownloadLink>
@@ -1115,7 +1067,6 @@ export function PDFExporterModal({ modalData, onClose }: PDFExporterModalProps) 
       </div>
     </div>
   );
-
   return (
     <FormModalLayout
       columns={1}

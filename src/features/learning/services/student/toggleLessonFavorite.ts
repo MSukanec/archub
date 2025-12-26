@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { CourseLessonProgress } from '@shared/schema';
-
 /**
  * Marca o desmarca una lección como favorita.
  * 
@@ -19,14 +18,12 @@ export async function toggleLessonFavorite(
   if (!lessonId) {
     throw new Error('Lesson ID is required');
   }
-
   const { data } = await supabase.auth.getSession();
   const session = data?.session;
   
   if (!session) {
     throw new Error('No active session');
   }
-
   const response = await fetch(`/api/lessons/${lessonId}/favorite`, {
     method: 'POST',
     headers: {
@@ -36,11 +33,9 @@ export async function toggleLessonFavorite(
     credentials: 'include',
     body: JSON.stringify({ is_favorite: isFavorite }),
   });
-
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Failed to toggle favorite' }));
+    const error = await response.json().catch(() => ({ error: 'Failed to toggle favorite'}));
     throw new Error(error.error || 'Failed to toggle favorite');
   }
-
   return await response.json();
 }

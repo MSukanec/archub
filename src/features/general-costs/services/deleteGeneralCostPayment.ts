@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-
 /**
  * Deletes a general cost payment from the database.
  * 
@@ -16,13 +15,11 @@ export async function deleteGeneralCostPayment(id: string, organizationId: strin
   if (!supabase) {
     throw new Error('Supabase client not initialized');
   }
-
   const { error } = await supabase
     .from('general_costs_payments')
     .delete()
     .eq('id', id)
     .eq('organization_id', organizationId);
-
   if (error) {
     throw error;
   }

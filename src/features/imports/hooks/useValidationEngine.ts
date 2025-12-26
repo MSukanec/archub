@@ -1,7 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import { isValidUUID, parseDate, parseNumber } from '../utils/normalize';
 import type { TargetField, ColumnMapping, ParsedData, ValidationError, ManualMapping } from '../types';
-
 interface UseValidationEngineProps {
   targetSchema: TargetField[];
   parsedData: ParsedData | null;
@@ -11,7 +10,6 @@ interface UseValidationEngineProps {
   defaultFieldValues?: Record<string, string>;
   cellCorrections?: Record<string, string>;
 }
-
 interface ValidationSummary {
   totalRows: number;
   validRows: number;
@@ -21,7 +19,6 @@ interface ValidationSummary {
   missingRequiredFields: string[];
   unmappedColumns: number[];
 }
-
 interface UseValidationEngineReturn {
   errors: ValidationError[];
   summary: ValidationSummary;
@@ -30,7 +27,6 @@ interface UseValidationEngineReturn {
   isRowValid: (rowIndex: number) => boolean;
   getRowErrors: (rowIndex: number) => ValidationError[];
 }
-
 export function useValidationEngine({
   targetSchema,
   parsedData,
@@ -40,15 +36,12 @@ export function useValidationEngine({
   defaultFieldValues = {},
   cellCorrections = {},
 }: UseValidationEngineProps): UseValidationEngineReturn {
-
   const requiredFields = useMemo(() => {
     return targetSchema.filter(f => f.required).map(f => f.field);
   }, [targetSchema]);
-
   const mappedFields = useMemo(() => {
     return new Set(Object.values(columnMapping).filter(Boolean) as string[]);
   }, [columnMapping]);
-
   const missingRequiredFields = useMemo(() => {
     return requiredFields.filter(field => {
       // Field is covered if it's mapped from file OR has a default value
@@ -57,21 +50,17 @@ export function useValidationEngine({
       return !isMapped && !hasDefaultValue;
     });
   }, [requiredFields, mappedFields, defaultFieldValues]);
-
   const unmappedColumns = useMemo(() => {
     if (!parsedData) return [];
     return parsedData.headers
       .map((_, index) => index)
       .filter(index => columnMapping[index] === undefined || columnMapping[index] === null);
   }, [parsedData, columnMapping]);
-
   const validateValue = useCallback((field: string, value: any, rowIndex: number): ValidationError | null => {
     const fieldConfig = targetSchema.find(f => f.field === field);
     if (!fieldConfig) return null;
-
     const stringValue = value !== null && value !== undefined ? String(value).trim() : '';
-    const isEmpty = stringValue === '' || value === null || value === undefined;
-
+    const isEmpty = stringValue === ''|| value === null || value === undefined;
     if (fieldConfig.required && isEmpty) {
       return {
         row: rowIndex,
@@ -82,14 +71,11 @@ export function useValidationEngine({
         severity: 'error',
       };
     }
-
     if (isEmpty) return null;
-
     const mappingKey = `${field}_${stringValue}`;
     if (manualMappings[mappingKey] !== undefined) {
       return null;
     }
-
     switch (fieldConfig.type) {
       case 'foreign-key': {
         const fieldValueMap = valueMapConfig[field];
@@ -127,7 +113,6 @@ export function useValidationEngine({
         }
         break;
       }
-
       case 'date': {
         const date = parseDate(stringValue);
         if (!date) {
@@ -142,7 +127,6 @@ export function useValidationEngine({
         }
         break;
       }
-
       case 'number':
       case 'currency': {
         const num = parseNumber(stringValue);
@@ -159,16 +143,12 @@ export function useValidationEngine({
         break;
       }
     }
-
     return null;
   }, [targetSchema, manualMappings, valueMapConfig]);
-
   const validateRow = useCallback((rowIndex: number): ValidationError[] => {
     if (!parsedData || rowIndex >= parsedData.rows.length) return [];
-
     const row = parsedData.rows[rowIndex];
     const errors: ValidationError[] = [];
-
     for (const [colIndexStr, field] of Object.entries(columnMapping)) {
       if (!field) continue;
       
@@ -186,7 +166,6 @@ export function useValidationEngine({
         errors.push(error);
       }
     }
-
     for (const requiredField of requiredFields) {
       // Skip if field is mapped from file OR has a default value OR has a cell correction
       const isMapped = mappedFields.has(requiredField);
@@ -207,10 +186,8 @@ export function useValidationEngine({
         });
       }
     }
-
     return errors;
   }, [parsedData, columnMapping, validateValue, requiredFields, mappedFields, targetSchema, defaultFieldValues, cellCorrections]);
-
   const allErrors = useMemo(() => {
     if (!parsedData) return [];
     
@@ -220,20 +197,16 @@ export function useValidationEngine({
     }
     return errors;
   }, [parsedData, validateRow]);
-
   const validateAll = useCallback(() => {
     return allErrors;
   }, [allErrors]);
-
   const isRowValid = useCallback((rowIndex: number): boolean => {
     const rowErrors = allErrors.filter(e => e.row === rowIndex && e.severity === 'error');
     return rowErrors.length === 0;
   }, [allErrors]);
-
   const getRowErrors = useCallback((rowIndex: number): ValidationError[] => {
     return allErrors.filter(e => e.row === rowIndex);
   }, [allErrors]);
-
   const summary = useMemo((): ValidationSummary => {
     if (!parsedData) {
       return {
@@ -246,7 +219,6 @@ export function useValidationEngine({
         unmappedColumns,
       };
     }
-
     const errorsByRow = new Map<number, { hasError: boolean; hasWarning: boolean }>();
     
     for (const error of allErrors) {
@@ -255,7 +227,6 @@ export function useValidationEngine({
       if (error.severity === 'warning') existing.hasWarning = true;
       errorsByRow.set(error.row, existing);
     }
-
     let validRows = 0;
     let invalidRows = 0;
     
@@ -267,7 +238,6 @@ export function useValidationEngine({
         invalidRows++;
       }
     }
-
     return {
       totalRows: parsedData.rows.length,
       validRows,
@@ -278,7 +248,6 @@ export function useValidationEngine({
       unmappedColumns,
     };
   }, [parsedData, allErrors, missingRequiredFields, unmappedColumns]);
-
   return {
     errors: allErrors,
     summary,

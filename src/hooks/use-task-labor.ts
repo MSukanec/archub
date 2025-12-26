@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-
 export const useTaskLabor = (taskId: string | null) => {
   return useQuery({
     queryKey: ['task-labor', taskId, 'labor-view'],

@@ -8,12 +8,10 @@ import { useGlobalModalStore } from '@/components/modal';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useSubcontractTasks } from '@/features/subcontracts';
-
 interface SubcontractScopeViewProps {
   subcontract: any;
   project?: any;
 }
-
 export function SubcontractScopeView({ subcontract, project }: SubcontractScopeViewProps) {
   const { openModal } = useGlobalModalStore();
   const [groupBy, setGroupBy] = useState<string>('rubros');
@@ -28,7 +26,6 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
       isEditing: false
     });
   };
-
   const handleEditTask = (task: any) => {
     openModal('subcontract-task', {
       subcontractId: subcontract.id,
@@ -37,11 +34,9 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
       isEditing: true
     });
   };
-
   const handleDeleteTask = (task: any) => {
     deleteSubcontractTask.mutate(task.id);
   };
-
   const columns = [
     {
       key: 'task_name',
@@ -93,17 +88,15 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
       )
     }
   ];
-
   // Grupos disponibles para el TableTopBar
   const groupOptions = [
-    { value: 'none', label: 'Sin Agrupar' },
-    { value: 'phases', label: 'Por Fases' },
-    { value: 'rubros', label: 'Por Rubros' },
-    { value: 'tasks', label: 'Por Tareas' },
-    { value: 'rubros-phases', label: 'Por Fases y Rubros' },
-    { value: 'phases-rubros', label: 'Por Rubros y Tareas' }
+    { value: 'none', label: 'Sin Agrupar'},
+    { value: 'phases', label: 'Por Fases'},
+    { value: 'rubros', label: 'Por Rubros'},
+    { value: 'tasks', label: 'Por Tareas'},
+    { value: 'rubros-phases', label: 'Por Fases y Rubros'},
+    { value: 'phases-rubros', label: 'Por Rubros y Tareas'}
   ];
-
   // Procesar datos para agrupación (igual que en ConstructionTasks)
   const processedTasks = useMemo(() => {
     return subcontractTasks.map((task: any) => {
@@ -127,7 +120,6 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
       };
     });
   }, [subcontractTasks, groupBy]);
-
   return (
     <div className="space-y-6">
       {/* Tabla de tareas */}
@@ -147,7 +139,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
         <Table
           data={processedTasks}
           columns={columns}
-          groupBy={groupBy === 'none' ? undefined : 'groupKey'}
+          groupBy={groupBy === 'none'? undefined : 'groupKey'}
           rowActions={(item) => [
             {
               icon: Edit,
@@ -158,7 +150,7 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
               icon: Trash2,
               label: 'Eliminar',
               onClick: () => handleDeleteTask(item),
-              variant: 'destructive' as const
+              variant: 'destructive'as const
             }
           ]}
           topBar={{
@@ -172,10 +164,10 @@ export function SubcontractScopeView({ subcontract, project }: SubcontractScopeV
             searchValue: '',
             onSearchChange: () => {}
           }}
-          renderGroupHeader={groupBy === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
+          renderGroupHeader={groupBy === 'none'? undefined : (groupKey: string, groupRows: any[]) => (
             <>
               <div className="col-span-full text-sm font-medium">
-                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
+                {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea': 'Tareas'})
               </div>
             </>
           )}

@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useAuthStore } from './authStore'
-
 interface ProjectContextState {
   selectedProjectId: string | null
   isGlobalView: boolean
@@ -9,7 +8,6 @@ interface ProjectContextState {
   setSelectedProject: (projectId: string | null, organizationId?: string | null) => void
   setCurrentOrganization: (organizationId: string | null) => void
 }
-
 export const useProjectContext = create<ProjectContextState>()(
   persist(
     (set, get) => ({

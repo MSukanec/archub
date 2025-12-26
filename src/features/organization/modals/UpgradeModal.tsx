@@ -5,17 +5,14 @@ import { FormModalFooter } from "@/components/modal";
 import { FormModalLayout } from "@/components/modal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUpgradeForm, type UpgradeFormData, type UseUpgradeFormProps } from "../forms/UpgradeForm";
-
 interface UpgradeModalProps {
   modalData?: UpgradeFormData;
   onClose: () => void;
 }
-
 function formatLimit(value: number | null | undefined): string {
   if (value === null || value === undefined || value === -1 || value >= 9999) return 'Ilimitados';
   return String(value);
 }
-
 function formatStorage(mb: number | null | undefined): string {
   if (mb === null || mb === undefined) return '—';
   if (mb >= 1024) {
@@ -24,7 +21,6 @@ function formatStorage(mb: number | null | undefined): string {
   }
   return `${mb} MB`;
 }
-
 function formatFileSize(mb: number | null | undefined): string {
   if (mb === null || mb === undefined) return '—';
   if (mb >= 1024) {
@@ -33,15 +29,13 @@ function formatFileSize(mb: number | null | undefined): string {
   }
   return `${mb} MB`;
 }
-
 export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
   const formData = modalData || {
-    currentPlan: { name: '', slug: '' },
+    currentPlan: { name: '', slug: ''},
     targetPlan: { name: '', slug: '', monthly_amount: 0, annual_amount: 0, features: {} },
-    billingPeriod: 'annual' as const,
+    billingPeriod: 'annual'as const,
     isManualPlan: false
   };
-
   const {
     prorationData,
     isLoadingProration,
@@ -53,10 +47,8 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
     handleConfirm,
     userData,
   } = useUpgradeForm({ formData, onClose });
-
   const { currentPlan, targetPlan, billingPeriod } = formData;
   const isAnnual = billingPeriod === 'annual';
-
   const editPanel = (
     <div className="space-y-4">
       {validationError && (
@@ -66,7 +58,6 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
           <AlertDescription>{validationError}</AlertDescription>
         </Alert>
       )}
-
       {isManualPlan && !validationError && (
         <Alert variant="destructive">
           <ShieldAlert className="h-4 w-4" />
@@ -76,7 +67,6 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
           </AlertDescription>
         </Alert>
       )}
-
       {prorationError && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -84,7 +74,6 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
           <AlertDescription>No se pudo calcular el precio. Intenta de nuevo.</AlertDescription>
         </Alert>
       )}
-
       {!validationError && !isManualPlan && (
         <>
           <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4 space-y-3">
@@ -95,14 +84,13 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">
-                  Precio {targetPlan.name} ({isAnnual ? 'Anual' : 'Mensual'})
+                  Precio {targetPlan.name} ({isAnnual ? 'Anual': 'Mensual'})
                 </span>
                 <span className="text-gray-900 dark:text-gray-100 font-medium">
                   USD ${(isAnnual ? targetPlan.annual_amount : targetPlan.monthly_amount).toFixed(2)}
                 </span>
               </div>
-
-              {isLoadingProration && currentPlan.slug !== 'free' && (
+              {isLoadingProration && currentPlan.slug !== 'free'&& (
                 <div className="flex justify-between items-center text-gray-500">
                   <span className="flex items-center gap-1">
                     <Gift className="h-3 w-3" />
@@ -111,7 +99,6 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
                   <Skeleton className="h-4 w-16" />
                 </div>
               )}
-
               {!isLoadingProration && hasProration && prorationData?.credit && (
                 <div className="flex justify-between text-green-600 dark:text-green-400">
                   <span className="flex items-center gap-1">
@@ -123,7 +110,6 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
                   </span>
                 </div>
               )}
-
               <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-900 dark:text-gray-100 font-semibold">
@@ -140,7 +126,6 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
               </div>
             </div>
           </div>
-
           {isAnnual && !userData?.organization?.settings?.is_founder && (
             <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4">
               <div className="flex items-start gap-3">
@@ -157,7 +142,6 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
               </div>
             </div>
           )}
-
           <div>
             <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
               Incluido en {targetPlan.name}:
@@ -185,7 +169,6 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
       )}
     </div>
   );
-
   const headerContent = (
     <FormModalHeader
       title={`Mejorar a ${targetPlan.name}`}
@@ -193,7 +176,6 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
       icon={ArrowUpCircle}
     />
   );
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -204,7 +186,6 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
       submitDisabled={isConfirmDisabled}
     />
   );
-
   return (
     <FormModalLayout
       columns={1}

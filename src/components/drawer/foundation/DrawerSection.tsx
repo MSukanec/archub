@@ -2,7 +2,6 @@ import { ReactNode } from 'react';
 import { LucideIcon, ChevronDown, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
-
 export interface DrawerSectionProps {
   title: string;
   icon?: LucideIcon;
@@ -17,7 +16,6 @@ export interface DrawerSectionProps {
   className?: string;
   contentClassName?: string;
 }
-
 export function DrawerSection({
   title,
   icon: Icon,
@@ -45,7 +43,7 @@ export function DrawerSection({
           collapsible && 'cursor-pointer hover:bg-muted/50 transition-colors'
         )}
         onClick={handleToggle}
-        role={collapsible ? 'button' : undefined}
+        role={collapsible ? 'button': undefined}
         aria-expanded={collapsible ? isExpanded : undefined}
       >
         {collapsible && (
@@ -83,5 +81,4 @@ export function DrawerSection({
     </div>
   );
 }
-
 export default DrawerSection;

@@ -26,14 +26,12 @@ import {
   type NavigationEntry,
   type NavigationItem
 } from '@/config/navigation';
-
 interface MegaMenuTriggerProps {
   label: string;
   sublabel?: string;
   isOpen: boolean;
   className?: string;
 }
-
 function MegaMenuTrigger({ label, sublabel, isOpen, className }: MegaMenuTriggerProps) {
   return (
     <div
@@ -63,7 +61,6 @@ function MegaMenuTrigger({ label, sublabel, isOpen, className }: MegaMenuTrigger
     </div>
   );
 }
-
 interface ContextOption {
   id: SidebarLevel;
   label: string;
@@ -72,7 +69,6 @@ interface ContextOption {
   description?: string;
   disabled?: boolean;
 }
-
 export function ContextMegaMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [, navigate] = useLocation();
@@ -83,7 +79,6 @@ export function ContextMegaMenu() {
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
   const isFounder = userData?.organization?.settings?.is_founder === true;
-
   const contextOptions: ContextOption[] = [
     {
       id: 'organization',
@@ -108,7 +103,6 @@ export function ContextMegaMenu() {
       description: 'Cursos y formación profesional'
     },
   ];
-
   if (isFounder) {
     contextOptions.push({
       id: 'founders',
@@ -118,7 +112,6 @@ export function ContextMegaMenu() {
       description: 'Portal exclusivo de fundadores'
     });
   }
-
   if (isAdmin) {
     contextOptions.push({
       id: 'community',
@@ -135,16 +128,13 @@ export function ContextMegaMenu() {
       description: 'Panel de administración'
     });
   }
-
   const currentContext = contextOptions.find(c => c.id === sidebarLevel) || contextOptions[0];
-
   const handleSelect = (option: ContextOption) => {
     if (option.disabled) return;
     setSidebarLevel(option.id);
     navigate(option.href);
     setIsOpen(false);
   };
-
   return (
     <div 
       ref={containerRef}
@@ -213,7 +203,6 @@ export function ContextMegaMenu() {
     </div>
   );
 }
-
 export function PagesMegaMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [, navigate] = useLocation();
@@ -222,7 +211,6 @@ export function PagesMegaMenu() {
   
   const { sidebarLevel } = useNavigationStore();
   const isAdmin = useIsAdmin();
-
   const getNavigationItems = (): NavigationEntry[] => {
     switch (sidebarLevel) {
       case 'organization':
@@ -240,29 +228,26 @@ export function PagesMegaMenu() {
         return ORGANIZATION_NAVIGATION;
     }
   };
-
   const navigationItems = getNavigationItems();
   
   const getCurrentPageLabel = (): string => {
     for (const item of navigationItems) {
-      if ('href' in item && item.href === location) {
+      if ('href'in item && item.href === location) {
         return item.label;
       }
     }
     return 'Seleccionar página';
   };
-
   const handleSelect = (href: string) => {
     navigate(href);
     setIsOpen(false);
   };
-
   const groupedItems = navigationItems.reduce<{ section: string; items: NavigationItem[] }[]>((acc, item) => {
-    if ('type' in item && item.type === 'section-header') {
+    if ('type'in item && item.type === 'section-header') {
       acc.push({ section: (item as any).label, items: [] });
-    } else if ('href' in item && acc.length > 0) {
+    } else if ('href'in item && acc.length > 0) {
       acc[acc.length - 1].items.push(item as NavigationItem);
-    } else if ('href' in item) {
+    } else if ('href'in item) {
       if (acc.length === 0) {
         acc.push({ section: 'General', items: [] });
       }
@@ -270,7 +255,6 @@ export function PagesMegaMenu() {
     }
     return acc;
   }, []);
-
   return (
     <div 
       ref={containerRef}
@@ -340,31 +324,24 @@ export function PagesMegaMenu() {
     </div>
   );
 }
-
 export interface PageTab {
   id: string;
   label: string;
 }
-
 interface TabsMegaMenuProps {
   tabs: PageTab[];
   activeTab: string;
   onTabChange: (tabId: string) => void;
 }
-
 export function TabsMegaMenu({ tabs, activeTab, onTabChange }: TabsMegaMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
   if (tabs.length === 0) return null;
-
   const currentTab = tabs.find(t => t.id === activeTab) || tabs[0];
-
   const handleSelect = (tabId: string) => {
     onTabChange(tabId);
     setIsOpen(false);
   };
-
   return (
     <div 
       ref={containerRef}
@@ -433,12 +410,10 @@ export function TabsMegaMenu({ tabs, activeTab, onTabChange }: TabsMegaMenuProps
     </div>
   );
 }
-
 export function UserAvatarMenu() {
   const [, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const [avatarPopoverOpen, setAvatarPopoverOpen] = useState(false);
-
   const handleLogout = async () => {
     try {
       await useAuthStore.getState().logout();
@@ -447,7 +422,6 @@ export function UserAvatarMenu() {
       console.error('Logout error:', error);
     }
   };
-
   return (
     <Popover open={avatarPopoverOpen} onOpenChange={setAvatarPopoverOpen}>
       <PopoverTrigger asChild>
@@ -496,7 +470,6 @@ export function UserAvatarMenu() {
             <Home className="h-4 w-4" />
             <span>Página de Inicio</span>
           </button>
-
           <button
             onClick={() => {
               navigate('/contact');

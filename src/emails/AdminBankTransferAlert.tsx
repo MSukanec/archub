@@ -12,7 +12,6 @@ import {
   Button,
   Section,
 } from '@react-email/components';
-
 interface AdminBankTransferAlertProps {
   userName?: string;
   userEmail?: string;
@@ -21,7 +20,6 @@ interface AdminBankTransferAlertProps {
   currency?: string;
   transferId?: string;
 }
-
 export const AdminBankTransferAlert = ({
   userName = 'Cliente',
   userEmail = 'cliente@example.com',
@@ -35,7 +33,6 @@ export const AdminBankTransferAlert = ({
     currency: currency,
     minimumFractionDigits: 0,
   }).format(Number(amount));
-
   return (
     <Html>
       <Head />
@@ -62,13 +59,11 @@ export const AdminBankTransferAlert = ({
               minute: '2-digit'
             })}
           </Text>
-
           <Section style={buttonContainer}>
             <Button style={button} href="https://seencel.com/admin/payments">
               Revisar Transferencia
             </Button>
           </Section>
-
           <Text style={textSmall}>
             Si el botón no funciona, copia y pega este enlace en tu navegador:
           </Text>
@@ -77,9 +72,7 @@ export const AdminBankTransferAlert = ({
               https://seencel.com/admin/payments
             </Link>
           </Text>
-
           <Hr style={hr} />
-
           <Text style={footerSmall}>
             Email automático de notificación para administradores.<br />
             <Link href="https://seencel.com" style={link}>seencel.com</Link>
@@ -89,19 +82,16 @@ export const AdminBankTransferAlert = ({
     </Html>
   );
 };
-
 const main = {
   backgroundColor: '#ffffff',
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
   padding: '40px 0',
 };
-
 const container = {
   maxWidth: '465px',
   margin: '0 auto',
   padding: '20px',
 };
-
 const h1 = {
   color: '#000',
   fontSize: '24px',
@@ -109,14 +99,12 @@ const h1 = {
   lineHeight: '1.3',
   margin: '0 0 15px 0',
 };
-
 const text = {
   color: '#555',
   fontSize: '14px',
   lineHeight: '22px',
   margin: '0 0 15px 0',
 };
-
 const textDetails = {
   color: '#555',
   fontSize: '14px',
@@ -127,27 +115,23 @@ const textDetails = {
   borderRadius: '6px',
   border: '1px solid #fde68a',
 };
-
 const textSmall = {
   color: '#888',
   fontSize: '12px',
   lineHeight: '18px',
   margin: '20px 0 5px 0',
 };
-
 const linkText = {
   color: '#0066cc',
   fontSize: '12px',
   lineHeight: '18px',
   margin: '0 0 15px 0',
-  wordBreak: 'break-all' as const,
+  wordBreak: 'break-all'as const,
 };
-
 const buttonContainer = {
-  textAlign: 'center' as const,
+  textAlign: 'center'as const,
   margin: '25px 0',
 };
-
 const button = {
   backgroundColor: '#000',
   borderRadius: '6px',
@@ -155,26 +139,22 @@ const button = {
   fontSize: '14px',
   fontWeight: '600',
   textDecoration: 'none',
-  textAlign: 'center' as const,
+  textAlign: 'center'as const,
   display: 'inline-block',
   padding: '12px 24px',
 };
-
 const hr = {
   borderColor: '#e5e5e5',
   margin: '30px 0',
 };
-
 const footerSmall = {
   color: '#999',
   fontSize: '12px',
   lineHeight: '16px',
   margin: '0',
 };
-
 const link = {
   color: '#0066cc',
   textDecoration: 'underline',
 };
-
 export default AdminBankTransferAlert;

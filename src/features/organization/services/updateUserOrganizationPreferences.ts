@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { UserOrganizationPreferences, UpdateUserOrganizationPreferencesInput } from '../types';
-
 /**
  * Actualiza o crea las preferencias de un usuario para una organización.
  * 
@@ -19,7 +18,6 @@ export async function updateUserOrganizationPreferences(
   if (!userId) {
     throw new Error('User not authenticated');
   }
-
   let session = null;
   try {
     const { data } = await supabase.auth.getSession();
@@ -31,7 +29,6 @@ export async function updateUserOrganizationPreferences(
   if (!session) {
     throw new Error('No active session');
   }
-
   const response = await fetch('/api/user/update-organization-preferences', {
     method: 'POST',
     headers: {
@@ -44,11 +41,9 @@ export async function updateUserOrganizationPreferences(
       last_project_id: input.lastProjectId,
     }),
   });
-
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
-
   const data = await response.json();
   return data;
 }

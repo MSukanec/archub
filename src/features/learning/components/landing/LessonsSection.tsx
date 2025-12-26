@@ -10,15 +10,13 @@ import { Badge } from '@/components/ui/badge';
 import { formatMinutesToTime } from '../../mappers';
 import type { ModuleWithLessons } from '../../types';
 import { SectionHeader } from './SectionHeader';
-
 interface LessonsSectionProps {
   modules: ModuleWithLessons[];
   title?: string;
   subtitle?: string;
   description?: string;
-  variant?: 'default' | 'no-container';
+  variant?: 'default'| 'no-container';
 }
-
 export function LessonsSection({ 
   modules, 
   title = "LECCIONES DEL CURSO",
@@ -27,13 +25,10 @@ export function LessonsSection({
   variant = 'default'
 }: LessonsSectionProps) {
   const [openModuleId, setOpenModuleId] = useState<string | null>(null);
-
   const toggleModule = (moduleId: string) => {
     setOpenModuleId((prev) => (prev === moduleId ? null : moduleId));
   };
-
   if (modules.length === 0) return null;
-
   const content = (
     <div className="space-y-12">
       <SectionHeader
@@ -41,7 +36,6 @@ export function LessonsSection({
         subtitle={subtitle}
         description={description}
       />
-
       <div className="space-y-4">
         {modules.map((module, idx) => {
           const isOpen = openModuleId === module.id;
@@ -84,7 +78,6 @@ export function LessonsSection({
                     )}
                   </Button>
                 </CollapsibleTrigger>
-
                 <CollapsibleContent>
                   <div className="border-t">
                     {module.lessons.map((lesson) => (
@@ -121,11 +114,9 @@ export function LessonsSection({
       </div>
     </div>
   );
-
   if (variant === 'no-container') {
     return <section className="py-16 sm:py-20 bg-muted/30">{content}</section>;
   }
-
   return (
     <section className="py-16 sm:py-20 bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

@@ -11,11 +11,9 @@ import { es } from 'date-fns/locale';
 import { Edit, Trash2, Building, Crown, Award, Eye } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
-
 import { useToast } from '@/hooks/use-toast';
 import { AdminOrganizationRow } from '@/features/organization/components/admin/AdminOrganizationRow';
 import { OrganizationDetailDrawer } from '@/features/legacy/components/admin/OrganizationDetailDrawer';
-
 interface Organization {
   id: string;
   name: string;
@@ -45,18 +43,15 @@ interface Organization {
   projects_count: number;
   last_seen_at: string | null;
 }
-
 // Componente para mostrar la última actividad
 function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
   const [tick, setTick] = useState(0);
-
   useEffect(() => {
     const interval = setInterval(() => setTick(t => t + 1), 30_000);
     return () => clearInterval(interval);
   }, []);
-
   const { label, isOnline, tooltip } = useMemo(() => {
-    if (!lastSeen) return { label: '—', isOnline: false, tooltip: 'Sin actividad registrada' };
+    if (!lastSeen) return { label: '—', isOnline: false, tooltip: 'Sin actividad registrada'};
     
     const lastSeenTime = new Date(lastSeen).getTime();
     const now = Date.now();
@@ -75,7 +70,7 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
     
     let relativeLabel = '';
     if (diffDays >= 1) {
-      relativeLabel = `hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
+      relativeLabel = `hace ${diffDays} día${diffDays > 1 ? 's': ''}`;
     } else if (diffHr >= 1) {
       relativeLabel = `hace ${diffHr} h`;
     } else if (diffMin >= 1) {
@@ -90,7 +85,6 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
       tooltip: format(new Date(lastSeen), 'dd/MM/yyyy HH:mm:ss', { locale: es })
     };
   }, [lastSeen, tick]);
-
   return (
     <div title={tooltip}>
       {isOnline ? (
@@ -103,7 +97,6 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
     </div>
   );
 }
-
 // Hook para obtener todas las organizaciones (admin) desde backend optimizado
 function useAllOrganizations() {
   return useQuery({
@@ -132,20 +125,16 @@ function useAllOrganizations() {
     refetchInterval: 60000
   });
 }
-
 const AdminAdminOrganizations = () => {
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { openModal } = useGlobalModalStore();
-
   const { data: organizations, isLoading } = useAllOrganizations();
-
   // Calculate statistics
   const stats = {
     total: organizations?.length || 0,
@@ -153,7 +142,6 @@ const AdminAdminOrganizations = () => {
     pro: organizations?.filter((org: Organization) => org.plan?.name === 'Pro').length || 0,
     teams: organizations?.filter((org: Organization) => org.plan?.name === 'Teams').length || 0
   };
-
   const handleViewDetails = (organization: Organization) => {
     setSelectedOrganization(organization);
     setIsDrawerOpen(true);
@@ -164,11 +152,9 @@ const AdminAdminOrganizations = () => {
     setSelectedOrganization(null);
     queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
   };
-
   const handleEdit = (organization: Organization) => {
     openModal('admin-organization', { organization, isEditing: true });
   };
-
   const handleDelete = (organization: Organization) => {
     openModal('delete-confirmation', {
       title: 'Desactivar Organización',
@@ -178,7 +164,6 @@ const AdminAdminOrganizations = () => {
       dangerous: true
     });
   };
-
   const deleteOrganizationMutation = useMutation({
     mutationFn: async (organizationId: string) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -206,26 +191,23 @@ const AdminAdminOrganizations = () => {
       });
     }
   });
-
   // Filtrar organizaciones
   const filteredOrganizations = organizations?.filter((org: Organization) => {
     const matchesSearch = org.name.toLowerCase().includes(searchValue.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || 
-      (statusFilter === 'active' && org.is_active) ||
-      (statusFilter === 'inactive' && !org.is_active);
-    const matchesType = typeFilter === 'all' ||
-      (typeFilter === 'system' && org.is_system) ||
-      (typeFilter === 'regular' && !org.is_system);
+    const matchesStatus = statusFilter === 'all'|| 
+      (statusFilter === 'active'&& org.is_active) ||
+      (statusFilter === 'inactive'&& !org.is_active);
+    const matchesType = typeFilter === 'all'||
+      (typeFilter === 'system'&& org.is_system) ||
+      (typeFilter === 'regular'&& !org.is_system);
     
     return matchesSearch && matchesStatus && matchesType;
   }) || [];
-
   const handleClearFilters = () => {
     setSearchValue('');
     setStatusFilter('all');
     setTypeFilter('all');
   };
-
   const customFilters = (
     <div className="space-y-4 w-72">
       <div className="space-y-2">
@@ -242,7 +224,6 @@ const AdminAdminOrganizations = () => {
           </SelectContent>
         </Select>
       </div>
-
       <div className="space-y-2">
         <Label className="text-xs font-medium">Estado</Label>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -256,7 +237,6 @@ const AdminAdminOrganizations = () => {
           </SelectContent>
         </Select>
       </div>
-
       <div className="space-y-2">
         <Label className="text-xs font-medium">Tipo</Label>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
@@ -272,18 +252,17 @@ const AdminAdminOrganizations = () => {
       </div>
     </div>
   );
-
   const tableColumns = [
     {
       key: 'last_activity',
       label: 'Activo',
-      type: 'status' as const,
+      type: 'status'as const,
       render: (org: Organization) => <LastActivityCell lastSeen={org.last_seen_at} />
     },
     {
       key: 'name',
       label: 'Organización',
-      type: 'long-text' as const,
+      type: 'long-text'as const,
       render: (org: Organization) => {
         let logoUrl = org.logo_url || undefined;
         if (org.image_bucket && org.image_path && supabase) {
@@ -306,7 +285,7 @@ const AdminAdminOrganizations = () => {
     {
       key: 'founder',
       label: 'Estatus',
-      type: 'badge' as const,
+      type: 'badge'as const,
       render: (org: Organization) => {
         if (org.settings?.is_founder) {
           return <Badge variant="organization-founder">Fundador</Badge>;
@@ -317,7 +296,7 @@ const AdminAdminOrganizations = () => {
     {
       key: 'plan',
       label: 'Plan',
-      type: 'badge' as const,
+      type: 'badge'as const,
       render: (org: Organization) => {
         const planName = org.plan?.name || 'Sin plan';
         let planColorVar = '--plan-free-bg';
@@ -343,7 +322,7 @@ const AdminAdminOrganizations = () => {
     {
       key: 'members',
       label: 'Miembros',
-      type: 'number' as const,
+      type: 'number'as const,
       render: (org: Organization) => (
         <span className="text-sm">{org.members_count}</span>
       ),
@@ -351,15 +330,14 @@ const AdminAdminOrganizations = () => {
     {
       key: 'status',
       label: 'Estado',
-      type: 'status' as const,
+      type: 'status'as const,
       render: (org: Organization) => (
-        <Badge variant={org.is_active ? 'status-active' : 'error'}>
-          {org.is_active ? 'Activa' : 'Inactiva'}
+        <Badge variant={org.is_active ? 'status-active': 'error'}>
+          {org.is_active ? 'Activa': 'Inactiva'}
         </Badge>
       ),
     },
   ];
-
   return (
     <div className="space-y-6">
       {/* Organizations Table */}
@@ -383,7 +361,7 @@ const AdminAdminOrganizations = () => {
             icon: Trash2,
             label: 'Eliminar',
             onClick: () => handleDelete(organization),
-            variant: 'destructive' as const
+            variant: 'destructive'as const
           }
         ]}
         renderCard={(organization) => (
@@ -410,5 +388,4 @@ const AdminAdminOrganizations = () => {
     </div>
   );
 };
-
 export default AdminAdminOrganizations;

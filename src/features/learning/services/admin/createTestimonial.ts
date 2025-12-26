@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-
 export interface CreateTestimonialData {
   courseId?: string;
   organizationId?: string;
@@ -13,10 +12,8 @@ export interface CreateTestimonialData {
   isActive?: boolean;
   sortIndex?: number;
 }
-
 export async function createTestimonial(data: CreateTestimonialData) {
   if (!supabase) throw new Error('Supabase not initialized');
-
   const { error, data: testimonial } = await supabase
     .from('testimonials')
     .insert({
@@ -34,7 +31,6 @@ export async function createTestimonial(data: CreateTestimonialData) {
     })
     .select()
     .single();
-
   if (error) throw error;
   return testimonial;
 }

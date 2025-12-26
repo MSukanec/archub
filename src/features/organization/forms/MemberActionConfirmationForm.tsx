@@ -1,7 +1,6 @@
 import { AlertTriangle, UserMinus, Mail, CreditCard, Info } from 'lucide-react'
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
-
 export interface BillingInfo {
   hasPaidForSeat?: boolean
   creditAvailable?: number
@@ -10,15 +9,13 @@ export interface BillingInfo {
   creditAmount?: number
   nextBillingDate?: string
 }
-
 interface MemberActionConfirmationFormProps {
-  actionType: 'revoke_invitation' | 'remove_member'
+  actionType: 'revoke_invitation'| 'remove_member'
   memberName: string
   memberEmail: string
   memberRole?: string
   billingInfo?: BillingInfo
 }
-
 function RevokeInvitationContent({
   memberName,
   memberEmail,
@@ -48,7 +45,6 @@ function RevokeInvitationContent({
           </div>
         </div>
       </div>
-
       <div className="rounded-lg border border-amber-500/25 bg-amber-500/5 p-4">
         <div className="flex items-start gap-2">
           <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
@@ -73,7 +69,6 @@ function RevokeInvitationContent({
           </div>
         </div>
       </div>
-
       {billingInfo?.hasPaidForSeat && (
         <>
           <Separator />
@@ -110,7 +105,6 @@ function RevokeInvitationContent({
           </div>
         </>
       )}
-
       {!billingInfo?.hasPaidForSeat && (
         <Alert>
           <Info className="h-4 w-4" />
@@ -122,7 +116,6 @@ function RevokeInvitationContent({
     </div>
   )
 }
-
 function RemoveMemberContent({
   memberName,
   memberEmail,
@@ -154,7 +147,6 @@ function RemoveMemberContent({
           </div>
         </div>
       </div>
-
       <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
         <div className="flex items-start gap-2">
           <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
@@ -183,7 +175,6 @@ function RemoveMemberContent({
           </div>
         </div>
       </div>
-
       {billingInfo?.hasPaidForSeat && (
         <>
           <Separator />
@@ -220,7 +211,6 @@ function RemoveMemberContent({
           </div>
         </>
       )}
-
       {!billingInfo?.hasPaidForSeat && (
         <Alert>
           <Info className="h-4 w-4" />
@@ -232,7 +222,6 @@ function RemoveMemberContent({
     </div>
   )
 }
-
 export function MemberActionConfirmationForm({
   actionType,
   memberName,
@@ -241,7 +230,6 @@ export function MemberActionConfirmationForm({
   billingInfo,
 }: MemberActionConfirmationFormProps) {
   const isRevoke = actionType === 'revoke_invitation'
-
   return (
     <>
       {isRevoke ? (

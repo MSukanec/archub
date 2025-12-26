@@ -20,15 +20,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
 const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
-  { value: '30d', label: 'Últimos 30 días' },
-  { value: '3m', label: 'Últimos 3 meses' },
-  { value: '6m', label: 'Últimos 6 meses' },
-  { value: '1y', label: 'Último año' },
-  { value: 'all', label: 'Histórico' },
+  { value: '30d', label: 'Últimos 30 días'},
+  { value: '3m', label: 'Últimos 3 meses'},
+  { value: '6m', label: 'Últimos 6 meses'},
+  { value: '1y', label: 'Último año'},
+  { value: 'all', label: 'Histórico'},
 ]
-
 export default function Materials() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all')
@@ -38,19 +36,15 @@ export default function Materials() {
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
-
   const { data: allPayments = [] } = useMaterialPayments(selectedProjectId || undefined, currentOrganizationId || undefined)
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined)
   const availablePeriods = useMemo(() => calculateAvailablePeriods(allPayments), [allPayments])
-
   const dataHealthIssues = useMemo((): DataIssue[] => {
     const issues: DataIssue[] = []
-
     const paymentsWithoutExchangeRate = allPayments.filter(p => {
       if (!p.currency || !defaultCurrency) return false
       return p.currency.code !== defaultCurrency.code && !p.exchange_rate
     })
-
     if (paymentsWithoutExchangeRate.length > 0) {
       issues.push({
         id: 'materials-missing-exchange-rate',
@@ -59,14 +53,13 @@ export default function Materials() {
         title: 'Pagos sin cotización',
         description: `${paymentsWithoutExchangeRate.length} pago(s) en moneda extranjera no tienen cotización registrada`,
         affectedCount: paymentsWithoutExchangeRate.length,
-        affectedEntities: paymentsWithoutExchangeRate.map(p => ({ id: p.id, label: p.notes || 'Pago' })),
+        affectedEntities: paymentsWithoutExchangeRate.map(p => ({ id: p.id, label: p.notes || 'Pago'})),
         recommendedAction: {
           label: 'Editar pagos',
           actionType: 'bulk_edit'
         }
       })
     }
-
     const futurePayments = allPayments.filter(p => {
       const paymentDate = parseLocalDate(p.payment_date)
       if (!paymentDate) return false
@@ -74,7 +67,6 @@ export default function Materials() {
       today.setHours(23, 59, 59, 999)
       return paymentDate > today
     })
-
     if (futurePayments.length > 0) {
       issues.push({
         id: 'materials-future-date',
@@ -83,23 +75,20 @@ export default function Materials() {
         title: 'Pagos con fecha futura',
         description: `${futurePayments.length} pago(s) tienen fecha posterior a hoy`,
         affectedCount: futurePayments.length,
-        affectedEntities: futurePayments.map(p => ({ id: p.id, label: p.notes || 'Pago' })),
+        affectedEntities: futurePayments.map(p => ({ id: p.id, label: p.notes || 'Pago'})),
         recommendedAction: {
           label: 'Revisar fechas',
           actionType: 'manual'
         }
       })
     }
-
     return issues
   }, [allPayments, defaultCurrency])
-
   const getAffectedIdsForIssue = useCallback((issueId: string): string[] => {
     const issue = dataHealthIssues.find(i => i.id === issueId)
     if (!issue?.affectedEntities) return []
     return issue.affectedEntities.map(e => String(e.id))
   }, [dataHealthIssues])
-
   const handleDataHealthClick = useCallback((issueId: string) => {
     if (activeTab !== 'payments') {
       setActiveTab('payments')
@@ -112,33 +101,27 @@ export default function Materials() {
       }
     }
   }, [activeTab, activeFilterIssueId])
-
   useEffect(() => {
     if (activeFilterIssueId && dataHealthIssues.length === 0) {
       setActiveFilterIssueId(null)
     }
   }, [activeFilterIssueId, dataHealthIssues])
-
   const filteredPaymentIds = useMemo(() => {
     if (!activeFilterIssueId) return null
     return getAffectedIdsForIssue(activeFilterIssueId)
   }, [activeFilterIssueId, getAffectedIdsForIssue])
-
   const validSelectedPeriod = useMemo(() => {
     if (availablePeriods[selectedPeriod]) return selectedPeriod
     return 'all'
   }, [selectedPeriod, availablePeriods])
-
   useEffect(() => {
     if (validSelectedPeriod !== selectedPeriod) {
       setSelectedPeriod(validSelectedPeriod)
     }
   }, [validSelectedPeriod, selectedPeriod])
-
   useEffect(() => {
     setSidebarContext('construction')
   }, [])
-
   const getPeriodSelector = () => {
     if (activeTab !== "dashboard") return []
     
@@ -166,7 +149,7 @@ export default function Materials() {
                 data-testid={`option-period-${option.value}`}
               >
                 {option.label}
-                {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
+                {!isAvailable && option.value !== 'all'&& <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
               </DropdownMenuItem>
             )
           })}
@@ -174,7 +157,6 @@ export default function Materials() {
       </DropdownMenu>
     ]
   }
-
   const headerTabs = [
     {
       id: "dashboard",
@@ -203,7 +185,6 @@ export default function Materials() {
       disabled: true
     }
   ]
-
   const headerProps = {
     icon: Package,
     title: "Materiales",
@@ -247,7 +228,6 @@ export default function Materials() {
     }),
     actions: getPeriodSelector()
   }
-
   if (isLoading) {
     return (
       <Layout headerProps={headerProps} wide={false}>
@@ -257,7 +237,6 @@ export default function Materials() {
       </Layout>
     )
   }
-
   return (
     <Layout headerProps={headerProps} wide={false}>
       <div className="space-y-4">
@@ -278,7 +257,7 @@ export default function Materials() {
           />
         )}
         
-        {activeTab === 'dashboard' && (
+        {activeTab === 'dashboard'&& (
           <MaterialsDashboardTab
             projectId={selectedProjectId || undefined}
             onNavigateToPayments={() => setActiveTab('payments')}
@@ -288,8 +267,8 @@ export default function Materials() {
               else if (tab === 'purchases') setActiveTab('purchases')
             }}
             onScrollToPanel={(panelId) => {
-              const element = document.querySelector(`[data-testid="chart-${panelId === 'monthlyChart' ? 'monthly-trend' : panelId}"]`)
-              element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              const element = document.querySelector(`[data-testid="chart-${panelId === 'monthlyChart'? 'monthly-trend': panelId}"]`)
+              element?.scrollIntoView({ behavior: 'smooth', block: 'center'})
             }}
             selectedPeriod={validSelectedPeriod}
             dismissedIssueIds={dismissedIssueIds}
@@ -298,8 +277,7 @@ export default function Materials() {
             }}
           />
         )}
-
-        {activeTab === 'payments' && (
+        {activeTab === 'payments'&& (
           <MaterialPaymentsTab 
             projectId={selectedProjectId || undefined}
             externalFilterIssueId={activeFilterIssueId}
@@ -307,16 +285,13 @@ export default function Materials() {
             getAffectedIdsForIssue={getAffectedIdsForIssue}
           />
         )}
-
-        {activeTab === 'purchase-orders' && (
+        {activeTab === 'purchase-orders'&& (
           <PurchaseOrdersTab projectId={selectedProjectId || undefined} organizationId={currentOrganizationId || undefined} />
         )}
-
-        {activeTab === 'purchases' && (
+        {activeTab === 'purchases'&& (
           <PurchasesTab projectId={selectedProjectId || undefined} />
         )}
-
-        {activeTab === 'settings' && (
+        {activeTab === 'settings'&& (
           <MaterialSettingsTab projectId={selectedProjectId || undefined} />
         )}
       </div>

@@ -1,13 +1,11 @@
 import type { EntityType, BucketName } from './types';
 import type { ImagePreset } from '@/lib/imageCompression';
-
 interface EntityConfig {
   bucket: BucketName;
   basePath: string;
   compressionPreset: ImagePreset;
-  visibility: 'public' | 'organization' | 'private';
+  visibility: 'public'| 'organization'| 'private';
 }
-
 export const ENTITY_CONFIG: Record<EntityType, EntityConfig> = {
   'user_avatar': {
     bucket: 'public-assets',
@@ -184,7 +182,6 @@ export const ENTITY_CONFIG: Record<EntityType, EntityConfig> = {
     visibility: 'organization'
   }
 };
-
 export function getEntityConfig(entity: EntityType): EntityConfig {
   const config = ENTITY_CONFIG[entity];
   if (!config) {
@@ -192,15 +189,12 @@ export function getEntityConfig(entity: EntityType): EntityConfig {
   }
   return config;
 }
-
 export function getBucketForEntity(entity: EntityType): BucketName {
   return getEntityConfig(entity).bucket;
 }
-
 export function getCompressionPreset(entity: EntityType): ImagePreset {
   return getEntityConfig(entity).compressionPreset;
 }
-
-export function getVisibility(entity: EntityType): 'public' | 'organization' | 'private' {
+export function getVisibility(entity: EntityType): 'public'| 'organization'| 'private'{
   return getEntityConfig(entity).visibility;
 }

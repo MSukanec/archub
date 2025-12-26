@@ -1,12 +1,10 @@
 import { supabase } from "./supabase";
-
 export type PriceRow = {
   amount: number;
   currency_code: string;
   provider: string | null;
   months: number | null;
 };
-
 /**
  * Obtiene el precio de un curso por slug usando el sistema unificado:
  * - Lee el precio base en USD desde courses.price
@@ -18,7 +16,6 @@ export async function getCoursePriceBySlug(
   opts: { currency: string; provider?: string } = { currency: "ARS" }
 ): Promise<PriceRow | null> {
   const currency = opts.currency;
-
   // 1. Obtener curso y precio base en USD
   const { data: course, error: courseError } = await supabase
     .from("courses")
@@ -26,13 +23,10 @@ export async function getCoursePriceBySlug(
     .eq("is_deleted", false)
     .eq("slug", courseSlug)
     .single();
-
   if (courseError || !course?.is_active) {
     return null;
   }
-
   let finalAmount = Number(course.price);
-
   // 2. Si la moneda es ARS, convertir usando exchange_rates
   if (currency === 'ARS') {
     const { data: exchangeRate, error: exchangeError } = await supabase
@@ -42,15 +36,12 @@ export async function getCoursePriceBySlug(
       .eq("to_currency", "ARS")
       .eq("is_active", true)
       .single();
-
     if (exchangeError || !exchangeRate) {
       console.error('[getCoursePrice] Exchange rate not found:', exchangeError);
       return null;
     }
-
     finalAmount = finalAmount * Number(exchangeRate.rate);
   }
-
   return {
     amount: finalAmount,
     currency_code: currency,

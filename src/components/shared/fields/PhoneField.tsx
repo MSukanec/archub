@@ -8,31 +8,29 @@ import {
 } from '@/components/ui/popover';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
 // Lista de países con códigos de discado y banderas
 const countries = [
-  { code: 'AR', name: 'Argentina', dialCode: '+54', flag: '🇦🇷' },
-  { code: 'US', name: 'Estados Unidos', dialCode: '+1', flag: '🇺🇸' },
-  { code: 'MX', name: 'México', dialCode: '+52', flag: '🇲🇽' },
-  { code: 'ES', name: 'España', dialCode: '+34', flag: '🇪🇸' },
-  { code: 'CO', name: 'Colombia', dialCode: '+57', flag: '🇨🇴' },
-  { code: 'PE', name: 'Perú', dialCode: '+51', flag: '🇵🇪' },
-  { code: 'CL', name: 'Chile', dialCode: '+56', flag: '🇨🇱' },
-  { code: 'UY', name: 'Uruguay', dialCode: '+598', flag: '🇺🇾' },
-  { code: 'PY', name: 'Paraguay', dialCode: '+595', flag: '🇵🇾' },
-  { code: 'BO', name: 'Bolivia', dialCode: '+591', flag: '🇧🇴' },
-  { code: 'EC', name: 'Ecuador', dialCode: '+593', flag: '🇪🇨' },
-  { code: 'VE', name: 'Venezuela', dialCode: '+58', flag: '🇻🇪' },
-  { code: 'BR', name: 'Brasil', dialCode: '+55', flag: '🇧🇷' },
-  { code: 'FR', name: 'Francia', dialCode: '+33', flag: '🇫🇷' },
-  { code: 'DE', name: 'Alemania', dialCode: '+49', flag: '🇩🇪' },
-  { code: 'IT', name: 'Italia', dialCode: '+39', flag: '🇮🇹' },
-  { code: 'GB', name: 'Reino Unido', dialCode: '+44', flag: '🇬🇧' },
-  { code: 'CA', name: 'Canadá', dialCode: '+1', flag: '🇨🇦' },
-  { code: 'JP', name: 'Japón', dialCode: '+81', flag: '🇯🇵' },
-  { code: 'AU', name: 'Australia', dialCode: '+61', flag: '🇦🇺' },
+  { code: 'AR', name: 'Argentina', dialCode: '+54', flag: '🇦🇷'},
+  { code: 'US', name: 'Estados Unidos', dialCode: '+1', flag: '🇺🇸'},
+  { code: 'MX', name: 'México', dialCode: '+52', flag: '🇲🇽'},
+  { code: 'ES', name: 'España', dialCode: '+34', flag: '🇪🇸'},
+  { code: 'CO', name: 'Colombia', dialCode: '+57', flag: '🇨🇴'},
+  { code: 'PE', name: 'Perú', dialCode: '+51', flag: '🇵🇪'},
+  { code: 'CL', name: 'Chile', dialCode: '+56', flag: '🇨🇱'},
+  { code: 'UY', name: 'Uruguay', dialCode: '+598', flag: '🇺🇾'},
+  { code: 'PY', name: 'Paraguay', dialCode: '+595', flag: '🇵🇾'},
+  { code: 'BO', name: 'Bolivia', dialCode: '+591', flag: '🇧🇴'},
+  { code: 'EC', name: 'Ecuador', dialCode: '+593', flag: '🇪🇨'},
+  { code: 'VE', name: 'Venezuela', dialCode: '+58', flag: '🇻🇪'},
+  { code: 'BR', name: 'Brasil', dialCode: '+55', flag: '🇧🇷'},
+  { code: 'FR', name: 'Francia', dialCode: '+33', flag: '🇫🇷'},
+  { code: 'DE', name: 'Alemania', dialCode: '+49', flag: '🇩🇪'},
+  { code: 'IT', name: 'Italia', dialCode: '+39', flag: '🇮🇹'},
+  { code: 'GB', name: 'Reino Unido', dialCode: '+44', flag: '🇬🇧'},
+  { code: 'CA', name: 'Canadá', dialCode: '+1', flag: '🇨🇦'},
+  { code: 'JP', name: 'Japón', dialCode: '+81', flag: '🇯🇵'},
+  { code: 'AU', name: 'Australia', dialCode: '+61', flag: '🇦🇺'},
 ];
-
 interface PhoneFieldProps {
   value: string;
   onChange: (value: string) => void;
@@ -41,25 +39,21 @@ interface PhoneFieldProps {
   disabled?: boolean;
   className?: string;
 }
-
 export const PhoneField = forwardRef<HTMLInputElement, PhoneFieldProps>(
   ({ value, onChange, onBlur, placeholder = 'Número de teléfono', disabled, className }, ref) => {
     const [selectedCountry, setSelectedCountry] = useState(countries[0]); // Default: Argentina
     const [open, setOpen] = useState(false);
-
     const handleCountrySelect = (country: typeof countries[0]) => {
       setSelectedCountry(country);
       setOpen(false);
       // No cambia el número de teléfono, solo el país seleccionado
     };
-
     const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
       // Permitir solo números, espacios, guiones y paréntesis
       const cleanValue = newValue.replace(/[^\d\s\-()]/g, '');
       onChange(cleanValue);
     };
-
     // Función para normalizar a E.164 (exportada para uso externo)
     const normalizeToE164 = (phoneNumber: string, dialCode: string): string => {
       // Remover espacios, guiones y paréntesis
@@ -73,7 +67,6 @@ export const PhoneField = forwardRef<HTMLInputElement, PhoneFieldProps>(
       // Si no empieza con +, agregar el dialCode
       return `${dialCode}${digits}`;
     };
-
     return (
       <div className="flex">
         {/* Botón selector de país */}
@@ -126,7 +119,6 @@ export const PhoneField = forwardRef<HTMLInputElement, PhoneFieldProps>(
             </div>
           </PopoverContent>
         </Popover>
-
         {/* Input de número de teléfono */}
         <Input
           ref={ref}
@@ -145,5 +137,4 @@ export const PhoneField = forwardRef<HTMLInputElement, PhoneFieldProps>(
     );
   }
 );
-
 PhoneField.displayName = 'PhoneField';

@@ -1,10 +1,8 @@
 import { Package } from "lucide-react";
 import { EmptyState } from '@/components/shared/EmptyState';
-
 interface MaterialCostsTabProps {
   material: any;
 }
-
 export function MaterialCostsTab({ material }: MaterialCostsTabProps) {
   return (
     <div className="space-y-6">

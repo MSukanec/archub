@@ -8,13 +8,11 @@ import { ProjectActivesView } from '@/features/projects/views/ProjectActivesView
 import { ProjectListView } from '@/features/projects/views/ProjectListView';
 import { ProjectSettingsView } from '@/features/projects/views/ProjectSettingsView';
 import { Button } from '@/components/ui/button';
-
 const PROJECTS_TABS = [
-  { id: 'actives', label: 'Proyectos Activos' },
-  { id: 'list', label: 'Lista de Proyectos' },
-  { id: 'settings', label: 'Ajustes' },
+  { id: 'actives', label: 'Proyectos Activos'},
+  { id: 'list', label: 'Lista de Proyectos'},
+  { id: 'settings', label: 'Ajustes'},
 ];
-
 export default function OrganizationProjectsPage() {
   const [activeTab, setActiveTab] = useState('actives');
   const { data: userData } = useCurrentUser();
@@ -23,11 +21,9 @@ export default function OrganizationProjectsPage() {
   
   const layoutPreference = userData?.preferences?.layout || 'experimental';
   const isLabLayout = layoutPreference === 'lab';
-
   const handleNewProject = () => {
     openModal('project', { organizationId });
   };
-
   const renderView = () => {
     switch (activeTab) {
       case 'actives':
@@ -40,10 +36,9 @@ export default function OrganizationProjectsPage() {
         return <ProjectActivesView />;
     }
   };
-
   const secondaryRightContent = (
     <div className="flex items-center gap-3">
-      {(activeTab === 'actives' || activeTab === 'list') && (
+      {(activeTab === 'actives'|| activeTab === 'list') && (
         <Button
           size="sm"
           onClick={handleNewProject}
@@ -55,7 +50,6 @@ export default function OrganizationProjectsPage() {
       )}
     </div>
   );
-
   if (isLabLayout) {
     return (
       <LabLayout 
@@ -73,14 +67,12 @@ export default function OrganizationProjectsPage() {
       </LabLayout>
     );
   }
-
   const headerTabs = PROJECTS_TABS.map(tab => ({
     ...tab,
     isActive: activeTab === tab.id
   }));
-
   const getActionButton = () => {
-    if (activeTab === 'actives' || activeTab === 'list') {
+    if (activeTab === 'actives'|| activeTab === 'list') {
       return {
         label: "Nuevo Proyecto",
         icon: Plus,
@@ -89,7 +81,6 @@ export default function OrganizationProjectsPage() {
     }
     return undefined;
   };
-
   const headerProps = {
     title: "Gestión de Proyectos",
     description: "Administra todos los proyectos de tu organización desde un solo lugar",
@@ -100,7 +91,6 @@ export default function OrganizationProjectsPage() {
     onTabChange: (tabId: string) => setActiveTab(tabId),
     actionButton: getActionButton(),
   };
-
   return (
     <Layout headerProps={headerProps} wide={false}>
       {renderView()}

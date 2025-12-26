@@ -4,13 +4,11 @@ export interface OrganizationMemberUser {
   email: string;
   avatar_url: string | null;
 }
-
 export interface OrganizationMemberRole {
   id: string;
   name: string;
   type: string;
 }
-
 export interface OrganizationMember {
   id: string;
   user_id: string;
@@ -23,19 +21,16 @@ export interface OrganizationMember {
   users: OrganizationMemberUser | null;
   roles: OrganizationMemberRole | null;
 }
-
 export interface OrganizationStats {
   activeProjects: number;
   documentsLast30Days: number;
   generatedTasks: number;
   financialMovementsLast30Days: number;
 }
-
 export interface ActivityData {
   date: string;
   total: number;
 }
-
 export interface ActivityLog {
   id: string;
   organization_id: string;
@@ -52,7 +47,6 @@ export interface ActivityLog {
     email: string;
   };
 }
-
 export interface OrganizationWallet {
   id: string;
   organization_id: string;
@@ -68,7 +62,6 @@ export interface OrganizationWallet {
     is_active: boolean;
   };
 }
-
 export interface UserOrganizationPreferences {
   id: string;
   user_id: string;
@@ -77,14 +70,11 @@ export interface UserOrganizationPreferences {
   created_at: string;
   updated_at: string;
 }
-
 export interface UpdateUserOrganizationPreferencesInput {
   organizationId: string;
   lastProjectId: string | null;
 }
-
 import type { BadgeVariant } from '@/components/ui/badge';
-
 export interface ActivityDisplayInfo {
   icon: string;
   label: string;

@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-
 /**
  * Establece el avatar de un contacto usando un adjunto existente.
  * 
@@ -14,7 +13,6 @@ export async function setContactAvatar(
   if (!supabase || !contactId || !attachmentId) {
     throw new Error('Missing required parameters');
   }
-
   const { error } = await supabase
     .from('contacts')
     .update({
@@ -22,7 +20,6 @@ export async function setContactAvatar(
       avatar_updated_at: new Date().toISOString(),
     })
     .eq('id', contactId);
-
   if (error) {
     throw new Error(`Error al actualizar avatar: ${error.message}`);
   }

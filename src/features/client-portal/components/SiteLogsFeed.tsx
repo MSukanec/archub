@@ -7,28 +7,24 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useMediaLightbox, MediaLightbox, type MediaItem } from '@/components/shared/viewers/ImageLightbox';
 import type { ClientPortalSiteLog } from '../types';
-
 interface SiteLogsFeedProps {
   logs: ClientPortalSiteLog[];
   isLoading?: boolean;
 }
-
 const WEATHER_CONFIG: Record<string, { icon: React.ComponentType<{ className?: string }>, label: string }> = {
-  sunny: { icon: Sun, label: 'Soleado' },
-  partly_cloudy: { icon: Cloud, label: 'Parcialmente nublado' },
-  cloudy: { icon: Cloud, label: 'Nublado' },
-  rain: { icon: CloudRain, label: 'Lluvia' },
-  storm: { icon: CloudRain, label: 'Tormenta' },
-  snow: { icon: CloudSnow, label: 'Nieve' },
-  fog: { icon: Cloud, label: 'Niebla' },
-  windy: { icon: Wind, label: 'Ventoso' },
-  hail: { icon: CloudRain, label: 'Granizo' },
+  sunny: { icon: Sun, label: 'Soleado'},
+  partly_cloudy: { icon: Cloud, label: 'Parcialmente nublado'},
+  cloudy: { icon: Cloud, label: 'Nublado'},
+  rain: { icon: CloudRain, label: 'Lluvia'},
+  storm: { icon: CloudRain, label: 'Tormenta'},
+  snow: { icon: CloudSnow, label: 'Nieve'},
+  fog: { icon: Cloud, label: 'Niebla'},
+  windy: { icon: Wind, label: 'Ventoso'},
+  hail: { icon: CloudRain, label: 'Granizo'},
 };
-
 function DateSeparator({ date }: { date: Date }) {
-  const formattedDate = format(date, "EEEE d 'de' MMMM", { locale: es });
+  const formattedDate = format(date, "EEEE d 'de'MMMM", { locale: es });
   const capitalizedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-
   return (
     <div className="relative flex items-center my-6">
       <div className="flex-shrink-0 pr-4">
@@ -40,13 +36,11 @@ function DateSeparator({ date }: { date: Date }) {
     </div>
   );
 }
-
 interface PortalLogEntryCardProps {
   siteLog: ClientPortalSiteLog;
   mediaItems: MediaItem[];
   lightbox: ReturnType<typeof useMediaLightbox>;
 }
-
 function PortalLogEntryCard({ siteLog, mediaItems, lightbox }: PortalLogEntryCardProps) {
   const entryTypeName = siteLog.type_name || 'Registro General';
   const weatherConfig = siteLog.weather ? WEATHER_CONFIG[siteLog.weather] : null;
@@ -55,7 +49,6 @@ function PortalLogEntryCard({ siteLog, mediaItems, lightbox }: PortalLogEntryCar
   const formattedTime = siteLog.created_at 
     ? format(new Date(siteLog.created_at), 'HH:mm')
     : '00:00';
-
   return (
     <div 
       className="group pl-12 py-3 border border-transparent hover:border-gray-300 dark:hover:border-gray-700 rounded-md transition-colors"
@@ -68,7 +61,6 @@ function PortalLogEntryCard({ siteLog, mediaItems, lightbox }: PortalLogEntryCar
             {siteLog.creator?.full_name?.charAt(0) || 'U'}
           </AvatarFallback>
         </Avatar>
-
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="font-bold text-sm">
@@ -90,13 +82,11 @@ function PortalLogEntryCard({ siteLog, mediaItems, lightbox }: PortalLogEntryCar
               </span>
             )}
           </div>
-
           {siteLog.comments && (
             <div className="mb-4">
               <p className="text-sm whitespace-pre-wrap">{siteLog.comments}</p>
             </div>
           )}
-
           {siteLog.files && siteLog.files.length > 0 && (
             <div className="mb-4">
               <div className="flex flex-wrap gap-2">
@@ -157,7 +147,7 @@ function PortalLogEntryCard({ siteLog, mediaItems, lightbox }: PortalLogEntryCar
                         <Video className="h-4 w-4 text-gray-500" />
                         <span className="text-xs text-muted-foreground">
                           {file.file_name && file.file_name.length > 15 ? 
-                            file.file_name.substring(0, 15) + '...' : 
+                            file.file_name.substring(0, 15) + '...': 
                             file.file_name || 'Sin nombre'
                           }
                         </span>
@@ -173,7 +163,6 @@ function PortalLogEntryCard({ siteLog, mediaItems, lightbox }: PortalLogEntryCar
     </div>
   );
 }
-
 export function SiteLogsFeed({ logs, isLoading }: SiteLogsFeedProps) {
   const groupedLogs = useMemo(() => {
     const groups: { [key: string]: ClientPortalSiteLog[] } = {};
@@ -193,19 +182,17 @@ export function SiteLogsFeed({ logs, isLoading }: SiteLogsFeedProps) {
       logs: groups[key]
     }));
   }, [logs]);
-
   const mediaItems = useMemo(() => {
     return logs.flatMap((log) => 
-      log.files?.filter((file) => file.file_type === 'image' || file.file_type === 'video')
+      log.files?.filter((file) => file.file_type === 'image'|| file.file_type === 'video')
         .map((file) => ({
-          type: file.file_type as 'image' | 'video',
+          type: file.file_type as 'image'| 'video',
           src: file.file_url
         })) || []
     );
   }, [logs]);
   
   const lightbox = useMediaLightbox(mediaItems);
-
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -229,7 +216,6 @@ export function SiteLogsFeed({ logs, isLoading }: SiteLogsFeedProps) {
       </div>
     );
   }
-
   if (logs.length === 0) {
     return (
       <Card>
@@ -245,7 +231,6 @@ export function SiteLogsFeed({ logs, isLoading }: SiteLogsFeedProps) {
       </Card>
     );
   }
-
   return (
     <>
       <div className="space-y-2" data-testid="portal-sitelog-timeline">

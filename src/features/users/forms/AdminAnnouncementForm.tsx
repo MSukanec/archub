@@ -11,7 +11,6 @@ import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
-
 export const announcementSchema = z.object({
   title: z.string().min(1, 'El título es requerido'),
   message: z.string().min(1, 'El mensaje es requerido'),
@@ -31,9 +30,7 @@ export const announcementSchema = z.object({
   starts_at: z.string().optional(),
   ends_at: z.string().optional(),
 })
-
 export type AnnouncementFormData = z.infer<typeof announcementSchema>
-
 export interface Announcement {
   id: string
   title: string
@@ -52,11 +49,9 @@ export interface Announcement {
   created_at: string | null
   created_by: string | null
 }
-
 interface FormPanelProps {
   form: ReturnType<typeof useForm<AnnouncementFormData>>
 }
-
 export function FormPanel({ form }: FormPanelProps) {
   return (
     <Form {...form}>
@@ -74,7 +69,6 @@ export function FormPanel({ form }: FormPanelProps) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="message"
@@ -96,7 +90,6 @@ export function FormPanel({ form }: FormPanelProps) {
             </FormItem>
           )}
         />
-
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -121,7 +114,6 @@ export function FormPanel({ form }: FormPanelProps) {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="audience"
@@ -146,7 +138,6 @@ export function FormPanel({ form }: FormPanelProps) {
             )}
           />
         </div>
-
         <FormField
           control={form.control}
           name="is_active"
@@ -168,7 +159,6 @@ export function FormPanel({ form }: FormPanelProps) {
             </FormItem>
           )}
         />
-
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -183,7 +173,6 @@ export function FormPanel({ form }: FormPanelProps) {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="ends_at"
@@ -201,7 +190,6 @@ export function FormPanel({ form }: FormPanelProps) {
             )}
           />
         </div>
-
         <div className="border-t pt-4">
           <h4 className="text-sm font-medium mb-3">Enlace en el texto (opcional)</h4>
           
@@ -219,7 +207,6 @@ export function FormPanel({ form }: FormPanelProps) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="link_url"
@@ -238,7 +225,6 @@ export function FormPanel({ form }: FormPanelProps) {
             />
           </div>
         </div>
-
         <div className="border-t pt-4">
           <h4 className="text-sm font-medium mb-3">Botón Primario (opcional)</h4>
           
@@ -256,7 +242,6 @@ export function FormPanel({ form }: FormPanelProps) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="primary_button_url"
@@ -275,7 +260,6 @@ export function FormPanel({ form }: FormPanelProps) {
             />
           </div>
         </div>
-
         <div className="border-t pt-4">
           <h4 className="text-sm font-medium mb-3">Botón Secundario (opcional)</h4>
           
@@ -293,7 +277,6 @@ export function FormPanel({ form }: FormPanelProps) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="secondary_button_url"
@@ -316,11 +299,9 @@ export function FormPanel({ form }: FormPanelProps) {
     </Form>
   )
 }
-
 interface ViewPanelProps {
   announcement?: Announcement
 }
-
 export function ViewPanel({ announcement }: ViewPanelProps) {
   const getTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
@@ -331,7 +312,6 @@ export function ViewPanel({ announcement }: ViewPanelProps) {
     }
     return labels[type] || type
   }
-
   const getAudienceLabel = (audience: string) => {
     const labels: Record<string, string> = {
       all: 'Todos los usuarios',
@@ -341,7 +321,6 @@ export function ViewPanel({ announcement }: ViewPanelProps) {
     }
     return labels[audience] || audience
   }
-
   return (
     <div className="space-y-4">
       <div>
@@ -372,7 +351,7 @@ export function ViewPanel({ announcement }: ViewPanelProps) {
         <div>
           <p className="text-sm text-muted-foreground mb-1">Estado</p>
           <p className="text-sm" data-testid="text-announcement-status">
-            {announcement?.is_active ? 'Activo' : 'Inactivo'}
+            {announcement?.is_active ? 'Activo': 'Inactivo'}
           </p>
         </div>
       </div>
@@ -399,17 +378,14 @@ export function ViewPanel({ announcement }: ViewPanelProps) {
     </div>
   )
 }
-
 interface UseAnnouncementFormOptions {
   announcement?: Announcement
   onSuccess: () => void
 }
-
 export function useAnnouncementForm({ announcement, onSuccess }: UseAnnouncementFormOptions) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
-
   const form = useForm<AnnouncementFormData>({
     resolver: zodResolver(announcementSchema),
     defaultValues: {
@@ -428,7 +404,6 @@ export function useAnnouncementForm({ announcement, onSuccess }: UseAnnouncement
       ends_at: announcement?.ends_at ? new Date(announcement.ends_at).toISOString().slice(0, 16) : '',
     }
   })
-
   useEffect(() => {
     if (announcement) {
       form.reset({
@@ -464,7 +439,6 @@ export function useAnnouncementForm({ announcement, onSuccess }: UseAnnouncement
       })
     }
   }, [announcement, form])
-
   const createAnnouncementMutation = useMutation({
     mutationFn: async (data: AnnouncementFormData) => {
       if (!supabase || !userData?.user?.id) throw new Error('Supabase not initialized or user not found')
@@ -508,7 +482,6 @@ export function useAnnouncementForm({ announcement, onSuccess }: UseAnnouncement
       })
     }
   })
-
   const updateAnnouncementMutation = useMutation({
     mutationFn: async (data: AnnouncementFormData) => {
       if (!supabase) throw new Error('Supabase not initialized')
@@ -552,7 +525,6 @@ export function useAnnouncementForm({ announcement, onSuccess }: UseAnnouncement
       })
     }
   })
-
   const onSubmit = async (data: AnnouncementFormData) => {
     if (announcement) {
       await updateAnnouncementMutation.mutateAsync(data)
@@ -560,7 +532,6 @@ export function useAnnouncementForm({ announcement, onSuccess }: UseAnnouncement
       await createAnnouncementMutation.mutateAsync(data)
     }
   }
-
   return {
     form,
     onSubmit,

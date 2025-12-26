@@ -2,15 +2,13 @@ import { Clock, BookOpen } from 'lucide-react';
 import { formatMinutesToTime } from '../../mappers';
 import type { ModuleWithLessons } from '../../types';
 import { SectionHeader } from './SectionHeader';
-
 interface ModulesSectionProps {
   modules: ModuleWithLessons[];
   title?: string;
   subtitle?: string;
   description?: string;
-  variant?: 'default' | 'no-container';
+  variant?: 'default'| 'no-container';
 }
-
 export function ModulesSection({ 
   modules, 
   title = "MÓDULOS DEL CURSO",
@@ -19,7 +17,6 @@ export function ModulesSection({
   variant = 'default'
 }: ModulesSectionProps) {
   if (modules.length === 0) return null;
-
   const content = (
     <div className="space-y-12">
       <SectionHeader
@@ -27,7 +24,6 @@ export function ModulesSection({
         subtitle={subtitle}
         description={description}
       />
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {modules.map((module, idx) => (
           <div
@@ -54,7 +50,6 @@ export function ModulesSection({
                 </div>
               )}
             </div>
-
             <div className="p-6">
               <div className="mb-4 space-y-2">
                 <span className="font-bold block text-sm sm:text-base text-accent">
@@ -72,11 +67,9 @@ export function ModulesSection({
                   </span>
                 </div>
               </div>
-
               <h3 className="font-semibold mb-4 group-hover:text-primary transition-colors text-xl sm:text-2xl md:text-3xl leading-tight">
                 {module.title}
               </h3>
-
               {module.description && (
                 <p className="text-sm text-muted-foreground">
                   {module.description}
@@ -88,11 +81,9 @@ export function ModulesSection({
       </div>
     </div>
   );
-
   if (variant === 'no-container') {
     return <section className="py-16 sm:py-20">{content}</section>;
   }
-
   return (
     <section className="py-16 sm:py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

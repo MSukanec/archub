@@ -3,7 +3,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import DataRowCard from '@/components/shared/DataRowCard';
 import { FavoriteButton } from '@/features/learning';
-
 interface LessonRowProps {
   lesson: {
     id: string;
@@ -18,7 +17,6 @@ interface LessonRowProps {
   courseId: string; // 🌟 NUEVO: Necesario para FavoriteButton
   onGoToLesson: (lessonId: string) => void;
 }
-
 export default function LessonRow({ lesson, courseId, onGoToLesson }: LessonRowProps) {
   const formatDuration = (seconds: number | null) => {
     if (!seconds) return '-';
@@ -26,7 +24,6 @@ export default function LessonRow({ lesson, courseId, onGoToLesson }: LessonRowP
     const secs = seconds % 60;
     return `${totalMins}:${secs.toString().padStart(2, '0')}`;
   };
-
   return (
     <DataRowCard
       data-testid={`lesson-row-${lesson.id}`}
@@ -37,12 +34,10 @@ export default function LessonRow({ lesson, courseId, onGoToLesson }: LessonRowP
         <p className="font-medium text-sm leading-tight">
           {lesson.title}
         </p>
-
         {/* 2. Nombre de Módulo */}
         <p className="text-xs text-muted-foreground">
           {lesson.module_title}
         </p>
-
         {/* 3. Datos / Badge */}
         <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
           <div className="flex items-center gap-1">
@@ -70,7 +65,6 @@ export default function LessonRow({ lesson, courseId, onGoToLesson }: LessonRowP
             </Badge>
           )}
         </div>
-
         {/* 4. Botones: 2/3 Ir a Lección + 1/3 Favorito */}
         <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border/50">
           {/* Botón Ir a Lección (2/3) */}
@@ -87,7 +81,6 @@ export default function LessonRow({ lesson, courseId, onGoToLesson }: LessonRowP
           >
             Ir a Lección
           </Button>
-
           {/* Botón Favorito (1/3) */}
           <div className="flex items-center justify-center">
             <FavoriteButton 

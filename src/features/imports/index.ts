@@ -1,5 +1,4 @@
 export { UniversalImportForm } from './components/UniversalImportForm';
-
 export {
   type FieldType,
   type TargetField,
@@ -13,14 +12,12 @@ export {
   type ImportState,
   IMPORT_STEPS,
 } from './types';
-
 export {
   useFileParser,
   useColumnAutoMap,
   useValidationEngine,
   useValueNormalizer,
 } from './hooks';
-
 export {
   StepPreview,
   StepMapping,
@@ -28,7 +25,6 @@ export {
   StepConflicts,
   StepSummary,
 } from './steps';
-
 export {
   normalizeText,
   levenshteinDistance,
@@ -38,7 +34,6 @@ export {
   parseNumber,
   parseCurrency,
 } from './utils';
-
 export {
   getMappingPatterns,
   getAllMappingPatterns,

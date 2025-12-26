@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';
 import { projectsKeys } from '@/core/query-keys';
-
 // Interface para el proyecto (usando la estructura real de la app)
 interface Project {
   id: string;
@@ -40,20 +39,18 @@ interface Project {
     };
   };
 }
-
 interface ProjectRowProps {
   project: Project;
   onClick?: (project: Project) => void;
   onEdit?: (project: Project) => void;
   onDelete?: (project: Project) => void;
   selected?: boolean;
-  density?: 'compact' | 'normal' | 'comfortable';
+  density?: 'compact'| 'normal'| 'comfortable';
   showChevron?: boolean;
   enableSwipe?: boolean;
   isActive?: boolean; // Para marcar el proyecto activo
   'data-testid'?: string;
 }
-
 // Helper para obtener iniciales del proyecto
 const getProjectInitials = (name: string): string => {
   if (!name) return "P";
@@ -64,7 +61,6 @@ const getProjectInitials = (name: string): string => {
     .toUpperCase()
     .slice(0, 2);
 };
-
 // Función helper para mapear status a texto legible
 const getStatusText = (status: string): string => {
   const statusMap: { [key: string]: string } = {
@@ -75,7 +71,6 @@ const getStatusText = (status: string): string => {
   };
   return statusMap[status] || status;
 };
-
 export function ProjectRow({ 
   project, 
   onClick, 
@@ -89,7 +84,6 @@ export function ProjectRow({
   'data-testid': dataTestId
 }: ProjectRowProps) {
   const avatarFallback = getProjectInitials(project.name);
-
   // Generate image URL on-demand from bucket+path with React Query
   const { data: avatarUrl } = useQuery({
     queryKey: projectsKeys.image(project.id),
@@ -99,7 +93,6 @@ export function ProjectRow({
     staleTime: 25 * 60 * 1000,         // Stale after 25 min
     select: (data) => data || undefined, // Convert null to undefined for avatarUrl
   });
-
   // Build metadata string (tipo, modalidad, estado)
   const metadata: string[] = [];
   
@@ -112,7 +105,6 @@ export function ProjectRow({
   }
   
   metadata.push(getStatusText(project.status));
-
   // Contenido interno del card usando el nuevo sistema de 3 columnas
   const cardContent = (
     <>
@@ -122,15 +114,13 @@ export function ProjectRow({
         <div className="font-semibold text-sm truncate">
           {project.name}
         </div>
-
         {/* Metadata: Tipo, Modalidad, Estado */}
         {metadata.length > 0 && (
           <div className="text-muted-foreground text-xs truncate mt-0.5">
-            {metadata.join(' • ')}
+            {metadata.join('• ')}
           </div>
         )}
       </div>
-
       {/* Columna 3: Badge de ACTIVO */}
       {isActive && (
         <div className="flex items-center">
@@ -144,7 +134,6 @@ export function ProjectRow({
       )}
     </>
   );
-
   // Usar el nuevo DataRowCard con avatar (Columna 1)
   const projectCard = (
     <DataRowCard
@@ -158,7 +147,6 @@ export function ProjectRow({
       {cardContent}
     </DataRowCard>
   );
-
   // If swipe is enabled and we have edit/delete handlers, wrap in SwipeableCard
   if (enableSwipe && (onEdit || onDelete)) {
     const swipeActions = [];
@@ -180,13 +168,11 @@ export function ProjectRow({
         onClick: () => onDelete(project),
       });
     }
-
     return (
       <SwipeableCard actions={swipeActions}>
         {projectCard}
       </SwipeableCard>
     );
   }
-
   return projectCard;
 }

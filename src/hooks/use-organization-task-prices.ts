@@ -4,7 +4,6 @@ import { queryClient } from '@/lib/queryClient'
 import { useCurrentUser } from './use-current-user'
 import { toast } from '@/hooks/use-toast'
 import type { OrganizationTaskPrice, InsertOrganizationTaskPrice } from '@shared/schema'
-
 export interface OrganizationTaskPriceData {
   task_id: string
   labor_unit_cost?: number | null
@@ -14,7 +13,6 @@ export interface OrganizationTaskPriceData {
   currency_code?: string | null
   note?: string | null
 }
-
 export function useOrganizationTaskPrice(taskId: string | null) {
   const { data: userData } = useCurrentUser()
   
@@ -24,14 +22,12 @@ export function useOrganizationTaskPrice(taskId: string | null) {
       if (!userData?.organization?.id || !taskId) {
         return null
       }
-
       // Get the authentication token
       const { supabase } = await import('@/lib/supabase');
       const { data: session } = await supabase.auth.getSession();
       if (!session.session?.access_token) {
         throw new Error('No authentication token available');
       }
-
       // Use server endpoint to query ORGANIZATION_TASK_PRICES_VIEW
       const response = await fetch(`/api/organization-task-prices?organization_id=${userData.organization.id}&task_id=${taskId}`, {
         method: 'GET',
@@ -40,18 +36,15 @@ export function useOrganizationTaskPrice(taskId: string | null) {
           'Authorization': `Bearer ${session.session.access_token}`
         },
       })
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-
       const data = await response.json()
       return data as OrganizationTaskPrice | null
     },
     enabled: !!userData?.organization?.id && !!taskId
   })
 }
-
 export function useOrganizationTaskPrices() {
   const { data: userData } = useCurrentUser()
   
@@ -61,14 +54,12 @@ export function useOrganizationTaskPrices() {
       if (!userData?.organization?.id) {
         return []
       }
-
       // Get the authentication token
       const { supabase } = await import('@/lib/supabase');
       const { data: session } = await supabase.auth.getSession();
       if (!session.session?.access_token) {
         throw new Error('No authentication token available');
       }
-
       // Use server endpoint to query ORGANIZATION_TASK_PRICES_VIEW
       const response = await fetch(`/api/organization-task-prices?organization_id=${userData.organization.id}`, {
         method: 'GET',
@@ -77,18 +68,15 @@ export function useOrganizationTaskPrices() {
           'Authorization': `Bearer ${session.session.access_token}`
         },
       })
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-
       const data = await response.json()
       return data as OrganizationTaskPrice[]
     },
     enabled: !!userData?.organization?.id
   })
 }
-
 export function useUpsertOrganizationTaskPrice() {
   const { data: userData } = useCurrentUser()
   
@@ -97,7 +85,6 @@ export function useUpsertOrganizationTaskPrice() {
       if (!supabase || !userData?.organization?.id) {
         throw new Error('No organization found')
       }
-
       // Try to update first, if no rows affected, then insert
       const { data: existingPrice } = await supabase
         .from('organization_task_prices')
@@ -105,9 +92,7 @@ export function useUpsertOrganizationTaskPrice() {
         .eq('organization_id', userData.organization.id)
         .eq('task_id', priceData.task_id)
         .maybeSingle()
-
       let result;
-
       if (existingPrice) {
         // Update existing record
         const { data, error } = await supabase
@@ -119,12 +104,10 @@ export function useUpsertOrganizationTaskPrice() {
           .eq('id', existingPrice.id)
           .select()
           .single()
-
         if (error) {
           console.error('Error updating organization task price:', error)
           throw error
         }
-
         result = data
       } else {
         // Insert new record
@@ -136,15 +119,12 @@ export function useUpsertOrganizationTaskPrice() {
           })
           .select()
           .single()
-
         if (error) {
           console.error('Error creating organization task price:', error)
           throw error
         }
-
         result = data
       }
-
       return result
     },
     onSuccess: (data, variables) => {
@@ -166,7 +146,6 @@ export function useUpsertOrganizationTaskPrice() {
     }
   })
 }
-
 export function useDeleteOrganizationTaskPrice() {
   const { data: userData } = useCurrentUser()
   
@@ -175,13 +154,11 @@ export function useDeleteOrganizationTaskPrice() {
       if (!supabase || !userData?.organization?.id) {
         throw new Error('Supabase not initialized or no organization found')
       }
-
       const { error } = await supabase
         .from('organization_task_prices')
         .delete()
         .eq('organization_id', userData.organization.id)
         .eq('task_id', taskId)
-
       if (error) {
         console.error('Error deleting organization task price:', error)
         throw error

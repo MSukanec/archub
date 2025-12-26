@@ -3,7 +3,6 @@ import { upsertLessonMarker } from '../services';
 import { LEARNING_QUERY_KEYS } from '../constants';
 import type { UpsertMarkerPayload } from '../types';
 import { useToast } from '@/hooks/use-toast';
-
 /**
  * Hook para crear o actualizar un marcador de lección.
  * 
@@ -16,7 +15,6 @@ import { useToast } from '@/hooks/use-toast';
 export function useUpsertLessonMarker() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
   return useMutation({
     mutationFn: (payload: UpsertMarkerPayload) => upsertLessonMarker(payload),
     onSuccess: (data, variables) => {
@@ -24,7 +22,6 @@ export function useUpsertLessonMarker() {
       queryClient.invalidateQueries({
         queryKey: LEARNING_QUERY_KEYS.lessonMarkers(variables.lessonId),
       });
-
       toast({
         title: "Marcador guardado",
         description: "El marcador ha sido guardado correctamente",

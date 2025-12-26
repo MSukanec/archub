@@ -8,7 +8,6 @@ import {
 } from '../services/clientPaymentSchedule';
 import { CLIENT_QUERY_KEYS } from '../constants';
 import type { ClientPaymentSchedule } from '../types';
-
 export function useClientPaymentSchedule(
   projectId: string | undefined,
   organizationId: string | undefined
@@ -19,7 +18,6 @@ export function useClientPaymentSchedule(
     enabled: !!projectId && !!organizationId,
   });
 }
-
 export function useClientPaymentScheduleItem(
   scheduleId: string | undefined,
   organizationId: string | undefined
@@ -30,17 +28,15 @@ export function useClientPaymentScheduleItem(
     enabled: !!scheduleId && !!organizationId,
   });
 }
-
 export function useCreateClientPaymentSchedule() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       schedule,
       organizationId,
       projectId,
     }: {
-      schedule: Omit<ClientPaymentSchedule, 'id' | 'created_at' | 'updated_at' | 'organization_id'>;
+      schedule: Omit<ClientPaymentSchedule, 'id'| 'created_at'| 'updated_at'| 'organization_id'>;
       organizationId: string;
       projectId: string;
     }) => createClientPaymentSchedule(schedule, organizationId),
@@ -55,10 +51,8 @@ export function useCreateClientPaymentSchedule() {
     },
   });
 }
-
 export function useUpdateClientPaymentSchedule() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       scheduleId,
@@ -67,7 +61,7 @@ export function useUpdateClientPaymentSchedule() {
       projectId,
     }: {
       scheduleId: string;
-      updates: Partial<Omit<ClientPaymentSchedule, 'id' | 'created_at' | 'updated_at' | 'organization_id'>>;
+      updates: Partial<Omit<ClientPaymentSchedule, 'id'| 'created_at'| 'updated_at'| 'organization_id'>>;
       organizationId: string;
       projectId: string;
     }) => updateClientPaymentSchedule(scheduleId, updates, organizationId),
@@ -85,10 +79,8 @@ export function useUpdateClientPaymentSchedule() {
     },
   });
 }
-
 export function useDeleteClientPaymentSchedule() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       scheduleId,

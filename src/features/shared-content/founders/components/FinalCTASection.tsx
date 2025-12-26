@@ -3,23 +3,19 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import type { FoundersSectionProps } from "../types";
-
 export function FinalCTASection({ mode }: FoundersSectionProps) {
   const { user } = useAuthStore();
   const isAuthenticated = !!user;
-
-  const ctaHref = mode === 'dashboard' 
+  const ctaHref = mode === 'dashboard'
     ? '/settings/pricing-plan?billing=annual'
     : isAuthenticated 
-      ? '/settings/pricing-plan?billing=annual' 
+      ? '/settings/pricing-plan?billing=annual'
       : '/precios';
-
-  const ctaText = mode === 'dashboard' 
-    ? 'Actualizar a Plan Anual' 
+  const ctaText = mode === 'dashboard'
+    ? 'Actualizar a Plan Anual'
     : isAuthenticated 
       ? 'Ver Planes Anuales'
       : 'Suscribirme al Plan Anual';
-
   return (
     <section
       className="py-20 -mx-6"
@@ -32,19 +28,17 @@ export function FinalCTASection({ mode }: FoundersSectionProps) {
         <div className="max-w-4xl mx-auto text-center">
           <h2
             className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-8"
-            style={{ color: '#ffffff' }}
+            style={{ color: '#ffffff'}}
           >
             ¿Listo para ser parte de la historia de Seencel?
           </h2>
-
           <p
             className="text-lg sm:text-xl mb-12 max-w-2xl mx-auto"
-            style={{ color: '#b0b0b0' }}
+            style={{ color: '#b0b0b0'}}
           >
             Únete hoy al grupo exclusivo de fundadores y asegura beneficios vitalicios 
             mientras ayudas a construir el futuro de la gestión de proyectos de construcción.
           </p>
-
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href={ctaHref}>
               <Button
@@ -57,8 +51,7 @@ export function FinalCTASection({ mode }: FoundersSectionProps) {
               </Button>
             </Link>
           </div>
-
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm" style={{ color: '#808080' }}>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm" style={{ color: '#808080'}}>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-primary" />
               <span>Beneficios inmediatos</span>

@@ -2,12 +2,11 @@ export interface RestrictionMessage {
   message: string;
   actionLabel: string;
   actionUrl: string;
-  planType?: 'teams' | 'pro' | 'enterprise';
+  planType?: 'teams'| 'pro'| 'enterprise';
   iconColor?: string;
   backgroundColor?: string;
   borderColor?: string;
 }
-
 export const restrictionMessages: Record<string, RestrictionMessage> = {
   export_pdf_custom: {
     message: "Esta funcionalidad está disponible solo en el plan PRO.",
@@ -100,7 +99,6 @@ export const restrictionMessages: Record<string, RestrictionMessage> = {
     borderColor: 'hsl(213, 100%, 30%)',
   },
 };
-
 export function getRestrictionMessage(key: string): RestrictionMessage {
   return restrictionMessages[key] || {
     message: "Esta funcionalidad no está disponible en tu plan actual.",

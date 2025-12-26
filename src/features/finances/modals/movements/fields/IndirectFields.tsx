@@ -3,20 +3,17 @@ import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { Calculator } from 'lucide-react'
 import { useIndirectCosts } from '@/hooks/use-indirect-costs'
 import { useCurrentUser } from '@/hooks/use-current-user'
-
 // Indirect item interface
 export interface IndirectItem {
   indirect_id: string
   indirect_name: string
 }
-
 // Props interface
 interface IndirectFieldsProps {
   selectedIndirects: IndirectItem[]
   onIndirectsChange: (indirectsList: IndirectItem[]) => void
   projectId?: string
 }
-
 export const IndirectFields: React.FC<IndirectFieldsProps> = ({
   selectedIndirects,
   onIndirectsChange,
@@ -30,10 +27,8 @@ export const IndirectFields: React.FC<IndirectFieldsProps> = ({
   // Get current user data to access organization info
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
-
   // Get indirect costs for this organization
   const { data: indirectCosts = [], isLoading } = useIndirectCosts(organizationId)
-
   // Transform indirect costs data for ComboBox  
   const indirectsOptions = indirectCosts.map((indirect: any) => {
     return {
@@ -41,7 +36,6 @@ export const IndirectFields: React.FC<IndirectFieldsProps> = ({
       label: indirect.name || 'Sin nombre'
     }
   })
-
   const handleIndirectChange = (value: string) => {
     setIndirectId(value)
     
@@ -51,7 +45,6 @@ export const IndirectFields: React.FC<IndirectFieldsProps> = ({
     if (selectedIndirect) {
       indirectName = selectedIndirect.name || 'Sin nombre'
     }
-
     if (value) {
       onIndirectsChange([{
         indirect_id: value,
@@ -61,7 +54,6 @@ export const IndirectFields: React.FC<IndirectFieldsProps> = ({
       onIndirectsChange([])
     }
   }
-
   // Sync external changes with internal state
   useEffect(() => {
     const expectedIndirectId = selectedIndirects.length > 0 ? selectedIndirects[0].indirect_id : ''
@@ -70,7 +62,6 @@ export const IndirectFields: React.FC<IndirectFieldsProps> = ({
       setIndirectId(expectedIndirectId)
     }
   }, [selectedIndirects, indirectId, indirectCosts])
-
   return (
     <div className="space-y-4">
       {/* Header */}

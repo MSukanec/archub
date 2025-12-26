@@ -1,5 +1,4 @@
 import { apiRequest } from '@/lib/queryClient';
-
 export async function deletePersonnel(
   personnelId: string,
   organizationId: string
@@ -8,7 +7,6 @@ export async function deletePersonnel(
     'DELETE',
     `/api/personnel/${personnelId}?organizationId=${organizationId}`
   );
-
   if (response.ok) {
     const result = await response.json();
     if (!result.success) {
@@ -16,7 +14,6 @@ export async function deletePersonnel(
     }
     return;
   }
-
   const errorData = await response.json();
   throw new Error(errorData.error || 'Failed to delete personnel');
 }

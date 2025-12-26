@@ -10,19 +10,16 @@ import { Button } from '@/components/ui/button';
 import AdminSubscriptionsTab from './AdminSubscriptionsTab';
 import AdminPlansTab from './AdminPlansTab';
 import AdminAuditTab from './AdminAuditTab';
-
 const AdminSubscriptions = () => {
   const [activeTab, setActiveTab] = useState('subscriptions');
   const { setSidebarLevel, sidebarLevel } = useNavigationStore();
   const { openModal } = useGlobalModalStore();
   const { toast } = useToast();
-
   useEffect(() => {
     if (sidebarLevel !== 'general') {
       setSidebarLevel('admin');
     }
   }, [setSidebarLevel, sidebarLevel]);
-
   const executeDowngradesCronMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest('POST', '/api/admin/cron/execute-scheduled-downgrades');
@@ -44,7 +41,6 @@ const AdminSubscriptions = () => {
       });
     },
   });
-
   const executeNotifierCronMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest('POST', '/api/admin/cron/execute-expiry-notifier');
@@ -66,7 +62,6 @@ const AdminSubscriptions = () => {
       });
     },
   });
-
   const getActions = () => {
     switch (activeTab) {
       case 'subscriptions':
@@ -79,7 +74,7 @@ const AdminSubscriptions = () => {
             data-testid="button-execute-downgrades"
           >
             <Play className="w-4 h-4 mr-1" />
-            {executeDowngradesCronMutation.isPending ? 'Ejecutando...' : 'Ejecutar Downgrades'}
+            {executeDowngradesCronMutation.isPending ? 'Ejecutando...': 'Ejecutar Downgrades'}
           </Button>,
           <Button 
             key="notifier" 
@@ -89,7 +84,7 @@ const AdminSubscriptions = () => {
             data-testid="button-execute-notifier"
           >
             <Bell className="w-4 h-4 mr-1" />
-            {executeNotifierCronMutation.isPending ? 'Ejecutando...' : 'Ejecutar Notificador'}
+            {executeNotifierCronMutation.isPending ? 'Ejecutando...': 'Ejecutar Notificador'}
           </Button>,
           <Button 
             key="reset" 
@@ -115,7 +110,6 @@ const AdminSubscriptions = () => {
         return undefined;
     }
   };
-
   const headerProps = {
     title: "Suscripciones",
     icon: CreditCard,
@@ -139,14 +133,12 @@ const AdminSubscriptions = () => {
     onTabChange: (tabId: string) => setActiveTab(tabId),
     actions: getActions(),
   };
-
   return (
     <Layout wide headerProps={headerProps}>
-      {activeTab === 'subscriptions' && <AdminSubscriptionsTab />}
-      {activeTab === 'plans' && <AdminPlansTab />}
-      {activeTab === 'audit' && <AdminAuditTab />}
+      {activeTab === 'subscriptions'&& <AdminSubscriptionsTab />}
+      {activeTab === 'plans'&& <AdminPlansTab />}
+      {activeTab === 'audit'&& <AdminAuditTab />}
     </Layout>
   );
 };
-
 export default AdminSubscriptions;

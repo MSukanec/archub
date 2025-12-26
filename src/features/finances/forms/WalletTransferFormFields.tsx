@@ -17,7 +17,6 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrgCurrencyContext } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
 import { useCreateWalletTransfer } from '../hooks/use-financial-operations'
-
 const walletTransferSchema = z.object({
   operation_date: z.date({
     required_error: "Fecha es requerida",
@@ -31,19 +30,16 @@ const walletTransferSchema = z.object({
   message: "La billetera origen y destino deben ser diferentes",
   path: ["destination_wallet_id"],
 })
-
 type WalletTransferFormData = z.infer<typeof walletTransferSchema>
-
 export interface WalletTransferFormFieldsProps {
   projectId?: string
   organizationId?: string
-  mode: 'create' | 'edit' | 'view'
+  mode: 'create'| 'edit'| 'view'
   onSuccess: () => void
   onCancel: () => void
   hideActions?: boolean
   formRef?: React.RefObject<HTMLFormElement>
 }
-
 export function WalletTransferFormFields({ 
   projectId, 
   organizationId,
@@ -55,18 +51,14 @@ export function WalletTransferFormFields({
 }: WalletTransferFormFieldsProps) {
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
-
   const { data: wallets = [], isLoading: walletsLoading } = useOrganizationWallets(organizationId || '')
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
   
   const orgCurrencyContext = useOrgCurrencyContext(organizationId)
-
   const createMutation = useCreateWalletTransfer()
-
   const currentMember = useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
   }, [members, userData?.user?.id])
-
   const form = useForm<WalletTransferFormData>({
     resolver: zodResolver(walletTransferSchema),
     defaultValues: {
@@ -78,9 +70,7 @@ export function WalletTransferFormFields({
       description: '',
     }
   })
-
   const isLoading = walletsLoading || membersLoading || orgCurrencyContext.isLoading
-
   useEffect(() => {
     if (mode === 'create') {
       if (orgCurrencyContext.defaultCurrencyId && !orgCurrencyContext.isLoading) {
@@ -88,13 +78,11 @@ export function WalletTransferFormFields({
       }
     }
   }, [orgCurrencyContext.defaultCurrencyId, orgCurrencyContext.isLoading, mode, form])
-
   useEffect(() => {
-    if (mode === 'create' && !walletsLoading && wallets.length > 0) {
+    if (mode === 'create'&& !walletsLoading && wallets.length > 0) {
       form.setValue('source_wallet_id', wallets[0].id || '')
     }
   }, [wallets, walletsLoading, mode, form])
-
   const onSubmit = async (data: WalletTransferFormData) => {
     if (!organizationId || !currentMember) {
       toast({
@@ -104,7 +92,6 @@ export function WalletTransferFormFields({
       })
       return
     }
-
     try {
       await createMutation.mutateAsync({
         organization_id: organizationId,
@@ -118,12 +105,10 @@ export function WalletTransferFormFields({
         created_by_user_id: currentMember.user_id,
         created_by_member_id: currentMember.id,
       })
-
       toast({
         title: "Transferencia registrada",
         description: "La transferencia entre billeteras se ha registrado correctamente",
       })
-
       onSuccess()
     } catch (error: any) {
       console.error('Error creating wallet transfer:', error)
@@ -134,7 +119,6 @@ export function WalletTransferFormFields({
       })
     }
   }
-
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -145,10 +129,8 @@ export function WalletTransferFormFields({
       </div>
     )
   }
-
   const sourceWalletId = form.watch('source_wallet_id')
   const availableDestinationWallets = wallets.filter(w => w.id !== sourceWalletId)
-
   return (
     <Form {...form}>
       <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -191,7 +173,6 @@ export function WalletTransferFormFields({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="amount"
@@ -217,7 +198,6 @@ export function WalletTransferFormFields({
             )}
           />
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-[1fr,auto,1fr] gap-4 items-end">
           <FormField
             control={form.control}
@@ -248,11 +228,9 @@ export function WalletTransferFormFields({
               </FormItem>
             )}
           />
-
           <div className="hidden md:flex items-center justify-center pb-2">
             <ArrowRight className="h-5 w-5 text-muted-foreground" />
           </div>
-
           <FormField
             control={form.control}
             name="destination_wallet_id"
@@ -283,9 +261,7 @@ export function WalletTransferFormFields({
             )}
           />
         </div>
-
         <input type="hidden" {...form.register('currency_id')} />
-
         <FormField
           control={form.control}
           name="description"
@@ -304,7 +280,6 @@ export function WalletTransferFormFields({
             </FormItem>
           )}
         />
-
         {!hideActions && (
           <div className="flex gap-2 pt-4 border-t">
             <button type="button" onClick={onCancel} className="flex-1 px-4 py-2 border rounded-md">
@@ -315,7 +290,7 @@ export function WalletTransferFormFields({
               disabled={createMutation.isPending} 
               className="flex-[3] px-4 py-2 bg-primary text-primary-foreground rounded-md"
             >
-              {createMutation.isPending ? 'Registrando...' : 'Registrar Transferencia'}
+              {createMutation.isPending ? 'Registrando...': 'Registrar Transferencia'}
             </button>
           </div>
         )}

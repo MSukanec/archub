@@ -1,13 +1,11 @@
 import { UserPlus, Eye, Edit } from "lucide-react";
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from "@/components/modal";
 import { useGlobalModalStore } from "@/components/modal";
-import { 
   FormPanel, 
   ViewPanel, 
   useContactForm,
   type Contact 
 } from '../forms/ContactForm';
-
 interface ContactModalProps {
   modalData?: {
     contactId?: string;
@@ -16,14 +14,12 @@ interface ContactModalProps {
   onClose: () => void;
   mode?: "create" | "edit" | "view";
 }
-
 export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModalProps) {
   const { openModal } = useGlobalModalStore();
   
   const contactId = modalData?.contactId;
   const contact = modalData?.contact || undefined;
   const mode = modeProp || 'create';
-
   const {
     form,
     onSubmit,
@@ -49,7 +45,6 @@ export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModa
     mode,
     onSuccess: onClose,
   });
-
   const getHeader = () => {
     switch (mode) {
       case "view":
@@ -70,9 +65,7 @@ export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModa
         };
     }
   };
-
   const header = getHeader();
-
   if ((mode === "edit" || mode === "view") && contactLoading) {
     return (
       <ModalLayout onClose={onClose} size="md">
@@ -87,7 +80,6 @@ export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModa
       </ModalLayout>
     );
   }
-
   if (mode === "view" && !editingContact) {
     return (
       <ModalLayout onClose={onClose} size="md">
@@ -102,7 +94,6 @@ export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModa
       </ModalLayout>
     );
   }
-
   return (
     <ModalLayout onClose={onClose} size="lg">
       <ModalHeader 
@@ -141,7 +132,6 @@ export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModa
           />
         )}
       </ModalBody>
-
       {mode !== "view" && (
         <ModalFooter
           leftLabel="Cancelar"
@@ -155,13 +145,12 @@ export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModa
           data-testid="button-submit-contact"
         />
       )}
-
       {mode === "view" && (
         <ModalFooter
           leftLabel="Cerrar"
           onLeftClick={onClose}
           submitText="Editar"
-          onSubmit={() => openModal('contact', { contactId: editingContact?.id, mode: 'edit' })}
+          onSubmit={() => openModal('contact', { contactId: editingContact?.id, mode: 'edit'})}
           data-testid="button-edit-from-view"
         />
       )}

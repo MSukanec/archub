@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-
 /**
  * Soft deletes a general cost from the database.
  * 
@@ -14,7 +13,6 @@ export async function deleteGeneralCost(generalCostId: string): Promise<string> 
   if (!supabase) {
     throw new Error('Supabase client not initialized');
   }
-
   const { error } = await supabase
     .from('general_costs')
     .update({
@@ -22,10 +20,8 @@ export async function deleteGeneralCost(generalCostId: string): Promise<string> 
       deleted_at: new Date().toISOString()
     })
     .eq('id', generalCostId);
-
   if (error) {
     throw error;
   }
-
   return generalCostId;
 }

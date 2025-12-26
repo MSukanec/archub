@@ -1,7 +1,6 @@
 /**
  * Data transformation utilities for the Learning module
  */
-
 /**
  * Formats minutes to a human-readable time string.
  * 
@@ -18,7 +17,6 @@ export function formatMinutesToTime(totalMinutes: number): string {
   const minutes = Math.floor(totalMinutes % 60);
   return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 }
-
 /**
  * Formats seconds to a human-readable time string.
  * 
@@ -34,7 +32,6 @@ export function formatSecondsToTime(totalSeconds: number): string {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 }
-
 /**
  * Formats seconds to HH:MM:SS format.
  * 
@@ -48,7 +45,6 @@ export function formatSecondsToHMS(totalSeconds: number): string {
   
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
-
 /**
  * Formats lesson count to a human-readable string.
  * 
@@ -56,9 +52,8 @@ export function formatSecondsToHMS(totalSeconds: number): string {
  * @returns Formatted string (e.g., "1 lección" or "10 lecciones")
  */
 export function formatLessonsCount(count: number): string {
-  return `${count} ${count === 1 ? 'lección' : 'lecciones'}`;
+  return `${count} ${count === 1 ? 'lección': 'lecciones'}`;
 }
-
 /**
  * Formats progress text showing completed vs total lessons.
  * 
@@ -67,9 +62,8 @@ export function formatLessonsCount(count: number): string {
  * @returns Formatted progress text (e.g., "5 de 10 lecciones")
  */
 export function formatProgressText(completed: number, total: number): string {
-  return `${completed} de ${total} ${total === 1 ? 'lección' : 'lecciones'}`;
+  return `${completed} de ${total} ${total === 1 ? 'lección': 'lecciones'}`;
 }
-
 /**
  * Maps modules and lessons arrays into modules with nested lessons.
  * Calculates total duration for each module.
@@ -95,7 +89,6 @@ export function mapModulesWithLessons(
     };
   });
 }
-
 /**
  * Calculates course statistics from modules with lessons.
  * 

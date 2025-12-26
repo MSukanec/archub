@@ -4,16 +4,13 @@ import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useGlobalModalStore } from '@/components/modal';
 import AdminGeneralMovementConcepts from './AdminGeneralMovementConcepts';
 import AdminGeneralUnitPresentations from './AdminGeneralUnitPresentations';
-
 const AdminGeneral = () => {
   const [activeTab, setActiveTab] = useState('movimientos');
   const { openModal } = useGlobalModalStore();
-
   const tabs = [
-    { id: 'movimientos', label: 'Movimientos', isActive: activeTab === 'movimientos' },
-    { id: 'unidades', label: 'Unidades de Venta', isActive: activeTab === 'unidades' }
+    { id: 'movimientos', label: 'Movimientos', isActive: activeTab === 'movimientos'},
+    { id: 'unidades', label: 'Unidades de Venta', isActive: activeTab === 'unidades'}
   ];
-
   const getActionButton = () => {
     switch (activeTab) {
       case 'movimientos':
@@ -36,7 +33,6 @@ const AdminGeneral = () => {
         };
     }
   };
-
   const renderTabContent = () => {
     switch (activeTab) {
       case 'movimientos':
@@ -47,7 +43,6 @@ const AdminGeneral = () => {
         return <AdminGeneralMovementConcepts />;
     }
   };
-
   const headerProps = {
     title: 'General',
     icon: Settings,
@@ -57,7 +52,6 @@ const AdminGeneral = () => {
     onTabChange: setActiveTab,
     actionButton: getActionButton()
   };
-
   return (
     <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
@@ -66,5 +60,4 @@ const AdminGeneral = () => {
     </Layout>
   );
 };
-
 export default AdminGeneral;

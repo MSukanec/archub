@@ -17,19 +17,15 @@ import { useToast } from '@/hooks/use-toast'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCreateIndirectCost, useUpdateIndirectCost, useIndirectCost } from '@/hooks/use-indirect-costs'
 import { useMovementConcepts } from '@/hooks/use-movement-concepts'
-
 // Schema de validación
 const indirectSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   category_id: z.string().optional()
 })
-
 type IndirectForm = z.infer<typeof indirectSchema>
-
 // UUID del concepto padre para Indirectos
 const INDIRECT_PARENT_UUID = 'e854de08-da8f-4769-a2c5-b24b622f20b0'
-
 interface IndirectModalProps {
   modalData?: {
     projectId?: string
@@ -41,22 +37,18 @@ interface IndirectModalProps {
   }
   onClose: () => void
 }
-
 export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { setPanel } = useModalPanelStore()
-
   const projectId = modalData?.projectId
   const organizationId = modalData?.organizationId
   const isEditing = modalData?.isEditing || !!modalData?.indirectId
-
   // Critical data queries
   const userQuery = useCurrentUser()
   const existingIndirectQuery = useIndirectCost(isEditing ? modalData?.indirectId || null : null)
   const indirectCategoriesQuery = useMovementConcepts('categories', INDIRECT_PARENT_UUID)
-
   // Modal readiness setup
   const readiness = useModalReadiness({
     criticalQueries: [
@@ -79,14 +71,11 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
       })
     }
   })
-
   // Get data from queries (only available when ready)
   const userData = userQuery.data
   const existingIndirect = existingIndirectQuery.data
   const indirectCategories = indirectCategoriesQuery.data || []
   const finalOrganizationId = organizationId || userData?.organization?.id
-
-
   const form = useForm<IndirectForm>({
     resolver: zodResolver(indirectSchema),
     defaultValues: {
@@ -95,7 +84,6 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
       category_id: ''
     }
   })
-
   // Set initial panel based on editing mode
   useEffect(() => {
     if (isEditing) {
@@ -104,7 +92,6 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
       setPanel('edit')
     }
   }, [isEditing, setPanel])
-
   // Reset form when existing data is loaded
   useEffect(() => {
     if (existingIndirect) {
@@ -113,10 +100,8 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
       form.setValue('category_id', (existingIndirect as any).category_id || '')
     }
   }, [existingIndirect, form])
-
   const createIndirectCost = useCreateIndirectCost()
   const updateIndirectCost = useUpdateIndirectCost()
-
   const onSubmit = async (data: IndirectForm) => {
     if (!finalOrganizationId) {
       toast({
@@ -126,9 +111,7 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
       })
       return
     }
-
     setIsSubmitting(true)
-
     try {
       if (isEditing && modalData?.indirectId) {
         // Modo edición
@@ -160,7 +143,6 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
       setIsSubmitting(false)
     }
   }
-
   const editPanel = (
     <div className="space-y-6">
       <Form {...form}>
@@ -191,7 +173,6 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
               </FormItem>
             )}
           />
-
           {/* Nombre */}
           <FormField
             control={form.control}
@@ -209,7 +190,6 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
               </FormItem>
             )}
           />
-
           {/* Descripción */}
           <FormField
             control={form.control}
@@ -228,34 +208,29 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
               </FormItem>
             )}
           />
-
-
         </form>
       </Form>
     </div>
   )
-
   const headerContent = (
     <FormModalHeader
-      title={isEditing ? 'Editar Costo Indirecto' : 'Nuevo Costo Indirecto'}
+      title={isEditing ? 'Editar Costo Indirecto': 'Nuevo Costo Indirecto'}
       description={isEditing 
         ? 'Modifica la información del costo indirecto seleccionado'
         : 'Define un nuevo tipo de costo indirecto para tus proyectos'}
       icon={TrendingUp}
     />
   )
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel={isEditing ? 'Actualizar' : 'Crear'}
+      rightLabel={isEditing ? 'Actualizar': 'Crear'}
       onRightClick={form.handleSubmit(onSubmit)}
       submitDisabled={isSubmitting}
       showLoadingSpinner={isSubmitting}
     />
   )
-
   // View panel for when viewing existing indirect cost
   const viewPanel = isEditing && existingIndirect ? (
     <div className="space-y-6">
@@ -281,7 +256,6 @@ export function IndirectModal({ modalData, onClose }: IndirectModalProps) {
       </div>
     </div>
   ) : null
-
   return (
     <FormModalLayout
       columns={1}

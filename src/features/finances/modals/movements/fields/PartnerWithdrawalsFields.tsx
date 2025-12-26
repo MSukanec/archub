@@ -5,30 +5,25 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { FormLabel } from '@/components/ui/form'
 import { IdentityBadge } from '@/components/shared/IdentityBadge'
-
 // Re-export for compatibility
 export interface PartnerWithdrawalItem {
   partner_id: string
   partner_name: string
 }
-
 interface PartnerWithdrawalsFieldsProps {
   selectedPartnerWithdrawals: PartnerWithdrawalItem[]
   onPartnerWithdrawalsChange: (partnerWithdrawals: PartnerWithdrawalItem[]) => void
 }
-
 export const PartnerWithdrawalsFields: React.FC<PartnerWithdrawalsFieldsProps> = ({
   selectedPartnerWithdrawals,
   onPartnerWithdrawalsChange
 }) => {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
-
   const { data: partners = [], isLoading } = usePartners(
     organizationId,
     { enabled: !!organizationId }
   )
-
   // Function to get partner display name
   const getPartnerDisplayName = (partner: Partner): string => {
     if (!partner?.contacts) return 'Socio sin nombre'
@@ -47,7 +42,6 @@ export const PartnerWithdrawalsFields: React.FC<PartnerWithdrawalsFieldsProps> =
       }
     }
   }
-
   // Create options for ComboBox with linkedUser for avatar rendering
   const partnerOptions = partners.map(partner => {
     const linkedUser = Array.isArray(partner.contacts?.linked_user) 
@@ -60,7 +54,6 @@ export const PartnerWithdrawalsFields: React.FC<PartnerWithdrawalsFieldsProps> =
       partnerName: getPartnerDisplayName(partner)
     };
   })
-
   // Handle partner change
   const handlePartnerChange = (partnerId: string) => {
     const selectedPartner = partners.find(p => p.id === partnerId)
@@ -70,10 +63,8 @@ export const PartnerWithdrawalsFields: React.FC<PartnerWithdrawalsFieldsProps> =
     }
     onPartnerWithdrawalsChange([partnerWithdrawal])
   }
-
   // Get current selected partner
   const currentSelectedPartner = selectedPartnerWithdrawals.length > 0 ? selectedPartnerWithdrawals[0] : null
-
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -86,7 +77,6 @@ export const PartnerWithdrawalsFields: React.FC<PartnerWithdrawalsFieldsProps> =
           </p>
         </div>
       </div>
-
       {/* Partner Selection Field */}
       <div>
         <FormLabel>Socio *</FormLabel>

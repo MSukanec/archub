@@ -3,7 +3,6 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { 
   Download, 
   Share2, 
   Edit3, 
@@ -18,7 +17,6 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useGlobalModalStore } from '@/components/modal';
 import { useDeleteDesignDocument } from '@/hooks/use-design-documents';
-
 interface DocumentInfoProps {
   document?: any;
   onDownload?: () => void;
@@ -26,7 +24,6 @@ interface DocumentInfoProps {
   onEdit?: () => void;
   onDelete?: () => void;
 }
-
 export function DocumentInfo({ 
   document, 
   onDownload, 
@@ -61,14 +58,12 @@ export function DocumentInfo({
       </Card>
     );
   }
-
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return 'N/A';
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ''+ sizes[i];
   };
-
   const getStatusColor = (status?: string) => {
     switch (status) {
       case 'aprobado': return 'green';
@@ -78,7 +73,6 @@ export function DocumentInfo({
       default: return 'gray';
     }
   };
-
   const getStatusText = (status?: string) => {
     switch (status) {
       case 'aprobado': return 'Aprobado';
@@ -88,7 +82,6 @@ export function DocumentInfo({
       default: return 'Sin estado';
     }
   };
-
   return (
     <Card className="h-full flex flex-col">
       <div className="px-4 py-3 border-b border-[var(--card-border)]">
@@ -114,9 +107,7 @@ export function DocumentInfo({
             </p>
           )}
         </div>
-
         <Separator />
-
         {/* Document Details - All with same spacing */}
         <div className="space-y-2">
           {/* File Type */}
@@ -126,7 +117,6 @@ export function DocumentInfo({
               {document.file_type || 'Desconocido'}
             </span>
           </div>
-
           {/* File Name (original) */}
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Nombre:</span>
@@ -134,7 +124,6 @@ export function DocumentInfo({
               {document.original_name || document.file_name}
             </span>
           </div>
-
           {/* Status */}
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Estado:</span>
@@ -142,13 +131,11 @@ export function DocumentInfo({
               {getStatusText(document.status)}
             </span>
           </div>
-
           {/* File Size */}
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Tamaño:</span>
             <span className="text-xs">{formatFileSize(document.file_size)}</span>
           </div>
-
           {/* Created Date */}
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Creado:</span>
@@ -156,7 +143,6 @@ export function DocumentInfo({
               {format(new Date(document.created_at), 'dd MMM yyyy', { locale: es })}
             </span>
           </div>
-
           {/* Creator */}
           {document.creator && (
             <div className="flex items-center justify-between">
@@ -166,7 +152,6 @@ export function DocumentInfo({
               </span>
             </div>
           )}
-
           {/* Version if available */}
           {document.version && (
             <div className="flex items-center justify-between">
@@ -174,7 +159,6 @@ export function DocumentInfo({
               <span className="text-xs">v{document.version}</span>
             </div>
           )}
-
           {/* Folder path if available */}
           {document.folder && (
             <div className="flex items-center justify-between">
@@ -185,7 +169,6 @@ export function DocumentInfo({
             </div>
           )}
         </div>
-
       </CardContent>
       
       {/* Footer with Action Buttons */}

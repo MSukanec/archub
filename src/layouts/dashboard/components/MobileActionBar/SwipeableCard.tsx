@@ -2,14 +2,12 @@ import React, { useState, useEffect, ReactNode } from "react";
 import { motion, PanInfo, useMotionValue, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Star, Edit, Trash2 } from "lucide-react";
-
 interface SwipeAction {
   label: string;
   icon: ReactNode;
   variant?: "destructive" | "default";
   onClick: () => void;
 }
-
 interface SwipeableCardProps {
   children: ReactNode;
   actions?: SwipeAction[];
@@ -17,7 +15,6 @@ interface SwipeableCardProps {
   onEdit?: () => void;
   onDelete?: () => void;
 }
-
 export default function SwipeableCard({
   children,
   actions,
@@ -29,17 +26,14 @@ export default function SwipeableCard({
   const [isRevealed, setIsRevealed] = useState(false);
   const x = useMotionValue(0);
   const actionWidth = 80;
-
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-
   const defaultActions: SwipeAction[] = [
     {
       label: "Favorito",
@@ -58,21 +52,15 @@ export default function SwipeableCard({
       onClick: onDelete || (() => {}),
     },
   ];
-
   const finalActions = actions || defaultActions;
   const totalActionWidth = finalActions.length * actionWidth;
-
   const actionOpacity = useTransform(x, [-totalActionWidth, 0], [1, 0]);
   const actionScale = useTransform(x, [-totalActionWidth, 0], [1, 0.8]);
-
   const handleDragEnd = (_: any, info: PanInfo) => {
     if (!isMobile) return;
-
     const velocity = info.velocity.x;
     const offset = info.offset.x;
-
     const swipeToOpen = offset < -totalActionWidth * 0.25 || velocity < -300;
-
     if (swipeToOpen) {
       x.set(-totalActionWidth);
       setIsRevealed(true);
@@ -81,17 +69,14 @@ export default function SwipeableCard({
       setIsRevealed(false);
     }
   };
-
   const handleActionClick = (action: SwipeAction) => {
     action.onClick();
     x.set(0);
     setIsRevealed(false);
   };
-
   if (!isMobile) {
     return <>{children}</>;
   }
-
   return (
     <div className="relative overflow-hidden">
       <motion.div
@@ -121,7 +106,6 @@ export default function SwipeableCard({
           </Button>
         ))}
       </motion.div>
-
       <motion.div
         drag="x"
         dragConstraints={{ left: -totalActionWidth, right: 0 }}

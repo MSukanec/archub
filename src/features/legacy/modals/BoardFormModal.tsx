@@ -14,14 +14,11 @@ import { useCreateKanbanBoard, useUpdateKanbanBoard } from '@/hooks/use-kanban';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useKanbanStore } from '@/stores/kanbanStore';
 import { useToast } from '@/hooks/use-toast';
-
 const boardSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
 });
-
 type BoardFormData = z.infer<typeof boardSchema>;
-
 interface BoardFormModalProps {
   modalData?: {
     board?: any;
@@ -29,7 +26,6 @@ interface BoardFormModalProps {
   };
   onClose: () => void;
 }
-
 export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
   const { board, isEditing = false } = modalData || {};
   const { currentPanel, setPanel } = useModalPanelStore();
@@ -39,7 +35,6 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
   const updateBoardMutation = useUpdateKanbanBoard();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
-
   const form = useForm<BoardFormData>({
     resolver: zodResolver(boardSchema),
     defaultValues: {
@@ -47,7 +42,6 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
       description: board?.description || ''
     }
   });
-
   React.useEffect(() => {
     if (board) {
       form.reset({
@@ -63,13 +57,11 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
       setPanel('edit');
     }
   }, [board, form, setPanel]);
-
   const handleClose = () => {
     form.reset();
     setPanel('view');
     onClose();
   };
-
   const onSubmit = async (data: BoardFormData) => {
     if (!userData?.organization?.id) {
       toast({
@@ -79,7 +71,6 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
       });
       return;
     }
-
     try {
       if (isEditing && board) {
         await updateBoardMutation.mutateAsync({
@@ -103,7 +94,6 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
           description: "El tablero se ha creado correctamente"
         });
       }
-
       handleClose();
     } catch (error) {
       console.error('Error saving board:', error);
@@ -114,7 +104,6 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
       });
     }
   };
-
   const viewPanel = (
     <>
       <div>
@@ -130,7 +119,6 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
       </div>
     </>
   );
-
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -150,7 +138,6 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="description"
@@ -171,13 +158,12 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
       </form>
     </Form>
   );
-
   const headerContent = (
     <FormModalHeader
       title={isEditing ? "Editar Tablero" : "Nuevo Tablero de Ideas"}
       icon={Kanban}
       leftActions={
-        currentPanel === 'edit' && isEditing ? (
+        currentPanel === 'edit'&& isEditing ? (
           <button
             type="button"
             onClick={() => setPanel('view')}
@@ -189,14 +175,13 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
       }
     />
   );
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
       rightLabel={isEditing ? "Actualizar Tablero" : "Crear Tablero"}
       onRightClick={() => {
-        if (currentPanel === 'view' && isEditing) {
+        if (currentPanel === 'view'&& isEditing) {
           setPanel('edit');
         } else {
           form.handleSubmit(onSubmit)();
@@ -205,7 +190,6 @@ export function BoardFormModal({ modalData, onClose }: BoardFormModalProps) {
       rightLoading={isLoading}
     />
   );
-
   return (
     <FormModalLayout
       columns={1}

@@ -2,7 +2,6 @@ import { useRef } from 'react'
 import { Users } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { PersonnelPaymentFormFields } from '../forms/PersonnelPaymentForm'
-
 interface PersonnelPaymentModalProps {
   modalData?: {
     projectId?: string;
@@ -10,12 +9,10 @@ interface PersonnelPaymentModalProps {
     paymentId?: string;
   };
   onClose: () => void;
-  mode?: 'create' | 'edit' | 'view';
+  mode?: 'create'| 'edit'| 'view';
 }
-
-export function PersonnelPaymentModal({ modalData, onClose, mode = 'create' }: PersonnelPaymentModalProps) {
+export function PersonnelPaymentModal({ modalData, onClose, mode = 'create'}: PersonnelPaymentModalProps) {
   const formRef = useRef<HTMLFormElement>(null)
-
   const getHeader = () => {
     switch (mode) {
       case 'view':
@@ -36,7 +33,6 @@ export function PersonnelPaymentModal({ modalData, onClose, mode = 'create' }: P
         };
     }
   };
-
   const getSubmitText = () => {
     switch (mode) {
       case 'view':
@@ -48,7 +44,6 @@ export function PersonnelPaymentModal({ modalData, onClose, mode = 'create' }: P
         return 'Registrar Pago';
     }
   };
-
   const handleSubmit = () => {
     if (mode === 'view') {
       onClose();
@@ -56,9 +51,7 @@ export function PersonnelPaymentModal({ modalData, onClose, mode = 'create' }: P
       formRef.current.requestSubmit();
     }
   };
-
   const header = getHeader();
-
   return (
     <ModalLayout 
       onClose={onClose} 
@@ -94,5 +87,4 @@ export function PersonnelPaymentModal({ modalData, onClose, mode = 'create' }: P
     </ModalLayout>
   )
 }
-
 export default PersonnelPaymentModal

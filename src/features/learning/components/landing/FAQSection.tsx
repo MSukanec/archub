@@ -8,15 +8,13 @@ import {
 } from '@/components/ui/collapsible';
 import type { CourseFaq } from '@shared/schema';
 import { SectionHeader } from './SectionHeader';
-
 interface FAQSectionProps {
   faqs: CourseFaq[];
   title?: string;
   subtitle?: string;
   description?: string;
-  variant?: 'default' | 'no-container';
+  variant?: 'default'| 'no-container';
 }
-
 export function FAQSection({ 
   faqs,
   title = "PREGUNTAS FRECUENTES",
@@ -25,9 +23,7 @@ export function FAQSection({
   variant = 'default'
 }: FAQSectionProps) {
   const [openFaq, setOpenFaq] = useState<string | null>(null);
-
   if (faqs.length === 0) return null;
-
   const content = (
     <div className="space-y-12">
       <SectionHeader
@@ -35,7 +31,6 @@ export function FAQSection({
         subtitle={subtitle}
         description={description}
       />
-
       <div className="space-y-4">
         {faqs.map((faq) => {
           const isOpen = openFaq === faq.id;
@@ -61,7 +56,6 @@ export function FAQSection({
                     )}
                   </Button>
                 </CollapsibleTrigger>
-
                 <CollapsibleContent>
                   <div className="px-6 pb-5 pt-2 border-t">
                     <p className="text-muted-foreground leading-relaxed">
@@ -76,11 +70,9 @@ export function FAQSection({
       </div>
     </div>
   );
-
   if (variant === 'no-container') {
     return <section className="py-16 sm:py-20">{content}</section>;
   }
-
   return (
     <section className="py-16 sm:py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

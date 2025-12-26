@@ -1,10 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { BookOpen, Plus } from "lucide-react";
-
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
-
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
 import { useSiteLogs } from "@/features/sitelog/hooks/use-site-logs";
@@ -12,15 +10,13 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from "@/components/modal";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-
 import SitelogEntriesTab from './SitelogEntriesTab';
 import SitelogMedia from './SitelogMedia';
 import SitelogSettings from './SitelogSettings';
 import { SitelogStatsSection } from '@/features/sitelog/components/SitelogStatsSection';
-
 export default function Sitelog() {
   const { openModal } = useGlobalModalStore();
-  const [activeTab, setActiveTab] = useState<'entradas' | 'multimedia' | 'ajustes'>('entradas');
+  const [activeTab, setActiveTab] = useState<'entradas'| 'multimedia'| 'ajustes'>('entradas');
   
   const { data: userData, isLoading } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
@@ -38,7 +34,6 @@ export default function Sitelog() {
   }, [siteLogs.length, activeTab]);
   
   const { setSidebarContext } = useNavigationStore()
-
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('construction')
@@ -46,8 +41,6 @@ export default function Sitelog() {
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-
   // Mutation para eliminar bitácora
   const deleteSiteLogMutation = useMutation({
     mutationFn: async (siteLogId: string) => {
@@ -57,7 +50,6 @@ export default function Sitelog() {
         .from('site_logs')
         .delete()
         .eq('id', siteLogId);
-
       if (error) throw error;
     },
     onSuccess: () => {
@@ -71,7 +63,6 @@ export default function Sitelog() {
       });
     },
     onError: (error) => {
-
       toast({
         title: "Error",
         description: "No se pudo eliminar la entrada de bitácora",
@@ -79,7 +70,6 @@ export default function Sitelog() {
       });
     }
   });
-
   // Mutation para toggle favorito
   const toggleFavoriteMutation = useMutation({
     mutationFn: async (siteLogId: string) => {
@@ -87,12 +77,10 @@ export default function Sitelog() {
       
       const siteLog = siteLogs?.find(log => log.id === siteLogId);
       if (!siteLog) throw new Error('Site log not found');
-
       const { error } = await supabase
         .from('site_logs')
         .update({ is_favorite: !siteLog.is_favorite })
         .eq('id', siteLogId);
-
       if (error) throw error;
     },
     onSuccess: () => {
@@ -100,7 +88,6 @@ export default function Sitelog() {
       queryClient.invalidateQueries({ queryKey: ['sitelog-timeline'] });
     },
     onError: (error) => {
-
       toast({
         title: "Error",
         description: "No se pudo actualizar el favorito",
@@ -108,19 +95,15 @@ export default function Sitelog() {
       });
     }
   });
-
   const toggleFavorite = (siteLogId: string) => {
     toggleFavoriteMutation.mutate(siteLogId);
   };
-
   const handleViewSiteLog = (siteLog: any) => {
-    openModal('site-log', { id: siteLog.id, data: siteLog, mode: 'view' });
+    openModal('site-log', { id: siteLog.id, data: siteLog, mode: 'view'});
   };
-
   const handleEditSiteLog = (siteLog: any) => {
     openModal('site-log', { data: siteLog, isEditing: true });
   };
-
   const handleDeleteSiteLog = (siteLog: any) => {
     openModal('delete-confirmation', {
       mode: 'simple',
@@ -131,7 +114,6 @@ export default function Sitelog() {
       isLoading: deleteSiteLogMutation.isPending
     });
   };
-
   const headerProps = {
     icon: BookOpen,
     title: "Bitácora de Obra",
@@ -140,23 +122,22 @@ export default function Sitelog() {
     showMembers: true,
     showProjectSelector: true,
     tabs: [
-      { id: 'entradas', label: 'Entradas', isActive: activeTab === 'entradas' },
+      { id: 'entradas', label: 'Entradas', isActive: activeTab === 'entradas'},
       { 
         id: 'multimedia', 
         label: 'Multimedia', 
         isActive: activeTab === 'multimedia',
         isDisabled: siteLogs.length === 0
       },
-      { id: 'ajustes', label: 'Ajustes', isActive: activeTab === 'ajustes' }
+      { id: 'ajustes', label: 'Ajustes', isActive: activeTab === 'ajustes'}
     ],
-    onTabChange: (tabId: string) => setActiveTab(tabId as 'entradas' | 'multimedia' | 'ajustes'),
-    actionButton: activeTab === 'entradas' ? {
+    onTabChange: (tabId: string) => setActiveTab(tabId as 'entradas'| 'multimedia'| 'ajustes'),
+    actionButton: activeTab === 'entradas'? {
       label: 'Nueva Bitácora',
       icon: Plus,
       onClick: () => openModal('site-log')
     } : undefined
   };
-
   if (isLoading || siteLogsLoading) {
     return (
       <Layout wide headerProps={headerProps}>
@@ -166,17 +147,15 @@ export default function Sitelog() {
       </Layout>
     );
   }
-
   return (
     <Layout headerProps={headerProps}>
       <div className="space-y-6">
         {/* Stats Section - Solo mostrar si hay datos y estamos en tab de entradas */}
-        {activeTab === 'entradas' && siteLogs.length > 0 && (
+        {activeTab === 'entradas'&& siteLogs.length > 0 && (
           <SitelogStatsSection siteLogs={siteLogs} />
         )}
-
         {/* Render active tab content */}
-        {activeTab === 'entradas' && (
+        {activeTab === 'entradas'&& (
           <SitelogEntriesTab 
             siteLogs={siteLogs}
             toggleFavorite={toggleFavorite}
@@ -185,10 +164,9 @@ export default function Sitelog() {
             handleDeleteSiteLog={handleDeleteSiteLog}
           />
         )}
-
-        {activeTab === 'multimedia' && <SitelogMedia />}
+        {activeTab === 'multimedia'&& <SitelogMedia />}
         
-        {activeTab === 'ajustes' && <SitelogSettings />}
+        {activeTab === 'ajustes'&& <SitelogSettings />}
       </div>
     </Layout>
   );

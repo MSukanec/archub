@@ -27,7 +27,6 @@ import {
   useUpdateMaterialPayment,
 } from '@/features/materials'
 import { getMaterialPaymentStatusBadgeConfig } from '../utils/statusBadge'
-
 const materialPaymentSchema = z.object({
   payment_date: z.date({
     required_error: "Fecha de pago es requerida",
@@ -40,9 +39,7 @@ const materialPaymentSchema = z.object({
   reference: z.string().optional(),
   notes: z.string().optional(),
 })
-
 type MaterialPaymentFormData = z.infer<typeof materialPaymentSchema>
-
 function FormPanel({
   form,
   onSubmit,
@@ -78,7 +75,6 @@ function FormPanel({
       </div>
     )
   }
-
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -120,7 +116,6 @@ function FormPanel({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="status"
@@ -147,7 +142,6 @@ function FormPanel({
           )}
         />
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
@@ -178,7 +172,6 @@ function FormPanel({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="amount"
@@ -204,7 +197,6 @@ function FormPanel({
           )}
         />
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
@@ -235,7 +227,6 @@ function FormPanel({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="exchange_rate"
@@ -258,7 +249,6 @@ function FormPanel({
           )}
         />
       </div>
-
       <FormField
         control={form.control}
         name="notes"
@@ -277,7 +267,6 @@ function FormPanel({
           </FormItem>
         )}
       />
-
       <FormField
         control={form.control}
         name="reference"
@@ -295,7 +284,6 @@ function FormPanel({
           </FormItem>
         )}
       />
-
       <div>
         <FileUploader
           mode="multiple"
@@ -320,7 +308,6 @@ function FormPanel({
     </div>
   )
 }
-
 function ViewPanel({
   existingPayment,
   attachments,
@@ -352,7 +339,6 @@ function ViewPanel({
           })()}
         </div>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Fecha de Pago</h4>
@@ -367,21 +353,18 @@ function ViewPanel({
           </span>
         </div>
       </div>
-
       {existingPayment.reference && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Referencia</h4>
           <span className="text-sm" data-testid="text-material-payment-reference">{existingPayment.reference}</span>
         </div>
       )}
-
       {existingPayment.notes && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Notas</h4>
           <p className="text-sm bg-muted/30 p-3 rounded-md" data-testid="text-material-payment-notes">{existingPayment.notes}</p>
         </div>
       )}
-
       {attachments.length > 0 && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Archivos Adjuntos</h4>
@@ -405,15 +388,14 @@ function ViewPanel({
           </div>
         </div>
       )}
-
       <div className="pt-4 border-t border-border">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground">
           <div data-testid="text-material-payment-created-at">
-            <span className="font-medium">Creado:</span> {format(new Date(existingPayment.created_at), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
+            <span className="font-medium">Creado:</span> {format(new Date(existingPayment.created_at), "dd/MM/yyyy 'a las'HH:mm", { locale: es })}
           </div>
           {existingPayment.updated_at && existingPayment.updated_at !== existingPayment.created_at && (
             <div data-testid="text-material-payment-updated-at">
-              <span className="font-medium">Actualizado:</span> {format(new Date(existingPayment.updated_at), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
+              <span className="font-medium">Actualizado:</span> {format(new Date(existingPayment.updated_at), "dd/MM/yyyy 'a las'HH:mm", { locale: es })}
             </div>
           )}
         </div>
@@ -421,18 +403,16 @@ function ViewPanel({
     </div>
   )
 }
-
 export interface MaterialPaymentFormFieldsProps {
   projectId?: string;
   organizationId?: string;
   paymentId?: string;
-  mode: 'create' | 'edit' | 'view';
+  mode: 'create'| 'edit'| 'view';
   onSuccess: () => void;
   onCancel: () => void;
   hideActions?: boolean;
   formRef?: React.RefObject<HTMLFormElement>;
 }
-
 export function MaterialPaymentFormFields({ 
   projectId, 
   organizationId, 
@@ -447,21 +427,17 @@ export function MaterialPaymentFormFields({
   const { toast } = useToast()
   const [filesToUpload, setFilesToUpload] = useState<any[]>([])
   const [attachments, setAttachments] = useState<any[]>([])
-
   const { data: existingPayment, isLoading: loadingPayment } = useMaterialPayment(
     projectId,
     paymentId,
     organizationId
   )
-
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId || '')
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
-
   const currentMember = useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
   }, [members, userData?.user?.id])
-
   const form = useForm<MaterialPaymentFormData>({
     resolver: zodResolver(materialPaymentSchema),
     defaultValues: {
@@ -475,11 +451,9 @@ export function MaterialPaymentFormFields({
       notes: '',
     }
   })
-
-  const isLoading = currenciesLoading || walletsLoading || membersLoading || ((mode === 'edit' || mode === 'view') && loadingPayment)
-
+  const isLoading = currenciesLoading || walletsLoading || membersLoading || ((mode === 'edit'|| mode === 'view') && loadingPayment)
   useEffect(() => {
-    if (existingPayment && (mode === 'edit' || mode === 'view')) {
+    if (existingPayment && (mode === 'edit'|| mode === 'view')) {
       const paymentDate = parseLocalDate(existingPayment.payment_date) || new Date()
       
       form.reset({
@@ -494,7 +468,6 @@ export function MaterialPaymentFormFields({
       })
     }
   }, [existingPayment, mode, form])
-
   useEffect(() => {
     const fetchAttachments = async () => {
       if (!paymentId || !organizationId || !projectId) return
@@ -529,7 +502,7 @@ export function MaterialPaymentFormFields({
       }
     }
     
-    if (mode === 'edit' || mode === 'view') {
+    if (mode === 'edit'|| mode === 'view') {
       fetchAttachments()
     }
   }, [paymentId, organizationId, projectId, mode])
@@ -546,9 +519,8 @@ export function MaterialPaymentFormFields({
       isExisting: true,
     }))
   }, [attachments])
-
   useEffect(() => {
-    if (mode === 'create' && !paymentId) {
+    if (mode === 'create'&& !paymentId) {
       if (currencies && currencies.length > 0) {
         const defaultCurrency = currencies.find(c => c.is_default)
         const currencyId = defaultCurrency?.currency?.id || currencies[0].currency?.id
@@ -566,11 +538,9 @@ export function MaterialPaymentFormFields({
       }
     }
   }, [currencies, wallets, mode, paymentId, form])
-
   const createPaymentMutation = useCreateMaterialPayment()
   const updatePaymentMutation = useUpdateMaterialPayment()
   const queryClient = useQueryClient()
-
   const handleExistingFileDelete = async (fileId: string) => {
     try {
       await deleteFile(fileId, false)
@@ -587,14 +557,12 @@ export function MaterialPaymentFormFields({
       })
     }
   }
-
   const isSubmitting = createPaymentMutation.isPending || updatePaymentMutation.isPending
-
   const onSubmit = async (data: MaterialPaymentFormData) => {
     try {
       let paymentResult;
       
-      if (mode === 'edit' && paymentId) {
+      if (mode === 'edit'&& paymentId) {
         paymentResult = await updatePaymentMutation.mutateAsync({
           projectId: projectId || '',
           paymentId,
@@ -628,7 +596,6 @@ export function MaterialPaymentFormFields({
           organizationId: organizationId || '',
         })
       }
-
       const createdPaymentId = paymentResult?.id || paymentId
       
       if (filesToUpload.length > 0 && createdPaymentId) {
@@ -641,7 +608,6 @@ export function MaterialPaymentFormFields({
           })
           return;
         }
-
         for (const fileInput of filesToUpload) {
           try {
             console.log('[MaterialPaymentFormFields] Uploading file:', {
@@ -693,7 +659,7 @@ export function MaterialPaymentFormFields({
       }
       
       toast({
-        title: mode === 'edit' ? 'Pago actualizado' : 'Pago registrado',
+        title: mode === 'edit'? 'Pago actualizado': 'Pago registrado',
         description: mode === 'edit'
           ? 'El pago de materiales ha sido actualizado correctamente'
           : 'El pago de materiales ha sido registrado correctamente',
@@ -704,11 +670,10 @@ export function MaterialPaymentFormFields({
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Error al ${mode === 'edit' ? 'actualizar' : 'registrar'} el pago: ${error.message || 'Error desconocido'}`,
+        description: `Error al ${mode === 'edit'? 'actualizar': 'registrar'} el pago: ${error.message || 'Error desconocido'}`,
       })
     }
   }
-
   if (mode === 'view') {
     return (
       <div className="space-y-6 w-full">
@@ -732,7 +697,6 @@ export function MaterialPaymentFormFields({
       </div>
     )
   }
-
   return (
     <Form {...form}>
       <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
@@ -767,7 +731,7 @@ export function MaterialPaymentFormFields({
               className="flex-[3]"
               data-testid="button-material-payment-submit"
             >
-              {isSubmitting ? 'Guardando...' : mode === 'edit' ? 'Guardar Cambios' : 'Registrar Pago'}
+              {isSubmitting ? 'Guardando...': mode === 'edit'? 'Guardar Cambios': 'Registrar Pago'}
             </Button>
           </div>
         )}
@@ -775,5 +739,4 @@ export function MaterialPaymentFormFields({
     </Form>
   )
 }
-
 export default MaterialPaymentFormFields

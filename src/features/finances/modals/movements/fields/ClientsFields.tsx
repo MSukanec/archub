@@ -3,20 +3,16 @@ import { Building } from 'lucide-react'
 import { useProjectClients } from '@/features/clients'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
-
-
 export interface CommitmentItem {
   project_client_id: string
   client_name: string
   unit: string
 }
-
 interface ClientsFieldsProps {
   selectedClients: CommitmentItem[]
   onClientsChange: (commitments: CommitmentItem[]) => void
   projectId?: string
 }
-
 export const ClientsFields: React.FC<ClientsFieldsProps> = ({
   selectedClients,
   onClientsChange,
@@ -24,18 +20,14 @@ export const ClientsFields: React.FC<ClientsFieldsProps> = ({
 }) => {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
-
   const { data: projectClients = [], isLoading: clientsLoading } = useProjectClients(
     projectId,
     organizationId
   )
-
   // Single row state for simplified interface
   const [commitmentId, setCommitmentId] = useState(
     selectedClients.length > 0 ? selectedClients[0].project_client_id : ''
   )
-
-
   // Function to get commitment display name (unit + client)
   const getCommitmentDisplayName = (projectClient: any): string => {
     if (!projectClient?.contact) return 'Cliente sin nombre'
@@ -57,11 +49,10 @@ export const ClientsFields: React.FC<ClientsFieldsProps> = ({
     }
     return clientName
   }
-
   // Create options for ComboBox - sorted by unit
   const commitmentOptions = projectClients
     .sort((a, b) => {
-      const unitA = a.unit || 'ZZZ' // Put items without unit at the end
+      const unitA = a.unit || 'ZZZ'// Put items without unit at the end
       const unitB = b.unit || 'ZZZ'
       return unitA.localeCompare(unitB)
     })
@@ -69,20 +60,17 @@ export const ClientsFields: React.FC<ClientsFieldsProps> = ({
       value: client.id,
       label: getCommitmentDisplayName(client)
     }))
-
   // Handle commitment change
   const handleCommitmentChange = (value: string) => {
     setCommitmentId(value)
     updateSelectedClients(value)
   }
-
   // Update selectedClients based on current values
   const updateSelectedClients = (currentCommitmentId: string) => {
     if (!currentCommitmentId) {
       onClientsChange([])
       return
     }
-
     const projectClient = projectClients.find(pc => pc.id === currentCommitmentId)
     
     if (!projectClient?.contact) {
@@ -111,10 +99,8 @@ export const ClientsFields: React.FC<ClientsFieldsProps> = ({
       client_name: clientName,
       unit: projectClient.unit || 'Sin unidad'
     }
-
     onClientsChange([validCommitment])
   }
-
   // Sync external changes with internal state
   useEffect(() => {
     const expectedCommitmentId = selectedClients.length > 0 ? selectedClients[0].project_client_id : ''
@@ -123,7 +109,6 @@ export const ClientsFields: React.FC<ClientsFieldsProps> = ({
       setCommitmentId(expectedCommitmentId)
     }
   }, [selectedClients, commitmentId])
-
   return (
     <div className="space-y-4">
       {/* Header */}

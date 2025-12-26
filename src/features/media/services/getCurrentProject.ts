@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-
 /**
  * Obtiene el proyecto actual verificando que pertenece a la organización.
  * 
@@ -18,7 +17,6 @@ export async function getCurrentProject(
   if (!projectId || !organizationId || !supabase) {
     return null;
   }
-
   const { data, error } = await supabase
     .from('projects')
     .select('id, name, organization_id')
@@ -26,11 +24,9 @@ export async function getCurrentProject(
     .eq('organization_id', organizationId)
     .eq('is_deleted', false)
     .single();
-
   if (error) {
     console.log('Project not found in current organization:', error);
     return null;
   }
-
   return data;
 }

@@ -23,14 +23,11 @@ import { Users, UserPlus, Calendar, DollarSign, Loader2, CalendarClock } from 'l
 import { formatCurrency } from '@/lib/currency-formatter';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-
 const memberSchema = z.object({
   email: z.string().email('Email inválido'),
   roleId: z.string().min(1, 'Debe seleccionar un rol'),
 });
-
 type MemberFormData = z.infer<typeof memberSchema>;
-
 interface SeatPricingData {
   canAddSeat: boolean;
   error?: string;
@@ -42,12 +39,12 @@ interface SeatPricingData {
   } | null;
   subscription: {
     id: string;
-    billingPeriod: 'monthly' | 'annual';
+    billingPeriod: 'monthly'| 'annual';
     startedAt: string;
     expiresAt: string;
     currentSeats: number;
     maxSeats: number;
-    paymentProvider: 'mercadopago' | 'paypal' | 'bank_transfer' | null;
+    paymentProvider: 'mercadopago'| 'paypal'| 'bank_transfer'| null;
     payerEmail: string | null;
   } | null;
   pricing: {
@@ -73,20 +70,17 @@ interface SeatPricingData {
     roleName?: string;
   };
 }
-
 interface MemberModalProps {
   editingMember?: any;
   defaultEmail?: string;
   onClose: () => void;
 }
-
 const planColors: Record<string, string> = {
   free: 'var(--plan-free-bg)',
   pro: 'var(--plan-pro-bg)',
   teams: 'var(--plan-teams-bg)',
   enterprise: 'var(--plan-enterprise-bg)',
 };
-
 function getPlanColor(planSlug: string | undefined): string {
   if (!planSlug) return planColors.free;
   const normalized = planSlug.toLowerCase();
@@ -95,7 +89,6 @@ function getPlanColor(planSlug: string | undefined): string {
   if (normalized.includes('pro')) return planColors.pro;
   return planColors.free;
 }
-
 export function MemberFormModal({ editingMember, defaultEmail, onClose }: MemberModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -108,7 +101,6 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
   const isReinvite = !!defaultEmail;
   const organizationId = userData?.preferences?.last_organization_id;
   const isEditing = !!editingMember;
-
   const { data: roles = [] } = useQuery({
     queryKey: ['roles'],
     queryFn: async () => {
@@ -117,12 +109,10 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
         .select('id, name, type')
         .eq('type', 'organization')
         .order('name');
-
       if (error) throw error;
       return data || [];
     },
   });
-
   const form = useForm<MemberFormData>({
     resolver: zodResolver(memberSchema),
     defaultValues: {
@@ -130,10 +120,8 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       roleId: '',
     },
   });
-
   const watchedEmail = form.watch('email');
   const watchedRoleId = form.watch('roleId');
-
   useEffect(() => {
     if (editingMember) {
       form.reset({
@@ -149,7 +137,6 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       setPanel('edit');
     }
   }, [editingMember, defaultEmail, form, setPanel]);
-
   useEffect(() => {
     if (!isEditing && watchedEmail && watchedRoleId && !hasCalculated) {
       const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchedEmail);
@@ -158,7 +145,6 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       }
     }
   }, [watchedEmail, watchedRoleId, isEditing, hasCalculated]);
-
   const calculateSeatCost = useCallback(async (data: MemberFormData): Promise<SeatPricingData | null> => {
     if (!organizationId) return null;
     
@@ -168,7 +154,6 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       if (!sessionData?.session?.access_token) {
         throw new Error('No hay sesión activa');
       }
-
       const response = await fetch('/api/checkout/calculate-seat-proration', {
         method: 'POST',
         headers: {
@@ -181,13 +166,11 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
           role_id: data.roleId,
         }),
       });
-
       const result = await response.json();
       
       if (!response.ok) {
         throw new Error(result.error || 'Error calculando costo');
       }
-
       const pricingResult = result.data as SeatPricingData;
       setPricingData(pricingResult);
       setHasCalculated(true);
@@ -199,17 +182,14 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       setIsCalculating(false);
     }
   }, [organizationId]);
-
   const createMemberMutation = useOptimisticMutation<any, MemberFormData>({
     mutationFn: async (memberData: MemberFormData) => {
       if (!organizationId) throw new Error('No organization selected');
-
       const response = await apiRequest('POST', '/api/invite-member', {
         email: memberData.email,
         roleId: memberData.roleId,
         organizationId: organizationId,
       });
-
       return response.json();
     },
     queryKey: organizationKeys.invitations(organizationId),
@@ -217,14 +197,12 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       if (!oldData) return oldData;
       return oldData;
     },
-    onSuccessMessage: isReinvite ? 'Miembro reinvitado exitosamente' : 'Invitación enviada exitosamente',
+    onSuccessMessage: isReinvite ? 'Miembro reinvitado exitosamente': 'Invitación enviada exitosamente',
     onErrorMessage: 'Error al invitar miembro',
   });
-
   const updateMemberMutation = useOptimisticMutation<any, MemberFormData>({
     mutationFn: async (memberData: MemberFormData) => {
       if (!editingMember?.id) throw new Error('No member to update');
-
       const { data, error } = await supabase
         .from('organization_members')
         .update({
@@ -232,7 +210,6 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
         })
         .eq('id', editingMember.id)
         .select();
-
       if (error) throw error;
       return data;
     },
@@ -258,7 +235,6 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
     onSuccessMessage: 'Rol del miembro actualizado correctamente',
     onErrorMessage: 'Error al actualizar miembro',
   });
-
   const handleClose = () => {
     form.reset();
     setPricingData(null);
@@ -266,21 +242,18 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
     setPanel('view');
     onClose();
   };
-
   const handleFormSubmit = async (data: MemberFormData) => {
     if (editingMember) {
       updateMemberMutation.mutate(data);
       handleClose();
       return;
     }
-
     let pricing = pricingData;
     if (!pricing) {
       pricing = await calculateSeatCost(data);
     }
     
     if (!pricing) return;
-
     if (!pricing.canAddSeat) {
       toast({
         title: 'No se puede agregar miembro',
@@ -289,7 +262,6 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       });
       return;
     }
-
     const isPayPal = pricing.subscription?.paymentProvider === 'paypal';
     const needsPayment = pricing.pricing && (isPayPal 
       ? pricing.pricing.proratedAmountUSD > 0 
@@ -303,7 +275,6 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       handleClose();
     }
   };
-
   const handleProceedToPayment = async (pricing: SeatPricingData) => {
     if (!pricing?.subscription || !pricing?.pricing) return;
     
@@ -314,7 +285,6 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       if (!sessionData?.session?.access_token) {
         throw new Error('No hay sesión activa');
       }
-
       const formData = form.getValues();
       const isPayPalProvider = pricing.subscription.paymentProvider === 'paypal';
       
@@ -334,13 +304,11 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
             billing_period: pricing.subscription.billingPeriod,
           }),
         });
-
         const result = await response.json();
         
         if (!response.ok || !result.ok) {
           throw new Error(result.error || 'Error creando orden de pago');
         }
-
         window.location.href = result.approval_url;
       } else {
         const response = await fetch('/api/checkout/mp/create-seat', {
@@ -358,13 +326,11 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
             billing_period: pricing.subscription.billingPeriod,
           }),
         });
-
         const result = await response.json();
         
         if (!response.ok || !result.ok) {
           throw new Error(result.error || 'Error creando preferencia de pago');
         }
-
         window.location.href = result.init_point;
       }
     } catch (error: any) {
@@ -376,18 +342,16 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       setIsLoading(false);
     }
   };
-
   const isPayPal = pricingData?.subscription?.paymentProvider === 'paypal';
   const needsPayment = pricingData?.pricing && (isPayPal 
     ? pricingData.pricing.proratedAmountUSD > 0 
     : pricingData.pricing.proratedAmountARS > 0
   );
   const selectedRole = roles.find(r => r.id === watchedRoleId);
-
   const formatPrice = (amountARS: number, amountUSD: number) => {
     // Use Intl.NumberFormat with currency style for proper locale formatting
     // Always show 2 decimals for consistency with payment provider receipts
-    const formatAmount = (amount: number, currency: 'USD' | 'ARS') => {
+    const formatAmount = (amount: number, currency: 'USD'| 'ARS') => {
       return new Intl.NumberFormat('es-AR', {
         style: 'currency',
         currency: currency,
@@ -401,7 +365,6 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
     }
     return formatAmount(amountARS, 'ARS');
   };
-
   const formPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
@@ -424,7 +387,6 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="roleId"
@@ -453,7 +415,6 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
             </FormItem>
           )}
         />
-
         {!isEditing && watchedEmail && watchedRoleId && (
           <>
             <Separator className="my-4" />
@@ -469,7 +430,6 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
                   <DollarSign className="h-4 w-4 text-primary" />
                   <span className="font-medium text-sm">Costo del nuevo miembro</span>
                 </div>
-
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Miembro:</span>
@@ -480,9 +440,7 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
                     <span className="text-muted-foreground">Rol:</span>
                     <Badge variant="neutral" className="text-xs">{selectedRole?.name || pricingData.invitation.roleName}</Badge>
                   </div>
-
                   <Separator className="my-2" />
-
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Plan:</span>
                     <Badge 
@@ -492,41 +450,33 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
                       {pricingData.organization?.planName}
                     </Badge>
                   </div>
-
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <Calendar className="h-3 w-3" />
                       <span>Período:</span>
                     </div>
-                    <span>{pricingData.subscription.billingPeriod === 'monthly' ? 'Mensual' : 'Anual'}</span>
+                    <span>{pricingData.subscription.billingPeriod === 'monthly'? 'Mensual': 'Anual'}</span>
                   </div>
-
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Días restantes:</span>
                     <span>{pricingData.pricing.daysRemaining} de {pricingData.pricing.totalDays}</span>
                   </div>
-
                   <Separator className="my-2" />
-
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Precio asiento completo:</span>
                     <span>{formatPrice(pricingData.pricing.seatPriceARS, pricingData.pricing.seatPriceUSD)}</span>
                   </div>
-
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Porcentaje prorrateado:</span>
                     <span>{pricingData.pricing.percentageRemaining}%</span>
                   </div>
-
                   <Separator className="my-2" />
-
                   <div className="flex items-center justify-between pt-1">
                     <span className="font-semibold">Total a pagar ahora:</span>
                     <span className="text-lg font-bold text-primary">
                       {formatPrice(pricingData.pricing.proratedAmountARS, pricingData.pricing.proratedAmountUSD)}
                     </span>
                   </div>
-
                   {!isPayPal && pricingData.subscription.payerEmail && (
                     <div className="mt-3 p-2 rounded bg-blue-500/10 border border-blue-500/20 text-xs">
                       <span className="text-blue-600 dark:text-blue-400">
@@ -535,7 +485,6 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
                     </div>
                   )}
                 </div>
-
                 {pricingData.nextBilling && (
                   <div className="mt-4 p-3 rounded-md bg-background border">
                     <div className="flex items-center gap-2 mb-2">
@@ -546,7 +495,7 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
                       <div className="flex items-center justify-between">
                         <span className="text-muted-foreground">Fecha:</span>
                         <span className="font-medium">
-                          {format(new Date(pricingData.nextBilling.date), "d 'de' MMMM, yyyy", { locale: es })}
+                          {format(new Date(pricingData.nextBilling.date), "d 'de'MMMM, yyyy", { locale: es })}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
@@ -574,12 +523,12 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
     <FormModalHeader
       title={
         isEditing 
-          ? 'Editar Miembro' 
-          : (isReinvite ? 'Reinvitar Miembro' : 'Invitar Miembro')
+          ? 'Editar Miembro'
+          : (isReinvite ? 'Reinvitar Miembro': 'Invitar Miembro')
       }
       description={
         isEditing 
-          ? 'Actualiza el rol y permisos del miembro en tu organización.' 
+          ? 'Actualiza el rol y permisos del miembro en tu organización.'
           : isReinvite 
             ? 'Selecciona el rol para reinvitar a este miembro anterior.'
             : 'Ingresa el email del nuevo miembro. Si no tiene cuenta, recibirá una invitación por correo.'
@@ -587,27 +536,25 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       icon={isEditing ? Users : UserPlus}
     />
   );
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
       rightLabel={
         isLoading 
-          ? (needsPayment ? 'Redirigiendo...' : 'Procesando...')
+          ? (needsPayment ? 'Redirigiendo...': 'Procesando...')
           : isCalculating 
-            ? 'Calculando...' 
+            ? 'Calculando...'
             : isEditing 
-              ? 'Actualizar' 
+              ? 'Actualizar'
               : needsPayment
                 ? 'Proceder al Pago'
-                : (isReinvite ? 'Reinvitar' : 'Invitar')
+                : (isReinvite ? 'Reinvitar': 'Invitar')
       }
       onRightClick={form.handleSubmit(handleFormSubmit)}
       isSubmitting={isLoading || isCalculating}
     />
   );
-
   const viewPanel = editingMember ? (
     <div className="space-y-4">
       <div>
@@ -624,7 +571,6 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       </div>
     </div>
   ) : null;
-
   return (
     <FormModalLayout
       columns={1}

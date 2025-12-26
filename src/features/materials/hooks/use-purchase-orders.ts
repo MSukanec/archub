@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-
 export interface PurchaseOrderItem {
   id: string;
   purchase_order_id: string;
@@ -16,7 +15,6 @@ export interface PurchaseOrderItem {
     abbreviation: string | null;
   } | null;
 }
-
 export interface PurchaseOrder {
   id: string;
   project_id: string;
@@ -25,7 +23,7 @@ export interface PurchaseOrder {
   approved_by: string | null;
   provider_id: string | null;
   order_date: string;
-  status: 'draft' | 'sent' | 'quoted' | 'approved' | 'rejected' | 'converted';
+  status: 'draft'| 'sent'| 'quoted'| 'approved'| 'rejected'| 'converted';
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -56,20 +54,17 @@ export interface PurchaseOrder {
   } | null;
   items?: PurchaseOrderItem[];
 }
-
 export const PURCHASE_ORDER_STATUS = {
-  draft: { label: 'Borrador', variant: 'neutral' as const },
-  sent: { label: 'Enviado', variant: 'info' as const },
-  quoted: { label: 'Cotizado', variant: 'pending' as const },
-  approved: { label: 'Aprobado', variant: 'success' as const },
-  rejected: { label: 'Rechazado', variant: 'error' as const },
-  converted: { label: 'Convertido', variant: 'status-completed' as const },
+  draft: { label: 'Borrador', variant: 'neutral'as const },
+  sent: { label: 'Enviado', variant: 'info'as const },
+  quoted: { label: 'Cotizado', variant: 'pending'as const },
+  approved: { label: 'Aprobado', variant: 'success'as const },
+  rejected: { label: 'Rechazado', variant: 'error'as const },
+  converted: { label: 'Convertido', variant: 'status-completed'as const },
 };
-
 export function getPurchaseOrderStatusBadgeConfig(status: PurchaseOrder['status']) {
   return PURCHASE_ORDER_STATUS[status] || PURCHASE_ORDER_STATUS.draft;
 }
-
 export function usePurchaseOrders(projectId: string | undefined, organizationId: string | undefined) {
   return useQuery<{ data: PurchaseOrder[] }, Error, PurchaseOrder[]>({
     queryKey: [`/api/projects/${projectId}/purchase-orders?organization_id=${organizationId}`],
@@ -77,7 +72,6 @@ export function usePurchaseOrders(projectId: string | undefined, organizationId:
     select: (response) => response?.data || [],
   });
 }
-
 export function usePurchaseOrder(
   projectId: string | undefined,
   orderId: string | undefined,
@@ -89,10 +83,8 @@ export function usePurchaseOrder(
     select: (response) => response?.data || null,
   });
 }
-
 export function useCreatePurchaseOrder() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({
       orderData,
@@ -132,10 +124,8 @@ export function useCreatePurchaseOrder() {
     },
   });
 }
-
 export function useUpdatePurchaseOrder() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({
       projectId,
@@ -180,10 +170,8 @@ export function useUpdatePurchaseOrder() {
     },
   });
 }
-
 export function useDeletePurchaseOrder() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({
       orderId,

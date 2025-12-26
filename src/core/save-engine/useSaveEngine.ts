@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useQueryClient, QueryKey } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-
 export interface SaveEngineOptions<TData> {
   data: TData;
   queryKey: QueryKey;
@@ -14,14 +13,12 @@ export interface SaveEngineOptions<TData> {
   successMessage?: string;
   errorMessage?: string;
 }
-
 export interface SaveEngineReturn {
   isSaving: boolean;
   lastSavedAt: Date | null;
   hasUnsavedChanges: boolean;
   saveNow: () => void;
 }
-
 export function useSaveEngine<TData>({
   data,
   queryKey,
@@ -45,7 +42,6 @@ export function useSaveEngine<TData>({
   const previousDataRef = useRef<TData>(data);
   const isInitialLoadRef = useRef(true);
   const pendingDataRef = useRef<TData | null>(null);
-
   const hasNonEmptyValues = useCallback((obj: any): boolean => {
     if (!obj || typeof obj !== 'object') return false;
     return Object.values(obj).some(value => {
@@ -55,20 +51,16 @@ export function useSaveEngine<TData>({
       return value != null;
     });
   }, []);
-
   const executeSave = useCallback(async (dataToSave: TData) => {
     if (!enabled) return;
-
     setIsSaving(true);
     
     const previousCacheData = queryClient.getQueryData(queryKey);
-
     if (optimisticUpdate) {
       queryClient.setQueryData(queryKey, (oldData: any) => 
         optimisticUpdate(oldData, dataToSave)
       );
     }
-
     try {
       await saveFn(dataToSave);
       setLastSavedAt(new Date());
@@ -78,7 +70,6 @@ export function useSaveEngine<TData>({
       additionalQueryKeys.forEach(key => {
         queryClient.invalidateQueries({ queryKey: key });
       });
-
       if (showSuccessToast) {
         toast({
           title: "Guardado",
@@ -91,7 +82,6 @@ export function useSaveEngine<TData>({
       if (optimisticUpdate && previousCacheData !== undefined) {
         queryClient.setQueryData(queryKey, previousCacheData);
       }
-
       toast({
         title: "Error",
         description: errorMessage,
@@ -101,7 +91,6 @@ export function useSaveEngine<TData>({
       setIsSaving(false);
     }
   }, [enabled, saveFn, queryClient, queryKey, optimisticUpdate, additionalQueryKeys, showSuccessToast, successMessage, errorMessage, toast]);
-
   const saveNow = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -112,18 +101,13 @@ export function useSaveEngine<TData>({
       pendingDataRef.current = null;
     }
   }, [executeSave]);
-
   useEffect(() => {
     if (!enabled) return;
-
     const dataString = JSON.stringify(data);
     const previousString = JSON.stringify(previousDataRef.current);
-
     if (dataString === previousString) return;
-
     const previousHadValues = hasNonEmptyValues(previousDataRef.current);
     const currentHasValues = hasNonEmptyValues(data);
-
     if (isInitialLoadRef.current && !previousHadValues && currentHasValues) {
       previousDataRef.current = data;
       setTimeout(() => {
@@ -131,23 +115,18 @@ export function useSaveEngine<TData>({
       }, 300);
       return;
     }
-
     isInitialLoadRef.current = false;
     previousDataRef.current = data;
     pendingDataRef.current = data;
     setHasUnsavedChanges(true);
-
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-
     timeoutRef.current = setTimeout(() => {
       executeSave(data);
       pendingDataRef.current = null;
     }, delay);
-
   }, [JSON.stringify(data), delay, enabled, executeSave, hasNonEmptyValues]);
-
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -155,7 +134,6 @@ export function useSaveEngine<TData>({
       }
     };
   }, []);
-
   return {
     isSaving,
     lastSavedAt,

@@ -4,27 +4,22 @@ import { Textarea } from '@/components/ui/textarea';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import type { CourseLessonNote } from '@shared/schema';
-
 interface LessonSummaryNoteProps {
   lessonId: string;
 }
-
-type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
-
+type SaveStatus = 'idle'| 'saving'| 'saved'| 'error';
 export function LessonSummaryNote({ lessonId }: LessonSummaryNoteProps) {
   const [noteText, setNoteText] = useState('');
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const savedTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialLoadRef = useRef(true);
-
   // Fetch summary note with React Query (optimized backend endpoint)
   const { data: note, isLoading } = useQuery<CourseLessonNote | null>({
     queryKey: [`/api/lessons/${lessonId}/summary-note`],
     enabled: !!lessonId,
     staleTime: 30000, // Cache for 30 seconds
   });
-
   // Update mutation
   const saveMutation = useMutation({
     mutationFn: async (body: string) => {
@@ -64,7 +59,6 @@ export function LessonSummaryNote({ lessonId }: LessonSummaryNoteProps) {
       setSaveStatus('error');
     }
   });
-
   // Initialize noteText when data loads
   useEffect(() => {
     if (note) {
@@ -77,29 +71,24 @@ export function LessonSummaryNote({ lessonId }: LessonSummaryNoteProps) {
       isInitialLoadRef.current = false;
     }, 100);
   }, [note]);
-
   // Auto-save with debounce
   useEffect(() => {
     // Don't auto-save during initial load
     if (isInitialLoadRef.current) {
       return;
     }
-
     // Don't save if note is empty and was empty initially
-    if (noteText.trim() === '' && (!note || note.body === '')) {
+    if (noteText.trim() === ''&& (!note || note.body === '')) {
       return;
     }
-
     // Clear existing timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
-
     // Debounce save
     debounceTimerRef.current = setTimeout(() => {
       saveMutation.mutate(noteText);
     }, 700);
-
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
@@ -109,7 +98,6 @@ export function LessonSummaryNote({ lessonId }: LessonSummaryNoteProps) {
       }
     };
   }, [noteText, lessonId]);
-
   const getSaveStatusIndicator = () => {
     switch (saveStatus) {
       case 'saving':
@@ -137,7 +125,6 @@ export function LessonSummaryNote({ lessonId }: LessonSummaryNoteProps) {
         return null;
     }
   };
-
   if (isLoading) {
     return (
       <div className="space-y-3 animate-pulse">
@@ -145,7 +132,6 @@ export function LessonSummaryNote({ lessonId }: LessonSummaryNoteProps) {
       </div>
     );
   }
-
   return (
     <div className="space-y-3" data-testid="lesson-summary-note-container">
       <Textarea

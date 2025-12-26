@@ -1,7 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { UploadMediaInputV2, UploadMediaResultV2, MediaFileType } from '../types';
 import { nanoid } from 'nanoid';
-
 /**
  * Sube un archivo usando la nueva arquitectura de dos tablas:
  * - media_files: Registro centralizado del archivo físico
@@ -20,7 +19,6 @@ export async function uploadMediaFileV2(input: UploadMediaInputV2): Promise<Uplo
   if (!supabase) {
     throw new Error('Supabase not initialized');
   }
-
   const {
     file,
     organization_id = null,
@@ -42,12 +40,10 @@ export async function uploadMediaFileV2(input: UploadMediaInputV2): Promise<Uplo
     position,
     metadata = {}
   } = input;
-
   // Validar que al menos una entidad esté presente
   if (!project_id && !site_log_id && !movement_id && !contact_id && !course_lesson_id && !general_cost_id && !client_payment_id && !course_id && !course_module_id) {
     throw new Error('Se requiere al menos una entidad relacionada (project_id, site_log_id, course_id, etc.)');
   }
-
   // Generate unique file path
   const fileExt = file.name.split('.').pop();
   const fileName = `${nanoid()}.${fileExt}`;
@@ -58,14 +54,12 @@ export async function uploadMediaFileV2(input: UploadMediaInputV2): Promise<Uplo
     : course_id
     ? `courses/${course_id}/${fileName}`
     : `global/${fileName}`;
-
   // Determinar tipo de archivo
-  const fileType: MediaFileType = file.type.startsWith('image/') ? 'image' 
+  const fileType: MediaFileType = file.type.startsWith('image/') ? 'image'
     : file.type.startsWith('video/') ? 'video'
-    : file.type === 'application/pdf' ? 'pdf'
+    : file.type === 'application/pdf'? 'pdf'
     : file.type.includes('document') || file.type.includes('word') ? 'doc'
     : 'other';
-
   try {
     // 1. Upload to storage
     const { error: uploadError } = await supabase.storage
@@ -74,14 +68,11 @@ export async function uploadMediaFileV2(input: UploadMediaInputV2): Promise<Uplo
         cacheControl: '3600',
         upsert: false
       });
-
     if (uploadError) throw uploadError;
-
     // 2. Get public URL
     const { data: { publicUrl } } = supabase.storage
       .from(bucket)
       .getPublicUrl(filePath);
-
     // 3. Create media_files record
     const { data: mediaFile, error: mediaFileError } = await supabase
       .from('media_files')
@@ -99,13 +90,11 @@ export async function uploadMediaFileV2(input: UploadMediaInputV2): Promise<Uplo
       })
       .select('id')
       .single();
-
     if (mediaFileError) {
       // Rollback: delete from storage
       await supabase.storage.from(bucket).remove([filePath]);
       throw mediaFileError;
     }
-
     // 4. Create media_links record
     // Determine if this is public (course-related media is always public)
     const isPublic = !!(course_id || course_module_id || course_lesson_id);
@@ -135,21 +124,18 @@ export async function uploadMediaFileV2(input: UploadMediaInputV2): Promise<Uplo
       })
       .select('id')
       .single();
-
     if (mediaLinkError) {
       // Rollback: delete media_files record and storage
       await supabase.from('media_files').delete().eq('id', mediaFile.id);
       await supabase.storage.from(bucket).remove([filePath]);
       throw mediaLinkError;
     }
-
     return {
       media_file_id: mediaFile.id,
       link_id: mediaLink.id,
       file_url: publicUrl,
       file_path: filePath
     };
-
   } catch (error) {
     console.error('Error uploading media file V2:', error);
     throw error;

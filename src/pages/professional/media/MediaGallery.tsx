@@ -8,7 +8,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Images, Plus } from 'lucide-react';
 import { useGalleryFiles, useDeleteMediaFile } from '@/features/media';
-
 // Gallery file interface - compatible with Gallery component
 interface GalleryFile {
   id: string;
@@ -25,7 +24,6 @@ interface GalleryFile {
   created_by: string;
   site_log_id?: string | null;
 }
-
 export function MediaGallery() {
   const { openModal } = useGlobalModalStore();
   const { toast } = useToast();
@@ -33,13 +31,11 @@ export function MediaGallery() {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   const projectId = userData?.preferences?.last_project_id;
-
   // Usar hooks del feature de media (nueva arquitectura)
   const { data: galleryFilesRaw = [], isLoading: galleryLoading, error: galleryError } = useGalleryFiles(
     organizationId,
     projectId
   );
-
   // Mapear a formato compatible con Gallery component
   const galleryFiles: GalleryFile[] = galleryFilesRaw.map(file => {
     const mapped = {
@@ -69,15 +65,12 @@ export function MediaGallery() {
     
     return mapped;
   });
-
   // Delete file mutation usando nuevo servicio
   const deleteFileMutation = useDeleteMediaFile();
-
   // Gallery handlers
   const handleEdit = (file: GalleryFile) => {
     openModal('gallery', { fileId: file.id });
   };
-
   const handleDownload = (file: GalleryFile) => {
     if (file.file_url) {
       const link = document.createElement('a');
@@ -88,7 +81,6 @@ export function MediaGallery() {
       document.body.removeChild(link);
     }
   };
-
   const handleDelete = (file: GalleryFile) => {
     // DEBUG: Ver qué datos tiene el file cuando hacemos delete
     console.log('[MediaGallery] handleDelete called with:', {
@@ -126,7 +118,6 @@ export function MediaGallery() {
       }
     });
   };
-
   if (galleryLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -137,7 +128,6 @@ export function MediaGallery() {
       </div>
     );
   }
-
   if (galleryError) {
     return (
       <EmptyState
@@ -152,7 +142,6 @@ export function MediaGallery() {
       />
     );
   }
-
   if (galleryFiles.length === 0) {
     return (
       <EmptyState
@@ -168,7 +157,6 @@ export function MediaGallery() {
       />
     );
   }
-
   return (
     <GalleryComponent
       files={galleryFiles}

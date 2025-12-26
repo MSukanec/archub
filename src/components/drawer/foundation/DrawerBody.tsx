@@ -1,12 +1,10 @@
 import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-
 export interface DrawerBodyProps {
   children: ReactNode;
   className?: string;
   noPadding?: boolean;
 }
-
 export function DrawerBody({
   children,
   className,
@@ -25,5 +23,4 @@ export function DrawerBody({
     </div>
   );
 }
-
 export default DrawerBody;

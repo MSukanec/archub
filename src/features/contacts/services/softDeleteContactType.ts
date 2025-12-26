@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-
 /**
  * Realiza un soft delete de un tipo de contacto.
  * 
@@ -14,7 +13,6 @@ export async function softDeleteContactType(
   if (!supabase || !typeId || !organizationId) {
     throw new Error('Missing required parameters');
   }
-
   const { error } = await supabase
     .from('contact_types')
     .update({
@@ -23,7 +21,6 @@ export async function softDeleteContactType(
     })
     .eq('id', typeId)
     .eq('organization_id', organizationId);
-
   if (error) {
     throw error;
   }

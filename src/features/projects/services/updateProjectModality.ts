@@ -1,9 +1,7 @@
 import { supabase } from '@/lib/supabase';
-
 export interface UpdateProjectModalityData {
   name?: string;
 }
-
 /**
  * Actualiza una modalidad de proyecto personalizada de una organización.
  * Solo se pueden actualizar modalidades que pertenecen a la organización (no del sistema).
@@ -21,11 +19,9 @@ export async function updateProjectModality(
   if (!supabase) {
     throw new Error('Supabase client not available');
   }
-
   if (!modalityId || !organizationId) {
     throw new Error('Missing required parameters: modalityId and organizationId are required');
   }
-
   const { error } = await supabase
     .from('project_modalities')
     .update({
@@ -34,7 +30,6 @@ export async function updateProjectModality(
     })
     .eq('id', modalityId)
     .eq('organization_id', organizationId);
-
   if (error) {
     console.error('Error updating project modality:', error);
     throw error;

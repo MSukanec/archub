@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 import { Plus, Package2, Settings, CheckCircle, XCircle, Filter, Search, ArrowUpDown } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-
 import { HierarchicalTree } from '@/components/shared/trees/HierarchicalTree';
-
-import { 
   useMovementConceptsAdmin, 
   useDeleteMovementConcept, 
   useMoveConceptToParent,
@@ -15,16 +11,14 @@ import {
 } from '@/hooks/use-movement-concepts-admin';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
-
 const AdminGeneralMovementConcepts = () => {
   const { data: userData } = useCurrentUser();
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedConcepts, setExpandedConcepts] = useState<Set<string>>(new Set());
-  const [systemFilter, setSystemFilter] = useState<'all' | 'system' | 'user'>('all');
+  const [systemFilter, setSystemFilter] = useState<'all'| 'system'| 'user'>('all');
   
   // Global modal store
   const { openModal } = useGlobalModalStore();
-
   const { data: concepts = [], isLoading, error, isError, refetch } = useMovementConceptsAdmin();
   
   // Debug logging
@@ -36,13 +30,11 @@ const AdminGeneralMovementConcepts = () => {
   
   const deleteConceptMutation = useDeleteMovementConcept();
   const moveConceptMutation = useMoveConceptToParent();
-
   // Calculate statistics
   const calculateStats = (concepts: MovementConceptAdmin[]) => {
     let totalConcepts = 0;
     let systemConcepts = 0;
     let userConcepts = 0;
-
     const countRecursive = (concepts: MovementConceptAdmin[]) => {
       concepts.forEach(concept => {
         totalConcepts++;
@@ -58,7 +50,6 @@ const AdminGeneralMovementConcepts = () => {
         }
       });
     };
-
     countRecursive(concepts);
     return { 
       totalConcepts, 
@@ -66,9 +57,7 @@ const AdminGeneralMovementConcepts = () => {
       userConcepts 
     };
   };
-
   const stats = calculateStats(concepts);
-
   // Filter concepts based on search term and system filter
   const filterConcepts = (concepts: MovementConceptAdmin[]): MovementConceptAdmin[] => {
     return concepts
@@ -77,13 +66,13 @@ const AdminGeneralMovementConcepts = () => {
         const filteredChildren = concept.children ? filterConcepts(concept.children) : [];
         
         // Check if current concept matches filters
-        const matchesSearch = searchTerm === '' || 
+        const matchesSearch = searchTerm === ''|| 
           concept.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (concept.description && concept.description.toLowerCase().includes(searchTerm.toLowerCase()));
         
-        const matchesSystemFilter = systemFilter === 'all' ||
-          (systemFilter === 'system' && concept.is_system) ||
-          (systemFilter === 'user' && !concept.is_system);
+        const matchesSystemFilter = systemFilter === 'all'||
+          (systemFilter === 'system'&& concept.is_system) ||
+          (systemFilter === 'user'&& !concept.is_system);
         
         // Include concept if it matches filters OR has matching children
         if ((matchesSearch && matchesSystemFilter) || filteredChildren.length > 0) {
@@ -97,17 +86,13 @@ const AdminGeneralMovementConcepts = () => {
       })
       .filter((concept): concept is MovementConceptAdmin => concept !== null);
   };
-
   const filteredConcepts = filterConcepts(concepts);
-
   const handleOpenCreateModal = () => {
     openModal('movement-concept');
   };
-
   const handleOpenEditModal = (concept: MovementConceptAdmin) => {
     openModal('movement-concept', { editingConcept: concept });
   };
-
   const handleCreateChildConcept = (parentConcept: any) => {
     openModal('movement-concept', { 
       parentConcept: {
@@ -118,7 +103,6 @@ const AdminGeneralMovementConcepts = () => {
       }
     });
   };
-
   const handleDeleteConcept = (conceptId: string) => {
     // Find the concept to get its name for the modal
     const findConceptInTree = (concepts: MovementConceptAdmin[], id: string): MovementConceptAdmin | null => {
@@ -131,10 +115,8 @@ const AdminGeneralMovementConcepts = () => {
       }
       return null;
     };
-
     const concept = findConceptInTree(concepts, conceptId);
     if (!concept) return;
-
     // Get all other concepts as replacement options (excluding the current one and its children)
     const getAllConcepts = (concepts: MovementConceptAdmin[]): MovementConceptAdmin[] => {
       let allConcepts: MovementConceptAdmin[] = [];
@@ -146,7 +128,6 @@ const AdminGeneralMovementConcepts = () => {
       });
       return allConcepts;
     };
-
     const allConcepts = getAllConcepts(concepts);
     const replacementOptions = allConcepts
       .filter(c => c.id !== conceptId) // Exclude only the current concept being deleted
@@ -154,7 +135,6 @@ const AdminGeneralMovementConcepts = () => {
         label: c.name,
         value: c.id
       }));
-
     openModal('delete-confirmation', {
       mode: 'replace',
       title: 'Eliminar Concepto de Movimiento',
@@ -183,14 +163,11 @@ const AdminGeneralMovementConcepts = () => {
       isLoading: deleteConceptMutation.isPending
     });
   };
-
   const clearFilters = () => {
     setSearchTerm('');
     setSystemFilter('all');
   };
-
-  const hasActiveFilters = searchTerm !== '' || systemFilter !== 'all';
-
+  const hasActiveFilters = searchTerm !== ''|| systemFilter !== 'all';
   const handleMoveToParent = async (conceptId: string, newParentId: string | null) => {
     try {
       await moveConceptMutation.mutateAsync({ conceptId, newParentId });
@@ -198,11 +175,9 @@ const AdminGeneralMovementConcepts = () => {
       console.error('Error moving concept:', error);
     }
   };
-
   if (isError) {
     console.error('❌ AdminMovementConcepts error:', error);
   }
-
   return (
     <div className="space-y-6">
       {/* Statistics Cards */}
@@ -219,7 +194,6 @@ const AdminGeneralMovementConcepts = () => {
             </p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Conceptos Sistema</CardTitle>
@@ -232,7 +206,6 @@ const AdminGeneralMovementConcepts = () => {
             </p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Conceptos Usuario</CardTitle>
@@ -246,7 +219,6 @@ const AdminGeneralMovementConcepts = () => {
           </CardContent>
         </Card>
       </div>
-
       {/* Main Content - Direct Tree without Card */}
       {isLoading ? (
         <div className="flex items-center justify-center py-8">
@@ -317,5 +289,4 @@ const AdminGeneralMovementConcepts = () => {
     </div>
   );
 }
-
 export default AdminGeneralMovementConcepts;

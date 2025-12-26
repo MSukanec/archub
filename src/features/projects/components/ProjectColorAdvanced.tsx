@@ -4,28 +4,23 @@ import { hslToHex, hexToRgb, hexToHsl, formatHslForCss, calculateHoverColor, cal
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useThemeStore } from "@/stores/themeStore";
-
 type Props = {
   initialHue?: number | null;
   initialEnabled?: boolean;
   onChange: (params: { useCustom: boolean; hue: number | null; hex: string | null }) => void;
 };
-
 export function ProjectColorAdvanced({
   initialHue = null,
   initialEnabled = false,
   onChange
 }: Props) {
   const { isDark } = useThemeStore();
-
   // State
   const [enabled, setEnabled] = useState(initialEnabled);
   const [hue, setHue] = useState<number>(initialHue ?? 180); // Default to cyan
   const [hasInteracted, setHasInteracted] = useState(false); // Track user interaction
-
   // Calculate hex color from hue
   const hex = useMemo(() => hslToHex(hue), [hue]);
-
   // Apply preview to CSS variables when enabled
   useEffect(() => {
     if (!enabled) {
@@ -38,25 +33,21 @@ export function ProjectColorAdvanced({
       root.style.removeProperty('--accent-preview-foreground');
       return;
     }
-
     // Apply preview variables
     const root = document.documentElement;
     const rgb = hexToRgb(hex);
     const hsl = hexToHsl(hex);
-
     if (rgb && hsl) {
       const hslFormatted = formatHslForCss(hsl.h, hsl.s, hsl.l);
       const rgbFormatted = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
       const hoverColor = calculateHoverColor(hex, isDark);
       const foregroundColor = calculateForegroundColor(hex);
-
       root.style.setProperty('--accent-preview', `hsl(${hslFormatted})`);
       root.style.setProperty('--accent-preview-hsl', hslFormatted);
       root.style.setProperty('--accent-preview-rgb', rgbFormatted);
       root.style.setProperty('--accent-preview-hover', hoverColor);
       root.style.setProperty('--accent-preview-foreground', foregroundColor);
     }
-
     // Cleanup on unmount
     return () => {
       root.style.removeProperty('--accent-preview');
@@ -66,31 +57,26 @@ export function ProjectColorAdvanced({
       root.style.removeProperty('--accent-preview-foreground');
     };
   }, [enabled, hex, isDark]);
-
   // Notify parent of changes (only after user interaction)
   useEffect(() => {
     if (!hasInteracted) return;
-
     onChange({
       useCustom: enabled,
       hue: enabled ? hue : null,
       hex: enabled ? hex : null
     });
   }, [enabled, hue, hex, onChange, hasInteracted]);
-
   // Handle checkbox toggle
   const handleToggle = (checked: boolean) => {
     setHasInteracted(true);
     setEnabled(checked);
   };
-
   // Handle slider change
   const handleHueChange = (value: number) => {
     if (!enabled) return;
     setHasInteracted(true);
     setHue(value);
   };
-
   return (
     <div className="rounded-xl border border-border p-4 mt-4 bg-card">
         {/* Header */}
@@ -116,7 +102,6 @@ export function ProjectColorAdvanced({
             </span>
           </label>
         </div>
-
         {/* Slider and preview */}
         <div className="space-y-3">
           {/* Slider */}
@@ -169,7 +154,6 @@ export function ProjectColorAdvanced({
               data-testid="color-preview-circle"
             />
           </div>
-
           {/* Info text */}
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">
@@ -179,7 +163,6 @@ export function ProjectColorAdvanced({
               Color: <span className="font-mono font-medium">{hex}</span>
             </span>
           </div>
-
           {/* Preview badge */}
           {enabled && (
             <div className="flex items-center gap-2 pt-2 border-t border-border">

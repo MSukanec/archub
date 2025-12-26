@@ -1,7 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { Project } from '../types';
 import { transformProjects } from '../mappers/projectMapper';
-
 /**
  * Obtiene todos los proyectos de una organización con sus relaciones.
  * 
@@ -24,7 +23,6 @@ export async function getProjects(organizationId: string): Promise<Project[]> {
   if (!supabase || !organizationId) {
     return [];
   }
-
   // Usar la vista projects_view que ya tiene TODA la información:
   // - project_type_id, project_type_name
   // - project_modality_id, project_modality_name

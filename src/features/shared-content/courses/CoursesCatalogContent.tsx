@@ -3,7 +3,6 @@ import { useAllCourses, UnifiedCourseGrid, useLearningCourses } from '@/features
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useLocation } from 'wouter';
 import type { CoursesCatalogContentProps, CourseCatalogTab } from './types';
-
 export function CoursesCatalogContent({ mode, showTabs = true }: CoursesCatalogContentProps) {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState<CourseCatalogTab>('all');
@@ -14,9 +13,7 @@ export function CoursesCatalogContent({ mode, showTabs = true }: CoursesCatalogC
   const isAuthenticated = !!userData?.user;
   
   const { data: learningData, isLoading: learningLoading } = useLearningCourses();
-
   const isLoading = publicLoading || learningLoading;
-
   const { enrollmentMap, progressMap } = useMemo(() => {
     const enrollMap = new Map<string, boolean>();
     const progMap = new Map<string, { completed: number; total: number; percentage: number }>();
@@ -39,7 +36,6 @@ export function CoursesCatalogContent({ mode, showTabs = true }: CoursesCatalogC
     
     return { enrollmentMap: enrollMap, progressMap: progMap };
   }, [learningData]);
-
   const coursesData = useMemo(() => {
     if (!publicCourses) return [];
     
@@ -47,7 +43,7 @@ export function CoursesCatalogContent({ mode, showTabs = true }: CoursesCatalogC
       const isEnrolled = enrollmentMap.get(course.id) || false;
       const progress = progressMap.get(course.id);
       
-      const courseUrl = mode === 'public' 
+      const courseUrl = mode === 'public'
         ? `/cursos/${course.slug}`
         : `/learning/courses/${course.slug}`;
       
@@ -59,7 +55,6 @@ export function CoursesCatalogContent({ mode, showTabs = true }: CoursesCatalogC
       };
     });
   }, [publicCourses, enrollmentMap, progressMap, navigate, mode]);
-
   const filteredCourses = useMemo(() => {
     if (activeTab === 'all') {
       return coursesData;
@@ -70,7 +65,6 @@ export function CoursesCatalogContent({ mode, showTabs = true }: CoursesCatalogC
     }
     return coursesData;
   }, [coursesData, activeTab]);
-
   const enrolledCount = useMemo(() => 
     coursesData.filter(c => c.isEnrolled && (c.progress?.percentage || 0) < 100).length,
     [coursesData]
@@ -80,7 +74,6 @@ export function CoursesCatalogContent({ mode, showTabs = true }: CoursesCatalogC
     coursesData.filter(c => c.isEnrolled && c.progress?.percentage === 100).length,
     [coursesData]
   );
-
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -93,7 +86,6 @@ export function CoursesCatalogContent({ mode, showTabs = true }: CoursesCatalogC
       </div>
     );
   }
-
   return (
     <UnifiedCourseGrid 
       courses={filteredCourses}

@@ -1,10 +1,9 @@
 import DataRowCard, { DataRowCardProps } from '@/components/shared/DataRowCard';
-
 interface Subcontract {
   id: string;
   title: string;
   code?: string;
-  status: 'draft' | 'active' | 'awarded' | 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  status: 'draft'| 'active'| 'awarded'| 'pending'| 'in_progress'| 'completed'| 'cancelled';
   amount_total?: number;
   currency_id?: string;
   exchange_rate?: number;
@@ -30,17 +29,15 @@ interface Subcontract {
     saldoUSD: number;
   };
 }
-
 interface SubcontractRowProps {
   subcontract: Subcontract;
   onClick?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
   selected?: boolean;
-  density?: 'compact' | 'normal' | 'comfortable';
+  density?: 'compact'| 'normal'| 'comfortable';
   className?: string;
 }
-
 const formatCurrency = (amount: number, symbol?: string): string => {
   const formattedAmount = new Intl.NumberFormat('es-AR', {
     minimumFractionDigits: 0,
@@ -49,14 +46,13 @@ const formatCurrency = (amount: number, symbol?: string): string => {
   
   return `${symbol || '$'}${formattedAmount}`;
 };
-
 const getSubcontractInitials = (subcontract: Subcontract): string => {
   if (subcontract.code) {
     return subcontract.code.slice(0, 2).toUpperCase();
   }
   
   if (subcontract.title) {
-    const words = subcontract.title.split(' ');
+    const words = subcontract.title.split('');
     if (words.length > 1) {
       return words.slice(0, 2).map(w => w[0]?.toUpperCase()).join('');
     }
@@ -65,11 +61,10 @@ const getSubcontractInitials = (subcontract: Subcontract): string => {
   
   return 'SC';
 };
-
 const getContractorName = (subcontract: Subcontract): string => {
   const contact = subcontract.contact || (subcontract as any).winner_bid?.contacts;
   
-  if (subcontract.status !== 'awarded' || !contact) {
+  if (subcontract.status !== 'awarded'|| !contact) {
     return 'Sin adjudicar';
   }
   
@@ -90,8 +85,7 @@ const getContractorName = (subcontract: Subcontract): string => {
   
   return 'Sin subcontratista';
 };
-
-const getStatusColor = (status: string): 'success' | 'warning' | 'danger' | 'neutral' => {
+const getStatusColor = (status: string): 'success'| 'warning'| 'danger'| 'neutral'=> {
   switch (status) {
     case 'awarded':
     case 'completed':
@@ -107,7 +101,6 @@ const getStatusColor = (status: string): 'success' | 'warning' | 'danger' | 'neu
       return 'neutral';
   }
 };
-
 const getStatusText = (status: string): string => {
   switch (status) {
     case 'draft':
@@ -128,7 +121,6 @@ const getStatusText = (status: string): string => {
       return status;
   }
 };
-
 const calculatePaymentPercentage = (subcontract: Subcontract): number => {
   const analysis = subcontract.analysis;
   if (!analysis || !subcontract.amount_total || subcontract.amount_total === 0) {
@@ -136,7 +128,6 @@ const calculatePaymentPercentage = (subcontract: Subcontract): number => {
   }
   return (analysis.pagoALaFecha / subcontract.amount_total) * 100;
 };
-
 export default function SubcontractRow({ 
   subcontract, 
   onClick, 
@@ -159,11 +150,9 @@ export default function SubcontractRow({
   const formattedPaid = subcontract.analysis?.pagoALaFecha 
     ? formatCurrency(subcontract.analysis.pagoALaFecha, subcontract.currency?.symbol)
     : formatCurrency(0, subcontract.currency?.symbol);
-
   const formattedBalance = subcontract.analysis?.saldo 
     ? formatCurrency(subcontract.analysis.saldo, subcontract.currency?.symbol)
     : formatCurrency((subcontract.amount_total || 0) - (subcontract.analysis?.pagoALaFecha || 0), subcontract.currency?.symbol);
-
   const cardContent = (
     <>
       <div className="flex-1 min-w-0">
@@ -176,40 +165,38 @@ export default function SubcontractRow({
         </div>
         
         <div className={`text-sm truncate ${
-          statusColor === 'success' ? 'text-green-600' : 
-          statusColor === 'danger' ? 'text-red-600' : 
-          statusColor === 'warning' ? 'text-yellow-600' : 
+          statusColor === 'success'? 'text-green-600': 
+          statusColor === 'danger'? 'text-red-600': 
+          statusColor === 'warning'? 'text-yellow-600': 
           'text-muted-foreground'
         }`}>
           {statusText}
         </div>
       </div>
-
       <div className="flex flex-col items-end flex-shrink-0">
         <div className="flex items-center gap-1">
-          <span className="text-xs" style={{ color: '#8B5CF6' }}>T:</span>
-          <span className="font-mono text-sm" style={{ color: '#8B5CF6' }}>
+          <span className="text-xs" style={{ color: '#8B5CF6'}}>T:</span>
+          <span className="font-mono text-sm" style={{ color: '#8B5CF6'}}>
             {formattedTotal}
           </span>
         </div>
         
         <div className="flex items-center gap-1">
-          <span className="text-xs" style={{ color: '#10B981' }}>P:</span>
-          <span className="font-mono text-sm" style={{ color: '#10B981' }}>
+          <span className="text-xs" style={{ color: '#10B981'}}>P:</span>
+          <span className="font-mono text-sm" style={{ color: '#10B981'}}>
             {formattedPaid}
           </span>
         </div>
         
         <div className="flex items-center gap-1">
-          <span className="text-xs" style={{ color: '#3B82F6' }}>S:</span>
-          <span className="font-mono text-sm" style={{ color: '#3B82F6' }}>
+          <span className="text-xs" style={{ color: '#3B82F6'}}>S:</span>
+          <span className="font-mono text-sm" style={{ color: '#3B82F6'}}>
             {formattedBalance}
           </span>
         </div>
       </div>
     </>
   );
-
   return (
     <DataRowCard
       avatarFallback={getSubcontractInitials(subcontract)}
@@ -224,5 +211,4 @@ export default function SubcontractRow({
     </DataRowCard>
   );
 }
-
 export type { Subcontract };

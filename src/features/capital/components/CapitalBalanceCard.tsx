@@ -4,7 +4,6 @@ import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { Scale, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { PartnerCapitalKPI } from '@/features/capital';
-
 interface CapitalBalanceCardProps {
   partner: {
     partnerId: string;
@@ -23,42 +22,38 @@ interface CapitalBalanceCardProps {
   currencySymbol: string;
   onPartnerClick?: () => void;
 }
-
 function getContributionVariant(status: PartnerCapitalKPI['contribution_status']) {
   switch (status) {
     case 'equilibrado':
-      return { variant: 'capital-equal' as const, label: 'En equilibrio' };
+      return { variant: 'capital-equal'as const, label: 'En equilibrio'};
     case 'sobre_aportado':
-      return { variant: 'capital-over' as const, label: 'Sobre aportado' };
+      return { variant: 'capital-over'as const, label: 'Sobre aportado'};
     case 'bajo_aportado':
-      return { variant: 'capital-under' as const, label: 'Bajo aportado' };
+      return { variant: 'capital-under'as const, label: 'Bajo aportado'};
     case 'sin_porcentaje':
     default:
-      return { variant: 'capital-equal' as const, label: 'Sin % asignado' };
+      return { variant: 'capital-equal'as const, label: 'Sin % asignado'};
   }
 }
-
 function getNetVariant(status: PartnerCapitalKPI['net_status']) {
   switch (status) {
     case 'equilibrado':
-      return { variant: 'capital-equal' as const, label: 'En equilibrio' };
+      return { variant: 'capital-equal'as const, label: 'En equilibrio'};
     case 'arriba':
-      return { variant: 'capital-over' as const, label: 'Capital arriba' };
+      return { variant: 'capital-over'as const, label: 'Capital arriba'};
     case 'abajo':
-      return { variant: 'capital-under' as const, label: 'Capital abajo' };
+      return { variant: 'capital-under'as const, label: 'Capital abajo'};
     case 'sin_porcentaje':
     default:
-      return { variant: 'capital-equal' as const, label: 'Sin % asignado' };
+      return { variant: 'capital-equal'as const, label: 'Sin % asignado'};
   }
 }
-
 export function CapitalBalanceCard({
   partner,
   currencySymbol,
   onPartnerClick,
 }: CapitalBalanceCardProps) {
   const hasPercentage = partner.ownershipPercentage !== null;
-
   const formatCurrency = (amount: number) => {
     const absAmount = Math.abs(amount);
     return new Intl.NumberFormat('es-AR', {
@@ -66,11 +61,9 @@ export function CapitalBalanceCard({
       maximumFractionDigits: 0,
     }).format(absAmount);
   };
-
   const formatSignedCurrency = (amount: number) => {
-    return (amount > 0 ? '+' : '') + currencySymbol + ' ' + formatCurrency(amount);
+    return (amount > 0 ? '+': '') + currencySymbol + ''+ formatCurrency(amount);
   };
-
   return (
     <Card
       data-testid={`partner-balance-card-${partner.partnerId}`}
@@ -93,7 +86,6 @@ export function CapitalBalanceCard({
           )}
         </div>
       </div>
-
       {hasPercentage && (
         <>
           {/* BLOQUE APORTES */}
@@ -134,7 +126,7 @@ export function CapitalBalanceCard({
                 </div>
               )}
             </div>
-            {partner.contribution_status !== 'sin_porcentaje' && (
+            {partner.contribution_status !== 'sin_porcentaje'&& (
               <div className="flex gap-2">
                 <Badge variant={getContributionVariant(partner.contribution_status).variant}>
                   {getContributionVariant(partner.contribution_status).label}
@@ -142,7 +134,6 @@ export function CapitalBalanceCard({
               </div>
             )}
           </div>
-
           {/* BLOQUE CAPITAL NETO */}
           <div className="space-y-3">
             <div className="space-y-2">
@@ -153,10 +144,10 @@ export function CapitalBalanceCard({
                   <div
                     className={cn(
                       'text-sm font-bold',
-                      partner.balance >= 0 ? 'text-foreground' : 'text-chart-negative',
+                      partner.balance >= 0 ? 'text-foreground': 'text-chart-negative',
                     )}
                   >
-                    {partner.balance < 0 ? '-' : ''}
+                    {partner.balance < 0 ? '-': ''}
                     {currencySymbol} {formatCurrency(partner.balance)}
                   </div>
                 </div>
@@ -187,7 +178,7 @@ export function CapitalBalanceCard({
                 </div>
               )}
             </div>
-            {partner.net_status !== 'sin_porcentaje' && (
+            {partner.net_status !== 'sin_porcentaje'&& (
               <div className="flex gap-2">
                 <Badge variant={getNetVariant(partner.net_status).variant}>
                   {getNetVariant(partner.net_status).label}
@@ -197,7 +188,6 @@ export function CapitalBalanceCard({
           </div>
         </>
       )}
-
       {!hasPercentage && (
         <div className="text-center py-4">
           <Badge variant="neutral" className="text-xs">

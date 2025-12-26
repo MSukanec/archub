@@ -4,7 +4,6 @@ import { useProjectContext } from '@/stores/projectContext';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import { supabase } from '@/lib/supabase';
-
 export interface UpgradeFormData {
   currentPlan: {
     name: string;
@@ -23,10 +22,9 @@ export interface UpgradeFormData {
       [key: string]: any;
     };
   };
-  billingPeriod: 'monthly' | 'annual';
+  billingPeriod: 'monthly'| 'annual';
   isManualPlan: boolean;
 }
-
 interface ProrationResult {
   hasActiveSubscription: boolean;
   currentPlan: {
@@ -65,12 +63,10 @@ interface ProrationResult {
     ars: number;
   };
 }
-
 export interface UseUpgradeFormProps {
   formData: UpgradeFormData;
   onClose: () => void;
 }
-
 export function useUpgradeForm({ formData, onClose }: UseUpgradeFormProps) {
   const { toast } = useToast();
   const { currentOrganizationId } = useProjectContext();
@@ -80,16 +76,13 @@ export function useUpgradeForm({ formData, onClose }: UseUpgradeFormProps) {
   const [prorationData, setProrationData] = useState<ProrationResult | null>(null);
   const [isLoadingProration, setIsLoadingProration] = useState(true);
   const [prorationError, setProrationError] = useState<Error | null>(null);
-
   const { currentPlan, targetPlan, billingPeriod, isManualPlan } = formData;
-
   useEffect(() => {
     const loadProration = async () => {
       if (!currentOrganizationId || !targetPlan.slug) {
         setIsLoadingProration(false);
         return;
       }
-
       try {
         setIsLoadingProration(true);
         setProrationError(null);
@@ -99,7 +92,6 @@ export function useUpgradeForm({ formData, onClose }: UseUpgradeFormProps) {
           setIsLoadingProration(false);
           return;
         }
-
         const response = await fetch('/api/checkout/calculate-proration', {
           method: 'POST',
           headers: {
@@ -126,17 +118,14 @@ export function useUpgradeForm({ formData, onClose }: UseUpgradeFormProps) {
         setIsLoadingProration(false);
       }
     };
-
     loadProration();
   }, [currentOrganizationId, targetPlan.slug, billingPeriod]);
-
   const isOwner = useMemo(() => {
     if (!userData?.user?.id || !userData?.organization) {
       return false;
     }
     return userData.organization.owner_id === userData.user.id;
   }, [userData?.user?.id, userData?.organization?.owner_id]);
-
   const validationError = useMemo(() => {
     if (!targetPlan?.slug) {
       return "Plan de destino no válido";
@@ -155,17 +144,14 @@ export function useUpgradeForm({ formData, onClose }: UseUpgradeFormProps) {
     }
     return null;
   }, [targetPlan?.slug, currentOrganizationId, userData?.user, userData?.organization, isOwner]);
-
   const handleConfirm = () => {
     if (validationError || isManualPlan) return;
     navigate(`/subscription/checkout?plan=${targetPlan.slug}&billing=${billingPeriod}`);
     onClose();
   };
-
   const hasProration = prorationData?.hasActiveSubscription && prorationData?.credit && prorationData.credit.creditAmount > 0;
   const needsProration = currentPlan.slug !== 'free';
   const isConfirmDisabled = !!validationError || isManualPlan || (needsProration && isLoadingProration);
-
   return {
     prorationData,
     isLoadingProration,

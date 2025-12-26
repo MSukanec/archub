@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCourseDuration } from '../services';
 import { LEARNING_QUERY_KEYS } from '../constants';
-
 /**
  * Hook para obtener la duración total de un curso.
  * 

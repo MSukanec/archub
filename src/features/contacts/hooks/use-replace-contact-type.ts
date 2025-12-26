@@ -1,13 +1,11 @@
 import { useOptimisticMutation } from '@/core/save-engine';
 import { replaceContactType } from '../services';
 import { contactsKeys, contactTypesKeys } from '@/core/query-keys';
-
 interface ReplaceContactTypeParams {
   oldTypeId: string;
   newTypeId: string;
   organizationId: string;
 }
-
 export function useReplaceContactType(organizationId: string) {
   return useOptimisticMutation({
     mutationFn: ({ oldTypeId, newTypeId, organizationId }: ReplaceContactTypeParams) => 

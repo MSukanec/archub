@@ -6,7 +6,6 @@ import { useContactTypes, useDeleteContactType, useReplaceContactType } from '@/
 import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import type { ContactType } from '@/features/contacts';
-
 export function ContactSettingsView() {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
@@ -15,43 +14,36 @@ export function ContactSettingsView() {
   const { data: contactTypes = [], isLoading } = useContactTypes(organizationId);
   const deleteMutation = useDeleteContactType(organizationId || '');
   const replaceMutation = useReplaceContactType(organizationId || '');
-
   const sortedTypes = [...contactTypes].sort((a: ContactType, b: ContactType) => 
-    a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
+    a.name.localeCompare(b.name, 'es', { sensitivity: 'base'})
   );
-
   const handleAddType = () => {
     openModal('contactType', { isEditing: false });
   };
-
   const handleEditType = (type: ContactType) => {
     openModal('contactType', { 
       contactType: type,
       isEditing: true 
     });
   };
-
   const handleDeleteType = (type: ContactType) => {
     if (!organizationId) return;
-
     const otherTypes = contactTypes.filter((t: ContactType) => t.id !== type.id);
     const hasReplacements = otherTypes.length > 0;
-    const mode = hasReplacements ? 'replace' : 'delete';
+    const mode = hasReplacements ? 'replace': 'delete';
     
     const replacementOptions = otherTypes
-      .sort((a: ContactType, b: ContactType) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
+      .sort((a: ContactType, b: ContactType) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base'}))
       .map((t: ContactType) => ({
         label: t.name,
         value: t.id
       }));
-
     const consequences = [
       `Todos los contactos con este tipo quedarán sin esta categoría`,
-      mode === 'replace' 
+      mode === 'replace'
         ? 'Puedes reemplazarlos con otro tipo o dejarlos sin referencia'
         : ''
     ].filter(Boolean);
-
     openModal('delete-confirmation', {
       mode,
       title: 'Eliminar tipo de contacto',
@@ -59,7 +51,7 @@ export function ContactSettingsView() {
       itemName: type.name,
       itemType: 'tipo de contacto',
       consequences: consequences.length > 0 ? consequences : undefined,
-      replacementOptions: mode === 'replace' ? replacementOptions : undefined,
+      replacementOptions: mode === 'replace'? replacementOptions : undefined,
       currentId: type.id,
       onDelete: async () => {
         await deleteMutation.mutateAsync(type.id);
@@ -69,7 +61,6 @@ export function ContactSettingsView() {
       }
     });
   };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -77,7 +68,6 @@ export function ContactSettingsView() {
       </div>
     );
   }
-
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -103,7 +93,6 @@ export function ContactSettingsView() {
             Puedes crear tipos personalizados para adaptar la clasificación a las necesidades de tu organización.
           </p>
         </div>
-
         <div className="space-y-3">
           {sortedTypes.length > 0 ? (
             <>

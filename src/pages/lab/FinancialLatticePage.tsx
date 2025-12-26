@@ -8,16 +8,13 @@ import { cn } from '@/lib/utils';
 import { Layout as DashboardLayout } from '@/layouts/dashboard/DashboardLayout';
 import { LabPageLayout } from '@/layouts/lab/components/LabPageLayout';
 import { useLab } from '@/layouts/lab/context/LabContext';
-import { 
   NeuralNetworkGraph, 
   SatelliteNode, 
   GraphData, 
   NodeStatus,
 } from '@/components/lab/neural-network';
 import { StatusHeatmap, HeatmapCell } from '@/components/lab/heatmap';
-
-type ViewMode = 'network' | 'heatmap';
-
+type ViewMode = 'network'| 'heatmap';
 interface ClientsSummaryResponse {
   plan: { slug: string; isMultiCurrency: boolean };
   clients: Array<{
@@ -42,7 +39,6 @@ interface ClientsSummaryResponse {
     }>;
   }>;
 }
-
 interface ClientNodeData extends SatelliteNode {
   email?: string;
   phone?: string;
@@ -51,7 +47,6 @@ interface ClientNodeData extends SatelliteNode {
   totalPaid: number;
   lastInteraction: Date;
 }
-
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -59,7 +54,6 @@ function formatCurrency(amount: number): string {
     maximumFractionDigits: 0,
   }).format(amount);
 }
-
 function formatDate(date: Date): string {
   return new Intl.DateTimeFormat('es-AR', {
     day: 'numeric',
@@ -67,11 +61,9 @@ function formatDate(date: Date): string {
     year: 'numeric',
   }).format(date);
 }
-
 function getDaysSince(date: Date): number {
   return Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
 }
-
 function determineStatus(balanceDue: number, totalCommitted: number): NodeStatus {
   if (totalCommitted === 0) return 'healthy';
   const percentOwed = (balanceDue / totalCommitted) * 100;
@@ -80,7 +72,6 @@ function determineStatus(balanceDue: number, totalCommitted: number): NodeStatus
   if (percentOwed < 30) return 'warning';
   return 'critical';
 }
-
 async function fetchClientsSummary(projectId: string, organizationId: string): Promise<ClientsSummaryResponse | null> {
   if (!projectId || !organizationId) return null;
   
@@ -99,7 +90,6 @@ async function fetchClientsSummary(projectId: string, organizationId: string): P
   if (!response.ok) return null;
   return response.json();
 }
-
 function FinancialLatticeContent() {
   const graphRef = useRef<ForceGraphMethods | undefined>();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -118,14 +108,11 @@ function FinancialLatticeContent() {
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
     const updateDimensions = () => {
       const rect = container.getBoundingClientRect();
       setDimensions({ width: rect.width, height: rect.height });
     };
-
     updateDimensions();
-
     const resizeObserver = new ResizeObserver(() => {
       updateDimensions();
     });
@@ -152,7 +139,7 @@ function FinancialLatticeContent() {
         value: Math.max(0, client.balance_due),
         maxValue: client.total_committed_amount,
         currentValue: client.total_paid_amount,
-        type: 'satellite' as const,
+        type: 'satellite'as const,
         email: client.contacts?.email,
         phone: client.contacts?.phone,
         debtAmount: Math.max(0, client.balance_due),
@@ -167,7 +154,7 @@ function FinancialLatticeContent() {
     const coreNode = {
       id: 'core',
       label: selectedProject?.name || 'CORE',
-      type: 'core' as const,
+      type: 'core'as const,
       fx: 0,
       fy: 0,
     };
@@ -181,7 +168,6 @@ function FinancialLatticeContent() {
     
     return { nodes, links };
   }, [clientNodes, selectedProject]);
-
   const heatmapCells: HeatmapCell[] = useMemo(() => {
     return clientNodes.map(node => ({
       id: node.id,
@@ -240,10 +226,8 @@ function FinancialLatticeContent() {
       totalClients: clientNodes.length,
     };
   }, [clientNodes]);
-
   const isLoading = contextLoading || clientsLoading;
   const hasNoClients = !isLoading && clientNodes.length === 0 && selectedProjectId;
-
   return (
     <div ref={containerRef} className="relative h-full w-full bg-[var(--content-bg)] overflow-hidden">
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
@@ -252,7 +236,7 @@ function FinancialLatticeContent() {
             onClick={() => setViewMode('network')}
             className={cn(
               "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
-              viewMode === 'network' 
+              viewMode === 'network'
                 ? "bg-[var(--accent)] text-[var(--accent-foreground)]" 
                 : "text-[var(--text-muted)] hover:text-[var(--foreground)] hover:bg-[var(--card-hover-bg)]"
             )}
@@ -265,7 +249,7 @@ function FinancialLatticeContent() {
             onClick={() => setViewMode('heatmap')}
             className={cn(
               "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
-              viewMode === 'heatmap' 
+              viewMode === 'heatmap'
                 ? "bg-[var(--accent)] text-[var(--accent-foreground)]" 
                 : "text-[var(--text-muted)] hover:text-[var(--foreground)] hover:bg-[var(--card-hover-bg)]"
             )}
@@ -317,8 +301,7 @@ function FinancialLatticeContent() {
           </div>
         </div>
       </div>
-
-      {viewMode === 'network' && dimensions.width > 0 && dimensions.height > 0 && (
+      {viewMode === 'network'&& dimensions.width > 0 && dimensions.height > 0 && (
         <NeuralNetworkGraph
           data={graphData}
           width={dimensions.width}
@@ -328,7 +311,7 @@ function FinancialLatticeContent() {
         />
       )}
       
-      {viewMode === 'heatmap' && (
+      {viewMode === 'heatmap'&& (
         <StatusHeatmap
           cells={heatmapCells}
           onCellClick={handleCellClick}
@@ -336,7 +319,6 @@ function FinancialLatticeContent() {
           emptyMessage="No hay clientes para mostrar"
         />
       )}
-
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-[var(--card-bg)]/50 backdrop-blur-sm z-30">
           <div className="flex flex-col items-center gap-4">
@@ -357,7 +339,6 @@ function FinancialLatticeContent() {
           </div>
         </div>
       )}
-
       <AnimatePresence>
         {selectedNode && (
           <motion.div
@@ -383,9 +364,9 @@ function FinancialLatticeContent() {
                 <div 
                   className={cn(
                     "w-12 h-12 rounded-full flex items-center justify-center text-[var(--foreground)] font-bold",
-                    selectedNode.status === 'critical' && "bg-[var(--destructive)]/30",
-                    selectedNode.status === 'warning' && "bg-[var(--warning)]/30",
-                    selectedNode.status === 'healthy' && "bg-[var(--success)]/30",
+                    selectedNode.status === 'critical'&& "bg-[var(--destructive)]/30",
+                    selectedNode.status === 'warning'&& "bg-[var(--warning)]/30",
+                    selectedNode.status === 'healthy'&& "bg-[var(--success)]/30",
                   )}
                 >
                   {selectedNode.label.charAt(0).toUpperCase()}
@@ -398,18 +379,18 @@ function FinancialLatticeContent() {
               
               <div className={cn(
                 "px-3 py-2 rounded-lg flex items-center gap-2",
-                selectedNode.status === 'critical' && "bg-[var(--destructive)]/20",
-                selectedNode.status === 'warning' && "bg-[var(--warning)]/20",
-                selectedNode.status === 'healthy' && "bg-[var(--success)]/20",
+                selectedNode.status === 'critical'&& "bg-[var(--destructive)]/20",
+                selectedNode.status === 'warning'&& "bg-[var(--warning)]/20",
+                selectedNode.status === 'healthy'&& "bg-[var(--success)]/20",
               )}>
                 <AlertTriangle className={cn(
                   "w-4 h-4",
-                  selectedNode.status === 'critical' && "text-[var(--destructive)]",
-                  selectedNode.status === 'warning' && "text-[var(--warning)]",
-                  selectedNode.status === 'healthy' && "text-[var(--success)]",
+                  selectedNode.status === 'critical'&& "text-[var(--destructive)]",
+                  selectedNode.status === 'warning'&& "text-[var(--warning)]",
+                  selectedNode.status === 'healthy'&& "text-[var(--success)]",
                 )} />
                 <span className="text-sm text-[var(--foreground)]">
-                  Estado: {selectedNode.status === 'critical' ? 'Crítico' : selectedNode.status === 'warning' ? 'Alerta' : 'Saludable'}
+                  Estado: {selectedNode.status === 'critical'? 'Crítico': selectedNode.status === 'warning'? 'Alerta': 'Saludable'}
                 </span>
               </div>
               
@@ -476,7 +457,6 @@ function FinancialLatticeContent() {
     </div>
   );
 }
-
 export default function FinancialLatticePage() {
   return (
     <DashboardLayout hideHeader wide>

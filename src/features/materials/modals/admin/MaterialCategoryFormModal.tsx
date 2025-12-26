@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-
 import { FormModalLayout } from '@/components/modal'
 import { FormModalHeader } from '@/components/modal'
 import { FormModalFooter } from '@/components/modal'
@@ -10,17 +9,13 @@ import { useModalPanelStore } from '@/components/modal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-
 import { useCreateMaterialCategory, useUpdateMaterialCategory, useMaterialCategories, MaterialCategory, NewMaterialCategoryData } from '@/features/materials'
 import { useCurrentUser } from '@/hooks/use-current-user'
-
 import { Tag } from 'lucide-react'
-
 const materialCategorySchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   parent_id: z.string().optional().nullable(),
 })
-
 interface MaterialCategoryFormModalProps {
   modalData: {
     editingMaterialCategory?: MaterialCategory | null
@@ -28,13 +23,11 @@ interface MaterialCategoryFormModalProps {
   }
   onClose: () => void
 }
-
 export function MaterialCategoryFormModal({ modalData, onClose }: MaterialCategoryFormModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   
   const { editingMaterialCategory, parentCategory } = modalData
   const isEditing = !!editingMaterialCategory
-
   // Hooks
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
@@ -42,12 +35,10 @@ export function MaterialCategoryFormModal({ modalData, onClose }: MaterialCatego
   const updateMutation = useUpdateMaterialCategory()
   const { data: allCategories = [] } = useMaterialCategories(organizationId)
   const { setPanel } = useModalPanelStore()
-
   // Force edit mode when modal opens
   useEffect(() => {
     setPanel('edit')
   }, [])
-
   // Form setup
   const form = useForm<z.infer<typeof materialCategorySchema>>({
     resolver: zodResolver(materialCategorySchema),
@@ -56,7 +47,6 @@ export function MaterialCategoryFormModal({ modalData, onClose }: MaterialCatego
       parent_id: parentCategory?.id || null,
     },
   })
-
   // Helper function to flatten categories for the select
   const flattenCategories = (categories: MaterialCategory[], level = 0): Array<{ id: string; name: string; level: number }> => {
     const result: Array<{ id: string; name: string; level: number }> = [];
@@ -78,9 +68,7 @@ export function MaterialCategoryFormModal({ modalData, onClose }: MaterialCatego
     
     return result;
   };
-
   const availableParentCategories = flattenCategories(allCategories);
-
   // Load editing data
   useEffect(() => {
     if (isEditing && editingMaterialCategory) {
@@ -95,7 +83,6 @@ export function MaterialCategoryFormModal({ modalData, onClose }: MaterialCatego
       })
     }
   }, [isEditing, editingMaterialCategory, parentCategory, form])
-
   const onSubmit = async (data: z.infer<typeof materialCategorySchema>) => {
     setIsLoading(true)
     
@@ -117,10 +104,8 @@ export function MaterialCategoryFormModal({ modalData, onClose }: MaterialCatego
       setIsLoading(false)
     }
   }
-
   // View panel (not needed for this modal as it's always in edit mode)
   const viewPanel = null
-
   // Edit panel with form
   const editPanel = (
     <Form {...form}>
@@ -156,7 +141,6 @@ export function MaterialCategoryFormModal({ modalData, onClose }: MaterialCatego
             </FormItem>
           )}
         />
-
         {/* Name */}
         <FormField
           control={form.control}
@@ -174,11 +158,9 @@ export function MaterialCategoryFormModal({ modalData, onClose }: MaterialCatego
             </FormItem>
           )}
         />
-
       </form>
     </Form>
   )
-
   // Header content
   const headerContent = (
     <FormModalHeader 
@@ -186,7 +168,6 @@ export function MaterialCategoryFormModal({ modalData, onClose }: MaterialCatego
       icon={Tag}
     />
   )
-
   // Footer content
   const footerContent = (
     <FormModalFooter
@@ -198,7 +179,6 @@ export function MaterialCategoryFormModal({ modalData, onClose }: MaterialCatego
       showLoadingSpinner={isLoading}
     />
   )
-
   return (
     <FormModalLayout
       columns={1}

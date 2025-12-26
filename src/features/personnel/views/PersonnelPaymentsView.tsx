@@ -13,7 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/shared/AppCard';
+import { ActivityCard } from '@/components';
+import { InsightCard
 import { EmptyState } from '@/components/shared/EmptyState'
 import { IdentityBadge } from '@/components/shared/IdentityBadge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -30,14 +32,12 @@ import { useProjects } from '@/features/projects/hooks/use-projects'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization/hooks'
 import { useOrganizationCurrencies, useOrgCurrencyContext } from '@/hooks/use-currencies'
 import type { TargetField, ProjectContext } from '@/features/imports/types'
-
 interface PersonnelPaymentsTabProps {
   projectId?: string;
   externalFilterIssueId?: string | null;
   onClearExternalFilter?: () => void;
   getAffectedIdsForIssue?: (issueId: string) => string[];
 }
-
 interface PaymentMetrics {
   total_count: number;
   reference_currency_id: string | null;
@@ -54,7 +54,6 @@ interface PaymentMetrics {
   confirmed_by_currency: Array<{ currency_symbol: string; amount: number }>;
   pending_by_currency: Array<{ currency_symbol: string; amount: number }>;
 }
-
 export default function PersonnelPaymentsTab({ 
   projectId, 
   externalFilterIssueId, 
@@ -79,7 +78,6 @@ export default function PersonnelPaymentsTab({
   const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId);
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
   const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
-
   const [filterWallet, setFilterWallet] = useState<string>('all');
   const [filterCurrency, setFilterCurrency] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -90,23 +88,18 @@ export default function PersonnelPaymentsTab({
       onClearExternalFilter();
     }
   };
-
   const [selectedPayments, setSelectedPayments] = useState<PersonnelPaymentWithRelations[]>([]);
-
   const { data: paymentsData, isLoading } = usePersonnelPayments(activeProjectId || undefined, organizationId);
-
   const allPayments = useMemo(() => {
     if (!paymentsData) return [];
     return paymentsData;
   }, [paymentsData]);
-
   const referenceCurrency = useMemo(() => {
     if (!allPayments || allPayments.length === 0) return null;
     
     const firstWithCurrency = allPayments.find(p => p.currency);
     return firstWithCurrency?.currency || null;
   }, [allPayments]);
-
   const metricsData = useMemo<PaymentMetrics>(() => {
     let totalConfirmed = 0;
     let totalPending = 0;
@@ -116,25 +109,20 @@ export default function PersonnelPaymentsTab({
     let countRejected = 0;
     let countSkipped = 0;
     let latestPaymentDate: string | null = null;
-
     const confirmedByCurrency = new Map<string, { symbol: string; amount: number }>();
     const pendingByCurrency = new Map<string, { symbol: string; amount: number }>();
-
     allPayments.forEach(payment => {
       if (!payment.currency) return;
-
       const currencySymbol = payment.currency.symbol;
-
       let convertedAmount = payment.amount;
       if (referenceCurrency && payment.currency.id !== referenceCurrency.id) {
         if (payment.exchange_rate && payment.exchange_rate > 0) {
-          convertedAmount = convert(payment.amount, payment.exchange_rate, { direction: 'divide' });
+          convertedAmount = convert(payment.amount, payment.exchange_rate, { direction: 'divide'});
         } else {
           countSkipped += 1;
           convertedAmount = 0;
         }
       }
-
       if (payment.status === 'confirmed') {
         totalConfirmed += convertedAmount;
         countConfirmed += 1;
@@ -159,12 +147,10 @@ export default function PersonnelPaymentsTab({
         totalRejected += convertedAmount;
         countRejected += 1;
       }
-
       if (!latestPaymentDate || payment.payment_date > latestPaymentDate) {
         latestPaymentDate = payment.payment_date;
       }
     });
-
     return {
       total_count: allPayments.length,
       reference_currency_id: referenceCurrency?.id || null,
@@ -188,35 +174,30 @@ export default function PersonnelPaymentsTab({
       })),
     };
   }, [allPayments, referenceCurrency]);
-
   const filterOptions = useMemo(() => {
     const wallets = new Set<string>();
     const currencies = new Set<string>();
-
     allPayments.forEach(payment => {
       const walletName = payment.wallet?.name || (payment.wallet as any)?.wallets?.name;
       if (walletName) wallets.add(walletName);
       if (payment.currency?.code) currencies.add(payment.currency.code);
     });
-
     return {
       wallets: Array.from(wallets).sort(),
       currencies: Array.from(currencies).sort(),
     };
   }, [allPayments]);
-
   const externalFilterIds = useMemo(() => {
     if (!externalFilterIssueId || !getAffectedIdsForIssue) return null;
     return new Set(getAffectedIdsForIssue(externalFilterIssueId));
   }, [externalFilterIssueId, getAffectedIdsForIssue]);
-
   const personnelPayments = useMemo(() => {
     return allPayments.filter(payment => {
       if (externalFilterIds && !externalFilterIds.has(payment.id)) return false;
       const walletName = payment.wallet?.name || (payment.wallet as any)?.wallets?.name;
-      if (filterWallet !== 'all' && walletName !== filterWallet) return false;
-      if (filterCurrency !== 'all' && payment.currency?.code !== filterCurrency) return false;
-      if (filterStatus !== 'all' && payment.status !== filterStatus) return false;
+      if (filterWallet !== 'all'&& walletName !== filterWallet) return false;
+      if (filterCurrency !== 'all'&& payment.currency?.code !== filterCurrency) return false;
+      if (filterStatus !== 'all'&& payment.status !== filterStatus) return false;
       
       return true;
     }).sort((a, b) => {
@@ -228,9 +209,7 @@ export default function PersonnelPaymentsTab({
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
   }, [allPayments, filterWallet, filterCurrency, filterStatus, externalFilterIds]);
-
   const deletePaymentMutation = useDeletePersonnelPayment();
-
   const handleEdit = (payment: PersonnelPaymentWithRelations) => {
     openModal('personnel-payment', {
       projectId: activeProjectId,
@@ -239,10 +218,8 @@ export default function PersonnelPaymentsTab({
       mode: 'edit',
     });
   };
-
   const handleDeletePayment = (payment: PersonnelPaymentWithRelations) => {
     if (!organizationId || !activeProjectId) return;
-
     const symbol = payment.currency?.symbol || '$';
     const formattedAmount = `${symbol} ${payment.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     const paymentLabel = payment.reference 
@@ -263,25 +240,22 @@ export default function PersonnelPaymentsTab({
       isLoading: deletePaymentMutation.isPending
     });
   };
-
   const handleAddPayment = () => {
     openModal('personnel-payment', {
       projectId: activeProjectId,
       organizationId: organizationId,
     });
   };
-
   const handleBulkDelete = () => {
     if (!organizationId || !activeProjectId || selectedPayments.length === 0) return;
-
     const count = selectedPayments.length;
     
     showDeleteConfirmation({
       mode: 'simple',
-      title: `Eliminar ${count} ${count === 1 ? 'pago' : 'pagos'}`,
-      description: `¿Estás seguro de que querés eliminar ${count === 1 ? 'este pago' : `estos ${count} pagos`}? Esta acción no se puede deshacer.`,
-      itemName: `${count} ${count === 1 ? 'pago seleccionado' : 'pagos seleccionados'}`,
-      destructiveActionText: `Eliminar ${count === 1 ? 'pago' : 'pagos'}`,
+      title: `Eliminar ${count} ${count === 1 ? 'pago': 'pagos'}`,
+      description: `¿Estás seguro de que querés eliminar ${count === 1 ? 'este pago': `estos ${count} pagos`}? Esta acción no se puede deshacer.`,
+      itemName: `${count} ${count === 1 ? 'pago seleccionado': 'pagos seleccionados'}`,
+      destructiveActionText: `Eliminar ${count === 1 ? 'pago': 'pagos'}`,
       onDelete: async () => {
         let successCount = 0;
         let failCount = 0;
@@ -318,9 +292,7 @@ export default function PersonnelPaymentsTab({
       isLoading: deletePaymentMutation.isPending
     });
   };
-
   const createPaymentMutation = useCreatePersonnelPayment();
-
   const handleImport = () => {
     if (!organizationId || !userData?.user?.id) {
       toast({
@@ -330,7 +302,6 @@ export default function PersonnelPaymentsTab({
       });
       return;
     }
-
     const targetSchema: TargetField[] = [
       {
         field: 'payment_date',
@@ -396,10 +367,10 @@ export default function PersonnelPaymentsTab({
           labelKey: 'label',
           valueKey: 'value',
           options: [
-            { label: 'Confirmado', value: 'confirmed' },
-            { label: 'Pendiente', value: 'pending' },
-            { label: 'Rechazado', value: 'rejected' },
-            { label: 'Anulado', value: 'void' },
+            { label: 'Confirmado', value: 'confirmed'},
+            { label: 'Pendiente', value: 'pending'},
+            { label: 'Rechazado', value: 'rejected'},
+            { label: 'Anulado', value: 'void'},
           ],
         },
       },
@@ -418,7 +389,6 @@ export default function PersonnelPaymentsTab({
         description: 'Observaciones adicionales',
       },
     ];
-
     const walletValueMap: Record<string, string> = {};
     (organizationWallets || []).forEach(ow => {
       if (ow.wallets?.name && ow.id) {
@@ -426,7 +396,6 @@ export default function PersonnelPaymentsTab({
         walletValueMap[normalizedName] = ow.id;
       }
     });
-
     const currencyValueMap: Record<string, string> = {};
     (organizationCurrencies || []).forEach(oc => {
       if (oc.currency?.code && oc.currency_id) {
@@ -438,7 +407,6 @@ export default function PersonnelPaymentsTab({
         }
       }
     });
-
     const valueMapConfig: Record<string, Record<string, string>> = {
       currency_code: currencyValueMap,
       status: {
@@ -449,11 +417,9 @@ export default function PersonnelPaymentsTab({
       },
       wallet_name: walletValueMap,
     };
-
     const projectContext: ProjectContext = activeProjectId 
       ? { type: 'project', projectId: activeProjectId, projectName: projectName || undefined }
       : { type: 'organization', organizationId: organizationId!, organizationName: organizationName || undefined };
-
     openModal('universal-import', {
       config: {
         entityName: 'Pago de Personal',
@@ -484,7 +450,6 @@ export default function PersonnelPaymentsTab({
               }
             }
           });
-
           const walletsMap = new Map<string, string>();
           let defaultWalletId: string | null = null;
           
@@ -513,10 +478,8 @@ export default function PersonnelPaymentsTab({
               defaultWalletId = organizationWallets[0].id;
             }
           }
-
           const invalidRows: Array<{ index: number; reason: string }> = [];
           const validRowsToImport: typeof rows = [];
-
           rows.forEach((row, idx) => {
             const errors: string[] = [];
             
@@ -555,15 +518,12 @@ export default function PersonnelPaymentsTab({
             if (!paymentDate) {
               errors.push('Fecha de pago vacía');
             }
-
             if (errors.length > 0) {
-              invalidRows.push({ index: idx + 1, reason: errors.join(' | ') });
+              invalidRows.push({ index: idx + 1, reason: errors.join('| ') });
               return;
             }
-
             validRowsToImport.push({ ...row, _currencyId: currencyId });
           });
-
           if (invalidRows.length > 0) {
             const errorMsg = invalidRows.map(e => `Fila ${e.index}: ${e.reason}`).join('\n');
             toast({
@@ -573,7 +533,6 @@ export default function PersonnelPaymentsTab({
             });
             throw new Error(`Validación fallida: ${invalidRows.length} filas inválidas`);
           }
-
           if (!defaultWalletId) {
             toast({
               title: 'Error de validación',
@@ -582,7 +541,6 @@ export default function PersonnelPaymentsTab({
             });
             throw new Error('No hay billeteras disponibles');
           }
-
           const validStatuses = ['confirmed', 'pending', 'overdue', 'cancelled'];
           let successCount = 0;
           for (const row of validRowsToImport) {
@@ -597,9 +555,7 @@ export default function PersonnelPaymentsTab({
                   resolvedWalletId = walletsMap.get(walletInput.toLowerCase()) || defaultWalletId;
                 }
               }
-
               const resolvedStatus = validStatuses.includes(row.status) ? row.status : 'confirmed';
-
               const paymentData = {
                 personnel_id: null,
                 amount: parseFloat(row.amount) || 0,
@@ -611,7 +567,6 @@ export default function PersonnelPaymentsTab({
                 reference: row.reference || null,
                 notes: row.notes || null,
               };
-
               const targetProjectId = row._projectId || activeProjectId;
               
               if (!targetProjectId) {
@@ -634,7 +589,6 @@ export default function PersonnelPaymentsTab({
               });
             }
           }
-
           toast({
             title: 'Importación completada',
             description: `Se importaron ${successCount} de ${rows.length} pagos correctamente`,
@@ -643,7 +597,6 @@ export default function PersonnelPaymentsTab({
       },
     });
   };
-
   if (!organizationId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -651,7 +604,6 @@ export default function PersonnelPaymentsTab({
       </div>
     )
   }
-
   const formatDate = (dateString: string, formatString: string) => {
     try {
       const date = parseLocalDate(dateString);
@@ -660,27 +612,23 @@ export default function PersonnelPaymentsTab({
       return '-';
     }
   };
-
   const formatAmount = (amount: number, currencySymbol: string | undefined) => {
     const symbol = currencySymbol || '$';
     return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
-
   const formatCurrencyKPI = (amount: number, currencySymbol: string | null) => {
     const formattedInteger = Math.round(amount).toLocaleString('es-AR');
     const symbol = currencySymbol || '$';
     return <span>{symbol} {formattedInteger}</span>;
   };
-
   const formatCurrencyBreakdown = (currencyData: Array<{ currency_symbol: string; amount: number }>) => {
     if (!currencyData || currencyData.length === 0) return '-';
     
     return currencyData.map(({ currency_symbol, amount }) => {
       const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       return `${currency_symbol} ${formattedAmount}`;
-    }).join(' + ');
+    }).join('+ ');
   };
-
   const getPersonnelName = (payment: PersonnelPaymentWithRelations) => {
     const contact = payment.personnel?.contact;
     if (!contact) return '-';
@@ -690,19 +638,18 @@ export default function PersonnelPaymentsTab({
     }
     return contact.full_name || '-';
   };
-
   const columns: Column<PersonnelPaymentWithRelations>[] = [
     {
       key: 'payment_date',
       label: 'Fecha',
-      type: 'date' as const,
+      type: 'date'as const,
       sortable: true,
       render: (payment: PersonnelPaymentWithRelations) => formatDate(payment.payment_date, 'dd/MM/yyyy'),
     },
     {
       key: 'personnel',
       label: 'Personal',
-      type: 'name' as const,
+      type: 'name'as const,
       sortable: true,
       render: (payment: PersonnelPaymentWithRelations) => (
         <div className="flex items-center gap-2">
@@ -737,7 +684,7 @@ export default function PersonnelPaymentsTab({
     ...(activeProjectId ? [] : [{
       key: 'project',
       label: 'Proyecto',
-      type: 'badge' as const,
+      type: 'badge'as const,
       sortable: true,
       render: (payment: PersonnelPaymentWithRelations) => {
         if (!payment.project) return '-';
@@ -751,14 +698,14 @@ export default function PersonnelPaymentsTab({
     {
       key: 'notes',
       label: 'Descripción',
-      type: 'long-text' as const,
+      type: 'long-text'as const,
       sortable: true,
       render: (payment: PersonnelPaymentWithRelations) => payment.notes || '-',
     },
     {
       key: 'wallet',
       label: 'Billetera',
-      type: 'name' as const,
+      type: 'name'as const,
       sortable: true,
       render: (payment: PersonnelPaymentWithRelations) => {
         const walletName = payment.wallet?.name || (payment.wallet as any)?.wallets?.name;
@@ -768,9 +715,9 @@ export default function PersonnelPaymentsTab({
     {
       key: 'amount',
       label: 'Monto',
-      type: 'amount' as const,
+      type: 'amount'as const,
       sortable: true,
-      sortType: 'number' as const,
+      sortType: 'number'as const,
       render: (payment: PersonnelPaymentWithRelations) => (
         <div className="flex flex-col items-end">
           <span className="font-bold">{formatAmount(payment.amount, payment.currency?.symbol)}</span>
@@ -785,19 +732,17 @@ export default function PersonnelPaymentsTab({
     {
       key: 'status',
       label: 'Estado',
-      type: 'status' as const,
+      type: 'status'as const,
       sortable: true,
       render: (payment: PersonnelPaymentWithRelations) => (
         <PaymentStatusBadge status={payment.status as PaymentStatus} />
       ),
     },
   ];
-
   const isFilterActive = 
-    filterWallet !== 'all' || 
-    filterCurrency !== 'all' || 
+    filterWallet !== 'all'|| 
+    filterCurrency !== 'all'|| 
     filterStatus !== 'all';
-
   const handleClearFilters = () => {
     setFilterWallet('all');
     setFilterCurrency('all');
@@ -806,7 +751,6 @@ export default function PersonnelPaymentsTab({
       onClearExternalFilter();
     }
   };
-
   const handleViewPayment = (payment: PersonnelPaymentWithRelations) => {
     openModal('personnel-payment', {
       projectId: activeProjectId,
@@ -815,7 +759,6 @@ export default function PersonnelPaymentsTab({
       mode: 'view',
     });
   };
-
   if (allPayments.length === 0 && !isLoading) {
     return (
       <EmptyState
@@ -832,7 +775,6 @@ export default function PersonnelPaymentsTab({
       />
     );
   }
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -854,7 +796,6 @@ export default function PersonnelPaymentsTab({
             }
           </StatCardMeta>
         </StatCard>
-
         <StatCard data-testid="stat-card-total-pagos">
           <StatCardTitle showArrow={false}>
             <DollarSign className="w-4 h-4 inline mr-1" />
@@ -865,7 +806,6 @@ export default function PersonnelPaymentsTab({
           </StatCardValue>
           <StatCardMeta>Cantidad de pagos registrados</StatCardMeta>
         </StatCard>
-
         <StatCard data-testid="stat-card-ultimo-pago">
           <StatCardTitle showArrow={false}>
             <Calendar className="w-4 h-4 inline mr-1" />
@@ -880,7 +820,6 @@ export default function PersonnelPaymentsTab({
           <StatCardMeta>Fecha del último pago registrado</StatCardMeta>
         </StatCard>
       </div>
-
       <Table
         columns={columns}
         data={personnelPayments}
@@ -977,7 +916,7 @@ export default function PersonnelPaymentsTab({
             label: 'Eliminar Pago',
             icon: Trash2,
             onClick: () => handleDeletePayment(payment),
-            variant: 'destructive' as const,
+            variant: 'destructive'as const,
           },
         ]}
         renderCard={(payment: PersonnelPaymentWithRelations) => (
@@ -994,7 +933,7 @@ export default function PersonnelPaymentsTab({
             <div className="font-bold text-lg">
               {formatAmount(payment.amount, payment.currency?.symbol)}
             </div>
-            {getPersonnelName(payment) !== '-' && (
+            {getPersonnelName(payment) !== '-'&& (
               <div className="text-sm font-medium">
                 {getPersonnelName(payment)}
               </div>

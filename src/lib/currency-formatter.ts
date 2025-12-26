@@ -8,7 +8,6 @@
  * 
  * @see /lib/money.ts para el módulo centralizado de multimoneda
  */
-
 /**
  * Formatea un número como moneda sin decimales
  * @param amount - El monto a formatear
@@ -27,7 +26,6 @@ export function formatCurrency(
   });
   return `${symbol} ${formattedNumber}`;
 }
-
 /**
  * Formatea usando Intl.NumberFormat con configuración estándar
  * @param amount - El monto a formatear
@@ -47,7 +45,6 @@ export function formatIntlCurrency(
     maximumFractionDigits: 0
   }).format(amount);
 }
-
 /**
  * Formatea un número sin decimales y sin símbolo de moneda
  * @param amount - El monto a formatear
@@ -63,7 +60,6 @@ export function formatNumber(
     maximumFractionDigits: 0 
   });
 }
-
 /**
  * Formatea porcentajes con 2 decimales exactos
  * @param amount - El valor del porcentaje (0.1234 = 12.34%)

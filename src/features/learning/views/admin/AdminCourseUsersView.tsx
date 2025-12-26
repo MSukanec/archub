@@ -14,7 +14,6 @@ import AdminCourseStudentRow from '@/features/learning/components/admin/AdminCou
 import { useActionBarMobile } from '@/layouts'
 import { useMobile } from '@/hooks/use-mobile'
 import { useEffect, useState, useMemo } from 'react'
-
 export default function AdminCourseUsersTab() {
   const { toast } = useToast()
   const { openModal } = useGlobalModalStore()
@@ -28,18 +27,15 @@ export default function AdminCourseUsersTab() {
     searchValue: mobileSearchValue,
     setSearchValue: setMobileSearchValue
   } = useActionBarMobile()
-
   const [searchValue, setSearchValue] = useState("")
   const [filterByStatus, setFilterByStatus] = useState("all")
   const [filterByCourse, setFilterByCourse] = useState("all")
-
   // Sync search values between mobile and desktop
   useEffect(() => {
     if (isMobile && mobileSearchValue !== searchValue) {
       setSearchValue(mobileSearchValue)
     }
   }, [mobileSearchValue, isMobile])
-
   // Fetch enrollments with user and course data
   const { data: enrollments = [], isLoading } = useQuery({
     queryKey: ['/api/admin/enrollments'],
@@ -48,14 +44,12 @@ export default function AdminCourseUsersTab() {
       
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return [];
-
       const res = await fetch('/api/admin/enrollments', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         },
         credentials: 'include'
       });
-
       if (!res.ok) throw new Error('Failed to fetch enrollments');
       return res.json();
     },
@@ -63,16 +57,13 @@ export default function AdminCourseUsersTab() {
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     refetchOnWindowFocus: false
   });
-
   // Get available courses and statuses for filters
   const availableCourses = useMemo(() => Array.from(
     new Set(enrollments.map((e: any) => e.courses?.title).filter(Boolean))
   ), [enrollments])
-
   const availableStatuses = useMemo(() => Array.from(
     new Set(enrollments.map((e: any) => e.status).filter(Boolean))
   ), [enrollments])
-
   // Filter enrollments
   const filteredEnrollments = useMemo(() => {
     return enrollments.filter((enrollment: any) => {
@@ -87,21 +78,17 @@ export default function AdminCourseUsersTab() {
           return false
         }
       }
-
       // Status filter
       if (filterByStatus !== "all" && enrollment.status !== filterByStatus) {
         return false
       }
-
       // Course filter
       if (filterByCourse !== "all" && enrollment.courses?.title !== filterByCourse) {
         return false
       }
-
       return true
     })
   }, [enrollments, searchValue, filterByStatus, filterByCourse])
-
   // Configure mobile action bar
   useEffect(() => {
     if (isMobile) {
@@ -140,7 +127,6 @@ export default function AdminCourseUsersTab() {
       })
       setShowActionBar(true)
     }
-
     // Cleanup when component unmounts
     return () => {
       if (isMobile) {
@@ -148,7 +134,6 @@ export default function AdminCourseUsersTab() {
       }
     }
   }, [isMobile, setActions, setShowActionBar, clearActions])
-
   // Separate effect for filter configuration
   useEffect(() => {
     if (isMobile && availableCourses.length > 0) {
@@ -161,10 +146,10 @@ export default function AdminCourseUsersTab() {
             placeholder: 'Todos los estados',
             allOptionLabel: 'Todos los estados',
             options: [
-              { value: 'active', label: 'Activo' },
-              { value: 'completed', label: 'Completado' },
-              { value: 'expired', label: 'Expirado' },
-              { value: 'cancelled', label: 'Cancelado' }
+              { value: 'active', label: 'Activo'},
+              { value: 'completed', label: 'Completado'},
+              { value: 'expired', label: 'Expirado'},
+              { value: 'cancelled', label: 'Cancelado'}
             ]
           },
           {
@@ -185,7 +170,6 @@ export default function AdminCourseUsersTab() {
       })
     }
   }, [filterByStatus, filterByCourse, availableCourses, isMobile])
-
   // Delete enrollment mutation
   const deleteEnrollmentMutation = useMutation({
     mutationFn: async (enrollmentId: string) => {
@@ -193,7 +177,6 @@ export default function AdminCourseUsersTab() {
       
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session');
-
       const res = await fetch(`/api/admin/enrollments/${enrollmentId}`, {
         method: 'DELETE',
         headers: {
@@ -201,7 +184,6 @@ export default function AdminCourseUsersTab() {
         },
         credentials: 'include'
       });
-
       if (!res.ok) throw new Error('Failed to delete enrollment');
     },
     onSuccess: () => {
@@ -219,15 +201,12 @@ export default function AdminCourseUsersTab() {
       });
     }
   });
-
   const handleCreateEnrollment = () => {
     openModal('course-enrollment', {});
   };
-
   const handleEditEnrollment = (enrollment: any) => {
     openModal('course-enrollment', { enrollment, isEditing: true });
   };
-
   const handleDeleteEnrollment = (enrollment: any) => {
     openModal('delete-confirmation', {
       mode: 'delete',
@@ -239,7 +218,6 @@ export default function AdminCourseUsersTab() {
       isLoading: deleteEnrollmentMutation.isPending
     });
   };
-
   const columns = [
     {
       key: 'user',
@@ -266,13 +244,13 @@ export default function AdminCourseUsersTab() {
         const colors: Record<string, string> = {
           'ARS': '#6366f1', // indigo
           'USD': '#10b981', // green
-          'EUR': '#f59e0b'  // amber
+          'EUR': '#f59e0b' // amber
         };
         return (
           <Badge 
             style={{ 
               backgroundColor: colors[currency] || '#6b7280',
-              color: 'white' 
+              color: 'white'
             }}
           >
             {currency}
@@ -290,7 +268,7 @@ export default function AdminCourseUsersTab() {
         
         return (
           <div className="font-medium text-sm">
-            {currency === 'ARS' ? '$' : currency === 'USD' ? 'US$' : '€'}
+            {currency === 'ARS'? '$': currency === 'USD'? 'US$': '€'}
             {Number(amount).toLocaleString('es-AR')}
           </div>
         );
@@ -348,7 +326,7 @@ export default function AdminCourseUsersTab() {
           cancelled: 'Cancelado'
         }
         return (
-          <Badge style={{ backgroundColor: colors[enrollment.status as keyof typeof colors] || '#6b7280', color: 'white' }}>
+          <Badge style={{ backgroundColor: colors[enrollment.status as keyof typeof colors] || '#6b7280', color: 'white'}}>
             {labels[enrollment.status as keyof typeof labels] || enrollment.status}
           </Badge>
         )
@@ -383,7 +361,7 @@ export default function AdminCourseUsersTab() {
               <div 
                 className="h-full rounded-full transition-all duration-300"
                 style={{ 
-                  backgroundColor: endDate ? 'var(--accent)' : '#a855f7',
+                  backgroundColor: endDate ? 'var(--accent)': '#a855f7',
                   width: `${progressPercentage}%`
                 }}
               />
@@ -419,7 +397,6 @@ export default function AdminCourseUsersTab() {
       }
     }
   ];
-
   return (
     <>
       {filteredEnrollments.length > 0 ? (
@@ -437,7 +414,7 @@ export default function AdminCourseUsersTab() {
               icon: Trash2,
               label: 'Eliminar',
               onClick: () => handleDeleteEnrollment(enrollment),
-              variant: 'destructive' as const
+              variant: 'destructive'as const
             }
           ]}
           renderCard={(enrollment) => (

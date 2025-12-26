@@ -1,6 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { benefits } from "../data/benefits";
-
 export function BenefitsSection() {
   return (
     <section className="py-20 bg-card -mx-6" data-testid="section-benefits">
@@ -13,7 +12,6 @@ export function BenefitsSection() {
             8 beneficios únicos que solo los miembros fundadores disfrutarán
           </p>
         </div>
-
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {benefits.map((benefit, index) => (
             <Card

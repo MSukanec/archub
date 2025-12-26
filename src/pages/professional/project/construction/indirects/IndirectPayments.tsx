@@ -7,12 +7,10 @@ import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal'
 import { Receipt, Plus, Wallet } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-
 interface IndirectPaymentsProps {
   projectId: string
   organizationId: string
 }
-
 export function IndirectPayments({ projectId, organizationId }: IndirectPaymentsProps) {
   const { openModal } = useGlobalModalStore()
   
@@ -26,7 +24,6 @@ export function IndirectPayments({ projectId, organizationId }: IndirectPayments
       // no está completamente definida. Esto se puede adaptar cuando se tenga más información
       // sobre cómo se relacionan los pagos con los costos indirectos
       return []
-
       /* 
       Estructura esperada una vez que se implemente:
       
@@ -55,12 +52,10 @@ export function IndirectPayments({ projectId, organizationId }: IndirectPayments
         .eq('movement.organization_id', organizationId)
         .eq('movement.project_id', projectId)
         .order('movement(movement_date)', { ascending: false })
-
       if (error) {
         console.error('Error fetching indirect payments:', error)
         throw error
       }
-
       // Transform payments data to match expected format
       const movements = (paymentsData || []).map((payment: any) => ({
         id: payment.movement?.id,
@@ -97,13 +92,11 @@ export function IndirectPayments({ projectId, organizationId }: IndirectPayments
           category: payment.indirect_costs?.category
         }
       }))
-
       return movements
       */
     },
     enabled: !!organizationId && !!projectId && !!supabase
   })
-
   const detailColumns: Column[] = [
     {
       key: "movement_date",
@@ -195,7 +188,6 @@ export function IndirectPayments({ projectId, organizationId }: IndirectPayments
       )
     }
   ]
-
   // Summary calculations
   const totalByCurrency = payments.reduce((acc, payment) => {
     const currencyCode = (payment as any)?.currency?.code || 'ARS'
@@ -214,7 +206,6 @@ export function IndirectPayments({ projectId, organizationId }: IndirectPayments
     
     return acc
   }, {} as Record<string, { total: number; count: number; symbol: string }>)
-
   if (!isLoading && payments.length === 0) {
     return (
       <div className="space-y-6">
@@ -235,7 +226,6 @@ export function IndirectPayments({ projectId, organizationId }: IndirectPayments
       </div>
     )
   }
-
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
@@ -250,7 +240,7 @@ export function IndirectPayments({ projectId, organizationId }: IndirectPayments
                     {data.symbol} {data.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {data.count} pago{data.count !== 1 ? 's' : ''} registrado{data.count !== 1 ? 's' : ''}
+                    {data.count} pago{data.count !== 1 ? 's': ''} registrado{data.count !== 1 ? 's': ''}
                   </p>
                 </div>
                 <Receipt className="w-8 h-8 text-muted-foreground" />
@@ -259,7 +249,6 @@ export function IndirectPayments({ projectId, organizationId }: IndirectPayments
           ))}
         </div>
       )}
-
       {/* Payments Table */}
       <div className="bg-card rounded-lg border">
         <div className="p-6 border-b">

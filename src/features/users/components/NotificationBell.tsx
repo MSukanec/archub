@@ -11,17 +11,14 @@ import {
 import { NotificationDropdown } from './NotificationDropdown';
 import { ButtonSidebar as ButtonSidebarDefault } from '@/layouts';
 const ButtonSidebar = ButtonSidebarDefault;
-
 interface NotificationBellProps {
   isExpanded: boolean;
 }
-
 export function NotificationBell({ isExpanded }: NotificationBellProps) {
   const { data: userData } = useCurrentUser();
   const userId = userData?.user?.id;
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-
   const fetchUnreadCount = async () => {
     if (!userId) return;
     
@@ -32,23 +29,17 @@ export function NotificationBell({ isExpanded }: NotificationBellProps) {
       console.error('Error fetching unread count:', error);
     }
   };
-
   useEffect(() => {
     if (!userId) return;
-
     fetchUnreadCount();
-
     const unsubscribe = subscribeUserNotifications(userId, () => {
       fetchUnreadCount();
     });
-
     return () => {
       unsubscribe();
     };
   }, [userId]);
-
   if (!userId) return null;
-
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
@@ -70,7 +61,7 @@ export function NotificationBell({ isExpanded }: NotificationBellProps) {
                   className="h-5 min-w-5 px-1.5 text-xs flex items-center justify-center bg-[var(--accent)] text-white border-0 hover:bg-[var(--accent)]"
                   data-testid="badge-unread-count"
                 >
-                  {unreadCount > 99 ? '99+' : unreadCount}
+                  {unreadCount > 99 ? '99+': unreadCount}
                 </Badge>
               ) : undefined
             }

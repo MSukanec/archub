@@ -1,12 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-
 export interface Country {
   id: string;
   name: string;
   alpha_3: string;
   country_code: string;
 }
-
 export function useCountries() {
   return useQuery<Country[]>({
     queryKey: ['countries'],

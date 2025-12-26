@@ -1,7 +1,6 @@
 import { Package } from 'lucide-react'
 import { FormModalHeader, FormModalFooter, FormModalLayout } from '@/components/modal'
 import { FormPanel, ViewPanel, usePlanForm, type Plan } from '../forms/PlanForm'
-
 interface PlanModalProps {
   modalData?: {
     plan?: Plan
@@ -9,10 +8,8 @@ interface PlanModalProps {
   }
   onClose: () => void
 }
-
 export function PlanModal({ modalData, onClose }: PlanModalProps) {
   const { plan, isEditing = false } = modalData || {}
-
   const {
     form,
     onSubmit,
@@ -22,31 +19,27 @@ export function PlanModal({ modalData, onClose }: PlanModalProps) {
     isEditing,
     onSuccess: onClose,
   })
-
   const handleClose = () => {
     form.reset()
     onClose()
   }
-
   const headerContent = (
     <FormModalHeader 
-      title={isEditing ? 'Editar Plan' : 'Nuevo Plan'}
-      description={isEditing ? 'Modifica los detalles del plan de suscripción' : 'Crea un nuevo plan de suscripción'}
+      title={isEditing ? 'Editar Plan': 'Nuevo Plan'}
+      description={isEditing ? 'Modifica los detalles del plan de suscripción': 'Crea un nuevo plan de suscripción'}
       icon={Package}
     />
   )
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={isEditing ? 'Guardar Cambios' : 'Crear Plan'}
+      rightLabel={isEditing ? 'Guardar Cambios': 'Crear Plan'}
       onRightClick={form.handleSubmit(onSubmit)}
       isSubmitting={isSubmitting}
       submitDisabled={isSubmitting}
     />
   )
-
   return (
     <FormModalLayout
       columns={1}

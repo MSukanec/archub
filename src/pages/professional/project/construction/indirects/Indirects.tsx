@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { TrendingUp, Plus, Home, Search, Filter, Bell } from "lucide-react";
-
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
@@ -8,27 +7,22 @@ import { useGlobalModalStore } from '@/components/modal';
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { useNavigationStore } from '@/stores/navigationStore';
-
 // Importar los componentes separados
 import IndirectList from './IndirectList';
 import { IndirectPayments } from './IndirectPayments';
-
 export default function Indirects() {
   const [activeTab, setActiveTab] = useState('lista')
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
   const { setSidebarContext } = useNavigationStore();
-
   // Estados específicos para controles de header en tab Lista
   const [searchQuery, setSearchQuery] = useState('');
-  const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
-
+  const [currencyView, setCurrencyView] = useState<'discriminado'| 'pesificado'| 'dolarizado'>('discriminado');
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('construction')
   }, [setSidebarContext])
-
   // Mobile action bar
   const { 
     setActions, 
@@ -37,11 +31,9 @@ export default function Indirects() {
     setFilterConfig 
   } = useActionBarMobile()
   const isMobile = useMobile()
-
   // Filter states for mobile
   const [filterByStatus, setFilterByStatus] = useState('all')
   const [filterByType, setFilterByType] = useState('all')
-
   // Función para crear costo indirecto
   const handleCreateIndirect = () => {
     openModal('indirect', {
@@ -51,13 +43,11 @@ export default function Indirects() {
       isEditing: false
     });
   };
-
   // Clear filters function
   const handleClearFilters = () => {
     setFilterByStatus('all')
     setFilterByType('all')
   }
-
   // Configure mobile action bar only for lista tab
   useEffect(() => {
     if (isMobile && activeTab === 'lista') {
@@ -99,14 +89,12 @@ export default function Indirects() {
       // Clear action bar for other tabs
       clearActions()
     }
-
     return () => {
       if (isMobile && activeTab === 'lista') {
         clearActions()
       }
     }
   }, [isMobile, activeTab, openModal])
-
   // Configure filter config separately
   useEffect(() => {
     if (isMobile && activeTab === 'lista') {
@@ -120,8 +108,8 @@ export default function Indirects() {
             allOptionLabel: 'Todos los estados',
             placeholder: 'Seleccionar estado...',
             options: [
-              { value: 'active', label: 'Activo' },
-              { value: 'inactive', label: 'Inactivo' }
+              { value: 'active', label: 'Activo'},
+              { value: 'inactive', label: 'Inactivo'}
             ]
           },
           {
@@ -132,10 +120,10 @@ export default function Indirects() {
             allOptionLabel: 'Todas las categorías',
             placeholder: 'Seleccionar categoría...',
             options: [
-              { value: 'administrative', label: 'Administrativo' },
-              { value: 'operational', label: 'Operacional' },
-              { value: 'equipment', label: 'Equipos' },
-              { value: 'other', label: 'Otros' }
+              { value: 'administrative', label: 'Administrativo'},
+              { value: 'operational', label: 'Operacional'},
+              { value: 'equipment', label: 'Equipos'},
+              { value: 'other', label: 'Otros'}
             ]
           }
         ],
@@ -143,7 +131,6 @@ export default function Indirects() {
       })
     }
   }, [isMobile, activeTab, filterByStatus, filterByType, setFilterConfig])
-
   // Props del header que cambian según la tab activa
   const getHeaderProps = () => {
     const baseProps = {
@@ -152,12 +139,11 @@ export default function Indirects() {
       organizationId: currentOrganizationId,
       showMembers: true,
       tabs: [
-        { id: 'lista', label: 'Lista', isActive: activeTab === 'lista' },
-        { id: 'pagos', label: 'Pagos', isActive: activeTab === 'pagos' }
+        { id: 'lista', label: 'Lista', isActive: activeTab === 'lista'},
+        { id: 'pagos', label: 'Pagos', isActive: activeTab === 'pagos'}
       ],
       onTabChange: setActiveTab
     };
-
     // Solo agregar controles específicos para la tab Lista
     if (activeTab === 'lista') {
       return {
@@ -169,23 +155,21 @@ export default function Indirects() {
         }
       };
     }
-
     return baseProps;
   };
-
   return (
     <Layout headerProps={getHeaderProps()} wide={false}>
       <div className="h-full">
-        {activeTab === 'lista' && <IndirectList filterByStatus={filterByStatus} filterByType={filterByType} />}
+        {activeTab === 'lista'&& <IndirectList filterByStatus={filterByStatus} filterByType={filterByType} />}
         
-        {activeTab === 'pagos' && selectedProjectId && currentOrganizationId && (
+        {activeTab === 'pagos'&& selectedProjectId && currentOrganizationId && (
           <IndirectPayments 
             projectId={selectedProjectId}
             organizationId={currentOrganizationId}
           />
         )}
         
-        {activeTab === 'pagos' && (!selectedProjectId || !currentOrganizationId) && (
+        {activeTab === 'pagos'&& (!selectedProjectId || !currentOrganizationId) && (
           <div className="flex items-center justify-center h-64">
             <p className="text-muted-foreground">Selecciona un proyecto para ver los pagos de costos indirectos</p>
           </div>

@@ -1,12 +1,10 @@
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts'
 import { CHART_COLORS, CHART_TOOLTIP, CHART_STATES, CHART_DIMENSIONS, CHART_SHAPES, formatCompact, getChartColor, formatPercent } from '../theme'
-
 export interface DonutDataPoint {
   label: string
   value: number
   color?: string
 }
-
 export interface DonutChartProps {
   data: DonutDataPoint[]
   height?: number
@@ -20,7 +18,6 @@ export interface DonutChartProps {
   onClick?: (label: string, value: number) => void
   clickable?: boolean
 }
-
 export function DonutChart({
   data,
   height = CHART_DIMENSIONS.height.lg,
@@ -41,7 +38,6 @@ export function DonutChart({
       </div>
     )
   }
-
   if (!data || data.length === 0) {
     return (
       <div style={{ height }} className={CHART_STATES.empty.className}>
@@ -49,14 +45,12 @@ export function DonutChart({
       </div>
     )
   }
-
   const total = data.reduce((sum, item) => sum + item.value, 0)
   const chartData = data.map((item, index) => ({
     ...item,
     color: item.color || getChartColor(index),
     percentage: total > 0 ? (item.value / total) * 100 : 0,
   }))
-
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -64,7 +58,7 @@ export function DonutChart({
           <Pie
             data={chartData}
             cx="50%"
-            cy={showLegend ? '45%' : '50%'}
+            cy={showLegend ? '45%': '50%'}
             labelLine={false}
             innerRadius={innerRadius}
             outerRadius={outerRadius}
@@ -75,13 +69,13 @@ export function DonutChart({
                 onClick(d.label, d.value)
               }
             }}
-            style={clickable ? { cursor: 'pointer' } : undefined}
+            style={clickable ? { cursor: 'pointer'} : undefined}
           >
             {chartData.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
                 fill={entry.color}
-                style={clickable ? { cursor: 'pointer' } : undefined}
+                style={clickable ? { cursor: 'pointer'} : undefined}
               />
             ))}
           </Pie>
@@ -105,7 +99,7 @@ export function DonutChart({
             <Legend
               verticalAlign="bottom"
               height={25}
-              wrapperStyle={{ fontSize: '12px', paddingTop: '0px' }}
+              wrapperStyle={{ fontSize: '12px', paddingTop: '0px'}}
               formatter={(value, entry: any) => (
                 <span className="text-xs text-muted-foreground">{entry.payload.label}</span>
               )}

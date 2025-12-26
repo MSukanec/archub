@@ -10,22 +10,19 @@ import { MessageCircle, ArrowUp, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { formatDateCompact } from '@/lib/date-utils';
-
 interface SupportMessage {
   id: string;
   user_id: string;
   message: string;
-  sender: 'user' | 'admin';
+  sender: 'user'| 'admin';
   created_at: string;
 }
-
 interface UserInfo {
   id: string;
   full_name: string;
   email: string;
   avatar_url?: string;
 }
-
 interface Conversation {
   user_id: string;
   user: UserInfo;
@@ -33,7 +30,6 @@ interface Conversation {
   last_message_at: string;
   unread_count: number;
 }
-
 const AdminSupportTicketsTab = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
@@ -41,7 +37,6 @@ const AdminSupportTicketsTab = () => {
   const queryClient = useQueryClient();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
   // Marcar mensajes como leídos cuando se selecciona una conversación
   const markAsReadMutation = useMutation({
     mutationFn: async (userId: string) => {
@@ -50,7 +45,6 @@ const AdminSupportTicketsTab = () => {
       if (!session?.access_token) {
         throw new Error("No session");
       }
-
       const response = await fetch('/api/admin/support/mark-read', {
         method: 'POST',
         headers: {
@@ -59,11 +53,9 @@ const AdminSupportTicketsTab = () => {
         },
         body: JSON.stringify({ user_id: userId })
       });
-
       if (!response.ok) {
         throw new Error('Error marking messages as read');
       }
-
       return response.json();
     },
     onSuccess: async () => {
@@ -75,17 +67,14 @@ const AdminSupportTicketsTab = () => {
       await queryClient.refetchQueries({ queryKey: ['unread-support-messages-count'] });
     }
   });
-
   // Marcar como leído cuando se selecciona una conversación
   const handleSelectConversation = (userId: string) => {
     setSelectedUserId(userId);
     markAsReadMutation.mutate(userId);
   };
-
   // 🔥 SUPABASE REALTIME - Escuchar cambios en tiempo real para conversaciones
   useEffect(() => {
     if (!supabase) return;
-
     // Suscribirse a cambios en support_messages
     const channel = supabase
       .channel('admin_support_conversations')
@@ -104,12 +93,10 @@ const AdminSupportTicketsTab = () => {
         }
       )
       .subscribe();
-
     return () => {
       supabase.removeChannel(channel);
     };
   }, []);
-
   // Fetch all conversations - YA NO USA POLLING, Realtime lo actualiza
   const { data: conversations = [], isLoading } = useQuery({
     queryKey: ['admin-support-conversations'],
@@ -119,7 +106,6 @@ const AdminSupportTicketsTab = () => {
       if (!session?.access_token) {
         throw new Error("No session");
       }
-
       const response = await fetch('/api/admin/support/conversations', {
         method: 'GET',
         headers: {
@@ -127,11 +113,9 @@ const AdminSupportTicketsTab = () => {
           'Content-Type': 'application/json'
         }
       });
-
       if (!response.ok) {
         throw new Error('Error fetching conversations');
       }
-
       const data = await response.json();
       return data.conversations as Conversation[];
     },
@@ -140,7 +124,6 @@ const AdminSupportTicketsTab = () => {
     // Permitir refetch al montar para capturar cambios que llegaron mientras estaba cerrado
     staleTime: 0,
   });
-
   // Send admin reply
   const sendReplyMutation = useMutation({
     mutationFn: async ({ userId, message }: { userId: string; message: string }) => {
@@ -149,7 +132,6 @@ const AdminSupportTicketsTab = () => {
       if (!session?.access_token) {
         throw new Error("No session");
       }
-
       const response = await fetch('/api/admin/support/messages', {
         method: 'POST',
         headers: {
@@ -158,12 +140,10 @@ const AdminSupportTicketsTab = () => {
         },
         body: JSON.stringify({ user_id: userId, message })
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Error sending reply');
       }
-
       return response.json();
     },
     onSuccess: () => {
@@ -182,17 +162,14 @@ const AdminSupportTicketsTab = () => {
       });
     }
   });
-
   // Auto-resize textarea
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
-
     textarea.style.height = 'auto';
     const newHeight = Math.min(textarea.scrollHeight, 120);
     textarea.style.height = `${newHeight}px`;
   }, [inputValue]);
-
   // Auto-scroll to newest messages
   useEffect(() => {
     if (scrollAreaRef.current && selectedUserId) {
@@ -202,7 +179,6 @@ const AdminSupportTicketsTab = () => {
       }
     }
   }, [selectedUserId, conversations]);
-
   const handleSendReply = () => {
     if (!inputValue.trim() || !selectedUserId || sendReplyMutation.isPending) return;
     
@@ -211,17 +187,14 @@ const AdminSupportTicketsTab = () => {
       message: inputValue.trim()
     });
   };
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter'&& !e.shiftKey) {
       e.preventDefault();
       handleSendReply();
     }
   };
-
   const selectedConversation = conversations.find(c => c.user_id === selectedUserId);
   const sortedMessages = selectedConversation?.messages.slice().reverse() || [];
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -229,7 +202,6 @@ const AdminSupportTicketsTab = () => {
       </div>
     );
   }
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-250px)]">
       {/* Lista de conversaciones */}
@@ -293,7 +265,6 @@ const AdminSupportTicketsTab = () => {
           )}
         </ScrollArea>
       </div>
-
       {/* Chat individual */}
       <div className="lg:col-span-2 border rounded-lg bg-card overflow-hidden flex flex-col">
         {selectedConversation ? (
@@ -313,7 +284,6 @@ const AdminSupportTicketsTab = () => {
                 </div>
               </div>
             </div>
-
             {/* Mensajes */}
             <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
               <div className="space-y-4">
@@ -322,11 +292,11 @@ const AdminSupportTicketsTab = () => {
                     key={message.id}
                     className={cn(
                       "flex gap-3",
-                      message.sender === 'admin' ? 'flex-row-reverse' : 'flex-row'
+                      message.sender === 'admin'? 'flex-row-reverse': 'flex-row'
                     )}
                   >
                     <div className="flex-shrink-0">
-                      {message.sender === 'user' ? (
+                      {message.sender === 'user'? (
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={selectedConversation.user.avatar_url} alt={selectedConversation.user.full_name} />
                           <AvatarFallback className="bg-[var(--accent)] text-white text-xs">
@@ -343,7 +313,6 @@ const AdminSupportTicketsTab = () => {
                         </div>
                       )}
                     </div>
-
                     <div
                       className={cn(
                         "rounded-lg px-4 py-2 max-w-[75%]",
@@ -355,7 +324,7 @@ const AdminSupportTicketsTab = () => {
                       <div className="text-sm whitespace-pre-wrap">{message.message}</div>
                       <div className={cn(
                         "text-xs mt-1",
-                        message.sender === 'admin' ? 'text-white/70' : 'text-muted-foreground'
+                        message.sender === 'admin'? 'text-white/70': 'text-muted-foreground'
                       )}>
                         {formatDateCompact(message.created_at)}
                       </div>
@@ -364,9 +333,7 @@ const AdminSupportTicketsTab = () => {
                 ))}
               </div>
             </ScrollArea>
-
             <Separator />
-
             {/* Input de respuesta */}
             <div className="p-4">
               <div className="relative flex items-center gap-2 rounded-lg border bg-background px-3 py-2">
@@ -430,5 +397,4 @@ const AdminSupportTicketsTab = () => {
     </div>
   );
 };
-
 export default AdminSupportTicketsTab;

@@ -2,12 +2,10 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Lock, ArrowUpCircle } from 'lucide-react';
 import { useLocation } from 'wouter';
-
 interface ReadOnlyBannerProps {
   show: boolean;
   projectName?: string;
 }
-
 export function ReadOnlyBanner({ show, projectName }: ReadOnlyBannerProps) {
   const [, navigate] = useLocation();
   

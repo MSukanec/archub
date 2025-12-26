@@ -5,29 +5,22 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckSquare, Plus, Kanban, Edit, Trash2, List, Search, Filter, X } from 'lucide-react';
-
 import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, useUpdateKanbanBoard, useDeleteKanbanBoard, useDeleteKanbanList, useDeleteKanbanCard, useUpdateLastKanbanBoard } from '@/hooks/use-kanban';
 import { useToast } from '@/hooks/use-toast';
-
 import { useKanbanStore } from '@/stores/kanbanStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
 import { useNavigationStore } from '@/stores/navigationStore';
-
 import { ActionBarMobileProvider, useActionBarMobile } from '@/layouts';
 import { ActionBarMobile } from '@/layouts';
-
 import { Card } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
-
 function CalendarContent() {
   const { setSidebarContext } = useNavigationStore();
-
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('project');
   }, [setSidebarContext]);
-
   const { currentBoardId, setCurrentBoardId } = useKanbanStore();
   const { setActions, setShowActionBar } = useActionBarMobile();
   const { openModal } = useGlobalModalStore();
@@ -46,7 +39,6 @@ function CalendarContent() {
   const deleteListMutation = useDeleteKanbanList();
   const deleteCardMutation = useDeleteKanbanCard();
   const updateLastBoardMutation = useUpdateLastKanbanBoard();
-
   // Initialize board selection based on saved preference or first available board
   useEffect(() => {
     if (boards.length > 0 && !currentBoardId) {
@@ -58,12 +50,10 @@ function CalendarContent() {
       setCurrentBoardId(selectedBoardId);
     }
   }, [boards, currentBoardId, setCurrentBoardId, userData?.preferences?.last_kanban_board_id]);
-
   // Reset board selection when organization changes
   useEffect(() => {
     setCurrentBoardId(null);
   }, [userData?.organization?.id, setCurrentBoardId]);
-
   // Configure mobile action bar
   useEffect(() => {
     setActions({
@@ -89,11 +79,9 @@ function CalendarContent() {
     });
     setShowActionBar(true);
   }, [setActions, setShowActionBar]);
-
   const handleEditBoard = (board: any) => {
     openModal('board', { board: board, isEditing: true });
   };
-
   const handleDeleteBoard = (boardId: string) => {
     const boardToDelete = boards.find(b => b.id === boardId);
     
@@ -120,19 +108,15 @@ function CalendarContent() {
       isLoading: deleteBoardMutation.isPending
     });
   };
-
   const handleDeleteList = async (listId: string) => {
     await deleteListMutation.mutateAsync(listId);
   };
-
   const handleDeleteCard = async (cardId: string) => {
     if (!currentBoardId) return;
     await deleteCardMutation.mutateAsync({ cardId, boardId: currentBoardId });
   };
-
   const handleCardMove = async (cardId: string, sourceListId: string, destListId: string, destIndex: number) => {
     if (!currentBoardId) return;
-
     try {
       await moveCardMutation.mutateAsync({
         cardId,
@@ -144,16 +128,13 @@ function CalendarContent() {
       console.error('Error moving card:', error);
     }
   };
-
   const handleBoardChange = (boardId: string) => {
     setCurrentBoardId(boardId);
     // Save the selected board preference
     updateLastBoardMutation.mutate(boardId);
   };
-
   // Current board for display
   const currentBoard = boards.find(board => board.id === currentBoardId);
-
   // Header configuration
   const headerProps = {
     icon: CheckSquare,
@@ -166,7 +147,7 @@ function CalendarContent() {
     additionalButton: {
       label: 'Nuevo Tablero',
       icon: Plus,
-      variant: 'ghost' as const,
+      variant: 'ghost'as const,
       onClick: () => openModal('board', {}),
       restricted: {
         feature: "max_kanban_boards",
@@ -174,14 +155,12 @@ function CalendarContent() {
       }
     }
   };
-
   // Loading state
   if (boardsLoading) {
     const loadingHeaderProps = {
       icon: CheckSquare,
       title: "Tablero"
     };
-
     return (
       <Layout headerProps={loadingHeaderProps} wide={true}>
         <div className="flex items-center justify-center h-64">
@@ -190,7 +169,6 @@ function CalendarContent() {
       </Layout>
     );
   }
-
   // Empty state with EmptyState
   if (boards.length === 0) {
     const emptyHeaderProps = {
@@ -206,7 +184,6 @@ function CalendarContent() {
         }
       }
     };
-
     return (
       <Layout headerProps={emptyHeaderProps} wide={true}>
         <EmptyState
@@ -223,9 +200,7 @@ function CalendarContent() {
       </Layout>
     );
   }
-
   const selectedBoard = boards.find(board => board.id === currentBoardId);
-
   return (
     <Layout headerProps={headerProps} wide={true}>
       <div className="space-y-6">
@@ -246,7 +221,6 @@ function CalendarContent() {
     </Layout>
   );
 }
-
 export default function Calendar() {
   return (
     <ActionBarMobileProvider>

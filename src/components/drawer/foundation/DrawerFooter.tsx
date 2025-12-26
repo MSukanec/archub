@@ -1,11 +1,10 @@
 import { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
 export interface DrawerFooterProps {
   leftLabel?: string;
   onLeftClick?: () => void;
-  leftVariant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'destructive';
+  leftVariant?: 'default'| 'secondary'| 'outline'| 'ghost'| 'destructive';
   leftDisabled?: boolean;
   
   submitText?: string;
@@ -16,7 +15,6 @@ export interface DrawerFooterProps {
   children?: ReactNode;
   className?: string;
 }
-
 export function DrawerFooter({
   leftLabel = 'Cancelar',
   onLeftClick,
@@ -66,11 +64,10 @@ export function DrawerFooter({
           className="flex-[2]"
           data-testid="drawer-submit-button"
         >
-          {submitLoading ? 'Procesando...' : submitText}
+          {submitLoading ? 'Procesando...': submitText}
         </Button>
       )}
     </div>
   );
 }
-
 export default DrawerFooter;

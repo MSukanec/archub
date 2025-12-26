@@ -5,13 +5,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Check } from "lucide-react";
 import chroma from "chroma-js";
-
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { FileUploader } from "@/components/shared/fields/FileUploader";
-
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/features/organization";
 import { useProjectTypes, useProjectModalities } from "@/features/projects";
@@ -19,7 +17,6 @@ import { useProjectContext } from "@/stores/projectContext";
 import { useOrganizationCurrencies } from "@/hooks/use-currencies";
 import { useUpdateChecklist } from "@/hooks/use-update-checklist";
 import { supabase } from "@/lib/supabase";
-
 import { useOptimisticMutation } from '@/core/save-engine';
 import { projectsKeys } from '@/core/query-keys';
 import { createProject } from '../services/createProject';
@@ -30,27 +27,24 @@ import { userOrgPreferencesKeys } from '@/core/query-keys';
 import { ProjectColorAdvanced } from '../components/ProjectColorAdvanced';
 import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
 import type { CreateProjectData, UpdateProjectData, Project as ProjectType } from '../types';
-
 const PRESET_COLORS = [
-  { hex: '#007aff', name: 'Ocean' },
-  { hex: '#34c759', name: 'Grass' },
-  { hex: '#ffcc00', name: 'Amber' },
-  { hex: '#ff3b30', name: 'Coral' },
-  { hex: '#af52de', name: 'Violet' },
-  { hex: '#5e5ce6', name: 'Slate' },
-  { hex: '#00c7be', name: 'Mint' },
-  { hex: '#84cc16', name: 'Lime' },
+  { hex: '#007aff', name: 'Ocean'},
+  { hex: '#34c759', name: 'Grass'},
+  { hex: '#ffcc00', name: 'Amber'},
+  { hex: '#ff3b30', name: 'Coral'},
+  { hex: '#af52de', name: 'Violet'},
+  { hex: '#5e5ce6', name: 'Slate'},
+  { hex: '#00c7be', name: 'Mint'},
+  { hex: '#84cc16', name: 'Lime'},
 ];
-
 function getTextColor(backgroundColor: string): string {
   try {
     const color = chroma(backgroundColor);
-    return color.luminance() > 0.5 ? '#000000' : '#ffffff';
+    return color.luminance() > 0.5 ? '#000000': '#ffffff';
   } catch {
     return '#ffffff';
   }
 }
-
 export const projectSchema = z.object({
   name: z.string().min(1, "El nombre del proyecto es requerido"),
   project_type_id: z.string().optional(),
@@ -62,9 +56,7 @@ export const projectSchema = z.object({
   custom_color_h: z.number().min(0).max(360).nullable().optional(),
   custom_color_hex: z.string().nullable().optional(),
 });
-
 export type ProjectFormData = z.infer<typeof projectSchema>;
-
 export interface Project {
   id: string;
   name: string;
@@ -90,7 +82,6 @@ export interface Project {
     avatar_url?: string;
   };
 }
-
 interface FormPanelProps {
   form: ReturnType<typeof useForm<ProjectFormData>>;
   onSubmit: (data: ProjectFormData) => void;
@@ -101,12 +92,11 @@ interface FormPanelProps {
   currentImageUrl: string | null | undefined;
   imagePreviewUrl: string | null;
   onFileSelect: (file: File | null) => void;
-  mode: 'create' | 'edit' | 'view';
+  mode: 'create'| 'edit'| 'view';
   handleImageDelete: () => void;
   isUploadingImage: boolean;
   isDeletingImage: boolean;
 }
-
 export function FormPanel({
   form,
   onSubmit,
@@ -139,7 +129,6 @@ export function FormPanel({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="status"
@@ -164,7 +153,6 @@ export function FormPanel({
             )}
           />
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -191,7 +179,6 @@ export function FormPanel({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="project_modality_id"
@@ -218,7 +205,6 @@ export function FormPanel({
             )}
           />
         </div>
-
         {organizationCurrencies.length > 1 && (
           <FormField
             control={form.control}
@@ -245,7 +231,6 @@ export function FormPanel({
             )}
           />
         )}
-
         <div className="space-y-2">
           <FormLabel>Imagen Principal (opcional)</FormLabel>
           <FileUploader
@@ -277,7 +262,6 @@ export function FormPanel({
             compressOnDrop={false}
           />
         </div>
-
         <FormField
           control={form.control}
           name="color"
@@ -329,7 +313,6 @@ export function FormPanel({
             </FormItem>
           )}
         />
-
         <ProjectColorAdvanced
           initialHue={form.watch('custom_color_h') ?? undefined}
           initialEnabled={form.watch('use_custom_color')}
@@ -346,13 +329,11 @@ export function FormPanel({
     </Form>
   );
 }
-
 interface ViewPanelProps {
   project: Project | undefined;
   projectTypes: any[];
   projectModalities: any[];
 }
-
 export function ViewPanel({ project, projectTypes, projectModalities }: ViewPanelProps) {
   const getStatusLabel = (status: string | undefined) => {
     switch (status) {
@@ -363,7 +344,6 @@ export function ViewPanel({ project, projectTypes, projectModalities }: ViewPane
       default: return 'Sin especificar';
     }
   };
-
   return (
     <div className="space-y-4" data-testid="project-view-panel">
       <div>
@@ -380,7 +360,6 @@ export function ViewPanel({ project, projectTypes, projectModalities }: ViewPane
               : 'Sin especificar'}
           </p>
         </div>
-
         <div>
           <h4 className="font-medium text-sm text-muted-foreground">Modalidad</h4>
           <p className="mt-1">
@@ -401,7 +380,7 @@ export function ViewPanel({ project, projectTypes, projectModalities }: ViewPane
         <div className="flex items-center gap-2 mt-1">
           <div 
             className="w-6 h-6 rounded-full border border-border"
-            style={{ backgroundColor: project?.color || '#84cc16' }}
+            style={{ backgroundColor: project?.color || '#84cc16'}}
           />
           <span className="text-sm">
             {PRESET_COLORS.find(c => c.hex === project?.color)?.name || project?.color || 'Lime'}
@@ -411,22 +390,19 @@ export function ViewPanel({ project, projectTypes, projectModalities }: ViewPane
     </div>
   );
 }
-
 export interface UseProjectFormCallbacks {
   onImageUploadStart?: () => void;
   onImageUploadSuccess?: () => void;
   onImageUploadError?: (error: Error) => void;
-  onSubmitSuccess?: (mode: 'create' | 'edit') => void;
+  onSubmitSuccess?: (mode: 'create'| 'edit') => void;
   onSubmitError?: (error: Error) => void;
 }
-
 export interface UseProjectFormOptions {
   project?: Project;
-  mode?: 'create' | 'edit' | 'view';
+  mode?: 'create'| 'edit'| 'view';
   onSuccess?: () => void;
   callbacks?: UseProjectFormCallbacks;
 }
-
 export function useProjectForm({ project, mode = 'create', onSuccess, callbacks }: UseProjectFormOptions) {
   const { data: userData } = useCurrentUser();
   const { currentOrganizationId, setSelectedProject } = useProjectContext();
@@ -436,20 +412,17 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
   const { data: projectModalities = [] } = useProjectModalities(organizationId);
   const { data: organizationCurrencies = [] } = useOrganizationCurrencies(organizationId);
   const queryClient = useQueryClient();
-
   const defaultCurrencyId = useMemo(
     () => organizationCurrencies.find(oc => oc.is_default)?.currency_id || '',
     [organizationCurrencies]
   );
-
   const updateChecklist = useUpdateChecklist();
-
   const { mutate: createProjectMutate, mutateAsync: createProjectAsync, isPending: isCreating } = useOptimisticMutation<ProjectType, CreateProjectData>({
     mutationFn: async (data) => createProject(data),
     queryKey: projectsKeys.list(organizationId),
     optimisticUpdate: (oldData: any, variables: CreateProjectData) => {
       const optimisticProject = {
-        id: 'temp-' + Date.now(),
+        id: 'temp-'+ Date.now(),
         ...variables,
         created_at: new Date().toISOString(),
         organization_id: organizationId,
@@ -463,7 +436,6 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     onErrorMessage: "Error al crear proyecto",
     additionalQueryKeys: [],
   });
-
   const { mutate: updateProjectMutate, isPending: isUpdating } = useOptimisticMutation<ProjectType, { projectId: string; data: UpdateProjectData }>({
     mutationFn: async ({ projectId, data }) => updateProject(projectId, data),
     queryKey: projectsKeys.list(organizationId),
@@ -477,10 +449,8 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     onErrorMessage: "Error al actualizar proyecto",
     additionalQueryKeys: [projectsKeys.data(project?.id)],
   });
-
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
-
   // Query to fetch project_data - updates when mutation invalidates
   const { data: editingProjectData } = useQuery({
     queryKey: projectsKeys.data(project?.id),
@@ -495,7 +465,6 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     },
     enabled: !!project?.id && mode === 'edit',
   });
-
   // Query to get image URL - depends on editingProjectData so it updates when image is deleted
   const { data: currentImageUrl } = useQuery({
     queryKey: projectsKeys.image(project?.id),
@@ -508,7 +477,6 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     },
     enabled: !!editingProjectData?.image_bucket && !!editingProjectData?.image_path,
   });
-
   // Mutation to upload project image using optimistic mutation
   const { mutateAsync: uploadImageAsync, isPending: isUploadingImage } = useOptimisticMutation<any, { file: File; projectId: string }>({
     mutationFn: async ({ file, projectId }) => {
@@ -523,7 +491,6 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     onErrorMessage: "No se pudo subir la imagen",
     additionalQueryKeys: [projectsKeys.list(organizationId)],
   });
-
   // Mutation to delete project image using optimistic mutation
   const { mutateAsync: deleteImageAsync, isPending: isDeletingImage } = useOptimisticMutation<void, void>({
     mutationFn: async (): Promise<void> => {
@@ -547,11 +514,9 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     onErrorMessage: "No se pudo eliminar la imagen",
     additionalQueryKeys: [projectsKeys.image(project?.id)],
   });
-
   const currentUserMember = organizationMembers.find(member => 
     member.user_id === userData?.user?.id
   );
-
   const getDefaultValues = (): ProjectFormData => {
     if (project && mode !== 'create') {
       return {
@@ -578,21 +543,18 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
       custom_color_hex: null,
     };
   };
-
   const form = useForm<ProjectFormData>({
     resolver: zodResolver(projectSchema),
     defaultValues: getDefaultValues(),
   });
-
   const currentCurrencyId = form.watch('currency_id');
   
   // ⚠️ CRITICAL: Move setValue to useEffect (NOT render path)
   useEffect(() => {
-    if (mode === 'create' && !currentCurrencyId && defaultCurrencyId) {
+    if (mode === 'create'&& !currentCurrencyId && defaultCurrencyId) {
       form.setValue('currency_id', defaultCurrencyId);
     }
   }, [mode, currentCurrencyId, defaultCurrencyId, form]);
-
   const handleFileSelect = (file: File | null) => {
     if (!file) {
       setSelectedImageFile(null);
@@ -607,7 +569,6 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     };
     reader.readAsDataURL(file);
   };
-
   const handleImageUpload = async (projectId: string) => {
     if (!selectedImageFile) return;
     
@@ -631,7 +592,6 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
       callbacks?.onImageUploadError?.(error);
     }
   };
-
   const handleImageDelete = async () => {
     try {
       await deleteImageAsync();
@@ -639,24 +599,20 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
       console.error('Error deleting image:', error);
     }
   };
-
   const reset = () => {
     form.reset();
     setSelectedImageFile(null);
     setImagePreviewUrl(null);
   };
-
   const onSubmit = async (data: ProjectFormData) => {
     if (!organizationId) {
       callbacks?.onSubmitError?.(new Error("No hay una organización activa seleccionada"));
       return;
     }
-
     if (!currentUserMember && mode === 'create') {
       callbacks?.onSubmitError?.(new Error("Usuario no es miembro de la organización"));
       return;
     }
-
     const cleanedData = {
       name: data.name,
       status: data.status,
@@ -668,9 +624,8 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
       project_modality_id: data.project_modality_id || null,
       currency_id: data.currency_id || defaultCurrencyId || null,
     };
-
     try {
-      if (mode === 'edit' && project) {
+      if (mode === 'edit'&& project) {
         // INSTANT PRECACHING: Update both project_data and projects list simultaneously
         if (editingProjectData) {
           const updatedProjectData = {
@@ -715,7 +670,6 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
             organization_id: organizationId,
           }
         });
-
         // Background operations (non-blocking)
         const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
         logActivity({
@@ -726,7 +680,6 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
           target_id: project.id,
           metadata: { name: cleanedData.name, project_type: projectTypeName }
         }).catch((err: any) => console.error('Error logging activity:', err));
-
         // Upload image in background if selected (non-blocking)
         if (selectedImageFile) {
           handleImageUpload(project.id)
@@ -735,7 +688,6 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
               callbacks?.onImageUploadError?.(err as Error);
             });
         }
-
         callbacks?.onSubmitSuccess?.('edit');
       } else {
         // CREATE MODE - Don't await, close modal immediately with optimistic update
@@ -786,14 +738,13 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
               organization_id: organizationId,
               last_project_id: createdProject.id,
               updated_at: new Date().toISOString()
-            }, { onConflict: 'user_id,organization_id' })).then(() => {
+            }, { onConflict: 'user_id,organization_id'})).then(() => {
               queryClient.invalidateQueries({
                 queryKey: userOrgPreferencesKeys.detail(userData.user.id, organizationId)
               });
             }).catch((error: any) => {
               console.error('Error setting project as active:', error);
             });
-
             // Log activity with real UUID in background
             const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
             logActivity({
@@ -804,7 +755,6 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
               target_id: createdProject.id,
               metadata: { name: cleanedData.name, project_type: projectTypeName }
             }).catch((err: any) => console.error('Error logging activity:', err));
-
             // Upload image in background if selected
             if (selectedImageFile) {
               handleImageUpload(createdProject.id)
@@ -817,16 +767,13 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
         }).catch((error: any) => {
           console.error('Error during background project creation:', error);
         });
-
         callbacks?.onSubmitSuccess?.('create');
       }
-
       onSuccess?.();
     } catch (error: any) {
       callbacks?.onSubmitError?.(error);
     }
   };
-
   return {
     form,
     onSubmit,

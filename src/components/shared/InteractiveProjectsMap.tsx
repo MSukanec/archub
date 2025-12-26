@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { InteractiveMap, MapItem } from '@/components/shared/InteractiveMap';
-
 interface ProjectLocation extends MapItem {
   id: string;
   name: string;
@@ -16,7 +15,6 @@ interface ProjectLocation extends MapItem {
   country?: string;
   imageUrl?: string;
 }
-
 export function InteractiveProjectsMap() {
   const { data: projects = [], isLoading, error } = useQuery<ProjectLocation[]>({
     queryKey: ['/api/community/projects'],
@@ -26,7 +24,6 @@ export function InteractiveProjectsMap() {
     staleTime: 0,
     gcTime: 0,
   });
-
   return (
     <InteractiveMap<ProjectLocation>
       items={projects}

@@ -1,6 +1,5 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-
 interface SearchFieldProps {
   value: string;
   onChange: (value: string) => void;
@@ -8,7 +7,6 @@ interface SearchFieldProps {
   label?: string;
   className?: string;
 }
-
 export function SearchField({ 
   value, 
   onChange, 

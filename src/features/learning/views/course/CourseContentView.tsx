@@ -18,12 +18,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
-
 interface CourseContentTabProps {
   courseId?: string;
   courseSlug?: string;
 }
-
 interface LessonData {
   id: string;
   title: string;
@@ -33,7 +31,6 @@ interface LessonData {
   is_completed: boolean;
   is_favorite: boolean;
 }
-
 interface ModuleData {
   id: string;
   title: string;
@@ -41,32 +38,26 @@ interface ModuleData {
   imageUrl?: string;
   lessons: LessonData[];
 }
-
 export default function CourseContentTab({ courseId, courseSlug }: CourseContentTabProps) {
   const [, navigate] = useLocation();
   const { setCurrentLesson } = useCourseSidebarStore();
   const goToLesson = useCoursePlayerStore(s => s.goToLesson);
   const containerRef = useRef<HTMLDivElement>(null);
   const hasScrolledRef = useRef(false);
-
   const { data: courseStructure = [], isLoading: structureLoading } = useCourseStructure(courseId);
   const { data: courseProgress = [] } = useCourseProgress(courseId);
-
   const { data: notesResponse } = useQuery<{ lesson_id: string }[]>({
     queryKey: [`/api/courses/${courseId}/notes`],
     enabled: !!courseId
   });
-
   const { data: markersResponse } = useQuery<{ lesson_id: string }[]>({
     queryKey: [`/api/courses/${courseId}/markers`],
     enabled: !!courseId
   });
-
   // Get module IDs from course structure
   const moduleIds = useMemo(() => {
     return courseStructure.map((m: any) => m.id);
   }, [courseStructure]);
-
   // Fetch module images using module IDs (same approach as landing page)
   const { data: moduleImagesResponse } = useQuery<Record<string, string>>({
     queryKey: [`courses/${courseId}/module-images`, moduleIds],
@@ -85,9 +76,7 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
           .in('course_module_id', moduleIds)
           .eq('category', 'module_image')
           .eq('media_files.is_deleted', false);
-
         if (error) throw error;
-
         const imageMap: Record<string, string> = {};
         (data || []).forEach((link: any) => {
           if (link.course_module_id && link.media_files) {
@@ -107,10 +96,8 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
     },
     enabled: moduleIds.length > 0
   });
-
   const modules = useMemo<ModuleData[]>(() => {
     if (!courseStructure.length) return [];
-
     const notesCountMap: Record<string, { notes: number; markers: number }> = {};
     
     (notesResponse || []).forEach((note) => {
@@ -126,12 +113,10 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
       }
       notesCountMap[marker.lesson_id].markers++;
     });
-
     return courseStructure.map((module) => {
       const moduleLessons = (module.lessons || []).map((lesson: any) => {
         const progress = courseProgress.find((p: any) => p.lesson_id === lesson.id);
         const counts = notesCountMap[lesson.id] || { notes: 0, markers: 0 };
-
         return {
           id: lesson.id,
           title: lesson.title,
@@ -142,7 +127,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
           is_favorite: progress?.is_favorite || false
         };
       });
-
       return {
         id: module.id,
         title: module.title,
@@ -152,7 +136,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
       };
     }).sort((a, b) => a.sort_index - b.sort_index);
   }, [courseStructure, courseProgress, notesResponse, markersResponse, moduleImagesResponse]);
-
   const { nextRecommendedLessonId, activeModuleId } = useMemo(() => {
     for (const module of modules) {
       for (const lesson of module.lessons) {
@@ -166,31 +149,26 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
     }
     return { nextRecommendedLessonId: null, activeModuleId: null };
   }, [modules]);
-
   const [expandedModuleId, setExpandedModuleId] = useState<string | null>(null);
-
   useEffect(() => {
     if (activeModuleId && expandedModuleId === null) {
       setExpandedModuleId(activeModuleId);
     }
   }, [activeModuleId, expandedModuleId]);
-
   useEffect(() => {
     if (expandedModuleId && !hasScrolledRef.current && containerRef.current) {
       const moduleElement = document.querySelector(`[data-testid="module-section-${expandedModuleId}"]`);
       if (moduleElement) {
         setTimeout(() => {
-          moduleElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          moduleElement.scrollIntoView({ behavior: 'smooth', block: 'start'});
           hasScrolledRef.current = true;
         }, 300);
       }
     }
   }, [expandedModuleId]);
-
   const handleToggleModule = (moduleId: string) => {
     setExpandedModuleId(prev => prev === moduleId ? null : moduleId);
   };
-
   const stats = useMemo(() => {
     const totalLessons = modules.reduce((acc, m) => acc + m.lessons.length, 0);
     const completedLessons = modules.reduce(
@@ -208,7 +186,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
       totalDurationMin: Math.floor(totalDurationSec / 60)
     };
   }, [modules]);
-
   const handleGoToLesson = (lessonId: string) => {
     setCurrentLesson(lessonId);
     goToLesson(lessonId, null);
@@ -220,18 +197,15 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
       navigate(`/learning/courses/${courseSlug}?${params.toString()}`);
     }
   };
-
   // Mark all lessons as complete
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [markingModuleId, setMarkingModuleId] = useState<string | null>(null);
-
   const handleMarkAllComplete = async (moduleId: string, lessonIds: string[]) => {
     setMarkingModuleId(moduleId);
     try {
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.access_token) throw new Error('No active session');
-
       // Make all requests in parallel
       await Promise.all(
         lessonIds.map(lessonId =>
@@ -249,7 +223,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
           })
         )
       );
-
       // Invalidate cache once after all requests
       queryClient.invalidateQueries({ queryKey: [`/api/courses/${courseId}/progress`] });
       
@@ -268,7 +241,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
       setMarkingModuleId(null);
     }
   };
-
   if (!courseId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -276,7 +248,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
       </div>
     );
   }
-
   if (structureLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -284,7 +255,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
       </div>
     );
   }
-
   if (modules.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
@@ -295,7 +265,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
       </div>
     );
   }
-
   return (
     <div ref={containerRef} className="max-w-6xl mx-auto px-4 py-6 md:px-6">
       {/* Mobile: Inline header */}
@@ -306,7 +275,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
         totalDurationMin={stats.totalDurationMin}
         variant="inline"
       />
-
       {/* Desktop: Two columns - Sidebar left, Modules right */}
       <div className="lg:grid lg:grid-cols-[280px_1fr] lg:gap-8">
         {/* Left sidebar - visible only on desktop */}
@@ -317,7 +285,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
           totalDurationMin={stats.totalDurationMin}
           variant="sidebar"
         />
-
         {/* Modules list */}
         <div className="space-y-4">
           {modules.map((module, index) => (

@@ -1,13 +1,13 @@
 import { Building2, Calendar, Vote, MessageCircle, ChevronRight, Sparkles } from 'lucide-react';
 import { useFounderDirectory, useFounderEvents, useFounderVotes } from '@/features/founders-portal/services';
 import { useForumThreads } from '@/features/forum/services';
-import { StatCard, StatCardTitle, StatCardValue, StatCardContent } from '@/components/ActivityCard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/shared/AppCard';
+import { ActivityCard } from '@/components';
+import { InsightCard;
 import { Skeleton } from '@/components/ui/skeleton';
-
 interface FoundersDashboardTabProps {
   onTabChange: (tab: string) => void;
 }
-
 function HeroSection() {
   return (
     <div 
@@ -39,7 +39,6 @@ function HeroSection() {
     </div>
   );
 }
-
 interface KPICardProps {
   title: string;
   count: number;
@@ -49,7 +48,6 @@ interface KPICardProps {
   onClick: () => void;
   testId: string;
 }
-
 function KPICard({ title, count, items, icon, isLoading, onClick, testId }: KPICardProps) {
   if (isLoading) {
     return (
@@ -67,7 +65,6 @@ function KPICard({ title, count, items, icon, isLoading, onClick, testId }: KPIC
       </StatCard>
     );
   }
-
   return (
     <StatCard 
       onCardClick={onClick}
@@ -78,7 +75,7 @@ function KPICard({ title, count, items, icon, isLoading, onClick, testId }: KPIC
         <div className="flex items-center gap-3">
           <div 
             className="w-10 h-10 rounded-lg flex items-center justify-center"
-            style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 15%, transparent)' }}
+            style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 15%, transparent)'}}
           >
             {icon}
           </div>
@@ -109,31 +106,26 @@ function KPICard({ title, count, items, icon, isLoading, onClick, testId }: KPIC
     </StatCard>
   );
 }
-
 export function FoundersDashboardTab({ onTabChange }: FoundersDashboardTabProps) {
   const { data: organizations, isLoading: isLoadingOrgs } = useFounderDirectory();
   const { data: events, isLoading: isLoadingEvents } = useFounderEvents();
   const { data: votes, isLoading: isLoadingVotes } = useFounderVotes();
   const { data: threadsData, isLoading: isLoadingThreads } = useForumThreads(null, 1, 10);
-
   // Forum threads are already filtered by user roles on the backend
   const threads = threadsData?.threads || [];
-
   const orgNames = organizations?.slice(0, 4).map(org => org.name) || [];
   const eventTitles = events?.slice(0, 4).map(event => event.title) || [];
   const voteTitles = votes?.slice(0, 4).map(vote => vote.title) || [];
   const threadTitles = threads.slice(0, 4).map(thread => thread.title) || [];
-
   return (
     <div className="space-y-6">
       <HeroSection />
-
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
           title="Organizaciones"
           count={organizations?.length || 0}
           items={orgNames}
-          icon={<Building2 className="w-5 h-5" style={{ color: 'var(--accent)' }} />}
+          icon={<Building2 className="w-5 h-5" style={{ color: 'var(--accent)'}} />}
           isLoading={isLoadingOrgs}
           onClick={() => onTabChange('directorio')}
           testId="kpi-card-directorio"
@@ -142,7 +134,7 @@ export function FoundersDashboardTab({ onTabChange }: FoundersDashboardTabProps)
           title="Eventos"
           count={events?.length || 0}
           items={eventTitles}
-          icon={<Calendar className="w-5 h-5" style={{ color: 'var(--accent)' }} />}
+          icon={<Calendar className="w-5 h-5" style={{ color: 'var(--accent)'}} />}
           isLoading={isLoadingEvents}
           onClick={() => onTabChange('eventos')}
           testId="kpi-card-eventos"
@@ -151,7 +143,7 @@ export function FoundersDashboardTab({ onTabChange }: FoundersDashboardTabProps)
           title="Votaciones"
           count={votes?.length || 0}
           items={voteTitles}
-          icon={<Vote className="w-5 h-5" style={{ color: 'var(--accent)' }} />}
+          icon={<Vote className="w-5 h-5" style={{ color: 'var(--accent)'}} />}
           isLoading={isLoadingVotes}
           onClick={() => onTabChange('votaciones')}
           testId="kpi-card-votaciones"
@@ -160,7 +152,7 @@ export function FoundersDashboardTab({ onTabChange }: FoundersDashboardTabProps)
           title="Temas del Foro"
           count={threads.length}
           items={threadTitles}
-          icon={<MessageCircle className="w-5 h-5" style={{ color: 'var(--accent)' }} />}
+          icon={<MessageCircle className="w-5 h-5" style={{ color: 'var(--accent)'}} />}
           isLoading={isLoadingThreads}
           onClick={() => onTabChange('foro')}
           testId="kpi-card-foro"

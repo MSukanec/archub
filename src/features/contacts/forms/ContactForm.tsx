@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Mail, Phone, Building, MapPin, Link2, Share2, Upload, User, Paperclip, FileText, Image as ImageIcon, Film } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,7 +15,6 @@ import { ComboBoxMultiSelectField } from "@/components/shared/fields/ComboBoxMul
 import { FileUploader } from "@/components/shared/fields/FileUploader";
 import { PhoneField } from "@/components/shared/fields/PhoneField";
 import { AvatarUploader } from "@/components/shared/fields/AvatarUploader";
-
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useContactTypes, useContact, useContactAttachments, useCreateContact, useUpdateContact, useInviteMember } from "@/features/contacts/hooks";
 import { useToast } from "@/hooks/use-toast";
@@ -27,7 +25,6 @@ import { deleteFile } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
 import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
 import type { ContactMediaLink } from '../services/getContactAttachments';
-
 const createContactSchema = z.object({
   first_name: z.string().min(1, "El nombre es requerido"),
   last_name: z.string().optional(),
@@ -47,25 +44,20 @@ const createContactSchema = z.object({
   message: "El nombre es requerido cuando no hay usuario vinculado",
   path: ["first_name"],
 });
-
 export type CreateContactForm = z.infer<typeof createContactSchema>;
-
 export type Contact = import('@/features/contacts/types').ContactWithRelations;
-
 function getDisplayName(contact: Contact | undefined | null): string {
   return contact?.full_name || `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || 'Sin nombre';
 }
-
 function getInitials(contact: Contact | undefined | null): string {
   const name = getDisplayName(contact);
   return name
-    .split(' ')
+    .split('')
     .map(word => word.charAt(0))
     .join('')
     .toUpperCase()
     .slice(0, 2);
 }
-
 interface FormPanelProps {
   form: ReturnType<typeof useForm<CreateContactForm>>;
   onSubmit: (data: CreateContactForm) => void;
@@ -83,7 +75,6 @@ interface FormPanelProps {
   onExistingFileDelete: (fileId: string) => Promise<void>;
   currentAvatarUrl?: string;
 }
-
 export function FormPanel({
   form,
   onSubmit,
@@ -109,7 +100,7 @@ export function FormPanel({
   const displayNameLive = `${firstName || ''} ${lastName || ''}`.trim() || 'Sin nombre';
   
   const initials = displayNameLive
-    .split(' ')
+    .split('')
     .map(word => word.charAt(0))
     .join('')
     .toUpperCase()
@@ -125,7 +116,6 @@ export function FormPanel({
           onAvatarSelect={onAvatarChange}
           isUploading={avatarUploading}
         />
-
         {linkedUser && (
           <div className="mb-4 p-3 border border-accent/20 bg-accent/5 rounded-lg flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -146,12 +136,11 @@ export function FormPanel({
                 disabled={inviteMemberMutation.isPending}
                 data-testid="button-invite-to-organization"
               >
-                {inviteMemberMutation.isPending ? 'Invitando...' : 'Invitar'}
+                {inviteMemberMutation.isPending ? 'Invitando...': 'Invitar'}
               </Button>
             )}
           </div>
         )}
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -171,7 +160,6 @@ export function FormPanel({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="last_name"
@@ -191,7 +179,6 @@ export function FormPanel({
             )}
           />
         </div>
-
         <FormField
           control={form.control}
           name="email"
@@ -227,7 +214,6 @@ export function FormPanel({
             </FormItem>
           )}
         />
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -246,7 +232,6 @@ export function FormPanel({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="contact_type_ids"
@@ -272,7 +257,6 @@ export function FormPanel({
             )}
           />
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -287,7 +271,6 @@ export function FormPanel({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="location"
@@ -302,7 +285,6 @@ export function FormPanel({
             )}
           />
         </div>
-
         <FormField
           control={form.control}
           name="notes"
@@ -321,7 +303,6 @@ export function FormPanel({
             </FormItem>
           )}
         />
-
         <Separator />
         <div className="space-y-2">
           <FormLabel className="flex items-center gap-2">
@@ -346,12 +327,10 @@ export function FormPanel({
             }}
           />
         </div>
-
       </form>
     </Form>
   );
 }
-
 interface ViewPanelProps {
   contact: Contact;
   contactAvatarUrl?: string;
@@ -362,7 +341,6 @@ interface ViewPanelProps {
   inviteMemberMutation?: any;
   isAlreadyMember?: boolean;
 }
-
 export function ViewPanel({
   contact,
   contactAvatarUrl,
@@ -375,32 +353,29 @@ export function ViewPanel({
 }: ViewPanelProps) {
   const displayName = getDisplayName(contact);
   const linkedUserAvatarUrl = contact.linked_user?.avatar_url || "";
-
   const handleCall = () => {
     if (contact.phone) {
       window.location.href = `tel:${contact.phone}`;
     }
   };
-
   const handleEmail = () => {
     if (contact.email) {
       window.location.href = `mailto:${contact.email}`;
     }
   };
-
   return (
     <div className="space-y-6">
       <div className="text-center pt-4 pb-6">
         <div className="flex justify-center mb-4">
           <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
-            {contactAvatarUrl && contactAvatarUrl.trim() !== '' && (
+            {contactAvatarUrl && contactAvatarUrl.trim() !== ''&& (
               <AvatarImage 
                 src={contactAvatarUrl} 
                 alt={`Avatar de ${displayName}`}
                 className="object-cover"
               />
             )}
-            {!contactAvatarUrl && linkedUserAvatarUrl && linkedUserAvatarUrl.trim() !== '' && (
+            {!contactAvatarUrl && linkedUserAvatarUrl && linkedUserAvatarUrl.trim() !== ''&& (
               <AvatarImage 
                 src={linkedUserAvatarUrl} 
                 alt={`Avatar de ${displayName}`}
@@ -412,11 +387,9 @@ export function ViewPanel({
             </AvatarFallback>
           </Avatar>
         </div>
-
         <h2 className="text-2xl font-bold text-foreground mb-2" data-testid="text-contact-name">
           {displayName}
         </h2>
-
         {contact.contact_types && contact.contact_types.length > 0 && (
           <div className="flex flex-wrap gap-2 justify-center mb-4">
             {contact.contact_types.map((type: any) => (
@@ -430,7 +403,6 @@ export function ViewPanel({
             ))}
           </div>
         )}
-
         {contact.linked_user && (
           <div className="flex items-center justify-center gap-1 mb-4">
             <User className="h-4 w-4 text-green-600" />
@@ -438,9 +410,7 @@ export function ViewPanel({
           </div>
         )}
       </div>
-
       <Separator />
-
       {contact.linked_user && !isAlreadyMember && inviteMemberMutation && (
         <div className="p-3 border border-accent/20 bg-accent/5 rounded-lg flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -458,12 +428,11 @@ export function ViewPanel({
             disabled={inviteMemberMutation.isPending}
             data-testid="button-invite-to-organization"
           >
-            {inviteMemberMutation.isPending ? 'Invitando...' : 'Invitar'}
+            {inviteMemberMutation.isPending ? 'Invitando...': 'Invitar'}
           </Button>
         </div>
       )}
-
-      <div className={`grid gap-3 ${contact.phone && contact.email ? 'grid-cols-3' : contact.phone || contact.email ? 'grid-cols-2' : 'grid-cols-1'}`}>
+      <div className={`grid gap-3 ${contact.phone && contact.email ? 'grid-cols-3': contact.phone || contact.email ? 'grid-cols-2': 'grid-cols-1'}`}>
         {contact.phone && (
           <Button
             variant="default"
@@ -496,7 +465,6 @@ export function ViewPanel({
           Compartir
         </Button>
       </div>
-
       <div className="grid grid-cols-1 gap-4">
         {contact.email && (
           <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
@@ -511,7 +479,6 @@ export function ViewPanel({
             </div>
           </div>
         )}
-
         {contact.phone && (
           <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
             <div className="p-2 bg-accent/10 rounded-lg">
@@ -525,7 +492,6 @@ export function ViewPanel({
             </div>
           </div>
         )}
-
         {contact.company_name && (
           <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
             <div className="p-2 bg-accent/10 rounded-lg">
@@ -539,7 +505,6 @@ export function ViewPanel({
             </div>
           </div>
         )}
-
         {contact.location && (
           <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
             <div className="p-2 bg-accent/10 rounded-lg">
@@ -554,7 +519,6 @@ export function ViewPanel({
           </div>
         )}
       </div>
-
       {contact.notes && (
         <div>
           <h3 className="text-sm font-medium text-muted-foreground mb-3">Notas</h3>
@@ -565,7 +529,6 @@ export function ViewPanel({
           </div>
         </div>
       )}
-
       {existingFiles && existingFiles.length > 0 && (
         <div>
           <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
@@ -574,8 +537,8 @@ export function ViewPanel({
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {existingFiles.map((file: any) => {
-              const isImage = file.file_type === 'image' || file.file_type?.startsWith('image/');
-              const isVideo = file.file_type === 'video' || file.file_type?.startsWith('video/');
+              const isImage = file.file_type === 'image'|| file.file_type?.startsWith('image/');
+              const isVideo = file.file_type === 'video'|| file.file_type?.startsWith('video/');
               
               return (
                 <a
@@ -611,39 +574,30 @@ export function ViewPanel({
           </div>
         </div>
       )}
-
     </div>
   );
 }
-
 interface UseContactFormProps {
   contactId?: string;
   contact?: Contact;
   mode: "create" | "edit" | "view";
   onSuccess?: () => void;
 }
-
 export function useContactForm({ contactId, contact, mode, onSuccess }: UseContactFormProps) {
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
   
   const organizationId = userData?.organization?.id;
-
   const [foundUser, setFoundUser] = useState<any>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [contactAvatarUrl, setContactAvatarUrl] = useState<string>('');
   const [filesToUpload, setFilesToUpload] = useState<any[]>([]);
   const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
-
   const { data: fetchedContact, isLoading: contactLoading } = useContact(organizationId, contactId);
-
   const { data: contactTypes } = useContactTypes(organizationId);
-
   const { data: attachmentsData = [], refetch: refetchAttachments } = useContactAttachments(contactId, organizationId);
-
   const editingContact = contact || fetchedContact;
-
   const existingFiles = (attachmentsData || []).map((link: ContactMediaLink) => ({
     id: link.media_file?.id || link.id,
     file_name: link.media_file?.file_name || 'Archivo adjunto',
@@ -652,7 +606,6 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
     file_url: link.media_file?.file_url || '',
     isExisting: true,
   }));
-
   const handleExistingFileDelete = async (fileId: string) => {
     try {
       await deleteFile(fileId, false);
@@ -669,23 +622,18 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
       });
     }
   };
-
   useEffect(() => {
     if (!editingContact?.id) {
       setContactAvatarUrl('');
       return;
     }
-
     const loadAvatarUrl = async () => {
       const url = await getContactAvatarUrl(editingContact.id);
       setContactAvatarUrl(url || '');
     };
-
     loadAvatarUrl();
   }, [editingContact?.id]);
-
   const currentAvatarUrl = avatarPreviewUrl || contactAvatarUrl;
-
   const form = useForm<CreateContactForm>({
     resolver: zodResolver(createContactSchema),
     defaultValues: {
@@ -700,7 +648,6 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
       linked_user_id: '',
     }
   });
-
   useEffect(() => {
     if (editingContact?.id) {
       form.reset({
@@ -716,49 +663,39 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
       });
     }
   }, [editingContact?.id, form]);
-
   const linkedUserId = editingContact?.linked_user_id || form.watch('linked_user_id');
-
   const { data: roles = [] } = useQuery<{ id: string; name: string }[]>({
     queryKey: ['/api/roles', organizationId],
     enabled: !!organizationId,
     staleTime: 10 * 60 * 1000,
   });
-
   const { data: isMemberData } = useQuery<{ isMember: boolean } | null>({
     queryKey: ['/api/organization-members', linkedUserId, organizationId],
     enabled: !!linkedUserId && !!organizationId,
     staleTime: 5 * 60 * 1000,
   });
-
   const isAlreadyMember = isMemberData?.isMember || false;
-
   const emailValue = form.watch('email');
-
   useEffect(() => {
     if (!emailValue || emailValue.trim().length === 0) {
       setFoundUser(null);
       return;
     }
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(emailValue.trim())) {
       setFoundUser(null);
       return;
     }
-
     const timeoutId = setTimeout(() => {
       setFoundUser(null);
     }, 300);
-
     return () => clearTimeout(timeoutId);
   }, [emailValue]);
-
   useEffect(() => {
     if (foundUser) {
-      const nameParts = foundUser.full_name?.split(' ') || [];
+      const nameParts = foundUser.full_name?.split('') || [];
       const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
+      const lastName = nameParts.slice(1).join('') || '';
       
       form.setValue("linked_user_id", foundUser.id);
       form.setValue("first_name", firstName);
@@ -770,18 +707,17 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
       }
     }
   }, [foundUser, form, editingContact]);
-
   const inviteMemberHook = useInviteMember(organizationId || '', linkedUserId);
   
   const inviteMemberMutation = {
     mutate: () => {
       if (!organizationId || !editingContact?.linked_user?.email) {
-        toast({ title: 'Error', description: 'Faltan datos para invitar al usuario', variant: 'destructive' });
+        toast({ title: 'Error', description: 'Faltan datos para invitar al usuario', variant: 'destructive'});
         return;
       }
       const defaultRole = roles.find(r => !r.name.toLowerCase().includes('admin'));
       if (!defaultRole) {
-        toast({ title: 'Error', description: 'No se encontró un rol válido', variant: 'destructive' });
+        toast({ title: 'Error', description: 'No se encontró un rol válido', variant: 'destructive'});
         return;
       }
       inviteMemberHook.mutate({
@@ -793,18 +729,14 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
     },
     isPending: inviteMemberHook.isPending,
   };
-
   const handleAvatarUpload = (file: File) => {
     setPendingAvatarFile(file);
     const previewUrl = URL.createObjectURL(file);
     setAvatarPreviewUrl(previewUrl);
   };
-
   const createMutation = useCreateContact(organizationId || '');
   const updateMutation = useUpdateContact(organizationId || '', editingContact?.id || '');
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const onSubmit = async (data: CreateContactForm) => {
     if (!organizationId) return;
     
@@ -819,7 +751,7 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
           .eq('organization_id', organizationId)
           .ilike('email', data.email.trim());
         
-        if (mode === 'edit' && editingContact) {
+        if (mode === 'edit'&& editingContact) {
           query = query.neq('id', editingContact.id);
         }
         
@@ -830,10 +762,9 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
           throw new Error(`Ya existe un contacto con el email "${data.email}" (${contactName}). No se pueden tener contactos duplicados con el mismo email.`);
         }
       }
-
       let contactId: string;
       
-      if (mode === 'edit' && editingContact) {
+      if (mode === 'edit'&& editingContact) {
         await updateMutation.mutateAsync({
           first_name: data.first_name,
           last_name: data.last_name || undefined,
@@ -860,19 +791,17 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
         });
         contactId = result.id;
       }
-
       if (filesToUpload.length > 0) {
         for (const fileInput of filesToUpload) {
           if (!fileInput.file) continue;
           try {
             await uploadContactDocument(fileInput.file, contactId, organizationId, 'document');
           } catch (uploadError: any) {
-            toast({ variant: 'destructive', title: 'Error al subir archivo', description: uploadError?.message || 'Error desconocido' });
+            toast({ variant: 'destructive', title: 'Error al subir archivo', description: uploadError?.message || 'Error desconocido'});
           }
         }
         setFilesToUpload([]);
       }
-
       if (pendingAvatarFile) {
         try {
           setAvatarUploading(true);
@@ -881,30 +810,26 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
           setPendingAvatarFile(null);
           setAvatarPreviewUrl(null);
         } catch (avatarError: any) {
-          toast({ variant: 'destructive', title: 'Error al subir avatar', description: avatarError?.message || 'No se pudo subir la foto de perfil' });
+          toast({ variant: 'destructive', title: 'Error al subir avatar', description: avatarError?.message || 'No se pudo subir la foto de perfil'});
         } finally {
           setAvatarUploading(false);
         }
       }
-
       await logActivity({
         organization_id: organizationId,
         user_id: userData?.user?.id || '',
-        action: mode === 'edit' ? ACTIVITY_ACTIONS.UPDATE_CONTACT : ACTIVITY_ACTIONS.ADD_CONTACT,
+        action: mode === 'edit'? ACTIVITY_ACTIONS.UPDATE_CONTACT : ACTIVITY_ACTIONS.ADD_CONTACT,
         target_table: TARGET_TABLES.CONTACTS,
         target_id: contactId,
-        metadata: { first_name: data.first_name || '', last_name: data.last_name || '', company_name: data.company_name || '' }
+        metadata: { first_name: data.first_name || '', last_name: data.last_name || '', company_name: data.company_name || ''}
       });
-
       if (mode === 'create') {
         try {
           await supabase.rpc('tick_home_checklist', { p_key: 'create_contact', p_value: true });
           queryClient.invalidateQueries({ queryKey: ['current-user'] });
         } catch {}
       }
-
       queryClient.invalidateQueries({ queryKey: contactsKeys.attachmentList(organizationId, contactId) });
-
       onSuccess?.();
     } catch (error: any) {
       toast({ title: "Error", description: error.message || "Hubo un error al procesar el contacto", variant: "destructive" });
@@ -912,7 +837,6 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
       setIsSubmitting(false);
     }
   };
-
   const handleShare = () => {
     if (navigator.share && editingContact) {
       navigator.share({
@@ -921,7 +845,6 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
       });
     }
   };
-
   const resetPendingAvatar = () => {
     if (avatarPreviewUrl) {
       URL.revokeObjectURL(avatarPreviewUrl);
@@ -929,7 +852,6 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
     setPendingAvatarFile(null);
     setAvatarPreviewUrl(null);
   };
-
   return {
     form,
     onSubmit,

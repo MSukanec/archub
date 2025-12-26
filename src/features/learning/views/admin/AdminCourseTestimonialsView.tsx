@@ -6,38 +6,31 @@ import { Pencil, Trash2, MessageSquareQuote, Clock } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal';
 import { TestimonialCard } from '@/components/shared/TestimonialCard';
 import type { Testimonial } from '@shared/schema';
-
 interface AdminCourseTestimonialsTabProps {
   courseId: string;
 }
-
 export default function AdminCourseTestimonialsTab({ courseId }: AdminCourseTestimonialsTabProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { openModal } = useGlobalModalStore();
-
   const { data: testimonials = [], isLoading } = useQuery<Testimonial[]>({
     queryKey: ['course-testimonials', courseId],
     queryFn: async () => {
       if (!courseId || !supabase) return [];
-
       const { data, error } = await supabase
         .from('testimonials')
         .select('*')
         .eq('course_id', courseId)
         .eq('is_deleted', false)
         .order('sort_index', { ascending: true });
-
       if (error) {
         console.error('Error fetching testimonials:', error);
         return [];
       }
-
       return data || [];
     },
     enabled: !!courseId && !!supabase
   });
-
   const deleteTestimonialMutation = useMutation({
     mutationFn: async (testimonialId: string) => {
       const { deleteTestimonial } = await import('@/features/learning');
@@ -60,22 +53,19 @@ export default function AdminCourseTestimonialsTab({ courseId }: AdminCourseTest
       });
     }
   });
-
   const handleEditTestimonial = (testimonial: Testimonial) => {
     openModal('testimonial', { courseId, testimonial });
   };
-
   const handleDeleteTestimonial = (testimonial: Testimonial) => {
     openModal('delete-confirmation', {
       mode: 'delete',
       title: 'Eliminar Testimonio',
       description: 'Esta acción eliminará el testimonio de forma permanente.',
       itemName: testimonial.author_name,
-      itemDetails: testimonial.content?.slice(0, 100) + (testimonial.content && testimonial.content.length > 100 ? '...' : ''),
+      itemDetails: testimonial.content?.slice(0, 100) + (testimonial.content && testimonial.content.length > 100 ? '...': ''),
       onDelete: () => deleteTestimonialMutation.mutate(testimonial.id)
     });
   };
-
   if (isLoading) {
     return (
       <div className="w-full space-y-4" data-testid="admin-course-testimonials-tab">
@@ -85,7 +75,6 @@ export default function AdminCourseTestimonialsTab({ courseId }: AdminCourseTest
       </div>
     );
   }
-
   if (testimonials.length === 0) {
     return (
       <div className="w-full" data-testid="admin-course-testimonials-tab">
@@ -102,7 +91,6 @@ export default function AdminCourseTestimonialsTab({ courseId }: AdminCourseTest
       </div>
     );
   }
-
   return (
     <div className="w-full space-y-4" data-testid="admin-course-testimonials-tab">
       {testimonials.map((testimonial) => (

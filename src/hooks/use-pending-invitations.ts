@@ -1,13 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useCurrentUser } from './use-current-user';
 import { supabase } from '@/lib/supabase';
-
 export interface PendingInvitationMember {
   id: string;
   full_name?: string;
   avatar_url?: string;
 }
-
 export interface PendingInvitation {
   id: string;
   organization_id: string;
@@ -19,11 +17,9 @@ export interface PendingInvitation {
   created_at: string;
   members: PendingInvitationMember[];
 }
-
 export function usePendingInvitations() {
   const { data: currentUser } = useCurrentUser();
   const userId = currentUser?.user?.id;
-
   return useQuery<PendingInvitation[]>({
     queryKey: ['pending-invitations', userId],
     queryFn: async () => {

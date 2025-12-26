@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
-
 export interface ProviderProduct {
   id: string;
   organization_id: string;
@@ -12,24 +11,20 @@ export interface ProviderProduct {
   created_at: string;
   updated_at: string;
 }
-
 export interface NewProviderProductData {
   organization_id: string;
   product_id: string;
   provider_code?: string;
   is_active?: boolean;
 }
-
 // Hook para obtener los productos del proveedor (organización actual)
 export function useProviderProducts() {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
-
   return useQuery({
     queryKey: ['provider-products', organizationId],
     queryFn: async () => {
       if (!organizationId || !supabase) return [];
-
       const { data, error } = await supabase
         .from('provider_products')
         .select(`
@@ -46,24 +41,20 @@ export function useProviderProducts() {
           )
         `)
         .eq('organization_id', organizationId);
-
       if (error) {
         console.error('Error fetching provider products:', error);
         throw error;
       }
-
       return data || [];
     },
     enabled: !!organizationId && !!supabase,
   });
 }
-
 // Hook para crear o actualizar un producto de proveedor
 export function useToggleProviderProduct() {
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
-
   return useMutation({
     mutationFn: async ({ productId, isActive, providerCode, currencyId, price }: { 
       productId: string; 
@@ -77,7 +68,6 @@ export function useToggleProviderProduct() {
       if (!organizationId || !supabase) {
         throw new Error('No organization or supabase client');
       }
-
       try {
         // Primero verificar si ya existe el provider_product
         const { data: existing, error: selectError } = await supabase
@@ -86,13 +76,10 @@ export function useToggleProviderProduct() {
           .eq('organization_id', organizationId)
           .eq('product_id', productId)
           .single();
-
         if (selectError && selectError.code !== 'PGRST116') {
           throw selectError;
         }
-
         let providerProduct;
-
         if (existing) {
           // Actualizar existente
           const updateData: any = { 
@@ -103,14 +90,12 @@ export function useToggleProviderProduct() {
           if (providerCode !== undefined) {
             updateData.provider_code = providerCode;
           }
-
           const { data, error } = await supabase
             .from('provider_products')
             .update(updateData)
             .eq('id', existing.id)
             .select()
             .single();
-
           if (error) throw error;
           providerProduct = data;
         } else {
@@ -124,17 +109,14 @@ export function useToggleProviderProduct() {
           if (providerCode !== undefined) {
             insertData.provider_code = providerCode;
           }
-
           const { data, error } = await supabase
             .from('provider_products')
             .insert(insertData)
             .select()
             .single();
-
           if (error) throw error;
           providerProduct = data;
         }
-
         // Solo manejar product_prices cuando se activa un producto Y se proporcionan AMBOS precio Y moneda
         if (providerProduct && isActive && currencyId && price !== undefined) {
           // Verificar si ya existe un precio para este provider_product
@@ -143,11 +125,9 @@ export function useToggleProviderProduct() {
             .select('id')
             .eq('provider_product_id', providerProduct.id)
             .single();
-
           if (priceSelectError && priceSelectError.code !== 'PGRST116') {
             console.warn('Error checking existing price:', priceSelectError);
           }
-
           if (existingPrice) {
             // Si existe y se proporcionan currencyId/price, actualizar
             if (currencyId && price !== undefined) {
@@ -161,7 +141,6 @@ export function useToggleProviderProduct() {
                   updated_at: new Date().toISOString()
                 })
                 .eq('id', existingPrice.id);
-
               if (priceUpdateError) {
                 console.warn('Error updating price:', priceUpdateError);
               } else {
@@ -175,7 +154,6 @@ export function useToggleProviderProduct() {
               currency_id: null,
               price: null
             };
-
             // Si se proporcionan currencyId/price, usarlos
             if (currencyId && price !== undefined) {
               console.log('Inserting price with currencyId:', currencyId);
@@ -183,17 +161,14 @@ export function useToggleProviderProduct() {
               insertData.price = price;
               console.log('Final insertData:', insertData);
             }
-
             const { error: priceInsertError } = await supabase
               .from('product_prices')
               .insert(insertData);
-
             if (priceInsertError) {
               console.warn('Error creating price:', priceInsertError);
             }
           }
         }
-
         return providerProduct;
       } catch (error) {
         throw error;
@@ -219,7 +194,6 @@ export function useToggleProviderProduct() {
     },
   });
 }
-
 // Hook para obtener el estado de selección de un producto específico
 export function useIsProductSelected(productId: string) {
   const { data: providerProducts = [] } = useProviderProducts();

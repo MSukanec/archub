@@ -8,7 +8,6 @@ import { pdf } from '@react-pdf/renderer';
 import { PaymentReceiptPDF, type PaymentReceiptData } from '@/features/pdf';
 import { useToast } from '@/hooks/use-toast';
 import type { ClientPortalPayment, ClientPortalProject, ClientPortalClient, ClientPortalCommitment } from '../types';
-
 interface PaymentsListProps {
   payments: ClientPortalPayment[];
   isLoading?: boolean;
@@ -18,14 +17,12 @@ interface PaymentsListProps {
   organizationName?: string;
   organizationLogo?: string | null;
 }
-
 const statusConfig = {
-  confirmed: { label: 'Confirmado', icon: CheckCircle, className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
-  pending: { label: 'Pendiente', icon: Clock, className: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200' },
-  rejected: { label: 'Rechazado', icon: XCircle, className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
-  void: { label: 'Anulado', icon: AlertCircle, className: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
+  confirmed: { label: 'Confirmado', icon: CheckCircle, className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'},
+  pending: { label: 'Pendiente', icon: Clock, className: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'},
+  rejected: { label: 'Rechazado', icon: XCircle, className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'},
+  void: { label: 'Anulado', icon: AlertCircle, className: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'},
 };
-
 export function PaymentsList({ 
   payments, 
   isLoading, 
@@ -37,22 +34,19 @@ export function PaymentsList({
 }: PaymentsListProps) {
   const { toast } = useToast();
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
-
   const formatDate = (dateStr: string) => {
     try {
-      return format(new Date(dateStr), "d 'de' MMMM, yyyy", { locale: es });
+      return format(new Date(dateStr), "d 'de'MMMM, yyyy", { locale: es });
     } catch {
       return dateStr;
     }
   };
-
   const formatCurrency = (amount: number, symbol: string = '$') => {
     return `${symbol} ${new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount)}`;
   };
-
   const handleDownloadReceipt = async (payment: ClientPortalPayment) => {
     if (payment.receipt_url) {
       const link = document.createElement('a');
@@ -64,7 +58,6 @@ export function PaymentsList({
       document.body.removeChild(link);
       return;
     }
-
     setDownloadingId(payment.id);
     try {
       const receiptData: PaymentReceiptData = {
@@ -74,7 +67,7 @@ export function PaymentsList({
         currency_symbol: payment.currency_symbol,
         currency_code: payment.currency_code,
         exchange_rate: payment.exchange_rate,
-        status: payment.status as 'confirmed' | 'pending' | 'rejected' | 'void',
+        status: payment.status as 'confirmed'| 'pending'| 'rejected'| 'void',
         reference: payment.reference,
         wallet_name: payment.wallet_name,
         client_name: client?.contact_name,
@@ -86,7 +79,6 @@ export function PaymentsList({
         commitment_total: commitment?.amount,
         cumulative_percentage: payment.cumulative_percentage,
       };
-
       const blob = await pdf(<PaymentReceiptPDF data={receiptData} />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -96,7 +88,6 @@ export function PaymentsList({
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-
       toast({
         title: "Recibo descargado",
         description: "El recibo de pago se ha descargado correctamente.",
@@ -112,7 +103,6 @@ export function PaymentsList({
       setDownloadingId(null);
     }
   };
-
   if (isLoading) {
     return (
       <div className="space-y-3" data-testid="payments-loading">
@@ -130,7 +120,6 @@ export function PaymentsList({
       </div>
     );
   }
-
   if (payments.length === 0) {
     return (
       <div className="text-center py-12" data-testid="payments-empty">
@@ -139,12 +128,10 @@ export function PaymentsList({
       </div>
     );
   }
-
   return (
     <div className="space-y-3" data-testid="payments-list">
       {payments.map((payment) => {
         const config = statusConfig[payment.status as keyof typeof statusConfig] || statusConfig.pending;
-
         return (
           <div
             key={payment.id}
@@ -162,7 +149,6 @@ export function PaymentsList({
                   {config.label}
                 </Badge>
               </div>
-
               {/* Row 2: Monto + Porcentaje acumulado + Billetera */}
               <div className="flex items-center justify-between">
                 <div className="flex items-baseline gap-2">
@@ -181,7 +167,6 @@ export function PaymentsList({
                   </span>
                 )}
               </div>
-
               {/* Row 3: Cotización + Download */}
               <div className="flex items-center justify-between pt-2 border-t border-border/50">
                 {payment.exchange_rate && payment.exchange_rate !== 1 ? (
@@ -207,7 +192,6 @@ export function PaymentsList({
                 </Button>
               </div>
             </div>
-
             {/* Desktop Layout */}
             <div className="hidden sm:flex items-center gap-6">
               {/* Fecha */}
@@ -216,7 +200,6 @@ export function PaymentsList({
                   {formatDate(payment.payment_date)}
                 </p>
               </div>
-
               {/* Monto + Porcentaje acumulado */}
               <div className="w-[160px] flex-shrink-0">
                 <div className="flex items-baseline gap-2">
@@ -230,14 +213,12 @@ export function PaymentsList({
                   )}
                 </div>
               </div>
-
               {/* Billetera */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-muted-foreground truncate">
                   {payment.wallet_name || '-'}
                 </p>
               </div>
-
               {/* Cotización */}
               <div className="w-[80px] flex-shrink-0 text-right">
                 <p className="text-sm text-muted-foreground">
@@ -247,14 +228,12 @@ export function PaymentsList({
                   }
                 </p>
               </div>
-
               {/* Estado */}
               <div className="w-[100px] flex-shrink-0">
                 <Badge className={config.className}>
                   {config.label}
                 </Badge>
               </div>
-
               {/* Download */}
               <div className="w-[40px] flex-shrink-0 flex justify-end">
                 <Button

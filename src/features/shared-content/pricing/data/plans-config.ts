@@ -1,6 +1,5 @@
 import { Folder, HardDrive, Users, Briefcase, Bot } from "lucide-react";
 import type { PlanConfig, PlanSlug } from "../types";
-
 export const plansConfig: Record<PlanSlug, PlanConfig> = {
   'free': {
     icon: Folder,
@@ -16,10 +15,10 @@ export const plansConfig: Record<PlanSlug, PlanConfig> = {
       'Documentación de obra'
     ],
     limits: [
-      { iconComponent: Folder, value: '4 proyectos' },
-      { iconComponent: HardDrive, value: '500 MB' },
-      { iconComponent: Bot, value: 'Resúmenes básicos' },
-      { iconComponent: Users, value: '1 usuario' }
+      { iconComponent: Folder, value: '4 proyectos'},
+      { iconComponent: HardDrive, value: '500 MB'},
+      { iconComponent: Bot, value: 'Resúmenes básicos'},
+      { iconComponent: Users, value: '1 usuario'}
     ]
   },
   'pro': {
@@ -38,10 +37,10 @@ export const plansConfig: Record<PlanSlug, PlanConfig> = {
       'Comunidad'
     ],
     limits: [
-      { iconComponent: Folder, value: '50 proyectos' },
-      { iconComponent: HardDrive, value: '50 GB' },
-      { iconComponent: Bot, value: '10,000 tokens/mes' },
-      { iconComponent: Users, value: '1 usuario' }
+      { iconComponent: Folder, value: '50 proyectos'},
+      { iconComponent: HardDrive, value: '50 GB'},
+      { iconComponent: Bot, value: '10,000 tokens/mes'},
+      { iconComponent: Users, value: '1 usuario'}
     ]
   },
   'teams': {
@@ -60,10 +59,10 @@ export const plansConfig: Record<PlanSlug, PlanConfig> = {
       'Soporte 24/7'
     ],
     limits: [
-      { iconComponent: Folder, value: 'Ilimitados' },
-      { iconComponent: HardDrive, value: '500 GB' },
-      { iconComponent: Bot, value: 'Ilimitados' },
-      { iconComponent: Users, value: 'Ilimitados' }
+      { iconComponent: Folder, value: 'Ilimitados'},
+      { iconComponent: HardDrive, value: '500 GB'},
+      { iconComponent: Bot, value: 'Ilimitados'},
+      { iconComponent: Users, value: 'Ilimitados'}
     ]
   },
   'enterprise': {
@@ -83,7 +82,6 @@ export const plansConfig: Record<PlanSlug, PlanConfig> = {
     limits: []
   }
 };
-
 export function getPlanConfig(planName: string): PlanConfig {
   const slug = planName.toLowerCase() as PlanSlug;
   return plansConfig[slug] || plansConfig['free'];

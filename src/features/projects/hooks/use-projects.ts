@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getProjects } from '../services/getProjects';
 import { projectsKeys } from '@/core/query-keys';
-
 /**
  * Hook para obtener todos los proyectos de una organización.
  * 

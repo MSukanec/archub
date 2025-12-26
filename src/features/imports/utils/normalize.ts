@@ -5,9 +5,8 @@ export const normalizeText = (text: string): string => {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .trim()
-    .replace(/\s+/g, ' ');
+    .replace(/\s+/g, '');
 };
-
 export const levenshteinDistance = (str1: string, str2: string): number => {
   const matrix: number[][] = [];
   
@@ -35,7 +34,6 @@ export const levenshteinDistance = (str1: string, str2: string): number => {
   
   return matrix[str2.length][str1.length];
 };
-
 export const calculateSimilarity = (str1: string, str2: string): number => {
   const s1 = normalizeText(str1);
   const s2 = normalizeText(str2);
@@ -48,12 +46,10 @@ export const calculateSimilarity = (str1: string, str2: string): number => {
   const editDistance = levenshteinDistance(longer, shorter);
   return (longer.length - editDistance) / longer.length;
 };
-
 export const isValidUUID = (value: string): boolean => {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return uuidRegex.test(value);
 };
-
 export const parseDate = (value: string): Date | null => {
   if (!value) return null;
   
@@ -77,7 +73,6 @@ export const parseDate = (value: string): Date | null => {
   const date = new Date(value);
   return isNaN(date.getTime()) ? null : date;
 };
-
 export const parseNumber = (value: string): number | null => {
   if (!value || value === '') return null;
   
@@ -88,7 +83,6 @@ export const parseNumber = (value: string): number | null => {
   const num = parseFloat(cleaned);
   return isNaN(num) ? null : num;
 };
-
 export const parseCurrency = (value: string): number | null => {
   return parseNumber(value);
 };

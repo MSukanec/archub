@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { ProjectClient, ProjectClientWithRelations } from '../types';
-
 /**
  * Obtiene todos los clientes de un proyecto con sus relaciones.
  * 
@@ -20,21 +19,17 @@ export async function getProjectClients(
   if (!supabase || !organizationId || !projectId) {
     return [];
   }
-
   const { data, error } = await supabase
     .from('project_clients_view')
     .select('*')
     .eq('organization_id', organizationId)
     .eq('project_id', projectId)
     .order('created_at', { ascending: false });
-
   if (error) {
     throw error;
   }
-
   return data || [];
 }
-
 export async function getProjectClientById(
   clientId: string,
   organizationId: string
@@ -42,21 +37,17 @@ export async function getProjectClientById(
   if (!supabase || !organizationId || !clientId) {
     return null;
   }
-
   const { data, error } = await supabase
     .from('project_clients_view')
     .select('*')
     .eq('id', clientId)
     .eq('organization_id', organizationId)
     .single();
-
   if (error) {
     throw error;
   }
-
   return data;
 }
-
 /**
  * Crea un nuevo cliente de proyecto.
  * 
@@ -68,7 +59,7 @@ export async function getProjectClientById(
  * @throws {Error} Si falla la creación
  */
 export async function createProjectClient(
-  projectClient: Omit<ProjectClient, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>,
+  projectClient: Omit<ProjectClient, 'id'| 'created_at'| 'updated_at'| 'project_id'| 'organization_id'| 'created_by'>,
   projectId: string,
   organizationId: string,
   createdBy: string
@@ -122,18 +113,15 @@ export async function createProjectClient(
       )
     `)
     .single();
-
   if (error) {
     throw error;
   }
-
   return {
     ...data,
     contact: data.contact && !data.contact.is_deleted ? data.contact : null,
     role: data.role && !data.role.is_deleted ? data.role : null,
   };
 }
-
 /**
  * Actualiza un cliente de proyecto existente.
  * 
@@ -145,7 +133,7 @@ export async function createProjectClient(
  */
 export async function updateProjectClient(
   clientId: string,
-  updates: Partial<Omit<ProjectClient, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by' | 'is_deleted' | 'deleted_at'>>,
+  updates: Partial<Omit<ProjectClient, 'id'| 'created_at'| 'updated_at'| 'project_id'| 'organization_id'| 'created_by'| 'is_deleted'| 'deleted_at'>>,
   organizationId: string
 ): Promise<ProjectClientWithRelations> {
   const { data, error } = await supabase
@@ -196,18 +184,15 @@ export async function updateProjectClient(
       )
     `)
     .single();
-
   if (error) {
     throw error;
   }
-
   return {
     ...data,
     contact: data.contact && !data.contact.is_deleted ? data.contact : null,
     role: data.role && !data.role.is_deleted ? data.role : null,
   };
 }
-
 /**
  * Elimina un cliente de proyecto (soft delete).
  * 
@@ -231,10 +216,8 @@ export async function deleteProjectClient(
     })
     .eq('id', clientId)
     .eq('organization_id', organizationId);
-
   if (error) {
     throw error;
   }
-
   return true;
 }

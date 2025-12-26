@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { ProjectActivityData } from '../types';
-
 /**
  * Obtiene datos de actividad del proyecto para los últimos 7 días.
  * 
@@ -18,24 +17,20 @@ export async function getProjectActivity(
   if (!supabase || !organizationId || !projectId) {
     return [];
   }
-
   // Get activity data for the last 7 days
   const endDate = new Date();
   const startDate = new Date();
   startDate.setDate(endDate.getDate() - 6);
-
   const dates = [];
   for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
     dates.push(new Date(d));
   }
-
   const activityData = await Promise.all(
     dates.map(async (date) => {
       const dateStr = date.toISOString().split('T')[0];
       const nextDate = new Date(date);
       nextDate.setDate(nextDate.getDate() + 1);
       const nextDateStr = nextDate.toISOString().split('T')[0];
-
       // Count activities for this date
       const [documentsResult, siteLogsResult, movementsResult] = await Promise.all([
         supabase
@@ -60,11 +55,10 @@ export async function getProjectActivity(
           .gte('movement_date', dateStr)
           .lt('movement_date', nextDateStr)
       ]);
-
       return {
         date: date.toLocaleDateString('es-ES', { 
           month: 'short', 
-          day: 'numeric' 
+          day: 'numeric'
         }),
         documents: documentsResult.count || 0,
         siteLogs: siteLogsResult.count || 0,
@@ -72,6 +66,5 @@ export async function getProjectActivity(
       };
     })
   );
-
   return activityData;
 }

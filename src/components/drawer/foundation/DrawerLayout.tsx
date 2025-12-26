@@ -3,10 +3,8 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
-export type DrawerSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
-export type DrawerSide = 'left' | 'right';
-
+export type DrawerSize = 'sm'| 'md'| 'lg'| 'xl'| 'full';
+export type DrawerSide = 'left'| 'right';
 const sizeClasses: Record<DrawerSize, string> = {
   sm: 'w-full sm:w-[400px]',
   md: 'w-full sm:w-[500px]',
@@ -14,12 +12,10 @@ const sizeClasses: Record<DrawerSize, string> = {
   xl: 'w-full sm:w-[800px]',
   full: 'w-full',
 };
-
 const sideClasses: Record<DrawerSide, string> = {
   left: 'left-0 animate-in slide-in-from-left duration-300',
   right: 'right-0 animate-in slide-in-from-right duration-300',
 };
-
 export interface DrawerLayoutProps {
   children: ReactNode;
   isOpen: boolean;
@@ -42,7 +38,6 @@ export interface DrawerLayoutProps {
   
   zIndex?: number;
 }
-
 export function DrawerLayout({
   children,
   isOpen,
@@ -86,7 +81,7 @@ export function DrawerLayout({
   
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !preventEscapeClose && isOpen) {
+      if (event.key === 'Escape'&& !preventEscapeClose && isOpen) {
         event.preventDefault();
         handleClose();
       }
@@ -171,5 +166,4 @@ export function DrawerLayout({
   
   return createPortal(content, document.body);
 }
-
 export default DrawerLayout;

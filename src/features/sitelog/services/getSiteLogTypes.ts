@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-
 export interface SiteLogType {
   id: string;
   name: string;
@@ -12,7 +11,6 @@ export interface SiteLogType {
   deleted_at: string | null;
   created_by: string | null;
 }
-
 /**
  * Obtiene los tipos de bitácora disponibles para una organización.
  * 
@@ -27,7 +25,6 @@ export async function getSiteLogTypes(organizationId: string): Promise<SiteLogTy
   if (!supabase || !organizationId) {
     return [];
   }
-
   const { data, error } = await supabase
     .from('site_log_types')
     .select('*')
@@ -35,7 +32,6 @@ export async function getSiteLogTypes(organizationId: string): Promise<SiteLogTy
     .eq('is_deleted', false)
     .order('is_default', { ascending: false })
     .order('name');
-
   if (error) throw error;
   
   return data || [];

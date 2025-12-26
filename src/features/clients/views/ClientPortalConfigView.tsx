@@ -7,7 +7,6 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
-
 interface PortalSettings {
   project_id: string;
   organization_id: string;
@@ -19,14 +18,12 @@ interface PortalSettings {
   show_progress: boolean;
   allow_comments: boolean;
 }
-
 interface PortalSectionConfig {
-  id: keyof Pick<PortalSettings, 'show_dashboard' | 'show_installments' | 'show_payments' | 'show_logs'>;
+  id: keyof Pick<PortalSettings, 'show_dashboard'| 'show_installments'| 'show_payments'| 'show_logs'>;
   label: string;
   description: string;
   icon: typeof Building2;
 }
-
 const SECTION_CONFIGS: PortalSectionConfig[] = [
   {
     id: 'show_dashboard',
@@ -53,15 +50,12 @@ const SECTION_CONFIGS: PortalSectionConfig[] = [
     icon: BookOpen,
   },
 ];
-
 interface ClientPortalConfigViewProps {
   projectId?: string;
 }
-
 export function ClientPortalConfigView({ projectId }: ClientPortalConfigViewProps) {
   const { toast } = useToast();
   const queryKey = ['/api/client-portal', projectId, 'config'];
-
   const { data: settings, isLoading, error } = useQuery<PortalSettings>({
     queryKey,
     queryFn: async () => {
@@ -70,7 +64,6 @@ export function ClientPortalConfigView({ projectId }: ClientPortalConfigViewProp
     },
     enabled: !!projectId,
   });
-
   const updateMutation = useMutation({
     mutationFn: async (newSettings: Partial<PortalSettings>) => {
       if (!settings) return;
@@ -120,11 +113,9 @@ export function ClientPortalConfigView({ projectId }: ClientPortalConfigViewProp
       queryClient.invalidateQueries({ queryKey });
     },
   });
-
   const handleToggle = (key: keyof PortalSettings, value: boolean) => {
     updateMutation.mutate({ [key]: value });
   };
-
   if (!projectId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -135,7 +126,6 @@ export function ClientPortalConfigView({ projectId }: ClientPortalConfigViewProp
       </div>
     );
   }
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -143,7 +133,6 @@ export function ClientPortalConfigView({ projectId }: ClientPortalConfigViewProp
       </div>
     );
   }
-
   if (error || !settings) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -154,7 +143,6 @@ export function ClientPortalConfigView({ projectId }: ClientPortalConfigViewProp
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       <Alert>
@@ -164,7 +152,6 @@ export function ClientPortalConfigView({ projectId }: ClientPortalConfigViewProp
           Los cambios se guardan automáticamente.
         </AlertDescription>
       </Alert>
-
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
@@ -212,7 +199,6 @@ export function ClientPortalConfigView({ projectId }: ClientPortalConfigViewProp
           })}
         </CardContent>
       </Card>
-
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Configuración Adicional</CardTitle>
@@ -237,7 +223,6 @@ export function ClientPortalConfigView({ projectId }: ClientPortalConfigViewProp
               data-testid="switch-portal-show-amounts"
             />
           </div>
-
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <Label htmlFor="show-progress" className="text-sm font-medium cursor-pointer">
@@ -254,7 +239,6 @@ export function ClientPortalConfigView({ projectId }: ClientPortalConfigViewProp
               data-testid="switch-portal-show-progress"
             />
           </div>
-
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <Label htmlFor="allow-comments" className="text-sm font-medium cursor-pointer">
@@ -276,5 +260,4 @@ export function ClientPortalConfigView({ projectId }: ClientPortalConfigViewProp
     </div>
   );
 }
-
 export default ClientPortalConfigView;

@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { 
   Users, 
   UserMinus,
   Clock, 
@@ -12,7 +11,6 @@ import {
   Trash2,
   Shield
 } from "lucide-react";
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,9 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
-
 import MemberRow from "@/features/organization/components/MemberRow";
-
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/lib/supabase";
 import { organizationKeys } from "@/core/query-keys";
@@ -37,16 +33,14 @@ import { useGlobalModalStore } from "@/components/modal";
 import { useMobile } from "@/hooks/use-mobile";
 import { useLocation } from "wouter";
 import { useMemberActionConfirmation } from "@/features/organization/hooks/useMemberActionConfirmation";
-
 function getInitials(name: string): string {
   return name
-    .split(' ')
+    .split('')
     .map(word => word.charAt(0))
     .join('')
     .substring(0, 2)
     .toUpperCase();
 }
-
 function getRoleBadgeVariant(roleName: string): "info" | "neutral" | "success" | "warning" {
   const role = roleName?.toLowerCase() || '';
   if (role.includes('admin')) return 'info';
@@ -54,13 +48,11 @@ function getRoleBadgeVariant(roleName: string): "info" | "neutral" | "success" |
   if (role.includes('viewer') || role.includes('guest')) return 'neutral';
   return 'neutral';
 }
-
 function getRoleBadgeClassName(roleName: string) {
   const role = roleName?.toLowerCase() || '';
   if (role.includes('admin')) return 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90';
   return '';
 }
-
 export function OrganizationMembersListView() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -68,9 +60,7 @@ export function OrganizationMembersListView() {
   const { showRevokeInvitationConfirmation, showRemoveMemberConfirmation } = useMemberActionConfirmation();
   const isMobile = useMobile();
   const [, navigate] = useLocation();
-
   const organizationId = userData?.organization?.id;
-
   const { data: membersRaw = [], isLoading: membersLoading } = useQuery({
     queryKey: organizationKeys.members(organizationId),
     queryFn: async () => {
@@ -111,7 +101,6 @@ export function OrganizationMembersListView() {
     },
     enabled: !!organizationId,
   });
-
   const ownerId = (() => {
     const admins = membersRaw.filter((m: any) => {
       const role = ((Array.isArray(m.roles) ? m.roles[0] : m.roles)?.name || '').toLowerCase();
@@ -125,7 +114,6 @@ export function OrganizationMembersListView() {
     });
     return sortedAdmins[0]?.user_id || null;
   })();
-
   const members = [...membersRaw].sort((a, b) => {
     const aRole = ((Array.isArray(a.roles) ? a.roles[0] : a.roles)?.name || '').toLowerCase();
     const bRole = ((Array.isArray(b.roles) ? b.roles[0] : b.roles)?.name || '').toLowerCase();
@@ -137,25 +125,17 @@ export function OrganizationMembersListView() {
     const bIsAdmin = bRole.includes('admin');
     const aIsEditor = aRole.includes('editor');
     const bIsEditor = bRole.includes('editor');
-
     if (aIsOwner && !bIsOwner) return -1;
     if (!aIsOwner && bIsOwner) return 1;
-
     if (aIsAdmin && !bIsAdmin) return -1;
     if (!aIsAdmin && bIsAdmin) return 1;
-
     if (aIsAdmin && bIsAdmin) return aName.localeCompare(bName);
-
     if (aIsEditor && !bIsEditor) return -1;
     if (!aIsEditor && bIsEditor) return 1;
-
     if (aIsEditor && bIsEditor) return aName.localeCompare(bName);
-
     return aName.localeCompare(bName);
   });
-
   const suspendedMembersCount = members.filter((m: any) => m.is_over_limit === true).length;
-
   const { data: pendingInvites = [], isLoading: invitesLoading } = useQuery({
     queryKey: organizationKeys.invitations(organizationId),
     queryFn: async () => {
@@ -193,7 +173,6 @@ export function OrganizationMembersListView() {
     },
     enabled: !!organizationId,
   });
-
   const { data: formerMembersRaw = [] } = useQuery({
     queryKey: organizationKeys.formerMembers(organizationId),
     queryFn: async () => {
@@ -234,9 +213,7 @@ export function OrganizationMembersListView() {
     },
     enabled: !!organizationId,
   });
-
   const formerMembers = formerMembersRaw;
-
   const revokeInviteMutation = useOptimisticMutation({
     mutationFn: async (invitationId: string) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -254,7 +231,6 @@ export function OrganizationMembersListView() {
     onSuccessMessage: 'Invitación revocada correctamente',
     onErrorMessage: 'No se pudo revocar la invitación',
   });
-
   const resendInviteMutation = useOptimisticMutation({
     mutationFn: async (invitationId: string) => {
       toast({
@@ -268,7 +244,6 @@ export function OrganizationMembersListView() {
       return oldData;
     },
   });
-
   const removeMemberMutation = useOptimisticMutation({
     mutationFn: async (memberId: string) => {
       if (!organizationId) throw new Error('Organization not found');
@@ -293,7 +268,6 @@ export function OrganizationMembersListView() {
     onSuccessMessage: 'Miembro eliminado correctamente',
     onErrorMessage: 'Error al eliminar el miembro',
   });
-
   const handleRemoveMember = (member: any) => {
     const memberUser = Array.isArray(member.users) ? member.users[0] : member.users;
     const memberRole = Array.isArray(member.roles) ? member.roles[0] : member.roles;
@@ -309,7 +283,6 @@ export function OrganizationMembersListView() {
       isLoading: removeMemberMutation.isPending,
     });
   };
-
   const handleRevokeInvitation = (invite: any) => {
     showRevokeInvitationConfirmation({
       memberName: invite.user_data?.full_name || '',
@@ -322,7 +295,6 @@ export function OrganizationMembersListView() {
       isLoading: revokeInviteMutation.isPending,
     });
   };
-
   if (membersLoading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -330,7 +302,6 @@ export function OrganizationMembersListView() {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {suspendedMembersCount > 0 && (
@@ -341,7 +312,7 @@ export function OrganizationMembersListView() {
           </AlertTitle>
           <AlertDescription className="text-amber-700 dark:text-amber-300 flex items-center justify-between">
             <span>
-              {suspendedMembersCount} {suspendedMembersCount === 1 ? 'miembro está suspendido' : 'miembros están suspendidos'} por exceder los límites de tu plan actual.
+              {suspendedMembersCount} {suspendedMembersCount === 1 ? 'miembro está suspendido': 'miembros están suspendidos'} por exceder los límites de tu plan actual.
             </span>
             <Button 
               size="sm" 
@@ -366,7 +337,6 @@ export function OrganizationMembersListView() {
             Invita a tu equipo para trabajar juntos y colaborar fácilmente. Gestiona sus permisos para proyectos mejores.
           </p>
         </div>
-
         <div>
           {isMobile ? (
             <div className="space-y-3">
@@ -396,7 +366,7 @@ export function OrganizationMembersListView() {
                 const isSuspended = member.is_over_limit === true;
                 const isOwner = member.user_id === ownerId;
                 return (
-                  <Card key={member.id} className={`p-4 ${isSuspended ? 'opacity-60' : ''}`}>
+                  <Card key={member.id} className={`p-4 ${isSuspended ? 'opacity-60': ''}`}>
                     <CardContent className="p-0">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -421,7 +391,6 @@ export function OrganizationMembersListView() {
                             </p>
                           </div>
                         </div>
-
                         <div className="flex items-center gap-4">
                           <div className="text-xs text-muted-foreground text-right">
                             <div>
@@ -431,7 +400,6 @@ export function OrganizationMembersListView() {
                               }
                             </div>
                           </div>
-
                           {isSuspended && (
                             <Badge 
                               variant="neutral"
@@ -440,14 +408,12 @@ export function OrganizationMembersListView() {
                               Suspendido
                             </Badge>
                           )}
-
                           <Badge 
                             variant={getRoleBadgeVariant((Array.isArray(member.roles) ? member.roles[0] : member.roles)?.name || '')}
                             className={getRoleBadgeClassName((Array.isArray(member.roles) ? member.roles[0] : member.roles)?.name || '')}
                           >
                             {(Array.isArray(member.roles) ? member.roles[0] : member.roles)?.name || 'Sin rol'}
                           </Badge>
-
                           {!isOwner && (
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -483,7 +449,6 @@ export function OrganizationMembersListView() {
                   </Card>
                 );
               })}
-
               {members.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">
                   <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
@@ -495,9 +460,7 @@ export function OrganizationMembersListView() {
           )}
         </div>
       </div>
-
       <hr className="border-t border-[var(--section-divider)] my-8" />
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
           <div className="flex items-center gap-2 mb-6">
@@ -508,7 +471,6 @@ export function OrganizationMembersListView() {
             Personas que han sido invitadas pero aún no han aceptado unirse a tu organización.
           </p>
         </div>
-
         <div>
           {isMobile ? (
             <div className="space-y-3">
@@ -537,7 +499,6 @@ export function OrganizationMembersListView() {
                           </p>
                         </div>
                       </div>
-
                       <div className="flex gap-2">
                         <Button 
                           variant="secondary" 
@@ -592,12 +553,10 @@ export function OrganizationMembersListView() {
                           </p>
                         </div>
                       </div>
-
                       <div className="flex items-center gap-4">
                         <Badge variant="neutral">
                           {(Array.isArray(invite.roles) ? invite.roles[0] : invite.roles)?.name || 'Sin rol'}
                         </Badge>
-
                         <div className="flex gap-2">
                           <Button 
                             variant="secondary" 
@@ -619,7 +578,6 @@ export function OrganizationMembersListView() {
                   </CardContent>
                 </Card>
               ))}
-
               {pendingInvites.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">
                   <Clock className="h-12 w-12 mx-auto mb-4 opacity-20" />
@@ -630,11 +588,9 @@ export function OrganizationMembersListView() {
           )}
         </div>
       </div>
-
       {formerMembers.length > 0 && (
         <>
           <hr className="border-t border-[var(--section-divider)] my-8" />
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-6">
@@ -645,7 +601,6 @@ export function OrganizationMembersListView() {
                 Personas que formaron parte de tu organización pero ya no están activas. Puedes volver a invitarlos si es necesario.
               </p>
             </div>
-
             <div>
               <div className="space-y-2">
                 {formerMembers.map((member) => {
@@ -675,7 +630,6 @@ export function OrganizationMembersListView() {
                               </p>
                             </div>
                           </div>
-
                           <div className="flex items-center gap-4">
                             <div className="text-xs text-muted-foreground text-right">
                               <div className="text-[10px] uppercase tracking-wide">Fue miembro</div>
@@ -684,18 +638,16 @@ export function OrganizationMembersListView() {
                                   ? format(new Date(member.joined_at), 'MMM yyyy', { locale: es })
                                   : '—'
                                 }
-                                {member.updated_at && ' - '}
+                                {member.updated_at && '- '}
                                 {member.updated_at && !isNaN(new Date(member.updated_at).getTime()) 
                                   ? format(new Date(member.updated_at), 'MMM yyyy', { locale: es })
                                   : ''
                                 }
                               </div>
                             </div>
-
                             <Badge variant="neutral" className="text-muted-foreground">
                               {roleData?.name || 'Sin rol'}
                             </Badge>
-
                             <Button 
                               variant="outline" 
                               size="sm"

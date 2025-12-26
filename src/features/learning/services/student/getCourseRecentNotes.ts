@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-
 /**
  * Obtiene las notas recientes de un curso.
  * 
@@ -14,14 +13,12 @@ export async function getCourseRecentNotes(courseId: string): Promise<any[]> {
   if (!courseId) {
     return [];
   }
-
   const { data } = await supabase.auth.getSession();
   const session = data?.session;
   
   if (!session) {
     throw new Error('No active session');
   }
-
   const response = await fetch(`/api/courses/${courseId}/recent-notes`, {
     method: 'GET',
     headers: {
@@ -30,11 +27,9 @@ export async function getCourseRecentNotes(courseId: string): Promise<any[]> {
     },
     credentials: 'include',
   });
-
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Failed to fetch course recent notes' }));
+    const error = await response.json().catch(() => ({ error: 'Failed to fetch course recent notes'}));
     throw new Error(error.error || 'Failed to fetch course recent notes');
   }
-
   return await response.json();
 }

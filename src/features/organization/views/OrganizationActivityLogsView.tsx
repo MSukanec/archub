@@ -4,7 +4,6 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Activity as ActivityIcon } from 'lucide-react';
 import { useLocation } from 'wouter';
-
 import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
@@ -15,20 +14,16 @@ import { getOrganizationActivityLogs } from '@/features/organization/services/ge
 import { getActivityDisplayInfo } from '@/features/organization/utils';
 import { organizationKeys } from '@/core/query-keys';
 import type { ActivityLog } from '@/features/organization/types';
-
 interface OrganizationActivityLogsViewProps {
   organizationId: string;
 }
-
 export function OrganizationActivityLogsView({ organizationId }: OrganizationActivityLogsViewProps) {
   const [, navigate] = useLocation();
-
   const { data: activities = [], isLoading } = useQuery<ActivityLog[]>({
     queryKey: organizationKeys.activityLogs(organizationId),
     queryFn: () => getOrganizationActivityLogs(organizationId),
     enabled: !!organizationId,
   });
-
   // Handle activity click
   const handleActivityClick = (activity: any) => {
     console.log('Activity clicked:', activity);
@@ -50,15 +45,14 @@ export function OrganizationActivityLogsView({ organizationId }: OrganizationAct
         console.log('Activity details:', activity);
     }
   };
-
   // Table columns configuration
   const columns: Column<ActivityLog>[] = useMemo(() => [
     {
-      key: 'created_at' as const,
+      key: 'created_at'as const,
       label: 'Fecha',
-      type: 'date' as const,
+      type: 'date'as const,
       sortable: true,
-      sortType: 'date' as const,
+      sortType: 'date'as const,
       render: (activity: ActivityLog) => (
         <div className="flex flex-col gap-0.5">
           <span className="text-xs font-medium">
@@ -74,9 +68,9 @@ export function OrganizationActivityLogsView({ organizationId }: OrganizationAct
       )
     },
     {
-      key: 'user' as const,
+      key: 'user'as const,
       label: 'Usuario',
-      type: 'name' as const,
+      type: 'name'as const,
       sortable: false,
       render: (activity: ActivityLog) => (
         <IdentityBadge
@@ -89,9 +83,9 @@ export function OrganizationActivityLogsView({ organizationId }: OrganizationAct
       )
     },
     {
-      key: 'action' as const,
+      key: 'action'as const,
       label: 'Acción',
-      type: 'name' as const,
+      type: 'name'as const,
       sortable: false,
       render: (activity: ActivityLog) => {
         const displayInfo = getActivityDisplayInfo(activity);
@@ -105,9 +99,9 @@ export function OrganizationActivityLogsView({ organizationId }: OrganizationAct
       }
     },
     {
-      key: 'description' as const,
+      key: 'description'as const,
       label: 'Detalle',
-      type: 'long-text' as const,
+      type: 'long-text'as const,
       sortable: false,
       render: (activity: ActivityLog) => {
         const displayInfo = getActivityDisplayInfo(activity);
@@ -119,7 +113,6 @@ export function OrganizationActivityLogsView({ organizationId }: OrganizationAct
       }
     }
   ], []);
-
   return (
     <div className="space-y-6">
       {/* Activity Chart and Table */}

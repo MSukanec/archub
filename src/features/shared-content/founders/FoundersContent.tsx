@@ -5,7 +5,6 @@ import { CourseBonusSection } from "./components/CourseBonusSection";
 import { HowToJoinSection } from "./components/HowToJoinSection";
 import { FinalCTASection } from "./components/FinalCTASection";
 import type { FoundersContentProps } from "./types";
-
 export function FoundersContent({ mode, showHero = true }: FoundersContentProps) {
   return (
     <>

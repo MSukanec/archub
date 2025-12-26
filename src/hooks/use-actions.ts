@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
-
 export interface TaskKind {
   id: string;
   code: string;
@@ -11,7 +10,6 @@ export interface TaskKind {
   created_at: string;
   updated_at: string;
 }
-
 export function useTaskKinds() {
   return useQuery({
     queryKey: ['task-kinds'],
@@ -22,20 +20,16 @@ export function useTaskKinds() {
         .from('task_kind')
         .select('*')
         .order('name', { ascending: true });
-
       if (error) {
         console.error('Error fetching task kinds:', error);
         throw error;
       }
-
       return data || [];
     },
   });
 }
-
 export function useDeleteTaskKind() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (id: string) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -44,7 +38,6 @@ export function useDeleteTaskKind() {
         .from('task_kind')
         .delete()
         .eq('id', id);
-
       if (error) throw error;
     },
     onSuccess: () => {

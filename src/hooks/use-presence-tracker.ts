@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { usePresenceStore } from '@/stores/presenceStore';
 import { supabase } from '@/lib/supabase';
-
 /**
  * Mapea rutas a nombres de vistas legibles
  * Simplifica rutas complejas a nombres entendibles
@@ -67,7 +66,7 @@ function mapRouteToView(path: string): string {
   if (path.startsWith('/clients')) return 'clients';
   
   // Public routes (no tracking)
-  if (path === '/login' || path === '/register' || path === '/forgot-password') {
+  if (path === '/login'|| path === '/register'|| path === '/forgot-password') {
     return 'auth';
   }
   
@@ -79,7 +78,6 @@ function mapRouteToView(path: string): string {
   // Default: usar el path directamente (sin barras)
   return path.replace(/\//g, '_').substring(1) || 'unknown';
 }
-
 /**
  * Hook para tracking automático de cambios de vista
  * Se ejecuta cada vez que el usuario navega a una nueva ruta
@@ -91,13 +89,11 @@ function mapRouteToView(path: string): string {
 export function usePresenceTracker() {
   const [location] = useLocation();
   const { setCurrentView } = usePresenceStore();
-
   useEffect(() => {
     // No trackear rutas públicas de auth
-    if (location === '/login' || location === '/register' || location === '/forgot-password' || location === '/') {
+    if (location === '/login'|| location === '/register'|| location === '/forgot-password'|| location === '/') {
       return;
     }
-
     // Mapear ruta a nombre de vista
     const viewName = mapRouteToView(location);
     
@@ -107,7 +103,6 @@ export function usePresenceTracker() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.user) return; // Solo trackear usuarios autenticados
-
         // Cerrar vista anterior (si existe)
         await supabase.rpc('analytics_exit_previous_view');
         
@@ -117,7 +112,6 @@ export function usePresenceTracker() {
         // Silenciar errores de analytics (no afectan la UX)
       }
     };
-
     // Ejecutar tracking en background (no esperamos respuesta)
     trackViewChange();
     

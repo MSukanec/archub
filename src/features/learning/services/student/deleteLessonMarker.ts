@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-
 /**
  * Elimina un marcador por su ID.
  * 
@@ -16,14 +15,12 @@ export async function deleteLessonMarker(markerId: string): Promise<boolean> {
   if (!markerId) {
     throw new Error('Marker ID is required');
   }
-
   const { data } = await supabase.auth.getSession();
   const session = data?.session;
   
   if (!session) {
     throw new Error('No active session');
   }
-
   const response = await fetch(`/api/notes/${markerId}`, {
     method: 'DELETE',
     headers: {
@@ -32,11 +29,9 @@ export async function deleteLessonMarker(markerId: string): Promise<boolean> {
     },
     credentials: 'include',
   });
-
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Failed to delete marker' }));
+    const error = await response.json().catch(() => ({ error: 'Failed to delete marker'}));
     throw new Error(error.error || 'Failed to delete marker');
   }
-
   return true;
 }

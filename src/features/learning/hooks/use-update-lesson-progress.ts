@@ -3,7 +3,6 @@ import { updateLessonProgress } from '../services';
 import { LEARNING_QUERY_KEYS } from '../constants';
 import type { UpdateLessonProgressPayload } from '../types';
 import { useToast } from '@/hooks/use-toast';
-
 /**
  * Hook para actualizar el progreso de una lección.
  * 
@@ -22,7 +21,6 @@ import { useToast } from '@/hooks/use-toast';
 export function useUpdateLessonProgress(courseId?: string) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
   return useMutation({
     mutationFn: (payload: UpdateLessonProgressPayload) => updateLessonProgress(payload),
     onSuccess: (data, variables) => {
@@ -30,14 +28,12 @@ export function useUpdateLessonProgress(courseId?: string) {
       queryClient.invalidateQueries({
         queryKey: LEARNING_QUERY_KEYS.lessonProgress(variables.lessonId),
       });
-
       // Invalidar progreso del curso si se proporciona courseId
       if (courseId) {
         queryClient.invalidateQueries({
           queryKey: LEARNING_QUERY_KEYS.courseProgress(courseId),
         });
       }
-
       // Mostrar toast si la lección se completó
       if (variables.is_completed || (variables.progress_pct && variables.progress_pct >= 95)) {
         toast({

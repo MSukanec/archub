@@ -3,16 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Crown, Check, ArrowRight, Sparkles, Users, Gift } from 'lucide-react';
 import type { CoursesMode } from '@/features/shared-content/courses/types';
-
 interface FoundersPromoSectionProps {
   mode?: CoursesMode;
   coursePrice?: number;
 }
-
 export function FoundersPromoSection({ mode = 'public', coursePrice }: FoundersPromoSectionProps) {
   const [, navigate] = useLocation();
-  const foundersUrl = mode === 'dashboard' ? '/settings/founders' : '/founders';
-
+  const foundersUrl = mode === 'dashboard'? '/settings/founders': '/founders';
   return (
     <section className="py-16 sm:py-20" data-testid="section-founders-promo">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,7 +35,6 @@ export function FoundersPromoSection({ mode = 'public', coursePrice }: FoundersP
                   </p>
                 </div>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div className="space-y-4">
                   <h3 className="font-semibold flex items-center gap-2">
@@ -57,7 +53,6 @@ export function FoundersPromoSection({ mode = 'public', coursePrice }: FoundersP
                     </div>
                   )}
                 </div>
-
                 <div className="space-y-3">
                   <h3 className="font-semibold flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-accent" />
@@ -83,7 +78,6 @@ export function FoundersPromoSection({ mode = 'public', coursePrice }: FoundersP
                   </ul>
                 </div>
               </div>
-
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-4 border-t border-accent/20">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Users className="w-4 h-4" />

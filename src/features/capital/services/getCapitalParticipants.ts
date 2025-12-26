@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { CapitalParticipant, CapitalParticipantContact } from '../types';
-
 export async function getCapitalParticipants(organizationId: string): Promise<CapitalParticipant[]> {
   if (!organizationId) {
     return [];
@@ -37,7 +36,6 @@ export async function getCapitalParticipants(organizationId: string): Promise<Ca
     .eq('organization_id', organizationId)
     .eq('is_deleted', false)
     .order('created_at', { ascending: false });
-
   if (error) {
     throw error;
   }
@@ -54,6 +52,5 @@ export async function getCapitalParticipants(organizationId: string): Promise<Ca
     } as CapitalParticipant;
   });
 }
-
 // Backward compatibility alias
 export const getPartners = getCapitalParticipants;

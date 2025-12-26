@@ -5,14 +5,13 @@ import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { convertToBaseCurrency, formatKPI, formatSubValue } from '@/lib/money';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown } from '@/lib/kpis';
-
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Table } from '@/components/shared/table/Table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal';
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/shared/AppCard';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useGeneralCostsPayments, type GeneralCostPayment } from '../hooks/use-general-costs-payments';
 import { useDeleteGeneralCostPayment } from '../hooks/use-delete-general-cost-payment';
@@ -32,14 +31,12 @@ import type { TargetField, ImportConfig } from '@/features/imports/types';
 import { exportToExcel, createExportColumns } from '@/lib/export-utils';
 import { pdf } from '@react-pdf/renderer';
 import { GeneralCostPaymentsPDF, type GeneralCostPaymentsPDFData, type GeneralCostPaymentItem } from '@/features/pdf';
-
 interface GeneralCostsPaymentsTabProps {
   initialFilterMonth?: string;
   initialFilterGeneralCost?: string;
   initialFilterCategory?: string;
   onClearDrillDown?: () => void;
 }
-
 export default function GeneralCostsPaymentsView({
   initialFilterMonth,
   initialFilterGeneralCost,
@@ -52,7 +49,6 @@ export default function GeneralCostsPaymentsView({
   
   const organizationId = userData?.organization?.id;
   const defaultCurrencyId = userData?.organization?.preferences?.default_currency_id;
-
   // Filter states
   const [filterWallet, setFilterWallet] = useState<string>('all');
   const [filterCurrency, setFilterCurrency] = useState<string>('all');
@@ -60,10 +56,8 @@ export default function GeneralCostsPaymentsView({
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterMonth, setFilterMonth] = useState<string>(initialFilterMonth || 'all');
   const [filterCategory, setFilterCategory] = useState<string>(initialFilterCategory || 'all');
-
   // Selection state
   const [selectedPayments, setSelectedPayments] = useState<GeneralCostPayment[]>([]);
-
   const { data: allPayments = [], isLoading } = useGeneralCostsPayments(organizationId);
   const deletePaymentMutation = useDeleteGeneralCostPayment(organizationId ?? null);
   const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
@@ -75,12 +69,10 @@ export default function GeneralCostsPaymentsView({
   const createPaymentMutation = useCreateGeneralCostPayment(organizationId ?? null);
   const { toast } = useToast();
   const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
-
   // Obtener el member actual del usuario (igual que en el formulario de pagos)
   const currentMember = useMemo(() => {
     return members.find((m: any) => m.user_id === userData?.user?.id);
   }, [members, userData?.user?.id]);
-
   // Mobile Action Bar
   const {
     setActions,
@@ -89,7 +81,6 @@ export default function GeneralCostsPaymentsView({
     setFilterConfig
   } = useActionBarMobile();
   const isMobile = useMobile();
-
   // Sync filter states with props when they change (drill-down from dashboard)
   useEffect(() => {
     // Reset all drill-down filters first, then apply new ones
@@ -97,21 +88,19 @@ export default function GeneralCostsPaymentsView({
     setFilterGeneralCost(initialFilterGeneralCost || 'all');
     setFilterCategory(initialFilterCategory || 'all');
   }, [initialFilterMonth, initialFilterGeneralCost, initialFilterCategory]);
-
   // Check if we have active drill-down filters from dashboard
   const hasDrillDownFilter = !!(initialFilterMonth || initialFilterGeneralCost || initialFilterCategory);
   const drillDownLabel = initialFilterMonth 
     ? (() => {
         const [year, m] = initialFilterMonth.split('-');
         const date = new Date(parseInt(year), parseInt(m) - 1);
-        return `Mes: ${date.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })}`;
+        return `Mes: ${date.toLocaleDateString('es-AR', { month: 'long', year: 'numeric'})}`;
       })()
     : initialFilterCategory 
       ? `Categoría: ${initialFilterCategory}`
       : initialFilterGeneralCost 
         ? `Gasto General: ${initialFilterGeneralCost}`
         : null;
-
   // Extract unique values for filters
   const filterOptions = useMemo(() => {
     const wallets = new Set<string>();
@@ -119,7 +108,6 @@ export default function GeneralCostsPaymentsView({
     const generalCosts = new Set<string>();
     const categories = new Set<string>();
     const months = new Set<string>();
-
     allPayments.forEach(payment => {
       if (payment.wallet?.wallets?.name) wallets.add(payment.wallet.wallets.name);
       if (payment.currency?.code) currencies.add(payment.currency.code);
@@ -133,7 +121,6 @@ export default function GeneralCostsPaymentsView({
         }
       }
     });
-
     return {
       wallets: Array.from(wallets).sort(),
       currencies: Array.from(currencies).sort(),
@@ -142,16 +129,15 @@ export default function GeneralCostsPaymentsView({
       months: Array.from(months).sort().reverse(),
     };
   }, [allPayments]);
-
   // Apply filters
   const filteredPayments = useMemo(() => {
     return allPayments.filter(payment => {
-      if (filterWallet !== 'all' && payment.wallet?.wallets?.name !== filterWallet) return false;
-      if (filterCurrency !== 'all' && payment.currency?.code !== filterCurrency) return false;
-      if (filterGeneralCost !== 'all' && payment.general_cost?.name !== filterGeneralCost) return false;
-      if (filterCategory !== 'all' && payment.general_cost?.category?.name !== filterCategory) return false;
-      if (filterStatus !== 'all' && payment.status !== filterStatus) return false;
-      if (filterMonth !== 'all' && payment.payment_date) {
+      if (filterWallet !== 'all'&& payment.wallet?.wallets?.name !== filterWallet) return false;
+      if (filterCurrency !== 'all'&& payment.currency?.code !== filterCurrency) return false;
+      if (filterGeneralCost !== 'all'&& payment.general_cost?.name !== filterGeneralCost) return false;
+      if (filterCategory !== 'all'&& payment.general_cost?.category?.name !== filterCategory) return false;
+      if (filterStatus !== 'all'&& payment.status !== filterStatus) return false;
+      if (filterMonth !== 'all'&& payment.payment_date) {
         const date = parseLocalDate(payment.payment_date);
         if (date) {
           const paymentMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -161,7 +147,6 @@ export default function GeneralCostsPaymentsView({
       return true;
     });
   }, [allPayments, filterWallet, filterCurrency, filterGeneralCost, filterCategory, filterStatus, filterMonth]);
-
   // Sort by payment_date DESC, then by created_at DESC
   const sortedPayments = useMemo(() => {
     return [...filteredPayments].sort((a, b) => {
@@ -178,7 +163,6 @@ export default function GeneralCostsPaymentsView({
       return createdAtB - createdAtA;
     });
   }, [filteredPayments]);
-
   // Calculate metrics using new KPI system
   const metricsData = useMemo(() => {
     // KPI 1: Total Pagos (conteo simple)
@@ -186,7 +170,6 @@ export default function GeneralCostsPaymentsView({
       count: allPayments.length,
       label: 'Cantidad de pagos'
     });
-
     // KPI 2: Pagos a la Fecha (monetaria - TOTAL convertido a moneda base + breakdown original)
     // Solo incluye pagos confirmados
     const confirmedPayments = allPayments.filter(p => p.status === 'confirmed');
@@ -199,13 +182,11 @@ export default function GeneralCostsPaymentsView({
       })),
       baseCurrencyId: defaultCurrency?.code  // Moneda para convertir (se refetcha automáticamente)
     });
-
     return {
       total_count_kpi: totalPagosKPI,
       total_confirmed_kpi: pagosALaFechaKPI,
     };
   }, [allPayments, defaultCurrency]);  // ← CRÍTICO: defaultCurrency en dependencias
-
   const handleEdit = (payment: GeneralCostPayment) => {
     if (!organizationId) return;
     openModal('general-costs-payment', {
@@ -214,10 +195,8 @@ export default function GeneralCostsPaymentsView({
       mode: 'edit',
     });
   };
-
   const handleDelete = (payment: GeneralCostPayment) => {
     if (!organizationId) return;
-
     const generalCostName = payment.general_cost?.name || 'Sin categoría';
     const symbol = payment.currency?.symbol || '$';
     const formattedAmount = `${symbol} ${payment.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -236,18 +215,16 @@ export default function GeneralCostsPaymentsView({
       isLoading: deletePaymentMutation.isPending
     });
   };
-
   const handleBulkDelete = () => {
     if (!organizationId || selectedPayments.length === 0) return;
-
     const count = selectedPayments.length;
     
     showDeleteConfirmation({
       mode: 'simple',
-      title: `Eliminar ${count} ${count === 1 ? 'pago' : 'pagos'}`,
-      description: `¿Estás seguro de que querés eliminar ${count === 1 ? 'este pago' : `estos ${count} pagos`}? Esta acción no se puede deshacer.`,
-      itemName: `${count} ${count === 1 ? 'pago seleccionado' : 'pagos seleccionados'}`,
-      destructiveActionText: `Eliminar ${count === 1 ? 'pago' : 'pagos'}`,
+      title: `Eliminar ${count} ${count === 1 ? 'pago': 'pagos'}`,
+      description: `¿Estás seguro de que querés eliminar ${count === 1 ? 'este pago': `estos ${count} pagos`}? Esta acción no se puede deshacer.`,
+      itemName: `${count} ${count === 1 ? 'pago seleccionado': 'pagos seleccionados'}`,
+      destructiveActionText: `Eliminar ${count === 1 ? 'pago': 'pagos'}`,
       onDelete: async () => {
         let successCount = 0;
         let failCount = 0;
@@ -282,7 +259,6 @@ export default function GeneralCostsPaymentsView({
       isLoading: deletePaymentMutation.isPending
     });
   };
-
   const handleView = (payment: GeneralCostPayment) => {
     if (!organizationId) return;
     openModal('general-costs-payment-view', {
@@ -290,14 +266,12 @@ export default function GeneralCostsPaymentsView({
       paymentId: payment.id,
     });
   };
-
   const handleAddPayment = () => {
     if (!organizationId) return;
     openModal('general-costs-payment', {
       organizationId,
     });
   };
-
   const handleImport = () => {
     if (!organizationId || !userData?.user?.id) {
       toast({
@@ -307,7 +281,6 @@ export default function GeneralCostsPaymentsView({
       });
       return;
     }
-
     const targetSchema: TargetField[] = [
       {
         field: 'payment_date',
@@ -389,10 +362,10 @@ export default function GeneralCostsPaymentsView({
           labelKey: 'label',
           valueKey: 'value',
           options: [
-            { label: 'Confirmado', value: 'confirmed' },
-            { label: 'Pendiente', value: 'pending' },
-            { label: 'Vencido', value: 'overdue' },
-            { label: 'Cancelado', value: 'cancelled' },
+            { label: 'Confirmado', value: 'confirmed'},
+            { label: 'Pendiente', value: 'pending'},
+            { label: 'Vencido', value: 'overdue'},
+            { label: 'Cancelado', value: 'cancelled'},
           ],
         },
       },
@@ -411,7 +384,6 @@ export default function GeneralCostsPaymentsView({
         description: 'Observaciones adicionales',
       },
     ];
-
     const walletValueMap: Record<string, string> = {};
     organizationWallets.forEach(ow => {
       if (ow.wallets?.name && ow.id) {
@@ -419,7 +391,6 @@ export default function GeneralCostsPaymentsView({
         walletValueMap[normalizedName] = ow.id;
       }
     });
-
     const currencyValueMap: Record<string, string> = {};
     organizationCurrencies.forEach(oc => {
       if (oc.currency?.code && oc.currency_id) {
@@ -431,13 +402,11 @@ export default function GeneralCostsPaymentsView({
         }
       }
     });
-
     const generalCostValueMap: Record<string, string> = {};
     generalCostsData.forEach(gc => {
       const normalizedName = gc.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
       generalCostValueMap[normalizedName] = gc.id;
     });
-
     const valueMapConfig: Record<string, Record<string, string>> = {
       currency_code: currencyValueMap,
       status: {
@@ -449,7 +418,6 @@ export default function GeneralCostsPaymentsView({
       wallet_name: walletValueMap,
       general_cost_name: generalCostValueMap,
     };
-
     openModal('universal-import', {
       config: {
         entityName: 'Pago de Gasto General',
@@ -475,13 +443,11 @@ export default function GeneralCostsPaymentsView({
         },
         onImport: async (rows: any[], onProgress?: (current: number, total: number) => void) => {
           const isValidUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-
           const generalCostsMap = new Map<string, string>();
           generalCostsData.forEach(gc => {
             const normalized = gc.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
             generalCostsMap.set(normalized, gc.id);
           });
-
           const currenciesMap = new Map<string, string>();
           organizationCurrencies.forEach(oc => {
             if (oc.currency?.code && oc.currency_id) {
@@ -492,7 +458,6 @@ export default function GeneralCostsPaymentsView({
               }
             }
           });
-
           const walletsMap = new Map<string, string>();
           let defaultWalletId: string | null = null;
           
@@ -508,14 +473,12 @@ export default function GeneralCostsPaymentsView({
           if (!defaultWalletId && organizationWallets.length > 0) {
             defaultWalletId = organizationWallets[0].id;
           }
-
           const invalidRows: Array<{ index: number; reason: string }> = [];
           const validRowsToImport: Array<{ row: any; resolvedCurrencyId: string; resolvedGeneralCostId: string; resolvedWalletId: string | null }> = [];
-
           rows.forEach((row, idx) => {
             const rawGeneralCost = row.general_cost_name;
             if (!rawGeneralCost) {
-              invalidRows.push({ index: idx + 1, reason: 'Sin gasto general asignado' });
+              invalidRows.push({ index: idx + 1, reason: 'Sin gasto general asignado'});
               return;
             }
             let resolvedGeneralCostId = rawGeneralCost;
@@ -527,10 +490,9 @@ export default function GeneralCostsPaymentsView({
                 return;
               }
             }
-
             const rawCurrency = row.currency_code;
             if (!rawCurrency) {
-              invalidRows.push({ index: idx + 1, reason: 'Sin moneda asignada' });
+              invalidRows.push({ index: idx + 1, reason: 'Sin moneda asignada'});
               return;
             }
             let resolvedCurrencyId = rawCurrency;
@@ -542,7 +504,6 @@ export default function GeneralCostsPaymentsView({
                 return;
               }
             }
-
             let resolvedWalletId: string | null = null;
             const rawWallet = row.wallet_name;
             if (rawWallet) {
@@ -556,30 +517,23 @@ export default function GeneralCostsPaymentsView({
             if (!resolvedWalletId) {
               resolvedWalletId = defaultWalletId;
             }
-
             validRowsToImport.push({ row, resolvedCurrencyId, resolvedGeneralCostId, resolvedWalletId });
           });
-
           if (invalidRows.length > 0) {
             toast({
               title: `${invalidRows.length} filas no se pudieron importar`,
-              description: invalidRows.slice(0, 3).map(r => `Fila ${r.index}: ${r.reason}`).join('. ') + (invalidRows.length > 3 ? '...' : ''),
+              description: invalidRows.slice(0, 3).map(r => `Fila ${r.index}: ${r.reason}`).join('. ') + (invalidRows.length > 3 ? '...': ''),
               variant: 'destructive',
             });
           }
-
           let successCount = 0;
           let failCount = 0;
-
           const totalToImport = validRowsToImport.length;
           let currentIndex = 0;
-
           const validStatuses = ['confirmed', 'pending', 'overdue', 'cancelled'];
-
           for (const { row, resolvedCurrencyId, resolvedGeneralCostId, resolvedWalletId } of validRowsToImport) {
             try {
               const resolvedStatus = validStatuses.includes(row.status) ? row.status : 'confirmed';
-
               await createPaymentMutation.mutateAsync({
                 organization_id: organizationId!,
                 payment_date: row.payment_date,
@@ -600,7 +554,6 @@ export default function GeneralCostsPaymentsView({
             currentIndex++;
             onProgress?.(currentIndex, totalToImport);
           }
-
           if (failCount > 0) {
             toast({
               title: 'Importación parcial',
@@ -613,7 +566,6 @@ export default function GeneralCostsPaymentsView({
               description: `Se importaron ${successCount} pagos correctamente.`,
             });
           }
-
           // Invalidar cache para refrescar la lista y dashboard (scoped by organizationId)
           if (successCount > 0 && organizationId) {
             queryClient.invalidateQueries({ queryKey: generalCostsKeys.paymentList(organizationId) });
@@ -624,17 +576,16 @@ export default function GeneralCostsPaymentsView({
       } as ImportConfig,
     });
   };
-
   const handleExportExcel = () => {
     const exportColumns = [
       { key: 'payment_date', label: 'Fecha de Pago', render: (p: GeneralCostPayment) => formatDate(p.payment_date) },
-      { key: 'general_cost', label: 'Gasto General', render: (p: GeneralCostPayment) => p.general_cost?.name || '-' },
-      { key: 'category', label: 'Categoría', render: (p: GeneralCostPayment) => p.general_cost?.category?.name || '-' },
-      { key: 'notes', label: 'Notas', render: (p: GeneralCostPayment) => p.notes || '-' },
-      { key: 'wallet', label: 'Billetera', render: (p: GeneralCostPayment) => p.wallet?.wallets?.name || '-' },
+      { key: 'general_cost', label: 'Gasto General', render: (p: GeneralCostPayment) => p.general_cost?.name || '-'},
+      { key: 'category', label: 'Categoría', render: (p: GeneralCostPayment) => p.general_cost?.category?.name || '-'},
+      { key: 'notes', label: 'Notas', render: (p: GeneralCostPayment) => p.notes || '-'},
+      { key: 'wallet', label: 'Billetera', render: (p: GeneralCostPayment) => p.wallet?.wallets?.name || '-'},
       { key: 'amount', label: 'Monto', render: (p: GeneralCostPayment) => p.amount },
-      { key: 'currency', label: 'Moneda', render: (p: GeneralCostPayment) => p.currency?.code || '-' },
-      { key: 'exchange_rate', label: 'Cotización', render: (p: GeneralCostPayment) => p.exchange_rate || '-' },
+      { key: 'currency', label: 'Moneda', render: (p: GeneralCostPayment) => p.currency?.code || '-'},
+      { key: 'exchange_rate', label: 'Cotización', render: (p: GeneralCostPayment) => p.exchange_rate || '-'},
       { key: 'status', label: 'Estado', render: (p: GeneralCostPayment) => {
         const statusLabels: Record<string, string> = {
           confirmed: 'Confirmado',
@@ -644,9 +595,8 @@ export default function GeneralCostsPaymentsView({
         };
         return statusLabels[p.status] || p.status;
       }},
-      { key: 'reference', label: 'Referencia', render: (p: GeneralCostPayment) => p.reference || '-' },
+      { key: 'reference', label: 'Referencia', render: (p: GeneralCostPayment) => p.reference || '-'},
     ];
-
     const filename = `gastos_generales_pagos_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
     
     exportToExcel({
@@ -655,19 +605,16 @@ export default function GeneralCostsPaymentsView({
       columns: exportColumns,
       data: sortedPayments,
     });
-
     toast({
       title: 'Exportación exitosa',
       description: `Se exportaron ${sortedPayments.length} pagos a Excel.`,
     });
   };
-
   const handleExportPDF = async () => {
     try {
       const confirmedPayments = sortedPayments.filter(p => p.status === 'confirmed');
       const totalConfirmed = confirmedPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
       const defaultSymbol = defaultCurrency?.symbol || '$';
-
       const pdfData: GeneralCostPaymentsPDFData = {
         organization_name: userData?.organization?.name || 'Mi Organización',
         organization_logo: userData?.organization?.logo_url || null,
@@ -679,7 +626,7 @@ export default function GeneralCostsPaymentsView({
           payment_date: p.payment_date,
           amount: p.amount,
           exchange_rate: p.exchange_rate,
-          status: p.status === 'void' ? 'cancelled' : p.status === 'rejected' ? 'cancelled' : p.status as 'confirmed' | 'pending' | 'overdue' | 'cancelled',
+          status: p.status === 'void'? 'cancelled': p.status === 'rejected'? 'cancelled': p.status as 'confirmed'| 'pending'| 'overdue'| 'cancelled',
           reference: p.reference,
           notes: p.notes,
           currency_symbol: p.currency?.symbol,
@@ -694,7 +641,6 @@ export default function GeneralCostsPaymentsView({
         total_confirmed_formatted: `${defaultSymbol} ${totalConfirmed.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         generated_at: new Date().toISOString(),
       };
-
       const blob = await pdf(<GeneralCostPaymentsPDF data={pdfData} />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -704,7 +650,6 @@ export default function GeneralCostsPaymentsView({
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-
       toast({
         title: 'Exportación exitosa',
         description: `Se exportaron ${sortedPayments.length} pagos a PDF.`,
@@ -717,7 +662,6 @@ export default function GeneralCostsPaymentsView({
       });
     }
   };
-
   const formatDate = (dateString: string) => {
     try {
       const date = parseLocalDate(dateString);
@@ -726,20 +670,18 @@ export default function GeneralCostsPaymentsView({
       return '-';
     }
   };
-
   const formatAmount = (amount: number, currencySymbol: string | undefined) => {
     const symbol = currencySymbol || '$';
     return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
-
   const getStatusBadgeStyle = (status: any): React.CSSProperties => {
     const statusColorMap: Record<string, { colorVar: string }> = {
-      confirmed: { colorVar: '--success' },
-      pending: { colorVar: '--warning' },
-      overdue: { colorVar: '--destructive' },
-      cancelled: { colorVar: '--badge-status-neutral' },
+      confirmed: { colorVar: '--success'},
+      pending: { colorVar: '--warning'},
+      overdue: { colorVar: '--destructive'},
+      cancelled: { colorVar: '--badge-status-neutral'},
     };
-    const validStatus = status && typeof status === 'string' && status in statusColorMap 
+    const validStatus = status && typeof status === 'string'&& status in statusColorMap 
       ? status 
       : 'cancelled';
     const config = statusColorMap[validStatus];
@@ -749,8 +691,7 @@ export default function GeneralCostsPaymentsView({
       borderColor: `color-mix(in srgb, var(${config.colorVar}) 30%, transparent)`,
     };
   };
-
-  const getStatusLabel = (status: 'confirmed' | 'pending' | 'overdue' | 'cancelled') => {
+  const getStatusLabel = (status: 'confirmed'| 'pending'| 'overdue'| 'cancelled') => {
     const labels: Record<string, string> = {
       confirmed: 'Confirmado',
       pending: 'Pendiente',
@@ -759,17 +700,14 @@ export default function GeneralCostsPaymentsView({
     };
     return labels[status] || status;
   };
-
   const formatCurrencyAmount = (amount: number, currencySymbol?: string) => {
     const symbol = currencySymbol || '$';
     const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     return `${symbol} ${formattedAmount}`;
   };
-
   // Configure Mobile Action Bar - Always show 5 buttons
   useEffect(() => {
     if (!isMobile) return;
-
     setActions({
       search: {
         id: 'search',
@@ -798,7 +736,6 @@ export default function GeneralCostsPaymentsView({
       },
     });
     setShowActionBar(true);
-
     // Cleanup when component unmounts
     return () => {
       clearActions();
@@ -806,7 +743,6 @@ export default function GeneralCostsPaymentsView({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobile]);
-
   // Handler to clear all filters
   const handleClearFilters = () => {
     setFilterWallet('all');
@@ -817,7 +753,6 @@ export default function GeneralCostsPaymentsView({
     onClearDrillDown?.();
     setFilterStatus('all');
   };
-
   // Configure filters for Mobile Action Bar
   useEffect(() => {
     if (isMobile && filterOptions.wallets.length > 0) {
@@ -854,10 +789,10 @@ export default function GeneralCostsPaymentsView({
             placeholder: 'Todos',
             allOptionLabel: 'Todos',
             options: [
-              { value: 'confirmed', label: 'Confirmado' },
-              { value: 'pending', label: 'Pendiente' },
-              { value: 'overdue', label: 'Vencido' },
-              { value: 'cancelled', label: 'Cancelado' }
+              { value: 'confirmed', label: 'Confirmado'},
+              { value: 'pending', label: 'Pendiente'},
+              { value: 'overdue', label: 'Vencido'},
+              { value: 'cancelled', label: 'Cancelado'}
             ]
           }
         ],
@@ -866,20 +801,19 @@ export default function GeneralCostsPaymentsView({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobile, filterOptions, filterGeneralCost, filterWallet, filterCurrency, filterStatus]);
-
   const columns = [
     {
       key: 'payment_date',
       label: 'Fecha de Pago',
-      type: 'date' as const,
+      type: 'date'as const,
       sortable: true,
-      align: 'left' as const,
+      align: 'left'as const,
       render: (payment: GeneralCostPayment) => formatDate(payment.payment_date),
     },
     {
       key: 'general_cost',
       label: 'Gasto General',
-      type: 'medium-text' as const,
+      type: 'medium-text'as const,
       sortable: true,
       render: (payment: GeneralCostPayment) => (
         <div className="flex items-center gap-2">
@@ -914,7 +848,7 @@ export default function GeneralCostsPaymentsView({
     {
       key: 'notes',
       label: 'Notas',
-      type: 'long-text' as const,
+      type: 'long-text'as const,
       sortable: true,
       render: (payment: GeneralCostPayment) => (
         <div className="text-xs text-muted-foreground line-clamp-2">
@@ -925,23 +859,23 @@ export default function GeneralCostsPaymentsView({
     {
       key: 'wallet',
       label: 'Billetera',
-      type: 'medium-text' as const,
+      type: 'medium-text'as const,
       sortable: true,
-      align: 'left' as const,
+      align: 'left'as const,
       cellClassName: 'font-bold',
       render: (payment: GeneralCostPayment) => payment.wallet?.wallets?.name || '-',
     },
     {
       key: 'amount',
       label: 'Monto',
-      type: 'amount' as const,
+      type: 'amount'as const,
       sortable: true,
-      sortType: 'number' as const,
+      sortType: 'number'as const,
       render: (payment: GeneralCostPayment) => (
         <div className="flex flex-col items-end">
           <span className="font-bold">{formatAmount(payment.amount, payment.currency?.symbol)}</span>
           {isMultiCurrency && (
-            <span className="text-xs text-muted-foreground" style={{ fontSize: '12px' }}>
+            <span className="text-xs text-muted-foreground" style={{ fontSize: '12px'}}>
               Cot. {payment.exchange_rate != null ? payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 }) : '0,00'}
             </span>
           )}
@@ -951,12 +885,12 @@ export default function GeneralCostsPaymentsView({
     {
       key: 'status',
       label: 'Estado',
-      type: 'status' as const,
+      type: 'status'as const,
       sortable: true,
       render: (payment: GeneralCostPayment) => {
-        const mappedStatus = (payment.status === 'confirmed' || payment.status === 'pending')
+        const mappedStatus = (payment.status === 'confirmed'|| payment.status === 'pending')
           ? payment.status
-          : (payment.status === 'void' || payment.status === 'rejected') ? 'cancelled' : 'pending';
+          : (payment.status === 'void'|| payment.status === 'rejected') ? 'cancelled': 'pending';
         return (
           <Badge 
             variant="neutral"
@@ -968,15 +902,13 @@ export default function GeneralCostsPaymentsView({
       },
     },
   ];
-
   const isFilterActive = 
-    filterWallet !== 'all' || 
-    filterCurrency !== 'all' || 
-    filterGeneralCost !== 'all' ||
-    filterCategory !== 'all' ||
-    filterStatus !== 'all' ||
+    filterWallet !== 'all'|| 
+    filterCurrency !== 'all'|| 
+    filterGeneralCost !== 'all'||
+    filterCategory !== 'all'||
+    filterStatus !== 'all'||
     filterMonth !== 'all';
-
   if (!organizationId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -984,7 +916,6 @@ export default function GeneralCostsPaymentsView({
       </div>
     );
   }
-
   if (isLoading) {
     return (
       <div className="text-center py-8">
@@ -992,7 +923,6 @@ export default function GeneralCostsPaymentsView({
       </div>
     );
   }
-
   if (allPayments.length === 0) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -1016,7 +946,6 @@ export default function GeneralCostsPaymentsView({
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Drill-down filter banner */}
@@ -1045,7 +974,6 @@ export default function GeneralCostsPaymentsView({
           </Button>
         </div>
       )}
-
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {/* Total Pagos - Mobile: 1 col, Desktop: 2 cols */}
@@ -1059,7 +987,6 @@ export default function GeneralCostsPaymentsView({
           </StatCardValue>
           <StatCardMeta>{metricsData?.total_count_kpi?.meta?.unit}</StatCardMeta>
         </StatCard>
-
         {/* Pagos a la Fecha - Mobile: 1 col, Desktop: 2 cols */}
         <StatCard data-testid="stat-card-pagos-fecha" className="col-span-1 lg:col-span-2">
           <StatCardTitle showArrow={false}>
@@ -1082,7 +1009,6 @@ export default function GeneralCostsPaymentsView({
           </StatCardMeta>
         </StatCard>
       </div>
-
       <Table
         columns={columns}
         data={sortedPayments}
@@ -1156,7 +1082,6 @@ export default function GeneralCostsPaymentsView({
                   </Select>
                 </div>
               )}
-
               {/* Filter by Wallet */}
               {filterOptions.wallets.length > 0 && (
                 <div>
@@ -1174,7 +1099,6 @@ export default function GeneralCostsPaymentsView({
                   </Select>
                 </div>
               )}
-
               {/* Filter by Currency */}
               {filterOptions.currencies.length > 0 && (
                 <div>
@@ -1192,7 +1116,6 @@ export default function GeneralCostsPaymentsView({
                   </Select>
                 </div>
               )}
-
               {/* Filter by Month */}
               {filterOptions.months.length > 0 && (
                 <div>
@@ -1206,7 +1129,7 @@ export default function GeneralCostsPaymentsView({
                       {filterOptions.months.map(month => {
                         const [year, m] = month.split('-');
                         const date = new Date(parseInt(year), parseInt(m) - 1);
-                        const label = date.toLocaleDateString('es-AR', { month: 'short', year: 'numeric' });
+                        const label = date.toLocaleDateString('es-AR', { month: 'short', year: 'numeric'});
                         return (
                           <SelectItem key={month} value={month}>{label}</SelectItem>
                         );
@@ -1215,7 +1138,6 @@ export default function GeneralCostsPaymentsView({
                   </Select>
                 </div>
               )}
-
               {/* Filter by Status */}
               <div>
                 <Label className="text-xs font-medium mb-1 block">Estado</Label>
@@ -1237,7 +1159,7 @@ export default function GeneralCostsPaymentsView({
         }}
         leadingRowAction={(payment: GeneralCostPayment) => 
           payment.attachments_count && payment.attachments_count > 0 ? {
-            label: `${payment.attachments_count} Adjunto${payment.attachments_count > 1 ? 's' : ''}`,
+            label: `${payment.attachments_count} Adjunto${payment.attachments_count > 1 ? 's': ''}`,
             icon: Paperclip,
             onClick: () => handleView(payment),
           } : null
@@ -1252,7 +1174,7 @@ export default function GeneralCostsPaymentsView({
             label: 'Eliminar Pago',
             icon: Trash2,
             onClick: () => handleDelete(payment),
-            variant: 'destructive' as const,
+            variant: 'destructive'as const,
           },
         ]}
       />

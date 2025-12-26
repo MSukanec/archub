@@ -1,10 +1,8 @@
 import { RoleRestricted } from "@/features/users"
 import { Settings } from 'lucide-react'
-
 interface MaterialSettingsTabProps {
   projectId?: string
 }
-
 export default function MaterialSettingsTab({ projectId }: MaterialSettingsTabProps) {
   return (
     <RoleRestricted requiredRole="admin" hideCompletely showAsPreview>

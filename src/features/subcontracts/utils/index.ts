@@ -5,7 +5,6 @@ export function calculateSubcontractBalance(
 ): number {
   return totalAmount - paidAmount;
 }
-
 export function calculatePaymentProgress(
   totalAmount: number,
   paidAmount: number

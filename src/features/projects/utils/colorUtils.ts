@@ -3,9 +3,7 @@
  * 
  * Utility functions for color manipulation and calculations.
  */
-
 import chroma from 'chroma-js';
-
 /**
  * Calcula el color de texto (negro o blanco) basado en el color de fondo.
  * 
@@ -18,12 +16,11 @@ import chroma from 'chroma-js';
 export function getTextColor(backgroundColor: string): string {
   try {
     const color = chroma(backgroundColor);
-    return color.luminance() > 0.5 ? '#000000' : '#ffffff';
+    return color.luminance() > 0.5 ? '#000000': '#ffffff';
   } catch {
     return '#ffffff';
   }
 }
-
 /**
  * Convierte un color hex a RGB.
  * 
@@ -40,7 +37,6 @@ export function hexToRgb(hex: string): string {
   
   return `${r}, ${g}, ${b}`;
 }
-
 /**
  * Convierte un color hex a HSL.
  * 
@@ -56,7 +52,6 @@ export function hexToHsl(hex: string): string {
     return '0 0% 0%';
   }
 }
-
 /**
  * Formatea HSL para uso en CSS.
  * 
@@ -66,7 +61,6 @@ export function hexToHsl(hex: string): string {
 export function formatHslForCss(hsl: string): string {
   return hsl;
 }
-
 /**
  * Calcula un color de hover más claro o más oscuro.
  * 
@@ -82,7 +76,6 @@ export function calculateHoverColor(hex: string, isDark: boolean): string {
     return hex;
   }
 }
-
 /**
  * Calcula el color de foreground (texto) basado en el color de acento.
  * 
@@ -93,7 +86,6 @@ export function calculateHoverColor(hex: string, isDark: boolean): string {
 export function calculateForegroundColor(hex: string, isDark: boolean): string {
   return getTextColor(hex);
 }
-
 /**
  * Convierte un valor de Hue (0-360) a hex.
  * 

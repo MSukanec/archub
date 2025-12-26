@@ -2,7 +2,6 @@ import DataRowCard from '@/components/shared/DataRowCard';
 import { SwipeableCard } from '@/layouts';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-
 // Interface para el cliente basada en ProjectClientSummary
 interface Client {
   id: string;
@@ -51,7 +50,6 @@ interface Client {
   balance_due: number;
   next_due: number | null;
 }
-
 interface ClientRowProps {
   client: Client;
   onClick?: (client: Client) => void;
@@ -59,11 +57,10 @@ interface ClientRowProps {
   onEdit?: (client: Client) => void;
   onDelete?: (client: Client) => void;
   selected?: boolean;
-  density?: 'compact' | 'normal' | 'comfortable';
+  density?: 'compact'| 'normal'| 'comfortable';
   enableSwipe?: boolean;
   'data-testid'?: string;
 }
-
 // Helper para obtener las iniciales del cliente
 const getClientInitials = (client: Client): string => {
   const contact = client.contacts;
@@ -74,7 +71,7 @@ const getClientInitials = (client: Client): string => {
   
   if (contact.company_name) {
     // Para empresas, usar las primeras dos letras o primera letra de cada palabra
-    const words = contact.company_name.split(' ');
+    const words = contact.company_name.split('');
     if (words.length > 1) {
       return words.slice(0, 2).map(w => w[0]?.toUpperCase()).join('');
     }
@@ -90,7 +87,6 @@ const getClientInitials = (client: Client): string => {
   
   return firstInitial + lastInitial || 'CL';
 };
-
 // Helper para obtener el nombre completo del cliente
 const getClientDisplayName = (client: Client): string => {
   const contact = client.contacts;
@@ -116,7 +112,6 @@ const getClientDisplayName = (client: Client): string => {
   
   return 'Sin nombre';
 };
-
 // Helper para formatear importes
 const formatCurrency = (amount: number, symbol?: string): string => {
   const formattedAmount = new Intl.NumberFormat('es-AR', {
@@ -126,34 +121,32 @@ const formatCurrency = (amount: number, symbol?: string): string => {
   
   return `${symbol || '$'}${formattedAmount}`;
 };
-
 // Helper para obtener configuración de badge de estado
 const getStatusConfig = (status: string): { label: string; borderColor: string; textColor: string } => {
   const configs: Record<string, { label: string; borderColor: string; textColor: string }> = {
     active: { 
       label: 'Activo', 
       borderColor: 'border-green-600 dark:border-green-400', 
-      textColor: 'text-green-600 dark:text-green-400' 
+      textColor: 'text-green-600 dark:text-green-400'
     },
     inactive: { 
       label: 'Inactivo', 
       borderColor: 'border-muted-foreground', 
-      textColor: 'text-muted-foreground' 
+      textColor: 'text-muted-foreground'
     },
     pending: { 
       label: 'Pendiente', 
       borderColor: 'border-orange-600 dark:border-orange-400', 
-      textColor: 'text-orange-600 dark:text-orange-400' 
+      textColor: 'text-orange-600 dark:text-orange-400'
     },
   };
   
   return configs[status] || { 
     label: status, 
     borderColor: 'border-muted-foreground', 
-    textColor: 'text-muted-foreground' 
+    textColor: 'text-muted-foreground'
   };
 };
-
 export default function ClientRow({ 
   client, 
   onClick, 
@@ -187,7 +180,6 @@ export default function ClientRow({
   if (client.role?.name) {
     metadata.push(client.role.name);
   }
-
   // Contenido interno del card
   const cardContent = (
     <>
@@ -197,15 +189,13 @@ export default function ClientRow({
         <div className="font-semibold text-sm truncate">
           {getClientDisplayName(client)}
         </div>
-
         {/* Metadata: Rol + Unidad */}
         {metadata.length > 0 && (
           <div className="text-muted-foreground text-xs truncate mt-0.5">
-            {metadata.join(' • ')}
+            {metadata.join('• ')}
           </div>
         )}
       </div>
-
       {/* Columna derecha: Estado + Balance */}
       <div className="flex flex-col items-end gap-1 flex-shrink-0">
         {/* Badge de Estado */}
@@ -225,7 +215,6 @@ export default function ClientRow({
       </div>
     </>
   );
-
   // Card base usando DataRowCard
   const clientCard = (
     <DataRowCard
@@ -239,7 +228,6 @@ export default function ClientRow({
       {cardContent}
     </DataRowCard>
   );
-
   // If swipe is enabled and we have actions, wrap in SwipeableCard
   if (enableSwipe && (onView || onEdit || onDelete)) {
     const swipeActions = [];
@@ -270,16 +258,13 @@ export default function ClientRow({
         onClick: () => onDelete(client),
       });
     }
-
     return (
       <SwipeableCard actions={swipeActions}>
         {clientCard}
       </SwipeableCard>
     );
   }
-
   return clientCard;
 }
-
 // Export del tipo para uso externo
 export type { Client };

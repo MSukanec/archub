@@ -12,9 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 interface EmailPreview {
-  type: 'registration' | 'purchase' | 'bank-transfer-admin' | 'invitation' | 'transfer-pending';
+  type: 'registration'| 'purchase'| 'bank-transfer-admin'| 'invitation'| 'transfer-pending';
   html: string;
   preview: {
     subject: string;
@@ -22,13 +21,11 @@ interface EmailPreview {
     to: string;
   };
 }
-
 interface Course {
   id: string;
   title: string;
   price: number;
 }
-
 function EmailTemplatesContent() {
   const [registrationEmail, setRegistrationEmail] = useState<EmailPreview | null>(null);
   const [purchaseEmail, setPurchaseEmail] = useState<EmailPreview | null>(null);
@@ -38,26 +35,21 @@ function EmailTemplatesContent() {
   const [loading, setLoading] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
-
   // Editable fields for registration email
   const [regUserName, setRegUserName] = useState('Jorge Benitest');
   const [regAdminName, setRegAdminName] = useState('Matías - Seencel');
-
   // Editable fields for purchase email
   const [purUserName, setPurUserName] = useState('Jorge Benitest');
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
-
   // Editable fields for invitation email
   const [invOrganizationName, setInvOrganizationName] = useState('Constructora ABC');
   const [invInviterName, setInvInviterName] = useState('Juan Pérez');
   const [invRoleName, setInvRoleName] = useState('Miembro');
   const [invInviteeEmail, setInvInviteeEmail] = useState('invitado@example.com');
-
   useEffect(() => {
     loadCourses();
     loadEmails();
   }, []);
-
   const loadCourses = async () => {
     try {
       const res = await fetch('/api/admin/courses-for-preview');
@@ -72,13 +64,12 @@ function EmailTemplatesContent() {
       console.error('Error loading courses:', error);
     }
   };
-
   const loadEmails = async () => {
     setLoading(true);
     try {
       const regRes = await fetch('/api/admin/email-preview/registration', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify({
           userName: regUserName,
           userEmail: 'usuario@example.com',
@@ -89,10 +80,9 @@ function EmailTemplatesContent() {
         const data = await regRes.json();
         setRegistrationEmail(data);
       }
-
       const purRes = await fetch('/api/admin/email-preview/purchase', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify({
           userName: purUserName,
           courseId: selectedCourseId || undefined,
@@ -102,10 +92,9 @@ function EmailTemplatesContent() {
         const data = await purRes.json();
         setPurchaseEmail(data);
       }
-
       const tpRes = await fetch('/api/admin/email-preview/transfer-pending', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify({
           userName: 'Jorge Benitest',
           courseName: 'Curso Avanzado de Construcción',
@@ -117,10 +106,9 @@ function EmailTemplatesContent() {
         const data = await tpRes.json();
         setTransferPendingEmail(data);
       }
-
       const btaRes = await fetch('/api/admin/email-preview/bank-transfer-admin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify({
           userName: 'Juan Pérez',
           userEmail: 'juan.perez@example.com',
@@ -134,10 +122,9 @@ function EmailTemplatesContent() {
         const data = await btaRes.json();
         setBankTransferAdminEmail(data);
       }
-
       const invRes = await fetch('/api/admin/email-preview/invitation', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify({
           inviteeEmail: invInviteeEmail,
           organizationName: invOrganizationName,
@@ -156,15 +143,12 @@ function EmailTemplatesContent() {
       setLoading(false);
     }
   };
-
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedCode(id);
     setTimeout(() => setCopiedCode(null), 2000);
   };
-
   const selectedCourse = courses.find(c => c.id === selectedCourseId);
-
   const RegistrationEmailEditor = () => (
     <div className="space-y-6">
       <Card className="border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30">
@@ -196,12 +180,11 @@ function EmailTemplatesContent() {
             disabled={loading}
             className="w-full"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin': ''}`} />
             Actualizar Vista Previa
           </Button>
         </CardContent>
       </Card>
-
       {registrationEmail && (
         <div className="space-y-4">
           <Card>
@@ -216,7 +199,7 @@ function EmailTemplatesContent() {
                   size="sm"
                   onClick={() => copyToClipboard(registrationEmail.preview.subject, 'reg-subject')}
                 >
-                  {copiedCode === 'reg-subject' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copiedCode === 'reg-subject'? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </CardTitle>
             </CardHeader>
@@ -224,7 +207,6 @@ function EmailTemplatesContent() {
               <p className="text-sm text-muted-foreground font-mono">{registrationEmail.preview.subject}</p>
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader>
               <CardTitle className="text-sm">Vista Previa del Email</CardTitle>
@@ -244,7 +226,6 @@ function EmailTemplatesContent() {
       )}
     </div>
   );
-
   const PurchaseEmailEditor = () => (
     <div className="space-y-6">
       <Card className="border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30">
@@ -270,7 +251,6 @@ function EmailTemplatesContent() {
               </SelectContent>
             </Select>
           </div>
-
           {selectedCourse && (
             <>
               <div className="p-3 rounded-lg bg-gray-100 dark:bg-gray-800">
@@ -279,7 +259,6 @@ function EmailTemplatesContent() {
               </div>
             </>
           )}
-
           <div>
             <label className="text-sm font-medium">Nombre del Cliente</label>
             <Input 
@@ -289,18 +268,16 @@ function EmailTemplatesContent() {
               className="mt-1"
             />
           </div>
-
           <Button 
             onClick={loadEmails} 
             disabled={loading}
             className="w-full"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin': ''}`} />
             Actualizar Vista Previa
           </Button>
         </CardContent>
       </Card>
-
       {purchaseEmail && (
         <div className="space-y-4">
           <Card>
@@ -315,7 +292,7 @@ function EmailTemplatesContent() {
                   size="sm"
                   onClick={() => copyToClipboard(purchaseEmail.preview.subject, 'pur-subject')}
                 >
-                  {copiedCode === 'pur-subject' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copiedCode === 'pur-subject'? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </CardTitle>
             </CardHeader>
@@ -323,7 +300,6 @@ function EmailTemplatesContent() {
               <p className="text-sm text-muted-foreground font-mono">{purchaseEmail.preview.subject}</p>
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader>
               <CardTitle className="text-sm">Vista Previa del Email</CardTitle>
@@ -343,7 +319,6 @@ function EmailTemplatesContent() {
       )}
     </div>
   );
-
   const TransferPendingEmailEditor = () => (
     <div className="space-y-4">
       {transferPendingEmail && (
@@ -360,7 +335,7 @@ function EmailTemplatesContent() {
                   size="sm"
                   onClick={() => copyToClipboard(transferPendingEmail.preview.subject, 'tp-subject')}
                 >
-                  {copiedCode === 'tp-subject' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copiedCode === 'tp-subject'? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </CardTitle>
             </CardHeader>
@@ -368,7 +343,6 @@ function EmailTemplatesContent() {
               <p className="text-sm text-muted-foreground font-mono">{transferPendingEmail.preview.subject}</p>
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader>
               <CardTitle className="text-sm">Vista Previa del Email</CardTitle>
@@ -389,7 +363,6 @@ function EmailTemplatesContent() {
       )}
     </div>
   );
-
   const BankTransferAdminEmailEditor = () => (
     <div className="space-y-4">
       {bankTransferAdminEmail && (
@@ -406,7 +379,7 @@ function EmailTemplatesContent() {
                   size="sm"
                   onClick={() => copyToClipboard(bankTransferAdminEmail.preview.subject, 'bta-subject')}
                 >
-                  {copiedCode === 'bta-subject' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copiedCode === 'bta-subject'? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </CardTitle>
             </CardHeader>
@@ -414,7 +387,6 @@ function EmailTemplatesContent() {
               <p className="text-sm text-muted-foreground font-mono">{bankTransferAdminEmail.preview.subject}</p>
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader>
               <CardTitle className="text-sm">Vista Previa del Email</CardTitle>
@@ -434,7 +406,6 @@ function EmailTemplatesContent() {
       )}
     </div>
   );
-
   const InvitationEmailEditor = () => (
     <div className="space-y-6">
       <Card className="border-purple-200 bg-purple-50 dark:border-purple-900 dark:bg-purple-950/30">
@@ -484,12 +455,11 @@ function EmailTemplatesContent() {
             disabled={loading}
             className="w-full"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin': ''}`} />
             Actualizar Vista Previa
           </Button>
         </CardContent>
       </Card>
-
       {invitationEmail && (
         <div className="space-y-4">
           <Card>
@@ -504,7 +474,7 @@ function EmailTemplatesContent() {
                   size="sm"
                   onClick={() => copyToClipboard(invitationEmail.preview.subject, 'inv-subject')}
                 >
-                  {copiedCode === 'inv-subject' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copiedCode === 'inv-subject'? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </CardTitle>
             </CardHeader>
@@ -512,7 +482,6 @@ function EmailTemplatesContent() {
               <p className="text-sm text-muted-foreground font-mono">{invitationEmail.preview.subject}</p>
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader>
               <CardTitle className="text-sm">Vista Previa del Email</CardTitle>
@@ -532,7 +501,6 @@ function EmailTemplatesContent() {
       )}
     </div>
   );
-
   return (
     <div className="space-y-6">
       <Tabs defaultValue="registration" className="w-full">
@@ -543,23 +511,18 @@ function EmailTemplatesContent() {
           <TabsTrigger value="transfer-pending" data-testid="tab-transfer-pending-email">⏳ Pendiente</TabsTrigger>
           <TabsTrigger value="bank-transfer-admin" data-testid="tab-bank-transfer-admin-email">🏦 Admin</TabsTrigger>
         </TabsList>
-
         <TabsContent value="registration" className="mt-6">
           <RegistrationEmailEditor />
         </TabsContent>
-
         <TabsContent value="purchase" className="mt-6">
           <PurchaseEmailEditor />
         </TabsContent>
-
         <TabsContent value="invitation" className="mt-6">
           <InvitationEmailEditor />
         </TabsContent>
-
         <TabsContent value="transfer-pending" className="mt-6">
           <TransferPendingEmailEditor />
         </TabsContent>
-
         <TabsContent value="bank-transfer-admin" className="mt-6">
           <BankTransferAdminEmailEditor />
         </TabsContent>
@@ -567,7 +530,6 @@ function EmailTemplatesContent() {
     </div>
   );
 }
-
 const EmailTemplatesAdmin = () => {
   const headerProps = {
     title: 'Plantillas de Email',
@@ -575,12 +537,10 @@ const EmailTemplatesAdmin = () => {
     showSearch: false,
     showFilters: false,
   };
-
   return (
     <Layout wide headerProps={headerProps}>
       <EmailTemplatesContent />
     </Layout>
   );
 };
-
 export default EmailTemplatesAdmin;

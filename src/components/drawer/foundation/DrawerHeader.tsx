@@ -2,7 +2,6 @@ import { ReactNode } from 'react';
 import { LucideIcon, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
 export interface DrawerHeaderProps {
   title: string;
   description?: string;
@@ -17,7 +16,6 @@ export interface DrawerHeaderProps {
   
   className?: string;
 }
-
 export function DrawerHeader({
   title,
   description,
@@ -77,5 +75,4 @@ export function DrawerHeader({
     </div>
   );
 }
-
 export default DrawerHeader;

@@ -1,18 +1,14 @@
 import { Image, Video, LayoutGrid, Grid3X3 } from 'lucide-react';
-
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SparklineChart } from '@/components/charts/sparkline/SparklineChart';
-
 import { useMediaMetrics } from '../hooks/use-media-metrics';
 import type { GalleryFile } from '../types';
-
 interface MediaStatsSectionProps {
   galleryFiles: GalleryFile[];
-  galleryStyle: 'uniform' | 'masonry';
+  galleryStyle: 'uniform'| 'masonry';
   onGalleryStyleChange: () => void;
 }
-
 export function MediaStatsSection({ galleryFiles, galleryStyle, onGalleryStyleChange }: MediaStatsSectionProps) {
   const {
     totalFiles,
@@ -20,7 +16,6 @@ export function MediaStatsSection({ galleryFiles, galleryStyle, onGalleryStyleCh
     totalVideos,
     timeline
   } = useMediaMetrics(galleryFiles);
-
   return (
     <Card className="w-full p-6" data-testid="card-media-stats">
       {/* Header: Title/Value on left, KPIs on right */}
@@ -47,7 +42,6 @@ export function MediaStatsSection({ galleryFiles, galleryStyle, onGalleryStyleCh
               {totalImages}
             </span>
           </div>
-
           {/* Videos */}
           <div className="flex items-center gap-2" data-testid="stat-videos">
             <Video className="h-4 w-4 text-muted-foreground" />
@@ -56,17 +50,16 @@ export function MediaStatsSection({ galleryFiles, galleryStyle, onGalleryStyleCh
               {totalVideos}
             </span>
           </div>
-
           {/* Style Toggle Button */}
           <Button 
             variant="ghost"
             size="sm"
             onClick={onGalleryStyleChange}
             className="ml-4 h-8 px-3"
-            title={galleryStyle === 'uniform' ? 'Cambiar a estilo mosaico' : 'Cambiar a estilo uniforme'}
+            title={galleryStyle === 'uniform'? 'Cambiar a estilo mosaico': 'Cambiar a estilo uniforme'}
             data-testid="button-gallery-style"
           >
-            {galleryStyle === 'uniform' ? (
+            {galleryStyle === 'uniform'? (
               <LayoutGrid className="w-4 h-4 mr-2" />
             ) : (
               <Grid3X3 className="w-4 h-4 mr-2" />
@@ -75,7 +68,6 @@ export function MediaStatsSection({ galleryFiles, galleryStyle, onGalleryStyleCh
           </Button>
         </div>
       </div>
-
       {/* Sparkline Chart */}
       <div>
         <SparklineChart 

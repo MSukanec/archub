@@ -3,11 +3,9 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { BlockedRestricted } from '@/components/shared/restrictions';
 import type { Course } from '@shared/schema';
-
 interface CTAFooterProps {
   course: Course;
 }
-
 export function CTAFooter({ course }: CTAFooterProps) {
   const isBlocked = course.is_active === false;
   
@@ -21,7 +19,6 @@ export function CTAFooter({ course }: CTAFooterProps) {
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
             Únete hoy y transforma tu forma de trabajar
           </p>
-
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <BlockedRestricted
               isBlocked={isBlocked}
@@ -42,7 +39,6 @@ export function CTAFooter({ course }: CTAFooterProps) {
               </div>
             )}
           </div>
-
           <p className="text-sm text-muted-foreground">
             Acceso inmediato • Sin compromisos • Contenido siempre disponible
           </p>

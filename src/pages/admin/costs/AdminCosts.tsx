@@ -13,25 +13,21 @@ import AdminCostMaterials from './AdminCostMaterials';
 import AdminCostBrands from './AdminCostBrands';
 import AdminCostCategories from './AdminCostCategories';
 import AdminCostLabor from './AdminCostLabor';
-
 const COSTS_TABS = [
-  { id: 'productos', label: 'Productos' },
-  { id: 'materiales', label: 'Materiales' },
-  { id: 'marcas', label: 'Marcas' },
-  { id: 'categorias', label: 'Categorías' },
-  { id: 'labor', label: 'Mano de Obra' }
+  { id: 'productos', label: 'Productos'},
+  { id: 'materiales', label: 'Materiales'},
+  { id: 'marcas', label: 'Marcas'},
+  { id: 'categorias', label: 'Categorías'},
+  { id: 'labor', label: 'Mano de Obra'}
 ];
-
 const AdminCosts = () => {
   const [activeTab, setActiveTab] = useState('productos');
   const { openModal } = useGlobalModalStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
-
   const layoutPreference = userData?.preferences?.layout || 'experimental';
   const isLabLayout = layoutPreference === 'lab';
-
   const refreshPricesMutation = useMutation({
     mutationFn: async () => {
       try {
@@ -42,7 +38,6 @@ const AdminCosts = () => {
           throw new Error(`Error al refrescar precios de productos: ${productAvgError.message}`);
         }
         console.log('Vista product_avg_prices refrescada exitosamente');
-
         console.log('Refrescando vista material_avg_prices...');
         const { error: materialAvgError } = await supabase.rpc('refresh_material_avg_prices');
         if (materialAvgError) {
@@ -50,7 +45,6 @@ const AdminCosts = () => {
           throw new Error(`Error al refrescar precios de materiales: ${materialAvgError.message}`);
         }
         console.log('Vista material_avg_prices refrescada exitosamente');
-
         console.log('Refrescando vista labor_avg_prices...');
         const { error: laborAvgError } = await supabase.rpc('refresh_labor_avg_prices');
         if (laborAvgError) {
@@ -90,7 +84,6 @@ const AdminCosts = () => {
       });
     }
   });
-
   const renderView = () => {
     switch (activeTab) {
       case 'productos':
@@ -107,7 +100,6 @@ const AdminCosts = () => {
         return <AdminCostProducts />;
     }
   };
-
   const handleCreate = () => {
     switch (activeTab) {
       case 'productos':
@@ -127,7 +119,6 @@ const AdminCosts = () => {
         break;
     }
   };
-
   const getCreateLabel = () => {
     switch (activeTab) {
       case 'productos': return 'Nuevo Producto';
@@ -138,9 +129,7 @@ const AdminCosts = () => {
       default: return 'Nuevo';
     }
   };
-
-  const showRefreshButton = activeTab === 'productos' || activeTab === 'labor';
-
+  const showRefreshButton = activeTab === 'productos'|| activeTab === 'labor';
   const secondaryRightContent = (
     <div className="flex items-center gap-3">
       {showRefreshButton && (
@@ -151,7 +140,7 @@ const AdminCosts = () => {
           disabled={refreshPricesMutation.isPending}
           data-testid="button-refresh-prices"
         >
-          <RefreshCw className={`w-4 h-4 mr-2 ${refreshPricesMutation.isPending ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 mr-2 ${refreshPricesMutation.isPending ? 'animate-spin': ''}`} />
           Refrescar
         </Button>
       )}
@@ -165,7 +154,6 @@ const AdminCosts = () => {
       </Button>
     </div>
   );
-
   if (isLabLayout) {
     return (
       <LabLayout 
@@ -181,12 +169,10 @@ const AdminCosts = () => {
       </LabLayout>
     );
   }
-
   const tabs = COSTS_TABS.map(tab => ({
     ...tab,
     isActive: activeTab === tab.id
   }));
-
   const getActionButton = () => {
     switch (activeTab) {
       case 'productos':
@@ -237,7 +223,6 @@ const AdminCosts = () => {
         return undefined;
     }
   };
-
   const headerProps = {
     title: "Costos",
     icon: Package,
@@ -247,12 +232,10 @@ const AdminCosts = () => {
     onTabChange: setActiveTab,
     actionButton: getActionButton()
   };
-
   return (
     <Layout wide headerProps={headerProps}>
       {renderView()}
     </Layout>
   );
 };
-
 export default AdminCosts;

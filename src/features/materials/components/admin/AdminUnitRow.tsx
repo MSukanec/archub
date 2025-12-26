@@ -1,6 +1,5 @@
 import React from 'react';
 import DataRowCard from '@/components/shared/DataRowCard';
-
 // Interface para la unidad de presentación (usando la estructura real de la app)
 interface UnitPresentation {
   id: string;
@@ -16,15 +15,13 @@ interface UnitPresentation {
     name: string;
   };
 }
-
 interface AdminUnitRowProps {
   unitPresentation: UnitPresentation;
   onClick?: () => void;
   selected?: boolean;
-  density?: 'compact' | 'normal' | 'comfortable';
+  density?: 'compact'| 'normal'| 'comfortable';
   className?: string;
 }
-
 // Helper para obtener las iniciales de la unidad
 const getUnitInitials = (unitPresentation: UnitPresentation): string => {
   const presentation = unitPresentation.name;
@@ -35,7 +32,6 @@ const getUnitInitials = (unitPresentation: UnitPresentation): string => {
   }
   return presentation.slice(0, 2).toUpperCase();
 };
-
 export default function AdminUnitRow({ 
   unitPresentation, 
   onClick, 
@@ -53,18 +49,15 @@ export default function AdminUnitRow({
         <div className="font-semibold text-sm truncate">
           {unitPresentation.name}
         </div>
-
         {/* Segunda fila - Unidad Base - Equivalencia */}
         <div className="text-xs text-muted-foreground truncate">
           {unitPresentation.unit?.name || 'Sin unidad'} - {unitPresentation.equivalence}
         </div>
       </div>
-
       {/* Espacio mínimo para chevron si existe */}
       {onClick && <div className="w-2" />}
     </>
   );
-
   // Usar el nuevo DataRowCard con avatar de iniciales
   return (
     <DataRowCard
@@ -79,6 +72,5 @@ export default function AdminUnitRow({
     </DataRowCard>
   );
 }
-
 // Export del tipo para uso externo
 export type { UnitPresentation };

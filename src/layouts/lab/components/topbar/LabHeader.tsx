@@ -2,7 +2,6 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ExpandableAvatarGroup } from "@/components/shared/layout/ExpandableAvatarGroup";
-
 interface Tab {
   id: string;
   label: string;
@@ -11,7 +10,6 @@ interface Tab {
   href?: string;
   badgeCount?: number; // Opcional: contador para mostrar en la tab
 }
-
 interface ActionButton {
   id: string;
   label: string;
@@ -20,7 +18,6 @@ interface ActionButton {
   variant?: "default" | "secondary" | "outline" | "ghost";
   disabled?: boolean;
 }
-
 interface HeaderProps {
   icon?: React.ComponentType<any>;
   title?: string;
@@ -31,7 +28,6 @@ interface HeaderProps {
   organizationId?: string;
   showMembers?: boolean;
 }
-
 export function Header({ 
   icon, 
   title, 
@@ -47,7 +43,7 @@ export function Header({
       "w-full bg-[var(--layout-bg)]",
       className
     )}>
-      <div className="px-6 border-b" style={{ borderColor: 'hsl(210, 40%, 93%)' }}>
+      <div className="px-6 border-b" style={{ borderColor: 'hsl(210, 40%, 93%)'}}>
         {/* Fila Superior: Icono + Título + Descripción a la izquierda, Miembros a la derecha - SIEMPRE VISIBLE */}
         <div className="min-h-[50px] flex items-center justify-between py-2">
           {/* Left: Icon + Title + Description */}
@@ -73,7 +69,6 @@ export function Header({
               )}
             </div>
           </div>
-
           {/* Right: Expandable Avatar Group */}
           <div className="flex items-center gap-3">
             {showMembers && organizationId && (
@@ -81,10 +76,9 @@ export function Header({
             )}
           </div>
         </div>
-
         {/* Fila Inferior: Tabs a la izquierda, Acciones a la derecha */}
         {(tabs.length > 0 || actions.length > 0) && (
-          <div className="flex items-center justify-between border-t" style={{ borderColor: 'hsl(210, 40%, 93%)' }}>
+          <div className="flex items-center justify-between border-t" style={{ borderColor: 'hsl(210, 40%, 93%)'}}>
           {/* Left: Tabs */}
           <div className="flex items-center gap-1">
             {tabs.map((tab) => (
@@ -103,16 +97,15 @@ export function Header({
                   {tab.badgeCount !== undefined && tab.badgeCount > 0 && (
                     <span 
                       className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full text-[10px] font-bold text-white"
-                      style={{ backgroundColor: 'var(--accent)' }}
+                      style={{ backgroundColor: 'var(--accent)'}}
                     >
-                      {tab.badgeCount > 99 ? '99+' : tab.badgeCount}
+                      {tab.badgeCount > 99 ? '99+': tab.badgeCount}
                     </span>
                   )}
                 </span>
               </button>
             ))}
           </div>
-
           {/* Right: Action Buttons */}
           {actions.length > 0 && (
             <div className="flex items-center gap-2 py-2">

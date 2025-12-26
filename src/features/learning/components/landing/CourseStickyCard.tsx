@@ -7,18 +7,15 @@ import { BookOpen, Clock, CheckCircle, MessageCircle, Shield } from 'lucide-reac
 import { useAuthStore } from '@/stores/authStore';
 import type { Course } from '@shared/schema';
 import type { CourseStats } from '../../types';
-
 interface CourseStickyCardProps {
   course: Course;
   stats: CourseStats;
   isEnrolled?: boolean;
   progressPercentage?: number;
 }
-
 export function CourseStickyCard({ course, stats, isEnrolled = false, progressPercentage = 0 }: CourseStickyCardProps) {
   const user = useAuthStore((state) => state.user);
   const [, navigate] = useLocation();
-
   // Determine button state and action
   const handleCTAClick = useCallback(() => {
     if (isEnrolled) {
@@ -32,11 +29,9 @@ export function CourseStickyCard({ course, stats, isEnrolled = false, progressPe
       navigate('/register');
     }
   }, [isEnrolled, user, course.slug, navigate]);
-
   // Determine button text and variant
-  const buttonText = isEnrolled ? 'CONTINUAR CURSO' : 'INSCRIBIRME';
-  const buttonVariant = isEnrolled ? 'default' : 'default';
-
+  const buttonText = isEnrolled ? 'CONTINUAR CURSO': 'INSCRIBIRME';
+  const buttonVariant = isEnrolled ? 'default': 'default';
   return (
     <Card className="overflow-hidden shadow-xl border-2" data-testid="card-course-sticky">
       {/* Course Image */}
@@ -49,7 +44,6 @@ export function CourseStickyCard({ course, stats, isEnrolled = false, progressPe
           />
         </div>
       )}
-
       <CardContent className="p-6 space-y-6">
         {/* Course Title */}
         <div>
@@ -57,7 +51,6 @@ export function CourseStickyCard({ course, stats, isEnrolled = false, progressPe
             {course.title}
           </h3>
         </div>
-
         {/* Progress Bar - Only show when enrolled */}
         {isEnrolled && (
           <div className="space-y-2">
@@ -68,7 +61,6 @@ export function CourseStickyCard({ course, stats, isEnrolled = false, progressPe
             <Progress value={progressPercentage} className="h-2" data-testid="progress-bar" />
           </div>
         )}
-
         {/* Price */}
         {course.price && !isEnrolled && (
           <div className="space-y-1">
@@ -80,7 +72,6 @@ export function CourseStickyCard({ course, stats, isEnrolled = false, progressPe
             </div>
           </div>
         )}
-
         {/* Course Stats */}
         <div className="space-y-3 text-sm">
           <div className="flex items-center gap-3">
@@ -96,7 +87,6 @@ export function CourseStickyCard({ course, stats, isEnrolled = false, progressPe
             <span data-testid="text-duration">{stats.total_duration_formatted} de Contenido</span>
           </div>
         </div>
-
         {/* Additional Features */}
         <div className="space-y-2 text-sm border-t pt-4">
           <div className="flex items-start gap-2">
@@ -114,7 +104,6 @@ export function CourseStickyCard({ course, stats, isEnrolled = false, progressPe
             </div>
           )}
         </div>
-
         {/* CTA Button - Only ONE button shown at a time */}
         <div className="pt-2">
           <Button 

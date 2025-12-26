@@ -1,13 +1,11 @@
 import React, { useMemo } from 'react'
 import { formatDate } from '@/lib/date-utils'
 import { Edit, Trash2 } from 'lucide-react'
-
 import { Table } from '@/components/shared/trees/Table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { EmptyState } from '@/components/shared/EmptyState'
-
 interface CapitalMovement {
   id: string
   movement_date: string
@@ -38,7 +36,6 @@ interface CapitalMovement {
   type_name?: string
   partner?: string
 }
-
 interface CapitalHistoryProps {
   movements: CapitalMovement[]
   searchValue: string
@@ -51,7 +48,6 @@ interface CapitalHistoryProps {
   onEdit: (movement: CapitalMovement) => void
   onDelete: (movement: CapitalMovement) => void
 }
-
 export function CapitalHistoryTab({ 
   movements, 
   searchValue, 
@@ -78,7 +74,6 @@ export function CapitalHistoryTab({
              description.includes(searchLower) ||
              categoryName.includes(searchLower)
     })
-
     return [...filtered].sort((a, b) => {
       const dateComparison = new Date(b.movement_date).getTime() - new Date(a.movement_date).getTime()
       if (dateComparison !== 0) return dateComparison
@@ -86,7 +81,6 @@ export function CapitalHistoryTab({
       return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
     })
   }, [movements, searchValue])
-
   // Detailed table columns
   const detailColumns = [
     {
@@ -111,13 +105,10 @@ export function CapitalHistoryTab({
       render: (item: CapitalMovement) => {
         // Use partner field from movement data
         let displayName = item.partner
-
         if (!displayName) {
           return <div className="text-sm text-muted-foreground">Sin socio</div>
         }
-
-        const initials = displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2)
-
+        const initials = displayName.split('').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2)
         return (
           <div className="flex items-center gap-2">
             <Avatar className="w-8 h-8">
@@ -173,7 +164,7 @@ export function CapitalHistoryTab({
         
         return (
           <div>
-            <div className={`text-sm font-medium ${isAporte ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`text-sm font-medium ${isAporte ? 'text-green-600': 'text-red-600'}`}>
               {item.currency_symbol || '$'} {formattedAmount}
             </div>
             {item.exchange_rate && (
@@ -186,14 +177,13 @@ export function CapitalHistoryTab({
       }
     }
   ]
-
   return (
     <>
       {filteredMovements.length > 0 ? (
         <Table
           data={filteredMovements}
           columns={detailColumns}
-          defaultSort={{ key: 'movement_date', direction: 'desc' }}
+          defaultSort={{ key: 'movement_date', direction: 'desc'}}
           getItemId={(item) => item.id || 'unknown'}
           rowActions={(item) => [
             {
@@ -205,7 +195,7 @@ export function CapitalHistoryTab({
               icon: Trash2,
               label: 'Eliminar',
               onClick: () => onDelete(item),
-              variant: 'destructive' as const
+              variant: 'destructive'as const
             }
           ]}
         />

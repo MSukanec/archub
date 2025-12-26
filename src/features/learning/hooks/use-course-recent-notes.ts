@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCourseRecentNotes } from '../services';
-
 /**
  * Hook para obtener las notas recientes de un curso.
  * 

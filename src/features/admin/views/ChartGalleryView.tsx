@@ -14,7 +14,6 @@ import {
   BalanceTimelineChart,
   HeatmapGrid
 } from '@/components/charts'
-
 const MOCK_LINE_DATA = [
   { label: 'Ene', value: 4000 },
   { label: 'Feb', value: 3000 },
@@ -23,7 +22,6 @@ const MOCK_LINE_DATA = [
   { label: 'May', value: 6000 },
   { label: 'Jun', value: 5500 }
 ]
-
 const MOCK_MULTI_LINE_DATA = [
   { label: 'Ene', ingresos: 4000, gastos: 2400 },
   { label: 'Feb', ingresos: 3000, gastos: 1398 },
@@ -32,12 +30,10 @@ const MOCK_MULTI_LINE_DATA = [
   { label: 'May', ingresos: 6000, gastos: 4800 },
   { label: 'Jun', ingresos: 5500, gastos: 3800 }
 ]
-
 const MOCK_SPARKLINE_DATA = [
   { value: 10 }, { value: 15 }, { value: 8 }, { value: 22 }, 
   { value: 18 }, { value: 25 }, { value: 20 }, { value: 30 }
 ]
-
 const MOCK_BAR_DATA = [
   { label: 'Producto A', value: 4000 },
   { label: 'Producto B', value: 3000 },
@@ -45,28 +41,24 @@ const MOCK_BAR_DATA = [
   { label: 'Producto D', value: 2780 },
   { label: 'Producto E', value: 1890 }
 ]
-
 const MOCK_HORIZONTAL_BAR_DATA = [
-  { label: 'Marketing', value: 4000, color: 'var(--chart-1)' },
-  { label: 'Ventas', value: 3000, color: 'var(--chart-2)' },
-  { label: 'Desarrollo', value: 2000, color: 'var(--chart-3)' },
-  { label: 'Soporte', value: 2780, color: 'var(--chart-4)' }
+  { label: 'Marketing', value: 4000, color: 'var(--chart-1)'},
+  { label: 'Ventas', value: 3000, color: 'var(--chart-2)'},
+  { label: 'Desarrollo', value: 2000, color: 'var(--chart-3)'},
+  { label: 'Soporte', value: 2780, color: 'var(--chart-4)'}
 ]
-
 const MOCK_GROUPED_BAR_DATA = [
   { label: 'Q1', actual: 4000, proyectado: 4500 },
   { label: 'Q2', actual: 3000, proyectado: 3200 },
   { label: 'Q3', actual: 5000, proyectado: 4800 },
   { label: 'Q4', actual: 4500, proyectado: 5000 }
 ]
-
 const MOCK_DONUT_DATA = [
-  { label: 'Materiales', value: 400, color: 'var(--chart-1)' },
-  { label: 'Mano de Obra', value: 300, color: 'var(--chart-2)' },
-  { label: 'Equipos', value: 200, color: 'var(--chart-3)' },
-  { label: 'Otros', value: 100, color: 'var(--chart-4)' }
+  { label: 'Materiales', value: 400, color: 'var(--chart-1)'},
+  { label: 'Mano de Obra', value: 300, color: 'var(--chart-2)'},
+  { label: 'Equipos', value: 200, color: 'var(--chart-3)'},
+  { label: 'Otros', value: 100, color: 'var(--chart-4)'}
 ]
-
 const MOCK_COMPOSED_DATA = [
   { label: 'Ene', barValue: 4000, lineValue: 2400 },
   { label: 'Feb', barValue: 3000, lineValue: 1398 },
@@ -75,7 +67,6 @@ const MOCK_COMPOSED_DATA = [
   { label: 'May', barValue: 5890, lineValue: 4800 },
   { label: 'Jun', barValue: 4390, lineValue: 3800 }
 ]
-
 const MOCK_HEATMAP_DATA = [
   { label: 'Lun 9am', value: 50 },
   { label: 'Lun 12pm', value: 80 },
@@ -90,14 +81,12 @@ const MOCK_HEATMAP_DATA = [
   { label: 'Jue 12pm', value: 30 },
   { label: 'Jue 3pm', value: 70 }
 ]
-
 const MOCK_SEGMENTED_BAR_DATA = [
   { label: 'Materiales', value: 45000 },
   { label: 'Mano de Obra', value: 32000 },
   { label: 'Equipos', value: 18000 },
   { label: 'Otros', value: 5000 }
 ]
-
 const MOCK_FINANCIAL_FLOW_DATA = [
   { label: 'Ene', inflow: 50000, outflow: 35000, net: 15000 },
   { label: 'Feb', inflow: 45000, outflow: 40000, net: 5000 },
@@ -106,7 +95,6 @@ const MOCK_FINANCIAL_FLOW_DATA = [
   { label: 'May', inflow: 70000, outflow: 50000, net: 20000 },
   { label: 'Jun', inflow: 65000, outflow: 45000, net: 20000 }
 ]
-
 const MOCK_BALANCE_TIMELINE_DATA = [
   { label: '1 Ene', displayLabel: '1', dailyBalance: 5000, cumulativeBalance: 5000 },
   { label: '8 Ene', displayLabel: '8', dailyBalance: -2000, cumulativeBalance: 3000 },
@@ -114,12 +102,10 @@ const MOCK_BALANCE_TIMELINE_DATA = [
   { label: '22 Ene', displayLabel: '22', dailyBalance: -3000, cumulativeBalance: 8000 },
   { label: '29 Ene', displayLabel: '29', dailyBalance: 6000, cumulativeBalance: 14000 }
 ]
-
 interface ChartCardProps {
   title: string
   children: React.ReactNode
 }
-
 const ChartCard = ({ title, children }: ChartCardProps) => (
   <Card className="overflow-hidden" data-testid={`chart-card-${title.toLowerCase().replace(/\s+/g, '-')}`}>
     <CardHeader className="pb-2">
@@ -130,12 +116,10 @@ const ChartCard = ({ title, children }: ChartCardProps) => (
     </CardContent>
   </Card>
 )
-
 interface ChartGroupProps {
   title: string
   children: React.ReactNode
 }
-
 const ChartGroup = ({ title, children }: ChartGroupProps) => (
   <Card className="col-span-2 overflow-hidden" data-testid={`chart-group-${title.toLowerCase()}`}>
     <CardHeader>
@@ -148,7 +132,6 @@ const ChartGroup = ({ title, children }: ChartGroupProps) => (
     </CardContent>
   </Card>
 )
-
 const ChartGalleryView = () => {
   return (
     <div className="space-y-6 overflow-x-hidden" data-testid="chart-gallery-view">
@@ -165,15 +148,14 @@ const ChartGalleryView = () => {
               <MultiLineChart 
                 data={MOCK_MULTI_LINE_DATA} 
                 series={[
-                  { key: 'ingresos', color: 'var(--chart-1)', name: 'Ingresos' },
-                  { key: 'gastos', color: 'var(--chart-2)', name: 'Gastos' }
+                  { key: 'ingresos', color: 'var(--chart-1)', name: 'Ingresos'},
+                  { key: 'gastos', color: 'var(--chart-2)', name: 'Gastos'}
                 ]}
                 height={180}
               />
             </div>
           </ChartCard>
         </ChartGroup>
-
         <ChartGroup title="SPARKLINE">
           <ChartCard title="SparklineChart">
             <div className="h-48 flex items-center justify-center overflow-hidden">
@@ -186,7 +168,6 @@ const ChartGalleryView = () => {
             </div>
           </ChartCard>
         </ChartGroup>
-
         <ChartGroup title="BAR">
           <ChartCard title="VerticalBarChart">
             <div className="h-48 overflow-hidden">
@@ -203,8 +184,8 @@ const ChartGalleryView = () => {
               <GroupedBarChart 
                 data={MOCK_GROUPED_BAR_DATA}
                 series={[
-                  { key: 'actual', color: 'var(--chart-1)', name: 'Actual' },
-                  { key: 'proyectado', color: 'var(--chart-3)', name: 'Proyectado' }
+                  { key: 'actual', color: 'var(--chart-1)', name: 'Actual'},
+                  { key: 'proyectado', color: 'var(--chart-3)', name: 'Proyectado'}
                 ]}
                 height={180}
               />
@@ -219,7 +200,6 @@ const ChartGalleryView = () => {
             </div>
           </ChartCard>
         </ChartGroup>
-
         <ChartGroup title="PIE">
           <ChartCard title="DonutChart">
             <div className="h-48 overflow-hidden">
@@ -236,7 +216,6 @@ const ChartGalleryView = () => {
             </div>
           </ChartCard>
         </ChartGroup>
-
         <ChartGroup title="RADIAL">
           <ChartCard title="ProgressRingChart">
             <div className="h-48 flex items-center justify-center overflow-hidden">
@@ -249,7 +228,6 @@ const ChartGalleryView = () => {
             </div>
           </ChartCard>
         </ChartGroup>
-
         <ChartGroup title="COMPOSED">
           <ChartCard title="ComposedBarLineChart">
             <div className="h-48 overflow-hidden">
@@ -281,7 +259,6 @@ const ChartGalleryView = () => {
             </div>
           </ChartCard>
         </ChartGroup>
-
         <ChartGroup title="HEATMAP">
           <ChartCard title="HeatmapGrid">
             <div className="h-48 overflow-hidden">
@@ -292,10 +269,8 @@ const ChartGalleryView = () => {
             </div>
           </ChartCard>
         </ChartGroup>
-
       </div>
     </div>
   )
 }
-
 export default ChartGalleryView

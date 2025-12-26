@@ -7,32 +7,26 @@ import { InsuranceKpis } from '../components/InsuranceKpis'
 import { InsuranceGrid } from '../components/InsuranceGrid'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { Button } from '@/components/ui/button'
-
 export function InsuranceView() {
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
-
   const projectId = userData?.preferences?.last_project_id
   
   const filters = {
     project_id: projectId,
-    ...(statusFilter && { status: [statusFilter as 'vigente' | 'por_vencer' | 'vencido'] })
+    ...(statusFilter && { status: [statusFilter as 'vigente'| 'por_vencer'| 'vencido'] })
   }
-
   const { data: insurances = [], isLoading } = useInsuranceList(filters)
-
   const filteredInsurances = statusFilter 
     ? insurances.filter(insurance => insurance.status === statusFilter)
     : insurances
-
   const handleNewInsurance = () => {
     openModal('insurance', {
       mode: 'create',
       projectId
     })
   }
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -40,7 +34,6 @@ export function InsuranceView() {
       </div>
     )
   }
-
   if (insurances.length === 0) {
     return (
       <EmptyState
@@ -56,7 +49,6 @@ export function InsuranceView() {
       />
     )
   }
-
   return (
     <div className="space-y-6">
       {/* KPIs */}
@@ -65,7 +57,6 @@ export function InsuranceView() {
         activeFilter={statusFilter}
         onFilterChange={setStatusFilter}
       />
-
       {/* Grid */}
       <InsuranceGrid
         data={filteredInsurances}

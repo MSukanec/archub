@@ -2,7 +2,6 @@ import { useRef } from 'react';
 import { Building } from 'lucide-react';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { AdminOrganizationForm } from '../forms/AdminOrganizationForm';
-
 interface Organization {
   id: string;
   name: string;
@@ -13,33 +12,29 @@ interface Organization {
     [key: string]: any;
   } | null;
 }
-
 interface OrganizationModalProps {
   modalData?: {
     organization?: Organization;
     isEditing?: boolean;
-    mode?: 'create' | 'edit' | 'view';
+    mode?: 'create'| 'edit'| 'view';
   };
   onClose: () => void;
 }
-
 export function AdminOrganizationModal({ modalData, onClose }: OrganizationModalProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const { organization, isEditing = false, mode: modeFromData } = modalData || {};
   
-  const mode = modeFromData || (organization ? 'edit' : 'create');
-
+  const mode = modeFromData || (organization ? 'edit': 'create');
   const getHeader = () => {
     switch (mode) {
       case 'view':
-        return { title: 'Ver Organización', description: 'Detalles de la organización' };
+        return { title: 'Ver Organización', description: 'Detalles de la organización'};
       case 'edit':
-        return { title: 'Editar Organización', description: 'Modifica los datos de la organización' };
+        return { title: 'Editar Organización', description: 'Modifica los datos de la organización'};
       default:
-        return { title: 'Nueva Organización', description: 'Crea una nueva organización' };
+        return { title: 'Nueva Organización', description: 'Crea una nueva organización'};
     }
   };
-
   const getSubmitText = () => {
     switch (mode) {
       case 'view': return 'Cerrar';
@@ -47,7 +42,6 @@ export function AdminOrganizationModal({ modalData, onClose }: OrganizationModal
       default: return 'Crear';
     }
   };
-
   const handleSubmit = () => {
     if (mode === 'view') {
       onClose();
@@ -55,9 +49,7 @@ export function AdminOrganizationModal({ modalData, onClose }: OrganizationModal
       formRef.current.requestSubmit();
     }
   };
-
   const header = getHeader();
-
   return (
     <ModalLayout 
       onClose={onClose} 

@@ -1,6 +1,5 @@
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-
 /**
  * ============================================================================
  * CANONICAL DATE UTILITIES - USE THESE EVERYWHERE IN THE APP
@@ -17,7 +16,6 @@ import { es } from 'date-fns/locale'
  * - formatDate/formatDateShort/etc.: When displaying dates to users
  * ============================================================================
  */
-
 /**
  * Parse a date string as LOCAL date without timezone shift.
  * ALWAYS use this when converting database date strings to Date objects.
@@ -55,7 +53,6 @@ export function parseLocalDate(input: Date | string | number | null | undefined)
   const date = new Date(input);
   return isNaN(date.getTime()) ? null : date;
 }
-
 /**
  * Format a Date object to YYYY-MM-DD string for database storage.
  * ALWAYS use this when sending dates to the backend/database.
@@ -77,14 +74,12 @@ export function formatDateForDB(date: Date | null | undefined): string {
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
-
 /**
  * @deprecated Use parseLocalDate instead
  */
 function parseToDate(input: Date | string | number): Date | null {
   return parseLocalDate(input);
 }
-
 /**
  * Formats a date in a user-friendly format: "15 ago 2025"
  * @param date - Date to format (Date object, string, or number)
@@ -95,7 +90,6 @@ export function formatDate(date: Date | string | number): string {
   if (!dateObj) return '—';
   return format(dateObj, 'd MMM yyyy', { locale: es });
 }
-
 /**
  * Formats a date with day and month only: "15 ago"
  * @param date - Date to format (Date object, string, or number)
@@ -106,7 +100,6 @@ export function formatDateShort(date: Date | string | number): string {
   if (!dateObj) return '—';
   return format(dateObj, 'd MMM', { locale: es });
 }
-
 /**
  * Formats a date with abbreviated year: "15 ago 25"
  * @param date - Date to format (Date object, string, or number)
@@ -117,7 +110,6 @@ export function formatDateCompact(date: Date | string | number): string {
   if (!dateObj) return '—';
   return format(dateObj, 'd MMM yy', { locale: es });
 }
-
 /**
  * Formats time in HH:mm format: "14:30"
  * @param date - Date to format (Date object, string, or number)

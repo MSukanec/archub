@@ -11,17 +11,14 @@ export interface SubcontractTaskData {
   unit_symbol: string;
   rubro_name: string;
 }
-
 export async function getSubcontractTasks(subcontractId: string): Promise<SubcontractTaskData[]> {
   if (!subcontractId) {
     return [];
   }
-
   const response = await fetch(`/api/subcontract-tasks/${subcontractId}`);
   if (!response.ok) {
     throw new Error('Failed to fetch subcontract tasks');
   }
-
   const data = await response.json();
   return data || [];
 }

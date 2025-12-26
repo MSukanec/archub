@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCourseMarkersUrl, getCourseMarkers, type MarkerWithLesson } from '../services';
-
 /**
  * Hook para obtener todos los marcadores de un curso.
  * 
@@ -22,5 +21,4 @@ export function useCourseMarkers(courseId?: string) {
     staleTime: 1000 * 60 * 5,
   });
 }
-
 export type { MarkerWithLesson };

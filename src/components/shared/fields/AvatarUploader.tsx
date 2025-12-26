@@ -3,7 +3,6 @@ import { Camera, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
 interface AvatarUploaderProps {
   avatarUrl?: string | null;
   initials: string;
@@ -12,7 +11,6 @@ interface AvatarUploaderProps {
   isUploading?: boolean;
   className?: string;
 }
-
 export function AvatarUploader({
   avatarUrl,
   initials,
@@ -22,7 +20,6 @@ export function AvatarUploader({
   className
 }: AvatarUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.currentTarget.files?.[0];
     if (file) {
@@ -30,13 +27,12 @@ export function AvatarUploader({
     }
     e.currentTarget.value = '';
   };
-
   return (
     <div className={cn("flex flex-col items-center gap-4", className)}>
       {/* Avatar */}
       <div className="relative">
         <Avatar className="h-32 w-32 border-4 border-accent shadow-lg">
-          {avatarUrl && avatarUrl.trim() !== '' && (
+          {avatarUrl && avatarUrl.trim() !== ''&& (
             <AvatarImage 
               src={avatarUrl} 
               alt={`Avatar de ${displayName}`}
@@ -47,7 +43,6 @@ export function AvatarUploader({
             {initials}
           </AvatarFallback>
         </Avatar>
-
         {/* Upload button overlay */}
         <button
           type="button"
@@ -66,7 +61,6 @@ export function AvatarUploader({
             <Camera className="h-5 w-5" />
           )}
         </button>
-
         {/* Hidden file input */}
         <input
           ref={fileInputRef}
@@ -78,12 +72,11 @@ export function AvatarUploader({
           aria-label="Cargar foto de perfil"
         />
       </div>
-
       {/* Label */}
       <div className="text-center">
         <h3 className="text-lg font-semibold text-foreground">{displayName}</h3>
         <p className="text-sm text-muted-foreground">
-          {isUploading ? 'Subiendo foto...' : 'Haz clic en la cámara para cambiar la foto'}
+          {isUploading ? 'Subiendo foto...': 'Haz clic en la cámara para cambiar la foto'}
         </p>
       </div>
     </div>

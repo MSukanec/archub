@@ -3,9 +3,7 @@
  * 
  * Obtiene el precio de un material específico para una organización.
  */
-
 import { supabase } from '@/lib/supabase';
-
 export interface MaterialPrice {
   id: string;
   material_id: string;
@@ -20,7 +18,6 @@ export interface MaterialPrice {
     name: string;
   };
 }
-
 export async function getMaterialPrice(
   materialId: string,
   organizationId: string
@@ -28,7 +25,6 @@ export async function getMaterialPrice(
   if (!supabase) {
     throw new Error('Supabase client not available');
   }
-
   const { data, error } = await supabase
     .from('organization_material_prices')
     .select(`
@@ -38,12 +34,10 @@ export async function getMaterialPrice(
     .eq('material_id', materialId)
     .eq('organization_id', organizationId)
     .single();
-
   if (error && error.code !== 'PGRST116') {
     // PGRST116 = no rows found, which is ok
     console.error('Error fetching material price:', error);
     throw error;
   }
-
   return data;
 }

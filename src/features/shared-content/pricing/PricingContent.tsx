@@ -13,7 +13,6 @@ import { FAQSection } from "./components/FAQSection";
 import { buildComparisonData } from "./data/comparison";
 import { useGlobalModalStore } from "@/components/modal";
 import type { PricingContentProps, Plan, BillingPeriod } from "./types";
-
 export function PricingContent({ mode }: PricingContentProps) {
   const [, navigate] = useLocation();
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('annual');
@@ -26,13 +25,11 @@ export function PricingContent({ mode }: PricingContentProps) {
   const userPlanName = userData?.organization?.plan?.name;
   const isAuthenticated = !!userData?.user?.id;
   const subscriptionEndDate = userData?.organization?.subscription_end_date;
-
   const organizationId = userData?.organization?.id;
   const { data: billableMembersData } = useQuery<{ seats: number }>({
     queryKey: ['/api/billing/next-invoice', organizationId],
-    enabled: mode === 'dashboard' && isAuthenticated && !!organizationId
+    enabled: mode === 'dashboard'&& isAuthenticated && !!organizationId
   });
-
   const getPlanLevel = (planName: string): number => {
     const levels: Record<string, number> = {
       'free': 1,
@@ -42,7 +39,6 @@ export function PricingContent({ mode }: PricingContentProps) {
     };
     return levels[planName.toLowerCase()] || 0;
   };
-
   useEffect(() => {
     const fetchPlans = async () => {
       try {
@@ -50,7 +46,6 @@ export function PricingContent({ mode }: PricingContentProps) {
       const { data, error } = await supabase
           .from('plans')
           .select('id, name, slug, features, billing_type, is_active, status, monthly_amount, annual_amount');
-
         if (error) throw error;
         
         const transformedData = (data || []).map(plan => ({
@@ -85,15 +80,12 @@ export function PricingContent({ mode }: PricingContentProps) {
         setIsLoading(false);
       }
     };
-
     fetchPlans();
   }, []);
-
   const getPlanFeatures = (planSlug: string) => {
     const plan = plans.find(p => p.slug?.toLowerCase() === planSlug || p.name.toLowerCase() === planSlug);
     return plan?.features || {};
   };
-
   const handlePlanSelect = (plan: Plan) => {
     const isCurrentPlan = plan.name.toLowerCase() === userPlanName?.toLowerCase();
     
@@ -147,7 +139,6 @@ export function PricingContent({ mode }: PricingContentProps) {
       navigate(`/subscription/checkout?plan=${plan.slug}&billing=${billingPeriod}`);
     }
   };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -155,21 +146,17 @@ export function PricingContent({ mode }: PricingContentProps) {
       </div>
     );
   }
-
   const freeFeatures = getPlanFeatures('free');
   const proFeatures = getPlanFeatures('pro');
   const teamsFeatures = getPlanFeatures('teams');
   const comparisonData = buildComparisonData(freeFeatures, proFeatures, teamsFeatures);
-
   return (
     <div className="max-w-7xl mx-auto space-y-16 py-12 px-4">
       <BillingToggle 
         billingPeriod={billingPeriod} 
         onBillingPeriodChange={setBillingPeriod} 
       />
-
-      {billingPeriod === 'annual' && <FounderBanner mode={mode} />}
-
+      {billingPeriod === 'annual'&& <FounderBanner mode={mode} />}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
         {plans.map((plan) => {
           const isCurrentPlan = plan.name.toLowerCase() === userPlanName?.toLowerCase();
@@ -188,9 +175,7 @@ export function PricingContent({ mode }: PricingContentProps) {
           );
         })}
       </div>
-
       {enterprisePlan && <EnterpriseCard />}
-
       <ComparisonTable 
         comparisonData={comparisonData}
         userPlanName={userPlanName}
@@ -199,7 +184,6 @@ export function PricingContent({ mode }: PricingContentProps) {
         billingPeriod={billingPeriod}
         onPlanSelect={handlePlanSelect}
       />
-
       <FAQSection />
     </div>
   );

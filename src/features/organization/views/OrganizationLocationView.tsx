@@ -11,19 +11,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { MapPin, Building2, Navigation, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { GooglePlacesAutocomplete, GoogleMap } from '@/components/shared/integrations/google-maps'
-
 export function OrganizationLocationView() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   
   const organizationId = userData?.organization?.id
-
   const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-
   const [isHydrated, setIsHydrated] = useState(false);
   const hasHydratedRef = useRef(false);
-
   const [addressFull, setAddressFull] = useState('');
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
@@ -37,33 +33,27 @@ export function OrganizationLocationView() {
   const [timezone, setTimezone] = useState('');
   const [locationType, setLocationType] = useState<string>('');
   const [accessibilityNotes, setAccessibilityNotes] = useState('');
-
   const { data: organizationData, isSuccess: organizationDataSuccess } = useQuery({
     queryKey: organizationKeys.data(organizationId),
     queryFn: async () => {
       if (!organizationId || !supabase) return null;
-
       const { data, error } = await supabase
         .from('organization_data')
         .select('*')
         .eq('organization_id', organizationId)
         .single();
-
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching organization data:', error);
         throw error;
       }
-
       return data;
     },
     enabled: !!organizationId && !!supabase
   });
-
   const saveController = useAutosaveController({
     queryKey: organizationKeys.data(organizationId),
     saveFn: async (dataToSave: any) => {
       if (!organizationId || !supabase) throw new Error('Organization or Supabase not available');
-
       const normalizedData = {
         address_full: normalizeStringValue(dataToSave.address_full),
         address: normalizeStringValue(dataToSave.address),
@@ -78,19 +68,16 @@ export function OrganizationLocationView() {
         ...(dataToSave.location_type ? { location_type: dataToSave.location_type } : {}),
         accessibility_notes: normalizeStringValue(dataToSave.accessibility_notes),
       };
-
       const { data: existingData } = await supabase
         .from('organization_data')
         .select('id')
         .eq('organization_id', organizationId)
         .single();
-
       if (existingData) {
         const { error } = await supabase
           .from('organization_data')
           .update(normalizedData)
           .eq('organization_id', organizationId);
-
         if (error) throw error;
       } else {
         const { error } = await supabase
@@ -99,7 +86,6 @@ export function OrganizationLocationView() {
             organization_id: organizationId,
             ...normalizedData
           });
-
         if (error) throw error;
       }
     },
@@ -107,17 +93,15 @@ export function OrganizationLocationView() {
     errorMessage: "No se pudo guardar la ubicación",
     debounceMs: 500,
   });
-
   const validateCoordinates = (lat: number | null, lng: number | null) => {
     if (lat !== null || lng !== null) {
       if (lat === null || lng === null) return false;
-      if (typeof lat !== 'number' || typeof lng !== 'number') return false;
+      if (typeof lat !== 'number'|| typeof lng !== 'number') return false;
       if (lat < -90 || lat > 90) return false;
       if (lng < -180 || lng > 180) return false;
     }
     return true;
   };
-
   const getCurrentFormData = useCallback(() => ({
     address_full: addressFull,
     address: address,
@@ -132,16 +116,14 @@ export function OrganizationLocationView() {
     ...(locationType ? { location_type: locationType } : {}),
     accessibility_notes: accessibilityNotes,
   }), [addressFull, address, city, state, country, postalCode, placeId, lat, lng, timezone, locationType, accessibilityNotes]);
-
   const handleTextFieldBlur = useCallback(() => {
     if (!isHydrated) return;
     if (!validateCoordinates(lat, lng)) return;
     
     saveController.save(getCurrentFormData());
   }, [isHydrated, saveController, getCurrentFormData, lat, lng]);
-
   const handleTextFieldKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter'&& !e.shiftKey) {
       e.preventDefault();
       if (!isHydrated) return;
       if (!validateCoordinates(lat, lng)) return;
@@ -149,7 +131,6 @@ export function OrganizationLocationView() {
       saveController.save(getCurrentFormData());
     }
   }, [isHydrated, saveController, getCurrentFormData, lat, lng]);
-
   const handleSelectChange = useCallback((value: string) => {
     if (!isHydrated) return;
     
@@ -174,19 +155,15 @@ export function OrganizationLocationView() {
       });
     }, 0);
   }, [isHydrated, saveController, addressFull, address, city, state, country, postalCode, placeId, lat, lng, timezone, accessibilityNotes]);
-
   useEffect(() => {
     setIsHydrated(false);
     hasHydratedRef.current = false;
   }, [organizationId]);
-
   useEffect(() => {
     if (!organizationDataSuccess || hasHydratedRef.current) {
       return;
     }
-
     hasHydratedRef.current = true;
-
     if (organizationData) {
       setAddress(organizationData.address || '');
       setAddressFull(organizationData.address_full || organizationData.address || '');
@@ -201,7 +178,6 @@ export function OrganizationLocationView() {
       setLocationType(organizationData.location_type || '');
       setAccessibilityNotes(organizationData.accessibility_notes || '');
     }
-
     setTimeout(() => {
       setIsHydrated(true);
       
@@ -221,7 +197,6 @@ export function OrganizationLocationView() {
       });
     }, 100);
   }, [organizationData, organizationDataSuccess, saveController]);
-
   const handlePlaceSelected = (place: any) => {
     setAddressFull(place.address_full);
     setAddress(place.address_full);
@@ -253,47 +228,39 @@ export function OrganizationLocationView() {
       }, 10);
     }
   };
-
   const handleLatChange = async (value: string) => {
     const parsed = parseFloat(value);
     const newLat = isNaN(parsed) ? null : parsed;
     setLat(newLat);
-
     if (newLat !== null && lng !== null && googleMapsApiKey && (window as any).google) {
       await performReverseGeocoding(newLat, lng);
     }
   };
-
   const handleLngChange = async (value: string) => {
     const parsed = parseFloat(value);
     const newLng = isNaN(parsed) ? null : parsed;
     setLng(newLng);
-
     if (lat !== null && newLng !== null && googleMapsApiKey && (window as any).google) {
       await performReverseGeocoding(lat, newLng);
     }
   };
-
   const performReverseGeocoding = async (latitude: number, longitude: number) => {
     try {
       const geocoder = new (window as any).google.maps.Geocoder();
       const response = await geocoder.geocode({
         location: { lat: latitude, lng: longitude }
       });
-
       if (response.results && response.results.length > 0) {
         const result = response.results[0];
         const newAddress = result.formatted_address;
         
         setAddressFull(newAddress);
         setAddress(newAddress);
-
         const components = result.address_components;
         let newCity = '';
         let newState = '';
         let newCountry = '';
         let newPostalCode = '';
-
         components.forEach((component: any) => {
           const types = component.types;
           if (types.includes('locality')) {
@@ -306,7 +273,6 @@ export function OrganizationLocationView() {
             newPostalCode = component.long_name;
           }
         });
-
         setCity(newCity);
         setState(newState);
         setCountry(newCountry);
@@ -317,11 +283,9 @@ export function OrganizationLocationView() {
       console.error('Error in reverse geocoding:', error);
     }
   };
-
   const handleMarkerDragEnd = async (newLat: number, newLng: number) => {
     setLat(newLat);
     setLng(newLng);
-
     if (googleMapsApiKey && (window as any).google) {
       await performReverseGeocoding(newLat, newLng);
       toast({
@@ -330,7 +294,6 @@ export function OrganizationLocationView() {
       });
     }
   };
-
   if (!organizationId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -338,9 +301,7 @@ export function OrganizationLocationView() {
       </div>
     )
   }
-
   const hasCoordinates = lat !== null && lng !== null;
-
   return (
     <div className="space-y-8">
       <div className="space-y-4">
@@ -353,7 +314,6 @@ export function OrganizationLocationView() {
           Busca una dirección o ingresa las coordenadas manualmente. Todos los campos se sincronizan automáticamente. 
           También puedes arrastrar el pin en el mapa para ajustar la ubicación.
         </p>
-
         {!googleMapsApiKey && (
           <div className="p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md">
             <div className="flex items-start gap-2">
@@ -367,7 +327,6 @@ export function OrganizationLocationView() {
             </div>
           </div>
         )}
-
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           <div className="lg:col-span-2 space-y-2">
             {googleMapsApiKey ? (
@@ -394,7 +353,6 @@ export function OrganizationLocationView() {
               </>
             )}
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="latitude">Latitud (-90 a 90)</Label>
             <Input 
@@ -409,7 +367,6 @@ export function OrganizationLocationView() {
               data-testid="input-latitude"
             />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="longitude">Longitud (-180 a 180)</Label>
             <Input 
@@ -425,7 +382,6 @@ export function OrganizationLocationView() {
             />
           </div>
         </div>
-
         {hasCoordinates && googleMapsApiKey && (
           <div className="mt-4">
             <p className="text-sm text-muted-foreground mb-2">
@@ -448,7 +404,6 @@ export function OrganizationLocationView() {
           </div>
         )}
       </div>
-
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Building2 className="h-5 w-5 text-[var(--accent)]" />
@@ -460,7 +415,6 @@ export function OrganizationLocationView() {
           Estos campos se completan automáticamente al buscar una dirección, 
           pero puedes editarlos manualmente si es necesario.
         </p>
-
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="city">Ciudad</Label>
@@ -474,7 +428,6 @@ export function OrganizationLocationView() {
               data-testid="input-city"
             />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="postal-code">Código Postal</Label>
             <Input 
@@ -488,7 +441,6 @@ export function OrganizationLocationView() {
             />
           </div>
         </div>
-
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="state">Provincia/Estado</Label>
@@ -502,7 +454,6 @@ export function OrganizationLocationView() {
               data-testid="input-state"
             />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="country">País</Label>
             <Input 
@@ -516,7 +467,6 @@ export function OrganizationLocationView() {
             />
           </div>
         </div>
-
         <div className="space-y-2">
           <Label htmlFor="location-type">Tipo de Ubicación</Label>
           <Select value={locationType} onValueChange={handleSelectChange}>
@@ -531,7 +481,6 @@ export function OrganizationLocationView() {
             </SelectContent>
           </Select>
         </div>
-
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-4">
             <Label htmlFor="accessibility-notes">Notas de Accesibilidad</Label>

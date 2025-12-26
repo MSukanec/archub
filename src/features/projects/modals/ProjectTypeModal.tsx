@@ -6,18 +6,15 @@ import {
   useProjectTypeForm,
   type ProjectType 
 } from '../forms/ProjectTypeForm';
-
 interface ProjectTypeModalProps {
   modalData?: {
     projectType?: ProjectType;
   };
   onClose: () => void;
-  mode?: 'create' | 'edit' | 'view';
+  mode?: 'create'| 'edit'| 'view';
 }
-
-export function ProjectTypeModal({ modalData, onClose, mode = 'create' }: ProjectTypeModalProps) {
+export function ProjectTypeModal({ modalData, onClose, mode = 'create'}: ProjectTypeModalProps) {
   const { projectType } = modalData || {};
-
   const {
     form,
     onSubmit,
@@ -31,12 +28,10 @@ export function ProjectTypeModal({ modalData, onClose, mode = 'create' }: Projec
       onClose();
     },
   });
-
   const handleClose = () => {
     reset();
     onClose();
   };
-
   const getHeader = () => {
     switch (mode) {
       case 'view':
@@ -57,9 +52,7 @@ export function ProjectTypeModal({ modalData, onClose, mode = 'create' }: Projec
         };
     }
   };
-
   const header = getHeader();
-
   return (
     <ModalLayout onClose={handleClose} size="md">
       <ModalHeader 
@@ -69,18 +62,17 @@ export function ProjectTypeModal({ modalData, onClose, mode = 'create' }: Projec
       />
       
       <ModalBody>
-        {mode === 'view' && projectType ? (
+        {mode === 'view'&& projectType ? (
           <ViewPanel data={projectType} />
         ) : (
           <FormPanel form={form} onSubmit={onSubmit} />
         )}
       </ModalBody>
-
-      {mode !== 'view' && (
+      {mode !== 'view'&& (
         <ModalFooter
           leftLabel="Cancelar"
           onLeftClick={handleClose}
-          rightLabel={mode === 'create' ? 'Crear' : 'Actualizar'}
+          rightLabel={mode === 'create'? 'Crear': 'Actualizar'}
           onRightClick={form.handleSubmit(onSubmit)}
           isSubmitting={isSubmitting}
           submitDisabled={isSubmitting}

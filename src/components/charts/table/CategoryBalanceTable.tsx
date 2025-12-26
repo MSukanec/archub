@@ -1,15 +1,13 @@
 import { Badge } from '@/components/ui/badge'
 import { LucideIcon } from 'lucide-react'
-
 export interface CategoryBalanceRow {
   primaryLabel: string
   primaryIcon?: LucideIcon
   secondaryLabel: string
   secondaryIcon?: LucideIcon
   value: string
-  valueVariant: 'positive' | 'negative' | 'neutral'
+  valueVariant: 'positive'| 'negative'| 'neutral'
 }
-
 interface CategoryBalanceTableProps {
   columns: [string, string, string]
   data: CategoryBalanceRow[]
@@ -17,7 +15,6 @@ interface CategoryBalanceTableProps {
   emptyMessage?: string
   emptyIcon?: LucideIcon
 }
-
 export function CategoryBalanceTable({ 
   columns,
   data, 
@@ -36,7 +33,6 @@ export function CategoryBalanceTable({
         return 'text-muted-foreground'
     }
   }
-
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -55,7 +51,6 @@ export function CategoryBalanceTable({
       </div>
     )
   }
-
   if (!data || data.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -66,7 +61,6 @@ export function CategoryBalanceTable({
       </div>
     )
   }
-
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-3 gap-4 text-sm font-medium text-muted-foreground pb-2 border-b">
@@ -74,7 +68,6 @@ export function CategoryBalanceTable({
           <span key={i}>{col}</span>
         ))}
       </div>
-
       <div className="space-y-2 max-h-[240px] overflow-y-auto">
         {data.map((item, index) => {
           const PrimaryIcon = item.primaryIcon
@@ -86,12 +79,10 @@ export function CategoryBalanceTable({
                 {PrimaryIcon && <PrimaryIcon className="h-4 w-4 text-muted-foreground" />}
                 <span className="font-mono font-semibold">{item.primaryLabel}</span>
               </div>
-
               <div className="flex items-center gap-2">
                 {SecondaryIcon && <SecondaryIcon className="h-4 w-4 text-muted-foreground" />}
                 <span className="truncate">{item.secondaryLabel}</span>
               </div>
-
               <div className={`font-semibold ${getValueColor(item.valueVariant)}`}>
                 {item.value}
               </div>

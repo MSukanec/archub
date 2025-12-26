@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
   Folder, 
   ArrowLeft,
   ChevronRight,
@@ -16,38 +15,30 @@ import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
 import { useDesignDocumentsByFolder } from '@/hooks/use-design-documents';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-
-
-
 interface DocumentExplorerProps {
   className?: string;
   onDocumentSelect?: (document: any) => void;
 }
-
 interface BreadcrumbItem {
   id: string;
   name: string;
-  type: 'root' | 'folder' | 'subfolder';
+  type: 'root'| 'folder'| 'subfolder';
 }
-
 export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplorerProps) {
   const [navigation, setNavigation] = useState<BreadcrumbItem[]>([
-    { id: 'root', name: 'Documentos', type: 'root' }
+    { id: 'root', name: 'Documentos', type: 'root'}
   ]);
-
   // Helper functions
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     return format(new Date(dateString), 'dd MMM yyyy', { locale: es });
   };
-
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return 'N/A';
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ''+ sizes[i];
   };
-
   const currentLevel = navigation[navigation.length - 1];
   const isRoot = currentLevel.type === 'root';
   
@@ -60,34 +51,30 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
   
   // Obtener documentos de la carpeta actual
   const { data: documents } = useDesignDocumentsByFolder(
-    currentLevel.type === 'folder' || currentLevel.type === 'subfolder' ? currentLevel.id : undefined
+    currentLevel.type === 'folder'|| currentLevel.type === 'subfolder'? currentLevel.id : undefined
   );
-
   const navigateToFolder = (folder: any) => {
     const newItem: BreadcrumbItem = {
       id: folder.id,
       name: folder.name,
-      type: folder.parent_id ? 'subfolder' : 'folder'
+      type: folder.parent_id ? 'subfolder': 'folder'
     };
     setNavigation([...navigation, newItem]);
   };
-
   const navigateBack = () => {
     if (navigation.length > 1) {
       setNavigation(navigation.slice(0, -1));
     }
   };
-
   const navigateTo = (index: number) => {
     setNavigation(navigation.slice(0, index + 1));
   };
-
   // Modal functions
   const { openModal } = useGlobalModalStore();
   
   const openNewFolderModal = () => {
-    const parentId = currentLevel.type !== 'root' ? currentLevel.id : undefined;
-    const parentName = currentLevel.type !== 'root' ? currentLevel.name : undefined;
+    const parentId = currentLevel.type !== 'root'? currentLevel.id : undefined;
+    const parentName = currentLevel.type !== 'root'? currentLevel.name : undefined;
     
     openModal('document-folder', {
       parentId,
@@ -115,7 +102,6 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
       }
     });
   };
-
   const getStatusColor = (status?: string) => {
     switch (status) {
       case 'aprobado': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
@@ -125,7 +111,6 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     }
   };
-
   const getStatusText = (status?: string) => {
     switch (status) {
       case 'aprobado': return 'Aprobado';
@@ -135,7 +120,6 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
       default: return 'Sin estado';
     }
   };
-
   return (
     <ScrollArea className={`h-full ${className}`}>
       <div className="space-y-4 p-4">
@@ -182,7 +166,6 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
             Nueva carpeta
           </Button>
         </div>
-
         {/* Content Area */}
         <div className="space-y-3">
         {/* Show root folders */}
@@ -228,7 +211,6 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
             </div>
           </div>
         )}
-
         {/* Show subfolders if any */}
         {!isRoot && subFolders.length > 0 && (
           <div className="space-y-2">
@@ -276,7 +258,6 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
             </div>
           </div>
         )}
-
         {/* Show documents */}
         {!isRoot && documents && documents.length > 0 && (
           <div className="space-y-1">
@@ -296,7 +277,6 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
             ))}
           </div>
         )}
-
         {/* Empty states */}
         {isRoot && rootFolders.length === 0 && (
           <Card>
@@ -309,7 +289,6 @@ export function DocumentExplorer({ className, onDocumentSelect }: DocumentExplor
             </CardContent>
           </Card>
         )}
-
         {!isRoot && (!documents || documents.length === 0) && (
           <Card>
             <CardContent className="p-8 text-center">

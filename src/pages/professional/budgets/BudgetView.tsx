@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { DollarSign, Plus } from 'lucide-react';
-
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { BudgetListTab } from './view/BudgetListTab';
 import { BudgetMaterialsTab } from './view/BudgetMaterialsTab';
@@ -9,7 +8,6 @@ import { useBudgets } from "@/hooks/use-budgets";
 import { useBudgetItems, useCreateBudgetItem, useDeleteBudgetItem } from "@/hooks/use-budget-items";
 import { useGlobalModalStore } from '@/components/modal';
 import { useProjectContext } from '@/stores/projectContext';
-
 export default function BudgetView() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
@@ -22,14 +20,12 @@ export default function BudgetView() {
   const { openModal } = useGlobalModalStore();
   const createBudgetItem = useCreateBudgetItem();
   const deleteBudgetItem = useDeleteBudgetItem();
-
   // Función para agregar tarea
   const handleAddTask = () => {
     if (!selectedProjectId || !currentOrganizationId || !budget) {
       console.error('No project, organization or budget selected');
       return;
     }
-
     const modalData = {
       projectId: selectedProjectId,
       organizationId: currentOrganizationId,
@@ -37,18 +33,15 @@ export default function BudgetView() {
       currencyId: budget.currency_id,
       isEditing: false
     };
-
     console.log('🔧 BudgetView - handleAddTask modalData:', modalData);
     openModal('budget-item', modalData);
   };
-
   // Función para duplicar tarea
   const handleDuplicateTask = (task: any) => {
     if (!selectedProjectId || !currentOrganizationId || !budget || !task) {
       console.error('No project, organization, budget or task selected');
       return;
     }
-
     // Crear una copia de la tarea sin el id y con campos actualizados
     const duplicatedData = {
       budget_id: task.budget_id,
@@ -65,17 +58,14 @@ export default function BudgetView() {
       description: task.description ? `${task.description} (copia)` : 'Copia',
       sort_key: task.sort_key || 0
     };
-
     createBudgetItem.mutate(duplicatedData);
   };
-
   // Función para eliminar tarea
   const handleDeleteTask = (taskId: string) => {
     if (!taskId) {
       console.error('No task ID provided');
       return;
     }
-
     openModal('delete-confirmation', {
       mode: 'simple',
       title: 'Eliminar tarea del presupuesto',
@@ -85,7 +75,6 @@ export default function BudgetView() {
       }
     });
   };
-
   const headerTabs = [
     {
       id: 'Listado de Items',
@@ -98,7 +87,6 @@ export default function BudgetView() {
       isActive: activeTab === 'Cómputo de Materiales'
     }
   ];
-
   const headerProps = {
     icon: DollarSign,
     title: budget?.name || "Presupuesto",
@@ -110,7 +98,7 @@ export default function BudgetView() {
     tabs: headerTabs,
     onTabChange: setActiveTab,
     // Solo mostrar actionButton en la tab de "Listado de Items"
-    ...(activeTab === 'Listado de Items' && {
+    ...(activeTab === 'Listado de Items'&& {
       actionButton: {
         icon: Plus,
         label: "Agregar Tarea",
@@ -118,7 +106,6 @@ export default function BudgetView() {
       }
     })
   };
-
   if (isLoading || isLoadingItems) {
     return (
       <Layout headerProps={headerProps} wide>
@@ -130,7 +117,6 @@ export default function BudgetView() {
       </Layout>
     );
   }
-
   if (!budget) {
     return (
       <Layout headerProps={headerProps} wide>
@@ -143,7 +129,6 @@ export default function BudgetView() {
       </Layout>
     );
   }
-
   const renderTabContent = () => {
     switch (activeTab) {
       case 'Listado de Items':
@@ -168,7 +153,6 @@ export default function BudgetView() {
         return null;
     }
   };
-
   return (
     <Layout headerProps={headerProps} wide>
       {renderTabContent()}

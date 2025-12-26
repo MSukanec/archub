@@ -1,15 +1,13 @@
 import { ClientRoleForm } from '../forms/ClientRoleForm'
 import type { ClientRole } from '../types'
-
 interface ClientRoleModalProps {
   modalData?: {
     clientRole?: ClientRole;
   };
   onClose: () => void;
-  mode?: 'create' | 'edit' | 'view';
+  mode?: 'create'| 'edit'| 'view';
 }
-
-export function ClientRoleModal({ modalData, onClose, mode = 'create' }: ClientRoleModalProps) {
+export function ClientRoleModal({ modalData, onClose, mode = 'create'}: ClientRoleModalProps) {
   return (
     <ClientRoleForm
       modalData={modalData}
@@ -18,5 +16,4 @@ export function ClientRoleModal({ modalData, onClose, mode = 'create' }: ClientR
     />
   )
 }
-
 export default ClientRoleModal

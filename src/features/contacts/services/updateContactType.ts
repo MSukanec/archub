@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { ContactTypeInput, ContactType } from '../types';
-
 /**
  * Actualiza un tipo de contacto existente.
  * 
@@ -18,7 +17,6 @@ export async function updateContactType(
   if (!supabase || !typeId || !organizationId) {
     throw new Error('Missing required parameters');
   }
-
   const { data, error } = await supabase
     .from('contact_types')
     .update({
@@ -29,10 +27,8 @@ export async function updateContactType(
     .eq('organization_id', organizationId)
     .select()
     .single();
-
   if (error) {
     throw error;
   }
-
   return data;
 }

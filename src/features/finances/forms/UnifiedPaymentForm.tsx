@@ -10,13 +10,11 @@ import {
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { DollarSign, Users, Package, CreditCard } from 'lucide-react';
-
 interface UnifiedPaymentFormProps {
   modalData?: any;
   onClose: () => void;
   mode?: 'create';
 }
-
 const PAYMENT_TYPES = [
   {
     id: 'client_payment',
@@ -43,20 +41,15 @@ const PAYMENT_TYPES = [
     color: 'text-blue-600',
   },
 ];
-
 export default function UnifiedPaymentForm({ modalData, onClose }: UnifiedPaymentFormProps) {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const { openModal } = useGlobalModalStore();
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
-
   const handleContinue = () => {
     if (!selectedType) return;
-
     const paymentType = PAYMENT_TYPES.find((t) => t.id === selectedType);
     if (!paymentType) return;
-
     onClose();
-
     setTimeout(() => {
       openModal(paymentType.modalType, {
         mode: 'create',
@@ -66,7 +59,6 @@ export default function UnifiedPaymentForm({ modalData, onClose }: UnifiedPaymen
       });
     }, 100);
   };
-
   return (
     <ModalLayout onClose={onClose} size="md">
       <ModalHeader
@@ -74,7 +66,6 @@ export default function UnifiedPaymentForm({ modalData, onClose }: UnifiedPaymen
         title="Nuevo Movimiento"
         description="Selecciona el tipo de movimiento financiero a registrar"
       />
-
       <ModalBody>
         <div className="space-y-4">
           <Label className="text-sm font-medium">Tipo de Movimiento</Label>
@@ -93,7 +84,7 @@ export default function UnifiedPaymentForm({ modalData, onClose }: UnifiedPaymen
                   className={`
                     flex items-start gap-4 p-4 rounded-lg border cursor-pointer transition-all
                     ${selectedType === type.id 
-                      ? 'border-primary bg-primary/5 ring-1 ring-primary' 
+                      ? 'border-primary bg-primary/5 ring-1 ring-primary'
                       : 'border-border hover:border-primary/50 hover:bg-muted/50'
                     }
                   `}
@@ -113,7 +104,6 @@ export default function UnifiedPaymentForm({ modalData, onClose }: UnifiedPaymen
           </RadioGroup>
         </div>
       </ModalBody>
-
       <ModalFooter
         cancelText="Cancelar"
         onLeftClick={onClose}

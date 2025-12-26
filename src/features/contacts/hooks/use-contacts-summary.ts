@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getContactsSummary } from '../services';
 import { contactsKeys } from '@/core/query-keys';
-
 /**
  * Hook para obtener el resumen de contactos de una organización.
  * Usa la vista contacts_summary_view.

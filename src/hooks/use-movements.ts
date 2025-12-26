@@ -1,10 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useProjectContext } from '@/stores/projectContext'
-
 // NOTE: For activity logging integration, import logActivity from '@/utils/logActivity'
 // and add logging calls in mutation onSuccess handlers as needed
-
 interface Movement {
   id: string
   description: string
@@ -71,7 +69,6 @@ interface Movement {
     avatar_url?: string
   }
 }
-
 export function useMovements(organizationId?: string | undefined, projectId?: string | undefined | null) {
   const { currentOrganizationId, selectedProjectId } = useProjectContext()
   
@@ -87,11 +84,9 @@ export function useMovements(organizationId?: string | undefined, projectId?: st
     queryKey: ['movements', effectiveOrgId, effectiveProjectId],
     queryFn: async () => {
       if (!effectiveOrgId) return []
-
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
-
       let query = supabase
         .from('movements')
         .select(`
@@ -128,24 +123,19 @@ export function useMovements(organizationId?: string | undefined, projectId?: st
       query = query.eq('organization_id', effectiveOrgId)
         .order('movement_date', { ascending: false })
         .order('created_at', { ascending: false });
-
       // If project is specified, filter by project
       // Only filter by project if projectId is explicitly provided and not null
       if (effectiveProjectId && effectiveProjectId !== 'null') {
         query = query.eq('project_id', effectiveProjectId);
       }
-
       const { data, error } = await query;
-
       if (error) {
         console.error('Error fetching movements:', error)
         return []
       }
-
       if (!data || data.length === 0) {
         return []
       }
-
       // Transform the data from joined tables
       const transformedData = data.map((movement: any) => {
         return {
@@ -192,25 +182,20 @@ export function useMovements(organizationId?: string | undefined, projectId?: st
     enabled: !!effectiveOrgId
   })
 }
-
 export function useToggleMovementFavorite() {
   const queryClient = useQueryClient()
-
   return useMutation({
     mutationFn: async ({ movementId, isFavorite }: { movementId: string, isFavorite: boolean }) => {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
-
       const { error } = await supabase
         .from('movements')
         .update({ is_favorite: isFavorite })
         .eq('id', movementId)
-
       if (error) {
         throw error
       }
-
       return { movementId, isFavorite }
     },
     onSuccess: () => {

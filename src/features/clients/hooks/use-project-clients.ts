@@ -8,7 +8,6 @@ import {
 } from '../services/projectClients';
 import { CLIENT_QUERY_KEYS } from '../constants';
 import type { ProjectClient, ProjectClientWithRelations } from '../types';
-
 export function useProjectClients(
   projectId: string | undefined,
   organizationId: string | undefined
@@ -19,7 +18,6 @@ export function useProjectClients(
     enabled: !!projectId && !!organizationId,
   });
 }
-
 export function useProjectClient(
   projectId: string | undefined,
   clientId: string | undefined,
@@ -31,10 +29,8 @@ export function useProjectClient(
     enabled: !!projectId && !!clientId && !!organizationId,
   });
 }
-
 export function useCreateProjectClient() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       projectClient,
@@ -42,7 +38,7 @@ export function useCreateProjectClient() {
       organizationId,
       createdBy,
     }: {
-      projectClient: Omit<ProjectClient, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>;
+      projectClient: Omit<ProjectClient, 'id'| 'created_at'| 'updated_at'| 'project_id'| 'organization_id'| 'created_by'>;
       projectId: string;
       organizationId: string;
       createdBy: string;
@@ -57,10 +53,8 @@ export function useCreateProjectClient() {
     },
   });
 }
-
 export function useUpdateProjectClient() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       clientId,
@@ -68,7 +62,7 @@ export function useUpdateProjectClient() {
       organizationId,
     }: {
       clientId: string;
-      updates: Partial<Omit<ProjectClient, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>>;
+      updates: Partial<Omit<ProjectClient, 'id'| 'created_at'| 'updated_at'| 'project_id'| 'organization_id'| 'created_by'>>;
       organizationId: string;
     }) => updateProjectClient(clientId, updates, organizationId),
     onSuccess: (data) => {
@@ -84,10 +78,8 @@ export function useUpdateProjectClient() {
     },
   });
 }
-
 export function useDeleteProjectClient() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       clientId,

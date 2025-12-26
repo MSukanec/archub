@@ -12,13 +12,11 @@ import { useParameterAsChild, useDependencyOptions, useSaveDependencyOptions } f
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useGlobalModalStore } from '@/components/modal';
-
 export function ParameterVisibilityConfigModal() {
   const { data: modalData, type: modalType, open, closeModal } = useGlobalModalStore();
   const parameterId = modalData?.parameterId;
   const [configuredOptions, setConfiguredOptions] = useState<Record<string, string[]>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   // TODOS LOS HOOKS DEBEN ESTAR AL PRINCIPIO
   // Obtener dependencias donde este parámetro es hijo
   const { data: dependencies = [], isLoading: dependenciesLoading } = useParameterAsChild(parameterId);
@@ -37,7 +35,6 @@ export function ParameterVisibilityConfigModal() {
       return data;
     }
   });
-
   // Obtener opciones del parámetro hijo
   const { data: childOptions = [] } = useQuery({
     queryKey: ['child-parameter-options', parameterId],
@@ -52,9 +49,7 @@ export function ParameterVisibilityConfigModal() {
       return data;
     }
   });
-
   const saveDependencyOptionsMutation = useSaveDependencyOptions();
-
   // LOGS DE DEBUG DESPUÉS DE TODOS LOS HOOKS
   console.log('🔧 ParameterVisibilityConfigModal render:', {
     open,
@@ -62,7 +57,6 @@ export function ParameterVisibilityConfigModal() {
     parameterId,
     modalData
   });
-
   // Cargar configuraciones existentes para cada dependencia
   useEffect(() => {
     const loadExistingConfigurations = async () => {
@@ -79,12 +73,10 @@ export function ParameterVisibilityConfigModal() {
       
       setConfiguredOptions(configs);
     };
-
     if (dependencies.length > 0) {
       loadExistingConfigurations();
     }
   }, [dependencies]);
-
   const handleOptionToggle = (dependencyId: string, optionId: string, checked: boolean) => {
     setConfiguredOptions(prev => {
       const currentOptions = prev[dependencyId] || [];
@@ -98,7 +90,6 @@ export function ParameterVisibilityConfigModal() {
       };
     });
   };
-
   const handleSave = async () => {
     setIsSubmitting(true);
     
@@ -119,7 +110,6 @@ export function ParameterVisibilityConfigModal() {
       setIsSubmitting(false);
     }
   };
-
   // Contenido del modal (editPanel)
   const getModalContent = () => {
     if (dependenciesLoading) {
@@ -129,7 +119,6 @@ export function ParameterVisibilityConfigModal() {
         </div>
       );
     }
-
     if (dependencies.length === 0) {
       return (
         <div className="text-center py-8 text-muted-foreground">
@@ -139,7 +128,6 @@ export function ParameterVisibilityConfigModal() {
         </div>
       );
     }
-
     return (
       <ScrollArea className="max-h-[500px]">
         <div className="space-y-8">
@@ -161,12 +149,10 @@ export function ParameterVisibilityConfigModal() {
                   {childParameter?.label}
                 </Badge>
               </div>
-
               <div className="pl-4 border-l-2 border-muted space-y-3">
                 <p className="text-sm text-muted-foreground">
                   Cuando se seleccione <strong>"{dependency.parent_option?.label}"</strong> en <strong>"{dependency.parent_parameter?.label}"</strong>, mostrar estas opciones en <strong>"{childParameter?.label}"</strong>:
                 </p>
-
                 {/* Grid de opciones del hijo */}
                 <div className="grid grid-cols-2 gap-3">
                   {childOptions.map(option => {
@@ -191,7 +177,6 @@ export function ParameterVisibilityConfigModal() {
                     );
                   })}
                 </div>
-
                 {/* Resumen de opciones seleccionadas */}
                 <div className="mt-2">
                   <p className="text-xs text-muted-foreground">
@@ -205,33 +190,27 @@ export function ParameterVisibilityConfigModal() {
       </ScrollArea>
     );
   };
-
   const viewPanel = null;
-
   const editPanel = (
     <div className="space-y-4">
       {getModalContent()}
     </div>
   );
-
   const headerContent = (
     <FormModalHeader 
       title="Configurar Visibilidad por Opción"
       icon={Settings}
     />
   );
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={closeModal}
-      rightLabel={isSubmitting ? 'Guardando...' : 'Guardar Configuración'}
+      rightLabel={isSubmitting ? 'Guardando...': 'Guardar Configuración'}
       onRightClick={handleSave}
     />
   );
-
-  if (!open || modalType !== 'parameter-visibility-config' || !parameterId) return null;
-
+  if (!open || modalType !== 'parameter-visibility-config'|| !parameterId) return null;
   return (
     <FormModalLayout
       columns={1}

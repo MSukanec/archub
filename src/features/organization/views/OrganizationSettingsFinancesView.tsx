@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Coins, Wallet } from 'lucide-react';
-
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ComboBoxMultiSelectField } from '@/components/shared/fields/ComboBoxMultiSelectField';
-
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies';
 import { useAllWallets } from '@/hooks/use-wallets';
@@ -13,7 +11,6 @@ import { useOptimisticMutation } from '@/core/save-engine';
 import { organizationKeys } from '@/core/query-keys';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-
 export function OrganizationSettingsFinancesView() {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
@@ -22,14 +19,12 @@ export function OrganizationSettingsFinancesView() {
   const { data: allWallets } = useAllWallets();
   const { data: organizationWallets } = useOrganizationWallets(organizationId);
   const { toast } = useToast();
-
   const [defaultCurrency, setDefaultCurrency] = useState<string>('');
   const [secondaryCurrency, setSecondaryCurrency] = useState<string>('');
   const [defaultWallet, setDefaultWallet] = useState<string>('');
   const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
   
   const prevOrganizationId = useRef<string | undefined>(undefined);
-
   const saveDefaultCurrencyMutation = useOptimisticMutation({
     mutationFn: async (currencyId: string) => {
       const { error } = await supabase
@@ -44,7 +39,7 @@ export function OrganizationSettingsFinancesView() {
           currency_id: currencyId,
           is_default: true,
           is_active: true
-        }, { onConflict: 'organization_id,currency_id' });
+        }, { onConflict: 'organization_id,currency_id'});
       if (error2) throw error2;
     },
     queryKey: organizationKeys.currencies(userData?.organization?.id),
@@ -58,7 +53,6 @@ export function OrganizationSettingsFinancesView() {
     onSuccessMessage: 'Moneda por defecto actualizada',
     onErrorMessage: 'No se pudo actualizar la moneda por defecto',
   });
-
   const saveDefaultWalletMutation = useOptimisticMutation({
     mutationFn: async (walletId: string) => {
       if (!userData?.organization?.id) throw new Error('No se encontró la organización');
@@ -76,7 +70,7 @@ export function OrganizationSettingsFinancesView() {
           wallet_id: walletId,
           is_active: true,
           is_default: true,
-        }, { onConflict: 'organization_id,wallet_id' })
+        }, { onConflict: 'organization_id,wallet_id'})
         .select();
       if (upsertError) throw upsertError;
     },
@@ -91,7 +85,6 @@ export function OrganizationSettingsFinancesView() {
     onSuccessMessage: 'Billetera por defecto actualizada',
     onErrorMessage: 'No se pudo actualizar la billetera por defecto',
   });
-
   const updateSecondaryCurrenciesMutation = useOptimisticMutation({
     mutationFn: async (currencyIds: string[]) => {
       const orgId = userData?.organization?.id;
@@ -131,7 +124,6 @@ export function OrganizationSettingsFinancesView() {
         
         if (softDeleteError) throw softDeleteError;
       }
-
       for (const currencyId of currenciesToAdd) {
         const { data: existingRecord } = await supabase
           .from('organization_currencies')
@@ -181,7 +173,7 @@ export function OrganizationSettingsFinancesView() {
           is_default: false,
           is_active: true,
           is_deleted: false,
-          currency: currency || { id: currencyId, name: '', symbol: '', code: '' },
+          currency: currency || { id: currencyId, name: '', symbol: '', code: ''},
         };
       });
       return defaultCurrencyData ? [defaultCurrencyData, ...newSecondaries] : newSecondaries;
@@ -189,7 +181,6 @@ export function OrganizationSettingsFinancesView() {
     onSuccessMessage: 'Monedas secundarias actualizadas',
     onErrorMessage: 'No se pudieron actualizar las monedas secundarias',
   });
-
   const updateSecondaryWalletsMutation = useOptimisticMutation({
     mutationFn: async (walletIds: string[]) => {
       const orgId = userData?.organization?.id;
@@ -230,7 +221,6 @@ export function OrganizationSettingsFinancesView() {
         
         if (softDeleteError) throw softDeleteError;
       }
-
       for (const walletId of walletIdsToAdd) {
         const { data: existingRecord } = await supabase
           .from('organization_wallets')
@@ -288,7 +278,6 @@ export function OrganizationSettingsFinancesView() {
     onSuccessMessage: 'Billeteras secundarias actualizadas',
     onErrorMessage: 'No se pudieron actualizar las billeteras secundarias',
   });
-
   useEffect(() => {
     if (prevOrganizationId.current !== organizationId) {
       prevOrganizationId.current = organizationId;
@@ -298,14 +287,12 @@ export function OrganizationSettingsFinancesView() {
       setSecondaryWallets([]);
     }
   }, [organizationId]);
-
   const hasDefaultCurrency = organizationCurrencies?.some(c => c.is_default) ?? false;
   const needsDefaultCurrency = !isLoadingOrgCurrencies && 
                                 !isLoadingAllCurrencies && 
                                 organizationCurrencies !== undefined && 
                                 !hasDefaultCurrency &&
                                 !saveDefaultCurrencyMutation.isPending;
-
   useEffect(() => {
     if (isLoadingOrgCurrencies || isLoadingAllCurrencies) return;
     
@@ -319,7 +306,6 @@ export function OrganizationSettingsFinancesView() {
       setSecondaryCurrency(secondaryCur?.currency_id || '');
     }
   }, [organizationCurrencies, isLoadingOrgCurrencies, isLoadingAllCurrencies]);
-
   useEffect(() => {
     if (!needsDefaultCurrency) return;
     
@@ -336,7 +322,6 @@ export function OrganizationSettingsFinancesView() {
       saveDefaultCurrencyMutation.mutate(currencyToSet);
     }
   }, [needsDefaultCurrency, organizationCurrencies, allCurrencies]);
-
   useEffect(() => {
     if (organizationWallets?.length) {
       const defaultWal = organizationWallets.find(w => w.is_default);
@@ -351,8 +336,6 @@ export function OrganizationSettingsFinancesView() {
       setSecondaryWallets([]);
     }
   }, [organizationWallets]);
-
-
   const handleDefaultCurrencyChange = (currencyId: string) => {
     setDefaultCurrency(currencyId);
     if (secondaryCurrency === currencyId) {
@@ -360,27 +343,21 @@ export function OrganizationSettingsFinancesView() {
     }
     saveDefaultCurrencyMutation.mutate(currencyId);
   };
-
   const handleDefaultWalletChange = (walletId: string) => {
     setDefaultWallet(walletId);
     setSecondaryWallets(prev => prev.filter(id => id !== walletId));
     saveDefaultWalletMutation.mutate(walletId);
   };
-
   const handleSecondaryCurrencyChange = (currencyId: string) => {
     setSecondaryCurrency(currencyId);
     updateSecondaryCurrenciesMutation.mutate(currencyId ? [currencyId] : []);
   };
-
   const handleSecondaryWalletsChange = (walletIds: string[]) => {
     setSecondaryWallets(walletIds);
     updateSecondaryWalletsMutation.mutate(walletIds);
   };
-
-
   const availableSecondaryCurrencies = allCurrencies?.filter(c => c.id !== defaultCurrency) || [];
   const availableSecondaryWallets = allWallets?.filter(w => w.id !== defaultWallet) || [];
-
   return (
     <div className="space-y-12">
       
@@ -394,7 +371,6 @@ export function OrganizationSettingsFinancesView() {
             Define la moneda principal de tu organización y agrega monedas secundarias para gestionar movimientos en diferentes divisas.
           </p>
         </div>
-
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="default-currency">Moneda por Defecto</Label>
@@ -411,7 +387,6 @@ export function OrganizationSettingsFinancesView() {
               </SelectContent>
             </Select>
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="secondary-currency">Moneda Secundaria (Opcional)</Label>
             <Select value={secondaryCurrency} onValueChange={handleSecondaryCurrencyChange}>
@@ -430,7 +405,6 @@ export function OrganizationSettingsFinancesView() {
           </div>
         </div>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <div>
           <div className="flex items-center gap-2 mb-6">
@@ -441,7 +415,6 @@ export function OrganizationSettingsFinancesView() {
             Define las billeteras que utilizas para gestionar tus fondos. La billetera por defecto se seleccionará automáticamente en nuevos movimientos, mientras que las secundarias estarán disponibles como opciones.
           </p>
         </div>
-
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="default-wallet">Billetera por Defecto</Label>
@@ -458,7 +431,6 @@ export function OrganizationSettingsFinancesView() {
               </SelectContent>
             </Select>
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="secondary-wallets">Billeteras Secundarias</Label>
             <ComboBoxMultiSelectField
@@ -473,7 +445,6 @@ export function OrganizationSettingsFinancesView() {
           </div>
         </div>
       </div>
-
     </div>
   );
 }

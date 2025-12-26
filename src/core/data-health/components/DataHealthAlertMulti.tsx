@@ -2,7 +2,6 @@ import { Callout } from '@/components/shared/Callout';
 import type { DataIssue } from '../types';
 import { getRuleIcon } from '../rules/micro';
 import { useGlobalModalStore } from '@/components/modal';
-
 interface DataHealthAlertMultiProps {
   issues: DataIssue[];
   entityLabel?: string;
@@ -12,13 +11,11 @@ interface DataHealthAlertMultiProps {
   onDismissIssue?: (issueId: string) => void;
   filteredItemIds?: Set<string | number>;
 }
-
 const severityColors: Record<string, string> = {
   critical: 'var(--error)',
   warning: 'var(--warning)',
   info: 'var(--info)',
 };
-
 export function DataHealthAlertMulti({
   issues = [],
   entityLabel = 'elemento',
@@ -51,15 +48,12 @@ export function DataHealthAlertMulti({
   });
   
   if (visibleIssues.length === 0) return null;
-
   const isFiltering = !!activeFilterIssueId;
   const filteredIssue = issues.find(i => i.id === activeFilterIssueId);
   const totalAffected = filteredIssue?.affectedCount || 0;
-
   const handleOpenDetails = (issue: DataIssue) => {
     openModal('data-health-details', { issue });
   };
-
   return (
     <div className="space-y-2">
       {visibleIssues.map((issue) => {
@@ -82,7 +76,7 @@ export function DataHealthAlertMulti({
                 }
               },
               ...(onToggleFilter ? [{
-                label: isThisIssueFiltered ? 'Filtro activo' : 'Mostrar',
+                label: isThisIssueFiltered ? 'Filtro activo': 'Mostrar',
                 onClick: (e: React.MouseEvent | undefined) => {
                   e?.stopPropagation();
                   onToggleFilter(issue.id);
@@ -97,7 +91,7 @@ export function DataHealthAlertMulti({
       
       {isFiltering && (
         <div className="text-xs text-muted-foreground text-center">
-          Mostrando solo {totalAffected} {entityLabel}{totalAffected !== 1 ? 's' : ''} con problemas
+          Mostrando solo {totalAffected} {entityLabel}{totalAffected !== 1 ? 's': ''} con problemas
         </div>
       )}
     </div>

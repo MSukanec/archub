@@ -16,15 +16,12 @@ import { useOrganizationMembers } from '@/features/organization/hooks/use-organi
 import { createSiteLogType } from '@/features/sitelog/services/createSiteLogType';
 import { updateSiteLogType } from '@/features/sitelog/services/updateSiteLogType';
 import type { SiteLogType } from '@/features/sitelog/services/getSiteLogTypes';
-
 // Schema de validación
 const siteLogTypeSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido').max(100, 'Máximo 100 caracteres'),
   description: z.string().max(500, 'Máximo 500 caracteres').optional(),
 });
-
 type SiteLogTypeFormData = z.infer<typeof siteLogTypeSchema>;
-
 interface SiteLogTypeModalProps {
   modalData?: {
     siteLogType?: SiteLogType;
@@ -32,14 +29,12 @@ interface SiteLogTypeModalProps {
   };
   onClose: () => void;
 }
-
 export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) {
   const { siteLogType, isEditing = false } = modalData || {};
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   const { data: members = [] } = useOrganizationMembers(userData?.organization?.id);
-
   const form = useForm<SiteLogTypeFormData>({
     resolver: zodResolver(siteLogTypeSchema),
     defaultValues: {
@@ -47,7 +42,6 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
       description: '',
     }
   });
-
   // Cargar datos si es edición
   useEffect(() => {
     if (siteLogType) {
@@ -62,12 +56,10 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
       });
     }
   }, [siteLogType, form]);
-
   const handleClose = () => {
     form.reset();
     onClose();
   };
-
   // Define mutations inline siguiendo el patrón GOLD STANDARD de SiteLogModal
   const createMutation = useMutation({
     mutationFn: createSiteLogType,
@@ -88,7 +80,6 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
       });
     }
   });
-
   const updateMutation = useMutation({
     mutationFn: ({ typeId, organizationId, data }: {
       typeId: string;
@@ -112,7 +103,6 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
       });
     }
   });
-
   const onSubmit = (data: SiteLogTypeFormData) => {
     if (!userData?.organization?.id) {
       toast({
@@ -122,7 +112,6 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
       });
       return;
     }
-
     if (isEditing && siteLogType) {
       updateMutation.mutate({
         typeId: siteLogType.id,
@@ -151,7 +140,6 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
       });
     }
   };
-
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -174,7 +162,6 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="description"
@@ -196,10 +183,9 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
       </form>
     </Form>
   );
-
   const headerContent = (
     <FormModalHeader 
-      title={isEditing ? 'Editar Tipo' : 'Nuevo Tipo'}
+      title={isEditing ? 'Editar Tipo': 'Nuevo Tipo'}
       description={isEditing 
         ? 'Modifica los detalles del tipo de bitácora'
         : 'Crea un nuevo tipo de bitácora personalizado para tu organización'
@@ -207,19 +193,16 @@ export function SiteLogTypeModal({ modalData, onClose }: SiteLogTypeModalProps) 
       icon={Tag}
     />
   );
-
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={isEditing ? 'Guardar Cambios' : 'Crear Tipo'}
+      rightLabel={isEditing ? 'Guardar Cambios': 'Crear Tipo'}
       onRightClick={form.handleSubmit(onSubmit)}
       isSubmitting={isSubmitting}
     />
   );
-
   return (
     <FormModalLayout
       columns={1}

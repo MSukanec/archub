@@ -1,7 +1,5 @@
 import { create } from "zustand";
-
 type TabName = "Visión General" | "Contenido" | "Reproductor" | "Apuntes" | "Marcadores";
-
 type State = {
   activeTab: TabName;
   currentLessonId: string | null;
@@ -13,14 +11,12 @@ type State = {
   setVimeoPlayer: (player: any | null) => void;
   reset: () => void;
 };
-
 const initialState = {
   activeTab: "Visión General" as TabName,
   currentLessonId: null,
   pendingSeek: null,
   vimeoPlayer: null,
 };
-
 export const useCoursePlayerStore = create<State>((set) => ({
   ...initialState,
   setActiveTab: (t) => set({ activeTab: t }),

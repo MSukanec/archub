@@ -20,15 +20,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { CurrencyAmountField } from '@/components/shared/fields/CurrencyAmountField';
 import { Badge } from "@/components/ui/badge";
-
 const formSchema = z.object({
   provider_code: z.string().optional(),
   currency_id: z.string().optional(),
   amount: z.number().min(0, "El precio debe ser mayor or igual a 0").optional(),
 });
-
 type FormData = z.infer<typeof formSchema>;
-
 interface ProviderProductModalProps {
   modalData?: {
     product?: {
@@ -44,7 +41,6 @@ interface ProviderProductModalProps {
   };
   onClose: () => void;
 }
-
 export function ProviderProductModal({ modalData, onClose }: ProviderProductModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const product = modalData?.product;
@@ -60,11 +56,9 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
   // Formatear monedas para CurrencyAmountField
   const currencies = organizationCurrencies.map(oc => oc.currency);
   
-
   // Obtener el provider product actual para este producto
   const currentProviderProduct = providerProducts.find(pp => pp.product_id === product?.id);
   const currentPrice = currentProviderProduct?.product_prices?.[0];
-
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -73,7 +67,6 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
       amount: undefined,
     },
   });
-
   // Actualizar valores cuando cambie la moneda por defecto o el provider product
   useEffect(() => {
     // Solo proceder si tenemos las monedas cargadas
@@ -99,7 +92,6 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
       form.setValue('amount', undefined);
     }
   }, [defaultCurrency, currentProviderProduct, currentPrice, form, organizationCurrencies.length]);
-
   const handleSubmit = async (data: FormData) => {
     if (!product?.id) return;
     
@@ -135,7 +127,6 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
       setIsLoading(false);
     }
   };
-
   const editPanel = (
     <div className="space-y-6">
       {/* Información del Producto */}
@@ -149,7 +140,7 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
           
           <div className="space-y-2 text-sm">
             <div>
-              <span className="font-medium">Categoría:</span> {product.category_hierarchy?.split(' > ')[0] || product.categoryHierarchy?.split(' > ')[0] || 'Sin categoría'}
+              <span className="font-medium">Categoría:</span> {product.category_hierarchy?.split('> ')[0] || product.categoryHierarchy?.split('> ')[0] || 'Sin categoría'}
             </div>
             <div>
               <span className="font-medium">Material:</span> {product.material || 'No especificado'}
@@ -166,7 +157,6 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
           </div>
         </div>
       )}
-
       {/* Formulario */}
       <Form {...form}>
         <form 
@@ -201,7 +191,6 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
                 </FormItem>
               )}
             />
-
             {/* Campo de Precio con Moneda */}
             <FormField
               control={form.control}
@@ -228,14 +217,12 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
       </Form>
     </div>
   );
-
   const headerContent = (
     <FormModalHeader 
       title="Configurar Precio de Producto"
       icon={Package}
     />
   );
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -245,7 +232,6 @@ export function ProviderProductModal({ modalData, onClose }: ProviderProductModa
       showLoadingSpinner={isLoading}
     />
   );
-
   return (
     <FormModalLayout
       columns={1}

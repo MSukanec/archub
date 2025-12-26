@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { BookOpen } from 'lucide-react';
-
 interface Runbook {
   id: string;
   alert_type: string;
@@ -9,7 +8,6 @@ interface Runbook {
   steps_md: string;
   links: Array<{ label: string; url: string }>;
 }
-
 const DEFAULT_RUNBOOKS = [
   {
     alert_type: 'payment.approved_but_not_applied',
@@ -46,16 +44,13 @@ const DEFAULT_RUNBOOKS = [
     ]
   }
 ];
-
 export default function AdminOpsRunbooksTab() {
   const { data: runbooks = [], isLoading } = useQuery<Runbook[]>({
     queryKey: ['/api/admin/ops/runbooks'],
   });
-
   if (isLoading) {
     return <div className="text-center py-8 text-muted-foreground">Cargando runbooks...</div>;
   }
-
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">

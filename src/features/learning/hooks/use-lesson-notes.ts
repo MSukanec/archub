@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getLessonNotes } from '../services';
 import { LEARNING_QUERY_KEYS } from '../constants';
-
 /**
  * Hook para obtener todas las notas de una lección.
  * 

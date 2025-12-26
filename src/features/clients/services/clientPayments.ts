@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { ClientPayment, ClientPaymentWithRelations } from '../types';
-
 /**
  * Obtiene todos los pagos de cliente de un proyecto con sus relaciones.
  * 
@@ -23,7 +22,6 @@ export async function getClientPayments(
   if (!supabase || !organizationId || !projectId) {
     return [];
   }
-
   const { data: paymentsData, error } = await supabase
     .from('client_payments')
     .select(`
@@ -160,15 +158,12 @@ export async function getClientPayments(
     .or('is_deleted.is.null,is_deleted.eq.false')
     .order('payment_date', { ascending: false })
     .order('created_at', { ascending: false });
-
   if (error) {
     throw error;
   }
-
   if (!paymentsData || paymentsData.length === 0) {
     return [];
   }
-
   const data = paymentsData.map(payment => ({
     ...payment,
     client: payment.client ? {
@@ -204,10 +199,8 @@ export async function getClientPayments(
       file_name: link.media_file?.file_name || '',
     })) || [],
   }));
-
   return data;
 }
-
 /**
  * Obtiene un pago de cliente específico por su ID.
  * 
@@ -230,7 +223,6 @@ export async function getClientPaymentById(
   if (!supabase || !organizationId || !paymentId) {
     return null;
   }
-
   const { data, error } = await supabase
     .from('client_payments')
     .select(`
@@ -351,15 +343,12 @@ export async function getClientPaymentById(
     .eq('organization_id', organizationId)
     .or('is_deleted.is.null,is_deleted.eq.false')
     .single();
-
   if (error) {
     throw error;
   }
-
   if (!data) {
     return null;
   }
-
   return {
     ...data,
     client: data.client ? {
@@ -389,7 +378,6 @@ export async function getClientPaymentById(
     })) || [],
   };
 }
-
 /**
  * Crea un nuevo pago de cliente.
  * 
@@ -401,7 +389,7 @@ export async function getClientPaymentById(
  * @throws {Error} Si falla la creación
  */
 export async function createClientPayment(
-  payment: Omit<ClientPayment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>,
+  payment: Omit<ClientPayment, 'id'| 'created_at'| 'updated_at'| 'project_id'| 'organization_id'| 'created_by'>,
   projectId: string,
   organizationId: string,
   createdBy: string
@@ -513,11 +501,9 @@ export async function createClientPayment(
       )
     `)
     .single();
-
   if (error) {
     throw error;
   }
-
   return {
     ...data,
     client: data.client ? {
@@ -535,7 +521,6 @@ export async function createClientPayment(
     wallet: data.wallet || null,
   };
 }
-
 /**
  * Actualiza un pago de cliente existente.
  * 
@@ -547,7 +532,7 @@ export async function createClientPayment(
  */
 export async function updateClientPayment(
   paymentId: string,
-  updates: Partial<Omit<ClientPayment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>>,
+  updates: Partial<Omit<ClientPayment, 'id'| 'created_at'| 'updated_at'| 'project_id'| 'organization_id'| 'created_by'>>,
   organizationId: string
 ): Promise<ClientPaymentWithRelations> {
   const { data, error } = await supabase
@@ -657,11 +642,9 @@ export async function updateClientPayment(
       )
     `)
     .single();
-
   if (error) {
     throw error;
   }
-
   return {
     ...data,
     client: data.client ? {
@@ -679,7 +662,6 @@ export async function updateClientPayment(
     wallet: data.wallet || null,
   };
 }
-
 /**
  * Elimina un pago de cliente.
  * 
@@ -700,10 +682,8 @@ export async function deleteClientPayment(
     })
     .eq('id', paymentId)
     .eq('organization_id', organizationId);
-
   if (error) {
     throw error;
   }
-
   return true;
 }

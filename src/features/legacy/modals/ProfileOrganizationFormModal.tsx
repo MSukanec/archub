@@ -12,21 +12,17 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/lib/supabase';
 import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
-
 const organizationSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   is_active: z.boolean()
 });
-
 type OrganizationFormData = z.infer<typeof organizationSchema>;
-
 interface Organization {
   id: string;
   name: string;
   is_active: boolean;
   plan_id?: string;
 }
-
 interface ProfileOrganizationFormModalProps {
   modalData?: {
     organization?: Organization;
@@ -34,11 +30,9 @@ interface ProfileOrganizationFormModalProps {
   };
   onClose: () => void;
 }
-
 export function ProfileOrganizationFormModal({ modalData, onClose }: ProfileOrganizationFormModalProps) {
   const { organization, isEditing = false } = modalData || {};
   const { currentPanel, setPanel } = useModalPanelStore();
-
   const form = useForm<OrganizationFormData>({
     resolver: zodResolver(organizationSchema),
     defaultValues: {
@@ -46,7 +40,6 @@ export function ProfileOrganizationFormModal({ modalData, onClose }: ProfileOrga
       is_active: organization?.is_active ?? true
     }
   });
-
   React.useEffect(() => {
     if (organization) {
       form.reset({
@@ -62,13 +55,11 @@ export function ProfileOrganizationFormModal({ modalData, onClose }: ProfileOrga
       setPanel('edit');
     }
   }, [organization, form, setPanel]);
-
   const handleClose = () => {
     form.reset();
     setPanel('view');
     onClose();
   };
-
   const { mutate: updateOrganization, isPending: isLoading } = useOptimisticMutation({
     mutationFn: async (data: OrganizationFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -94,11 +85,9 @@ export function ProfileOrganizationFormModal({ modalData, onClose }: ProfileOrga
     onErrorMessage: "No se pudo actualizar la organización",
     additionalQueryKeys: [['user-organizations'], ['organizations']],
   });
-
   const onSubmit = (data: OrganizationFormData) => {
     updateOrganization(data);
   };
-
   const viewPanel = (
     <div className="space-y-4">
       <div>
@@ -108,12 +97,11 @@ export function ProfileOrganizationFormModal({ modalData, onClose }: ProfileOrga
       <div>
         <label className="text-sm font-medium">Estado</label>
         <p className="text-sm text-muted-foreground mt-1">
-          {organization?.is_active ? 'Activa' : 'Inactiva'}
+          {organization?.is_active ? 'Activa': 'Inactiva'}
         </p>
       </div>
     </div>
   );
-
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -130,7 +118,6 @@ export function ProfileOrganizationFormModal({ modalData, onClose }: ProfileOrga
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="is_active"
@@ -154,14 +141,12 @@ export function ProfileOrganizationFormModal({ modalData, onClose }: ProfileOrga
       </form>
     </Form>
   );
-
   const headerContent = (
     <FormModalHeader 
-      title={organization ? 'Editar Organización' : 'Ver Organización'}
+      title={organization ? 'Editar Organización': 'Ver Organización'}
       icon={Building}
     />
   );
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -170,7 +155,6 @@ export function ProfileOrganizationFormModal({ modalData, onClose }: ProfileOrga
       onRightClick={form.handleSubmit(onSubmit)}
     />
   );
-
   return (
     <FormModalLayout
       columns={1}

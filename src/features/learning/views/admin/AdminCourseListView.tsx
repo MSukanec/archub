@@ -11,22 +11,18 @@ import { useGlobalModalStore } from '@/components/modal'
 import { useLocation } from 'wouter'
 import { supabase } from '@/lib/supabase'
 import { queryClient } from '@/lib/queryClient'
-
 export default function AdminCourseListTab() {
   const { toast } = useToast()
   const { openModal } = useGlobalModalStore()
   const [, navigate] = useLocation()
   
   const { data: courses = [], isLoading: coursesLoading } = useAdminCourses()
-
   const handleCreateCourse = () => {
     openModal('course', {});
   };
-
   const handleEditCourse = (course: any) => {
     openModal('course', { course, isEditing: true });
   };
-
   const handleDeleteCourse = (course: any) => {
     openModal('delete-confirmation', {
       mode: 'dangerous',
@@ -42,16 +38,13 @@ export default function AdminCourseListTab() {
               'Authorization': `Bearer ${(await supabase?.auth.getSession())?.data.session?.access_token}`
             }
           });
-
           if (!response.ok) {
             throw new Error('Failed to delete course');
           }
-
           toast({
             title: 'Curso eliminado',
             description: 'El curso fue eliminado correctamente'
           });
-
           // Invalidate cache to refresh the list
           queryClient.invalidateQueries({ queryKey: ['/api/admin/courses'] });
         } catch (error) {
@@ -64,11 +57,9 @@ export default function AdminCourseListTab() {
       }
     });
   };
-
   const handleViewCourse = (courseId: string) => {
     navigate(`/admin/courses/${courseId}`);
   };
-
   const courseColumns = [
     {
       key: 'title',
@@ -95,7 +86,7 @@ export default function AdminCourseListTab() {
           draft: 'Borrador'
         }
         return (
-          <Badge style={{ backgroundColor: colors[course.visibility as keyof typeof colors], color: 'white' }}>
+          <Badge style={{ backgroundColor: colors[course.visibility as keyof typeof colors], color: 'white'}}>
             {labels[course.visibility as keyof typeof labels]}
           </Badge>
         )
@@ -105,8 +96,8 @@ export default function AdminCourseListTab() {
       key: 'is_active',
       label: 'Estado',
       render: (course: any) => (
-        <Badge style={{ backgroundColor: course.is_active ? 'var(--accent)' : '#6b7280', color: 'white' }}>
-          {course.is_active ? 'Activo' : 'Inactivo'}
+        <Badge style={{ backgroundColor: course.is_active ? 'var(--accent)': '#6b7280', color: 'white'}}>
+          {course.is_active ? 'Activo': 'Inactivo'}
         </Badge>
       )
     },
@@ -129,7 +120,6 @@ export default function AdminCourseListTab() {
       )
     }
   ];
-
   return (
     <>
       {courses.length > 0 ? (
@@ -148,7 +138,7 @@ export default function AdminCourseListTab() {
               icon: Trash2,
               label: 'Eliminar',
               onClick: () => handleDeleteCourse(course),
-              variant: 'destructive' as const
+              variant: 'destructive'as const
             }
           ]}
           emptyState={

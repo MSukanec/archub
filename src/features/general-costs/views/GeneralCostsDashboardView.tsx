@@ -8,7 +8,6 @@ import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/u
 import { useGeneralCostsPayments } from '../hooks/use-general-costs-payments';
 import { useGeneralCostsMonthlySummary } from '../hooks/use-general-costs-monthly-summary';
 import { useGeneralCostsByCategory } from '../hooks/use-general-costs-by-category';
-import { 
   ActivityCard,
   InsightCard,
   type ActivityItem,
@@ -26,7 +25,6 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
 import { type PeriodFilter } from '@/pages/dashboard/GeneralCostsPage';
-
 interface GeneralCostsDashboardTabProps {
   onNavigateToConceptos?: () => void;
   onNavigateToPayments?: () => void;
@@ -37,7 +35,6 @@ interface GeneralCostsDashboardTabProps {
   dismissedIssueIds?: Set<string>;
   onDismissIssue?: (issueId: string) => void;
 }
-
 function getPeriodLabel(period: PeriodFilter): string {
   switch (period) {
     case '30d': return 'Últimos 30 días';
@@ -47,7 +44,6 @@ function getPeriodLabel(period: PeriodFilter): string {
     case 'all': return 'Histórico';
   }
 }
-
 function getPreviousPeriodDateRange(period: PeriodFilter): { from: Date; to: Date } | null {
   const now = new Date();
   const to = new Date(now);
@@ -80,7 +76,6 @@ function getPreviousPeriodDateRange(period: PeriodFilter): { from: Date; to: Dat
   from.setHours(0, 0, 0, 0);
   return { from, to };
 }
-
 function getDateFromForPeriod(period: PeriodFilter): Date | null {
   if (period === 'all') return null;
   
@@ -105,7 +100,6 @@ function getDateFromForPeriod(period: PeriodFilter): Date | null {
   result.setHours(0, 0, 0, 0);
   return result;
 }
-
 /**
  * Calculate which periods have confirmed payments
  * Returns an object with period as key and boolean indicating if data exists
@@ -113,7 +107,7 @@ function getDateFromForPeriod(period: PeriodFilter): Date | null {
 export function calculateAvailablePeriods(allPayments: any[]): Record<PeriodFilter, boolean> {
   const confirmedPayments = allPayments.filter(p => p.status === 'confirmed');
   
-  // 'all' is always available
+  // 'all'is always available
   const result: Record<PeriodFilter, boolean> = {
     'all': true,
     '30d': false,
@@ -139,7 +133,6 @@ export function calculateAvailablePeriods(allPayments: any[]): Record<PeriodFilt
   
   return result;
 }
-
 export default function GeneralCostsDashboardView({ 
   onNavigateToConceptos, 
   onNavigateToPayments,
@@ -156,7 +149,6 @@ export default function GeneralCostsDashboardView({
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
   const defaultCurrencyId = userData?.organization?.preferences?.default_currency_id;
   const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
-
   const handleInsightAction = useCallback((action: InsightAction) => {
     switch (action.type) {
       case 'navigate':
@@ -189,7 +181,6 @@ export default function GeneralCostsDashboardView({
         break;
     }
   }, [onNavigateToConceptos, onNavigateToPayments, onNavigateToTab, onScrollToPanel, onFilterCategory]);
-
   const handleMonthDrillDown = useCallback((month: string) => {
     if (onNavigateToTab) {
       onNavigateToTab('pagos', { filterMonth: month });
@@ -197,7 +188,6 @@ export default function GeneralCostsDashboardView({
       onNavigateToPayments?.();
     }
   }, [onNavigateToTab, onNavigateToPayments]);
-
   const handleCategoryDrillDown = useCallback((categoryName: string) => {
     if (onNavigateToTab) {
       onNavigateToTab('pagos', { filterCategory: categoryName });
@@ -208,18 +198,13 @@ export default function GeneralCostsDashboardView({
   const { data: allPayments = [], isLoading: isLoadingPayments } = useGeneralCostsPayments(organizationId);
   const { data: monthlySummary = [], isLoading: isLoadingMonthlySummary } = useGeneralCostsMonthlySummary(organizationId ?? null);
   const { data: byCategory = [], isLoading: isLoadingByCategory } = useGeneralCostsByCategory(organizationId ?? null);
-
   const isLoading = isLoadingPayments || isLoadingMonthlySummary || isLoadingByCategory;
-
   const dateFrom = useMemo(() => getDateFromForPeriod(selectedPeriod), [selectedPeriod]);
-
   const periodMeta = useMemo(() => {
     const now = new Date();
     return getPeriodMeta(dateFrom, now);
   }, [dateFrom]);
-
   const kpiLabels = useMemo(() => getKPILabels(periodMeta), [periodMeta]);
-
   const confirmedPayments = useMemo(() => {
     const confirmed = allPayments.filter(p => p.status === 'confirmed');
     
@@ -233,22 +218,18 @@ export default function GeneralCostsDashboardView({
       return paymentDateAtMidnight >= dateFrom;
     });
   }, [allPayments, dateFrom]);
-
-
   const filteredMonthlySummary = useMemo(() => {
     if (!dateFrom) return monthlySummary;
     
     const fromMonth = `${dateFrom.getFullYear()}-${String(dateFrom.getMonth() + 1).padStart(2, '0')}`;
     return monthlySummary.filter(m => m.payment_month >= fromMonth);
   }, [monthlySummary, dateFrom]);
-
   const filteredByCategory = useMemo(() => {
     if (!dateFrom) return byCategory;
     
     const fromMonth = `${dateFrom.getFullYear()}-${String(dateFrom.getMonth() + 1).padStart(2, '0')}`;
     return byCategory.filter(item => item.payment_month >= fromMonth);
   }, [byCategory, dateFrom]);
-
   const currentPeriodPaymentsForComparison = useMemo(() => {
     if (selectedPeriod !== 'all') return confirmedPayments;
     
@@ -264,7 +245,6 @@ export default function GeneralCostsDashboardView({
       return paymentDateAtMidnight >= oneYearAgo;
     });
   }, [allPayments, selectedPeriod, confirmedPayments]);
-
   const previousPeriodPayments = useMemo(() => {
     const previousRange = getPreviousPeriodDateRange(selectedPeriod);
     if (!previousRange) return [];
@@ -277,7 +257,6 @@ export default function GeneralCostsDashboardView({
       return paymentDateAtMidnight >= previousRange.from && paymentDateAtMidnight < previousRange.to;
     });
   }, [allPayments, selectedPeriod]);
-
   const kpis = useMemo(() => {
     const totalGasto = calculateMonetaryKPI({
       items: confirmedPayments.map(p => ({
@@ -290,7 +269,6 @@ export default function GeneralCostsDashboardView({
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
-
     const currentPeriodTotalForTrend = calculateMonetaryKPI({
       items: currentPeriodPaymentsForComparison.map(p => ({
         amount: p.amount,
@@ -302,7 +280,6 @@ export default function GeneralCostsDashboardView({
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
-
     const previousTotalGasto = calculateMonetaryKPI({
       items: previousPeriodPayments.map(p => ({
         amount: p.amount,
@@ -314,51 +291,44 @@ export default function GeneralCostsDashboardView({
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
-
     let totalGastoTrend: TrendDirection = 'neutral';
     let totalGastoTrendValue = '';
     if (previousTotalGasto.value > 0) {
       const change = ((currentPeriodTotalForTrend.value - previousTotalGasto.value) / previousTotalGasto.value) * 100;
-      totalGastoTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
-      const periodLabel = selectedPeriod === 'all' ? 'vs año anterior' : 'vs período anterior';
-      totalGastoTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% ${periodLabel}`;
+      totalGastoTrend = change > 0 ? 'up': change < 0 ? 'down': 'neutral';
+      const periodLabel = selectedPeriod === 'all'? 'vs año anterior': 'vs período anterior';
+      totalGastoTrendValue = `${change > 0 ? '+': ''}${Math.round(change)}% ${periodLabel}`;
     }
-
     const months = new Set(confirmedPayments.map(p => {
       const date = parseLocalDate(p.payment_date);
       if (!date) return '';
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     }).filter(m => m !== ''));
     const monthCount = months.size || 1;
-
     const currentMonthsForTrend = new Set(currentPeriodPaymentsForComparison.map(p => {
       const date = parseLocalDate(p.payment_date);
       if (!date) return '';
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     }).filter(m => m !== ''));
     const currentMonthCountForTrend = currentMonthsForTrend.size || 1;
-
     const previousMonths = new Set(previousPeriodPayments.map(p => {
       const date = parseLocalDate(p.payment_date);
       if (!date) return '';
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     }).filter(m => m !== ''));
     const previousMonthCount = previousMonths.size || 1;
-
     const averageMonthlyItems = confirmedPayments.map(p => ({
       amount: p.amount / monthCount,
       currency_id: p.currency_id,
       currency: p.currency,
       exchange_rate: p.exchange_rate
     }));
-
     const averageMonthly = calculateMonetaryKPI({
       items: averageMonthlyItems,
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
-
     // Calcular promedio histórico general (todos los pagos confirmados)
     const allConfirmedPayments = allPayments.filter(p => p.status === 'confirmed');
     const allHistoricalMonths = new Set(allConfirmedPayments.map(p => {
@@ -367,44 +337,37 @@ export default function GeneralCostsDashboardView({
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     }).filter(m => m !== ''));
     const allHistoricalMonthCount = allHistoricalMonths.size || 1;
-
     const historicalAverageMonthlyItems = allConfirmedPayments.map(p => ({
       amount: p.amount / allHistoricalMonthCount,
       currency_id: p.currency_id,
       currency: p.currency,
       exchange_rate: p.exchange_rate
     }));
-
     const historicalAverageMonthly = calculateMonetaryKPI({
       items: historicalAverageMonthlyItems,
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
-
     let averageMonthlyTrend: TrendDirection = 'neutral';
     let averageMonthlyTrendValue = '';
     // Comparar promedio del período actual contra promedio histórico general
     if (historicalAverageMonthly.value > 0 && averageMonthly.value !== historicalAverageMonthly.value) {
       const change = ((averageMonthly.value - historicalAverageMonthly.value) / historicalAverageMonthly.value) * 100;
-      averageMonthlyTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
-      averageMonthlyTrendValue = `${change > 0 ? '+' : ''}${change.toFixed(1)}% vs promedio histórico`;
+      averageMonthlyTrend = change > 0 ? 'up': change < 0 ? 'down': 'neutral';
+      averageMonthlyTrendValue = `${change > 0 ? '+': ''}${change.toFixed(1)}% vs promedio histórico`;
     }
-
     const totalPayments = calculateCountKPI({
       count: confirmedPayments.length,
       label: 'pagos'
     });
-
     const paymentsPerMonth = monthCount > 0 ? Math.round(confirmedPayments.length / monthCount) : 0;
     const currentPaymentsPerMonthForTrend = currentMonthCountForTrend > 0 ? Math.round(currentPeriodPaymentsForComparison.length / currentMonthCountForTrend) : 0;
     const previousPaymentsPerMonth = previousMonthCount > 0 ? Math.round(previousPeriodPayments.length / previousMonthCount) : 0;
-
     let totalPaymentsTrend: TrendDirection = 'neutral';
     if (previousPaymentsPerMonth > 0) {
-      totalPaymentsTrend = currentPaymentsPerMonthForTrend > previousPaymentsPerMonth ? 'up' : currentPaymentsPerMonthForTrend < previousPaymentsPerMonth ? 'down' : 'neutral';
+      totalPaymentsTrend = currentPaymentsPerMonthForTrend > previousPaymentsPerMonth ? 'up': currentPaymentsPerMonthForTrend < previousPaymentsPerMonth ? 'down': 'neutral';
     }
-
     let topCategory = 'Sin datos';
     let maxAmount = 0;
     const categoryTotals = new Map<string, number>();
@@ -420,10 +383,8 @@ export default function GeneralCostsDashboardView({
         topCategory = name;
       }
     });
-
     const allCategoriesTotal = Array.from(categoryTotals.values()).reduce((sum, v) => sum + v, 0);
     const topCategoryPercentage = allCategoriesTotal > 0 ? Math.round((maxAmount / allCategoriesTotal) * 100) : 0;
-
     // Calculate concentration trend from previous period payments
     const previousCategoryTotals = new Map<string, number>();
     previousPeriodPayments.forEach(item => {
@@ -441,20 +402,17 @@ export default function GeneralCostsDashboardView({
     
     const previousAllCategoriesTotal = Array.from(previousCategoryTotals.values()).reduce((sum, v) => sum + v, 0);
     const previousConcentration = previousAllCategoriesTotal > 0 ? Math.round((previousMaxAmount / previousAllCategoriesTotal) * 100) : 0;
-
     let concentrationTrend: TrendDirection = 'neutral';
     let concentrationTrendValue = '';
     if (previousConcentration > 0) {
       const change = topCategoryPercentage - previousConcentration;
-      concentrationTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
-      concentrationTrendValue = `${change > 0 ? '+' : ''}${change}% vs período anterior`;
+      concentrationTrend = change > 0 ? 'up': change < 0 ? 'down': 'neutral';
+      concentrationTrendValue = `${change > 0 ? '+': ''}${change}% vs período anterior`;
     }
-
     const topCategoryKPI = calculateTextKPI({
       text: topCategory || 'Sin categoría',
       icon: 'tag'
     });
-
     const periodDivisor = periodMeta.isShortPeriod ? periodMeta.daysCount : monthCount;
     const periodAverageItems = confirmedPayments.map(p => ({
       amount: p.amount / periodDivisor,
@@ -462,14 +420,12 @@ export default function GeneralCostsDashboardView({
       currency: p.currency,
       exchange_rate: p.exchange_rate
     }));
-
     const periodAverage = calculateMonetaryKPI({
       items: periodAverageItems,
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
-
     return {
       totalGasto,
       totalGastoTrend,
@@ -490,7 +446,6 @@ export default function GeneralCostsDashboardView({
       monthCount
     };
   }, [confirmedPayments, defaultCurrency, filteredByCategory, previousPeriodPayments, selectedPeriod, currentPeriodPaymentsForComparison, periodMeta]);
-
   const monthlyChartData = useMemo(() => {
     return filteredMonthlySummary.map(m => {
       // Normalize month format to YYYY-MM (e.g., "2025-03")
@@ -501,7 +456,6 @@ export default function GeneralCostsDashboardView({
       };
     }).sort((a, b) => a.month.localeCompare(b.month));
   }, [filteredMonthlySummary]);
-
   const currentMonthComparison = useMemo(() => {
     if (monthlyChartData.length < 2) return null;
     
@@ -515,7 +469,6 @@ export default function GeneralCostsDashboardView({
       stableThresholdPercent: 5
     });
   }, [monthlyChartData]);
-
   const allCategoryData = useMemo(() => {
     const categoryTotals = new Map<string, number>();
     
@@ -523,16 +476,13 @@ export default function GeneralCostsDashboardView({
       const existing = categoryTotals.get(item.category_name) || 0;
       categoryTotals.set(item.category_name, existing + Number(item.total_amount));
     });
-
     return Array.from(categoryTotals.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
   }, [filteredByCategory]);
-
   const categoryChartData = useMemo(() => {
     return allCategoryData.slice(0, 8);
   }, [allCategoryData]);
-
   const previousCategoryData = useMemo(() => {
     const categoryTotals = new Map<string, number>();
     
@@ -541,12 +491,10 @@ export default function GeneralCostsDashboardView({
       const existing = categoryTotals.get(categoryName) || 0;
       categoryTotals.set(categoryName, existing + payment.amount);
     });
-
     return Array.from(categoryTotals.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
   }, [previousPeriodPayments]);
-
   const paymentsByConcept = useMemo(() => {
     const conceptTotals = new Map<string, { count: number; amount: number }>();
     
@@ -558,7 +506,6 @@ export default function GeneralCostsDashboardView({
         amount: existing.amount + payment.amount
       });
     });
-
     return Array.from(conceptTotals.entries())
       .map(([conceptName, data]) => ({
         conceptName,
@@ -567,7 +514,6 @@ export default function GeneralCostsDashboardView({
       }))
       .sort((a, b) => b.paymentsCount - a.paymentsCount);
   }, [confirmedPayments]);
-
   const autoInsights = useMemo(() => {
     const context = buildInsightContext({
       totalGasto: kpis.totalGasto.value,
@@ -584,7 +530,6 @@ export default function GeneralCostsDashboardView({
     });
     return generateInsights(context, 3);
   }, [kpis, allCategoryData, previousCategoryData, monthlyChartData, confirmedPayments, paymentsByConcept, periodMeta]);
-
   const recentActivityItems = useMemo((): ActivityItem[] => {
     return [...confirmedPayments]
       .sort((a, b) => {
@@ -608,7 +553,7 @@ export default function GeneralCostsDashboardView({
                   defaultCurrency?.code,
                   payment.amount,
                   payment.exchange_rate ?? null,
-                  { quoteCurrency: 'USD' }
+                  { quoteCurrency: 'USD'}
                 ),
                 defaultCurrency?.symbol || '$'
               )}
@@ -623,7 +568,6 @@ export default function GeneralCostsDashboardView({
         badge: <PaymentStatusBadge status="confirmed" />
       }));
   }, [confirmedPayments, defaultCurrency]);
-
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -639,7 +583,6 @@ export default function GeneralCostsDashboardView({
       </div>
     );
   }
-
   if (allPayments.length === 0) {
     return (
       <EmptyState 
@@ -659,7 +602,6 @@ export default function GeneralCostsDashboardView({
       />
     );
   }
-
   return (
     <div className="space-y-6" data-testid="general-costs-dashboard">
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -681,7 +623,6 @@ export default function GeneralCostsDashboardView({
             )}
           </div>
         </AppCard>
-
         <AppCard data-testid="kpi-average-monthly">
           <AppCardTitle>
             <TrendingUp className="h-4 w-4" />
@@ -695,7 +636,6 @@ export default function GeneralCostsDashboardView({
             <AppCardMeta>{kpiLabels.averageHelper}</AppCardMeta>
           </div>
         </AppCard>
-
         <AppCard data-testid="kpi-total-payments">
           <AppCardTitle>
             <Calendar className="h-4 w-4" />
@@ -709,7 +649,6 @@ export default function GeneralCostsDashboardView({
             />
           </div>
         </AppCard>
-
         <AppCard data-testid="kpi-concentration">
           <AppCardTitle>
             <TrendingUp className="h-4 w-4" />
@@ -721,7 +660,6 @@ export default function GeneralCostsDashboardView({
           </div>
         </AppCard>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AppCard 
           title="Evolución Mensual"
@@ -737,7 +675,6 @@ export default function GeneralCostsDashboardView({
             onBarClick={(month) => handleMonthDrillDown(month)}
           />
         </AppCard>
-
         <AppCard 
           title="Distribución por Categoría"
           icon={<PieChart />}
@@ -753,7 +690,6 @@ export default function GeneralCostsDashboardView({
           />
         </AppCard>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <InsightCard
           title="Insights"
@@ -763,7 +699,6 @@ export default function GeneralCostsDashboardView({
           onAction={handleInsightAction}
           data-testid="insights-section"
         />
-
         <ActivityCard
           title="Actividad Reciente"
           titleIcon={<Clock />}

@@ -8,14 +8,12 @@ import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { getCourseMarkersUrl, type MarkerWithLesson } from '../../services/student/getCourseMarkers';
 import type Player from '@vimeo/player';
-
 interface CourseMarkersProps {
   courseId: string;
   activeLessonId: string | null;
   vimeoPlayer?: Player | null;
   onLessonSelect: (lessonId: string, timeSec: number | null) => void;
 }
-
 export function CourseMarkers({ 
   courseId, 
   activeLessonId, 
@@ -25,34 +23,28 @@ export function CourseMarkers({
   const { toast } = useToast();
   const [currentTime, setCurrentTime] = useState(0);
   const debounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
-
   const { data: markers = [], isLoading } = useQuery<MarkerWithLesson[]>({
     queryKey: [getCourseMarkersUrl(courseId)],
     enabled: !!courseId,
     staleTime: 0,
   });
-
   useEffect(() => {
     if (!vimeoPlayer) return;
-
     const updateTime = async () => {
       try {
         const time = await vimeoPlayer.getCurrentTime();
         setCurrentTime(Math.floor(time));
       } catch (error) {}
     };
-
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, [vimeoPlayer]);
-
   const formatTime = (seconds: number | null): string => {
     if (seconds === null) return '0:00';
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
   const createMarkerMutation = useMutation({
     mutationFn: async (time_sec: number) => {
       if (!activeLessonId) throw new Error('No active lesson');
@@ -79,7 +71,6 @@ export function CourseMarkers({
       });
     }
   });
-
   const updateMarkerMutation = useMutation({
     mutationFn: async ({ lessonId, markerId, body }: { lessonId: string; markerId: string; body: string }) => {
       return apiRequest('PATCH', `/api/lessons/${lessonId}/markers/${markerId}`, { body });
@@ -95,7 +86,6 @@ export function CourseMarkers({
       });
     }
   });
-
   const deleteMarkerMutation = useMutation({
     mutationFn: async ({ lessonId, markerId }: { lessonId: string; markerId: string }) => {
       return apiRequest('DELETE', `/api/lessons/${lessonId}/markers/${markerId}`);
@@ -115,36 +105,29 @@ export function CourseMarkers({
       });
     }
   });
-
   const handleAddMarker = async () => {
     if (!vimeoPlayer || !activeLessonId) return;
-
     try {
       const time = await vimeoPlayer.getCurrentTime();
       const roundedTime = Math.floor(time);
       createMarkerMutation.mutate(roundedTime);
     } catch (error) {}
   };
-
   const handleBodyChange = (marker: MarkerWithLesson, newBody: string) => {
     const existingTimer = debounceTimersRef.current.get(marker.id);
     if (existingTimer) {
       clearTimeout(existingTimer);
     }
-
     queryClient.setQueryData<MarkerWithLesson[]>(
       [getCourseMarkersUrl(courseId)],
       (old = []) => old.map(m => m.id === marker.id ? { ...m, body: newBody } : m)
     );
-
     const timer = setTimeout(() => {
       updateMarkerMutation.mutate({ lessonId: marker.lesson_id, markerId: marker.id, body: newBody });
       debounceTimersRef.current.delete(marker.id);
     }, 600);
-
     debounceTimersRef.current.set(marker.id, timer);
   };
-
   const handleSeekTo = async (marker: MarkerWithLesson) => {
     if (marker.lesson_id === activeLessonId && vimeoPlayer && marker.time_sec !== null) {
       try {
@@ -154,11 +137,9 @@ export function CourseMarkers({
       onLessonSelect(marker.lesson_id, marker.time_sec);
     }
   };
-
   const handleDeleteMarker = (marker: MarkerWithLesson) => {
     deleteMarkerMutation.mutate({ lessonId: marker.lesson_id, markerId: marker.id });
   };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -166,7 +147,6 @@ export function CourseMarkers({
       </div>
     );
   }
-
   return (
     <div className="space-y-3" data-testid="course-markers-container">
       <div className="flex items-center justify-between gap-2">
@@ -188,7 +168,6 @@ export function CourseMarkers({
           </Button>
         )}
       </div>
-
       {markers.length === 0 ? (
         <div className="text-center py-6 text-muted-foreground">
           <Bookmark className="h-8 w-8 mx-auto mb-2 opacity-30" />
@@ -243,7 +222,6 @@ export function CourseMarkers({
                   </Button>
                 </div>
               </div>
-
               <Textarea
                 value={marker.body || ''}
                 onChange={(e) => handleBodyChange(marker, e.target.value)}

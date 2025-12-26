@@ -7,5 +7,4 @@
  * - Document modals → Media/Documents feature
  * - Project modals → Projects feature
  */
-
 export * from './modals';

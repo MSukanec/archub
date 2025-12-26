@@ -19,7 +19,6 @@ import { useCountries } from '@/hooks/use-countries';
 import { useSaveEngine } from '@/core/save-engine';
 import { usersKeys } from '@/core/query-keys';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
-
 interface FormData {
   firstName: string;
   lastName: string;
@@ -27,28 +26,25 @@ interface FormData {
   birthdate: Date | undefined;
   avatarUrl: string;
 }
-
 const getUserModeInfo = (userType: string | null) => {
   switch (userType) {
     case 'professional':
-      return { icon: Building, label: 'Profesional', description: 'Estudios y constructoras' };
+      return { icon: Building, label: 'Profesional', description: 'Estudios y constructoras'};
     case 'provider':
-      return { icon: Package, label: 'Proveedor de Materiales', description: 'Suministro de materiales' };
+      return { icon: Package, label: 'Proveedor de Materiales', description: 'Suministro de materiales'};
     case 'worker':
-      return { icon: Hammer, label: 'Mano de Obra', description: 'Contratistas y maestros' };
+      return { icon: Hammer, label: 'Mano de Obra', description: 'Contratistas y maestros'};
     case 'visitor':
-      return { icon: Eye, label: 'Solo Exploración', description: 'Modo exploración' };
+      return { icon: Eye, label: 'Solo Exploración', description: 'Modo exploración'};
     default:
-      return { icon: Settings, label: 'No definido', description: 'Selecciona tu modo de uso' };
+      return { icon: Settings, label: 'No definido', description: 'Selecciona tu modo de uso'};
   }
 };
-
 const normalizeStringValue = (value: string | null | undefined): string | null => {
   if (!value) return null;
   const trimmed = value.trim();
-  return trimmed === '' ? null : trimmed;
+  return trimmed === ''? null : trimmed;
 };
-
 export function UserBasicDataView() {
   const { data: userData, isLoading } = useCurrentUser();
   const { toast } = useToast();
@@ -61,12 +57,9 @@ export function UserBasicDataView() {
   const [birthdate, setBirthdate] = useState<Date | undefined>(undefined);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [isHydrated, setIsHydrated] = useState(false);
-
   const hasHydratedRef = useRef(false);
   const lastHydratedIdRef = useRef<string | null>(null);
-
   const { data: countries = [], isLoading: countriesLoading } = useCountries();
-
   const formData = useMemo<FormData>(() => ({
     firstName,
     lastName,
@@ -74,7 +67,6 @@ export function UserBasicDataView() {
     birthdate,
     avatarUrl,
   }), [firstName, lastName, country, birthdate, avatarUrl]);
-
   useSaveEngine<FormData>({
     data: formData,
     queryKey: usersKeys.current(),
@@ -147,7 +139,6 @@ export function UserBasicDataView() {
       };
     },
   });
-
   useEffect(() => {
     if (!userData) return;
     
@@ -176,7 +167,6 @@ export function UserBasicDataView() {
       setIsHydrated(true);
     }, 100);
   }, [userData]);
-
   const handleLogout = async () => {
     try {
       await logout();
@@ -188,14 +178,12 @@ export function UserBasicDataView() {
       });
     }
   };
-
   const getInitials = () => {
     if (firstName && lastName) {
       return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
     }
     return userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U';
   };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -203,7 +191,6 @@ export function UserBasicDataView() {
       </div>
     );
   }
-
   if (!userData?.user) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -211,7 +198,6 @@ export function UserBasicDataView() {
       </div>
     );
   }
-
   return (
     <div className="space-y-8">
       <div>
@@ -225,7 +211,6 @@ export function UserBasicDataView() {
               Esta información se mostrará públicamente, así que ten cuidado con lo que compartes.
             </p>
           </div>
-
           <div className="space-y-6">
             <div className="space-y-2">
               <Label className="text-sm font-medium">Avatar</Label>
@@ -275,9 +260,7 @@ export function UserBasicDataView() {
           </div>
         </div>
       </div>
-
       <hr className="border-t border-[var(--section-divider)] my-8" />
-
       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div className="space-y-1">
@@ -289,7 +272,6 @@ export function UserBasicDataView() {
               Actualiza tus datos personales aquí.
             </p>
           </div>
-
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -309,7 +291,6 @@ export function UserBasicDataView() {
                 />
               </div>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">País</Label>
@@ -358,9 +339,7 @@ export function UserBasicDataView() {
           </div>
         </div>
       </div>
-
       <hr className="border-t border-[var(--section-divider)] my-8" />
-
       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div className="space-y-1">
@@ -372,7 +351,6 @@ export function UserBasicDataView() {
               Personaliza tu experiencia según tu tipo de actividad.
             </p>
           </div>
-
           <div className="space-y-6">
             <div className="space-y-4 p-4 border border-[var(--accent)] rounded-lg">
               {(() => {
@@ -412,9 +390,7 @@ export function UserBasicDataView() {
           </div>
         </div>
       </div>
-
       <hr className="border-t border-[var(--section-divider)] my-8" />
-
       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div className="space-y-1">
@@ -426,7 +402,6 @@ export function UserBasicDataView() {
               Acciones irreversibles y destructivas.
             </p>
           </div>
-
           <div className="space-y-6">
             <div className="space-y-4 p-4 border border-destructive rounded-lg">
               <div className="space-y-2">

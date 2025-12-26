@@ -7,14 +7,12 @@ import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/ActivityCard';
 import { calculateCountKPI, calculatePercentageKPI } from '@/lib/kpis';
 import type { ContactWithRelations } from '@/features/contacts/types';
-
 interface ContactListProps {
   contacts: ContactWithRelations[];
   onEdit: (contact: ContactWithRelations) => void;
   onDelete: (contact: ContactWithRelations) => void;
   onRowClick?: (contact: ContactWithRelations) => void;
 }
-
 export function ContactList({ 
   contacts, 
   onEdit, 
@@ -60,7 +58,7 @@ export function ContactList({
     {
       key: "first_name" as const,
       label: "Nombre",
-      type: 'medium-text' as const,
+      type: 'medium-text'as const,
       sortable: false,
       render: (contact: ContactWithRelations) => {
         const fullName = contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || contact.linked_user?.full_name;
@@ -79,7 +77,7 @@ export function ContactList({
     {
       key: "email" as const,
       label: "Email",
-      type: 'email' as const,
+      type: 'email'as const,
       sortable: true,
       sortType: "string" as const,
       render: (contact: ContactWithRelations) => {
@@ -101,7 +99,7 @@ export function ContactList({
     {
       key: "phone" as const,
       label: "Teléfono",
-      type: 'short-text' as const,
+      type: 'short-text'as const,
       sortable: true,
       sortType: "string" as const,
       render: (contact: ContactWithRelations) => (
@@ -113,7 +111,7 @@ export function ContactList({
     {
       key: "contact_types" as const,
       label: "Tipo",
-      type: 'long-text' as const,
+      type: 'long-text'as const,
       sortable: false,
       render: (contact: ContactWithRelations) => {
         if (!contact.contact_types || contact.contact_types.length === 0) {
@@ -139,7 +137,7 @@ export function ContactList({
     {
       key: "company_name" as const,
       label: "Empresa",
-      type: 'short-text' as const,
+      type: 'short-text'as const,
       sortable: true,
       sortType: "string" as const,
       render: (contact: ContactWithRelations) => (
@@ -188,7 +186,6 @@ export function ContactList({
           <AppCardMeta>Categorías diferentes</AppCardMeta>
         </AppCard>
       </div>
-
       <Table
         data={sortedContacts}
         columns={columns}
@@ -203,7 +200,7 @@ export function ContactList({
             icon: Trash2,
             label: 'Eliminar',
             onClick: () => onDelete(contact),
-            variant: 'destructive' as const
+            variant: 'destructive'as const
           }
         ]}
         emptyStateConfig={{

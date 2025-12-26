@@ -1,6 +1,5 @@
 import type { Contact, ContactWithRelations, ContactAttachment } from '../types';
 import { getPublicUrl } from '@/lib/supabase/storage';
-
 /**
  * Formatea el nombre de un contacto con lógica de fallback.
  * 
@@ -9,7 +8,7 @@ import { getPublicUrl } from '@/lib/supabase/storage';
  * 2. first_name + last_name
  * 3. full_name
  * 4. company_name
- * 5. 'Cliente' (fallback)
+ * 5. 'Cliente'(fallback)
  * 
  * @param contact - Objeto contacto con campos de nombre
  * @returns Nombre formateado del contacto
@@ -44,17 +43,15 @@ export function formatContactName(contact: {
   
   return 'Cliente';
 }
-
 /**
  * Obtiene la URL pública de un adjunto de contacto.
  * 
  * @param attachment - Objeto de adjunto con bucket y path (solo requiere storage_bucket y storage_path)
  * @returns URL pública del archivo
  */
-export function getAttachmentPublicUrl(attachment: Pick<ContactAttachment, 'storage_bucket' | 'storage_path'>): string {
+export function getAttachmentPublicUrl(attachment: Pick<ContactAttachment, 'storage_bucket'| 'storage_path'>): string {
   return getPublicUrl(attachment.storage_bucket, attachment.storage_path);
 }
-
 /**
  * Agrupa contactos por la primera letra de su nombre.
  * 
@@ -83,7 +80,6 @@ export function groupContactsByLetter(
   
   return sortedGroups;
 }
-
 /**
  * Slugifica un nombre de archivo para storage.
  * 

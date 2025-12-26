@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
-
 export interface UnitPresentation {
   id: string;
   unit_id: string;
@@ -17,14 +16,12 @@ export interface UnitPresentation {
     name: string;
   };
 }
-
 export interface NewUnitPresentationData {
   unit_id: string;
   name: string;
   equivalence: number;
   description?: string;
 }
-
 export function useUnitPresentations() {
   const { data: userData } = useCurrentUser()
   
@@ -34,7 +31,6 @@ export function useUnitPresentations() {
       if (!supabase) {
         return []
       }
-
       const { data, error } = await supabase
         .from('unit_presentations')
         .select(`
@@ -42,26 +38,21 @@ export function useUnitPresentations() {
           unit:units(id, name)
         `)
         .order('name')
-
       if (error) {
         console.error('Error fetching unit presentations:', error)
         throw error
       }
-
       return data || []
     },
     enabled: !!supabase
   })
 }
-
 export function useCreateUnitPresentation() {
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
-
   return useMutation({
     mutationFn: async (data: NewUnitPresentationData) => {
       if (!supabase) throw new Error('Supabase client not available')
-
       const { data: result, error } = await supabase
         .from('unit_presentations')
         .insert([data])
@@ -70,12 +61,10 @@ export function useCreateUnitPresentation() {
           unit:units(id, name)
         `)
         .single()
-
       if (error) {
         console.error('Error creating unit presentation:', error)
         throw error
       }
-
       return result
     },
     onSuccess: () => {
@@ -96,14 +85,11 @@ export function useCreateUnitPresentation() {
     },
   })
 }
-
 export function useUpdateUnitPresentation() {
   const queryClient = useQueryClient()
-
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<NewUnitPresentationData> }) => {
       if (!supabase) throw new Error('Supabase client not available')
-
       const { data: result, error } = await supabase
         .from('unit_presentations')
         .update(data)
@@ -113,12 +99,10 @@ export function useUpdateUnitPresentation() {
           unit:units(id, name)
         `)
         .single()
-
       if (error) {
         console.error('Error updating unit presentation:', error)
         throw error
       }
-
       return result
     },
     onSuccess: () => {
@@ -139,19 +123,15 @@ export function useUpdateUnitPresentation() {
     },
   })
 }
-
 export function useDeleteUnitPresentation() {
   const queryClient = useQueryClient()
-
   return useMutation({
     mutationFn: async (id: string) => {
       if (!supabase) throw new Error('Supabase client not available')
-
       const { error } = await supabase
         .from('unit_presentations')
         .delete()
         .eq('id', id)
-
       if (error) {
         console.error('Error deleting unit presentation:', error)
         throw error

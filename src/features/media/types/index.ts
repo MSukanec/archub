@@ -3,16 +3,13 @@
  * 
  * All type definitions for the media module
  */
-
-export type MediaVisibility = 'organization' | 'project' | 'private';
-
-export type MediaFileType = 'image' | 'video' | 'pdf' | 'doc' | 'other';
-
+export type MediaVisibility = 'organization'| 'project'| 'private';
+export type MediaFileType = 'image'| 'video'| 'pdf'| 'doc'| 'other';
 export type MediaCategory = 
-  | 'dni_front' 
-  | 'dni_back' 
-  | 'document' 
-  | 'photo' 
+  | 'dni_front'
+  | 'dni_back'
+  | 'document'
+  | 'photo'
   | 'other'
   | 'general'
   | 'technical'
@@ -28,7 +25,6 @@ export type MediaCategory =
   | 'client_gallery'
   | 'forum_attachment'
   | 'inspiration_pin';
-
 /**
  * Registro en tabla media_files (archivo físico centralizado)
  */
@@ -47,7 +43,6 @@ export interface MediaFileRecord {
   deleted_at: string | null;
   created_at: string;
 }
-
 /**
  * Registro en tabla media_links (relación con entidades)
  */
@@ -73,7 +68,6 @@ export interface MediaLinkRecord {
   position: number | null;
   metadata: Record<string, any>;
 }
-
 /**
  * Archivo completo con datos del file + link (JOIN)
  */
@@ -101,7 +95,7 @@ export interface MediaFileWithLink {
   course_id?: string | null;
   course_module_id?: string | null;
   organization_id: string | null;
-  visibility: MediaVisibility | 'public' | null;
+  visibility: MediaVisibility | 'public'| null;
   description: string | null;
   category: MediaCategory | null;
   is_cover: boolean;
@@ -109,11 +103,9 @@ export interface MediaFileWithLink {
   created_at: string;
   created_by: string | null;
 }
-
 // ============================================
 // TIPOS LEGACY (mantener compatibilidad)
 // ============================================
-
 /**
  * @deprecated Usar MediaFileWithLink en su lugar
  */
@@ -131,7 +123,6 @@ export interface MediaFile {
   description?: string;
   file_path: string;
 }
-
 /**
  * @deprecated Usar MediaFileWithLink en su lugar
  */
@@ -139,7 +130,6 @@ export interface GalleryFile extends MediaFile {
   project_name?: string;
   site_log_id?: string | null;
 }
-
 /**
  * @deprecated Usar MediaFileWithLink en su lugar
  */
@@ -148,11 +138,9 @@ export interface DocumentFile extends MediaFile {
   folder_path?: string;
   tags?: string[];
 }
-
 // ============================================
 // INPUTS
 // ============================================
-
 export interface MediaFileInput {
   file: File;
   project_id: string;
@@ -161,13 +149,11 @@ export interface MediaFileInput {
   description?: string;
   created_by: string;
 }
-
 export interface UploadMediaResult {
   id: string;
   file_url: string;
   file_path: string;
 }
-
 /**
  * Input para subir archivo usando nueva arquitectura (media_files + media_links)
  */
@@ -198,7 +184,6 @@ export interface UploadMediaInputV2 {
   position?: number;
   metadata?: Record<string, any>;
 }
-
 /**
  * Resultado de subir archivo usando nueva arquitectura
  */

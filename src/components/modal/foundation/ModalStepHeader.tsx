@@ -1,14 +1,12 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
 import { StepModalConfig } from '../factory/types';
-
 interface ModalStepHeaderProps {
   title: string;
   icon?: LucideIcon;
   stepConfig?: StepModalConfig;
   className?: string;
 }
-
 export function ModalStepHeader({
   title,
   icon: Icon,
@@ -36,5 +34,4 @@ export function ModalStepHeader({
     </div>
   );
 }
-
 export { ModalStepHeader as FormModalStepHeader };

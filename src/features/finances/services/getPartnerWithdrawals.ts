@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-
 /**
  * Partner withdrawal from Supabase with all relations
  */
@@ -15,7 +14,7 @@ export interface PartnerWithdrawalWithRelations {
   notes: string | null;
   reference: string | null;
   wallet_id: string | null;
-  status: 'confirmed' | 'pending' | 'rejected' | 'void';
+  status: 'confirmed'| 'pending'| 'rejected'| 'void';
   created_by: string | null;
   file_url: string | null;
   created_at: string;
@@ -70,7 +69,6 @@ export interface PartnerWithdrawalWithRelations {
     color: string;
   } | null;
 }
-
 /**
  * Get all partner withdrawals for an organization with optional project filtering.
  * 
@@ -86,7 +84,6 @@ export async function getPartnerWithdrawals(
   if (!supabase || !organizationId) {
     return [];
   }
-
   let query = supabase
     .from('partner_withdrawals')
     .select(`
@@ -141,22 +138,17 @@ export async function getPartnerWithdrawals(
     `)
     .eq('organization_id', organizationId)
     .or('is_deleted.is.null,is_deleted.eq.false');
-
   // Filter by project if provided
   if (projectId) {
     query = query.eq('project_id', projectId);
   }
-
   const { data, error } = await query.order('withdrawal_date', { ascending: false });
-
   if (error) {
     throw error;
   }
-
   if (!data || data.length === 0) {
     return [];
   }
-
   // Transform the data to match the expected structure
   return data.map(withdrawal => ({
     ...withdrawal,

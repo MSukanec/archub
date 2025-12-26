@@ -1,13 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/ui/card'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/shared/AppCard';
+import { ActivityCard } from '@/components';
+import { InsightCard
 import { Clock, TrendingUp, UserPlus } from 'lucide-react'
 import { format, subMonths, startOfMonth, endOfMonth, isAfter, isBefore } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-
 // Helper to format user acquisition origin
 function formatAcquisitionOrigin(acquisition: { source?: string; medium?: string; campaign?: string } | null): string {
   if (!acquisition || !acquisition.source) return 'Desconocido';
@@ -26,9 +27,8 @@ function formatAcquisitionOrigin(acquisition: { source?: string; medium?: string
   if (medium) parts.push(`(${medium})`);
   if (campaign) parts.push(`· ${campaign}`);
   
-  return parts.join(' ');
+  return parts.join('');
 }
-
 function formatViewName(view: string | null): string {
   if (!view) return 'Sin ubicación';
   
@@ -65,7 +65,6 @@ function formatViewName(view: string | null): string {
   
   return viewMap[view] || view;
 }
-
 interface DashboardStats {
   totalOrganizations: number
   activeOrganizations: number
@@ -79,20 +78,17 @@ interface DashboardStats {
   newProjectsThisMonth: number
   newProjectsLastMonth: number
 }
-
 export default function AdminAdminDashboard() {
   // Fetch dashboard statistics - OPTIMIZADO
   const { data: stats, isLoading } = useQuery({
     queryKey: ['admin-administration-dashboard'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available')
-
       const now = new Date()
       const thisMonthStart = startOfMonth(now)
       const lastMonthStart = startOfMonth(subMonths(now, 1))
       const lastMonthEnd = endOfMonth(subMonths(now, 1))
       const ninetySecondsAgo = new Date(now.getTime() - 90000)
-
       // ✅ OPTIMIZACIÓN: Ejecutar queries en paralelo con Promise.all
       const [
         totalOrgsResult,
@@ -177,10 +173,8 @@ export default function AdminAdminDashboard() {
           .gte('created_at', lastMonthStart.toISOString())
           .lte('created_at', lastMonthEnd.toISOString())
       ])
-
       const uniqueActiveUsers = new Set(activeUsersResult.data?.map(u => u.user_id) || [])
       const activeUsersNow = uniqueActiveUsers.size
-
       return {
         totalOrganizations: totalOrgsResult.count || 0,
         activeOrganizations: activeOrgsResult.count || 0,
@@ -199,13 +193,11 @@ export default function AdminAdminDashboard() {
     staleTime: 30000, // Cache 30 segundos
     refetchInterval: 60000 // Auto-refresh cada minuto
   })
-
   // Últimas conexiones de usuarios - OPTIMIZADO
   const { data: recentActivity, isLoading: loadingActivity } = useQuery({
     queryKey: ['recent-user-activity'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available')
-
       const { data } = await supabase
         .from('user_presence')
         .select(`
@@ -216,14 +208,12 @@ export default function AdminAdminDashboard() {
         `)
         .order('last_seen_at', { ascending: false })
         .limit(10)
-
       return data
     },
     enabled: !!supabase,
     staleTime: 15000, // Cache 15 segundos (actividad cambia rápido)
     refetchInterval: 30000 // Auto-refresh cada 30 segundos
   })
-
   // Últimos usuarios registrados con su organización y origen (via backend endpoint)
   const { data: recentUsers, isLoading: loadingUsers } = useQuery({
     queryKey: ['recently-registered-users'],
@@ -251,7 +241,6 @@ export default function AdminAdminDashboard() {
     staleTime: 30000,
     refetchInterval: 60000
   })
-
   const userGrowth = stats?.newUsersLastMonth 
     ? ((stats.newUsersThisMonth - stats.newUsersLastMonth) / stats.newUsersLastMonth) * 100
     : 0
@@ -259,11 +248,9 @@ export default function AdminAdminDashboard() {
   const orgGrowth = stats?.newOrganizationsLastMonth 
     ? ((stats.newOrganizationsThisMonth - stats.newOrganizationsLastMonth) / stats.newOrganizationsLastMonth) * 100
     : 0
-
   const projectGrowth = stats?.newProjectsLastMonth 
     ? ((stats.newProjectsThisMonth - stats.newProjectsLastMonth) / stats.newProjectsLastMonth) * 100
     : 0
-
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -275,7 +262,6 @@ export default function AdminAdminDashboard() {
       </div>
     )
   }
-
   return (
     <div className="space-y-6">
       {/* KPI Grande de Usuarios */}
@@ -304,12 +290,11 @@ export default function AdminAdminDashboard() {
           
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Crecimiento</p>
-            <p className={`text-4xl font-bold ${userGrowth > 0 ? 'text-green-600' : userGrowth < 0 ? 'text-red-600' : 'text-muted-foreground'}`}>
-              {userGrowth > 0 ? '+' : ''}{userGrowth.toFixed(1)}%
+            <p className={`text-4xl font-bold ${userGrowth > 0 ? 'text-green-600': userGrowth < 0 ? 'text-red-600': 'text-muted-foreground'}`}>
+              {userGrowth > 0 ? '+': ''}{userGrowth.toFixed(1)}%
             </p>
           </div>
         </div>
-
         {/* Barra visual de tendencia (opcional) */}
         <div className="h-2 bg-muted rounded-full overflow-hidden">
           <div 
@@ -321,30 +306,27 @@ export default function AdminAdminDashboard() {
           {stats?.newUsersThisMonth || 0} nuevos de {stats?.totalUsers || 0} totales este mes
         </p>
       </Card>
-
       {/* Segunda fila: Organizaciones y Proyectos */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <StatCard href="/admin/administration" data-testid="card-organizaciones">
           <StatCardTitle>Organizaciones</StatCardTitle>
           <StatCardValue>{stats?.totalOrganizations || 0}</StatCardValue>
           {orgGrowth !== 0 && (
-            <StatCardMeta className={orgGrowth > 0 ? 'text-green-600' : 'text-red-600'}>
-              {orgGrowth > 0 ? '+' : ''}{orgGrowth.toFixed(1)}% vs mes anterior
+            <StatCardMeta className={orgGrowth > 0 ? 'text-green-600': 'text-red-600'}>
+              {orgGrowth > 0 ? '+': ''}{orgGrowth.toFixed(1)}% vs mes anterior
             </StatCardMeta>
           )}
         </StatCard>
-
         <StatCard href="/admin/administration" data-testid="card-proyectos">
           <StatCardTitle>Proyectos</StatCardTitle>
           <StatCardValue>{stats?.totalProjects || 0}</StatCardValue>
           {projectGrowth !== 0 && (
-            <StatCardMeta className={projectGrowth > 0 ? 'text-green-600' : 'text-red-600'}>
-              {projectGrowth > 0 ? '+' : ''}{projectGrowth.toFixed(1)}% vs mes anterior
+            <StatCardMeta className={projectGrowth > 0 ? 'text-green-600': 'text-red-600'}>
+              {projectGrowth > 0 ? '+': ''}{projectGrowth.toFixed(1)}% vs mes anterior
             </StatCardMeta>
           )}
         </StatCard>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Actividad Reciente */}
         <Card className="p-4" data-testid="card-actividad-reciente">
@@ -368,7 +350,6 @@ export default function AdminAdminDashboard() {
                   const now = Date.now()
                   const diffMs = now - lastSeenTime
                   const isActive = diffMs <= 90000
-
                   return (
                     <div key={activity.user_id} className="flex items-start justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
                       <div className="flex-1 min-w-0">
@@ -384,7 +365,7 @@ export default function AdminAdminDashboard() {
                           </Badge>
                         ) : (
                           <span className="text-xs text-muted-foreground whitespace-nowrap">
-                            {format(new Date(activity.last_seen_at), "d 'de' MMM, HH:mm", { locale: es })}
+                            {format(new Date(activity.last_seen_at), "d 'de'MMM, HH:mm", { locale: es })}
                           </span>
                         )}
                       </div>
@@ -399,7 +380,7 @@ export default function AdminAdminDashboard() {
                   window.location.href = '/admin/administration'
                 }}
                 className="block mt-4 pt-3 border-t text-center text-sm hover:underline transition-all"
-                style={{ color: 'hsl(var(--accent))' }}
+                style={{ color: 'hsl(var(--accent))'}}
               >
                 Ver más usuarios
               </a>
@@ -410,7 +391,6 @@ export default function AdminAdminDashboard() {
             </p>
           )}
         </Card>
-
         {/* Últimos Registrados */}
         <Card className="p-4" data-testid="card-usuarios-recientes">
           <div className="flex items-center gap-2 mb-4">
@@ -441,7 +421,7 @@ export default function AdminAdminDashboard() {
                     </div>
                     <div className="flex-shrink-0">
                       <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {format(new Date(user.created_at), "d 'de' MMM, HH:mm", { locale: es })}
+                        {format(new Date(user.created_at), "d 'de'MMM, HH:mm", { locale: es })}
                       </span>
                     </div>
                   </div>
@@ -454,7 +434,7 @@ export default function AdminAdminDashboard() {
                   window.location.href = '/admin/administration'
                 }}
                 className="block mt-4 pt-3 border-t text-center text-sm hover:underline transition-all"
-                style={{ color: 'hsl(var(--accent))' }}
+                style={{ color: 'hsl(var(--accent))'}}
               >
                 Ver más usuarios
               </a>

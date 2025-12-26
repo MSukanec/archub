@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { GeneralCost } from '../types';
-
 /**
  * Fetches all general costs for an organization.
  * 
@@ -14,11 +13,9 @@ export async function getGeneralCosts(organizationId: string): Promise<GeneralCo
   if (!organizationId) {
     return [];
   }
-
   if (!supabase) {
     throw new Error('Supabase client not initialized');
   }
-
   const { data, error } = await supabase
     .from('general_costs')
     .select(`
@@ -39,15 +36,12 @@ export async function getGeneralCosts(organizationId: string): Promise<GeneralCo
     .eq('organization_id', organizationId)
     .or('is_deleted.is.null,is_deleted.eq.false')
     .order('created_at', { ascending: false });
-
   if (error) {
     throw error;
   }
-
   if (!data || data.length === 0) {
     return [];
   }
-
   return data.map(gc => ({
     ...gc,
     category: Array.isArray(gc.category) ? gc.category[0] : gc.category

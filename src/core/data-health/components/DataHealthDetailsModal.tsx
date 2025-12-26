@@ -3,29 +3,23 @@ import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/m
 import { DataHealthDetailsContent } from './DataHealthDetailsContent';
 import type { DataIssue } from '../types';
 import { getRuleIcon } from '../rules/micro';
-
 export interface DataHealthDetailsModalProps {
   modalData?: {
     issue?: DataIssue;
   };
   onClose: () => void;
 }
-
 const severityDescriptions: Record<string, string> = {
   critical: 'Este problema requiere atención inmediata.',
   warning: 'Este problema debería resolverse pronto.',
   info: 'Este problema es informativo.',
 };
-
 export function DataHealthDetailsModal({ modalData, onClose }: DataHealthDetailsModalProps) {
   const issue = modalData?.issue;
-
   if (!issue) {
     return null;
   }
-
   const Icon = getRuleIcon(issue.ruleId);
-
   const headerContent = (
     <ModalHeader
       title="Detalle del problema"
@@ -33,14 +27,12 @@ export function DataHealthDetailsModal({ modalData, onClose }: DataHealthDetails
       icon={Icon || AlertTriangle}
     />
   );
-
   const footerContent = (
     <ModalFooter
       submitText="Cerrar"
       onSubmit={onClose}
     />
   );
-
   return (
     <ModalLayout
       onClose={onClose}

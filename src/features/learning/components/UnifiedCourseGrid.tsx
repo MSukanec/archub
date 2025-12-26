@@ -2,9 +2,7 @@ import { UnifiedCourseCard } from './UnifiedCourseCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { BookOpen } from 'lucide-react';
 import { Tabs } from '@/components/shared/Tabs';
-
-type CourseMode = 'public' | 'dashboard';
-
+type CourseMode = 'public'| 'dashboard';
 interface CourseWithEnrollment {
   id: string;
   slug: string;
@@ -25,7 +23,6 @@ interface CourseWithEnrollment {
   onBuyCourse?: () => void;
   showCartIcon?: boolean;
 }
-
 interface UnifiedCourseGridProps {
   courses: CourseWithEnrollment[];
   mode?: CourseMode;
@@ -36,7 +33,6 @@ interface UnifiedCourseGridProps {
   enrolledCount?: number;
   completedCount?: number;
 }
-
 function CourseCardSkeleton() {
   return (
     <Card className="h-full overflow-hidden">
@@ -52,7 +48,6 @@ function CourseCardSkeleton() {
     </Card>
   );
 }
-
 export function UnifiedCourseGrid({
   courses,
   mode = 'dashboard',
@@ -69,7 +64,7 @@ export function UnifiedCourseGrid({
         {showTabs && onTabChange && (
           <Tabs
             tabs={[
-              { value: 'all', label: 'Todos' },
+              { value: 'all', label: 'Todos'},
               { value: 'enrolled', label: `Inscripto${enrolledCount > 0 ? ` (${enrolledCount})` : ''}` },
               { value: 'completed', label: `Finalizados${completedCount > 0 ? ` (${completedCount})` : ''}` }
             ]}
@@ -85,14 +80,13 @@ export function UnifiedCourseGrid({
       </div>
     );
   }
-
   if (!courses || courses.length === 0) {
     return (
       <div className="space-y-6">
         {showTabs && onTabChange && (
           <Tabs
             tabs={[
-              { value: 'all', label: 'Todos' },
+              { value: 'all', label: 'Todos'},
               { value: 'enrolled', label: `Inscripto${enrolledCount > 0 ? ` (${enrolledCount})` : ''}` },
               { value: 'completed', label: `Finalizados${completedCount > 0 ? ` (${completedCount})` : ''}` }
             ]}
@@ -114,13 +108,12 @@ export function UnifiedCourseGrid({
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {showTabs && onTabChange && (
         <Tabs
           tabs={[
-            { value: 'all', label: 'Todos' },
+            { value: 'all', label: 'Todos'},
             { value: 'enrolled', label: `Inscripto${enrolledCount > 0 ? ` (${enrolledCount})` : ''}` },
             { value: 'completed', label: `Finalizados${completedCount > 0 ? ` (${completedCount})` : ''}` }
           ]}

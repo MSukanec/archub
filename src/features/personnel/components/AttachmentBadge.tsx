@@ -3,15 +3,12 @@ import { Button } from '@/components/ui/button'
 import { FileText, Download, Eye } from 'lucide-react'
 import { getCertificatePublicUrl } from '@/features/personnel/services/insurances'
 import { useToast } from '@/hooks/use-toast'
-
 interface AttachmentBadgeProps {
   attachmentId: string
   fileName?: string
 }
-
 export function AttachmentBadge({ attachmentId, fileName = "Certificado" }: AttachmentBadgeProps) {
   const { toast } = useToast()
-
   const handleView = async () => {
     try {
       const url = await getCertificatePublicUrl(attachmentId)
@@ -24,7 +21,6 @@ export function AttachmentBadge({ attachmentId, fileName = "Certificado" }: Atta
       })
     }
   }
-
   const handleDownload = async () => {
     try {
       const url = await getCertificatePublicUrl(attachmentId)
@@ -42,7 +38,6 @@ export function AttachmentBadge({ attachmentId, fileName = "Certificado" }: Atta
       })
     }
   }
-
   return (
     <div className="flex items-center gap-1">
       <Button

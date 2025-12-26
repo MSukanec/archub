@@ -6,25 +6,21 @@ import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectContext } from '@/stores/projectContext';
 import { useUpdateUserOrganizationPreferences } from '@/features/organization';
-
 import { useFileParser } from '../hooks/useFileParser';
 import { useColumnAutoMap } from '../hooks/useColumnAutoMap';
 import { useValidationEngine } from '../hooks/useValidationEngine';
 import { useAISuggestMapping } from '../hooks/useAISuggestMapping';
-
 import { StepPreview } from '../steps/StepPreview';
 import { StepMapping } from '../steps/StepMapping';
 import { StepValidation } from '../steps/StepValidation';
 import { StepConflicts } from '../steps/StepConflicts';
 import { StepSummary } from '../steps/StepSummary';
-
 import type { 
   ImportConfig, 
   ColumnMapping, 
   ManualMapping,
   IMPORT_STEPS 
 } from '../types';
-
 /**
  * Parse various date formats to ISO (YYYY-MM-DD)
  * Supports: DD/MM, DD/MM/YY, DD/MM/YYYY, DD-MM-YYYY, etc.
@@ -80,16 +76,13 @@ function parseDateToISO(value: string): string | null {
   
   return null; // Could not parse
 }
-
 interface UniversalImportFormProps {
   modalData?: {
     config: ImportConfig;
   };
   onClose: () => void;
 }
-
 const STEP_NAMES = ['Vista Previa', 'Mapeo', 'Validación', 'Conflictos', 'Resumen'];
-
 export function UniversalImportForm({ modalData, onClose }: UniversalImportFormProps) {
   const config = modalData?.config;
   
@@ -111,15 +104,12 @@ export function UniversalImportForm({ modalData, onClose }: UniversalImportFormP
       </ModalLayout>
     );
   }
-
   return <ImportFormContent config={config} onClose={onClose} />;
 }
-
 interface ImportFormContentProps {
   config: ImportConfig;
   onClose: () => void;
 }
-
 function ImportFormContent({ config, onClose }: ImportFormContentProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -141,9 +131,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
   const [contextOverrideToOrg, setContextOverrideToOrg] = useState(false);
   const [defaultFieldValues, setDefaultFieldValues] = useState<Record<string, string>>({});
   const [cellCorrections, setCellCorrections] = useState<Record<string, string>>({});
-
   const { suggestMapping, saveMappings, isLoading: isLoadingAI } = useAISuggestMapping();
-
   const { 
     parsedData, 
     isLoading: isParsingFile, 
@@ -151,7 +139,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     parseFile, 
     reset: resetParser 
   } = useFileParser();
-
   // Detectar si hay columna de proyecto en el archivo (must be before other useMemos that depend on it)
   const projectColumnDetection = useMemo(() => {
     if (!parsedData) return { hasProjectColumn: false, projectColumnIndex: -1 };
@@ -172,7 +159,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       projectColumnIndex,
     };
   }, [parsedData]);
-
   // Detectar si hay columna de cliente en el archivo
   const clientColumnDetection = useMemo(() => {
     if (!parsedData) return { hasClientColumn: false, clientColumnIndex: -1 };
@@ -193,32 +179,29 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       clientColumnIndex,
     };
   }, [parsedData]);
-
   // Effective project context: allows overriding from project to organization
   const effectiveProjectContext = useMemo(() => {
     if (contextOverrideToOrg && config.projectContext?.type === 'project') {
       return {
-        type: 'organization' as const,
+        type: 'organization'as const,
         organizationId: organizationId || '',
         organizationName: 'Organización',
       };
     }
     return config.projectContext;
   }, [config.projectContext, contextOverrideToOrg, organizationId]);
-
   // Detect conflict: project context + project column = should block or switch to org
   const hasProjectContextConflict = useMemo(() => {
-    return config.projectContext?.type === 'project' && 
+    return config.projectContext?.type === 'project'&& 
            projectColumnDetection.hasProjectColumn && 
            !contextOverrideToOrg;
   }, [config.projectContext, projectColumnDetection.hasProjectColumn, contextOverrideToOrg]);
-
   // Dynamically extend schema to include project_name field when importing at org level with project column
   // Also extends when user has overridden project context to organization
   // Additionally, merge availableClients into client_name field's foreignKeyConfig.options
   const extendedSchema = useMemo(() => {
     const shouldAddProjectField = 
-      (effectiveProjectContext?.type === 'organization' && projectColumnDetection.hasProjectColumn && config.availableProjects?.length) ||
+      (effectiveProjectContext?.type === 'organization'&& projectColumnDetection.hasProjectColumn && config.availableProjects?.length) ||
       (contextOverrideToOrg && projectColumnDetection.hasProjectColumn && config.availableProjects?.length);
     
     let schema = [...config.targetSchema];
@@ -226,7 +209,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     // Merge availableClients into client_name field if it exists and has availableClients
     if (config.availableClients?.length) {
       schema = schema.map(field => {
-        if (field.field === 'client_name' && field.type === 'foreign-key') {
+        if (field.field === 'client_name'&& field.type === 'foreign-key') {
           return {
             ...field,
             foreignKeyConfig: {
@@ -248,7 +231,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
         {
           field: 'project_name',
           label: 'Proyecto',
-          type: 'foreign-key' as const,
+          type: 'foreign-key'as const,
           required: true,
           description: 'Proyecto al que pertenece el registro',
           foreignKeyConfig: {
@@ -262,7 +245,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     }
     return schema;
   }, [config.targetSchema, effectiveProjectContext, projectColumnDetection.hasProjectColumn, config.availableProjects, contextOverrideToOrg, config.availableClients]);
-
   const { 
     autoMapping, 
     unmappedHeaders, 
@@ -273,12 +255,11 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     targetSchema: extendedSchema,
     customMapping: config.smartColumnMapping,
   });
-
   useEffect(() => {
     if (parsedData && Object.keys(columnMapping).length === 0 && Object.keys(autoMapping).length > 0) {
       // When importing to a specific project, exclude the project column from auto-mapping
       let filteredAutoMapping = { ...autoMapping };
-      if (config.projectContext?.type === 'project' && projectColumnDetection.hasProjectColumn) {
+      if (config.projectContext?.type === 'project'&& projectColumnDetection.hasProjectColumn) {
         const { projectColumnIndex } = projectColumnDetection;
         if (projectColumnIndex !== -1) {
           delete filteredAutoMapping[projectColumnIndex];
@@ -289,12 +270,12 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       
       if (organizationId && parsedData.headers.length > 0) {
         // Filter headers and schema for AI suggestion when in project context
-        const headersForAI = config.projectContext?.type === 'project' && projectColumnDetection.hasProjectColumn
+        const headersForAI = config.projectContext?.type === 'project'&& projectColumnDetection.hasProjectColumn
           ? parsedData.headers.filter((_, i) => i !== projectColumnDetection.projectColumnIndex)
           : parsedData.headers;
         
         const schemaForAI = config.projectContext?.type === 'project'
-          ? config.targetSchema.filter(f => f.field !== 'project_id' && f.field !== 'project_name' && f.field !== 'project')
+          ? config.targetSchema.filter(f => f.field !== 'project_id'&& f.field !== 'project_name'&& f.field !== 'project')
           : config.targetSchema;
         
         suggestMapping({
@@ -316,7 +297,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
             for (const [header, field] of Object.entries(result.mapping)) {
               const headerIndex = parsedData.headers.findIndex(h => h === header);
               // Skip project column when in project context
-              if (config.projectContext?.type === 'project' && headerIndex === projectColumnDetection.projectColumnIndex) {
+              if (config.projectContext?.type === 'project'&& headerIndex === projectColumnDetection.projectColumnIndex) {
                 continue;
               }
               if (headerIndex !== -1 && !filteredAutoMapping[headerIndex]) {
@@ -332,7 +313,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       }
     }
   }, [parsedData, autoMapping, columnMapping, organizationId, config.targetSchema, config.entityName, suggestMapping, config.projectContext, projectColumnDetection]);
-
   const { 
     errors: validationErrors, 
     summary: validationSummary,
@@ -347,7 +327,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     defaultFieldValues,
     cellCorrections,
   });
-
   const conflicts = useMemo(() => {
     if (!parsedData) return [];
     
@@ -357,13 +336,10 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       originalValues: string[];
       options: Array<{ label: string; value: string }>;
     }> = [];
-
     const foreignKeyFields = extendedSchema.filter(f => f.type === 'foreign-key');
-
     for (const field of foreignKeyFields) {
       const columnIndex = Object.entries(columnMapping).find(([_, f]) => f === field.field)?.[0];
       if (!columnIndex) continue;
-
       const colIdx = parseInt(columnIndex);
       const uniqueValues = new Set<string>();
       
@@ -373,7 +349,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
           uniqueValues.add(String(value).trim());
         }
       });
-
       const unmatchedValues: string[] = [];
       const valueMap = config.valueMapConfig?.[field.field] || {};
       const valueMapKeys = Object.keys(valueMap);
@@ -381,7 +356,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       // Also get options from foreignKeyConfig for matching
       const foreignKeyOptions = field.foreignKeyConfig?.options || [];
       const foreignKeyLabels = foreignKeyOptions.map(opt => opt.label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim());
-
       uniqueValues.forEach(value => {
         const normalized = value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
         
@@ -441,14 +415,12 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
           unmatchedValues.push(value);
         }
       });
-
       if (unmatchedValues.length > 0) {
         const options = field.foreignKeyConfig?.options || 
           Object.entries(valueMap).map(([key, val]) => ({
             label: key.charAt(0).toUpperCase() + key.slice(1),
             value: val as string,
           }));
-
         conflictGroups.push({
           field: field.field,
           fieldLabel: field.label,
@@ -457,10 +429,8 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
         });
       }
     }
-
     return conflictGroups;
   }, [parsedData, extendedSchema, columnMapping, config.valueMapConfig]);
-
   // Calculate successful mappings - values that are NOT in conflicts
   // This ensures mutual exclusivity: a value is either successful OR a conflict, never both
   const successfulMappings = useMemo(() => {
@@ -480,9 +450,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       mappings: Array<{ originalValue: string; mappedTo: string; mappedLabel: string }>;
       options: Array<{ label: string; value: string }>;
     }> = [];
-
     const foreignKeyFields = extendedSchema.filter(f => f.type === 'foreign-key');
-
     for (const field of foreignKeyFields) {
       const columnIndex = Object.entries(columnMapping).find(([_, f]) => f === field.field)?.[0];
       // Note: For successful mappings, we also want to show fields that were NOT mapped from the file
@@ -500,7 +468,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
           }
         });
       }
-
       const matchedMappings: Array<{ originalValue: string; mappedTo: string; mappedLabel: string }> = [];
       const valueMap = config.valueMapConfig?.[field.field] || {};
       const valueMapKeys = Object.keys(valueMap);
@@ -513,7 +480,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
             label: key.charAt(0).toUpperCase() + key.slice(1),
             value: val as string,
           }));
-
       uniqueValues.forEach(value => {
         // Skip if this value is in conflicts - it's NOT a successful mapping
         const conflictKey = `${field.field}_${value}`;
@@ -607,7 +573,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
           });
         }
       });
-
       if (matchedMappings.length > 0) {
         mappingGroups.push({
           field: field.field,
@@ -617,10 +582,8 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
         });
       }
     }
-
     return mappingGroups;
   }, [parsedData, extendedSchema, columnMapping, config.valueMapConfig, conflicts]);
-
   const handleMappingChange = useCallback((columnIndex: number, field: string | null) => {
     setColumnMapping(prev => {
       const next = { ...prev };
@@ -648,7 +611,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       }
     }
   }, [parsedData, aiConfidence]);
-
   const handleManualMappingChange = useCallback((field: string, originalValue: string, mappedValue: string | null) => {
     const key = `${field}_${originalValue}`;
     setManualMappings(prev => {
@@ -660,7 +622,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       return { ...prev, [key]: mappedValue };
     });
   }, []);
-
   const handleCellCorrectionChange = useCallback((rowIndex: number, field: string, value: string) => {
     // Use || as separator since field names contain underscores
     const key = `${rowIndex}||${field}`;
@@ -673,37 +634,29 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       return { ...prev, [key]: value.trim() };
     });
   }, []);
-
   const handleImport = async () => {
     if (!parsedData) return;
-
     setIsImporting(true);
     setImportProgress(0);
-
     try {
       const mappedRows: Record<string, any>[] = [];
       
       for (let i = 0; i < parsedData.rows.length; i++) {
         if (!isRowValid(i)) continue;
-
         const row = parsedData.rows[i];
         const mappedRow: Record<string, any> = {};
-
         for (const [colIndexStr, field] of Object.entries(columnMapping)) {
           if (!field) continue;
           const colIndex = parseInt(colIndexStr);
           let value = row[colIndex];
-
           const mappingKey = `${field}_${String(value).trim()}`;
           if (manualMappings[mappingKey] !== undefined) {
             const mappedValue = manualMappings[mappingKey];
             // If mapped to empty string (skip/omit), set value to null
-            value = mappedValue === '' ? null : mappedValue;
+            value = mappedValue === ''? null : mappedValue;
           }
-
           mappedRow[field] = value;
         }
-
         // Apply cell corrections for empty cells that user filled in
         for (const [correctionKey, correctionValue] of Object.entries(cellCorrections)) {
           // Use || as separator since field names contain underscores
@@ -717,7 +670,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
             mappedRow[fieldName] = correctionValue;
           }
         }
-
         // Inject default values for fields that weren't in the file
         for (const [fieldName, fieldValue] of Object.entries(defaultFieldValues)) {
           // Only inject if field wasn't already mapped from file AND wasn't corrected
@@ -725,7 +677,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
             mappedRow[fieldName] = fieldValue;
           }
         }
-
         // Inject _projectId based on context
         if (config.projectContext?.type === 'organization') {
           if (!projectColumnDetection.hasProjectColumn) {
@@ -754,10 +705,9 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
           // For project context, use the project from context
           mappedRow._projectId = config.projectContext.projectId;
         }
-
         // Convert date fields to ISO format (YYYY-MM-DD)
         for (const schemaField of config.targetSchema) {
-          if (schemaField.type === 'date' && mappedRow[schemaField.field]) {
+          if (schemaField.type === 'date'&& mappedRow[schemaField.field]) {
             const rawValue = String(mappedRow[schemaField.field]).trim();
             const parsedDate = parseDateToISO(rawValue);
             if (parsedDate) {
@@ -766,7 +716,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
             // If parsing fails, keep original value - database will show the error
           }
         }
-
         // Inject _clientId based on client column detection
         if (!clientColumnDetection.hasClientColumn && selectedClientId) {
           // Use selected client from dropdown when no client column in file
@@ -794,25 +743,19 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
           // Clean up the client_name field as we've extracted _clientId
           delete mappedRow.client_name;
         }
-
         mappedRows.push(mappedRow);
       }
-
       // Reset progress to 0 before starting actual import
       setImportProgress(0);
-
       // Create progress callback for the actual import process
       const onProgress = (current: number, total: number) => {
         setImportProgress(Math.round((current / total) * 100));
       };
-
       await config.onImport(mappedRows, onProgress);
-
       toast({
         title: "Importación exitosa",
         description: `Se importaron ${mappedRows.length} ${config.entityNamePlural} correctamente`,
       });
-
       onClose();
     } catch (error) {
       console.error('Import error:', error instanceof Error ? error.message : error, error);
@@ -826,7 +769,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       setImportProgress(0);
     }
   };
-
   const canGoNext = useMemo(() => {
     switch (currentStep) {
       case 1:
@@ -838,13 +780,13 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
         }
         
         // If organization context (or overridden to org) without project column, require selectedProjectId
-        if (effectiveProjectContext?.type === 'organization' && 
+        if (effectiveProjectContext?.type === 'organization'&& 
             !projectColumnDetection.hasProjectColumn && 
             !selectedProjectId) {
           return false;
         }
         // Check if project column exists but is not mapped (when in org context or overridden)
-        if (effectiveProjectContext?.type === 'organization' && 
+        if (effectiveProjectContext?.type === 'organization'&& 
             projectColumnDetection.hasProjectColumn) {
           const projectFieldMapped = Object.values(columnMapping).includes('project_name');
           if (!projectFieldMapped) {
@@ -875,7 +817,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
         return false;
     }
   }, [currentStep, parsedData, validationSummary, conflicts, manualMappings, effectiveProjectContext, projectColumnDetection, selectedProjectId, columnMapping, hasProjectContextConflict, clientColumnDetection, config.availableClients, selectedClientId]);
-
   const goNext = () => {
     if (currentStep < 5 && canGoNext) {
       if (currentStep === 2 && organizationId && parsedData) {
@@ -896,20 +837,17 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       setCurrentStep(prev => prev + 1);
     }
   };
-
   const goBack = () => {
     if (currentStep > 1) {
       setCurrentStep(prev => prev - 1);
     }
   };
-
   const handleReset = () => {
     resetParser();
     setColumnMapping({});
     setManualMappings({});
     setCurrentStep(1);
   };
-
   const handleSwitchToOrgContext = useCallback(async () => {
     if (!currentOrganizationId) return;
     
@@ -933,7 +871,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       description: 'Ahora estás importando a nivel organización. Mapea la columna "Proyecto" al campo correspondiente.',
     });
   }, [currentOrganizationId, updatePreferencesMutation, setSelectedProject, toast]);
-
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -1016,7 +953,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
         return null;
     }
   };
-
   return (
     <ModalLayout onClose={onClose} size="xl">
       <ModalHeader
@@ -1029,11 +965,9 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
           showNumbers: true,
         }}
       />
-
       <ModalBody>
         {renderStep()}
       </ModalBody>
-
       {currentStep < 5 && (
         <ModalFooter
           leftLabel={currentStep > 1 ? "Anterior" : "Cancelar"}

@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { CalendarIcon } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -17,7 +16,6 @@ import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
-
 export const changelogEntrySchema = z.object({
   title: z.string().min(1, 'El título es requerido'),
   description: z.string().min(1, 'La descripción es requerida'),
@@ -27,9 +25,7 @@ export const changelogEntrySchema = z.object({
   date: z.string().min(1, 'La fecha es requerida'),
   is_public: z.boolean().default(true),
 })
-
 export type ChangelogEntryFormData = z.infer<typeof changelogEntrySchema>
-
 export interface ChangelogEntry {
   id: string
   title: string
@@ -40,11 +36,9 @@ export interface ChangelogEntry {
   created_at: string
   created_by: string
 }
-
 interface FormPanelProps {
   form: ReturnType<typeof useForm<ChangelogEntryFormData>>
 }
-
 export function FormPanel({ form }: FormPanelProps) {
   return (
     <Form {...form}>
@@ -66,7 +60,6 @@ export function FormPanel({ form }: FormPanelProps) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="description"
@@ -85,7 +78,6 @@ export function FormPanel({ form }: FormPanelProps) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="type"
@@ -108,7 +100,6 @@ export function FormPanel({ form }: FormPanelProps) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="date"
@@ -154,7 +145,6 @@ export function FormPanel({ form }: FormPanelProps) {
             )
           }}
         />
-
         <FormField
           control={form.control}
           name="is_public"
@@ -180,11 +170,9 @@ export function FormPanel({ form }: FormPanelProps) {
     </Form>
   )
 }
-
 interface ViewPanelProps {
   entry?: ChangelogEntry
 }
-
 export function ViewPanel({ entry }: ViewPanelProps) {
   return (
     <div className="space-y-4">
@@ -215,23 +203,20 @@ export function ViewPanel({ entry }: ViewPanelProps) {
       <div>
         <label className="text-sm font-medium">Visibilidad</label>
         <p className="text-sm text-muted-foreground mt-1" data-testid="text-changelog-visibility">
-          {entry?.is_public ? 'Pública' : 'Privada'}
+          {entry?.is_public ? 'Pública': 'Privada'}
         </p>
       </div>
     </div>
   )
 }
-
 interface UseChangelogFormOptions {
   entry?: ChangelogEntry
   onSuccess: () => void
 }
-
 export function useChangelogForm({ entry, onSuccess }: UseChangelogFormOptions) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
-
   const form = useForm<ChangelogEntryFormData>({
     resolver: zodResolver(changelogEntrySchema),
     defaultValues: {
@@ -242,7 +227,6 @@ export function useChangelogForm({ entry, onSuccess }: UseChangelogFormOptions) 
       is_public: entry?.is_public ?? true,
     }
   })
-
   useEffect(() => {
     if (entry) {
       form.reset({
@@ -262,7 +246,6 @@ export function useChangelogForm({ entry, onSuccess }: UseChangelogFormOptions) 
       })
     }
   }, [entry, form])
-
   const createChangelogEntryMutation = useMutation({
     mutationFn: async (data: ChangelogEntryFormData) => {
       if (!supabase || !userData?.user?.id) throw new Error('Supabase not initialized or user not found')
@@ -297,7 +280,6 @@ export function useChangelogForm({ entry, onSuccess }: UseChangelogFormOptions) 
       })
     }
   })
-
   const updateChangelogEntryMutation = useMutation({
     mutationFn: async (data: ChangelogEntryFormData) => {
       if (!supabase) throw new Error('Supabase not initialized')
@@ -332,7 +314,6 @@ export function useChangelogForm({ entry, onSuccess }: UseChangelogFormOptions) 
       })
     }
   })
-
   const onSubmit = async (data: ChangelogEntryFormData) => {
     if (entry) {
       await updateChangelogEntryMutation.mutateAsync(data)
@@ -340,7 +321,6 @@ export function useChangelogForm({ entry, onSuccess }: UseChangelogFormOptions) 
       await createChangelogEntryMutation.mutateAsync(data)
     }
   }
-
   return {
     form,
     onSubmit,

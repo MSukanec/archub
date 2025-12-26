@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { GeneralCostCategory } from '../types';
-
 /**
  * Obtiene todas las categorías de gastos generales de una organización.
  * 
@@ -18,20 +17,16 @@ export async function getGeneralCostCategories(
   if (!supabase || !organizationId) {
     return [];
   }
-
   const { data, error } = await supabase
     .from('general_cost_categories')
     .select('*')
     .or(`and(organization_id.eq.${organizationId},or(is_deleted.is.null,is_deleted.eq.false)),and(is_system.eq.true,or(is_deleted.is.null,is_deleted.eq.false))`)
     .order('name', { ascending: true });
-
   if (error) {
     throw error;
   }
-
   return data || [];
 }
-
 /**
  * Obtiene una categoría de gasto general específica por su ID.
  * 
@@ -47,7 +42,6 @@ export async function getGeneralCostCategoryById(
   if (!supabase || !organizationId || !categoryId) {
     return null;
   }
-
   const { data, error } = await supabase
     .from('general_cost_categories')
     .select('*')
@@ -55,14 +49,11 @@ export async function getGeneralCostCategoryById(
     .eq('organization_id', organizationId)
     .or('is_deleted.is.null,is_deleted.eq.false')
     .single();
-
   if (error) {
     throw error;
   }
-
   return data;
 }
-
 /**
  * Crea una nueva categoría de gasto general.
  * 
@@ -72,7 +63,7 @@ export async function getGeneralCostCategoryById(
  * @throws {Error} Si falla la creación
  */
 export async function createGeneralCostCategory(
-  category: Pick<GeneralCostCategory, 'name' | 'description'>,
+  category: Pick<GeneralCostCategory, 'name'| 'description'>,
   organizationId: string
 ): Promise<GeneralCostCategory> {
   const { data, error } = await supabase
@@ -85,14 +76,11 @@ export async function createGeneralCostCategory(
     })
     .select()
     .single();
-
   if (error) {
     throw error;
   }
-
   return data;
 }
-
 /**
  * Actualiza una categoría de gasto general existente.
  * 
@@ -104,7 +92,7 @@ export async function createGeneralCostCategory(
  */
 export async function updateGeneralCostCategory(
   categoryId: string,
-  updates: Pick<GeneralCostCategory, 'name' | 'description'>,
+  updates: Pick<GeneralCostCategory, 'name'| 'description'>,
   organizationId: string
 ): Promise<GeneralCostCategory> {
   const { data, error } = await supabase
@@ -117,14 +105,11 @@ export async function updateGeneralCostCategory(
     .eq('organization_id', organizationId)
     .select()
     .single();
-
   if (error) {
     throw error;
   }
-
   return data;
 }
-
 /**
  * Elimina una categoría de gasto general (soft delete).
  * 
@@ -147,14 +132,11 @@ export async function deleteGeneralCostCategory(
     })
     .eq('id', categoryId)
     .eq('organization_id', organizationId);
-
   if (error) {
     throw error;
   }
-
   return true;
 }
-
 /**
  * Cuenta cuántos gastos generales tienen asignada una categoría específica.
  * 
@@ -166,19 +148,15 @@ export async function getGeneralCostCategoryUsageCount(categoryId: string): Prom
   if (!supabase || !categoryId) {
     return 0;
   }
-
   const { count, error } = await supabase
     .from('general_costs')
     .select('*', { count: 'exact', head: true })
     .eq('category_id', categoryId);
-
   if (error) {
     throw error;
   }
-
   return count || 0;
 }
-
 /**
  * Reemplaza una categoría con otra en todos los gastos generales.
  * Luego elimina la categoría antigua (soft delete).
@@ -198,11 +176,9 @@ export async function replaceGeneralCostCategory(
     .from('general_costs')
     .update({ category_id: newCategoryId })
     .eq('category_id', oldCategoryId);
-
   if (updateError) {
     throw updateError;
   }
-
   const { error: deleteError } = await supabase
     .from('general_cost_categories')
     .update({
@@ -211,10 +187,8 @@ export async function replaceGeneralCostCategory(
     })
     .eq('id', oldCategoryId)
     .eq('organization_id', organizationId);
-
   if (deleteError) {
     throw deleteError;
   }
-
   return { oldCategoryId, newCategoryId };
 }

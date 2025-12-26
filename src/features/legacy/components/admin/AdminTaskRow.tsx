@@ -3,16 +3,14 @@ import { TaskCostPopover } from '@/features/legacy/components/tasks/TaskCostPopo
 import TaskLaborCost from '@/components/shared/construction/TaskLaborCost';
 import TaskMaterialsSubtotal from '@/components/shared/construction/TaskMaterialsSubtotal';
 import TaskTotalSubtotal from '@/components/shared/construction/TaskTotalSubtotal';
-
 // Interface para la tarea administrativa
 interface AdminTaskRowProps {
   task: any;
   onClick?: () => void;
   selected?: boolean;
-  density?: 'compact' | 'normal' | 'comfortable';
+  density?: 'compact'| 'normal'| 'comfortable';
   className?: string;
 }
-
 export default function AdminTaskRow({
   task,
   onClick,
@@ -28,7 +26,6 @@ export default function AdminTaskRow({
     density,
     className
   };
-
   return (
     <DataRowCard {...rowProps}>
       {/* DIV SUPERIOR - Información completa */}

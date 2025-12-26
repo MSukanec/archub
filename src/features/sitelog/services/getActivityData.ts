@@ -1,7 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { subDays, format, startOfDay, endOfDay } from 'date-fns';
 import type { SiteLogActivity, ActivityTimePeriod } from '../types';
-
 /**
  * Obtiene actividad de usuarios en bitácoras por día.
  * 
@@ -9,7 +8,7 @@ import type { SiteLogActivity, ActivityTimePeriod } from '../types';
  * 
  * @param organizationId - ID de la organización
  * @param projectId - ID del proyecto
- * @param timePeriod - Período de análisis: 'week' (7 días), 'month' (30 días), 'year' (365 días)
+ * @param timePeriod - Período de análisis: 'week'(7 días), 'month'(30 días), 'year'(365 días)
  * @param membersData - Lista de miembros de la organización para cruzar con actividad
  * @returns Array con actividad por día, cada día tiene usuarios activos y total
  */
@@ -22,7 +21,6 @@ export async function getActivityData(
   if (!supabase || !organizationId || !projectId || !membersData) {
     return [];
   }
-
   try {
     let daysBack: number;
     switch (timePeriod) {
@@ -38,7 +36,6 @@ export async function getActivityData(
       default:
         daysBack = 7;
     }
-
     const { data: siteLogs, error } = await supabase
       .from('site_logs')
       .select(`
@@ -55,14 +52,11 @@ export async function getActivityData(
       .eq('project_id', projectId)
       .gte('created_at', subDays(new Date(), daysBack).toISOString())
       .order('created_at', { ascending: true });
-
     if (error) {
       console.error('Error fetching site log activity:', error);
       throw error;
     }
-
     const allSiteLogs = siteLogs || [];
-
     const memberMap = new Map();
     membersData.forEach((member: any) => {
       memberMap.set(member.user_id, {
@@ -71,7 +65,6 @@ export async function getActivityData(
         avatar_url: member.users?.avatar_url
       });
     });
-
     const activityData: SiteLogActivity[] = [];
     
     for (let i = 0; i < daysBack; i++) {
@@ -79,7 +72,6 @@ export async function getActivityData(
       const dayStart = startOfDay(currentDate);
       const dayEnd = endOfDay(currentDate);
       const formattedDate = format(currentDate, 'dd/MM');
-
       const usersActivity: Record<string, any> = {};
       memberMap.forEach((userData, userId) => {
         usersActivity[userId] = {
@@ -89,24 +81,20 @@ export async function getActivityData(
           activity_count: 0
         };
       });
-
       allSiteLogs.filter(s => s.created_at >= dayStart.toISOString() && s.created_at <= dayEnd.toISOString())
         .forEach(siteLog => {
           if (siteLog.created_by && usersActivity[siteLog.created_by]) {
             usersActivity[siteLog.created_by].activity_count += 1;
           }
         });
-
       const activeUsers = Object.values(usersActivity).filter(user => user.activity_count > 0);
       const total = activeUsers.reduce((sum, user) => sum + user.activity_count, 0);
-
       activityData.push({
         date: formattedDate,
         users: activeUsers,
         total
       });
     }
-
     return activityData;
   } catch (error) {
     console.error('Error fetching site log activity:', error);

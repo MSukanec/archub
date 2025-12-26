@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { 
   Upload, 
   Trash2,
   FileText,
@@ -18,7 +17,6 @@ import { useToast } from "@/hooks/use-toast";
 import { ImageLightbox, useImageLightbox } from '@/components/shared/viewers/ImageLightbox';
 import { cn } from "@/lib/utils";
 import { compressImage, shouldCompress, formatCompressionStats, type ImagePreset } from '@/lib/imageCompression';
-
 interface FileItem {
   id: string;
   file_name: string;
@@ -30,9 +28,7 @@ interface FileItem {
   mime_type?: string;
   uploadProgress?: number;
 }
-
-type AcceptPreset = 'all' | 'images' | 'media' | 'documents';
-
+type AcceptPreset = 'all'| 'images'| 'media'| 'documents';
 const ACCEPT_PRESETS: Record<AcceptPreset, Record<string, string[]>> = {
   all: {
     'application/pdf': ['.pdf'],
@@ -58,9 +54,8 @@ const ACCEPT_PRESETS: Record<AcceptPreset, Record<string, string[]>> = {
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
   }
 };
-
 export interface FileUploaderProps {
-  mode?: 'single' | 'multiple';
+  mode?: 'single'| 'multiple';
   existingFiles?: any[];
   filesToUpload?: any[];
   onFilesChange: (files: any[]) => void;
@@ -69,7 +64,7 @@ export interface FileUploaderProps {
   maxSize?: number;
   compressionPreset?: ImagePreset;
   compressOnDrop?: boolean;
-  variant?: 'dropzone' | 'hero' | 'compact';
+  variant?: 'dropzone'| 'hero'| 'compact';
   showLightbox?: boolean;
   emptyStateTitle?: string;
   emptyStateDescription?: string;
@@ -81,7 +76,6 @@ export interface FileUploaderProps {
   isUploading?: boolean;
   disabled?: boolean;
 }
-
 export function FileUploader({
   mode = 'multiple',
   existingFiles = [],
@@ -107,9 +101,7 @@ export function FileUploader({
   const { toast } = useToast();
   const [uploadingFiles, setUploadingFiles] = useState<Set<string>>(new Set());
   const [dragActive, setDragActive] = useState(false);
-
-  const acceptedTypes = typeof accept === 'string' ? ACCEPT_PRESETS[accept] : accept;
-
+  const acceptedTypes = typeof accept === 'string'? ACCEPT_PRESETS[accept] : accept;
   const normalizedExistingFiles: FileItem[] = existingFiles.map(file => ({
     id: file.id,
     file_name: file.file_name || file.fileName || 'Archivo',
@@ -120,7 +112,6 @@ export function FileUploader({
     isExisting: true,
     ...file
   }));
-
   const normalizedFilesToUpload: FileItem[] = filesToUpload.map((fileInput, index) => ({
     id: `preview-${index}`,
     file_name: fileInput.file?.name || fileInput.name || 'Archivo',
@@ -133,25 +124,22 @@ export function FileUploader({
     uploadProgress: fileInput.uploadProgress || 0,
     ...fileInput
   }));
-
   const imageUrls = useMemo(() => {
     if (!showLightbox) return [];
     const existingImageUrls = normalizedExistingFiles
-      .filter(file => file.file_type === 'image' || file.mime_type?.startsWith('image/'))
+      .filter(file => file.file_type === 'image'|| file.mime_type?.startsWith('image/'))
       .map(file => file.file_url);
     const previewImageUrls = normalizedFilesToUpload
-      .filter(file => file.file_type === 'image' || file.mime_type?.startsWith('image/'))
+      .filter(file => file.file_type === 'image'|| file.mime_type?.startsWith('image/'))
       .map(file => file.file_url);
     return [...existingImageUrls, ...previewImageUrls];
   }, [normalizedExistingFiles, normalizedFilesToUpload, showLightbox]);
-
   const { 
     isOpen: isLightboxOpen, 
     currentIndex, 
     openLightbox, 
     closeLightbox
   } = useImageLightbox(imageUrls);
-
   const handleImageClick = (imageUrl: string) => {
     if (!showLightbox) return;
     const imageIndex = imageUrls.indexOf(imageUrl);
@@ -159,7 +147,6 @@ export function FileUploader({
       openLightbox(imageIndex);
     }
   };
-
   const removeFileToUpload = (index: number) => {
     if (mode === 'single') {
       onFilesChange([]);
@@ -167,7 +154,6 @@ export function FileUploader({
       onFilesChange(filesToUpload.filter((_, i) => i !== index));
     }
   };
-
   const handleExistingFileDelete = async (fileId: string) => {
     if (onExistingFileDelete) {
       setUploadingFiles(prev => new Set(prev).add(fileId));
@@ -182,7 +168,6 @@ export function FileUploader({
       }
     }
   };
-
   const getFileIcon = (file: FileItem) => {
     const mimeType = file.mime_type;
     if (mimeType?.startsWith('image/')) {
@@ -196,15 +181,13 @@ export function FileUploader({
     }
     return <File className="w-4 h-4 text-muted-foreground" />;
   };
-
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i)) + ' ' + sizes[i];
+    return Math.round(bytes / Math.pow(k, i)) + ''+ sizes[i];
   };
-
   const getAcceptedTypesLabel = (): string => {
     if (typeof accept === 'string') {
       switch (accept) {
@@ -216,7 +199,6 @@ export function FileUploader({
     }
     return 'Archivos';
   };
-
   const processFiles = async (acceptedFiles: File[]) => {
     const processedFiles = [];
     
@@ -267,7 +249,6 @@ export function FileUploader({
       onFilesChange([...filesToUpload, ...processedFiles]);
     }
   };
-
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: processFiles,
     accept: acceptedTypes,
@@ -276,15 +257,12 @@ export function FileUploader({
     noClick: false,
     disabled
   });
-
   const allFiles: FileItem[] = [
     ...normalizedExistingFiles,
     ...normalizedFilesToUpload
   ];
-
   const hasFile = allFiles.length > 0;
   const isFileUploading = (fileId: string) => uploadingFiles.has(fileId);
-
   if (variant === 'hero') {
     const displayUrl = heroImageUrl || (normalizedFilesToUpload[0]?.file_url);
     
@@ -293,7 +271,7 @@ export function FileUploader({
         <div 
           className={cn(
             "relative w-full h-64 md:h-80 rounded-lg overflow-hidden transition-colors",
-            dragActive ? 'bg-primary/10' : 'bg-muted/30'
+            dragActive ? 'bg-primary/10': 'bg-muted/30'
           )}
           onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
           onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
@@ -383,7 +361,6 @@ export function FileUploader({
             </div>
           )}
         </div>
-
         <input
           id="hero-uploader-input"
           type="file"
@@ -399,8 +376,7 @@ export function FileUploader({
       </div>
     );
   }
-
-  if (variant === 'compact' || (mode === 'single' && hasFile)) {
+  if (variant === 'compact'|| (mode === 'single'&& hasFile)) {
     const file = normalizedExistingFiles[0] || normalizedFilesToUpload[0];
     
     if (file) {
@@ -453,7 +429,6 @@ export function FileUploader({
       );
     }
   }
-
   return (
     <div className={cn("space-y-4", className)}>
       <div
@@ -477,15 +452,13 @@ export function FileUploader({
           </div>
         </div>
       </div>
-
       {allFiles.length > 0 && (
         <div className="space-y-2">
           {allFiles.map((file) => {
             const isDeleting = isFileUploading(file.id);
             const isFileCurrentlyUploading = !file.isExisting && (file.uploadProgress || 0) < 100;
             const showProgress = isFileCurrentlyUploading && (file.uploadProgress || 0) > 0;
-            const isImage = file.file_type === 'image' || file.mime_type?.startsWith('image/');
-
+            const isImage = file.file_type === 'image'|| file.mime_type?.startsWith('image/');
             return (
               <div
                 key={file.id}
@@ -515,7 +488,6 @@ export function FileUploader({
                     getFileIcon(file)
                   )}
                 </div>
-
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium truncate">
@@ -544,7 +516,6 @@ export function FileUploader({
                     </p>
                   )}
                 </div>
-
                 <Button
                   variant="ghost"
                   size="icon-sm"
@@ -566,7 +537,6 @@ export function FileUploader({
           })}
         </div>
       )}
-
       {showLightbox && (
         <ImageLightbox
           images={imageUrls}
@@ -578,5 +548,4 @@ export function FileUploader({
     </div>
   );
 }
-
 export default FileUploader;

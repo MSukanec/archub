@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { LessonMarker, UpsertMarkerPayload } from '../types';
-
 /**
  * Crea o actualiza un marcador de lección.
  * 
@@ -27,14 +26,12 @@ export async function upsertLessonMarker(
   if (body.time_sec === undefined || body.time_sec === null) {
     throw new Error('time_sec is required for markers');
   }
-
   const { data } = await supabase.auth.getSession();
   const session = data?.session;
   
   if (!session) {
     throw new Error('No active session');
   }
-
   const response = await fetch(`/api/lessons/${lessonId}/markers`, {
     method: 'POST',
     headers: {
@@ -44,11 +41,9 @@ export async function upsertLessonMarker(
     credentials: 'include',
     body: JSON.stringify(body),
   });
-
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Failed to upsert lesson marker' }));
+    const error = await response.json().catch(() => ({ error: 'Failed to upsert lesson marker'}));
     throw new Error(error.error || 'Failed to upsert lesson marker');
   }
-
   return await response.json();
 }

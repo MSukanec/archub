@@ -1,22 +1,19 @@
 import { Check } from "lucide-react";
-
 const PRESET_COLORS = [
-  { hex: '#007aff', name: 'Ocean' },
-  { hex: '#34c759', name: 'Grass' },
-  { hex: '#ffcc00', name: 'Amber' },
-  { hex: '#ff3b30', name: 'Coral' },
-  { hex: '#af52de', name: 'Violet' },
-  { hex: '#5e5ce6', name: 'Slate' },
-  { hex: '#00c7be', name: 'Mint' },
-  { hex: '#84cc16', name: 'Lime' },
+  { hex: '#007aff', name: 'Ocean'},
+  { hex: '#34c759', name: 'Grass'},
+  { hex: '#ffcc00', name: 'Amber'},
+  { hex: '#ff3b30', name: 'Coral'},
+  { hex: '#af52de', name: 'Violet'},
+  { hex: '#5e5ce6', name: 'Slate'},
+  { hex: '#00c7be', name: 'Mint'},
+  { hex: '#84cc16', name: 'Lime'},
 ];
-
 type ColorPaletteFieldProps = {
   selectedColor: string;
   onColorChange: (color: string) => void;
   disabled?: boolean;
 };
-
 export function ColorPaletteField({ selectedColor, onColorChange, disabled }: ColorPaletteFieldProps) {
   return (
     <div className="flex flex-wrap gap-2">

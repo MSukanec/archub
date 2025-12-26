@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 import { ComponentType } from "react";
-
 interface MobileMenuButtonProps {
   icon: ComponentType<any>;
   label: string;
@@ -12,7 +11,6 @@ interface MobileMenuButtonProps {
   testId?: string;
   badgeCount?: number;
 }
-
 export function MobileMenuButton({
   icon: Icon,
   label,
@@ -46,7 +44,7 @@ export function MobileMenuButton({
           <span 
             className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold text-white bg-[var(--accent)]"
           >
-            {badgeCount > 99 ? '99+' : badgeCount}
+            {badgeCount > 99 ? '99+': badgeCount}
           </span>
         )}
       </div>

@@ -2,16 +2,14 @@ import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToggleLessonFavorite } from '../../hooks';
 import { cn } from '@/lib/utils';
-
 interface FavoriteButtonProps {
   lessonId: string;
   courseId: string;
   isFavorite: boolean;
-  variant?: 'icon' | 'button';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: 'icon'| 'button';
+  size?: 'sm'| 'md'| 'lg';
   className?: string;
 }
-
 export function FavoriteButton({ 
   lessonId, 
   courseId, 
@@ -25,16 +23,13 @@ export function FavoriteButton({
     courseId, 
     currentlyFavorite: isFavorite 
   });
-
   const iconSizes = {
     sm: 'h-4 w-4',
     md: 'h-5 w-5',
     lg: 'h-6 w-6'
   };
-
   // Usar el estado optimista para feedback instantáneo
   const displayFavorite = optimisticFavorite ?? isFavorite;
-
   if (variant === 'icon') {
     return (
       <Button
@@ -60,7 +55,6 @@ export function FavoriteButton({
       </Button>
     );
   }
-
   return (
     <Button
       variant="ghost"

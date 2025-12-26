@@ -8,7 +8,6 @@ import {
 } from '../services/clientPayments';
 import { CLIENT_QUERY_KEYS } from '../constants';
 import type { ClientPayment } from '../types';
-
 export function useClientPayments(
   projectId: string | undefined,
   organizationId: string | undefined
@@ -19,7 +18,6 @@ export function useClientPayments(
     enabled: !!projectId && !!organizationId,
   });
 }
-
 export function useClientPayment(
   paymentId: string | undefined,
   organizationId: string | undefined
@@ -30,10 +28,8 @@ export function useClientPayment(
     enabled: !!paymentId && !!organizationId,
   });
 }
-
 export function useCreateClientPayment() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       payment,
@@ -41,7 +37,7 @@ export function useCreateClientPayment() {
       organizationId,
       createdBy,
     }: {
-      payment: Omit<ClientPayment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>;
+      payment: Omit<ClientPayment, 'id'| 'created_at'| 'updated_at'| 'project_id'| 'organization_id'| 'created_by'>;
       projectId: string;
       organizationId: string;
       createdBy: string;
@@ -65,10 +61,8 @@ export function useCreateClientPayment() {
     },
   });
 }
-
 export function useUpdateClientPayment() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       paymentId,
@@ -76,7 +70,7 @@ export function useUpdateClientPayment() {
       organizationId,
     }: {
       paymentId: string;
-      updates: Partial<Omit<ClientPayment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>>;
+      updates: Partial<Omit<ClientPayment, 'id'| 'created_at'| 'updated_at'| 'project_id'| 'organization_id'| 'created_by'>>;
       organizationId: string;
     }) => updateClientPayment(paymentId, updates, organizationId),
     onSuccess: (data) => {
@@ -101,10 +95,8 @@ export function useUpdateClientPayment() {
     },
   });
 }
-
 export function useDeleteClientPayment() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({
       paymentId,

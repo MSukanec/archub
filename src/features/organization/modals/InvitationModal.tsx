@@ -9,13 +9,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CompactAvatarGroup } from '@/components/shared/CompactAvatarGroup';
 import { useInvitationForm, type UseInvitationFormProps } from '../forms/InvitationForm';
 import type { PendingInvitation } from '@/hooks/use-pending-invitations';
-
 interface InvitationModalProps {
   invitations: PendingInvitation[];
   open: boolean;
   onClose: () => void;
 }
-
 export function InvitationModal({ invitations, open, onClose }: InvitationModalProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   
@@ -23,38 +21,32 @@ export function InvitationModal({ invitations, open, onClose }: InvitationModalP
   const hasMultiple = invitations.length > 1;
   
   if (!open || !currentInvitation) return null;
-
   const { acceptMutation, rejectMutation, isLoading } = useInvitationForm({
     invitations,
     currentIndex,
     onClose,
     setCurrentIndex,
   });
-
   const handleAccept = () => {
     if (currentInvitation) {
       acceptMutation.mutate(currentInvitation.id);
     }
   };
-
   const handleReject = () => {
     if (currentInvitation) {
       rejectMutation.mutate(currentInvitation.id);
     }
   };
-
   const handlePrevious = () => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
     }
   };
-
   const handleNext = () => {
     if (currentIndex < invitations.length - 1) {
       setCurrentIndex(currentIndex + 1);
     }
   };
-
   // Header content
   const headerContent = (
     <FormModalHeader
@@ -67,7 +59,6 @@ export function InvitationModal({ invitations, open, onClose }: InvitationModalP
       icon={Mail}
     />
   );
-
   // View panel with invitation details
   const viewPanel = (
     <div className="space-y-4" data-testid="invitation-modal">
@@ -104,18 +95,16 @@ export function InvitationModal({ invitations, open, onClose }: InvitationModalP
             </div>
           </div>
         </div>
-
         {/* Members preview */}
         {currentInvitation.members && currentInvitation.members.length > 0 && (
           <div className="pt-3 border-t">
             <p className="text-xs text-muted-foreground mb-2">
-              {currentInvitation.members.length} {currentInvitation.members.length === 1 ? 'miembro' : 'miembros'}
+              {currentInvitation.members.length} {currentInvitation.members.length === 1 ? 'miembro': 'miembros'}
             </p>
             <CompactAvatarGroup members={currentInvitation.members} maxDisplay={4} size="md" />
           </div>
         )}
       </div>
-
       {hasMultiple && (
         <div className="flex items-center justify-between border-t pt-4">
           <Button
@@ -145,19 +134,17 @@ export function InvitationModal({ invitations, open, onClose }: InvitationModalP
       )}
     </div>
   );
-
   // Footer with action buttons
   const footerContent = (
     <FormModalFooter
       leftLabel="Rechazar"
       onLeftClick={handleReject}
-      rightLabel={acceptMutation.isPending ? 'Aceptando...' : 'Aceptar invitación'}
+      rightLabel={acceptMutation.isPending ? 'Aceptando...': 'Aceptar invitación'}
       onRightClick={handleAccept}
       submitVariant="default"
       submitDisabled={isLoading}
     />
   );
-
   return (
     <FormModalLayout
       columns={1}

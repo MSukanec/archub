@@ -15,7 +15,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useEffect } from 'react';
-
 const courseSchema = z.object({
   slug: z.string().min(1, 'El slug es requerido').regex(/^[a-z0-9-]+$/, 'Solo minúsculas, números y guiones'),
   title: z.string().min(1, 'El título es requerido'),
@@ -31,9 +30,7 @@ const courseSchema = z.object({
   }),
   is_active: z.boolean().default(true),
 });
-
 type CourseFormData = z.infer<typeof courseSchema>;
-
 interface Course {
   id: string;
   slug: string;
@@ -46,7 +43,6 @@ interface Course {
   created_at: string;
   created_by?: string;
 }
-
 interface CourseModalProps {
   modalData?: {
     course?: Course;
@@ -54,13 +50,11 @@ interface CourseModalProps {
   };
   onClose: () => void;
 }
-
 export function CourseModal({ modalData, onClose }: CourseModalProps) {
   const { course, isEditing = false } = modalData || {};
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
-
   const form = useForm<CourseFormData>({
     resolver: zodResolver(courseSchema),
     defaultValues: {
@@ -73,7 +67,6 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
       is_active: true,
     }
   });
-
   useEffect(() => {
     if (course) {
       form.reset({
@@ -97,15 +90,12 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
       });
     }
   }, [course, form]);
-
   const mutation = useMutation({
     mutationFn: async (data: CourseFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
       if (!userData) throw new Error('No user data');
-
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session');
-
       const courseData: any = {
         slug: data.slug,
         title: data.title,
@@ -115,7 +105,6 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
         status: data.status,
         is_active: data.is_active,
       };
-
       if (isEditing && course) {
         const res = await fetch(`/api/admin/courses/${course.id}`, {
           method: 'PATCH',
@@ -150,10 +139,9 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/courses'] });
       
       toast({
-        title: isEditing ? 'Curso actualizado' : 'Curso creado',
-        description: isEditing ? 'El curso se actualizó correctamente.' : 'El curso se creó correctamente.',
+        title: isEditing ? 'Curso actualizado': 'Curso creado',
+        description: isEditing ? 'El curso se actualizó correctamente.': 'El curso se creó correctamente.',
       });
-
       onClose();
     },
     onError: (error: any) => {
@@ -165,19 +153,16 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
       });
     }
   });
-
   const onSubmit = async (data: CourseFormData) => {
     await mutation.mutateAsync(data);
   };
-
   const headerContent = (
     <FormModalHeader
       icon={BookOpen}
-      title={isEditing ? 'Editar Curso' : 'Nuevo Curso'}
-      description={isEditing ? 'Modifica los datos del curso' : 'Crea un nuevo curso en la plataforma'}
+      title={isEditing ? 'Editar Curso': 'Nuevo Curso'}
+      description={isEditing ? 'Modifica los datos del curso': 'Crea un nuevo curso en la plataforma'}
     />
   );
-
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -196,7 +181,6 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="slug"
@@ -211,7 +195,6 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
             )}
           />
         </div>
-
         {/* Precio, Visibilidad y Estado - Tres columnas en desktop */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
@@ -227,7 +210,6 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="visibility"
@@ -250,7 +232,6 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="status"
@@ -274,7 +255,6 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
             )}
           />
         </div>
-
         {/* Descripción Corta - Una columna */}
         <FormField
           control={form.control}
@@ -289,7 +269,6 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
             </FormItem>
           )}
         />
-
         {/* Curso Activo - Una columna */}
         <FormField
           control={form.control}
@@ -308,18 +287,16 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
       </form>
     </Form>
   );
-
   const footerContent = (
     <FormModalFooter
       cancelText="Cancelar"
-      submitText={isEditing ? 'Actualizar Curso' : 'Crear Curso'}
+      submitText={isEditing ? 'Actualizar Curso': 'Crear Curso'}
       onSubmit={form.handleSubmit(onSubmit)}
       submitDisabled={mutation.isPending}
       showLoadingSpinner={mutation.isPending}
       onLeftClick={onClose}
     />
   );
-
   return (
     <FormModalLayout 
       onClose={onClose}

@@ -16,13 +16,10 @@ import { useDeleteClientRole } from '@/features/clients/hooks/use-client-roles';
 import { useReplaceClientRole } from '@/features/clients/hooks/use-replace-client-role';
 import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
 import type { ClientRole } from '@/features/clients/types';
-
 const clientRoleSchema = z.object({
   name: z.string().min(1, 'El nombre del rol es requerido').max(100),
 });
-
 type ClientRoleFormData = z.infer<typeof clientRoleSchema>;
-
 // Subcomponente: Formulario para create/edit
 function FormPanel({
   form,
@@ -57,7 +54,6 @@ function FormPanel({
     </Form>
   );
 }
-
 // Subcomponente: Vista de lectura
 function ViewPanel({
   clientRole,
@@ -76,7 +72,6 @@ function ViewPanel({
           {clientRole.name}
         </p>
       </div>
-
       {clientRole.description && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Descripción</h4>
@@ -85,7 +80,6 @@ function ViewPanel({
           </p>
         </div>
       )}
-
       <div className="pt-4 border-t border-border">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground">
           <div data-testid="text-role-created-at">
@@ -98,7 +92,6 @@ function ViewPanel({
           )}
         </div>
       </div>
-
       <div className="flex gap-2 pt-4 border-t border-border">
         <Button 
           size="sm" 
@@ -122,16 +115,14 @@ function ViewPanel({
     </div>
   );
 }
-
 interface ClientRoleFormProps {
   modalData?: {
     clientRole?: ClientRole;
   };
   onClose: () => void;
-  mode?: 'create' | 'edit' | 'view';
+  mode?: 'create'| 'edit'| 'view';
 }
-
-export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRoleFormProps) {
+export function ClientRoleForm({ modalData, onClose, mode = 'create'}: ClientRoleFormProps) {
   const { clientRole } = modalData || {};
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -139,15 +130,13 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
   const { pushModal, popModal } = useGlobalModalStore();
   const deleteRoleMutation = useDeleteClientRole();
   const replaceRoleMutation = useReplaceClientRole(userData?.organization?.id || null);
-  const [currentMode, setCurrentMode] = useState<'create' | 'edit' | 'view'>(mode);
-
+  const [currentMode, setCurrentMode] = useState<'create'| 'edit'| 'view'>(mode);
   const form = useForm<ClientRoleFormData>({
     resolver: zodResolver(clientRoleSchema),
     defaultValues: {
       name: '',
     }
   });
-
   useEffect(() => {
     if (clientRole) {
       form.reset({
@@ -159,23 +148,18 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
       });
     }
   }, [clientRole, form]);
-
   const handleClose = () => {
     form.reset();
     onClose();
   };
-
   const handleEditClick = () => {
     setCurrentMode('edit');
   };
-
   const handleDeleteClick = async () => {
     if (!clientRole) return;
-
     try {
       const count = await getClientRoleUsageCount(clientRole.id);
       const organizationId = userData?.organization?.id;
-
       if (!organizationId) {
         toast({
           title: 'Error',
@@ -184,14 +168,13 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
         });
         return;
       }
-
       if (count === 0) {
         // No hay clientes asociados, mostrar delete directo
         pushModal('delete-confirmation', {
           title: '¿Eliminar rol de cliente?',
           description: 'Esta acción no se puede deshacer',
           itemName: clientRole.name,
-          mode: 'delete' as const,
+          mode: 'delete'as const,
           consequences: ['El rol será eliminado permanentemente'],
           onDelete: async () => {
             await deleteRoleMutation.mutateAsync({ roleId: clientRole.id, organizationId });
@@ -204,9 +187,7 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
           queryKey: CLIENT_QUERY_KEYS.roles(organizationId),
           queryFn: () => getClientRoles(organizationId),
         });
-
         const otherRoles = rolesData.filter((r) => r.id !== clientRole.id);
-
         if (otherRoles.length === 0) {
           toast({
             title: 'No se puede eliminar',
@@ -216,19 +197,18 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
           });
           return;
         }
-
         pushModal('delete-confirmation', {
           title: '¿Eliminar rol de cliente?',
           description: 'Este rol tiene clientes asociados',
           itemName: clientRole.name,
-          mode: 'replace' as const,
+          mode: 'replace'as const,
           consequences: [
-            `${count} cliente${count === 1 ? '' : 's'} será${count === 1 ? 'á' : 'n'} afectado${count === 1 ? '' : 's'}`,
+            `${count} cliente${count === 1 ? '': 's'} será${count === 1 ? 'á': 'n'} afectado${count === 1 ? '': 's'}`,
             'Puedes reemplazarlos con otro rol o eliminarlos sin referencia',
           ],
           replacementOptions: otherRoles
             .sort((a, b) =>
-              a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
+              a.name.localeCompare(b.name, 'es', { sensitivity: 'base'})
             )
             .map((r) => ({
               label: r.name,
@@ -256,10 +236,9 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
       });
     }
   };
-
   const createMutation = useMutation({
     mutationFn: ({ role, organizationId }: {
-      role: Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id'>;
+      role: Omit<ClientRole, 'id'| 'created_at'| 'updated_at'| 'organization_id'>;
       organizationId: string;
     }) => createClientRole(role, organizationId),
     onSuccess: (data) => {
@@ -281,11 +260,10 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
       });
     }
   });
-
   const updateMutation = useMutation({
     mutationFn: ({ roleId, updates, organizationId }: {
       roleId: string;
-      updates: Partial<Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id'>>;
+      updates: Partial<Omit<ClientRole, 'id'| 'created_at'| 'updated_at'| 'organization_id'>>;
       organizationId: string;
     }) => updateClientRole(roleId, updates, organizationId),
     onSuccess: (data) => {
@@ -310,7 +288,6 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
       });
     }
   });
-
   const onSubmit = (data: ClientRoleFormData) => {
     if (!userData?.organization?.id) {
       toast({
@@ -320,8 +297,7 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
       });
       return;
     }
-
-    if (currentMode === 'edit' && clientRole) {
+    if (currentMode === 'edit'&& clientRole) {
       updateMutation.mutate({
         roleId: clientRole.id,
         updates: {
@@ -342,7 +318,6 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
       });
     }
   };
-
   const getHeader = () => {
     switch (currentMode) {
       case 'view':
@@ -363,9 +338,7 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
         };
     }
   };
-
   const header = getHeader();
-
   return (
     <ModalLayout onClose={handleClose} size="sm">
       <ModalHeader
@@ -373,9 +346,8 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
         description={header.description}
         icon={Users}
       />
-
       <ModalBody>
-        {currentMode === 'view' ? (
+        {currentMode === 'view'? (
           clientRole && (
             <ViewPanel
               clientRole={clientRole}
@@ -390,18 +362,17 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
           />
         )}
       </ModalBody>
-
-      {currentMode !== 'view' && (
+      {currentMode !== 'view'&& (
         <ModalFooter
           leftLabel="Cancelar"
           onLeftClick={handleClose}
-          rightLabel={currentMode === 'edit' ? 'Guardar Cambios' : 'Crear Rol'}
+          rightLabel={currentMode === 'edit'? 'Guardar Cambios': 'Crear Rol'}
           onRightClick={form.handleSubmit(onSubmit)}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
         />
       )}
       
-      {currentMode === 'view' && (
+      {currentMode === 'view'&& (
         <ModalFooter
           leftLabel="Cerrar"
           onLeftClick={handleClose}
@@ -410,5 +381,4 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
     </ModalLayout>
   );
 }
-
 export default ClientRoleForm;

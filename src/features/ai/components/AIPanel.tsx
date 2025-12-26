@@ -7,7 +7,6 @@
  * 
  * Refactorizado para usar Services → Hooks → Component pattern (FSD)
  */
-
 import { useEffect, useState, useRef, type KeyboardEvent } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -18,20 +17,17 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAIHistory } from '../hooks/use-ai-history';
 import { useAIChat } from '../hooks/use-ai-chat';
 import type { ChatMessage } from '../types';
-
 interface AIPanelProps {
   userId: string;
   userFullName: string;
   userAvatarUrl?: string;
   onClose: () => void;
 }
-
 const SUGGESTED_IDEAS = [
   "Dime los ingresos que tuvimos este mes.",
   "Crea un nuevo presupuesto para un baño completo.",
   "Qué cantidad de ladrillos tenemos comprados actualmente?"
 ];
-
 export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -53,25 +49,20 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
   const chatMutation = useAIChat();
   
   const userInitial = userFullName?.charAt(0)?.toUpperCase() || 'U';
-
   useEffect(() => {
     // Solo setear messages desde historial si están vacíos (primera carga)
     if (historyData?.messages && messages.length === 0) {
       setMessages(historyData.messages);
     }
   }, [historyData, messages.length]);
-
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
-
     textarea.style.height = 'auto';
     const newHeight = Math.min(textarea.scrollHeight, 120);
     textarea.style.height = `${newHeight}px`;
   }, [inputValue]);
-
   const hasMessages = messages.length > 0;
-
   useEffect(() => {
     if (scrollAreaRef.current && hasMessages) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
@@ -80,12 +71,10 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
       }
     }
   }, [messages, hasMessages]);
-
   const handleSendMessage = async (messageText?: string) => {
     const textToSend = messageText || inputValue.trim();
     
     if (!textToSend || chatMutation.isPending) return;
-
     if (!hasInteracted) {
       setHasInteracted(true);
       try {
@@ -102,7 +91,6 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
     
     setMessages(prev => [...prev, userMessage]);
     setInputValue("");
-
     chatMutation.mutate(textToSend, {
       onSuccess: (data) => {
         const assistantMessage: ChatMessage = {
@@ -120,20 +108,17 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
       }
     });
   };
-
   const handleIdeaClick = (idea: string) => {
     handleSendMessage(idea);
   };
-
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter'&& !e.shiftKey) {
       e.preventDefault();
       if (inputValue.trim() && !chatMutation.isPending) {
         handleSendMessage();
       }
     }
   };
-
   return (
     <div className="flex flex-col h-full">
       {/* CONTENIDO */}
@@ -167,12 +152,12 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
                 key={index}
                 className={cn(
                   "flex gap-3",
-                  message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
+                  message.role === 'user'? 'flex-row-reverse': 'flex-row'
                 )}
               >
                 {/* Avatar */}
                 <div className="flex-shrink-0">
-                  {message.role === 'user' ? (
+                  {message.role === 'user'? (
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={userAvatarUrl} alt={userFullName} />
                       <AvatarFallback className="bg-[var(--accent)] text-white text-xs">
@@ -185,7 +170,6 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
                     </div>
                   )}
                 </div>
-
                 {/* Burbuja de mensaje */}
                 <div
                   className={cn(
@@ -196,7 +180,7 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
                   )}
                 >
                   <div className="text-sm">
-                    {message.role === 'assistant' ? (
+                    {message.role === 'assistant'? (
                       <MessageContent content={message.content} />
                     ) : (
                       message.content
@@ -215,15 +199,13 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
             <div className="h-16 w-16 rounded-full bg-[var(--accent)] flex items-center justify-center mb-4">
               <Sparkles className="h-8 w-8 text-white" />
             </div>
-
             {/* Saludo */}
             <h2 className="text-xl font-semibold text-[var(--main-sidebar-fg)] mb-1">
-              Hola {userFullName.split(' ')[0] || 'Usuario'}
+              Hola {userFullName.split('')[0] || 'Usuario'}
             </h2>
             <p className="text-sm text-muted-foreground mb-6">
               ¿En qué puedo ayudarte?
             </p>
-
             {/* Ideas pre-establecidas */}
             <div className="w-full space-y-3">
               {SUGGESTED_IDEAS.map((idea, index) => (
@@ -241,7 +223,6 @@ export function AIPanel({ userId, userFullName, userAvatarUrl, onClose }: AIPane
           </div>
         </div>
       )}
-
       {/* INPUT - Siempre al fondo */}
       <Separator />
       <div className="p-4 pb-3">

@@ -1,7 +1,6 @@
 import { GanttLeftPanel } from './GanttLeftPanel';
 import { GanttTimelineBar } from './GanttTimelineBar';
 import { GanttRowProps } from './types';
-
 export function GanttRow({ 
   item, 
   timelineStart, 
@@ -27,7 +26,6 @@ export function GanttRow({
       </div>
     );
   }
-
   return (
     <div className="flex border-b border-border hover:bg-muted/20 transition-colors">
       {/* Left Panel */}

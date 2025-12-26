@@ -1,7 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-
-export type FlowKey = 'user_signup' | 'billing_checkout';
-
+export type FlowKey = 'user_signup'| 'billing_checkout';
 interface FlowStatusResponse {
   flow?: string;
   blocked: boolean;
@@ -13,7 +11,6 @@ interface FlowStatusResponse {
     title: string;
   }>;
 }
-
 const FLOW_BLOCKED_MESSAGES: Record<FlowKey, { title: string; description: string }> = {
   user_signup: {
     title: 'Registro temporalmente no disponible',
@@ -24,7 +21,6 @@ const FLOW_BLOCKED_MESSAGES: Record<FlowKey, { title: string; description: strin
     description: 'Nuestro sistema de pagos está siendo actualizado. Por favor, intenta nuevamente en unos minutos.',
   },
 };
-
 async function fetchFlowStatus(flowKey: FlowKey): Promise<FlowStatusResponse> {
   try {
     const res = await fetch(`/api/ops/flow-status?flow=${flowKey}`, {
@@ -40,14 +36,12 @@ async function fetchFlowStatus(flowKey: FlowKey): Promise<FlowStatusResponse> {
     return { blocked: false, alerts: [] };
   }
 }
-
 export function getFlowBlockedMessage(flowKey: FlowKey): { title: string; description: string } {
   return FLOW_BLOCKED_MESSAGES[flowKey] || {
     title: 'Servicio temporalmente no disponible',
     description: 'Por favor, intenta nuevamente en unos minutos.',
   };
 }
-
 export function useFlowBlocking(flowKey: FlowKey) {
   const { data, isLoading } = useQuery<FlowStatusResponse>({
     queryKey: ['/api/ops/flow-status', flowKey],
@@ -56,10 +50,8 @@ export function useFlowBlocking(flowKey: FlowKey) {
     refetchInterval: 60000,
     retry: false,
   });
-
   const isBlocked = data?.blocked ?? false;
   const message = getFlowBlockedMessage(flowKey);
-
   return {
     isBlocked,
     isLoading,
@@ -67,7 +59,6 @@ export function useFlowBlocking(flowKey: FlowKey) {
     alerts: data?.alerts || [],
   };
 }
-
 export async function checkFlowBlocked(flowKey: FlowKey): Promise<{
   blocked: boolean;
   message: { title: string; description: string };

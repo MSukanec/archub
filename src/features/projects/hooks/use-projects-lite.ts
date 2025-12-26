@@ -2,14 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 import { getProjects } from '../services/getProjects';
 import { projectsKeys } from '@/core/query-keys';
 import { useProjectContext } from '@/stores/projectContext';
-
 interface ProjectLite {
   id: string;
   name: string;
   color: string | null;
   status: string | null;
 }
-
 /**
  * Hook para obtener una lista ligera de proyectos (solo campos esenciales).
  * 

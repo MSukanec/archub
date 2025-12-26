@@ -45,7 +45,6 @@ import { orderedMethods, getPaymentButtonText, isArgentineCountry } from "@/util
 import { apiRequest } from "@/lib/queryClient";
 import mercadoPagoLogo from "/MercadoPago_logo.png";
 import paypalLogo from "/Paypal_2014_logo.png";
-
 // Helper para hacer fetch con timeout
 async function fetchWithTimeout(url: string, init: RequestInit = {}, ms = 15000) {
   const ctrl = new AbortController();
@@ -57,9 +56,7 @@ async function fetchWithTimeout(url: string, init: RequestInit = {}, ms = 15000)
     clearTimeout(id);
   }
 }
-
 type PaymentMethod = "mercadopago" | "paypal" | "transfer";
-
 interface AppliedCoupon {
   coupon_id: string;
   code: string;
@@ -68,20 +65,16 @@ interface AppliedCoupon {
   discount: number;
   final_price: number;
 }
-
 export default function CheckoutPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { setSidebarContext, setSidebarLevel, sidebarLevel, currentSidebarContext } = useNavigationStore();
-
   // Get query params (courseSlug)
   const params = new URLSearchParams(window.location.search);
   const courseSlug = params.get("course") || "";
-
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [loading, setLoading] = useState(false);
   const [showBankInfo, setShowBankInfo] = useState(false);
-
   // Bank transfer payment states
   const [bankTransferPaymentId, setBankTransferPaymentId] = useState<string | null>(null);
   const [filesToUpload, setFilesToUpload] = useState<any[]>([]);
@@ -90,7 +83,6 @@ export default function CheckoutPage() {
   const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
   
   const receiptFile = filesToUpload[0]?.file || null;
-
   // Set navigation context for sidebar and restore on unmount
   useEffect(() => {
     const previousContext = currentSidebarContext;
@@ -98,45 +90,37 @@ export default function CheckoutPage() {
     
     setSidebarContext('learning');
     setSidebarLevel('learning');
-
     return () => {
       // Restore previous sidebar context and level when leaving checkout
       setSidebarContext(previousContext);
       setSidebarLevel(previousLevel);
     };
   }, [setSidebarContext, setSidebarLevel]);
-
   // Provider/currency según método seleccionado
   const currentProvider = selectedMethod === "paypal" ? "paypal" : "mercadopago";
   const currentCurrency = selectedMethod === "paypal" ? "USD" : "ARS";
-
   const { data: priceData, isLoading: priceLoading } = useCoursePricing(
     courseSlug,
     currentCurrency,
     currentProvider
   );
-
   // Cupón
   const [couponCode, setCouponCode] = useState("");
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
-
   // User data and countries
   const { data: userData } = useCurrentUser();
   const { data: countries = [] } = useCountries();
-
   // Basic data form fields
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [country, setCountry] = useState("");
   const [phone, setPhone] = useState("");
-
   // Acceptance checkboxes
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptCommunications, setAcceptCommunications] = useState(false);
-
   // Billing data (optional)
   const [needsInvoice, setNeedsInvoice] = useState(false);
   const [isCompany, setIsCompany] = useState(false);
@@ -145,10 +129,8 @@ export default function CheckoutPage() {
   const [billingAddress, setBillingAddress] = useState("");
   const [billingCity, setBillingCity] = useState("");
   const [billingPostcode, setBillingPostcode] = useState("");
-
   // Course title
   const [courseTitle, setCourseTitle] = useState("Curso");
-
   // Load course title
   useEffect(() => {
     if (courseSlug) {
@@ -165,7 +147,6 @@ export default function CheckoutPage() {
         });
     }
   }, [courseSlug]);
-
   // Load user data
   useEffect(() => {
     if (userData) {
@@ -180,13 +161,11 @@ export default function CheckoutPage() {
       }
     }
   }, [userData]);
-
   // Load billing profile when user enables invoice
   useEffect(() => {
     if (!needsInvoice || !userData?.user?.id) {
       return;
     }
-
     const loadBillingProfile = async () => {
       try {
         const { data, error } = await supabase
@@ -194,12 +173,10 @@ export default function CheckoutPage() {
           .select('*')
           .eq('user_id', userData.user.id)
           .maybeSingle();
-
         if (error) {
           console.error('[billing_profiles] Error loading profile:', error);
           return;
         }
-
         if (data) {
           console.log('[billing_profiles] Loaded existing profile');
           // Only set fields that are empty (don't overwrite if user already started filling)
@@ -214,23 +191,19 @@ export default function CheckoutPage() {
         console.error('[billing_profiles] Unexpected error:', e);
       }
     };
-
     loadBillingProfile();
   }, [needsInvoice, userData?.user?.id]);
-
   // Redirect si no hay courseSlug
   useEffect(() => {
     if (!courseSlug) {
       navigate("/learning/courses");
     }
   }, [courseSlug, navigate]);
-
   // Determinar si el usuario es argentino
   const isArgentine = useMemo(() => {
     const countryData = countries.find((c) => c.id === country);
     return isArgentineCountry(countryData?.alpha_3);
   }, [countries, country]);
-
   // Preselección automática según país
   useEffect(() => {
     if (!selectedMethod && country && countries.length > 0) {
@@ -243,7 +216,6 @@ export default function CheckoutPage() {
       }
     }
   }, [country, countries, selectedMethod, isArgentine]);
-
   // Limpiar cupón SOLO cuando cambia la moneda (NO cuando cambia el método)
   // IMPORTANTE: El descuento debe recalcularse con el nuevo precio en la nueva moneda
   useEffect(() => {
@@ -261,7 +233,6 @@ export default function CheckoutPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentCurrency]);
-
   // Atajo de teclado: Enter dispara el CTA si todo está válido
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -275,14 +246,12 @@ export default function CheckoutPage() {
           firstName.trim() &&
           email.trim() &&
           country;
-
         if (isFormValid && !(e.target instanceof HTMLTextAreaElement)) {
           e.preventDefault();
           handleContinue();
         }
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [
@@ -296,47 +265,39 @@ export default function CheckoutPage() {
     country,
     showBankInfo,
   ]);
-
   const handleValidateCoupon = async () => {
     if (!couponCode.trim()) {
       setCouponError("Ingresá un código de cupón");
       return;
     }
-
     if (!priceData) {
       setCouponError("Esperá a que se cargue el precio del curso");
       return;
     }
-
     try {
       setValidatingCoupon(true);
       setCouponError(null);
-
       const { data: courseData, error: courseError } = await supabase
         .from("courses")
         .select("id")
         .eq("slug", courseSlug)
         .eq("is_deleted", false)
         .single();
-
       if (courseError || !courseData) {
         setCouponError("No se pudo obtener la información del curso");
         return;
       }
-
       const { data, error } = await supabase.rpc("validate_coupon", {
         p_code: couponCode.trim(),
         p_course_id: courseData.id,
         p_price: priceData.price,
         p_currency: priceData.currency,
       });
-
       if (error) {
         console.error("Error validando cupón:", error);
         setCouponError("Error al validar el cupón");
         return;
       }
-
       if (!data || !data.ok) {
         const errorMessages: Record<string, string> = {
           NOT_FOUND_OR_INACTIVE: "Cupón inválido o inactivo",
@@ -349,14 +310,12 @@ export default function CheckoutPage() {
           CURRENCY_MISMATCH: "El cupón no aplica a esta moneda",
           UNAUTHENTICATED: "Tenés que iniciar sesión para usar un cupón",
         };
-
         const errorMessage =
           errorMessages[data.reason || ""] ||
           "No pudimos aplicar el cupón. Probá de nuevo";
         setCouponError(errorMessage);
         return;
       }
-
       setCouponError(null);
       setAppliedCoupon({
         coupon_id: data.coupon_id,
@@ -366,12 +325,10 @@ export default function CheckoutPage() {
         discount: data.discount,
         final_price: data.final_price,
       });
-
       toast({
         title: "✓ Cupón aplicado",
         description: `¡Descuento de ${data.type === "percent" ? data.amount + "%" : "$" + data.amount} aplicado!`,
       });
-
       setCouponCode("");
     } catch (error: any) {
       console.error("Error al validar cupón:", error);
@@ -380,7 +337,6 @@ export default function CheckoutPage() {
       setValidatingCoupon(false);
     }
   };
-
   const handleRemoveCoupon = () => {
     setAppliedCoupon(null);
     setCouponCode("");
@@ -389,11 +345,9 @@ export default function CheckoutPage() {
       description: "El descuento fue quitado",
     });
   };
-
   const handleMercadoPagoPayment = async () => {
     try {
       setLoading(true);
-
       const {
         data: { session },
         error: sessionError,
@@ -401,7 +355,6 @@ export default function CheckoutPage() {
       if (sessionError || !session?.access_token) {
         throw new Error("Debes iniciar sesión para comprar un curso");
       }
-
       // Si el cupón deja el precio en 0 → inscripción directa
       const currentFinalPrice = appliedCoupon
         ? appliedCoupon.final_price
@@ -419,38 +372,30 @@ export default function CheckoutPage() {
             code: appliedCoupon?.code,
           }),
         });
-
         const data = await response.json();
         if (!response.ok) {
           console.error("Error al inscribir con cupón 100%:", data);
           throw new Error(data?.error || "No se pudo completar la inscripción");
         }
-
         toast({
           title: "¡Inscripción exitosa!",
           description: "Te inscribiste correctamente al curso. Ya podés acceder al contenido.",
         });
-
         setTimeout(() => {
           window.location.assign(`/learning/courses/${courseSlug}`);
         }, 1500);
         return;
       }
-
       const {
         data: { user: authUser },
       } = await supabase.auth.getUser();
       if (!authUser) throw new Error("No se pudo obtener el usuario autenticado");
-
       const userRecord = await getUserByAuthId(authUser.id);
-
       if (!userRecord?.id) {
         throw new Error("No se pudo obtener el ID interno del usuario");
       }
-
       // Save billing profile if user filled billing data
       await saveBillingProfile(userRecord.id);
-
       const requestBody = {
         user_id: userRecord.id,
         course_slug: courseSlug,
@@ -458,12 +403,9 @@ export default function CheckoutPage() {
         months: 12,
         ...(appliedCoupon && { code: appliedCoupon.code }),
       };
-
       console.log("[MP] Creando preferencia…", requestBody);
-
       const API_BASE = getApiBase();
       const mpUrl = `${API_BASE}/api/checkout/mp/create-course`;
-
       const res = await fetchWithTimeout(
         mpUrl,
         {
@@ -476,7 +418,6 @@ export default function CheckoutPage() {
         },
         15000
       );
-
       const text = await res.text();
       let payload: any;
       try {
@@ -484,13 +425,11 @@ export default function CheckoutPage() {
       } catch {
         payload = { error: text };
       }
-
       console.log("[MP] Respuesta create-preference:", {
         status: res.status,
         ok: res.ok,
         data: payload,
       });
-
       if (!res.ok) {
         // Si el cupón da 100% descuento, usar flujo de inscripción gratuita
         if (payload?.free_enrollment && appliedCoupon) {
@@ -507,18 +446,15 @@ export default function CheckoutPage() {
               code: appliedCoupon.code,
             }),
           });
-
           const freeEnrollData = await freeEnrollResponse.json();
           if (!freeEnrollResponse.ok) {
             console.error("Error al inscribir con cupón 100%:", freeEnrollData);
             throw new Error(freeEnrollData?.error || "No se pudo completar la inscripción");
           }
-
           toast({
             title: "¡Inscripción exitosa!",
             description: "Te inscribiste correctamente al curso. Ya podés acceder al contenido.",
           });
-
           setTimeout(() => {
             window.location.assign(`/learning/courses/${courseSlug}`);
           }, 1500);
@@ -532,11 +468,9 @@ export default function CheckoutPage() {
             : `create-preference falló: status=${res.status}`
         );
       }
-
       if (!payload?.init_point) {
         throw new Error("La preferencia no tiene init_point");
       }
-
       console.log("[MP] Redirigiendo a:", payload.init_point);
       window.location.assign(payload.init_point);
     } catch (error: any) {
@@ -550,11 +484,9 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
-
   const handlePayPalPayment = async () => {
     try {
       setLoading(true);
-
       const {
         data: { session },
         error: sessionError,
@@ -562,38 +494,29 @@ export default function CheckoutPage() {
       if (sessionError || !session?.access_token) {
         throw new Error("Debes iniciar sesión para comprar un curso");
       }
-
       const {
         data: { user: authUser },
       } = await supabase.auth.getUser();
       if (!authUser) {
         throw new Error("No se pudo obtener el usuario");
       }
-
       const userRecord = await getUserByAuthId(authUser.id);
-
       if (!userRecord) {
         throw new Error("No se pudo obtener el ID del usuario");
       }
-
       // Save billing profile if user filled billing data
       await saveBillingProfile(userRecord.id);
-
       const courseTitle = (priceData as any)?.courses?.title || courseSlug;
       const description = `${courseTitle} - Suscripción Anual`;
-
       const requestBody = {
         user_id: userRecord.id,
         course_slug: courseSlug,
         ...(appliedCoupon && { code: appliedCoupon.code }),
         description,
       };
-
       console.log("[PayPal] Creando orden…", requestBody);
-
       const API_BASE = getApiBase();
       const paypalUrl = `${API_BASE}/api/checkout/paypal/create-course`;
-
       const res = await fetchWithTimeout(
         paypalUrl,
         {
@@ -606,7 +529,6 @@ export default function CheckoutPage() {
         },
         15000
       );
-
       const text = await res.text();
       let payload: any;
       try {
@@ -614,18 +536,15 @@ export default function CheckoutPage() {
       } catch {
         payload = { ok: false, error: text };
       }
-
       console.log("[PayPal] Respuesta create-order:", {
         status: res.status,
         ok: res.ok,
         data: payload,
       });
-
       if (!res.ok || !payload?.ok) {
         console.error("[PayPal] Error al crear orden:", payload);
         throw new Error(payload?.error || `HTTP ${res.status}`);
       }
-
       // Si el cupón da 100% descuento, usar flujo de inscripción gratuita
       if (payload.free_enrollment && appliedCoupon) {
         console.log("[PayPal] Cupón da acceso gratuito, usando free-enroll...");
@@ -641,30 +560,25 @@ export default function CheckoutPage() {
             code: appliedCoupon.code,
           }),
         });
-
         const freeEnrollData = await freeEnrollResponse.json();
         if (!freeEnrollResponse.ok) {
           console.error("Error al inscribir con cupón 100%:", freeEnrollData);
           throw new Error(freeEnrollData?.error || "No se pudo completar la inscripción");
         }
-
         toast({
           title: "¡Inscripción exitosa!",
           description: "Te inscribiste correctamente al curso. Ya podés acceder al contenido.",
         });
-
         setTimeout(() => {
           window.location.assign(`/learning/courses/${courseSlug}`);
         }, 1500);
         return;
       }
-
       const approvalUrl = payload.approval_url;
       if (!approvalUrl) {
         console.error("[PayPal] No approval URL in payload:", payload);
         throw new Error("No se recibió la URL de aprobación de PayPal");
       }
-
       console.log("[PayPal] Redirigiendo a:", approvalUrl);
       window.location.assign(approvalUrl);
     } catch (error: any) {
@@ -676,22 +590,19 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
-
   const handleTransferPayment = async () => {
     setShowBankInfo(true);
     // Create the bank transfer payment record
     await handleCreateBankTransferPayment();
     // Scroll to top para que en mobile el usuario vea la información bancaria
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth'});
   };
-
   const handleCopyBankInfo = async () => {
     const bankInfo = `Alias: MATIAS.SUKANEC
 Banco: Banco Galicia - Caja de Ahorro en Pesos
 Número de cuenta: 4026691-4 063-1
 CBU: 00700634 30004026691416
 Titular: Matias Esteban Sukanec`;
-
     try {
       await navigator.clipboard.writeText(bankInfo);
       toast({
@@ -706,7 +617,6 @@ Titular: Matias Esteban Sukanec`;
       });
     }
   };
-
   const handleCreateBankTransferPayment = async () => {
     try {
       const {
@@ -721,7 +631,6 @@ Titular: Matias Esteban Sukanec`;
         });
         return;
       }
-
       // Calcular precio con descuento de cupón
       const priceWithCoupon = appliedCoupon
         ? appliedCoupon.final_price
@@ -730,9 +639,7 @@ Titular: Matias Esteban Sukanec`;
       // Calcular descuento de transferencia (5%)
       const transferDiscount = priceWithCoupon * (TRANSFER_DISCOUNT_PERCENT / 100);
       const finalAmount = priceWithCoupon - transferDiscount;
-
       const orderId = crypto.randomUUID();
-
       const API_BASE = getApiBase();
       const response = await fetch(`${API_BASE}/api/bank-transfer/create`, {
         method: "POST",
@@ -750,13 +657,10 @@ Titular: Matias Esteban Sukanec`;
           discount_amount: transferDiscount,
         }),
       });
-
       const data = await response.json();
-
       if (!response.ok || !data.btp_id) {
         throw new Error(data.error || "No se pudo crear el registro de pago");
       }
-
       setBankTransferPaymentId(data.btp_id);
     } catch (error: any) {
       console.error("Error creating bank transfer payment:", error);
@@ -767,7 +671,6 @@ Titular: Matias Esteban Sukanec`;
       });
     }
   };
-
   const handleUploadReceipt = async () => {
     if (!receiptFile || !bankTransferPaymentId) {
       toast({
@@ -777,10 +680,8 @@ Titular: Matias Esteban Sukanec`;
       });
       return;
     }
-
     try {
       setReceiptUploading(true);
-
       const {
         data: { session },
         error: sessionError,
@@ -788,7 +689,6 @@ Titular: Matias Esteban Sukanec`;
       if (sessionError || !session?.access_token) {
         throw new Error("Sesión expirada");
       }
-
       // Convert file to base64
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
@@ -800,7 +700,6 @@ Titular: Matias Esteban Sukanec`;
       });
       reader.readAsDataURL(receiptFile);
       const base64Data = await base64Promise;
-
       const API_BASE = getApiBase();
       const response = await fetchWithTimeout(`${API_BASE}/api/bank-transfer/upload`, {
         method: "POST",
@@ -814,17 +713,13 @@ Titular: Matias Esteban Sukanec`;
           file_data: base64Data,
         }),
       }, 30000); // 30 segundos timeout
-
       const data = await response.json();
-
       if (!response.ok || !data.success) {
         throw new Error(data.error || "No se pudo subir el comprobante");
       }
-
       // Store bucket:path format for display purposes
       setReceiptUrl(`${data.image_bucket}:${data.image_path}`);
       setReceiptUploaded(true);
-
       toast({
         title: "¡Comprobante enviado!",
         description: "Tu comprobante fue recibido. Te notificaremos cuando sea aprobado.",
@@ -840,18 +735,15 @@ Titular: Matias Esteban Sukanec`;
       setReceiptUploading(false);
     }
   };
-
   // Helper to build billing object only if user needs invoice
   const getBillingData = () => {
     if (!needsInvoice) {
       return undefined;
     }
-
     // Usar nombre y país de datos básicos
     const fullName = isCompany 
       ? undefined 
       : `${firstName.trim()} ${lastName.trim()}`.trim() || undefined;
-
     return {
       is_company: isCompany,
       full_name: fullName,
@@ -863,14 +755,12 @@ Titular: Matias Esteban Sukanec`;
       postcode: billingPostcode.trim() || undefined,
     };
   };
-
   // Helper to save billing profile before payment
   const saveBillingProfile = async (internalUserId: string) => {
     const billing = getBillingData();
     if (!billing) {
       return; // No billing data, skip
     }
-
     try {
       const { error } = await supabase
         .from('billing_profiles')
@@ -887,7 +777,6 @@ Titular: Matias Esteban Sukanec`;
         }, {
           onConflict: 'user_id'
         });
-
       if (error) {
         console.error('[billing_profiles] Error saving billing profile:', error);
       } else {
@@ -897,7 +786,6 @@ Titular: Matias Esteban Sukanec`;
       console.error('[billing_profiles] Unexpected error:', e);
     }
   };
-
   const handleContinue = async () => {
     // Validate first_name: 1-100 caracteres, Unicode (acentos, guiones)
     const trimmedFirstName = firstName.trim();
@@ -917,7 +805,6 @@ Titular: Matias Esteban Sukanec`;
       });
       return;
     }
-
     // Validate last_name: 0-100 caracteres (opcional)
     const trimmedLastName = lastName.trim();
     if (trimmedLastName.length > 100) {
@@ -928,7 +815,6 @@ Titular: Matias Esteban Sukanec`;
       });
       return;
     }
-
     // Validate email: formato válido y normalizar a minúsculas
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
@@ -949,7 +835,6 @@ Titular: Matias Esteban Sukanec`;
       return;
     }
     const normalizedEmail = trimmedEmail.toLowerCase();
-
     // Validate country
     if (!country) {
       toast({
@@ -959,14 +844,12 @@ Titular: Matias Esteban Sukanec`;
       });
       return;
     }
-
     // Normalize phone to E.164 if provided
     const selectedCountry = countries.find((c) => c.id === country);
     const normalizedPhone = toE164(
       phone, 
       selectedCountry?.alpha_3
     );
-
     if (!acceptTerms) {
       toast({
         title: "Aceptación requerida",
@@ -975,7 +858,6 @@ Titular: Matias Esteban Sukanec`;
       });
       return;
     }
-
     if (!acceptCommunications) {
       toast({
         title: "Aceptación requerida",
@@ -984,7 +866,6 @@ Titular: Matias Esteban Sukanec`;
       });
       return;
     }
-
     if (!selectedMethod) {
       toast({
         title: "Seleccioná un método de pago",
@@ -993,7 +874,6 @@ Titular: Matias Esteban Sukanec`;
       });
       return;
     }
-
     if (couponCode.trim() && !appliedCoupon) {
       toast({
         title: "Cupón no aplicado",
@@ -1003,7 +883,6 @@ Titular: Matias Esteban Sukanec`;
       });
       return;
     }
-
     // Validate billing data only if user needs invoice
     if (needsInvoice) {
       if (isCompany && !companyName.trim()) {
@@ -1032,7 +911,6 @@ Titular: Matias Esteban Sukanec`;
         return;
       }
     }
-
     // Guardar datos en el perfil automáticamente
     if (userData?.user?.id) {
       try {
@@ -1071,7 +949,6 @@ Titular: Matias Esteban Sukanec`;
         // Continue with payment even if profile save fails
       }
     }
-
     switch (selectedMethod) {
       case "mercadopago":
         handleMercadoPagoPayment();
@@ -1084,7 +961,6 @@ Titular: Matias Esteban Sukanec`;
         break;
     }
   };
-
   // Constante de descuento por transferencia bancaria
   const TRANSFER_DISCOUNT_PERCENT = 5.0; // 5%
   
@@ -1100,23 +976,18 @@ Titular: Matias Esteban Sukanec`;
   const finalPrice = priceAfterCoupon - transferDiscountAmount;
   
   const hasDiscount = (appliedCoupon && appliedCoupon.discount > 0) || transferDiscountAmount > 0;
-
   // Ordenar métodos de pago según el país seleccionado
   const selectedCountryData = useMemo(() => {
     return countries.find((c) => c.id === country);
   }, [countries, country]);
-
   const paymentMethodsOrder = useMemo(() => {
     return orderedMethods(selectedCountryData?.alpha_3, !!appliedCoupon);
   }, [selectedCountryData, appliedCoupon]);
-
   // Texto del botón según método seleccionado
   const buttonText = getPaymentButtonText(selectedMethod);
-
   if (!courseSlug) {
     return null;
   }
-
   const headerProps = {
     icon: ShoppingCart,
     title: "Checkout",
@@ -1135,7 +1006,6 @@ Titular: Matias Esteban Sukanec`;
       </Button>
     ]
   };
-
   return (
     <Layout headerProps={headerProps}>
       <div className="max-w-7xl mx-auto py-6 lg:py-8">
@@ -1148,7 +1018,6 @@ Titular: Matias Esteban Sukanec`;
             Seleccioná tu método de pago preferido y completá la compra de forma segura
           </p>
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column - Payment Methods (Mobile: shows first) */}
           <div className={cn(
@@ -1190,7 +1059,6 @@ Titular: Matias Esteban Sukanec`;
                           />
                         </div>
                       </div>
-
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">
                           Email <span className="text-accent">*</span>
@@ -1205,7 +1073,6 @@ Titular: Matias Esteban Sukanec`;
                           data-testid="input-email"
                         />
                       </div>
-
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">
                           País <span className="text-accent">*</span>
@@ -1223,7 +1090,6 @@ Titular: Matias Esteban Sukanec`;
                           </SelectContent>
                         </Select>
                       </div>
-
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">
                           Teléfono
@@ -1234,7 +1100,6 @@ Titular: Matias Esteban Sukanec`;
                           placeholder="Número de teléfono"
                         />
                       </div>
-
                       {/* Invoice Section - Integrated */}
                       <div className="space-y-4 pt-4 border-t mt-4">
                         <div className="flex items-center justify-between">
@@ -1251,7 +1116,6 @@ Titular: Matias Esteban Sukanec`;
                             data-testid="switch-needs-invoice"
                           />
                         </div>
-
                         {/* Show billing fields only when switch is ON */}
                         {needsInvoice && (
                           <div className="space-y-4 pt-4">
@@ -1267,7 +1131,6 @@ Titular: Matias Esteban Sukanec`;
                                 data-testid="switch-is-company"
                               />
                             </div>
-
                             {isCompany ? (
                               /* Company Fields */
                               <div className="space-y-4">
@@ -1282,7 +1145,6 @@ Titular: Matias Esteban Sukanec`;
                                     data-testid="input-company-name"
                                   />
                                 </div>
-
                                 <div className="space-y-2">
                                   <Label className="text-sm font-medium">
                                     CUIT / VAT / GST / Tax ID <span className="text-accent">*</span>
@@ -1297,7 +1159,6 @@ Titular: Matias Esteban Sukanec`;
                                     Número de identificación fiscal
                                   </p>
                                 </div>
-
                                 <div className="space-y-2">
                                   <Label className="text-sm font-medium">Dirección (opcional)</Label>
                                   <Input
@@ -1307,7 +1168,6 @@ Titular: Matias Esteban Sukanec`;
                                     data-testid="input-billing-address"
                                   />
                                 </div>
-
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                   <div className="space-y-2">
                                     <Label className="text-sm font-medium">Ciudad (opcional)</Label>
@@ -1346,7 +1206,6 @@ Titular: Matias Esteban Sukanec`;
                                     Número de identificación fiscal
                                   </p>
                                 </div>
-
                                 <div className="space-y-2">
                                   <Label className="text-sm font-medium">Dirección (opcional)</Label>
                                   <Input
@@ -1356,7 +1215,6 @@ Titular: Matias Esteban Sukanec`;
                                     data-testid="input-billing-address-individual"
                                   />
                                 </div>
-
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                   <div className="space-y-2">
                                     <Label className="text-sm font-medium">Ciudad (opcional)</Label>
@@ -1384,7 +1242,6 @@ Titular: Matias Esteban Sukanec`;
                       </div>
                     </div>
                   </div>
-
                   {/* Payment Methods */}
                   <div className="bg-card border rounded-lg p-6">
                     <div className="flex items-center gap-2 mb-4">
@@ -1451,7 +1308,6 @@ Titular: Matias Esteban Sukanec`;
                                   />
                                 </div>
                               </div>
-
                               {/* Badge tipo popover centrado */}
                               {isMPBlocked && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-background/40 backdrop-blur-[1px]">
@@ -1476,7 +1332,6 @@ Titular: Matias Esteban Sukanec`;
                             </div>
                           );
                         }
-
                         if (method === "paypal") {
                           return (
                             <div
@@ -1516,7 +1371,6 @@ Titular: Matias Esteban Sukanec`;
                             </div>
                           );
                         }
-
                         // transfer
                         const isTransferBlocked = !isArgentine; // Bloqueado para usuarios no argentinos
                         return (
@@ -1566,7 +1420,6 @@ Titular: Matias Esteban Sukanec`;
                                 </p>
                               </div>
                             </div>
-
                             {/* Badge tipo popover centrado */}
                             {isTransferBlocked && (
                               <div className="absolute inset-0 flex items-center justify-center bg-background/40 backdrop-blur-[1px]">
@@ -1606,7 +1459,6 @@ Titular: Matias Esteban Sukanec`;
                       </p>
                     </div>
                   </div>
-
                   {!receiptUploaded && (
                     <div className="space-y-4 bg-muted/30 p-4 rounded-lg font-mono text-sm">
                       <div>
@@ -1642,7 +1494,6 @@ Titular: Matias Esteban Sukanec`;
                       </div>
                     </div>
                   )}
-
                   {!receiptUploaded && (
                     <>
                       <div className="flex gap-3 mt-6">
@@ -1656,11 +1507,9 @@ Titular: Matias Esteban Sukanec`;
                           Copiar datos
                         </Button>
                       </div>
-
                       <Separator className="my-6" />
                     </>
                   )}
-
                   {/* Receipt Upload Section */}
                   <div className="space-y-4">
                     {!receiptUploaded && (
@@ -1674,7 +1523,6 @@ Titular: Matias Esteban Sukanec`;
                         </div>
                       </div>
                     )}
-
                     {!receiptUploaded ? (
                       /* File selection and upload */
                       <div className="space-y-4">
@@ -1734,7 +1582,6 @@ Titular: Matias Esteban Sukanec`;
                       </div>
                     )}
                   </div>
-
                   <div className="mt-6">
                     {receiptUploaded ? (
                       <Button
@@ -1768,7 +1615,6 @@ Titular: Matias Esteban Sukanec`;
               )}
             </div>
           </div>
-
           {/* Right Column - Coupon & Order Summary (Mobile: shows second) */}
           {!showBankInfo && (
             <div className="lg:col-span-5 order-2 lg:order-2">
@@ -1860,14 +1706,12 @@ Titular: Matias Esteban Sukanec`;
                   </Button>
                 </div>
               )}
-
               {/* Order Summary */}
               <div className="bg-card border rounded-lg p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
                   <Receipt className="h-5 w-5 text-accent" />
                   <h2 className="text-lg font-semibold">Resumen de compra</h2>
                 </div>
-
                 {priceLoading ? (
                   <div className="space-y-3">
                     <div className="h-4 bg-muted animate-pulse rounded" />
@@ -1880,9 +1724,7 @@ Titular: Matias Esteban Sukanec`;
                       <p className="text-base font-semibold">{courseTitle}</p>
                       <p className="text-sm text-muted-foreground mt-1">Suscripción anual</p>
                     </div>
-
                     <Separator />
-
                     {/* Price Breakdown */}
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
@@ -1891,7 +1733,6 @@ Titular: Matias Esteban Sukanec`;
                           {currentCurrency} ${priceData?.price?.toLocaleString("es-AR") || "0"}
                         </span>
                       </div>
-
                       {appliedCoupon && appliedCoupon.discount > 0 && (
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Descuento cupón</span>
@@ -1900,7 +1741,6 @@ Titular: Matias Esteban Sukanec`;
                           </span>
                         </div>
                       )}
-
                       {transferDiscountAmount > 0 && (
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Descuento transferencia (5%)</span>
@@ -1910,9 +1750,7 @@ Titular: Matias Esteban Sukanec`;
                         </div>
                       )}
                     </div>
-
                     <Separator />
-
                     {/* Total */}
                     <div className="flex justify-between items-baseline">
                       <span className="text-lg font-semibold">Total</span>
@@ -1927,7 +1765,6 @@ Titular: Matias Esteban Sukanec`;
                         )}
                       </div>
                     </div>
-
                     {/* Additional Info */}
                     <div className="pt-4 space-y-2 text-xs text-muted-foreground">
                       <div className="flex items-start gap-2">
@@ -1943,9 +1780,7 @@ Titular: Matias Esteban Sukanec`;
                         <p>Soporte incluido durante todo el período</p>
                       </div>
                     </div>
-
                     <Separator className="my-6" />
-
                     {/* Acceptance Checkboxes */}
                     <div className="space-y-4">
                       <div className="flex items-start gap-3">
@@ -1978,7 +1813,6 @@ Titular: Matias Esteban Sukanec`;
                           </a>
                         </label>
                       </div>
-
                       <div className="flex items-start gap-3">
                         <Checkbox
                           id="accept-communications"
@@ -1994,7 +1828,6 @@ Titular: Matias Esteban Sukanec`;
                         </label>
                       </div>
                     </div>
-
                     {/* Action Button */}
                     <Button
                       onClick={handleContinue}
@@ -2025,7 +1858,6 @@ Titular: Matias Esteban Sukanec`;
                   </div>
                 )}
               </div>
-
               {/* Security Badge */}
               <div className="mt-4 text-center text-xs text-muted-foreground">
                 <p className="flex items-center justify-center gap-1.5">

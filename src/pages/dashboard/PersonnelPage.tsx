@@ -4,7 +4,6 @@ import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal'
 import { Users, Plus, Calendar, ChevronDown } from 'lucide-react'
-import { 
   InsuranceTab, 
   usePersonnelPayments, 
   useInsuranceList,
@@ -23,15 +22,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
 const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
-  { value: '30d', label: 'Últimos 30 días' },
-  { value: '3m', label: 'Últimos 3 meses' },
-  { value: '6m', label: 'Últimos 6 meses' },
-  { value: '1y', label: 'Último año' },
-  { value: 'all', label: 'Histórico' },
+  { value: '30d', label: 'Últimos 30 días'},
+  { value: '3m', label: 'Últimos 3 meses'},
+  { value: '6m', label: 'Últimos 6 meses'},
+  { value: '1y', label: 'Último año'},
+  { value: 'all', label: 'Histórico'},
 ]
-
 export default function PersonnelPage() {
   const { openModal } = useGlobalModalStore()
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
@@ -40,15 +37,12 @@ export default function PersonnelPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all')
   const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set())
   const [activeFilterIssueId, setActiveFilterIssueId] = useState<string | null>(null)
-
   const { data: insuranceData = [] } = useInsuranceList({
     project_id: selectedProjectId || undefined
   })
-
   const { data: allPayments = [] } = usePersonnelPayments(selectedProjectId || undefined, currentOrganizationId || undefined)
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined)
   const availablePeriods = useMemo(() => calculateAvailablePeriods(allPayments), [allPayments])
-
   const dataHealthIssues = useMemo((): DataIssue[] => {
     const issues: DataIssue[] = []
     
@@ -61,7 +55,7 @@ export default function PersonnelPage() {
         title: 'Pagos sin personal asignado',
         description: `${paymentsWithoutPersonnel.length} pago(s) no tienen personal asignado`,
         affectedCount: paymentsWithoutPersonnel.length,
-        affectedEntities: paymentsWithoutPersonnel.map(p => ({ id: p.id, label: p.notes || 'Pago' })),
+        affectedEntities: paymentsWithoutPersonnel.map(p => ({ id: p.id, label: p.notes || 'Pago'})),
         recommendedAction: {
           label: 'Asignar personal',
           actionType: 'navigate',
@@ -82,7 +76,7 @@ export default function PersonnelPage() {
         title: 'Pagos sin tipo de cambio',
         description: `${paymentsWithMissingExchangeRate.length} pago(s) en moneda extranjera sin tipo de cambio`,
         affectedCount: paymentsWithMissingExchangeRate.length,
-        affectedEntities: paymentsWithMissingExchangeRate.map(p => ({ id: p.id, label: p.notes || 'Pago' })),
+        affectedEntities: paymentsWithMissingExchangeRate.map(p => ({ id: p.id, label: p.notes || 'Pago'})),
         recommendedAction: {
           label: 'Agregar tipo de cambio',
           actionType: 'navigate',
@@ -93,13 +87,11 @@ export default function PersonnelPage() {
     
     return issues
   }, [allPayments, defaultCurrency])
-
   const getAffectedIdsForIssue = useCallback((issueId: string): string[] => {
     const issue = dataHealthIssues.find(i => i.id === issueId)
     if (!issue?.affectedEntities) return []
     return issue.affectedEntities.map(e => String(e.id))
   }, [dataHealthIssues])
-
   const handleDataHealthClick = useCallback((issueId: string) => {
     if (activeTab !== 'payments') {
       setActiveTab('payments')
@@ -112,33 +104,27 @@ export default function PersonnelPage() {
       }
     }
   }, [activeTab, activeFilterIssueId])
-
   useEffect(() => {
     if (activeFilterIssueId && dataHealthIssues.length === 0) {
       setActiveFilterIssueId(null)
     }
   }, [activeFilterIssueId, dataHealthIssues])
-
   const filteredPaymentIds = useMemo(() => {
     if (!activeFilterIssueId) return null
     return getAffectedIdsForIssue(activeFilterIssueId)
   }, [activeFilterIssueId, getAffectedIdsForIssue])
-
   const validSelectedPeriod = useMemo(() => {
     if (availablePeriods[selectedPeriod]) return selectedPeriod
     return 'all'
   }, [selectedPeriod, availablePeriods])
-
   useEffect(() => {
     if (validSelectedPeriod !== selectedPeriod) {
       setSelectedPeriod(validSelectedPeriod)
     }
   }, [validSelectedPeriod, selectedPeriod])
-
   useEffect(() => {
     setSidebarContext('construction')
   }, [])
-
   const getPeriodSelector = () => {
     if (activeTab !== "dashboard") return []
     
@@ -166,7 +152,7 @@ export default function PersonnelPage() {
                 data-testid={`option-period-${option.value}`}
               >
                 {option.label}
-                {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
+                {!isAvailable && option.value !== 'all'&& <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
               </DropdownMenuItem>
             )
           })}
@@ -174,7 +160,6 @@ export default function PersonnelPage() {
       </DropdownMenu>
     ]
   }
-
   const headerProps = {
     icon: Users,
     title: "Mano de Obra",
@@ -213,22 +198,22 @@ export default function PersonnelPage() {
     onTabChange: (tabId: string) => {
       setActiveTab(tabId)
     },
-    actionButton: activeTab === 'attendance' ? {
+    actionButton: activeTab === 'attendance'? {
       label: 'Registrar Asistencia',
       icon: Plus,
       onClick: () => openModal('attendance', {})
-    } : activeTab === 'active' ? {
+    } : activeTab === 'active'? {
       label: 'Agregar Personal',
       icon: Plus,
       onClick: () => openModal('personnel')
-    } : activeTab === 'payments' ? {
+    } : activeTab === 'payments'? {
       label: 'Agregar Pago',
       icon: Plus,
       onClick: () => openModal('personnel-payment', {
         projectId: selectedProjectId,
         organizationId: currentOrganizationId
       })
-    } : activeTab === 'insurance' ? {
+    } : activeTab === 'insurance'? {
       label: 'Nuevo Seguro',
       icon: Plus,
       onClick: () => openModal('insurance', { 
@@ -238,7 +223,6 @@ export default function PersonnelPage() {
     } : undefined,
     actions: getPeriodSelector()
   }
-
   return (
     <Layout headerProps={headerProps} wide={false}>
       <div className="space-y-6 max-w-full min-w-0 overflow-x-hidden">
@@ -259,7 +243,7 @@ export default function PersonnelPage() {
           />
         )}
         
-        {activeTab === 'dashboard' && (
+        {activeTab === 'dashboard'&& (
           <PersonnelDashboardView
             projectId={selectedProjectId || undefined}
             onNavigateToPayments={() => setActiveTab('payments')}
@@ -269,8 +253,8 @@ export default function PersonnelPage() {
               else if (tab === 'attendance') setActiveTab('attendance')
             }}
             onScrollToPanel={(panelId) => {
-              const element = document.querySelector(`[data-testid="chart-${panelId === 'monthlyChart' ? 'monthly-trend' : panelId}"]`)
-              element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              const element = document.querySelector(`[data-testid="chart-${panelId === 'monthlyChart'? 'monthly-trend': panelId}"]`)
+              element?.scrollIntoView({ behavior: 'smooth', block: 'center'})
             }}
             selectedPeriod={validSelectedPeriod}
             dismissedIssueIds={dismissedIssueIds}
@@ -279,16 +263,14 @@ export default function PersonnelPage() {
             }}
           />
         )}
-
-        {activeTab === 'active' && (
+        {activeTab === 'active'&& (
           <PersonnelListView
             openModal={openModal}
             insuranceData={insuranceData}
             selectedProjectId={selectedProjectId}
           />
         )}
-
-        {activeTab === 'payments' && (
+        {activeTab === 'payments'&& (
           <PersonnelPaymentsView
             projectId={selectedProjectId || undefined}
             externalFilterIssueId={activeFilterIssueId}
@@ -296,16 +278,14 @@ export default function PersonnelPage() {
             getAffectedIdsForIssue={getAffectedIdsForIssue}
           />
         )}
-
-        {activeTab === 'attendance' && (
+        {activeTab === 'attendance'&& (
           <PersonnelAttendanceView
             openModal={openModal}
             selectedProjectId={selectedProjectId}
             currentOrganizationId={currentOrganizationId}
           />
         )}
-
-        {activeTab === 'insurance' && <InsuranceTab />}
+        {activeTab === 'insurance'&& <InsuranceTab />}
       </div>
     </Layout>
   )

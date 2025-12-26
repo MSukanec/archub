@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import { type ReactElement, cloneElement, isValidElement } from "react";
-
 interface SidebarIconButtonProps {
   icon: ReactElement;
   isActive?: boolean;
@@ -10,7 +9,6 @@ interface SidebarIconButtonProps {
   testId?: string;
   className?: string;
 }
-
 export function SidebarIconButton({
   icon,
   isActive = false,
@@ -29,7 +27,6 @@ export function SidebarIconButton({
         ),
       } as any)
     : icon;
-
   return (
     <button
       onClick={onClick}
@@ -49,9 +46,9 @@ export function SidebarIconButton({
       {badge !== undefined && badge > 0 && (
         <span 
           className="absolute -top-1 -right-1 h-4 min-w-[16px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold text-white border-0"
-          style={{ backgroundColor: 'var(--accent)' }}
+          style={{ backgroundColor: 'var(--accent)'}}
         >
-          {badge > 99 ? '99+' : badge}
+          {badge > 99 ? '99+': badge}
         </span>
       )}
     </button>

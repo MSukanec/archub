@@ -6,11 +6,9 @@ import { useGlobalModalStore } from '@/components/modal';
 import { HierarchicalTree } from '@/components/shared/trees/HierarchicalTree';
 import { Inbox } from 'lucide-react';
 import type { ForumCategory } from '@/features/forum/services';
-
 interface AdminCourseForumTabProps {
   courseId: string;
 }
-
 interface CategoryTreeNode {
   id: string;
   name: string;
@@ -21,13 +19,11 @@ interface CategoryTreeNode {
   description?: string | null;
   icon?: string | null;
 }
-
 export default function AdminCourseForumTab({ courseId }: AdminCourseForumTabProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { openModal } = useGlobalModalStore();
   const [expandedCategories] = useState<Set<string>>(new Set());
-
   const { data: categories = [], isLoading } = useQuery<ForumCategory[]>({
     queryKey: ['/api/forum/courses', courseId, 'categories'],
     queryFn: async () => {
@@ -37,7 +33,6 @@ export default function AdminCourseForumTab({ courseId }: AdminCourseForumTabPro
     },
     enabled: !!courseId,
   });
-
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const res = await apiRequest('DELETE', `/api/forum/categories/${id}`);
@@ -49,13 +44,12 @@ export default function AdminCourseForumTab({ courseId }: AdminCourseForumTabPro
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/forum/courses', courseId, 'categories'] });
-      toast({ title: 'Categoría eliminada', description: 'La categoría se ha eliminado correctamente' });
+      toast({ title: 'Categoría eliminada', description: 'La categoría se ha eliminado correctamente'});
     },
     onError: (error: any) => {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: 'Error', description: error.message, variant: 'destructive'});
     },
   });
-
   const reorderMutation = useMutation({
     mutationFn: async (orderedIds: string[]) => {
       const res = await apiRequest('POST', `/api/forum/courses/${courseId}/categories/reorder`, { orderedIds });
@@ -67,20 +61,18 @@ export default function AdminCourseForumTab({ courseId }: AdminCourseForumTabPro
     },
     onSuccess: () => {
       queryClient.refetchQueries({ queryKey: ['/api/forum/courses', courseId, 'categories'] });
-      toast({ title: 'Orden actualizado', description: 'El orden de las categorías se ha guardado' });
+      toast({ title: 'Orden actualizado', description: 'El orden de las categorías se ha guardado'});
     },
     onError: (error: any) => {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: 'Error', description: error.message, variant: 'destructive'});
     },
   });
-
   const handleEdit = (category: CategoryTreeNode) => {
     const originalCategory = categories.find(c => c.id === category.id);
     if (originalCategory) {
-      openModal('course-forum-category', { courseId, category: originalCategory, mode: 'edit' });
+      openModal('course-forum-category', { courseId, category: originalCategory, mode: 'edit'});
     }
   };
-
   const handleDelete = (categoryId: string) => {
     const category = categories.find(c => c.id === categoryId);
     if (category) {
@@ -93,12 +85,10 @@ export default function AdminCourseForumTab({ courseId }: AdminCourseForumTabPro
       });
     }
   };
-
   const handleReorder = (reorderedItems: CategoryTreeNode[]) => {
     const orderedIds = reorderedItems.map(item => item.id);
     reorderMutation.mutate(orderedIds);
   };
-
   const treeCategories: CategoryTreeNode[] = categories.map((cat, index) => ({
     id: cat.id,
     name: cat.name,
@@ -108,7 +98,6 @@ export default function AdminCourseForumTab({ courseId }: AdminCourseForumTabPro
     description: cat.description,
     icon: cat.icon,
   }));
-
   if (isLoading) {
     return (
       <div className="p-6" data-testid="admin-course-forum-tab">
@@ -120,7 +109,6 @@ export default function AdminCourseForumTab({ courseId }: AdminCourseForumTabPro
       </div>
     );
   }
-
   if (categories.length === 0) {
     return (
       <div className="p-6" data-testid="admin-course-forum-tab">
@@ -134,7 +122,6 @@ export default function AdminCourseForumTab({ courseId }: AdminCourseForumTabPro
       </div>
     );
   }
-
   return (
     <div className="p-6" data-testid="admin-course-forum-tab">
       <HierarchicalTree

@@ -3,7 +3,6 @@ import { LabToolbar } from './components/topbar/LabToolbar';
 import { LabDrawer } from './components/drawer/LabDrawer';
 import { useLabDrawerStore } from './stores/useLabDrawerStore';
 import type { PageTab } from './components/topbar/MegaMenu';
-
 interface LabLayoutProps {
   children: React.ReactNode;
   showToolbar?: boolean;
@@ -25,11 +24,10 @@ interface LabLayoutProps {
   drawerContent?: React.ReactNode;
   drawerTitle?: string;
   drawerSubtitle?: string;
-  drawerWidth?: 'sm' | 'md' | 'lg' | 'xl';
+  drawerWidth?: 'sm'| 'md'| 'lg'| 'xl';
   isDrawerOpen?: boolean;
   onDrawerClose?: () => void;
 }
-
 function LabLayoutInner({ 
   children, 
   showToolbar = true,
@@ -56,7 +54,6 @@ function LabLayoutInner({
   const currentDrawerTitle = drawerTitle || drawer.title;
   const currentDrawerSubtitle = drawerSubtitle || drawer.subtitle;
   const currentDrawerWidth = drawerWidth || drawer.width;
-
   return (
     <div className="h-full w-full flex flex-col overflow-hidden bg-background">
       {showToolbar && (
@@ -92,7 +89,6 @@ function LabLayoutInner({
     </div>
   );
 }
-
 export function LabLayout(props: LabLayoutProps) {
   return (
     <LabProvider>
@@ -100,5 +96,4 @@ export function LabLayout(props: LabLayoutProps) {
     </LabProvider>
   );
 }
-
 export default LabLayout;

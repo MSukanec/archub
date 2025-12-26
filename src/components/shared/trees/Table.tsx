@@ -39,14 +39,11 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Tabs } from "@/components/shared/Tabs";
-
 type SortDirection = "asc" | "desc" | null;
-
 interface ProjectBadgeProps {
   projectId: string | null;
   projectsMap: Record<string, { id: string; name: string; color: string | null }>;
 }
-
 export function ProjectBadge({ projectId, projectsMap }: ProjectBadgeProps) {
   if (!projectId) {
     return (
@@ -64,7 +61,6 @@ export function ProjectBadge({ projectId, projectsMap }: ProjectBadgeProps) {
       </Badge>
     );
   }
-
   const project = projectsMap[projectId];
   
   if (!project) {
@@ -83,7 +79,6 @@ export function ProjectBadge({ projectId, projectsMap }: ProjectBadgeProps) {
       </Badge>
     );
   }
-
   // Determinar el color del badge
   const backgroundColor = project.color || '#000000';
   
@@ -91,7 +86,6 @@ export function ProjectBadge({ projectId, projectsMap }: ProjectBadgeProps) {
   const displayName = project.name.length > 15 
     ? `${project.name.substring(0, 12)}...` 
     : project.name;
-
   return (
     <Badge 
       variant="secondary"
@@ -108,7 +102,6 @@ export function ProjectBadge({ projectId, projectsMap }: ProjectBadgeProps) {
     </Badge>
   );
 }
-
 interface TableProps<T = any> {
   columns: {
     key: keyof T | string;
@@ -118,7 +111,7 @@ interface TableProps<T = any> {
     sortType?: "string" | "number" | "date";
     width?: string; // Nuevo: ancho personalizado (ej: "10%", "100px", etc.)
     cellClassName?: string; // Nuevo: clases CSS personalizadas para las celdas de esta columna
-    align?: 'left' | 'center' | 'right'; // Nuevo: alineación de header y contenido
+    align?: 'left'| 'center'| 'right'; // Nuevo: alineación de header y contenido
   }[];
   data: T[];
   emptyState?: React.ReactNode; // DEPRECATED: Usar emptyStateConfig en su lugar
@@ -224,7 +217,7 @@ interface TableProps<T = any> {
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     onClick: () => void;
-    variant?: 'default' | 'destructive';
+    variant?: 'default'| 'destructive';
   }>;
   // 🆕 ACCIÓN PRINCIPAL INLINE (botón que aparece antes del menú de tres puntos)
   primaryRowAction?: (item: T) => {
@@ -242,7 +235,6 @@ interface TableProps<T = any> {
   inactiveSeparatorLabel?: string;
   showInactiveSeparator?: boolean;
 }
-
 export function Table<T = any>({
   columns,
   data,
@@ -361,7 +353,6 @@ export function Table<T = any>({
       </Button>
     );
   };
-
   /**
    * 🔧 HELPER PARA CREAR POPOVERS ESTÁNDAR
    * Crea la estructura estándar de un popover con título y botones
@@ -381,7 +372,6 @@ export function Table<T = any>({
       </>
     );
   };
-
   // Renderizado de contenido de filtros por defecto
   const defaultFilterContent = () => {
     return (
@@ -402,15 +392,13 @@ export function Table<T = any>({
   const defaultGroupingContent = () => {
     // Si se proporcionan opciones personalizadas, úsalas; si no, usa la opción por defecto
     const groupingOptions = topBar?.groupingOptions || [
-      { value: 'none', label: 'Sin agrupar' }
+      { value: 'none', label: 'Sin agrupar'}
     ];
     
     const currentValue = topBar?.currentGrouping || 'none';
     const onChange = topBar?.onGroupingChange || (() => {});
-
     return createStandardPopover("Agrupar por", groupingOptions, currentValue, onChange);
   };
-
   // Renderizado de contenido de exportación por defecto
   const defaultExportContent = () => {
     const exportOptions = [
@@ -427,7 +415,6 @@ export function Table<T = any>({
         onClick: topBar?.onExportPDF
       }
     ];
-
     return (
       <>
         <div className="text-xs font-medium mb-2 block">Exportar como</div>
@@ -452,14 +439,12 @@ export function Table<T = any>({
       </>
     );
   };
-
   // Handler interno para búsqueda del TopBar
   const handleTopBarSearchChange = (value: string) => {
     setSearchInputValue(value);
     const onChangeHandler = topBar?.onSearchChange ?? handleSearchChange;
     onChangeHandler?.(value);
   };
-
   // Función para renderizar el TopBar integrado
   const renderTopBar = () => {
     const tabs = topBar?.tabs || [];
@@ -472,7 +457,6 @@ export function Table<T = any>({
     const hasContent = tabs.length > 0 || showSearch || showFilter || showSort || showClearFilters || topBar?.leftModeButtons?.options.length || true; // Siempre true porque los botones de agrupación y exportación siempre están presentes
     
     if (!hasContent) return null;
-
     return (
       <div className="hidden lg:block border-b border-[var(--card-border)] bg-[var(--card-bg)] relative overflow-hidden">
         <AnimatePresence mode="wait">
@@ -491,7 +475,7 @@ export function Table<T = any>({
                 <div className="flex items-center gap-2">
                   <CheckSquare className="h-4 w-4 text-primary" />
                   <span className="text-sm font-medium">
-                    {selectedItems.length} {selectedItems.length === 1 ? 'seleccionado' : 'seleccionados'}
+                    {selectedItems.length} {selectedItems.length === 1 ? 'seleccionado': 'seleccionados'}
                   </span>
                 </div>
                 <Button
@@ -504,7 +488,6 @@ export function Table<T = any>({
                   Deseleccionar
                 </Button>
               </div>
-
               {/* Lado derecho - Bulk Actions */}
               <div className="flex items-center gap-1">
                 {topBar?.bulkActions?.customActions}
@@ -554,7 +537,6 @@ export function Table<T = any>({
                     onValueChange={topBar.tabsConfig.onValueChange}
                   />
                 )}
-
                 {/* LEGACY: Botones de modo - mantener por compatibilidad */}
                 {!topBar?.tabsConfig && topBar?.leftModeButtons && (
                   <div className="flex items-center gap-1">
@@ -597,7 +579,6 @@ export function Table<T = any>({
                   </div>
                 )}
               </div>
-
           {/* Lado derecho - Búsqueda, Orden, Filtros */}
           <div className="flex items-center gap-1">
             {/* Buscador */}
@@ -629,7 +610,6 @@ export function Table<T = any>({
                 <Search className="h-4 w-4 text-[var(--muted-foreground)] shrink-0" />
               </div>
             )}
-
             {/* Botón de ordenamiento */}
             {showSort && topBar?.renderSortContent && (
               <Popover>
@@ -654,7 +634,6 @@ export function Table<T = any>({
                 </PopoverContent>
               </Popover>
             )}
-
             {/* Botón de filtros - Solo mostrar si hay renderFilterContent configurado */}
             {showFilter && topBar?.renderFilterContent && (
               <Popover>
@@ -693,7 +672,6 @@ export function Table<T = any>({
                 </PopoverContent>
               </Popover>
             )}
-
             {/* Botón de agrupación - Solo visible si showGrouping está habilitado */}
             {topBar?.groupingOptions && topBar.groupingOptions.length > 0 && (
               <Popover>
@@ -718,7 +696,6 @@ export function Table<T = any>({
                 </PopoverContent>
               </Popover>
             )}
-
             {/* Botón de importar */}
             {topBar?.showImport && (
               <Button
@@ -732,7 +709,6 @@ export function Table<T = any>({
                 <span className="text-xs">Importar</span>
               </Button>
             )}
-
             {/* Botón de exportar - Solo visible si showExport está habilitado */}
             {topBar?.showExport && (
               <Popover>
@@ -751,7 +727,6 @@ export function Table<T = any>({
                 </PopoverContent>
               </Popover>
             )}
-
             {/* Acciones personalizadas */}
             {topBar?.customActions}
           </div>
@@ -761,7 +736,6 @@ export function Table<T = any>({
       </div>
     );
   };
-
   // Helper function to handle sort logic
   const handleSort = (
     key: string,
@@ -777,32 +751,25 @@ export function Table<T = any>({
       setSortKey(key);
       setSortDirection("asc");
     }
-
     if (sortDirection === null) {
       setSortKey(null);
     }
   };
-
   // 🆕 AGRUPAMIENTO DE DATOS CON SOPORTE PARA ELEMENTOS INACTIVOS
   const groupedData = useMemo(() => {
     // Helper: Función para ordenar un array de datos
     const sortData = (dataToSort: T[]) => {
       if (!sortKey || !sortDirection) return dataToSort;
-
       return [...dataToSort].sort((a, b) => {
         const column = columns.find((col) => col.key === sortKey);
         const sortType = column?.sortType || "string";
-
         const aValue = a[sortKey as keyof T];
         const bValue = b[sortKey as keyof T];
-
         // Handle null/undefined values
         if (aValue == null && bValue == null) return 0;
         if (aValue == null) return sortDirection === "asc" ? -1 : 1;
         if (bValue == null) return sortDirection === "asc" ? 1 : -1;
-
         let comparison = 0;
-
         switch (sortType) {
           case "number":
             comparison = (Number(aValue) || 0) - (Number(bValue) || 0);
@@ -825,11 +792,9 @@ export function Table<T = any>({
             comparison = String(aValue).localeCompare(String(bValue));
             break;
         }
-
         return sortDirection === "asc" ? comparison : -comparison;
       });
     };
-
     // 🆕 Si hay función getIsInactive, separar activos e inactivos
     let sortedData: T[];
     if (getIsInactive) {
@@ -846,12 +811,10 @@ export function Table<T = any>({
       // Comportamiento normal si no hay separación de inactivos
       sortedData = sortData(filteredData);
     }
-
     // Si no hay agrupamiento, devolver los datos como un solo grupo
     if (!groupBy) {
       return { 'all': sortedData };
     }
-
     // Agrupar datos por la clave especificada
     const grouped = sortedData.reduce((acc, item) => {
       const groupKey = String(item[groupBy as keyof T] || 'Sin grupo');
@@ -861,15 +824,12 @@ export function Table<T = any>({
       acc[groupKey].push(item);
       return acc;
     }, {} as Record<string, T[]>);
-
     return grouped;
   }, [filteredData, sortKey, sortDirection, columns, groupBy, getIsInactive]);
-
   // Aplanar datos agrupados para paginación
   const flattenedData = useMemo(() => {
     return Object.values(groupedData).flat();
   }, [groupedData]);
-
   // Pagination - usando flattenedData en lugar de sortedData
   const totalPages = Math.ceil(flattenedData.length / itemsPerPage);
   const paginatedData = showPagination
@@ -878,16 +838,13 @@ export function Table<T = any>({
         currentPage * itemsPerPage,
       )
     : flattenedData;
-
   const isItemSelected = (item: T) => {
     return selectedItems.some(
       (selectedItem) => getItemId(selectedItem) === getItemId(item),
     );
   };
-
   const handleSelectItem = (item: T, checked: boolean) => {
     if (!onSelectionChange) return;
-
     if (checked) {
       onSelectionChange([...selectedItems, item]);
     } else {
@@ -898,10 +855,8 @@ export function Table<T = any>({
       );
     }
   };
-
   const handleSelectAll = (checked: boolean) => {
     if (!onSelectionChange) return;
-
     if (checked) {
       // Add all items from current page to selection
       const newSelectedItems = [...selectedItems];
@@ -922,7 +877,6 @@ export function Table<T = any>({
       onSelectionChange(filteredSelection);
     }
   };
-
   const getGridTemplateColumns = () => {
     // Check if all columns have the same width
     const widths = columns.map(col => col.width || "minmax(0, 1fr)");
@@ -943,7 +897,6 @@ export function Table<T = any>({
       hasActions ? "40px" : ""
     ].filter(Boolean).join(" ");
   };
-
   // Function to get sort icon for column header
   const getSortIcon = (key: string) => {
     if (sortKey !== key)
@@ -954,7 +907,6 @@ export function Table<T = any>({
       return <ChevronDown className="ml-1 h-3 w-3 text-accent" />;
     return <ArrowUpDown className="ml-1 h-3 w-3 text-accent" />;
   };
-
   // Handle the special case for numbers with thousands formatting (accounting for TypeScript strict mode)
   const formatSortableValue = (key: string, value: any): any => {
     const column = columns.find((col) => col.key === key);
@@ -969,7 +921,6 @@ export function Table<T = any>({
     }
     return value;
   };
-
   if (isLoading) {
     return (
       <div className={cn("space-y-3", className)}>
@@ -998,7 +949,6 @@ export function Table<T = any>({
             </div>
           ))}
         </div>
-
         {/* Mobile loading skeleton */}
         <div className="lg:hidden">
           {Array.from({ length: 3 }).map((_, index) => (
@@ -1017,12 +967,10 @@ export function Table<T = any>({
       </div>
     );
   }
-
   // Diferenciamos entre "sin datos originales" y "sin resultados de búsqueda"
   const hasOriginalData = data.length > 0;
   const hasFilteredData = filteredData.length > 0;
   const hasActiveSearch = searchValue.length > 0;
-
   return (
     <div className={cn("space-y-3", className)}>
       {/* Desktop Table View */}
@@ -1072,8 +1020,8 @@ export function Table<T = any>({
           )}
           {columns.map((column) => {
             const isNumericColumn = column.sortType === "number";
-            const alignment = column.align || (isNumericColumn ? 'right' : 'left');
-            const justifyClass = alignment === 'right' ? 'justify-end' : alignment === 'center' ? 'justify-center' : 'justify-start';
+            const alignment = column.align || (isNumericColumn ? 'right': 'left');
+            const justifyClass = alignment === 'right'? 'justify-end': alignment === 'center'? 'justify-center': 'justify-start';
             
             return (
               <button
@@ -1081,9 +1029,9 @@ export function Table<T = any>({
                 className={cn(
                   "flex items-center transition-colors hover:text-accent",
                   justifyClass,
-                  alignment === 'left' && "text-left",
-                  alignment === 'center' && "text-center",
-                  alignment === 'right' && "text-right",
+                  alignment === 'left'&& "text-left",
+                  alignment === 'center'&& "text-center",
+                  alignment === 'right'&& "text-right",
                   column.sortable !== false && "cursor-pointer",
                 )}
                 onClick={() =>
@@ -1099,7 +1047,6 @@ export function Table<T = any>({
           })}
           {rowActions && <div></div>}
         </div>
-
         {/* Table Rows con agrupamiento */}
         <div>
           {!hasOriginalData ? (
@@ -1189,8 +1136,8 @@ export function Table<T = any>({
                     )}
                     {columns.map((column) => {
                       const isNumericColumn = column.sortType === "number";
-                      const alignment = column.align || (isNumericColumn ? 'right' : 'left');
-                      const justifyClass = alignment === 'right' ? 'justify-end' : alignment === 'center' ? 'justify-center' : 'justify-start';
+                      const alignment = column.align || (isNumericColumn ? 'right': 'left');
+                      const justifyClass = alignment === 'right'? 'justify-end': alignment === 'center'? 'justify-center': 'justify-start';
                       
                       return (
                         <div
@@ -1313,7 +1260,6 @@ export function Table<T = any>({
               const prevItem = index > 0 ? paginatedData[index - 1] : null;
               const prevIsInactive = prevItem && getIsInactive ? getIsInactive(prevItem) : false;
               const showSeparator = getIsInactive && showInactiveSeparator && !prevIsInactive && isInactive;
-
               return (
                 <Fragment key={getItemId(item)}>
                   {/* Separador visual entre activos e inactivos */}
@@ -1354,8 +1300,8 @@ export function Table<T = any>({
                 )}
                 {columns.map((column) => {
                   const isNumericColumn = column.sortType === "number";
-                  const alignment = column.align || (isNumericColumn ? 'right' : 'left');
-                  const justifyClass = alignment === 'right' ? 'justify-end' : alignment === 'center' ? 'justify-center' : 'justify-start';
+                  const alignment = column.align || (isNumericColumn ? 'right': 'left');
+                  const justifyClass = alignment === 'right'? 'justify-end': alignment === 'center'? 'justify-center': 'justify-start';
                   
                   return (
                     <div
@@ -1487,7 +1433,6 @@ export function Table<T = any>({
           )}
         </div>
       </div>
-
       {/* Mobile Card View */}
       <div className="lg:hidden">
         {!hasOriginalData ? (
@@ -1620,7 +1565,6 @@ export function Table<T = any>({
                     const value = column.render
                       ? column.render(item)
                       : String(item[column.key as keyof T] || "-");
-
                     return (
                       <div
                         key={String(column.key)}
@@ -1643,7 +1587,6 @@ export function Table<T = any>({
                       const value = column.render
                         ? column.render(item)
                         : String(item[column.key as keyof T] || "-");
-
                       return (
                         <div
                           key={String(column.key)}
@@ -1665,7 +1608,6 @@ export function Table<T = any>({
           )
         )}
       </div>
-
       {/* Pagination Controls */}
       {showPagination && (
         <div className="mt-4 pt-4 border-t border-[var(--table-border)]">
@@ -1688,7 +1630,6 @@ export function Table<T = any>({
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-
               {/* Page Number Buttons */}
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                 (pageNum) => {
@@ -1697,7 +1638,6 @@ export function Table<T = any>({
                     pageNum === 1 ||
                     pageNum === totalPages ||
                     Math.abs(pageNum - currentPage) <= 1;
-
                   if (
                     !isVisible &&
                     pageNum !== 2 &&
@@ -1719,7 +1659,6 @@ export function Table<T = any>({
                     }
                     return null;
                   }
-
                   return (
                     <Button
                       key={pageNum}
@@ -1733,7 +1672,6 @@ export function Table<T = any>({
                   );
                 },
               )}
-
               <Button
                 variant="outline"
                 size="sm"
@@ -1751,5 +1689,4 @@ export function Table<T = any>({
     </div>
   );
 }
-
 export default Table;

@@ -18,16 +18,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Package2, Plus } from 'lucide-react';
 import { useMovementConceptsAdmin } from '@/hooks/use-movement-concepts-admin';
-
 const conceptSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   parent_id: z.string().optional(),
   is_system: z.boolean().default(true),
 });
-
 type ConceptFormData = z.infer<typeof conceptSchema>;
-
 interface MovementConceptFormModalProps {
   modalData?: {
     editingConcept?: any;
@@ -40,7 +37,6 @@ interface MovementConceptFormModalProps {
   };
   onClose: () => void;
 }
-
 export default function MovementConceptFormModal({ modalData, onClose }: MovementConceptFormModalProps) {
   const editingConcept = modalData?.editingConcept;
   const parentConcept = modalData?.parentConcept;
@@ -50,10 +46,8 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
   const { currentPanel, setPanel } = useModalPanelStore();
   const { closeModal } = useGlobalModalStore();
   const [isLoading, setIsLoading] = useState(false);
-
   // Query for parent concepts
   const { data: concepts = [] } = useMovementConceptsAdmin();
-
   const form = useForm<ConceptFormData>({
     resolver: zodResolver(conceptSchema),
     defaultValues: {
@@ -63,12 +57,10 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
       is_system: true, // Siempre true para admin
     },
   });
-
   // Always show edit panel for both creating and editing
   React.useEffect(() => {
     setPanel('edit');
   }, [setPanel]);
-
   // Reset form when editing concept changes
   React.useEffect(() => {
     if (editingConcept) {
@@ -80,7 +72,6 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
       });
     }
   }, [editingConcept, form]);
-
   const createConceptMutation = useMutation({
     mutationFn: async (conceptData: ConceptFormData) => {
       const { data, error } = await supabase
@@ -93,7 +84,6 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
           organization_id: conceptData.is_system ? null : userData?.preferences?.last_organization_id,
         }])
         .select();
-
       if (error) throw error;
       return data;
     },
@@ -113,11 +103,9 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
       });
     },
   });
-
   const updateConceptMutation = useMutation({
     mutationFn: async (conceptData: ConceptFormData) => {
       if (!editingConcept?.id) throw new Error('No concept to update');
-
       const { data, error } = await supabase
         .from('movement_concepts')
         .update({
@@ -128,7 +116,6 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
         })
         .eq('id', editingConcept.id)
         .select();
-
       if (error) throw error;
       return data;
     },
@@ -148,13 +135,11 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
       });
     },
   });
-
   const handleClose = () => {
     form.reset();
     setPanel('view');
     closeModal();
   };
-
   const handleSubmit = async (data: ConceptFormData) => {
     setIsLoading(true);
     try {
@@ -167,7 +152,6 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
       setIsLoading(false);
     }
   };
-
   // Get flat list of concepts for parent selection
   const getParentOptions = (concepts: any[], level = 0): Array<{ id: string; name: string; level: number }> => {
     const options: Array<{ id: string; name: string; level: number }> = [];
@@ -189,9 +173,7 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
     
     return options;
   };
-
   const parentOptions = getParentOptions(concepts);
-
   const editPanel = (
     <FormModalBody columns={1}>
       <Form {...form}>
@@ -212,7 +194,6 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="parent_id"
@@ -240,7 +221,6 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="description"
@@ -257,16 +237,14 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
             </FormItem>
           )}
         />
-
         </form>
       </Form>
     </FormModalBody>
   );
-
   const headerContent = (
     <FormModalHeader
       title={editingConcept 
-        ? 'Editar Concepto de Movimiento' 
+        ? 'Editar Concepto de Movimiento'
         : parentConcept 
           ? `Nuevo Concepto Hijo de "${parentConcept.name}"` 
           : 'Nuevo Concepto de Movimiento'}
@@ -278,17 +256,15 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
       icon={editingConcept ? Package2 : Plus}
     />
   );
-
   const footerContent = (
     <FormModalFooter
       cancelText="Cancelar"
-      submitText={editingConcept ? 'Actualizar' : 'Crear'}
+      submitText={editingConcept ? 'Actualizar': 'Crear'}
       onLeftClick={handleClose}
       onSubmit={form.handleSubmit(handleSubmit)}
       showLoadingSpinner={isLoading}
     />
   );
-
   const viewPanel = editingConcept ? (
     <div className="space-y-4">
       <div>
@@ -301,11 +277,10 @@ export default function MovementConceptFormModal({ modalData, onClose }: Movemen
       </div>
       <div>
         <h4 className="font-medium">Tipo</h4>
-        <p className="text-muted-foreground mt-1">{editingConcept?.is_system ? 'Sistema' : 'Usuario'}</p>
+        <p className="text-muted-foreground mt-1">{editingConcept?.is_system ? 'Sistema': 'Usuario'}</p>
       </div>
     </div>
   ) : null;
-
   return (
     <FormModalLayout
       columns={1}

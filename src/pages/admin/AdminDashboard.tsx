@@ -3,7 +3,9 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/shared/AppCard';
+import { ActivityCard } from '@/components';
+import { InsightCard
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -21,15 +23,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-
-type DateRange = 'today' | '7days' | '30days'
-
+type DateRange = 'today'| '7days'| '30days'
 const DATE_RANGE_OPTIONS = [
-  { value: 'today', label: 'Hoy' },
-  { value: '7days', label: '7 días' },
-  { value: '30days', label: '30 días' },
+  { value: 'today', label: 'Hoy'},
+  { value: '7days', label: '7 días'},
+  { value: '30days', label: '30 días'},
 ]
-
 function formatViewName(view: string | null): string {
   if (!view) return 'Sin ubicación';
   
@@ -70,9 +69,8 @@ function formatViewName(view: string | null): string {
     'pricing': 'Planes',
   };
   
-  return viewMap[view] || view.replace(/_/g, ' ');
+  return viewMap[view] || view.replace(/_/g, '');
 }
-
 function formatDuration(seconds: number): string {
   if (seconds < 60) {
     return `${Math.round(seconds)}s`;
@@ -88,14 +86,12 @@ function formatDuration(seconds: number): string {
   
   return secs > 0 ? `${minutes}m ${secs}s` : `${minutes}m`;
 }
-
 function formatDurationHHMM(seconds: number): string {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 }
-
 export default function AdminDashboard() {
   const [dateRange, setDateRange] = useState<DateRange>('7days');
   const [accentColor, setAccentColor] = useState<string>('#8b5cf6');
@@ -126,7 +122,6 @@ export default function AdminDashboard() {
         return subDays(now, 7);
     }
   };
-
   const { data: kpiData, isLoading: loadingKPI } = useQuery({
     queryKey: ['admin-analytics-kpi', dateRange],
     queryFn: async () => {
@@ -177,7 +172,6 @@ export default function AdminDashboard() {
     enabled: !!supabase,
     refetchInterval: 30000
   });
-
   const { data: engagementData, isLoading: loadingEngagement } = useQuery({
     queryKey: ['admin-analytics-engagement', dateRange],
     queryFn: async () => {
@@ -214,7 +208,6 @@ export default function AdminDashboard() {
     },
     enabled: !!supabase
   });
-
   const { data: topUsersData, isLoading: loadingTopUsers } = useQuery({
     queryKey: ['admin-analytics-top-users', dateRange],
     queryFn: async () => {
@@ -290,7 +283,6 @@ export default function AdminDashboard() {
     },
     enabled: !!supabase
   });
-
   const { data: dropoffData, isLoading: loadingDropoff } = useQuery({
     queryKey: ['admin-analytics-dropoff', dateRange],
     queryFn: async () => {
@@ -332,7 +324,6 @@ export default function AdminDashboard() {
     },
     enabled: !!supabase
   });
-
   const { data: hourlyData, isLoading: loadingHourly } = useQuery({
     queryKey: ['admin-analytics-hourly', dateRange],
     queryFn: async () => {
@@ -362,7 +353,6 @@ export default function AdminDashboard() {
     },
     enabled: !!supabase
   });
-
   const renderView = () => (
     <div className="space-y-6">
       {!isLabLayout && (
@@ -374,7 +364,6 @@ export default function AdminDashboard() {
           />
         </div>
       )}
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {loadingKPI ? (
           <>
@@ -397,7 +386,6 @@ export default function AdminDashboard() {
               </StatCardValue>
               <StatCardMeta>En los últimos 90 segundos</StatCardMeta>
             </StatCard>
-
             <StatCard data-testid="card-sessions-today">
               <StatCardTitle showArrow={false}>
                 <div className="flex items-center gap-2">
@@ -410,7 +398,6 @@ export default function AdminDashboard() {
               </StatCardValue>
               <StatCardMeta>Total de vistas iniciadas</StatCardMeta>
             </StatCard>
-
             <StatCard data-testid="card-avg-session">
               <StatCardTitle showArrow={false}>
                 <div className="flex items-center gap-2">
@@ -423,7 +410,6 @@ export default function AdminDashboard() {
               </StatCardValue>
               <StatCardMeta>Por sesión hoy</StatCardMeta>
             </StatCard>
-
             <StatCard data-testid="card-total-users">
               <StatCardTitle showArrow={false}>
                 <div className="flex items-center gap-2">
@@ -439,13 +425,12 @@ export default function AdminDashboard() {
           </>
         )}
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card data-testid="card-engagement">
           <CardHeader>
             <CardTitle>Engagement por Vista</CardTitle>
             <CardDescription>
-              Tiempo promedio en cada sección (últimos {dateRange === 'today' ? 'hoy' : dateRange === '7days' ? '7 días' : '30 días'})
+              Tiempo promedio en cada sección (últimos {dateRange === 'today'? 'hoy': dateRange === '7days'? '7 días': '30 días'})
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -464,7 +449,7 @@ export default function AdminDashboard() {
                   />
                   <Tooltip 
                     formatter={(value: any) => formatDuration(value * 60)}
-                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                    labelStyle={{ color: 'hsl(var(--foreground))'}}
                     contentStyle={{ 
                       backgroundColor: 'hsl(var(--background))',
                       border: '1px solid hsl(var(--border))',
@@ -481,7 +466,6 @@ export default function AdminDashboard() {
             )}
           </CardContent>
         </Card>
-
         <Card data-testid="card-hourly-activity">
           <CardHeader>
             <CardTitle>Actividad por Hora del Día</CardTitle>
@@ -503,7 +487,7 @@ export default function AdminDashboard() {
                   />
                   <YAxis />
                   <Tooltip 
-                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                    labelStyle={{ color: 'hsl(var(--foreground))'}}
                     contentStyle={{ 
                       backgroundColor: 'hsl(var(--background))',
                       border: '1px solid hsl(var(--border))',
@@ -527,7 +511,6 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card data-testid="card-top-users">
           <CardHeader>
@@ -566,7 +549,7 @@ export default function AdminDashboard() {
                           <div className="flex flex-col">
                             <span className="font-medium">{user.full_name}</span>
                             <span className="text-xs text-muted-foreground">
-                              {user.status === 'online' ? '📍 ' : '⏸️ '}
+                              {user.status === 'online'? '📍 ': '⏸️ '}
                               {formatViewName(user.current_view ?? user.last_view_from_history ?? null)}
                             </span>
                           </div>
@@ -591,7 +574,6 @@ export default function AdminDashboard() {
             )}
           </CardContent>
         </Card>
-
         <Card data-testid="card-dropoff">
           <CardHeader>
             <CardTitle>Drop-off Analysis</CardTitle>
@@ -631,7 +613,6 @@ export default function AdminDashboard() {
       </div>
     </div>
   );
-
   const secondaryRightContent = (
     <div className="flex items-center gap-3">
       <DropdownMenu>
@@ -662,7 +643,6 @@ export default function AdminDashboard() {
       </DropdownMenu>
     </div>
   );
-
   if (isLabLayout) {
     return (
       <LabLayout 
@@ -675,7 +655,6 @@ export default function AdminDashboard() {
       </LabLayout>
     );
   }
-
   const headerProps = {
     title: "Analytics Dashboard",
     icon: BarChart3,
@@ -683,7 +662,6 @@ export default function AdminDashboard() {
     showSearch: false,
     showFilters: false,
   };
-
   return (
     <Layout wide headerProps={headerProps}>
       {renderView()}

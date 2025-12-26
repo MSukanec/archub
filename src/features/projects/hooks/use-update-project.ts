@@ -2,7 +2,6 @@ import { useOptimisticMutation } from '@/core/save-engine';
 import { updateProject } from '../services/updateProject';
 import { projectsKeys } from '@/core/query-keys';
 import type { UpdateProjectData } from '../types';
-
 export function useUpdateProject(organizationId: string | undefined) {
   return useOptimisticMutation({
     mutationFn: ({ projectId, data }: { projectId: string; data: UpdateProjectData }) => 

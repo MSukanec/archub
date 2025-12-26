@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-
 export interface GeneratedTask {
   id: string;
   code: string;
@@ -18,7 +17,6 @@ export interface GeneratedTask {
   created_at: string;
   updated_at: string;
 }
-
 // Interface for task materials
 export interface TaskMaterial {
   id: string
@@ -35,7 +33,6 @@ export interface TaskMaterial {
     }
   }
 }
-
 export function useGeneratedTasks() {
   return useQuery({
     queryKey: ['tasks-view'],
@@ -52,7 +49,6 @@ export function useGeneratedTasks() {
     }
   });
 }
-
 export function useGeneratedTask(taskId: string) {
   return useQuery({
     queryKey: ['tasks-view', taskId],
@@ -71,7 +67,6 @@ export function useGeneratedTask(taskId: string) {
     enabled: !!taskId
   });
 }
-
 // Hook para obtener el conteo de uso de tareas en construction_tasks
 export function useTaskUsageCount() {
   return useQuery({
@@ -98,11 +93,9 @@ export function useTaskUsageCount() {
     }
   });
 }
-
 export function useCreateGeneratedTask() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
   return useMutation({
     mutationFn: async (payload: {
       param_values: Record<string, any>;
@@ -249,11 +242,9 @@ export function useCreateGeneratedTask() {
     }
   });
 }
-
 export function useDeleteGeneratedTask() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
   return useMutation({
     mutationFn: async (taskId: string) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -292,7 +283,6 @@ export function useDeleteGeneratedTask() {
     }
   });
 }
-
 // Hook para obtener materiales de una tarea generada con precios de material_view
 export function useTaskMaterials(taskId: string | null) {
   return useQuery({
@@ -327,7 +317,6 @@ export function useTaskMaterials(taskId: string | null) {
     enabled: !!taskId && !!supabase
   });
 }
-
 // Hook para crear material de tarea
 export function useCreateTaskMaterial() {
   const queryClient = useQueryClient();
@@ -370,7 +359,6 @@ export function useCreateTaskMaterial() {
     }
   });
 }
-
 // Hook para eliminar material de tarea
 export function useDeleteTaskMaterial() {
   const queryClient = useQueryClient();
@@ -405,7 +393,6 @@ export function useDeleteTaskMaterial() {
     }
   });
 }
-
 // Hook para actualizar material de tarea
 export function useUpdateTaskMaterial() {
   const queryClient = useQueryClient();
@@ -442,12 +429,10 @@ export function useUpdateTaskMaterial() {
     }
   });
 }
-
 // Hook para actualizar tarea generada
 export function useUpdateGeneratedTask() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
   return useMutation({
     mutationFn: async (payload: {
       task_id: string;
@@ -510,12 +495,10 @@ export function useUpdateGeneratedTask() {
     }
   });
 }
-
 // Hook para crear labor de tarea
 export function useCreateTaskLabor() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
   return useMutation({
     mutationFn: async (payload: {
       task_id: string;
@@ -555,12 +538,10 @@ export function useCreateTaskLabor() {
     }
   });
 }
-
 // Hook para eliminar labor de tarea
 export function useDeleteTaskLabor() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
   return useMutation({
     mutationFn: async (laborId: string) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -593,5 +574,3 @@ export function useDeleteTaskLabor() {
     }
   });
 }
-
-

@@ -2,11 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { replaceClientRole } from '@/features/clients/services/clientRoles';
 import { CLIENT_QUERY_KEYS } from '@/features/clients/constants';
-
 export function useReplaceClientRole(organizationId: string | null) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
   return useMutation({
     mutationFn: ({ oldRoleId, newRoleId }: { oldRoleId: string; newRoleId: string }) =>
       replaceClientRole(oldRoleId, newRoleId),

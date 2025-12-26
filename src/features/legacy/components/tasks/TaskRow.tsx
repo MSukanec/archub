@@ -2,16 +2,14 @@ import DataRowCard, { DataRowCardProps } from '@/components/shared/DataRowCard';
 import { TaskCostPopover } from '@/features/legacy/components/tasks/TaskCostPopover';
 import TaskCostPerUnit from '@/components/shared/construction/TaskCostPerUnit';
 import TaskTotalSubtotal from '@/components/shared/construction/TaskTotalSubtotal';
-
 // Interface para la tarea de construcción
 interface TaskRowProps {
   task: any;
   onClick?: () => void;
   selected?: boolean;
-  density?: 'compact' | 'normal' | 'comfortable';
+  density?: 'compact'| 'normal'| 'comfortable';
   className?: string;
 }
-
 export default function TaskRow({
   task,
   onClick,
@@ -27,7 +25,6 @@ export default function TaskRow({
     density,
     className
   };
-
   return (
     <DataRowCard {...rowProps}>
       {/* DIV SUPERIOR - Información completa */}

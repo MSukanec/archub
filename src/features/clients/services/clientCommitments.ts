@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { ClientCommitment, ClientCommitmentWithRelations } from '../types';
-
 /**
  * Obtiene todos los compromisos de cliente de un proyecto con sus relaciones.
  * 
@@ -21,7 +20,6 @@ export async function getClientCommitments(
   if (!supabase || !organizationId || !projectId) {
     return [];
   }
-
   const { data: commitmentsData, error } = await supabase
     .from('client_commitments')
     .select(`
@@ -87,15 +85,12 @@ export async function getClientCommitments(
     .eq('is_deleted', false)
     .order('created_at', { ascending: false })
     .order('id', { ascending: false });
-
   if (error) {
     throw error;
   }
-
   if (!commitmentsData || commitmentsData.length === 0) {
     return [];
   }
-
   const data = commitmentsData.map(commitment => ({
     ...commitment,
     project_client: commitment.project_client ? {
@@ -109,10 +104,8 @@ export async function getClientCommitments(
     } : null,
     currency: commitment.currency || null,
   }));
-
   return data;
 }
-
 /**
  * Obtiene un compromiso de cliente específico por su ID.
  * 
@@ -133,7 +126,6 @@ export async function getClientCommitmentById(
   if (!supabase || !organizationId || !commitmentId) {
     return null;
   }
-
   const { data, error } = await supabase
     .from('client_commitments')
     .select(`
@@ -198,15 +190,12 @@ export async function getClientCommitmentById(
     .eq('organization_id', organizationId)
     .eq('is_deleted', false)
     .single();
-
   if (error) {
     throw error;
   }
-
   if (!data) {
     return null;
   }
-
   return {
     ...data,
     project_client: data.project_client ? {
@@ -221,7 +210,6 @@ export async function getClientCommitmentById(
     currency: data.currency || null,
   };
 }
-
 /**
  * Crea un nuevo compromiso de cliente.
  * 
@@ -233,7 +221,7 @@ export async function getClientCommitmentById(
  * @throws {Error} Si falla la creación
  */
 export async function createClientCommitment(
-  commitment: Omit<ClientCommitment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by' | 'is_deleted' | 'deleted_at'>,
+  commitment: Omit<ClientCommitment, 'id'| 'created_at'| 'updated_at'| 'project_id'| 'organization_id'| 'created_by'| 'is_deleted'| 'deleted_at'>,
   projectId: string,
   organizationId: string,
   createdBy: string
@@ -305,11 +293,9 @@ export async function createClientCommitment(
       )
     `)
     .single();
-
   if (error) {
     throw error;
   }
-
   return {
     ...data,
     project_client: data.project_client ? {
@@ -324,7 +310,6 @@ export async function createClientCommitment(
     currency: data.currency || null,
   };
 }
-
 /**
  * Actualiza un compromiso de cliente existente.
  * 
@@ -336,7 +321,7 @@ export async function createClientCommitment(
  */
 export async function updateClientCommitment(
   commitmentId: string,
-  updates: Partial<Omit<ClientCommitment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by' | 'is_deleted' | 'deleted_at'>>,
+  updates: Partial<Omit<ClientCommitment, 'id'| 'created_at'| 'updated_at'| 'project_id'| 'organization_id'| 'created_by'| 'is_deleted'| 'deleted_at'>>,
   organizationId: string
 ): Promise<ClientCommitmentWithRelations> {
   const { data, error } = await supabase
@@ -406,11 +391,9 @@ export async function updateClientCommitment(
       )
     `)
     .single();
-
   if (error) {
     throw error;
   }
-
   return {
     ...data,
     project_client: data.project_client ? {
@@ -425,7 +408,6 @@ export async function updateClientCommitment(
     currency: data.currency || null,
   };
 }
-
 /**
  * Elimina un compromiso de cliente (soft delete).
  * 
@@ -451,10 +433,8 @@ export async function deleteClientCommitment(
     .eq('id', commitmentId)
     .eq('organization_id', organizationId)
     .eq('is_deleted', false);
-
   if (error) {
     throw error;
   }
-
   return true;
 }

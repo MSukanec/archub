@@ -2,7 +2,6 @@ import { cn } from "@/lib/utils";
 import { useLocation } from "wouter";
 import { useState, useRef } from "react";
 import React from "react";
-
 interface SidebarButtonProps {
   icon: React.ReactNode;
   label: string;
@@ -14,13 +13,12 @@ interface SidebarButtonProps {
   userFullName?: string | null;
   rightIcon?: React.ReactNode;
   isChild?: boolean;
-  variant?: 'main' | 'secondary';
+  variant?: 'main'| 'secondary';
   isHeaderButton?: boolean;
   projectColor?: string;
   disableHover?: boolean;
   badgeCount?: number;
 }
-
 export default function SidebarButton({ 
   icon, 
   label, 
@@ -42,7 +40,6 @@ export default function SidebarButton({
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const [isHovered, setIsHovered] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
-
   const handleClick = () => {
     if (onClick) {
       onClick();
@@ -50,9 +47,8 @@ export default function SidebarButton({
       navigate(href);
     }
   };
-
   const handleMouseEnter = () => {
-    if (buttonRef.current && variant === 'main' && !isExpanded) {
+    if (buttonRef.current && variant === 'main'&& !isExpanded) {
       const rect = buttonRef.current.getBoundingClientRect();
       setTooltipPosition({
         top: rect.top + rect.height / 2,
@@ -103,7 +99,7 @@ export default function SidebarButton({
                     color: 'white'
                   } : {}}
                 >
-                  {userFullName.split(' ').map(name => name[0]).join('').substring(0, 2).toUpperCase()}
+                  {userFullName.split('').map(name => name[0]).join('').substring(0, 2).toUpperCase()}
                 </div>
               ) : (
                 <span 
@@ -123,9 +119,9 @@ export default function SidebarButton({
           {badgeCount !== undefined && badgeCount > 0 && (
             <span 
               className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full text-[10px] font-bold text-white"
-              style={{ backgroundColor: 'var(--accent)' }}
+              style={{ backgroundColor: 'var(--accent)'}}
             >
-              {badgeCount > 99 ? '99+' : badgeCount}
+              {badgeCount > 99 ? '99+': badgeCount}
             </span>
           )}
         </span>

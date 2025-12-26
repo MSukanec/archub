@@ -10,20 +10,17 @@ import { Building, Folder, Users, TrendingUp, Building2 } from 'lucide-react';
 import { Link } from 'wouter';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-
 interface CommunityStats {
   totalOrganizations: number;
   totalProjects: number;
   totalMembers: number;
 }
-
 interface Organization {
   id: string;
   name: string;
   logo_url: string | null;
   created_at: string;
 }
-
 interface ActiveUser {
   id: string;
   name: string;
@@ -31,14 +28,11 @@ interface ActiveUser {
   last_activity: string;
   current_page: string | null;
 }
-
 export default function Community() {
   const { setSidebarLevel } = useNavigationStore();
-
   useEffect(() => {
     setSidebarLevel('community');
   }, [setSidebarLevel]);
-
   const headerProps = {
     title: "Comunidad",
     icon: Users,
@@ -46,21 +40,16 @@ export default function Community() {
     showSearch: false,
     showFilters: false,
   };
-
   const { data: stats, isLoading: statsLoading, error: statsError } = useQuery<CommunityStats>({
     queryKey: ['/api/community/stats'],
   });
-
   const { data: organizations, isLoading: orgsLoading, error: orgsError } = useQuery<Organization[]>({
     queryKey: ['/api/community/organizations'],
   });
-
   const { data: activeUsers, isLoading: usersLoading, error: usersError } = useQuery<ActiveUser[]>({
     queryKey: ['/api/community/active-users'],
   });
-
   const displayedUsers = activeUsers?.slice(0, 10) || [];
-
   return (
     <Layout wide headerProps={headerProps}>
       <div className="space-y-8 pb-8">
@@ -96,7 +85,6 @@ export default function Community() {
             data-testid="stat-growth"
           />
         </div>
-
         {/* Featured Organizations */}
         <div>
           <h2 className="text-xl font-semibold mb-4 text-[var(--text-default)]">
@@ -124,7 +112,6 @@ export default function Community() {
             </div>
           )}
         </div>
-
         {/* Active Users */}
         <div>
           <h2 className="text-xl font-semibold mb-4 text-[var(--text-default)]">
@@ -156,7 +143,6 @@ export default function Community() {
     </Layout>
   );
 }
-
 interface StatCardProps {
   icon: React.ComponentType<{ className?: string }>;
   title: string;
@@ -165,7 +151,6 @@ interface StatCardProps {
   isLoading: boolean;
   'data-testid'?: string;
 }
-
 function StatCard({ icon: Icon, title, value, subtitle, isLoading, 'data-testid': dataTestId }: StatCardProps) {
   return (
     <Card className="hover:shadow-xl transition-shadow" data-testid={dataTestId}>
@@ -192,19 +177,16 @@ function StatCard({ icon: Icon, title, value, subtitle, isLoading, 'data-testid'
     </Card>
   );
 }
-
 interface OrganizationCardProps {
   organization: Organization;
 }
-
 function OrganizationCard({ organization }: OrganizationCardProps) {
   const initials = organization.name
-    .split(' ')
+    .split('')
     .map(word => word[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
-
   return (
     <Card className="hover:shadow-lg transition-all hover:scale-105 cursor-pointer" data-testid={`org-card-${organization.id}`}>
       <CardContent className="p-6">
@@ -239,21 +221,17 @@ function OrganizationCard({ organization }: OrganizationCardProps) {
     </Card>
   );
 }
-
 interface UserCardProps {
   user: ActiveUser;
 }
-
 function UserCard({ user }: UserCardProps) {
   const initials = user.name
-    .split(' ')
+    .split('')
     .map(word => word[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
-
   const timeAgo = formatDistanceToNow(new Date(user.last_activity), { addSuffix: true, locale: es });
-
   return (
     <Card className="hover:shadow-md transition-shadow" data-testid={`user-card-${user.id}`}>
       <CardContent className="p-4">
@@ -263,14 +241,14 @@ function UserCard({ user }: UserCardProps) {
               {user.avatar_url ? (
                 <AvatarImage src={user.avatar_url} alt={user.name} />
               ) : (
-                <AvatarFallback className="text-sm" style={{ backgroundColor: 'var(--accent-hover)', color: 'var(--accent)' }}>
+                <AvatarFallback className="text-sm" style={{ backgroundColor: 'var(--accent-hover)', color: 'var(--accent)'}}>
                   {initials}
                 </AvatarFallback>
               )}
             </Avatar>
             <div 
               className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white"
-              style={{ backgroundColor: 'var(--accent)' }}
+              style={{ backgroundColor: 'var(--accent)'}}
               title="En línea"
             />
           </div>

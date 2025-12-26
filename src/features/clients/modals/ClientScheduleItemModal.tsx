@@ -1,5 +1,4 @@
 import { ClientScheduleItemForm } from '../forms/ClientScheduleItemForm'
-
 interface ClientScheduleItemModalProps {
   modalData?: {
     scheduleId?: string;
@@ -8,10 +7,9 @@ interface ClientScheduleItemModalProps {
     commitmentId?: string;
   };
   onClose: () => void;
-  mode?: 'create' | 'edit' | 'view';
+  mode?: 'create'| 'edit'| 'view';
 }
-
-export function ClientScheduleItemModal({ modalData, onClose, mode = 'create' }: ClientScheduleItemModalProps) {
+export function ClientScheduleItemModal({ modalData, onClose, mode = 'create'}: ClientScheduleItemModalProps) {
   return (
     <ClientScheduleItemForm
       modalData={modalData}
@@ -20,5 +18,4 @@ export function ClientScheduleItemModal({ modalData, onClose, mode = 'create' }:
     />
   )
 }
-
 export default ClientScheduleItemModal

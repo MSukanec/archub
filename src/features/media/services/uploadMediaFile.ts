@@ -1,7 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { MediaFileInput, UploadMediaResult } from '../types';
 import { nanoid } from 'nanoid';
-
 /**
  * Sube un archivo a Supabase Storage y crea el registro en la base de datos.
  * 
@@ -19,14 +18,11 @@ export async function uploadMediaFile(input: MediaFileInput): Promise<UploadMedi
   if (!supabase) {
     throw new Error('Supabase not initialized');
   }
-
   const { file, project_id, organization_id, visibility, description, created_by } = input;
-
   // Generate unique file path
   const fileExt = file.name.split('.').pop();
   const fileName = `${nanoid()}.${fileExt}`;
   const filePath = `${organization_id}/${project_id}/${fileName}`;
-
   // Upload to storage
   const { error: uploadError } = await supabase.storage
     .from('media')
@@ -34,14 +30,11 @@ export async function uploadMediaFile(input: MediaFileInput): Promise<UploadMedi
       cacheControl: '3600',
       upsert: false
     });
-
   if (uploadError) throw uploadError;
-
   // Get public URL
   const { data: { publicUrl } } = supabase.storage
     .from('media')
     .getPublicUrl(filePath);
-
   // Create database record
   const { data, error: dbError } = await supabase
     .from('project_media')
@@ -59,8 +52,6 @@ export async function uploadMediaFile(input: MediaFileInput): Promise<UploadMedi
     })
     .select('id, file_url, file_path')
     .single();
-
   if (dbError) throw dbError;
-
   return data;
 }

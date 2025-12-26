@@ -4,7 +4,6 @@ import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { GlobalAnnouncementBanner, AnnouncementProvider, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, ANNOUNCEMENT_HEIGHT_MOBILE } from "@/features/users/components/GlobalAnnouncementBanner";
 import { useMobile } from "@/hooks/use-mobile";
-
 interface SEOProps {
   title: string;
   description: string;
@@ -14,7 +13,6 @@ interface SEOProps {
   ogImage?: string;
   twitterImage?: string;
 }
-
 interface MarketingLayoutProps {
   children: React.ReactNode;
   headerNavigation?: Array<{ label: string; href: string }>;
@@ -22,7 +20,6 @@ interface MarketingLayoutProps {
   heroSlot?: React.ReactNode;
   stickyContent?: React.ReactNode;
 }
-
 export function MarketingLayout({ 
   children, 
   headerNavigation,
@@ -43,7 +40,6 @@ export function MarketingLayout({
     </AnnouncementProvider>
   );
 }
-
 function MarketingLayoutContent({ 
   children, 
   headerNavigation,
@@ -55,7 +51,6 @@ function MarketingLayoutContent({
   const { hasActiveAnnouncement } = useAnnouncementBanner();
   const isMobile = useMobile();
   const announcementHeight = isMobile ? ANNOUNCEMENT_HEIGHT_MOBILE : ANNOUNCEMENT_HEIGHT;
-
   // Handle hash scrolling after SPA navigation
   useEffect(() => {
     const hash = window.location.hash;
@@ -63,18 +58,16 @@ function MarketingLayoutContent({
       setTimeout(() => {
         const element = document.querySelector(hash);
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          element.scrollIntoView({ behavior: 'smooth', block: 'start'});
         }
       }, 100);
     } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'smooth'});
     }
   }, [location]);
-
   // Handle SEO meta tags with proper cleanup
   useEffect(() => {
     if (!seo) return;
-
     const originalTitle = document.title;
     let metaDescription = document.querySelector('meta[name="description"]');
     const originalDescription = metaDescription?.getAttribute("content") || "";
@@ -111,7 +104,6 @@ function MarketingLayoutContent({
         tagTracker.set(key, { tag, wasCreated: true, originalValue: "" });
       }
     };
-
     const setMetaName = (name: string, content: string) => {
       let tag = document.querySelector(`meta[name="${name}"]`);
       const key = `name:${name}`;
@@ -128,24 +120,19 @@ function MarketingLayoutContent({
         tagTracker.set(key, { tag, wasCreated: true, originalValue: "" });
       }
     };
-
     setMetaTag("og:title", seo.ogTitle || seo.title);
     setMetaTag("og:description", seo.ogDescription || seo.description);
     setMetaTag("og:type", "website");
     setMetaTag("og:url", window.location.href);
-
     if (seo.keywords) {
       setMetaName("keywords", seo.keywords);
     }
-
     if (seo.ogImage) {
       setMetaTag("og:image", seo.ogImage);
     }
-
     if (seo.twitterImage) {
       setMetaName("twitter:image", seo.twitterImage);
     }
-
     return () => {
       document.title = originalTitle;
       
@@ -166,11 +153,9 @@ function MarketingLayoutContent({
       });
     };
   }, [seo]);
-
   const HEADER_HEIGHT = 64; // h-16 = 64px
   const bannerOffset = hasActiveAnnouncement ? announcementHeight : 0;
   const totalOffset = bannerOffset + HEADER_HEIGHT;
-
   // Special layout with hero section (for course landing pages)
   // Hero goes BEHIND the translucent header, no padding on wrapper
   if (heroSlot) {
@@ -210,7 +195,6 @@ function MarketingLayoutContent({
       </>
     );
   }
-
   // Normal layout (for standard marketing pages)
   return (
     <>

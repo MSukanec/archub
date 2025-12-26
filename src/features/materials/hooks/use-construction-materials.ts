@@ -3,12 +3,10 @@
  * 
  * React Query hook para obtener materiales calculados de construcción por proyecto.
  */
-
 import { useQuery } from '@tanstack/react-query';
 import { getConstructionMaterials } from '../services/getConstructionMaterials';
 import { MATERIALS_QUERY_KEYS } from '../constants';
 import type { ConstructionMaterialsParams } from '../types';
-
 export function useConstructionMaterials(
   projectId: string,
   organizationId: string,
@@ -21,7 +19,6 @@ export function useConstructionMaterials(
     filterTaskIds,
     organizationId,
   };
-
   return useQuery({
     queryKey: MATERIALS_QUERY_KEYS.construction(projectId, organizationId, selectedPhase, filterTaskIds),
     queryFn: () => getConstructionMaterials(params),

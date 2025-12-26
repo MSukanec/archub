@@ -1,10 +1,7 @@
 import { create } from 'zustand'
-
-export type SidebarContext = 'organization' | 'project' | 'design' | 'construction' | 'finances' | 'commercialization' | 'postsale' | 'organizations' | 'admin' | 'recursos' | 'perfil' | 'learning' | 'community' | 'founders'
-
+export type SidebarContext = 'organization'| 'project'| 'design'| 'construction'| 'finances'| 'commercialization'| 'postsale'| 'organizations'| 'admin'| 'recursos'| 'perfil'| 'learning'| 'community'| 'founders'
 // Nuevo tipo para los niveles del sidebar
-export type SidebarLevel = 'general' | 'organization' | 'project' | 'construction' | 'finances' | 'library' | 'provider' | 'admin' | 'community' | 'learning' | 'founders' | 'marketing'
-
+export type SidebarLevel = 'general'| 'organization'| 'project'| 'construction'| 'finances'| 'library'| 'provider'| 'admin'| 'community'| 'learning'| 'founders'| 'marketing'
 interface NavigationState {
   currentSidebarContext: SidebarContext
   setSidebarContext: (context: SidebarContext) => void
@@ -19,7 +16,6 @@ interface NavigationState {
   // Función para volver al nivel principal
   goToMainLevel: () => void
 }
-
 export const useNavigationStore = create<NavigationState>((set) => ({
   currentSidebarContext: 'organization',
   setSidebarContext: (context: SidebarContext) => set({ currentSidebarContext: context }),
@@ -34,5 +30,5 @@ export const useNavigationStore = create<NavigationState>((set) => ({
   // Estados para los niveles del sidebar
   sidebarLevel: 'general',
   setSidebarLevel: (level: SidebarLevel) => set({ sidebarLevel: level }),
-  goToMainLevel: () => set({ sidebarLevel: 'general' }),
+  goToMainLevel: () => set({ sidebarLevel: 'general'}),
 }))

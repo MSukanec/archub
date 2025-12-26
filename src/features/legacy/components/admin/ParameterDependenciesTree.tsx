@@ -6,19 +6,16 @@ import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useParameterDependenciesTree, ParameterDependencyNode, ParameterDependencyChild } from '@/hooks/use-parameter-dependencies-tree'
 import { useGlobalModalStore } from '@/components/modal'
-
 interface DependencyNodeProps {
   node: ParameterDependencyNode
   level: number
 }
-
 function DependencyNode({ node, level }: DependencyNodeProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const { openModal } = useGlobalModalStore()
   const hasChildren = node.children.length > 0
-
   return (
-    <div className={`${level > 0 ? 'ml-6 border-l border-muted-foreground/20 pl-4' : ''}`}>
+    <div className={`${level > 0 ? 'ml-6 border-l border-muted-foreground/20 pl-4': ''}`}>
       {/* Nodo del parámetro */}
       <div className="flex items-center gap-2 py-2">
         {hasChildren && (
@@ -49,11 +46,10 @@ function DependencyNode({ node, level }: DependencyNodeProps) {
           
           {hasChildren && (
             <Badge variant="secondary" className="text-xs">
-              {node.children.length} conexión{node.children.length !== 1 ? 'es' : ''}
+              {node.children.length} conexión{node.children.length !== 1 ? 'es': ''}
             </Badge>
           )}
         </div>
-
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
@@ -84,7 +80,6 @@ function DependencyNode({ node, level }: DependencyNodeProps) {
           </Button>
         </div>
       </div>
-
       {/* Conexiones/dependencias hijas */}
       {isExpanded && hasChildren && (
         <div className="ml-6 space-y-2">
@@ -100,15 +95,12 @@ function DependencyNode({ node, level }: DependencyNodeProps) {
     </div>
   )
 }
-
 interface DependencyConnectionProps {
   dependency: ParameterDependencyChild
   level: number
 }
-
 function DependencyConnection({ dependency, level }: DependencyConnectionProps) {
   const { openModal } = useGlobalModalStore()
-
   return (
     <div className="border border-muted-foreground/20 rounded-lg p-3 bg-muted/30">
       <div className="flex items-center justify-between mb-2">
@@ -152,7 +144,6 @@ function DependencyConnection({ dependency, level }: DependencyConnectionProps) 
           </Button>
         </div>
       </div>
-
       <div className="flex items-center gap-2 mb-2">
         <span className="text-xs text-muted-foreground">Se muestra el parámetro:</span>
         <div className="flex items-center gap-2">
@@ -163,7 +154,6 @@ function DependencyConnection({ dependency, level }: DependencyConnectionProps) 
           </Badge>
         </div>
       </div>
-
       {dependency.childOptions.length > 0 && (
         <div className="space-y-1">
           <span className="text-xs text-muted-foreground">Opciones configuradas:</span>
@@ -185,10 +175,8 @@ function DependencyConnection({ dependency, level }: DependencyConnectionProps) 
     </div>
   )
 }
-
 export function ParameterDependenciesTree() {
   const { data: dependencyTree = [], isLoading, error } = useParameterDependenciesTree()
-
   if (isLoading) {
     return (
       <Card>
@@ -200,7 +188,6 @@ export function ParameterDependenciesTree() {
       </Card>
     )
   }
-
   if (error) {
     return (
       <Card>
@@ -212,7 +199,6 @@ export function ParameterDependenciesTree() {
       </Card>
     )
   }
-
   if (dependencyTree.length === 0) {
     return (
       <EmptyState
@@ -222,7 +208,6 @@ export function ParameterDependenciesTree() {
       />
     )
   }
-
   return (
     <Card>
       <CardHeader>

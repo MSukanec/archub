@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-
 import { FormModalLayout } from '@/components/modal'
 import { FormModalHeader } from '@/components/modal'
 import { FormModalFooter } from '@/components/modal'
@@ -11,10 +10,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { CurrencyAmountField } from '@/components/shared/fields/CurrencyAmountField'
-
 import { useCreateProduct, useUpdateProduct, NewProductData } from '@/features/materials'
 import { useBrands, useCreateBrand } from '@/hooks/use-brands'
 import { useMaterials } from '@/features/materials'
@@ -22,9 +19,7 @@ import { useUnits } from '@/hooks/use-units'
 import { useUnitPresentations } from '@/hooks/use-unit-presentations'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useCurrentUser } from '@/hooks/use-current-user'
-
 import { Package } from 'lucide-react'
-
 const productSchema = z.object({
   material_id: z.string().min(1, 'El material es requerido'),
   brand_id: z.string().optional(),
@@ -37,8 +32,6 @@ const productSchema = z.object({
   url: z.string().optional(),
   image_url: z.string().optional(),
 })
-
-
 interface ProductModalProps {
   modalData: {
     editingProduct?: any
@@ -47,7 +40,6 @@ interface ProductModalProps {
   }
   onClose: () => void
 }
-
 export function ProductModal({ modalData, onClose }: ProductModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [selectedCurrency, setSelectedCurrency] = useState<string>('')
@@ -68,7 +60,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
   const { data: units = [] } = useUnits()
   const { data: unitPresentations = [] } = useUnitPresentations()
   const { data: organizationCurrencies = [] } = useOrganizationCurrencies(userData?.organization?.id)
-
   // Form setup
   const form = useForm<z.infer<typeof productSchema>>({
     resolver: zodResolver(productSchema),
@@ -85,7 +76,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
       image_url: '',
     },
   })
-
   // Force edit mode when modal opens or load existing data
   useEffect(() => {
     setPanel('edit')
@@ -106,7 +96,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
       })
     }
   }, [editingProduct, isEditing, isDuplicating, form])
-
   // Set default currency
   useEffect(() => {
     if (organizationCurrencies.length > 0 && !selectedCurrency) {
@@ -115,7 +104,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
       form.setValue('currency_id', defaultCurrency.currency.id)
     }
   }, [organizationCurrencies])
-
   const onSubmit = async (data: z.infer<typeof productSchema>) => {
     setIsLoading(true)
     
@@ -133,7 +121,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
         organization_id: userData?.organization?.id,
         is_system: false,
       }
-
       if (editingProduct && isEditing && !isDuplicating) {
         // Actualizar producto existente
         await updateMutation.mutateAsync({ id: editingProduct.id, data: productData })
@@ -148,7 +135,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
       setIsLoading(false)
     }
   }
-
   // Prepare data for ComboBoxes
   const materialOptions = materials.map(material => ({ value: material.id, label: material.name }))
   const brandOptions = brands.map(brand => ({ value: brand.id, label: brand.name }))
@@ -162,7 +148,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
     name: oc.currency.name,
     symbol: oc.currency.symbol
   }))
-
   // Handle brand creation
   const handleCreateBrand = async (brandName: string) => {
     try {
@@ -173,7 +158,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
       throw error
     }
   }
-
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -203,7 +187,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
               </FormItem>
             )}
           />
-
           {/* Marca */}
           <FormField
             control={form.control}
@@ -228,7 +211,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
               </FormItem>
             )}
           />
-
           {/* Modelo */}
           <FormField
             control={form.control}
@@ -246,7 +228,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
               </FormItem>
             )}
           />
-
           {/* Descripción */}
           <FormField
             control={form.control}
@@ -265,7 +246,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
               </FormItem>
             )}
           />
-
           {/* Precio y Unidad - Inline en Desktop */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Precio */}
@@ -292,7 +272,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
                 </FormItem>
               )}
             />
-
             {/* Unidad de Venta */}
             <FormField
               control={form.control}
@@ -318,9 +297,7 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
                 </FormItem>
               )}
             />
-
           </div>
-
           {/* Proveedor - Ancho completo */}
           <FormField
             control={form.control}
@@ -338,7 +315,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
               </FormItem>
             )}
           />
-
           {/* Link e Imagen - Inline en Desktop */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Link */}
@@ -359,7 +335,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
                 </FormItem>
               )}
             />
-
             {/* Imagen */}
             <FormField
               control={form.control}
@@ -383,14 +358,12 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
       </form>
     </Form>
   )
-
   const headerContent = (
     <FormModalHeader 
       title={editingProduct && isEditing && !isDuplicating ? "Editar Producto" : isDuplicating ? "Duplicar Producto" : "Nuevo Producto Personalizado"}
       icon={Package}
     />
   )
-
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -400,7 +373,6 @@ export function ProductModal({ modalData, onClose }: ProductModalProps) {
       showLoadingSpinner={isLoading}
     />
   )
-
   return (
     <FormModalLayout
       columns={1}

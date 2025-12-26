@@ -2,10 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createPersonnel, type CreatePersonnelData } from '../services';
 import { PERSONNEL_QUERY_KEYS } from '../constants';
 import { toast } from '@/hooks/use-toast';
-
 export function useCreatePersonnel() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (data: CreatePersonnelData) => createPersonnel(data),
     onSuccess: (data) => {

@@ -8,7 +8,6 @@ import { GanttDependencies } from './GanttDependencies';
 import { GanttContainerProps, GanttRowProps, calculateResolvedEndDate } from './types';
 import { useConstructionDependencies } from '@/hooks/use-construction-dependencies';
 import { useGlobalModalStore } from '@/components/modal';
-
 export function GanttContainer({ 
   data, 
   dependencies = [],
@@ -28,7 +27,7 @@ export function GanttContainer({
   // Estado para manejar conexiones drag & drop entre tareas
   const [dragConnectionData, setDragConnectionData] = useState<{
     fromTaskId: string;
-    fromPoint: 'start' | 'end';
+    fromPoint: 'start'| 'end';
   } | null>(null);
   
   // Estados para línea punteada temporal
@@ -43,7 +42,6 @@ export function GanttContainer({
     const saved = localStorage.getItem('gantt-left-panel-width');
     return saved ? parseInt(saved, 10) : 320;
   });
-
   // Estado para el hover sincronizado
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
   
@@ -120,7 +118,6 @@ export function GanttContainer({
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, []);
-
   // Función para manejar click en dependencias
   const handleDependencyClick = useCallback((dependency: any) => {
     openModal('dependency-connection', { dependency });
@@ -130,29 +127,24 @@ export function GanttContainer({
   const timelineRef = useRef<HTMLDivElement>(null);
   
   // Las dependencias vienen como prop, no necesitamos el hook aquí
-
   // Función para manejar el redimensionamiento del panel
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     const startX = e.clientX;
     const startWidth = leftPanelWidth;
-
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = e.clientX - startX;
       const newWidth = Math.max(200, Math.min(600, startWidth + deltaX));
       setLeftPanelWidth(newWidth);
       localStorage.setItem('gantt-left-panel-width', newWidth.toString());
     };
-
     const handleMouseUp = () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   }, [leftPanelWidth]);
-
   // Calculate timeline bounds from all items and their children - solo en la primera carga
   const [fixedTimelineBounds, setFixedTimelineBounds] = useState<{timelineStart: Date, timelineEnd: Date} | null>(null);
   
@@ -180,7 +172,6 @@ export function GanttContainer({
       
       return dates;
     };
-
     const allDates = getAllDates(data);
     if (allDates.length === 0) {
       const today = new Date();
@@ -197,7 +188,6 @@ export function GanttContainer({
       setFixedTimelineBounds(result);
       return result;
     }
-
     // Normalize min and max dates to avoid UTC issues
     const normalizedDates = allDates.map(d => new Date(d.getFullYear(), d.getMonth(), d.getDate()));
     const minDate = new Date(Math.min(...normalizedDates.map(d => d.getTime())));
@@ -226,7 +216,6 @@ export function GanttContainer({
     
     return result;
   }, [data, fixedTimelineBounds]);
-
   // FIXED: Calendar structure - Generate day by day to match timeline calculations exactly
   const calendarStructure = useMemo(() => {
     const allDays: Array<{ date: Date; dayNumber: string; dayName: string; isWeekend: boolean }> = [];
@@ -243,7 +232,6 @@ export function GanttContainer({
       });
       currentDate.setDate(currentDate.getDate() + 1);
     }
-
     // Group days into weeks for display only (maintaining week structure for visual consistency)
     const weeks: any[] = [];
     let weekKey = 0;
@@ -261,7 +249,6 @@ export function GanttContainer({
         weekKey++;
       }
     }
-
     const totalDays = allDays.length;
     
     // Calendar structure generated correctly
@@ -269,14 +256,12 @@ export function GanttContainer({
     
     return { weeks, totalDays };
   }, [timelineStart, timelineEnd]);
-
   // Función para manejar el seguimiento de la línea punteada
   useEffect(() => {
     if (!dragConnectionData) {
       setConnectionLineData(null);
       return;
     }
-
     const handleMouseMove = (e: MouseEvent) => {
       if (connectionLineData) {
         setConnectionLineData(prev => prev ? {
@@ -286,15 +271,11 @@ export function GanttContainer({
         } : null);
       }
     };
-
     document.addEventListener('mousemove', handleMouseMove);
     return () => document.removeEventListener('mousemove', handleMouseMove);
   }, [dragConnectionData, connectionLineData]);
-
-
-
   // Función para manejar el inicio de conexión con posición inicial
-  const handleConnectionDrag = useCallback((data: { fromTaskId: string; fromPoint: 'start' | 'end' } | null, initialPosition?: { x: number; y: number }) => {
+  const handleConnectionDrag = useCallback((data: { fromTaskId: string; fromPoint: 'start'| 'end'} | null, initialPosition?: { x: number; y: number }) => {
     // Debug logs removed
     setDragConnectionData(data);
     
@@ -313,36 +294,29 @@ export function GanttContainer({
       // Debug logs removed
     }
   }, []);
-
   // Función para iniciar el redimensionamiento
   const startResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     const startX = e.clientX;
     const startWidth = leftPanelWidth;
-
     const onMouseMove = (e: MouseEvent) => {
       const newWidth = startWidth + (e.clientX - startX);
       const clampedWidth = Math.max(200, Math.min(600, newWidth));
       setLeftPanelWidth(clampedWidth);
       localStorage.setItem('gantt-left-panel-width', clampedWidth.toString());
     };
-
     const onMouseUp = () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
     };
-
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
   }, [leftPanelWidth]);
-
   const weekWidth = 480; // DÍAS DOBLES: 240 * 2 = días más anchos
   const timelineWidth = Math.max(calendarStructure.weeks.length * weekWidth, 2400); // Ancho mínimo duplicado
-
   // Auto-scroll para posicionar el timeline en HOY - 7 días (solo la primera vez)
   useEffect(() => {
     if (autoScrolled) return;
-
     const scrollToToday = () => {
       const today = new Date();
       const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -386,12 +360,10 @@ export function GanttContainer({
         // console.log('Auto-scroll to day', targetDayIndex);
       }
     };
-
     // Ejecutar scroll después de un breve delay para asegurar que el DOM esté listo
     const timeoutId = setTimeout(scrollToToday, 100);
     return () => clearTimeout(timeoutId);
   }, [calendarStructure.weeks, calendarStructure.totalDays, timelineWidth, autoScrolled]);
-
   if (data.length === 0) {
     return (
       <div className="border border-border rounded-lg p-8 text-center text-muted-foreground">
@@ -399,7 +371,6 @@ export function GanttContainer({
       </div>
     );
   }
-
   // Filtrar datos para ocultar tareas de fases colapsadas
   const filteredData = useMemo(() => {
     const result: GanttRowProps[] = [];
@@ -419,7 +390,6 @@ export function GanttContainer({
     
     return result;
   }, [data, collapsedPhases]);
-
   return (
     <div className="relative border border-border rounded-lg overflow-hidden bg-card">
       {/* Handle de redimensionamiento unificado (de punta a punta vertical desde encabezado) */}
@@ -458,7 +428,6 @@ export function GanttContainer({
             Días
           </div>
         </div>
-
         {/* Encabezado de fechas POR SEMANAS - SCROLL INVISIBLE */}
         <div 
           className="flex-1 overflow-x-auto" 
@@ -538,9 +507,9 @@ export function GanttContainer({
                       key={`${week.key}-${dayIndex}`}
                       className={`flex items-center justify-center text-xs font-medium border-r border-[var(--table-header-border)]/30 last:border-r-0 ${
                         day.isWeekend 
-                          ? 'text-[var(--table-header-fg)]/60' 
+                          ? 'text-[var(--table-header-fg)]/60'
                           : 'text-[var(--table-header-fg)]'
-                      } ${isToday ? 'bg-[var(--accent)] text-white' : ''}`}
+                      } ${isToday ? 'bg-[var(--accent)] text-white': ''}`}
                       style={{ width: dayWidth, minWidth: dayWidth }}
                     >
                       {format(day.date, 'EEE d', { locale: es })}
@@ -552,7 +521,6 @@ export function GanttContainer({
           </div>
         </div>
       </div>
-
       {/* Contenido principal */}
       <div className="relative flex">
         {/* Panel Izquierdo - FIJO (sin scroll horizontal) */}
@@ -569,7 +537,7 @@ export function GanttContainer({
               <div 
                 key={`left-${item.id}`} 
                 className={`border-b border-[var(--table-row-border)] h-12 flex items-center transition-colors ${
-                  hoveredRowId === item.id ? 'bg-[var(--table-row-hover-bg)]' : 'bg-[var(--table-row-bg)]'
+                  hoveredRowId === item.id ? 'bg-[var(--table-row-hover-bg)]': 'bg-[var(--table-row-bg)]'
                 }`}
                 onMouseEnter={() => setHoveredRowId(item.id)}
                 onMouseLeave={() => setHoveredRowId(null)}
@@ -580,7 +548,7 @@ export function GanttContainer({
                     <div className="flex items-center px-4 border-r border-[var(--table-header-border)]/30 overflow-hidden"
                       style={{ width: `${leftPanelWidth - 225}px` }}>
                       {/* Icono de colapso para fases header */}
-                      {item.type === 'phase' && (
+                      {item.type === 'phase'&& (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -672,11 +640,11 @@ export function GanttContainer({
                       style={{ 
                         width: `${leftPanelWidth - 225}px`,
                         paddingLeft: `${4 + item.level * 16}px`, 
-                        paddingRight: '16px' 
+                        paddingRight: '16px'
                       }}
                     >
                       {/* Icono de colapso para fases */}
-                      {item.type === 'phase' && (
+                      {item.type === 'phase'&& (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -703,7 +671,7 @@ export function GanttContainer({
                     
                     {/* Columna Cantidad - 75px fijo */}
                     <div className="w-[75px] px-1 flex items-center justify-center border-r border-[var(--table-header-border)]/30">
-                      {item.type === 'task' && (
+                      {item.type === 'task'&& (
                         <span className="text-xs text-[var(--table-row-fg)]">
                           -
                         </span>
@@ -806,9 +774,7 @@ export function GanttContainer({
               {/* Fila vacía para mantener altura sincronizada */}
             </div>
           </div>
-
         </div>
-
         {/* Timeline - CON SCROLL HORIZONTAL SINCRONIZADO */}
         <div 
           ref={timelineRef}
@@ -832,7 +798,7 @@ export function GanttContainer({
               <div 
                 key={`timeline-${item.id}`} 
                 className={`border-b border-[var(--table-row-border)] h-12 flex items-center transition-colors ${
-                  hoveredRowId === item.id ? 'bg-[var(--table-row-hover-bg)]' : 'bg-[var(--table-row-bg)]'
+                  hoveredRowId === item.id ? 'bg-[var(--table-row-hover-bg)]': 'bg-[var(--table-row-bg)]'
                 }`}
                 onMouseEnter={() => setHoveredRowId(item.id)}
                 onMouseLeave={() => setHoveredRowId(null)}
@@ -878,9 +844,8 @@ export function GanttContainer({
                       }
                       return null;
                     })()}
-
-                    {/* Barra de fase - solo para elementos tipo 'phase' */}
-                    {item.type === 'phase' && item.startDate && (
+                    {/* Barra de fase - solo para elementos tipo 'phase'*/}
+                    {item.type === 'phase'&& item.startDate && (
                       <div className="absolute inset-0 flex items-center px-1">
                         {(() => {
                           const { startDate, resolvedEndDate, isValid } = calculateResolvedEndDate(item);
@@ -1005,7 +970,6 @@ export function GanttContainer({
                         return null;
                       })()}
                     </div>
-
                     {/* Barra de tarea */}
                     <div className="absolute inset-0 flex items-center px-1">
                       <GanttTimelineBar 
@@ -1026,8 +990,6 @@ export function GanttContainer({
                         projectId={projectId}
                       />
                     </div>
-
-
                   </div>
                 )}
               </div>
@@ -1098,7 +1060,6 @@ export function GanttContainer({
           />
         </div>
       </div>
-
       {/* Resize handle */}
       <div
         className="w-1 bg-[var(--accent)] cursor-col-resize hover:bg-[var(--accent)]/80 transition-colors flex-shrink-0"

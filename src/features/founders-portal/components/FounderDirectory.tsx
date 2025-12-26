@@ -3,16 +3,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Building2, MapPin, Users } from 'lucide-react';
 import { useFounderDirectory, type FounderOrganization } from '../services';
-
 function getInitials(name: string): string {
   return name
-    .split(' ')
+    .split('')
     .slice(0, 2)
     .map(word => word[0])
     .join('')
     .toUpperCase();
 }
-
 function OrganizationCard({ org }: { org: FounderOrganization }) {
   const country = org.settings?.country;
   
@@ -60,7 +58,6 @@ function OrganizationCard({ org }: { org: FounderOrganization }) {
     </Card>
   );
 }
-
 function DirectorySkeleton() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -80,14 +77,11 @@ function DirectorySkeleton() {
     </div>
   );
 }
-
 export function FounderDirectory() {
   const { data: organizations, isLoading, error } = useFounderDirectory();
-
   if (isLoading) {
     return <DirectorySkeleton />;
   }
-
   if (error) {
     return (
       <div className="text-center py-8 text-[var(--text-muted)]">
@@ -95,7 +89,6 @@ export function FounderDirectory() {
       </div>
     );
   }
-
   if (!organizations || organizations.length === 0) {
     return (
       <div className="text-center py-12">
@@ -106,7 +99,6 @@ export function FounderDirectory() {
       </div>
     );
   }
-
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {organizations.map((org) => (

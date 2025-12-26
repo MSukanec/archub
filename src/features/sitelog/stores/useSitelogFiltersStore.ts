@@ -1,11 +1,9 @@
 import { create } from 'zustand';
 import { isWithinInterval, parseISO, startOfDay, endOfDay } from 'date-fns';
-
 interface DateRange {
   from: Date | undefined;
   to: Date | undefined;
 }
-
 interface SitelogFiltersState {
   creator: string[];
   dateRange: DateRange;
@@ -18,17 +16,14 @@ interface SitelogFiltersState {
   resetFilters: () => void;
   getFilteredLogs: (logs: any[]) => any[];
 }
-
 const initialState = {
   creator: [],
   dateRange: { from: undefined, to: undefined },
   type: [],
   searchText: ''
 };
-
 export const useSitelogFiltersStore = create<SitelogFiltersState>((set, get) => ({
   ...initialState,
-
   setCreatorFilter: (creators: string[]) => set({ creator: creators }),
   
   setDateRange: (range: DateRange) => set({ dateRange: range }),
@@ -38,7 +33,6 @@ export const useSitelogFiltersStore = create<SitelogFiltersState>((set, get) => 
   setSearchText: (text: string) => set({ searchText: text }),
   
   resetFilters: () => set(initialState),
-
   getFilteredLogs: (logs: any[]) => {
     const { creator, dateRange, type, searchText } = get();
     
@@ -46,7 +40,6 @@ export const useSitelogFiltersStore = create<SitelogFiltersState>((set, get) => 
       if (creator.length > 0 && !creator.includes(log.created_by)) {
         return false;
       }
-
       if (dateRange.from || dateRange.to) {
         const logDate = parseISO(log.log_date);
         
@@ -62,11 +55,9 @@ export const useSitelogFiltersStore = create<SitelogFiltersState>((set, get) => 
           if (logDate > endOfDay(dateRange.to)) return false;
         }
       }
-
       if (type.length > 0 && !type.includes(log.entry_type)) {
         return false;
       }
-
       if (searchText.trim()) {
         const searchLower = searchText.toLowerCase();
         const matchesComment = log.comments?.toLowerCase().includes(searchLower);
@@ -76,7 +67,6 @@ export const useSitelogFiltersStore = create<SitelogFiltersState>((set, get) => 
           return false;
         }
       }
-
       return true;
     });
   }

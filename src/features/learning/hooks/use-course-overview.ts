@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCourseOverview } from '../services';
 import { LEARNING_QUERY_KEYS } from '../constants';
-
 /**
  * Hook para obtener la información básica de un curso.
  * 

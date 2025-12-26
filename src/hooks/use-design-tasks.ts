@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-
 export interface DesignTask {
   id: string;
   project_phase_id: string;
@@ -16,7 +15,6 @@ export interface DesignTask {
   created_by: string;
   created_at: string;
 }
-
 export interface CreateDesignTaskData {
   project_phase_id: string;
   name: string;
@@ -29,7 +27,6 @@ export interface CreateDesignTaskData {
   created_by: string;
   organization_id: string;
 }
-
 export function useDesignTasks(organizationId: string | undefined) {
   return useQuery({
     queryKey: ['design-tasks', organizationId],
@@ -42,21 +39,17 @@ export function useDesignTasks(organizationId: string | undefined) {
         .from('design_phase_tasks')
         .select('*')
         .order('position', { ascending: true });
-
       if (error) {
         console.error('Error fetching design tasks:', error);
         throw error;
       }
-
       return data || [];
     },
     enabled: !!organizationId,
   });
 }
-
 export function useCreateDesignTask() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (taskData: CreateDesignTaskData) => {
       const { data, error } = await supabase
@@ -64,12 +57,10 @@ export function useCreateDesignTask() {
         .insert([taskData])
         .select()
         .single();
-
       if (error) {
         console.error('Error creating design task:', error);
         throw error;
       }
-
       return data;
     },
     onSuccess: (data) => {
@@ -77,10 +68,8 @@ export function useCreateDesignTask() {
     },
   });
 }
-
 export function useUpdateDesignTask() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({ id, ...updateData }: { id: string } & Partial<CreateDesignTaskData>) => {
       const { data, error } = await supabase
@@ -89,12 +78,10 @@ export function useUpdateDesignTask() {
         .eq('id', id)
         .select()
         .single();
-
       if (error) {
         console.error('Error updating design task:', error);
         throw error;
       }
-
       return data;
     },
     onSuccess: () => {
@@ -102,17 +89,14 @@ export function useUpdateDesignTask() {
     },
   });
 }
-
 export function useDeleteDesignTask() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('design_phase_tasks')
         .delete()
         .eq('id', id);
-
       if (error) {
         console.error('Error deleting design task:', error);
         throw error;

@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
-
 // Interfaz actualizada para la vista CONSTRUCTION_TASKS_VIEW
 export interface ConstructionTaskView {
   id: string;
@@ -25,7 +24,6 @@ export interface ConstructionTaskView {
   created_at: string; // timestamp with time zone en DB, string en TS
   updated_at: string; // timestamp with time zone en DB, string en TS
 }
-
 // Hook específico para la vista CONSTRUCTION_TASKS_VIEW optimizada para cronograma
 export function useConstructionTasksView(projectId: string, organizationId: string) {
   return useQuery({
@@ -39,18 +37,15 @@ export function useConstructionTasksView(projectId: string, organizationId: stri
         .eq('project_id', projectId)
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: true });
-
       if (error) {
         console.error('Error fetching construction tasks view:', error);
         throw error;
       }
-
       return data || [];
     },
     enabled: !!projectId && !!organizationId,
   });
 }
-
 export interface ConstructionTask {
   // Identificadores principales de la vista
   task_instance_id: string;  // ID principal de la instancia de tarea
@@ -75,10 +70,8 @@ export interface ConstructionTask {
   
   // Progreso
   progress_percent: number;
-
   // Descripción
   description?: string | null;
-
   // Para compatibilidad con el sistema existente - mapearemos los campos
   id: string; // Será task_instance_id
   organization_id?: string; // Lo obtendremos del contexto
@@ -101,7 +94,6 @@ export interface ConstructionTask {
     param_values: any;
   };
 }
-
 export function useConstructionTasks(projectId: string, organizationId: string) {
   return useQuery({
     queryKey: ['construction-tasks', projectId, organizationId],
@@ -123,7 +115,6 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         .eq('project_id', projectId)
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: true });
-
       if (constructionError) {
         console.error('Error fetching construction tasks:', constructionError);
         throw constructionError;
@@ -133,9 +124,7 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         console.log('No construction tasks found for project:', projectId);
         return [];
       }
-
       // Debug logs removed
-
       // Obtener los IDs de las tareas
       const taskIds = constructionTasks.map(ct => ct.task_id);
       const constructionTaskIds = constructionTasks.map(ct => ct.id);
@@ -145,7 +134,6 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
         .from('task_view')
         .select('*')
         .in('id', taskIds);
-
       // Obtener las relaciones de fases para las tareas de construcción
       const { data: phaseRelations, error: phaseError } = await supabase
         .from('construction_phase_tasks')
@@ -163,25 +151,19 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
           )
         `)
         .in('construction_task_id', constructionTaskIds);
-
       if (phaseError) {
         console.error('Error fetching phase relations:', phaseError);
       }
-
       // Debug logs removed
-
       if (error) {
         console.error('Error fetching construction tasks:', error);
         throw error;
       }
-
       if (!constructionTasks || constructionTasks.length === 0) {
         console.log('No construction tasks found for project:', projectId);
         return [];
       }
-
       // Debug logs removed
-
       // Crear un mapa de los detalles de tareas por ID para fácil acceso
       const taskDetailsMap = new Map();
       if (taskDetails) {
@@ -189,7 +171,6 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
           taskDetailsMap.set(task.id, task);
         });
       }
-
       // Crear un mapa de las relaciones de fases por construction_task_id
       const phaseRelationsMap = new Map();
       if (phaseRelations) {
@@ -197,7 +178,6 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
           phaseRelationsMap.set(relation.construction_task_id, relation);
         });
       }
-
       // Mapear datos de construction_tasks al formato esperado
       const mappedTasks: ConstructionTask[] = constructionTasks.map((item: any) => {
         const taskData = taskDetailsMap.get(item.task_id);
@@ -226,7 +206,6 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
           // Campos de fase - obtenidos de la relación
           phase_instance_id: projectPhase?.id || '', 
           phase_name: phase?.name || 'Sin fase',
-
           progress_percent: phaseRelation?.progress_percent || 0,
           
           // Descripción
@@ -259,18 +238,14 @@ export function useConstructionTasks(projectId: string, organizationId: string) 
           }
         };
       });
-
       // Debug logs removed
-
       return mappedTasks;
     },
     enabled: !!projectId && !!organizationId,
   });
 }
-
 export function useCreateConstructionTask() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (taskData: {
       organization_id: string;
@@ -286,9 +261,7 @@ export function useCreateConstructionTask() {
       description?: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
-
       console.log('🔧 HOOK useCreateConstructionTask - DATOS RECIBIDOS:', taskData);
-
       // Preparar datos para inserción (solo campos que existen en construction_tasks)
       const insertData = {
         organization_id: taskData.organization_id,
@@ -301,25 +274,20 @@ export function useCreateConstructionTask() {
         duration_in_days: taskData.duration_in_days || null,
         description: taskData.description || null
       };
-
       console.log('📝 DATOS PREPARADOS PARA INSERT (construction_tasks):', insertData);
-
       // Crear la tarea de construcción
       const { data: constructionTask, error: taskError } = await supabase
         .from('construction_tasks')
         .insert(insertData)
         .select('*')
         .single();
-
       if (taskError) {
         console.error('❌ ERROR CREANDO CONSTRUCCION TASK:', taskError);
         console.error('❌ Datos que causaron el error:', taskData);
         console.error('❌ Error completo:', JSON.stringify(taskError, null, 2));
         throw taskError;
       }
-
       console.log('✅ TAREA DE CONSTRUCCION CREADA EXITOSAMENTE:', constructionTask);
-
       // Si se especifica una fase, crear la relación en construction_phase_tasks
       if (taskData.project_phase_id) {
         console.log('📋 CREANDO RELACION FASE-TAREA para phase_id:', taskData.project_phase_id);
@@ -332,7 +300,6 @@ export function useCreateConstructionTask() {
             project_id: taskData.project_id,
             progress_percent: 0
           });
-
         if (phaseTaskError) {
           console.error('❌ ERROR CREANDO RELACION FASE-TAREA:', phaseTaskError);
           // No lanzamos error porque la tarea principal ya se creó
@@ -340,7 +307,6 @@ export function useCreateConstructionTask() {
           console.log('✅ RELACION FASE-TAREA CREADA EXITOSAMENTE');
         }
       }
-
       return constructionTask;
     },
     onSuccess: (data) => {
@@ -373,31 +339,26 @@ export function useCreateConstructionTask() {
     },
   });
 }
-
 // Función para inicializar cost_scope en registros existentes
 export function useInitializeCostScope() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: {
       organization_id: string;
       project_id: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
-
       const { data: result, error } = await supabase
         .from('construction_tasks')
-        .update({ cost_scope: 'materials_and_labor' })
+        .update({ cost_scope: 'materials_and_labor'})
         .eq('organization_id', data.organization_id)
         .eq('project_id', data.project_id)
         .is('cost_scope', null)
         .select();
-
       if (error) {
         console.error('Error initializing cost_scope:', error);
         throw error;
       }
-
       return result;
     },
     onSuccess: (result, data) => {
@@ -409,10 +370,8 @@ export function useInitializeCostScope() {
     },
   });
 }
-
 export function useUpdateConstructionTask() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: {
       id: string;
@@ -430,11 +389,9 @@ export function useUpdateConstructionTask() {
       markup_pct?: number;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
-
       const updateData: any = {
         updated_at: new Date().toISOString()
       };
-
       if (data.quantity !== undefined) updateData.quantity = data.quantity;
       if (data.cost_scope !== undefined) updateData.cost_scope = data.cost_scope;
       if (data.start_date !== undefined) updateData.start_date = data.start_date;
@@ -443,19 +400,16 @@ export function useUpdateConstructionTask() {
       if (data.task_id !== undefined) updateData.task_id = data.task_id;
       if (data.description !== undefined) updateData.description = data.description?.trim() ? data.description : null;
       if (data.markup_pct !== undefined) updateData.markup_pct = data.markup_pct;
-
       const { data: result, error } = await supabase
         .from('construction_tasks')
         .update(updateData)
         .eq('id', data.id)
         .select('*')
         .single();
-
       if (error) {
         console.error('Error updating construction task:', error);
         throw error;
       }
-
       // Manejar la vinculación con la fase
       if (data.project_phase_id !== undefined) {
         // Primero eliminar cualquier vinculación existente
@@ -463,7 +417,6 @@ export function useUpdateConstructionTask() {
           .from('construction_phase_tasks')
           .delete()
           .eq('construction_task_id', data.id);
-
         // Si se especifica una fase, crear nueva vinculación
         if (data.project_phase_id) {
           const { error: phaseTaskError } = await supabase
@@ -474,7 +427,6 @@ export function useUpdateConstructionTask() {
               project_id: data.project_id, // Incluir project_id en la vinculación
               progress_percent: data.progress_percent || 0,
             });
-
           if (phaseTaskError) {
             console.error('Error linking task to phase:', phaseTaskError);
             // No lanzamos error aquí para que la actualización continúe
@@ -488,12 +440,10 @@ export function useUpdateConstructionTask() {
             progress_percent: data.progress_percent
           })
           .eq('construction_task_id', data.id);
-
         if (progressError) {
           console.error('Error updating progress:', progressError);
         }
       }
-
       return result;
     },
     onSuccess: (data) => {
@@ -518,7 +468,7 @@ export function useUpdateConstructionTask() {
       });
       
       // Solo mostrar toast para operaciones que no sean cost_scope
-      const isOnlyCostScope = Object.keys(data).length <= 4 && 'cost_scope' in data;
+      const isOnlyCostScope = Object.keys(data).length <= 4 && 'cost_scope'in data;
       if (!isOnlyCostScope) {
         toast({
           title: "Cómputo actualizado",
@@ -536,11 +486,9 @@ export function useUpdateConstructionTask() {
     },
   });
 }
-
 // Hook específico para redimensionamiento de barras sin toast ni refetch excesivo
 export function useUpdateConstructionTaskResize() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: {
       id: string; // task_instance_id
@@ -549,15 +497,12 @@ export function useUpdateConstructionTaskResize() {
       duration_in_days?: number;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
-
       const updateData: any = {
         updated_at: new Date().toISOString()
       };
-
       if (data.start_date !== undefined) updateData.start_date = data.start_date;
       if (data.end_date !== undefined) updateData.end_date = data.end_date;
       if (data.duration_in_days !== undefined) updateData.duration_in_days = data.duration_in_days;
-
       // CAMBIO: Usar task_instance_id para actualizar construction_tasks
       const { data: result, error } = await supabase
         .from('construction_tasks')
@@ -565,12 +510,10 @@ export function useUpdateConstructionTaskResize() {
         .eq('id', data.id) // data.id es task_instance_id ahora
         .select('id, project_id, organization_id')
         .single();
-
       if (error) {
         console.error('Error updating construction task resize:', error);
         throw error;
       }
-
       return result;
     },
     onSuccess: (data, variables) => {
@@ -606,7 +549,6 @@ export function useUpdateConstructionTaskResize() {
     },
   });
 }
-
 // Hook específico para drag que NO invalida caché hasta el final
 export function useUpdateConstructionTaskDrag() {
   return useMutation({
@@ -617,15 +559,12 @@ export function useUpdateConstructionTaskDrag() {
       duration_in_days?: number;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
-
       const updateData: any = {
         updated_at: new Date().toISOString()
       };
-
       if (data.start_date !== undefined) updateData.start_date = data.start_date;
       if (data.end_date !== undefined) updateData.end_date = data.end_date;
       if (data.duration_in_days !== undefined) updateData.duration_in_days = data.duration_in_days;
-
       // CAMBIO: Usar task_instance_id para updates de drag
       const { data: result, error } = await supabase
         .from('construction_tasks')
@@ -633,12 +572,10 @@ export function useUpdateConstructionTaskDrag() {
         .eq('id', data.id) // data.id es task_instance_id ahora
         .select('id, project_id, organization_id')
         .single();
-
       if (error) {
         console.error('Error updating construction task drag:', error);
         throw error;
       }
-
       return result;
     },
     // NO onSuccess para evitar invalidación inmediata de caché
@@ -647,10 +584,8 @@ export function useUpdateConstructionTaskDrag() {
     },
   });
 }
-
 export function useDeleteConstructionTask() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: {
       id: string;
@@ -658,17 +593,14 @@ export function useDeleteConstructionTask() {
       organization_id: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
-
       const { error } = await supabase
         .from('construction_tasks')
         .delete()
         .eq('id', data.id);
-
       if (error) {
         console.error('Error deleting construction task:', error);
         throw error;
       }
-
       return data;
     },
     onSuccess: (data) => {

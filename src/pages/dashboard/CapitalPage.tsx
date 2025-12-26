@@ -19,22 +19,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useCapitalDataHealth, DataHealthAlertMulti, type NormalizedCapitalTransaction } from '@/core/data-health';
-
 const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
-  { value: '30d', label: 'Últimos 30 días' },
-  { value: '3m', label: 'Últimos 3 meses' },
-  { value: '6m', label: 'Últimos 6 meses' },
-  { value: '1y', label: 'Último año' },
-  { value: 'all', label: 'Histórico' },
+  { value: '30d', label: 'Últimos 30 días'},
+  { value: '3m', label: 'Últimos 3 meses'},
+  { value: '6m', label: 'Últimos 6 meses'},
+  { value: '1y', label: 'Último año'},
+  { value: 'all', label: 'Histórico'},
 ];
-
 const CAPITAL_TABS = [
-  { id: 'dashboard', label: 'Visión General' },
-  { id: 'list', label: 'Participantes' },
-  { id: 'balances', label: 'Balances' },
-  { id: 'transactions', label: 'Transacciones' },
+  { id: 'dashboard', label: 'Visión General'},
+  { id: 'list', label: 'Participantes'},
+  { id: 'balances', label: 'Balances'},
+  { id: 'transactions', label: 'Transacciones'},
 ];
-
 export default function CapitalPage() {
   const { setSidebarLevel } = useNavigationStore();
   const { data: userData } = useCurrentUser();
@@ -43,42 +40,34 @@ export default function CapitalPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all');
   const [activeFilterIssueId, setActiveFilterIssueId] = useState<string | null>(null);
   const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
-
   const layoutPreference = userData?.preferences?.layout || 'experimental';
   const isLabLayout = layoutPreference === 'lab';
-
   useEffect(() => {
     setSidebarLevel('organization');
   }, [setSidebarLevel]);
-
   const organizationId = userData?.organization?.id;
-
   const { data: partners = [] } = usePartners(organizationId);
   const hasPartners = partners.length > 0;
   const { data: contributions = [] } = usePartnerContributions(organizationId);
   const { data: withdrawals = [] } = usePartnerWithdrawals(organizationId);
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
   const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
-
   const availablePeriods = useMemo(() => {
     return calculateAvailablePeriods(contributions, withdrawals);
   }, [contributions, withdrawals]);
-
   const validSelectedPeriod = useMemo(() => {
     if (availablePeriods[selectedPeriod]) return selectedPeriod;
     return 'all';
   }, [selectedPeriod, availablePeriods]);
-
   useEffect(() => {
     if (validSelectedPeriod !== selectedPeriod) {
       setSelectedPeriod(validSelectedPeriod);
     }
   }, [validSelectedPeriod, selectedPeriod]);
-
   const normalizedTransactions = useMemo<NormalizedCapitalTransaction[]>(() => {
     const contributionItems = contributions.map((c: any) => ({
       id: c.id,
-      type: 'contribution' as const,
+      type: 'contribution'as const,
       partnerName: c.partner?.contacts?.full_name || 'Sin socio',
       walletId: c.wallet_id || null,
       walletName: c.organization_wallet?.wallets?.name || null,
@@ -87,10 +76,9 @@ export default function CapitalPage() {
       currencyId: c.currency_id,
       exchangeRate: c.exchange_rate || null,
     }));
-
     const withdrawalItems = withdrawals.map((w: any) => ({
       id: w.id,
-      type: 'withdrawal' as const,
+      type: 'withdrawal'as const,
       partnerName: w.partner?.contacts?.full_name || 'Sin socio',
       walletId: w.wallet_id || null,
       walletName: w.organization_wallet?.wallets?.name || null,
@@ -99,28 +87,23 @@ export default function CapitalPage() {
       currencyId: w.currency_id,
       exchangeRate: w.exchange_rate || null,
     }));
-
     return [...contributionItems, ...withdrawalItems];
   }, [contributions, withdrawals]);
-
   const dataHealth = useCapitalDataHealth(normalizedTransactions, {
     organizationId: organizationId || '',
     defaultCurrencyId: defaultCurrency?.id,
     isMultiCurrency,
     enabled: !!organizationId && normalizedTransactions.length > 0,
   });
-
   useEffect(() => {
     if (activeFilterIssueId && !dataHealth.hasIssues) {
       setActiveFilterIssueId(null);
     }
   }, [activeFilterIssueId, dataHealth.hasIssues]);
-
   const filteredTransactionIds = useMemo(() => {
     if (!activeFilterIssueId) return null;
     return dataHealth.getAffectedIdsForIssue(activeFilterIssueId);
   }, [activeFilterIssueId, dataHealth]);
-
   const handleDataHealthClick = useCallback((issueId: string) => {
     if (activeTab !== 'transactions') {
       setActiveTab('transactions');
@@ -133,19 +116,15 @@ export default function CapitalPage() {
       }
     }
   }, [activeTab, activeFilterIssueId]);
-
   const handleAddParticipant = () => {
     openModal('capital-participant', { organizationId });
   };
-
   const handleAddTransaction = () => {
     openModal('capital-transaction', { organizationId });
   };
-
   const handleNavigateToTab = useCallback((tab: string, filters?: Record<string, unknown>) => {
     setActiveTab(tab);
   }, []);
-
   const renderView = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -181,7 +160,6 @@ export default function CapitalPage() {
         );
     }
   };
-
   const dataHealthAlert = dataHealth.result?.issues && dataHealth.result.issues.length > 0 ? (
     <DataHealthAlertMulti
       issues={dataHealth.result.issues}
@@ -198,7 +176,6 @@ export default function CapitalPage() {
       filteredItemIds={filteredTransactionIds || undefined}
     />
   ) : null;
-
   const periodContent = (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -225,14 +202,13 @@ export default function CapitalPage() {
               data-testid={`menu-item-period-${option.value}`}
             >
               <span>{option.label}</span>
-              {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
+              {!isAvailable && option.value !== 'all'&& <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
             </DropdownMenuItem>
           );
         })}
       </DropdownMenuContent>
     </DropdownMenu>
   );
-
   const getActionButton = () => {
     if (activeTab === 'list') {
       return {
@@ -241,7 +217,7 @@ export default function CapitalPage() {
         onClick: handleAddParticipant
       };
     }
-    if (activeTab === 'transactions' && hasPartners) {
+    if (activeTab === 'transactions'&& hasPartners) {
       return {
         label: "Nueva Transacción",
         icon: Plus,
@@ -250,13 +226,11 @@ export default function CapitalPage() {
     }
     return undefined;
   };
-
   const tabs = CAPITAL_TABS.map(tab => ({
     ...tab,
     isActive: activeTab === tab.id,
-    disabled: (tab.id === 'balances' || tab.id === 'transactions') && !hasPartners,
+    disabled: (tab.id === 'balances'|| tab.id === 'transactions') && !hasPartners,
   }));
-
   if (isLabLayout) {
     return (
       <LabLayout 
@@ -274,7 +248,6 @@ export default function CapitalPage() {
       </LabLayout>
     );
   }
-
   const headerProps = {
     icon: HandHeart,
     title: "Capital",
@@ -283,10 +256,9 @@ export default function CapitalPage() {
     showMembers: true,
     tabs,
     onTabChange: setActiveTab,
-    actions: activeTab === 'dashboard' ? [periodContent] : [],
+    actions: activeTab === 'dashboard'? [periodContent] : [],
     actionButton: getActionButton(),
   };
-
   return (
     <Layout headerProps={headerProps} wide={false}>
       <div className="space-y-6">

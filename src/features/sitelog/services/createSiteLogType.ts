@@ -1,12 +1,10 @@
 import { supabase } from '@/lib/supabase';
-
 export interface CreateSiteLogTypeData {
   name: string;
   description?: string | null;
   organizationId: string;
   createdBy: string;
 }
-
 /**
  * Crea un nuevo tipo de bitácora personalizado para una organización.
  * 
@@ -18,11 +16,9 @@ export async function createSiteLogType(data: CreateSiteLogTypeData) {
   if (!supabase) {
     throw new Error('Supabase client not available');
   }
-
   if (!data.name || !data.organizationId || !data.createdBy) {
     throw new Error('Missing required parameters: name, organizationId, and createdBy are required');
   }
-
   const { data: newType, error } = await supabase
     .from('site_log_types')
     .insert({
@@ -34,11 +30,9 @@ export async function createSiteLogType(data: CreateSiteLogTypeData) {
     })
     .select()
     .single();
-
   if (error) {
     console.error('Error creating site log type:', error);
     throw error;
   }
-
   return newType;
 }

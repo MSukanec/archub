@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getLearningDashboardFast } from '../services';
 import { LEARNING_QUERY_KEYS } from '../constants';
-
 /**
  * Hook para obtener una versión optimizada del dashboard de aprendizaje.
  * 

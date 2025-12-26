@@ -1,12 +1,10 @@
 import { useOptimisticMutation } from '@/core/save-engine';
 import { softDeleteContact } from '../services';
 import { contactsKeys } from '@/core/query-keys';
-
 interface DeleteContactParams {
   contactId: string;
   organizationId: string;
 }
-
 export function useDeleteContact(organizationId: string) {
   return useOptimisticMutation({
     mutationFn: ({ contactId, organizationId }: DeleteContactParams) => 

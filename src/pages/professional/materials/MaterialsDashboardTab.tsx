@@ -6,7 +6,6 @@ import { format, convertToBaseCurrency } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { useMaterialPayments } from '@/features/materials';
-import { 
   StatCard, 
   StatCardTitle, 
   StatCardValue, 
@@ -32,9 +31,7 @@ import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
 import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
 import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal';
-
-export type PeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all';
-
+export type PeriodFilter = '30d'| '3m'| '6m'| '1y'| 'all';
 interface MaterialsDashboardTabProps {
   projectId?: string;
   onNavigateToPayments?: () => void;
@@ -44,7 +41,6 @@ interface MaterialsDashboardTabProps {
   dismissedIssueIds?: Set<string>;
   onDismissIssue?: (issueId: string) => void;
 }
-
 function getPeriodLabel(period: PeriodFilter): string {
   switch (period) {
     case '30d': return 'Últimos 30 días';
@@ -54,7 +50,6 @@ function getPeriodLabel(period: PeriodFilter): string {
     case 'all': return 'Histórico';
   }
 }
-
 function getPreviousPeriodDateRange(period: PeriodFilter): { from: Date; to: Date } | null {
   const now = new Date();
   const to = new Date(now);
@@ -87,7 +82,6 @@ function getPreviousPeriodDateRange(period: PeriodFilter): { from: Date; to: Dat
   from.setHours(0, 0, 0, 0);
   return { from, to };
 }
-
 function getDateFromForPeriod(period: PeriodFilter): Date | null {
   if (period === 'all') return null;
   
@@ -112,7 +106,6 @@ function getDateFromForPeriod(period: PeriodFilter): Date | null {
   result.setHours(0, 0, 0, 0);
   return result;
 }
-
 export function calculateAvailablePeriods(allPayments: any[]): Record<PeriodFilter, boolean> {
   const confirmedPayments = allPayments.filter(p => p.status === 'confirmed');
   
@@ -140,7 +133,6 @@ export function calculateAvailablePeriods(allPayments: any[]): Record<PeriodFilt
   
   return result;
 }
-
 export default function MaterialsDashboardTab({ 
   projectId,
   onNavigateToPayments,
@@ -159,7 +151,6 @@ export default function MaterialsDashboardTab({
   
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
   const defaultCurrencyId = userData?.organization?.preferences?.default_currency_id;
-
   const handleInsightAction = useCallback((action: InsightAction) => {
     switch (action.type) {
       case 'navigate':
@@ -180,7 +171,6 @@ export default function MaterialsDashboardTab({
         break;
     }
   }, [onNavigateToPayments, onNavigateToTab, onScrollToPanel]);
-
   const handleMonthDrillDown = useCallback((month: string) => {
     if (onNavigateToTab) {
       onNavigateToTab('payments', { filterMonth: month });
@@ -188,7 +178,6 @@ export default function MaterialsDashboardTab({
       onNavigateToPayments?.();
     }
   }, [onNavigateToTab, onNavigateToPayments]);
-
   const handleCategoryDrillDown = useCallback((categoryName: string) => {
     if (onNavigateToTab) {
       onNavigateToTab('payments', { filterCategory: categoryName });
@@ -196,23 +185,17 @@ export default function MaterialsDashboardTab({
       onNavigateToPayments?.();
     }
   }, [onNavigateToTab, onNavigateToPayments]);
-
   const { data: allPayments = [], isLoading: isLoadingPayments } = useMaterialPayments(
     activeProjectId || undefined, 
     organizationId
   );
-
   const isLoading = isLoadingPayments;
-
   const dateFrom = useMemo(() => getDateFromForPeriod(selectedPeriod), [selectedPeriod]);
-
   const periodMeta = useMemo(() => {
     const now = new Date();
     return getPeriodMeta(dateFrom, now);
   }, [dateFrom]);
-
   const kpiLabels = useMemo(() => getKPILabels(periodMeta), [periodMeta]);
-
   const confirmedPayments = useMemo(() => {
     const confirmed = allPayments.filter(p => p.status === 'confirmed');
     
@@ -225,12 +208,11 @@ export default function MaterialsDashboardTab({
       return paymentDateAtMidnight >= dateFrom;
     });
   }, [allPayments, dateFrom]);
-
   const dataHealthIssues = useMemo(() => {
     const issues: Array<{
       id: string;
       ruleId: string;
-      severity: 'info' | 'warning' | 'critical';
+      severity: 'info'| 'warning'| 'critical';
       title: string;
       description: string;
       affectedCount: number;
@@ -238,16 +220,14 @@ export default function MaterialsDashboardTab({
       recommendedAction: {
         label: string;
         description?: string;
-        actionType: 'navigate' | 'edit' | 'bulk_edit' | 'manual';
+        actionType: 'navigate'| 'edit'| 'bulk_edit'| 'manual';
         targetPath?: string;
       };
     }> = [];
-
     const paymentsWithoutExchangeRate = allPayments.filter(p => {
       if (!p.currency || !defaultCurrency) return false;
       return p.currency.code !== defaultCurrency.code && !p.exchange_rate;
     });
-
     if (paymentsWithoutExchangeRate.length > 0) {
       issues.push({
         id: 'missing-exchange-rate',
@@ -256,7 +236,7 @@ export default function MaterialsDashboardTab({
         title: 'Pagos sin cotización',
         description: `${paymentsWithoutExchangeRate.length} pago(s) en moneda extranjera no tienen cotización registrada. Esto afecta los cálculos de totales.`,
         affectedCount: paymentsWithoutExchangeRate.length,
-        affectedEntities: paymentsWithoutExchangeRate.map(p => ({ id: p.id, label: p.notes || 'Pago' })),
+        affectedEntities: paymentsWithoutExchangeRate.map(p => ({ id: p.id, label: p.notes || 'Pago'})),
         recommendedAction: {
           label: 'Editar pagos',
           description: 'Agregá la cotización a los pagos afectados',
@@ -264,13 +244,11 @@ export default function MaterialsDashboardTab({
         }
       });
     }
-
     const futurePayments = allPayments.filter(p => {
       const paymentDate = parseLocalDate(p.payment_date);
       if (!paymentDate) return false;
       return paymentDate > new Date();
     });
-
     if (futurePayments.length > 0) {
       issues.push({
         id: 'future-payments',
@@ -279,7 +257,7 @@ export default function MaterialsDashboardTab({
         title: 'Pagos con fecha futura',
         description: `${futurePayments.length} pago(s) tienen fecha posterior a hoy.`,
         affectedCount: futurePayments.length,
-        affectedEntities: futurePayments.map(p => ({ id: p.id, label: p.notes || 'Pago' })),
+        affectedEntities: futurePayments.map(p => ({ id: p.id, label: p.notes || 'Pago'})),
         recommendedAction: {
           label: 'Revisar fechas',
           description: 'Verificá que las fechas sean correctas',
@@ -287,10 +265,8 @@ export default function MaterialsDashboardTab({
         }
       });
     }
-
     return { issues };
   }, [allPayments, defaultCurrency]);
-
   const monthlySummary = useMemo(() => {
     const monthMap = new Map<string, number>();
     
@@ -304,28 +280,26 @@ export default function MaterialsDashboardTab({
         defaultCurrency?.code,
         payment.amount,
         payment.exchange_rate ?? null,
-        { quoteCurrency: 'USD' }
+        { quoteCurrency: 'USD'}
       );
       
       monthMap.set(month, (monthMap.get(month) || 0) + convertedAmount);
     });
-
     return Array.from(monthMap.entries())
       .map(([payment_month, total_amount]) => ({ payment_month, total_amount }))
       .sort((a, b) => a.payment_month.localeCompare(b.payment_month));
   }, [confirmedPayments, defaultCurrency]);
-
   const bySupplier = useMemo(() => {
     const supplierMap = new Map<string, { total: number; count: number }>();
     
     confirmedPayments.forEach(payment => {
-      const supplierName = payment.notes?.split(' - ')[0] || 'Sin proveedor';
+      const supplierName = payment.notes?.split('- ')[0] || 'Sin proveedor';
       const convertedAmount = convertToBaseCurrency(
         payment.currency?.code || 'ARS',
         defaultCurrency?.code,
         payment.amount,
         payment.exchange_rate ?? null,
-        { quoteCurrency: 'USD' }
+        { quoteCurrency: 'USD'}
       );
       
       const existing = supplierMap.get(supplierName) || { total: 0, count: 0 };
@@ -334,19 +308,16 @@ export default function MaterialsDashboardTab({
         count: existing.count + 1 
       });
     });
-
     return Array.from(supplierMap.entries())
       .map(([name, data]) => ({ name, value: data.total, count: data.count }))
       .sort((a, b) => b.value - a.value);
   }, [confirmedPayments, defaultCurrency]);
-
   const filteredMonthlySummary = useMemo(() => {
     if (!dateFrom) return monthlySummary;
     
     const fromMonth = `${dateFrom.getFullYear()}-${String(dateFrom.getMonth() + 1).padStart(2, '0')}`;
     return monthlySummary.filter(m => m.payment_month >= fromMonth);
   }, [monthlySummary, dateFrom]);
-
   const currentPeriodPaymentsForComparison = useMemo(() => {
     if (selectedPeriod !== 'all') return confirmedPayments;
     
@@ -362,7 +333,6 @@ export default function MaterialsDashboardTab({
       return paymentDateAtMidnight >= oneYearAgo;
     });
   }, [allPayments, selectedPeriod, confirmedPayments]);
-
   const previousPeriodPayments = useMemo(() => {
     const previousRange = getPreviousPeriodDateRange(selectedPeriod);
     if (!previousRange) return [];
@@ -375,7 +345,6 @@ export default function MaterialsDashboardTab({
       return paymentDateAtMidnight >= previousRange.from && paymentDateAtMidnight < previousRange.to;
     });
   }, [allPayments, selectedPeriod]);
-
   const kpis = useMemo(() => {
     const totalGasto = calculateMonetaryKPI({
       items: confirmedPayments.map(p => ({
@@ -388,7 +357,6 @@ export default function MaterialsDashboardTab({
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
-
     const currentPeriodTotalForTrend = calculateMonetaryKPI({
       items: currentPeriodPaymentsForComparison.map(p => ({
         amount: p.amount,
@@ -400,7 +368,6 @@ export default function MaterialsDashboardTab({
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
-
     const previousTotalGasto = calculateMonetaryKPI({
       items: previousPeriodPayments.map(p => ({
         amount: p.amount,
@@ -412,51 +379,44 @@ export default function MaterialsDashboardTab({
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
-
     let totalGastoTrend: TrendDirection = 'neutral';
     let totalGastoTrendValue = '';
     if (previousTotalGasto.value > 0) {
       const change = ((currentPeriodTotalForTrend.value - previousTotalGasto.value) / previousTotalGasto.value) * 100;
-      totalGastoTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
-      const periodLabel = selectedPeriod === 'all' ? 'vs año anterior' : 'vs período anterior';
-      totalGastoTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% ${periodLabel}`;
+      totalGastoTrend = change > 0 ? 'up': change < 0 ? 'down': 'neutral';
+      const periodLabel = selectedPeriod === 'all'? 'vs año anterior': 'vs período anterior';
+      totalGastoTrendValue = `${change > 0 ? '+': ''}${Math.round(change)}% ${periodLabel}`;
     }
-
     const months = new Set(confirmedPayments.map(p => {
       const date = parseLocalDate(p.payment_date);
       if (!date) return '';
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     }).filter(m => m !== ''));
     const monthCount = months.size || 1;
-
     const currentMonthsForTrend = new Set(currentPeriodPaymentsForComparison.map(p => {
       const date = parseLocalDate(p.payment_date);
       if (!date) return '';
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     }).filter(m => m !== ''));
     const currentMonthCountForTrend = currentMonthsForTrend.size || 1;
-
     const previousMonths = new Set(previousPeriodPayments.map(p => {
       const date = parseLocalDate(p.payment_date);
       if (!date) return '';
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     }).filter(m => m !== ''));
     const previousMonthCount = previousMonths.size || 1;
-
     const averageMonthlyItems = confirmedPayments.map(p => ({
       amount: p.amount / monthCount,
       currency_id: p.currency_id,
       currency: p.currency,
       exchange_rate: p.exchange_rate
     }));
-
     const averageMonthly = calculateMonetaryKPI({
       items: averageMonthlyItems,
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
-
     const allConfirmedPayments = allPayments.filter(p => p.status === 'confirmed');
     const allHistoricalMonths = new Set(allConfirmedPayments.map(p => {
       const date = parseLocalDate(p.payment_date);
@@ -464,43 +424,36 @@ export default function MaterialsDashboardTab({
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     }).filter(m => m !== ''));
     const allHistoricalMonthCount = allHistoricalMonths.size || 1;
-
     const historicalAverageMonthlyItems = allConfirmedPayments.map(p => ({
       amount: p.amount / allHistoricalMonthCount,
       currency_id: p.currency_id,
       currency: p.currency,
       exchange_rate: p.exchange_rate
     }));
-
     const historicalAverageMonthly = calculateMonetaryKPI({
       items: historicalAverageMonthlyItems,
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
-
     let averageMonthlyTrend: TrendDirection = 'neutral';
     let averageMonthlyTrendValue = '';
     if (historicalAverageMonthly.value > 0 && averageMonthly.value !== historicalAverageMonthly.value) {
       const change = ((averageMonthly.value - historicalAverageMonthly.value) / historicalAverageMonthly.value) * 100;
-      averageMonthlyTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
-      averageMonthlyTrendValue = `${change > 0 ? '+' : ''}${change.toFixed(1)}% vs promedio histórico`;
+      averageMonthlyTrend = change > 0 ? 'up': change < 0 ? 'down': 'neutral';
+      averageMonthlyTrendValue = `${change > 0 ? '+': ''}${change.toFixed(1)}% vs promedio histórico`;
     }
-
     const totalPayments = calculateCountKPI({
       count: confirmedPayments.length,
       label: 'pagos'
     });
-
     const paymentsPerMonth = monthCount > 0 ? Math.round(confirmedPayments.length / monthCount) : 0;
     const currentPaymentsPerMonthForTrend = currentMonthCountForTrend > 0 ? Math.round(currentPeriodPaymentsForComparison.length / currentMonthCountForTrend) : 0;
     const previousPaymentsPerMonth = previousMonthCount > 0 ? Math.round(previousPeriodPayments.length / previousMonthCount) : 0;
-
     let totalPaymentsTrend: TrendDirection = 'neutral';
     if (previousPaymentsPerMonth > 0) {
-      totalPaymentsTrend = currentPaymentsPerMonthForTrend > previousPaymentsPerMonth ? 'up' : currentPaymentsPerMonthForTrend < previousPaymentsPerMonth ? 'down' : 'neutral';
+      totalPaymentsTrend = currentPaymentsPerMonthForTrend > previousPaymentsPerMonth ? 'up': currentPaymentsPerMonthForTrend < previousPaymentsPerMonth ? 'down': 'neutral';
     }
-
     let topSupplier = 'Sin datos';
     let maxAmount = 0;
     const supplierTotals = new Map<string, number>();
@@ -512,20 +465,18 @@ export default function MaterialsDashboardTab({
         topSupplier = item.name;
       }
     });
-
     const allSuppliersTotal = Array.from(supplierTotals.values()).reduce((sum, v) => sum + v, 0);
     const topSupplierPercentage = allSuppliersTotal > 0 ? Math.round((maxAmount / allSuppliersTotal) * 100) : 0;
-
     const previousSupplierTotals = new Map<string, number>();
     previousPeriodPayments.forEach(item => {
-      const supplierName = item.notes?.split(' - ')[0] || 'Sin proveedor';
+      const supplierName = item.notes?.split('- ')[0] || 'Sin proveedor';
       const existing = previousSupplierTotals.get(supplierName) || 0;
       const convertedAmount = convertToBaseCurrency(
         item.currency?.code || 'ARS',
         defaultCurrency?.code,
         item.amount,
         item.exchange_rate ?? null,
-        { quoteCurrency: 'USD' }
+        { quoteCurrency: 'USD'}
       );
       previousSupplierTotals.set(supplierName, existing + convertedAmount);
     });
@@ -539,20 +490,17 @@ export default function MaterialsDashboardTab({
     
     const previousAllSuppliersTotal = Array.from(previousSupplierTotals.values()).reduce((sum, v) => sum + v, 0);
     const previousConcentration = previousAllSuppliersTotal > 0 ? Math.round((previousMaxAmount / previousAllSuppliersTotal) * 100) : 0;
-
     let concentrationTrend: TrendDirection = 'neutral';
     let concentrationTrendValue = '';
     if (previousConcentration > 0) {
       const change = topSupplierPercentage - previousConcentration;
-      concentrationTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
-      concentrationTrendValue = `${change > 0 ? '+' : ''}${change}% vs período anterior`;
+      concentrationTrend = change > 0 ? 'up': change < 0 ? 'down': 'neutral';
+      concentrationTrendValue = `${change > 0 ? '+': ''}${change}% vs período anterior`;
     }
-
     const topSupplierKPI = calculateTextKPI({
       text: topSupplier || 'Sin proveedor',
       icon: 'tag'
     });
-
     const periodDivisor = periodMeta.isShortPeriod ? periodMeta.daysCount : monthCount;
     const periodAverageItems = confirmedPayments.map(p => ({
       amount: p.amount / periodDivisor,
@@ -560,14 +508,12 @@ export default function MaterialsDashboardTab({
       currency: p.currency,
       exchange_rate: p.exchange_rate
     }));
-
     const periodAverage = calculateMonetaryKPI({
       items: periodAverageItems,
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
-
     return {
       totalGasto,
       totalGastoTrend,
@@ -588,7 +534,6 @@ export default function MaterialsDashboardTab({
       monthCount
     };
   }, [confirmedPayments, defaultCurrency, bySupplier, previousPeriodPayments, selectedPeriod, currentPeriodPaymentsForComparison, periodMeta, allPayments]);
-
   const monthlyChartData = useMemo(() => {
     return filteredMonthlySummary.map(m => {
       const normalizedMonth = m.payment_month.substring(0, 7);
@@ -598,7 +543,6 @@ export default function MaterialsDashboardTab({
       };
     }).sort((a, b) => a.month.localeCompare(b.month));
   }, [filteredMonthlySummary]);
-
   const currentMonthComparison = useMemo(() => {
     if (monthlyChartData.length < 2) return null;
     
@@ -612,44 +556,39 @@ export default function MaterialsDashboardTab({
       stableThresholdPercent: 5
     });
   }, [monthlyChartData]);
-
   const supplierChartData = useMemo(() => {
     return bySupplier.slice(0, 8);
   }, [bySupplier]);
-
   const previousSupplierData = useMemo(() => {
     const supplierTotals = new Map<string, number>();
     
     previousPeriodPayments.forEach(payment => {
-      const supplierName = payment.notes?.split(' - ')[0] || 'Sin proveedor';
+      const supplierName = payment.notes?.split('- ')[0] || 'Sin proveedor';
       const existing = supplierTotals.get(supplierName) || 0;
       const convertedAmount = convertToBaseCurrency(
         payment.currency?.code || 'ARS',
         defaultCurrency?.code,
         payment.amount,
         payment.exchange_rate ?? null,
-        { quoteCurrency: 'USD' }
+        { quoteCurrency: 'USD'}
       );
       supplierTotals.set(supplierName, existing + convertedAmount);
     });
-
     return Array.from(supplierTotals.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
   }, [previousPeriodPayments, defaultCurrency]);
-
   const paymentsBySupplier = useMemo(() => {
     const supplierTotals = new Map<string, { count: number; amount: number }>();
     
     confirmedPayments.forEach(payment => {
-      const supplierName = payment.notes?.split(' - ')[0] || 'Sin proveedor';
+      const supplierName = payment.notes?.split('- ')[0] || 'Sin proveedor';
       const existing = supplierTotals.get(supplierName) || { count: 0, amount: 0 };
       supplierTotals.set(supplierName, {
         count: existing.count + 1,
         amount: existing.amount + payment.amount
       });
     });
-
     return Array.from(supplierTotals.entries())
       .map(([conceptName, data]) => ({
         conceptName,
@@ -658,7 +597,6 @@ export default function MaterialsDashboardTab({
       }))
       .sort((a, b) => b.paymentsCount - a.paymentsCount);
   }, [confirmedPayments]);
-
   const autoInsights = useMemo(() => {
     const context = buildInsightContext({
       totalGasto: kpis.totalGasto.value,
@@ -675,7 +613,6 @@ export default function MaterialsDashboardTab({
     });
     return generateInsights(context, 3);
   }, [kpis, bySupplier, previousSupplierData, monthlyChartData, confirmedPayments, paymentsBySupplier, periodMeta]);
-
   const recentActivityItems = useMemo((): ActivityItem[] => {
     return [...confirmedPayments]
       .sort((a, b) => {
@@ -686,7 +623,7 @@ export default function MaterialsDashboardTab({
       .slice(0, 5)
       .map((payment) => ({
         id: payment.id,
-        title: payment.notes?.split(' - ')[0] || 'Pago de materiales',
+        title: payment.notes?.split('- ')[0] || 'Pago de materiales',
         subtitle: `${formatDateShort(payment.payment_date)} · ${payment.project?.name || 'Sin proyecto'}`,
         rightContent: (
           <div className="text-right">
@@ -697,7 +634,7 @@ export default function MaterialsDashboardTab({
                   defaultCurrency?.code,
                   payment.amount,
                   payment.exchange_rate ?? null,
-                  { quoteCurrency: 'USD' }
+                  { quoteCurrency: 'USD'}
                 ),
                 defaultCurrency?.symbol || '$'
               )}
@@ -712,7 +649,6 @@ export default function MaterialsDashboardTab({
         badge: <PaymentStatusBadge status="confirmed" />
       }));
   }, [confirmedPayments, defaultCurrency]);
-
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -728,7 +664,6 @@ export default function MaterialsDashboardTab({
       </div>
     );
   }
-
   if (allPayments.length === 0) {
     return (
       <EmptyState 
@@ -752,7 +687,6 @@ export default function MaterialsDashboardTab({
       />
     );
   }
-
   return (
     <div className="space-y-6" data-testid="materials-dashboard">
       <DataHealthAlertMulti
@@ -764,7 +698,6 @@ export default function MaterialsDashboardTab({
         }}
         onToggleFilter={() => {}}
       />
-
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="kpi-total-gasto">
           <StatCardTitle>
@@ -784,7 +717,6 @@ export default function MaterialsDashboardTab({
             )}
           </StatCardMetaContainer>
         </StatCard>
-
         <StatCard data-testid="kpi-average-monthly">
           <StatCardTitle>
             <TrendingUp className="h-4 w-4" />
@@ -798,7 +730,6 @@ export default function MaterialsDashboardTab({
             <StatCardMeta>{kpiLabels.averageHelper}</StatCardMeta>
           </StatCardMetaContainer>
         </StatCard>
-
         <StatCard data-testid="kpi-total-payments">
           <StatCardTitle>
             <Calendar className="h-4 w-4" />
@@ -812,7 +743,6 @@ export default function MaterialsDashboardTab({
             />
           </StatCardMetaContainer>
         </StatCard>
-
         <StatCard data-testid="kpi-concentration">
           <StatCardTitle>
             <TrendingUp className="h-4 w-4" />
@@ -824,7 +754,6 @@ export default function MaterialsDashboardTab({
           </StatCardMetaContainer>
         </StatCard>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DashboardCard 
           title="Evolución Mensual"
@@ -840,7 +769,6 @@ export default function MaterialsDashboardTab({
             onBarClick={(month) => handleMonthDrillDown(month)}
           />
         </DashboardCard>
-
         <DashboardCard 
           title="Distribución por Proveedor"
           icon={<PieChart />}
@@ -856,7 +784,6 @@ export default function MaterialsDashboardTab({
           />
         </DashboardCard>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <InsightCard
           title="Insights"
@@ -866,7 +793,6 @@ export default function MaterialsDashboardTab({
           onAction={handleInsightAction}
           data-testid="insights-section"
         />
-
         <ActivityCard
           title="Actividad Reciente"
           titleIcon={<Clock />}

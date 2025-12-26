@@ -1,11 +1,9 @@
 import { uploadMediaFileV2 } from '@/features/media/services/uploadMediaFileV2';
-
 export interface GalleryFileInput {
   file: File;
   title: string;
   description?: string;
 }
-
 /**
  * Sube múltiples archivos de galería usando la nueva arquitectura (media_files + media_links).
  * 
@@ -23,12 +21,11 @@ export async function uploadGalleryFiles(
   projectId: string | null,
   organizationId: string,
   createdBy: string,
-  visibility: 'organization' | 'project' = 'organization'
+  visibility: 'organization'| 'project'= 'organization'
 ): Promise<void> {
   if (!files || files.length === 0) {
     throw new Error('No hay archivos para subir');
   }
-
   // Subir archivos en paralelo para mejor performance
   const uploadPromises = files.map(async ({ file, title, description }) => {
     try {
@@ -36,7 +33,6 @@ export async function uploadGalleryFiles(
       if (!file || file.size === 0) {
         return;
       }
-
       // Usar el servicio V2 que maneja media_files + media_links
       await uploadMediaFileV2({
         file,
@@ -51,7 +47,6 @@ export async function uploadGalleryFiles(
       throw error;
     }
   });
-
   // Esperar a que todos los archivos se suban
   await Promise.all(uploadPromises);
 }

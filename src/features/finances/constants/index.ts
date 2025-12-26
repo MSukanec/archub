@@ -2,9 +2,7 @@
  * Constants for finances feature
  * Enums, configurations, and static options
  */
-
 // ========== React Query Keys ==========
-
 export const FINANCIAL_QUERY_KEYS = {
   all: ['financial-movements'] as const,
   lists: () => [...FINANCIAL_QUERY_KEYS.all, 'list'] as const,
@@ -16,9 +14,7 @@ export const FINANCIAL_QUERY_KEYS = {
   stats: (organizationId: string | undefined) => 
     [...FINANCIAL_QUERY_KEYS.all, 'stats', organizationId] as const,
 };
-
 // ========== Movement Types ==========
-
 export const MOVEMENT_TYPES = {
   client_payment: { 
     label: "Pago de Cliente", 
@@ -61,9 +57,7 @@ export const MOVEMENT_TYPES = {
     color: "red" 
   },
 } as const;
-
 // ========== Payment Status ==========
-
 /**
  * Payment status configurations.
  * Only using valid ShadCN badge variants: default, secondary, destructive, outline
@@ -90,9 +84,7 @@ export const PAYMENT_STATUS = {
     color: "gray" 
   },
 } as const;
-
 // ========== Table Configuration ==========
-
 /**
  * Column configuration for the financial movements table.
  * Matches the columns from the legacy MovementsList.tsx page.

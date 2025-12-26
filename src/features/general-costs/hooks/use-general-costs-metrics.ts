@@ -1,11 +1,9 @@
 import { useMemo } from 'react';
 import type { GeneralCost } from '../types';
-
 interface GeneralCostsMetrics {
   totalCosts: number;
   timeline: { value: number; date: Date }[];
 }
-
 /**
  * Hook para calcular métricas de gastos generales.
  * 
@@ -19,7 +17,6 @@ interface GeneralCostsMetrics {
 export function useGeneralCostsMetrics(generalCosts: GeneralCost[]): GeneralCostsMetrics {
   return useMemo(() => {
     const totalCosts = generalCosts.length;
-
     // Generate historical timeline with running total
     // First, collect all general cost creation dates
     const costDates: Date[] = [];
@@ -35,10 +32,8 @@ export function useGeneralCostsMetrics(generalCosts: GeneralCost[]): GeneralCost
         // Skip invalid dates
       }
     });
-
     // Sort dates chronologically
     costDates.sort((a, b) => a.getTime() - b.getTime());
-
     // Determine the date range for the timeline
     let startDate: Date;
     const today = new Date();
@@ -56,7 +51,6 @@ export function useGeneralCostsMetrics(generalCosts: GeneralCost[]): GeneralCost
       // Start from the earlier of: 14 days ago or first cost date
       startDate = earliestCostDate < daysAgo14 ? earliestCostDate : daysAgo14;
     }
-
     // Build timeline with running total
     const timeline: { date: Date; value: number }[] = [];
     let cumulativeCount = 0;
@@ -78,7 +72,6 @@ export function useGeneralCostsMetrics(generalCosts: GeneralCost[]): GeneralCost
       // Move to next day
       currentDate.setDate(currentDate.getDate() + 1);
     }
-
     return {
       totalCosts,
       timeline

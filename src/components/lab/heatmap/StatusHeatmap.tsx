@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Grid3X3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { HeatmapCell, CellStatus } from './types';
-
 export interface StatusHeatmapProps {
   cells: HeatmapCell[];
   onCellClick?: (cell: HeatmapCell) => void;
@@ -12,9 +11,8 @@ export interface StatusHeatmapProps {
   emptyIcon?: React.ReactNode;
   className?: string;
   gridClassName?: string;
-  sortBy?: 'status' | 'value' | 'none';
+  sortBy?: 'status'| 'value'| 'none';
 }
-
 const statusClasses: Record<CellStatus, { card: string; bar: string; indicator: string; text: string }> = {
   critical: {
     card: 'bg-[var(--destructive)]/15 border-[var(--destructive)]/50 hover:bg-[var(--destructive)]/25',
@@ -35,7 +33,6 @@ const statusClasses: Record<CellStatus, { card: string; bar: string; indicator: 
     text: 'text-[var(--success)]',
   },
 };
-
 export function StatusHeatmap({
   cells,
   onCellClick,
@@ -59,7 +56,6 @@ export function StatusHeatmap({
       return b.value - a.value;
     });
   }, [cells, sortBy]);
-
   if (cells.length === 0) {
     return (
       <div className={cn("flex flex-col items-center justify-center h-64 text-center", className)}>
@@ -68,7 +64,6 @@ export function StatusHeatmap({
       </div>
     );
   }
-
   return (
     <div className={cn("absolute inset-0 overflow-auto p-8 pt-24", className)}>
       <div className="max-w-6xl mx-auto">
@@ -95,7 +90,7 @@ export function StatusHeatmap({
                 )}
                 data-testid={`heatmap-cell-${cell.id}`}
               >
-                {cell.status === 'critical' && (
+                {cell.status === 'critical'&& (
                   <div className="absolute top-2 right-2">
                     <div className={cn("w-2 h-2 rounded-full animate-pulse", classes.indicator)} />
                   </div>
@@ -103,7 +98,7 @@ export function StatusHeatmap({
                 
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-[var(--foreground)] truncate" title={cell.label}>
-                    {cell.label.split(' ')[0]}
+                    {cell.label.split('')[0]}
                   </p>
                   {cell.sublabel && (
                     <p className="text-xs text-[var(--text-muted)]">{cell.sublabel}</p>

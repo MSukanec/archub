@@ -1,23 +1,20 @@
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
 interface LabDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
   subtitle?: string;
   children: React.ReactNode;
-  width?: 'sm' | 'md' | 'lg' | 'xl';
+  width?: 'sm'| 'md'| 'lg'| 'xl';
 }
-
 const widthClasses = {
   sm: 'w-[320px]',
   md: 'w-[400px]',
   lg: 'w-[480px]',
   xl: 'w-[560px]',
 };
-
 export function LabDrawer({
   isOpen,
   onClose,
@@ -27,7 +24,6 @@ export function LabDrawer({
   width = 'md',
 }: LabDrawerProps) {
   if (!isOpen) return null;
-
   return (
     <div
       className={cn(
@@ -62,5 +58,4 @@ export function LabDrawer({
     </div>
   );
 }
-
 export default LabDrawer;

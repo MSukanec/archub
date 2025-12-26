@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Search, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
 interface ExpandableSearchButtonProps {
   searchValue?: string
   onSearchChange?: (value: string) => void
@@ -9,7 +8,6 @@ interface ExpandableSearchButtonProps {
   placeholder?: string
   className?: string
 }
-
 export function ExpandableSearchButton({
   searchValue = '',
   onSearchChange,
@@ -19,33 +17,28 @@ export function ExpandableSearchButton({
 }: ExpandableSearchButtonProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-
   const handleClick = () => {
     if (!isExpanded) {
       setIsExpanded(true)
     }
   }
-
   const handleClose = () => {
     setIsExpanded(false)
     if (onSearchChange) {
       onSearchChange('')
     }
   }
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (onSearchSubmit) {
       onSearchSubmit()
     }
   }
-
   useEffect(() => {
     if (isExpanded && inputRef.current) {
       inputRef.current.focus()
     }
   }, [isExpanded])
-
   return (
     <div className={cn("relative shrink-0", className)}>
       <form onSubmit={handleSubmit}>

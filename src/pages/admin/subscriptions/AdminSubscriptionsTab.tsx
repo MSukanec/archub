@@ -8,7 +8,6 @@ import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-
 interface OrganizationSubscription {
   id: string;
   organization_id: string;
@@ -28,7 +27,6 @@ interface OrganizationSubscription {
     slug: string;
   };
 }
-
 const AdminSubscriptionsTab = () => {
   const { openModal } = useGlobalModalStore();
   const isMobile = useMobile();
@@ -41,22 +39,17 @@ const AdminSubscriptionsTab = () => {
     searchValue: mobileSearchValue,
     setSearchValue: setMobileSearchValue
   } = useActionBarMobile();
-
   const [searchValue, setSearchValue] = useState("");
-
   useEffect(() => {
     if (isMobile && mobileSearchValue !== searchValue) {
       setSearchValue(mobileSearchValue);
     }
   }, [mobileSearchValue, isMobile]);
-
   const { data: subscriptions = [], isLoading } = useQuery<OrganizationSubscription[]>({
     queryKey: ['/api/admin/subscriptions'],
   });
-
   const filteredSubscriptions = useMemo(() => {
     if (!searchValue) return subscriptions;
-
     const search = searchValue.toLowerCase();
     return subscriptions.filter(sub => {
       const orgName = sub.organizations?.name?.toLowerCase() || '';
@@ -66,7 +59,6 @@ const AdminSubscriptionsTab = () => {
       return orgName.includes(search) || planName.includes(search) || status.includes(search);
     });
   }, [subscriptions, searchValue]);
-
   useEffect(() => {
     if (isMobile) {
       setActions({
@@ -85,14 +77,12 @@ const AdminSubscriptionsTab = () => {
       });
       setShowActionBar(true);
     }
-
     return () => {
       if (isMobile) {
         clearActions();
       }
     };
   }, [isMobile, setActions, setShowActionBar, clearActions]);
-
   useEffect(() => {
     if (isMobile) {
       setFilterConfig({
@@ -104,22 +94,18 @@ const AdminSubscriptionsTab = () => {
       });
     }
   }, [isMobile, setFilterConfig, setSearchValue, setMobileSearchValue]);
-
   const handleRowClick = (subscription: OrganizationSubscription) => {
     // TODO: Implement subscription modal
     console.log('View subscription:', subscription.id);
   };
-
   const handleEdit = (subscription: OrganizationSubscription) => {
     // TODO: Implement subscription modal
     console.log('Edit subscription:', subscription.id);
   };
-
   const handleDelete = (subscription: OrganizationSubscription) => {
     // TODO: Implement cancel subscription
     console.log('Cancel subscription:', subscription.id);
   };
-
   const columns = [
     {
       key: 'organization',
@@ -152,7 +138,7 @@ const AdminSubscriptionsTab = () => {
       width: '10%',
       render: (sub: OrganizationSubscription) => (
         <Badge variant="outline" className="text-xs">
-          {sub.billing_period === 'monthly' ? 'Mensual' : 'Anual'}
+          {sub.billing_period === 'monthly'? 'Mensual': 'Anual'}
         </Badge>
       ),
     },
@@ -193,14 +179,14 @@ const AdminSubscriptionsTab = () => {
       label: 'Estado',
       width: '12%',
       render: (sub: OrganizationSubscription) => {
-        const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive'; className?: string }> = {
-          active: { label: 'Activa', variant: 'default', className: 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400' },
-          expired: { label: 'Expirada', variant: 'secondary' },
-          cancelled: { label: 'Cancelada', variant: 'destructive' },
-          pending: { label: 'Pendiente', variant: 'secondary', className: 'bg-yellow-100 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-400' },
+        const statusConfig: Record<string, { label: string; variant: 'default'| 'secondary'| 'destructive'; className?: string }> = {
+          active: { label: 'Activa', variant: 'default', className: 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400'},
+          expired: { label: 'Expirada', variant: 'secondary'},
+          cancelled: { label: 'Cancelada', variant: 'destructive'},
+          pending: { label: 'Pendiente', variant: 'secondary', className: 'bg-yellow-100 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-400'},
         };
         
-        const config = statusConfig[sub.status] || { label: sub.status, variant: 'secondary' };
+        const config = statusConfig[sub.status] || { label: sub.status, variant: 'secondary'};
         
         return (
           <Badge variant={config.variant} className={config.className}>
@@ -210,7 +196,6 @@ const AdminSubscriptionsTab = () => {
       },
     },
   ];
-
   return (
     <div className="space-y-6">
       <Table
@@ -228,17 +213,16 @@ const AdminSubscriptionsTab = () => {
             icon: Trash2,
             label: 'Cancelar',
             onClick: () => handleDelete(sub),
-            variant: 'destructive' as const
+            variant: 'destructive'as const
           }
         ]}
         emptyStateConfig={{
           icon: <Inbox />,
-          title: isLoading ? 'Cargando...' : 'No hay suscripciones',
+          title: isLoading ? 'Cargando...': 'No hay suscripciones',
           description: 'Las suscripciones activas aparecerán aquí cuando las organizaciones contraten planes.',
         }}
       />
     </div>
   );
 };
-
 export default AdminSubscriptionsTab;

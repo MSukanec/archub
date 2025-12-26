@@ -2,10 +2,8 @@
  * Layout width utilities
  * Shared between Layout.tsx and PageLayout.tsx to avoid circular dependencies
  */
-
 export type WidthMode = "normal" | "wide" | "full";
 export type WidthProp = boolean | "full";
-
 /**
  * Resolves width prop value to internal width mode
  * @param wide - Width prop value (false | true | "full")
@@ -16,7 +14,6 @@ export function resolveWidthMode(wide?: WidthProp): WidthMode {
   if (wide === true) return "wide";
   return "normal";
 }
-
 /**
  * Gets container classes based on width mode
  * Content always occupies 100% width - only padding varies
@@ -26,7 +23,6 @@ export function resolveWidthMode(wide?: WidthProp): WidthMode {
 export function getContainerClasses(mode: WidthMode): string {
   return "w-full";
 }
-
 /**
  * Gets padding classes for header based on width mode
  * In full mode, header maintains wide padding (px-24)
@@ -39,7 +35,6 @@ export function getHeaderPaddingClasses(mode: WidthMode): string {
   if (mode === "wide") return "px-4 sm:px-6 lg:px-24";
   return "px-4 sm:px-6 lg:px-20";
 }
-
 /**
  * Gets padding classes for content based on width mode
  * In full mode, content has zero padding (px-0)

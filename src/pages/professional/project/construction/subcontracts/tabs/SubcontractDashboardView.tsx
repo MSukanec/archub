@@ -1,7 +1,6 @@
 import { AlertCircle, Users, FileCheck, Award, Plus, FileText, Zap, FolderOpen, Calendar, DollarSign, User, Flag } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Callout } from '@/components/shared/Callout';
 import { FormSubsectionButton } from '@/components/modal';
 import { useGlobalModalStore } from '@/components/modal';
-
 interface SubcontractDashboardViewProps {
   subcontract: any;
   project: any;
@@ -18,7 +16,6 @@ interface SubcontractDashboardViewProps {
   provider: any;
   onTabChange?: (tab: string) => void;
 }
-
 export function SubcontractDashboardView({ 
   subcontract, 
   project, 
@@ -28,28 +25,25 @@ export function SubcontractDashboardView({
   onTabChange 
 }: SubcontractDashboardViewProps) {
   const { openModal } = useGlobalModalStore();
-
   // Función para formatear el estado
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      'draft': { variant: 'secondary' as const, label: 'Borrador' },
-      'pendiente': { variant: 'secondary' as const, label: 'Pendiente' },
-      'awarded': { variant: 'default' as const, label: 'Adjudicado' },
-      'en_proceso': { variant: 'default' as const, label: 'En Proceso' },
-      'completado': { variant: 'default' as const, label: 'Completado' },
-      'cancelado': { variant: 'destructive' as const, label: 'Cancelado' }
+      'draft': { variant: 'secondary'as const, label: 'Borrador'},
+      'pendiente': { variant: 'secondary'as const, label: 'Pendiente'},
+      'awarded': { variant: 'default'as const, label: 'Adjudicado'},
+      'en_proceso': { variant: 'default'as const, label: 'En Proceso'},
+      'completado': { variant: 'default'as const, label: 'Completado'},
+      'cancelado': { variant: 'destructive'as const, label: 'Cancelado'}
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
-
   // Estados vacíos
   const isDraft = subcontract.status === 'draft';
   const isTendering = subcontract.status === 'pendiente';
   const hasScope = false; // TODO: Conectar con datos reales de alcance
   const receivedBids = bids.filter(bid => bid.status === 'submitted');
-
   return (
     <div className="space-y-6">
       {/* Estados vacíos */}
@@ -58,25 +52,23 @@ export function SubcontractDashboardView({
           icon={AlertCircle}
           onClick={() => onTabChange?.('Alcance')}
         >
-          Este subcontrato está en borrador y no tiene alcance definido.{' '}
+          Este subcontrato está en borrador y no tiene alcance definido.{''}
           <span className="font-medium text-accent cursor-pointer hover:underline">
             Agregar tareas al alcance
           </span>
         </Callout>
       )}
-
       {isTendering && receivedBids.length === 0 && (
         <Callout 
           icon={AlertCircle}
           onClick={() => onTabChange?.('Ofertas')}
         >
-          Este subcontrato está en licitación pero no hay ofertas recibidas.{' '}
+          Este subcontrato está en licitación pero no hay ofertas recibidas.{''}
           <span className="font-medium text-accent cursor-pointer hover:underline">
             Invitar oferentes
           </span>
         </Callout>
       )}
-
       {/* Cards principales */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Card izquierda - Ficha */}
@@ -95,7 +87,6 @@ export function SubcontractDashboardView({
                   <p className="text-sm text-muted-foreground">{format(new Date(subcontract.date), 'dd/MM/yyyy', { locale: es })}</p>
                 </div>
               </div>
-
               <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                 <Flag className="h-4 w-4 text-muted-foreground" />
                 <div>
@@ -115,7 +106,6 @@ export function SubcontractDashboardView({
                   </p>
                 </div>
               </div>
-
               <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
                 <div>
@@ -125,7 +115,7 @@ export function SubcontractDashboardView({
                       ? (() => {
                           const formatter = new Intl.NumberFormat('es-AR', {
                             style: 'currency',
-                            currency: winnerBid.currencies?.code === 'ARS' ? 'ARS' : 'USD',
+                            currency: winnerBid.currencies?.code === 'ARS'? 'ARS': 'USD',
                             minimumFractionDigits: 0,
                             maximumFractionDigits: 0
                           });
@@ -136,7 +126,6 @@ export function SubcontractDashboardView({
                   </p>
                 </div>
               </div>
-
               <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                 <User className="h-4 w-4 text-muted-foreground" />
                 <div>
@@ -152,7 +141,6 @@ export function SubcontractDashboardView({
                   </p>
                 </div>
               </div>
-
               {subcontract.notes && (
                 <div className="p-3 rounded-lg bg-muted/30">
                   <p className="text-sm font-medium mb-2">Notas</p>
@@ -162,7 +150,6 @@ export function SubcontractDashboardView({
             </div>
           </CardContent>
         </Card>
-
         {/* Card derecha - Acciones rápidas */}
         <Card className="h-full flex flex-col">
           <CardHeader 
@@ -177,14 +164,12 @@ export function SubcontractDashboardView({
               description="Agregar tareas al subcontrato"
               onClick={() => onTabChange?.('Alcance')}
             />
-
             <FormSubsectionButton
               icon={<Users className="h-4 w-4" />}
               title="Invitar oferentes"
               description="Enviar RFQ a proveedores"
               onClick={() => onTabChange?.('Ofertas')}
             />
-
             {receivedBids.length >= 2 && (
               <FormSubsectionButton
                 icon={<FileCheck className="h-4 w-4" />}
@@ -193,7 +178,6 @@ export function SubcontractDashboardView({
                 onClick={() => onTabChange?.('Ofertas')}
               />
             )}
-
             {receivedBids.length >= 1 && (
               <FormSubsectionButton
                 icon={<Award className="h-4 w-4" />}
@@ -205,7 +189,6 @@ export function SubcontractDashboardView({
           </CardContent>
         </Card>
       </div>
-
       {/* Card inferior - Documentos */}
       <Card className="h-full flex flex-col">
         <CardHeader 

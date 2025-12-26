@@ -1,14 +1,11 @@
 import { supabase } from '@/lib/supabase';
-
 export interface UpdateCourseFaqData {
   question: string;
   answer: string;
   sortIndex?: number;
 }
-
 export async function updateCourseFaq(faqId: string, data: UpdateCourseFaqData) {
   if (!supabase) throw new Error('Supabase not initialized');
-
   const { error } = await supabase
     .from('course_faqs')
     .update({
@@ -18,6 +15,5 @@ export async function updateCourseFaq(faqId: string, data: UpdateCourseFaqData) 
       updated_at: new Date().toISOString()
     })
     .eq('id', faqId);
-
   if (error) throw error;
 }

@@ -1,7 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-
 const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
@@ -216,7 +215,6 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
   },
 });
-
 export interface PaymentReceiptData {
   id: string;
   payment_date: string;
@@ -224,7 +222,7 @@ export interface PaymentReceiptData {
   currency_symbol: string;
   currency_code: string;
   exchange_rate?: number | null;
-  status: 'confirmed' | 'pending' | 'rejected' | 'void';
+  status: 'confirmed'| 'pending'| 'rejected'| 'void';
   reference?: string | null;
   notes?: string | null;
   wallet_name?: string | null;
@@ -243,27 +241,23 @@ export interface PaymentReceiptData {
   cumulative_paid?: number | null;
   cumulative_percentage?: number | null;
 }
-
 interface PaymentReceiptPDFProps {
   data: PaymentReceiptData;
 }
-
 export function PaymentReceiptPDF({ data }: PaymentReceiptPDFProps) {
   const formatDate = (dateStr: string) => {
     try {
-      return format(new Date(dateStr), "d 'de' MMMM 'de' yyyy", { locale: es });
+      return format(new Date(dateStr), "d 'de'MMMM 'de'yyyy", { locale: es });
     } catch {
       return dateStr;
     }
   };
-
   const formatCurrency = (amount: number, symbol: string = '$') => {
     return `${symbol} ${new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount)}`;
   };
-
   const receiptNumber = data.id.slice(0, 8).toUpperCase();
   
   const statusConfig = {
@@ -272,9 +266,7 @@ export function PaymentReceiptPDF({ data }: PaymentReceiptPDFProps) {
     rejected: { label: 'RECHAZADO', style: styles.statusRejected, textStyle: styles.statusTextRejected },
     void: { label: 'ANULADO', style: styles.statusRejected, textStyle: styles.statusTextRejected },
   };
-
   const status = statusConfig[data.status] || statusConfig.pending;
-
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -306,9 +298,7 @@ export function PaymentReceiptPDF({ data }: PaymentReceiptPDFProps) {
             </View>
           </View>
         </View>
-
         <View style={styles.divider} />
-
         {/* Client Info */}
         {data.client_name && (
           <View style={styles.section}>
@@ -339,7 +329,6 @@ export function PaymentReceiptPDF({ data }: PaymentReceiptPDFProps) {
             </View>
           </View>
         )}
-
         {/* Project Info */}
         {data.project_name && (
           <View style={styles.section}>
@@ -358,7 +347,6 @@ export function PaymentReceiptPDF({ data }: PaymentReceiptPDFProps) {
             </View>
           </View>
         )}
-
         {/* Payment Details */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>DETALLE DEL PAGO</Text>
@@ -385,7 +373,6 @@ export function PaymentReceiptPDF({ data }: PaymentReceiptPDFProps) {
             )}
           </View>
         </View>
-
         {/* Amount Section */}
         <View style={styles.amountSection}>
           <View style={styles.amountRow}>
@@ -413,13 +400,11 @@ export function PaymentReceiptPDF({ data }: PaymentReceiptPDFProps) {
               <Text style={styles.amountValue}>{data.cumulative_percentage.toFixed(1)}%</Text>
             </View>
           )}
-
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>TOTAL RECIBIDO</Text>
             <Text style={styles.totalValue}>{formatCurrency(data.amount, data.currency_symbol)}</Text>
           </View>
         </View>
-
         {/* Notes */}
         {data.notes && (
           <View style={styles.notesSection}>
@@ -427,7 +412,6 @@ export function PaymentReceiptPDF({ data }: PaymentReceiptPDFProps) {
             <Text style={styles.notesText}>{data.notes}</Text>
           </View>
         )}
-
         {/* Signature Section */}
         <View style={styles.signatureSection}>
           <View style={styles.signatureBox}>
@@ -439,7 +423,6 @@ export function PaymentReceiptPDF({ data }: PaymentReceiptPDFProps) {
             <Text style={styles.signatureLabel}>Firma del Receptor</Text>
           </View>
         </View>
-
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>

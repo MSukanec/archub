@@ -3,16 +3,13 @@
  * 
  * React Query mutation para crear precios de materiales.
  */
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createMaterialPrice } from '../services/createMaterialPrice';
 import { MATERIALS_QUERY_KEYS } from '../../constants';
 import { toast } from '@/hooks/use-toast';
 import type { InsertOrganizationMaterialPrice } from '../../../../../shared/schema';
-
 export function useCreateMaterialPrice() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (data: InsertOrganizationMaterialPrice) => createMaterialPrice(data),
     onSuccess: (_, variables) => {

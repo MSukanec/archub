@@ -5,7 +5,6 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Edit, Trash2, GripVertical } from 'lucide-react'
-
 interface Phase {
   id: string
   name: string
@@ -13,7 +12,6 @@ interface Phase {
   project_phase_id?: string
   taskCount?: number
 }
-
 interface PhaseOrderManagerProps {
   phases: Phase[]
   onReorder: (phases: Phase[]) => void
@@ -21,14 +19,12 @@ interface PhaseOrderManagerProps {
   onDelete: (phaseId: string) => void
   isUpdating?: boolean
 }
-
 interface SortablePhaseItemProps {
   phase: Phase
   onEdit: (phase: Phase) => void
   onDelete: (phaseId: string) => void
   isUpdating: boolean
 }
-
 function SortablePhaseItem({ phase, onEdit, onDelete, isUpdating }: SortablePhaseItemProps) {
   const {
     attributes,
@@ -38,21 +34,19 @@ function SortablePhaseItem({ phase, onEdit, onDelete, isUpdating }: SortablePhas
     transition,
     isDragging,
   } = useSortable({ id: phase.id, disabled: isUpdating })
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   }
-
   return (
     <Card
       ref={setNodeRef}
       style={style}
       className={`p-4 transition-all duration-200 ${
         isDragging 
-          ? 'shadow-lg rotate-1 scale-105 bg-background z-10' 
+          ? 'shadow-lg rotate-1 scale-105 bg-background z-10'
           : 'hover:shadow-md'
-      } ${isUpdating ? 'opacity-50' : ''}`}
+      } ${isUpdating ? 'opacity-50': ''}`}
     >
       <div className="flex items-center gap-3">
         {/* Drag Handle */}
@@ -106,7 +100,6 @@ function SortablePhaseItem({ phase, onEdit, onDelete, isUpdating }: SortablePhas
     </Card>
   )
 }
-
 export function PhaseOrderManager({ 
   phases, 
   onReorder, 
@@ -116,7 +109,6 @@ export function PhaseOrderManager({
 }: PhaseOrderManagerProps) {
   
   const sortedPhases = [...phases].sort((a, b) => a.position - b.position)
-
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
     
@@ -134,7 +126,6 @@ export function PhaseOrderManager({
     
     onReorder(updatedPhases)
   }
-
   return (
     <div className="space-y-4">
       <DndContext

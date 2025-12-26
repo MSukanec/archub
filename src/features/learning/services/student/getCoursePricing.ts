@@ -1,6 +1,5 @@
 import { getCoursePriceBySlug } from '@/lib/getCoursePrice';
 import type { CoursePricing } from '../types';
-
 /**
  * Obtiene la información de pricing de un curso.
  * 
@@ -22,16 +21,13 @@ export async function getCoursePricing(
   if (!courseSlug) {
     return null;
   }
-
   const priceData = await getCoursePriceBySlug(courseSlug, {
     currency,
     provider
   });
-
   if (!priceData) {
     return null;
   }
-
   return {
     courseSlug,
     currency: priceData.currency_code,

@@ -1,7 +1,6 @@
 import { useOptimisticMutation } from '@/core/save-engine';
 import { softDeleteContactType } from '../services';
 import { contactTypesKeys } from '@/core/query-keys';
-
 export function useDeleteContactType(organizationId: string) {
   return useOptimisticMutation({
     mutationFn: (typeId: string) => softDeleteContactType(typeId, organizationId),

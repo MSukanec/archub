@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getProjectById } from '../services/getProjectById';
 import { projectsKeys } from '@/core/query-keys';
-
 /**
  * Valida si un ID es un UUID válido (no temporal)
  */
@@ -13,7 +12,6 @@ function isValidUUID(id: string | undefined): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   return uuidRegex.test(id);
 }
-
 /**
  * Hook para obtener un proyecto específico por ID.
  * 

@@ -1,8 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-
 type FeatureFlags = Record<string, boolean>;
-
 export function useFeatureFlags() {
   return useQuery<FeatureFlags>({
     queryKey: ['/api/feature-flags'],
@@ -11,7 +9,6 @@ export function useFeatureFlags() {
     refetchOnWindowFocus: true,
   });
 }
-
 export function useFeatureFlag(key: string, defaultValue: boolean = true): { 
   value: boolean; 
   isLoading: boolean;
@@ -25,7 +22,6 @@ export function useFeatureFlag(key: string, defaultValue: boolean = true): {
   
   return { value, isLoading };
 }
-
 export function useMultipleFeatureFlags(keys: string[], defaultValue: boolean = true): { 
   flags: Record<string, boolean>;
   isLoading: boolean;

@@ -5,19 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useTaskSearch } from '@/hooks/use-task-search';
 import { cn } from '@/lib/utils';
-
 interface TaskSelection {
   taskId: string;
   quantity: number;
 }
-
 interface TaskBulkSelectorProps {
   organizationId: string;
   selections: TaskSelection[];
   onSelectionChange: (selections: TaskSelection[]) => void;
   className?: string;
 }
-
 export function TaskBulkSelector({
   organizationId,
   selections,
@@ -30,10 +27,9 @@ export function TaskBulkSelector({
   const { data: tasks = [], isLoading } = useTaskSearch(
     searchQuery, 
     organizationId, 
-    { origin: 'all' },
+    { origin: 'all'},
     searchQuery.length >= 2 // Buscar con 2+ caracteres
   );
-
   // Mapear selecciones para acceso rápido
   const selectedTasksMap = useMemo(() => {
     if (!selections || !Array.isArray(selections)) return {};
@@ -42,7 +38,6 @@ export function TaskBulkSelector({
       return acc;
     }, {} as Record<string, number>);
   }, [selections]);
-
   // Manejar selección/deselección de tarea
   const handleTaskToggle = useCallback((taskId: string, isSelected: boolean) => {
     const currentSelections = selections || [];
@@ -56,7 +51,6 @@ export function TaskBulkSelector({
       onSelectionChange(newSelections);
     }
   }, [selections, onSelectionChange]);
-
   // Manejar cambio de cantidad
   const handleQuantityChange = useCallback((taskId: string, quantity: number) => {
     const currentSelections = selections || [];
@@ -67,14 +61,12 @@ export function TaskBulkSelector({
     );
     onSelectionChange(newSelections);
   }, [selections, onSelectionChange]);
-
   // Incrementar/decrementar cantidad
   const adjustQuantity = useCallback((taskId: string, delta: number) => {
     const currentQuantity = selectedTasksMap[taskId] || 1;
     const newQuantity = Math.max(0.01, currentQuantity + delta);
     handleQuantityChange(taskId, newQuantity);
   }, [selectedTasksMap, handleQuantityChange]);
-
   return (
     <div className={cn("space-y-4", className)}>
       {/* Buscador */}
@@ -87,14 +79,12 @@ export function TaskBulkSelector({
           className="pl-10"
         />
       </div>
-
       {/* Información de selección */}
       {(selections?.length || 0) > 0 && (
         <div className="text-sm text-muted-foreground">
-          {selections?.length || 0} tarea{(selections?.length || 0) !== 1 ? 's' : ''} seleccionada{(selections?.length || 0) !== 1 ? 's' : ''}
+          {selections?.length || 0} tarea{(selections?.length || 0) !== 1 ? 's': ''} seleccionada{(selections?.length || 0) !== 1 ? 's': ''}
         </div>
       )}
-
       {/* Lista de tareas */}
       <div className="border rounded-lg">
         {/* Header de la tabla */}
@@ -104,7 +94,6 @@ export function TaskBulkSelector({
           <div>RUBRO</div>
           <div className="text-center">CANTIDAD</div>
         </div>
-
         {/* Contenido de la tabla */}
         <div className="max-h-80 overflow-y-auto">
           {isLoading ? (
@@ -122,7 +111,6 @@ export function TaskBulkSelector({
             tasks.map((task) => {
               const isSelected = task.id in selectedTasksMap;
               const quantity = selectedTasksMap[task.id] || 1;
-
               return (
                 <div 
                   key={task.id}
@@ -140,7 +128,6 @@ export function TaskBulkSelector({
                       }
                     />
                   </div>
-
                   {/* Nombre de la tarea */}
                   <div className="flex flex-col min-w-0">
                     <div className="text-sm font-medium truncate">
@@ -152,12 +139,10 @@ export function TaskBulkSelector({
                       </div>
                     )}
                   </div>
-
                   {/* Rubro */}
                   <div className="text-sm text-muted-foreground truncate">
                     {task.rubro_name || 'Sin rubro'}
                   </div>
-
                   {/* Cantidad (solo si está seleccionada) */}
                   <div className="flex items-center justify-center">
                     {isSelected ? (

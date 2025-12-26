@@ -1,14 +1,11 @@
 import { Star, Edit, Trash2, Image, Video, Play, FileText } from "lucide-react";
 import { format } from "date-fns";
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-
 import { useMediaLightbox, type MediaItem } from "@/components/shared/viewers/ImageLightbox";
 import { WEATHER_TYPES } from '../constants';
-
 interface LogEntryCardProps {
   siteLog: any;
   isExpanded: boolean;
@@ -20,7 +17,6 @@ interface LogEntryCardProps {
   mediaItems: MediaItem[];
   lightbox: ReturnType<typeof useMediaLightbox>;
 }
-
 export function LogEntryCard({
   siteLog,
   toggleFavorite,
@@ -32,7 +28,7 @@ export function LogEntryCard({
 }: LogEntryCardProps) {
   // Obtener configuración del tipo desde la relación site_log_type
   const entryTypeName = siteLog.site_log_type?.name || 'Registro General';
-  const entryTypeConfig = { label: entryTypeName, icon: FileText, color: 'bg-teal-100 text-teal-800' };
+  const entryTypeConfig = { label: entryTypeName, icon: FileText, color: 'bg-teal-100 text-teal-800'};
   const weatherConfig = WEATHER_TYPES[siteLog.weather as keyof typeof WEATHER_TYPES];
   
   // Formatear hora del created_at
@@ -43,7 +39,6 @@ export function LogEntryCard({
   // Componentes de ícono dinámicos
   const WeatherIcon = weatherConfig?.icon;
   const TypeIcon = entryTypeConfig.icon;
-
   return (
     <div 
       className="group pl-12 py-3 border border-transparent hover:border-gray-300 rounded-md transition-colors cursor-pointer"
@@ -57,7 +52,6 @@ export function LogEntryCard({
             {siteLog.creator?.full_name?.charAt(0) || 'U'}
           </AvatarFallback>
         </Avatar>
-
         {/* Content */}
         <div className="flex-1 min-w-0">
           {/* Header: Name + Time */}
@@ -85,14 +79,12 @@ export function LogEntryCard({
               </span>
             )}
           </div>
-
           {/* Comentarios */}
           {siteLog.comments && (
             <div className="mb-4">
               <p className="text-sm">{siteLog.comments}</p>
             </div>
           )}
-
           {/* Archivos Adjuntos */}
           {siteLog.files && siteLog.files.length > 0 && (
             <div className="mb-4">
@@ -120,7 +112,7 @@ export function LogEntryCard({
                             }
                           }}
                         />
-                        <div className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded border-2 border-gray-200" style={{ display: 'none' }}>
+                        <div className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded border-2 border-gray-200" style={{ display: 'none'}}>
                           <Image className="h-6 w-6 text-gray-400" />
                         </div>
                       </div>
@@ -156,7 +148,7 @@ export function LogEntryCard({
                         <Video className="h-4 w-4 text-gray-500" />
                         <span className="text-xs text-muted-foreground">
                           {file.file_name && file.file_name.length > 15 ? 
-                            file.file_name.substring(0, 15) + '...' : 
+                            file.file_name.substring(0, 15) + '...': 
                             file.file_name || 'Sin nombre'
                           }
                         </span>
@@ -167,7 +159,6 @@ export function LogEntryCard({
               </div>
             </div>
           )}
-
           {/* Asistencias */}
           {siteLog.attendees && siteLog.attendees.length > 0 && (
             <div className="mb-4">
@@ -176,15 +167,15 @@ export function LogEntryCard({
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
                 {siteLog.attendees.map((attendee: any, index: number) => (
-                  <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.3)' }}>
+                  <Card key={index} className="p-2" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.3)'}}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium" style={{ color: '#3b82f6' }}>
+                      <span className="text-xs font-medium" style={{ color: '#3b82f6'}}>
                         {attendee.contact ? 
-                          `${attendee.contact.first_name || ''} ${attendee.contact.last_name || ''}`.trim() || 'Personal' 
+                          `${attendee.contact.first_name || ''} ${attendee.contact.last_name || ''}`.trim() || 'Personal'
                           : 'Personal'
                         }
                       </span>
-                      <span className="text-xs px-1 py-0.5 rounded" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
+                      <span className="text-xs px-1 py-0.5 rounded" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6'}}>
                         {attendee.attendance_type || 'Presente'}
                       </span>
                     </div>
@@ -197,7 +188,6 @@ export function LogEntryCard({
             </div>
           )}
         </div>
-
         {/* Action Buttons - Show on hover */}
         <div className="flex items-start gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button
@@ -208,7 +198,7 @@ export function LogEntryCard({
               toggleFavorite(siteLog.id);
             }}
           >
-            <Star className={`h-4 w-4 ${siteLog.is_favorite ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground'}`} />
+            <Star className={`h-4 w-4 ${siteLog.is_favorite ? 'text-yellow-500 fill-yellow-500': 'text-muted-foreground'}`} />
           </Button>
           
           <Button

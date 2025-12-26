@@ -10,14 +10,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { TaskParameter, TaskParameterOption, TaskParameterDependency, TaskParameterDependencyOption, InsertTaskParameterDependency, InsertTaskParameterDependencyOption } from '@shared/schema';
-
 interface DependencyWithDetails extends TaskParameterDependency {
   parent_parameter?: TaskParameter;
   parent_option?: TaskParameterOption;
   child_parameter?: TaskParameter;
   child_options?: TaskParameterOption[];
 }
-
 // Hook para obtener parámetros
 const useTaskParameters = () => {
   return useQuery({
@@ -34,7 +32,6 @@ const useTaskParameters = () => {
     }
   });
 };
-
 // Hook para obtener opciones de un parámetro
 const useParameterOptions = (parameterId: string | null) => {
   return useQuery({
@@ -54,7 +51,6 @@ const useParameterOptions = (parameterId: string | null) => {
     enabled: !!parameterId
   });
 };
-
 // Hook para obtener dependencias existentes
 const useTaskParameterDependencies = () => {
   return useQuery({
@@ -71,7 +67,6 @@ const useTaskParameterDependencies = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-
       // Obtener las opciones filtradas para cada dependencia
       const dependenciesWithOptions = await Promise.all(
         data.map(async (dep) => {
@@ -82,26 +77,21 @@ const useTaskParameterDependencies = () => {
               child_option:task_parameter_options(*)
             `)
             .eq('dependency_id', dep.id);
-
           if (optionsError) throw optionsError;
-
           return {
             ...dep,
             child_options: childOptions?.map(opt => opt.child_option).filter(Boolean) || []
           } as DependencyWithDetails;
         })
       );
-
       return dependenciesWithOptions;
     }
   });
 };
-
 export function TaskParameterDependencyManager() {
   const [isCreating, setIsCreating] = useState(false);
   const [editingDependency, setEditingDependency] = useState<string | null>(null);
   const [expandedDependencies, setExpandedDependencies] = useState<Set<string>>(new Set());
-
   // Formulario para nueva dependencia
   const [newDependency, setNewDependency] = useState({
     parent_parameter_id: '',
@@ -109,16 +99,13 @@ export function TaskParameterDependencyManager() {
     child_parameter_id: '',
     selected_child_options: [] as string[]
   });
-
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
   const { data: parameters = [], isLoading: parametersLoading } = useTaskParameters();
   const { data: dependencies = [], isLoading: dependenciesLoading } = useTaskParameterDependencies();
   
   const { data: parentOptions = [] } = useParameterOptions(newDependency.parent_parameter_id);
   const { data: childOptions = [] } = useParameterOptions(newDependency.child_parameter_id);
-
   // Mutación para crear dependencia
   const createDependencyMutation = useMutation({
     mutationFn: async (dependencyData: InsertTaskParameterDependency) => {
@@ -147,7 +134,6 @@ export function TaskParameterDependencyManager() {
       console.error('Error creating dependency:', error);
     }
   });
-
   // Mutación para crear opciones de dependencia
   const createDependencyOptionsMutation = useMutation({
     mutationFn: async ({ dependencyId, optionIds }: { dependencyId: string, optionIds: string[] }) => {
@@ -155,7 +141,6 @@ export function TaskParameterDependencyManager() {
         dependency_id: dependencyId,
         child_option_id: optionId
       }));
-
       const { data, error } = await supabase
         .from('task_parameter_dependency_options')
         .insert(optionsData);
@@ -167,7 +152,6 @@ export function TaskParameterDependencyManager() {
       queryClient.invalidateQueries({ queryKey: ['task-parameter-dependencies'] });
     }
   });
-
   // Mutación para eliminar dependencia
   const deleteDependencyMutation = useMutation({
     mutationFn: async (dependencyId: string) => {
@@ -176,7 +160,6 @@ export function TaskParameterDependencyManager() {
         .from('task_parameter_dependency_options')
         .delete()
         .eq('dependency_id', dependencyId);
-
       // Luego eliminar la dependencia
       const { error } = await supabase
         .from('task_parameter_dependencies')
@@ -201,7 +184,6 @@ export function TaskParameterDependencyManager() {
       console.error('Error deleting dependency:', error);
     }
   });
-
   const handleCreateDependency = async () => {
     if (!newDependency.parent_parameter_id || !newDependency.parent_option_id || !newDependency.child_parameter_id) {
       toast({
@@ -211,14 +193,12 @@ export function TaskParameterDependencyManager() {
       });
       return;
     }
-
     try {
       const dependency = await createDependencyMutation.mutateAsync({
         parent_parameter_id: newDependency.parent_parameter_id,
         parent_option_id: newDependency.parent_option_id,
         child_parameter_id: newDependency.child_parameter_id
       });
-
       // Si hay opciones de hijo seleccionadas, crearlas
       if (newDependency.selected_child_options.length > 0) {
         await createDependencyOptionsMutation.mutateAsync({
@@ -226,7 +206,6 @@ export function TaskParameterDependencyManager() {
           optionIds: newDependency.selected_child_options
         });
       }
-
       // Limpiar formulario
       setNewDependency({
         parent_parameter_id: '',
@@ -239,7 +218,6 @@ export function TaskParameterDependencyManager() {
       console.error('Error creating dependency:', error);
     }
   };
-
   const toggleDependencyExpansion = (dependencyId: string) => {
     const newExpanded = new Set(expandedDependencies);
     if (newExpanded.has(dependencyId)) {
@@ -249,7 +227,6 @@ export function TaskParameterDependencyManager() {
     }
     setExpandedDependencies(newExpanded);
   };
-
   const handleChildOptionToggle = (optionId: string) => {
     const current = newDependency.selected_child_options;
     const updated = current.includes(optionId)
@@ -261,7 +238,6 @@ export function TaskParameterDependencyManager() {
       selected_child_options: updated
     }));
   };
-
   if (parametersLoading || dependenciesLoading) {
     return (
       <div className="p-8 text-center text-muted-foreground">
@@ -269,7 +245,6 @@ export function TaskParameterDependencyManager() {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Header y botón para crear nueva dependencia */}
@@ -292,7 +267,6 @@ export function TaskParameterDependencyManager() {
           Nueva Dependencia
         </Button>
       </div>
-
       {/* Panel de creación de dependencia */}
       {isCreating && (
         <Card>
@@ -326,7 +300,7 @@ export function TaskParameterDependencyManager() {
                   onValueChange={(value) => setNewDependency(prev => ({
                     ...prev,
                     parent_parameter_id: value,
-                    parent_option_id: '' // Reset parent option when parameter changes
+                    parent_option_id: ''// Reset parent option when parameter changes
                   }))}
                 >
                   <SelectTrigger>
@@ -341,7 +315,6 @@ export function TaskParameterDependencyManager() {
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="space-y-2">
                 <label className="text-sm font-medium">Opción del Padre</label>
                 <Select
@@ -361,7 +334,6 @@ export function TaskParameterDependencyManager() {
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="space-y-2">
                 <label className="text-sm font-medium">Parámetro Hijo</label>
                 <Select
@@ -387,7 +359,6 @@ export function TaskParameterDependencyManager() {
                 </Select>
               </div>
             </div>
-
             {/* Parte 2: Seleccionar opciones del parámetro hijo (opcional) */}
             {newDependency.child_parameter_id && childOptions.length > 0 && (
               <div className="space-y-3">
@@ -417,7 +388,6 @@ export function TaskParameterDependencyManager() {
                 </div>
               </div>
             )}
-
             <div className="flex justify-end gap-2 pt-4">
               <Button
                 variant="outline"
@@ -438,13 +408,12 @@ export function TaskParameterDependencyManager() {
                 disabled={createDependencyMutation.isPending}
               >
                 <Save className="w-4 h-4 mr-2" />
-                {createDependencyMutation.isPending ? 'Guardando...' : 'Guardar Dependencia'}
+                {createDependencyMutation.isPending ? 'Guardando...': 'Guardar Dependencia'}
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
-
       {/* Lista de dependencias existentes */}
       <div className="space-y-4">
         <h4 className="font-semibold">Dependencias Configuradas ({dependencies.length})</h4>
@@ -493,7 +462,6 @@ export function TaskParameterDependencyManager() {
                         </Badge>
                       </div>
                     </div>
-
                     <div className="flex items-center gap-2">
                       <Button
                         variant="ghost"
@@ -506,7 +474,6 @@ export function TaskParameterDependencyManager() {
                       </Button>
                     </div>
                   </div>
-
                   {/* Detalle expandido */}
                   {expandedDependencies.has(dependency.id) && (
                     <div className="mt-4 pt-4 border-t space-y-2">

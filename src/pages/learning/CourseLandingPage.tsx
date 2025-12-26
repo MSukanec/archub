@@ -6,7 +6,6 @@ import { CourseLandingShell } from '@/features/shared-content/courses/CourseLand
 import { useCourseLanding, useCourseEnrollment, useCourseProgress } from '@/features/learning';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
-
 export default function CourseLandingPage() {
   const { slug } = useParams<{ slug: string }>();
   const [, navigate] = useLocation();
@@ -15,21 +14,18 @@ export default function CourseLandingPage() {
   const { data, isLoading, error } = useCourseLanding(slug || '');
   const { data: enrollmentData } = useCourseEnrollment(data?.course?.id, userData?.user?.id);
   const { data: progressData } = useCourseProgress(data?.course?.id);
-
   const isEnrolled = enrollmentData?.isEnrolled || false;
   const progressPercentage = (() => {
     if (!isEnrolled || !progressData || progressData.length === 0) return 0;
     const completed = progressData.filter(p => p.is_completed).length;
     return Math.round((completed / progressData.length) * 100);
   })();
-
   useEffect(() => {
     setSidebarContext('learning');
     if (sidebarLevel !== 'general') {
       setSidebarLevel('learning');
     }
   }, [setSidebarContext, setSidebarLevel, sidebarLevel]);
-
   const handleCTAClick = () => {
     if (isEnrolled) {
       // Usuario inscrito → ir al curso
@@ -42,11 +38,9 @@ export default function CourseLandingPage() {
       navigate('/register');
     }
   };
-
   const ctaButtonText = isEnrolled 
-    ? (progressPercentage > 0 ? 'CONTINUAR CURSO' : 'VER CURSO')
+    ? (progressPercentage > 0 ? 'CONTINUAR CURSO': 'VER CURSO')
     : 'INSCRIBIRME AHORA';
-
   if (isLoading) {
     return (
       <Layout hideHeader wide>
@@ -59,7 +53,6 @@ export default function CourseLandingPage() {
       </Layout>
     );
   }
-
   if (error || !data) {
     return (
       <Layout hideHeader wide>
@@ -74,7 +67,6 @@ export default function CourseLandingPage() {
       </Layout>
     );
   }
-
   return (
     <Layout hideHeader wide>
       <HeroLayout noPadding>

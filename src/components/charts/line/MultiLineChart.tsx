@@ -1,17 +1,14 @@
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts'
 import { CHART_COLORS, CHART_AXIS, CHART_TOOLTIP, CHART_STATES, CHART_DIMENSIONS, CHART_SHAPES, formatCompact, getChartColor } from '../theme'
-
 export interface MultiLineDataPoint {
   label: string
   [key: string]: string | number
 }
-
 export interface LineSeriesConfig {
   key: string
   name: string
   color?: string
 }
-
 export interface MultiLineChartProps {
   data: MultiLineDataPoint[]
   series: LineSeriesConfig[]
@@ -24,7 +21,6 @@ export interface MultiLineChartProps {
   showLegend?: boolean
   showDots?: boolean
 }
-
 export function MultiLineChart({
   data,
   series,
@@ -44,7 +40,6 @@ export function MultiLineChart({
       </div>
     )
   }
-
   if (!data || data.length === 0) {
     return (
       <div style={{ height }} className={CHART_STATES.empty.className}>
@@ -52,7 +47,6 @@ export function MultiLineChart({
       </div>
     )
   }
-
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -92,7 +86,7 @@ export function MultiLineChart({
             <Legend
               verticalAlign="bottom"
               height={25}
-              wrapperStyle={{ fontSize: '12px', paddingTop: '0px' }}
+              wrapperStyle={{ fontSize: '12px', paddingTop: '0px'}}
             />
           )}
           {series.map((s, index) => (

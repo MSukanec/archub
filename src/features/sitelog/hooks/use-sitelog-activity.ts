@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useOrganizationMembers } from '@/features/organization';
 import { getActivityData } from '../services/getActivityData';
 import type { ActivityTimePeriod } from '../types';
-
 export function useSiteLogActivity(
   organizationId: string | undefined,
   projectId: string | undefined,

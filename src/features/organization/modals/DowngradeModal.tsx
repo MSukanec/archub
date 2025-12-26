@@ -13,7 +13,6 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLocation } from "wouter";
-
 interface DowngradeModalProps {
   modalData?: {
     currentPlan: {
@@ -31,7 +30,6 @@ interface DowngradeModalProps {
   };
   onClose: () => void;
 }
-
 interface ApiErrorResponse {
   error?: {
     code?: string;
@@ -39,7 +37,6 @@ interface ApiErrorResponse {
   };
   message?: string;
 }
-
 // Plan features mapping
 const PLAN_FEATURES: Record<string, string[]> = {
   teams: [
@@ -58,12 +55,10 @@ const PLAN_FEATURES: Record<string, string[]> = {
   ],
   free: []
 };
-
 interface PlanLimits {
   maxProjects: number;
   maxMembers: number;
 }
-
 interface UsageStats {
   projectsCount: number;
   membersCount: number;
@@ -72,20 +67,17 @@ interface UsageStats {
   targetPlanLimits?: PlanLimits;
   targetPlanName?: string;
 }
-
 export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
   const { toast } = useToast();
   const { currentOrganizationId } = useProjectContext();
   const { data: userData } = useCurrentUser();
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [, setLocation] = useLocation();
-
   const { currentPlan, targetPlan, subscriptionEndDate, isManualPlan } = modalData || {
-    currentPlan: { name: '', slug: '' },
+    currentPlan: { name: '', slug: ''},
     targetPlan: { name: '', slug: '', monthly_amount: 0, annual_amount: 0 },
     isManualPlan: false
   };
-
   // Fetch usage stats to calculate impact (includes target plan limits from DB)
   const { data: usageStats, isLoading: isLoadingStats } = useQuery<UsageStats>({
     queryKey: ['/api/organizations', currentOrganizationId, 'usage-stats', targetPlan.slug],
@@ -97,7 +89,6 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
     },
     enabled: !!currentOrganizationId && !!targetPlan.slug,
   });
-
   // Calculate impact based on target plan limits (from DB)
   const impact = useMemo(() => {
     if (!usageStats || !usageStats.targetPlanLimits) {
@@ -120,11 +111,10 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
       hasImpact: projectsAtRisk > 0 || membersAtRisk > 0,
       currentProjects: usageStats.projectsCount,
       currentMembers: usageStats.membersCount,
-      projectLimit: targetLimits.maxProjects === Infinity ? '∞' : targetLimits.maxProjects,
-      memberLimit: targetLimits.maxMembers === Infinity ? '∞' : targetLimits.maxMembers,
+      projectLimit: targetLimits.maxProjects === Infinity ? '∞': targetLimits.maxProjects,
+      memberLimit: targetLimits.maxMembers === Infinity ? '∞': targetLimits.maxMembers,
     };
   }, [usageStats]);
-
   // Check if user is the organization owner
   const isOwner = useMemo(() => {
     if (!userData?.user?.id || !userData?.organization) {
@@ -133,7 +123,6 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
     
     return userData.organization.owner_id === userData.user.id;
   }, [userData?.user?.id, userData?.organization?.owner_id]);
-
   // Validation checks
   const validationError = useMemo(() => {
     if (!targetPlan?.slug) {
@@ -158,7 +147,6 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
     
     return null;
   }, [targetPlan?.slug, currentOrganizationId, userData?.user, userData?.organization, isOwner]);
-
   const scheduleDowngradeMutation = useMutation({
     mutationFn: async () => {
       setInlineError(null);
@@ -181,7 +169,6 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
     onError: (error: any) => {
       let errorMessage = "No se pudo programar el cambio de plan";
       let errorCode = "UNKNOWN";
-
       const apiError = error as ApiErrorResponse;
       
       if (apiError.error?.message) {
@@ -190,7 +177,6 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
       } else if (apiError.message) {
         errorMessage = apiError.message;
       }
-
       setInlineError(errorMessage);
       
       toast({
@@ -200,27 +186,22 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
       });
     }
   });
-
   const handleClose = () => {
     setInlineError(null);
     onClose();
   };
-
   const handleConfirm = () => {
     if (validationError || isManualPlan) return;
     scheduleDowngradeMutation.mutate();
   };
-
   // Get features that will be lost
   const currentFeatures = PLAN_FEATURES[currentPlan.slug.toLowerCase()] || [];
   const targetFeatures = PLAN_FEATURES[targetPlan.slug.toLowerCase()] || [];
   const lostFeatures = currentFeatures.filter(f => !targetFeatures.includes(f));
-
   const isConfirmDisabled = 
     scheduleDowngradeMutation.isPending || 
     !!validationError || 
     isManualPlan;
-
   // Edit panel content
   const editPanel = (
     <div className="space-y-4">
@@ -232,7 +213,6 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
           <AlertDescription>{validationError}</AlertDescription>
         </Alert>
       )}
-
       {/* Manual Plan Warning */}
       {isManualPlan && !validationError && (
         <Alert variant="destructive">
@@ -243,7 +223,6 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
           </AlertDescription>
         </Alert>
       )}
-
       {/* Inline API Error */}
       {inlineError && (
         <Alert variant="destructive">
@@ -252,7 +231,6 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
           <AlertDescription>{inlineError}</AlertDescription>
         </Alert>
       )}
-
       {/* Downgrade Info */}
       {!validationError && !isManualPlan && (
         <>
@@ -270,7 +248,6 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
               </div>
             </div>
           </div>
-
           {/* Effective Date */}
           {subscriptionEndDate && (
             <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
@@ -287,7 +264,6 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
               </div>
             </div>
           )}
-
           {/* Resource Impact Warning */}
           {isLoadingStats ? (
             <div className="space-y-2">
@@ -313,9 +289,9 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
                       <div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300 bg-amber-100/50 dark:bg-amber-900/30 rounded-md px-3 py-2">
                         <FolderX className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                         <span>
-                          <strong>{impact.projectsAtRisk}</strong> proyecto{impact.projectsAtRisk > 1 ? 's' : ''} bloqueado{impact.projectsAtRisk > 1 ? 's' : ''}
+                          <strong>{impact.projectsAtRisk}</strong> proyecto{impact.projectsAtRisk > 1 ? 's': ''} bloqueado{impact.projectsAtRisk > 1 ? 's': ''}
                           <span className="text-amber-600 dark:text-amber-400 ml-1">
-                            ({impact.currentProjects} actual{impact.currentProjects !== 1 ? 'es' : ''} → límite: {impact.projectLimit})
+                            ({impact.currentProjects} actual{impact.currentProjects !== 1 ? 'es': ''} → límite: {impact.projectLimit})
                           </span>
                         </span>
                       </div>
@@ -324,9 +300,9 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
                       <div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300 bg-amber-100/50 dark:bg-amber-900/30 rounded-md px-3 py-2">
                         <UserX className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                         <span>
-                          <strong>{impact.membersAtRisk}</strong> miembro{impact.membersAtRisk > 1 ? 's' : ''} bloqueado{impact.membersAtRisk > 1 ? 's' : ''}
+                          <strong>{impact.membersAtRisk}</strong> miembro{impact.membersAtRisk > 1 ? 's': ''} bloqueado{impact.membersAtRisk > 1 ? 's': ''}
                           <span className="text-amber-600 dark:text-amber-400 ml-1">
-                            ({impact.currentMembers} actual{impact.currentMembers !== 1 ? 'es' : ''} → límite: {impact.memberLimit})
+                            ({impact.currentMembers} actual{impact.currentMembers !== 1 ? 'es': ''} → límite: {impact.memberLimit})
                           </span>
                         </span>
                       </div>
@@ -340,7 +316,6 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
               </div>
             </div>
           )}
-
           {/* Features Lost */}
           {lostFeatures.length > 0 && (
             <div>
@@ -360,7 +335,6 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
               </div>
             </div>
           )}
-
           {/* Important Notice */}
           <Alert>
             <AlertCircle className="h-4 w-4" />
@@ -377,7 +351,6 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
       )}
     </div>
   );
-
   // Header
   const headerContent = (
     <FormModalHeader
@@ -386,7 +359,6 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
       icon={ArrowDownCircle}
     />
   );
-
   // Footer
   const footerContent = (
     <FormModalFooter
@@ -398,7 +370,6 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
       submitDisabled={isConfirmDisabled}
     />
   );
-
   return (
     <FormModalLayout
       columns={1}

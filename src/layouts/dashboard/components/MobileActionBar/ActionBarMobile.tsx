@@ -43,28 +43,24 @@ export function ActionBarMobile() {
   if (!isMobile || !showActionBar) {
     return null
   }
-
   const handleSearchClick = () => {
     if (actions.search?.onClick) {
       actions.search.onClick()
     }
     setShowSearchPopover(true)
   }
-
   const handleFilterClick = () => {
     if (actions.filter?.onClick) {
       actions.filter.onClick()
     }
     setShowFilterPopover(true)
   }
-
   const handleNotificationsClick = () => {
     if (actions.notifications?.onClick) {
       actions.notifications.onClick()
     }
     setShowNotificationsPopover(true)
   }
-
   return (
     <>
       <BottomSheet open={showSearchPopover} onOpenChange={setShowSearchPopover}>
@@ -74,7 +70,7 @@ export function ActionBarMobile() {
           </BottomSheetHeader>
           <BottomSheetBody>
             <div className="flex items-center gap-2">
-              <Search className="h-5 w-5" style={{ color: 'var(--main-sidebar-fg)' }} />
+              <Search className="h-5 w-5" style={{ color: 'var(--main-sidebar-fg)'}} />
               <Input
                 ref={searchInputRef}
                 placeholder="Buscar..."
@@ -91,7 +87,6 @@ export function ActionBarMobile() {
           </BottomSheetBody>
         </BottomSheetContent>
       </BottomSheet>
-
       {filterConfig && (
         <BottomSheet open={showFilterPopover} onOpenChange={setShowFilterPopover}>
           <BottomSheetContent>
@@ -102,7 +97,7 @@ export function ActionBarMobile() {
               <div className="space-y-4">
                 {filterConfig.filters?.map((filter: any, index: number) => (
                   <div key={filter.key || index} className="space-y-2">
-                    <Label htmlFor={filter.key} style={{ color: 'var(--main-sidebar-fg)' }}>
+                    <Label htmlFor={filter.key} style={{ color: 'var(--main-sidebar-fg)'}}>
                       {filter.label}
                     </Label>
                     <Select value={filter.value || ''} onValueChange={filter.onChange}>
@@ -147,7 +142,6 @@ export function ActionBarMobile() {
           </BottomSheetContent>
         </BottomSheet>
       )}
-
       <BottomSheet open={showNotificationsPopover} onOpenChange={setShowNotificationsPopover}>
         <BottomSheetContent>
           <BottomSheetHeader>
@@ -157,7 +151,7 @@ export function ActionBarMobile() {
             <div className="py-8 text-center">
               <div className="flex flex-col items-center gap-2">
                 <Bell className="h-8 w-8 text-gray-400" />
-                <p style={{ color: 'var(--main-sidebar-fg)' }} className="text-sm">
+                <p style={{ color: 'var(--main-sidebar-fg)'}} className="text-sm">
                   Sin notificaciones
                 </p>
               </div>
@@ -165,7 +159,6 @@ export function ActionBarMobile() {
           </BottomSheetBody>
         </BottomSheetContent>
       </BottomSheet>
-
       <div 
         className="fixed bottom-0 left-0 right-0 z-40 px-4 py-3"
         style={{ 
@@ -174,7 +167,7 @@ export function ActionBarMobile() {
           borderTopWidth: '1px'
         }}
       >
-        <div className={`flex items-center justify-between ${actions.create ? 'px-4' : 'px-8'}`}>
+        <div className={`flex items-center justify-between ${actions.create ? 'px-4': 'px-8'}`}>
           <button
             onClick={() => navigate('/organization/dashboard')}
             className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors group"
@@ -182,11 +175,10 @@ export function ActionBarMobile() {
             <Home 
               className="h-6 w-6 transition-colors group-hover:text-[var(--accent)]" 
               style={{ 
-                color: 'var(--text-secondary)' 
+                color: 'var(--text-secondary)'
               }} 
             />
           </button>
-
           {actions.search && (
             <button
               onClick={handleSearchClick}
@@ -195,12 +187,11 @@ export function ActionBarMobile() {
               <Search 
                 className="h-6 w-6 transition-colors group-hover:text-[var(--accent)]" 
                 style={{ 
-                  color: showSearchPopover ? 'var(--accent)' : 'var(--text-secondary)' 
+                  color: showSearchPopover ? 'var(--accent)': 'var(--text-secondary)'
                 }} 
               />
             </button>
           )}
-
           {actions.create && (
             actions.create.planRestriction ? (
               <PlanRestricted 
@@ -215,7 +206,7 @@ export function ActionBarMobile() {
                 <button
                   onClick={actions.create.onClick}
                   className="flex items-center justify-center w-14 h-14 rounded-full shadow-lg text-white transition-colors"
-                  style={{ backgroundColor: 'var(--accent)' }}
+                  style={{ backgroundColor: 'var(--accent)'}}
                   data-testid="button-create-mobile"
                 >
                   {React.createElement(actions.create.icon, { className: "h-6 w-6" })}
@@ -225,14 +216,13 @@ export function ActionBarMobile() {
               <button
                 onClick={actions.create.onClick}
                 className="flex items-center justify-center w-14 h-14 rounded-full shadow-lg text-white transition-colors"
-                style={{ backgroundColor: 'var(--accent)' }}
+                style={{ backgroundColor: 'var(--accent)'}}
                 data-testid="button-create-mobile"
               >
                 {React.createElement(actions.create.icon, { className: "h-6 w-6" })}
               </button>
             )
           )}
-
           {actions.filter && (
             <button
               onClick={handleFilterClick}
@@ -241,12 +231,11 @@ export function ActionBarMobile() {
               <Filter 
                 className="h-6 w-6 transition-colors group-hover:text-[var(--accent)]" 
                 style={{ 
-                  color: showFilterPopover ? 'var(--accent)' : 'var(--text-secondary)' 
+                  color: showFilterPopover ? 'var(--accent)': 'var(--text-secondary)'
                 }} 
               />
             </button>
           )}
-
           {actions.notifications && (
             <button
               onClick={handleNotificationsClick}
@@ -255,7 +244,7 @@ export function ActionBarMobile() {
               <Bell 
                 className="h-6 w-6 transition-colors group-hover:text-[var(--accent)]" 
                 style={{ 
-                  color: showNotificationsPopover ? 'var(--accent)' : 'var(--text-secondary)' 
+                  color: showNotificationsPopover ? 'var(--accent)': 'var(--text-secondary)'
                 }} 
               />
             </button>
@@ -265,5 +254,4 @@ export function ActionBarMobile() {
     </>
   )
 }
-
 export const MobileActionBar = ActionBarMobile

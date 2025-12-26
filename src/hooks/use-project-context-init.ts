@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectContext } from '@/stores/projectContext';
-
 /**
  * Hook que inicializa el contexto de proyecto cuando cambia la organización del usuario
  * Diseñado para ser idempotente y evitar múltiples ejecuciones
@@ -10,7 +9,6 @@ export function useProjectContextInit() {
   const { data: userData } = useCurrentUser();
   const { setCurrentOrganization } = useProjectContext();
   const lastInitializedOrgRef = useRef<string | null>(null);
-
   useEffect(() => {
     const userOrganizationId = userData?.organization?.id;
     

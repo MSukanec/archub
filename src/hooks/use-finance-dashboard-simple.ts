@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { format, subMonths, startOfMonth, endOfMonth, eachMonthOfInterval, startOfYear, endOfYear, subYears, subQuarters, startOfQuarter, endOfQuarter } from 'date-fns'
 import { es } from 'date-fns/locale'
-
 interface FinancialSummary {
   totalIncome: number
   totalExpenses: number
@@ -12,20 +11,17 @@ interface FinancialSummary {
   thisMonthExpenses: number
   thisMonthBalance: number
 }
-
 interface MonthlyFlowData {
   month: string
   income: number
   expenses: number
   net: number
 }
-
 interface WalletBalance {
   wallet: string
   balance: number
   color: string
 }
-
 // Helper function to get date range based on time period
 function getDateRange(timePeriod: string) {
   const now = new Date()
@@ -56,7 +52,6 @@ function getDateRange(timePeriod: string) {
       return null // No date filtering
   }
 }
-
 export function useFinancialSummary(organizationId: string | undefined, projectId: string | undefined, timePeriod: string = 'desde-siempre') {
   return useQuery({
     queryKey: ['financial-summary', organizationId, projectId, timePeriod],
@@ -72,18 +67,15 @@ export function useFinancialSummary(organizationId: string | undefined, projectI
           thisMonthBalance: 0
         }
       }
-
       try {
         // Get movements data first
         let movementsQuery = supabase
           .from('movements')
           .select('amount, movement_date, type_id')
           .eq('organization_id', organizationId)
-
         if (projectId) {
           movementsQuery = movementsQuery.eq('project_id', projectId)
         }
-
         // Apply date filtering if needed
         const dateRange = getDateRange(timePeriod)
         if (dateRange) {
@@ -91,9 +83,7 @@ export function useFinancialSummary(organizationId: string | undefined, projectI
             .gte('movement_date', dateRange.start.toISOString())
             .lte('movement_date', dateRange.end.toISOString())
         }
-
         const { data: movements, error } = await movementsQuery
-
         if (error) throw error
         if (!movements || movements.length === 0) {
           return {
@@ -106,7 +96,6 @@ export function useFinancialSummary(organizationId: string | undefined, projectI
             thisMonthBalance: 0
           }
         }
-
         // Get unique type IDs
         const typeIds = Array.from(new Set(movements.map(m => m.type_id).filter(Boolean)))
         
@@ -115,23 +104,19 @@ export function useFinancialSummary(organizationId: string | undefined, projectI
           .from('movement_concepts')
           .select('id, name')
           .in('id', typeIds)
-
         // Create lookup map
         const conceptsMap = new Map()
         concepts?.forEach(concept => {
           conceptsMap.set(concept.id, concept.name)
         })
-
         // Calculate totals
         let totalIncome = 0
         let totalExpenses = 0
         let thisMonthIncome = 0
         let thisMonthExpenses = 0
-
         const currentMonth = new Date()
         const monthStart = startOfMonth(currentMonth)
         const monthEnd = endOfMonth(currentMonth)
-
         movements.forEach(movement => {
           const amount = Math.abs(movement.amount || 0)
           const typeName = conceptsMap.get(movement.type_id)?.toLowerCase() || ''
@@ -139,7 +124,6 @@ export function useFinancialSummary(organizationId: string | undefined, projectI
           
           const isIncome = typeName.includes('ingreso')
           const isThisMonth = movementDate >= monthStart && movementDate <= monthEnd
-
           if (isIncome) {
             totalIncome += amount
             if (isThisMonth) thisMonthIncome += amount
@@ -148,7 +132,6 @@ export function useFinancialSummary(organizationId: string | undefined, projectI
             if (isThisMonth) thisMonthExpenses += amount
           }
         })
-
         return {
           totalIncome,
           totalExpenses,
@@ -174,19 +157,16 @@ export function useFinancialSummary(organizationId: string | undefined, projectI
     enabled: !!organizationId
   })
 }
-
 export function useMonthlyFlowData(organizationId: string | undefined, projectId: string | undefined, timePeriod: string = 'desde-siempre') {
   return useQuery({
     queryKey: ['monthly-flow', organizationId, projectId, timePeriod],
     queryFn: async (): Promise<MonthlyFlowData[]> => {
       if (!organizationId || !supabase) return []
-
       try {
         // Adjust time range based on period
         let endDate = new Date()
         let startDate: Date
         let months: Date[]
-
         const dateRange = getDateRange(timePeriod)
         if (dateRange) {
           startDate = dateRange.start
@@ -195,10 +175,8 @@ export function useMonthlyFlowData(organizationId: string | undefined, projectId
           // Default: last 12 months
           startDate = subMonths(endDate, 11)
         }
-
         // Generate months within the range
         months = eachMonthOfInterval({ start: startDate, end: endDate })
-
         // Get movements data
         let movementsQuery = supabase
           .from('movements')
@@ -206,16 +184,12 @@ export function useMonthlyFlowData(organizationId: string | undefined, projectId
           .eq('organization_id', organizationId)
           .gte('movement_date', startDate.toISOString())
           .lte('movement_date', endDate.toISOString())
-
         if (projectId) {
           movementsQuery = movementsQuery.eq('project_id', projectId)
         }
-
         const { data: movements, error } = await movementsQuery
-
         if (error) throw error
         if (!movements || movements.length === 0) return []
-
         // Get unique type IDs
         const typeIds = Array.from(new Set(movements.map(m => m.type_id).filter(Boolean)))
         
@@ -224,13 +198,11 @@ export function useMonthlyFlowData(organizationId: string | undefined, projectId
           .from('movement_concepts')
           .select('id, name')
           .in('id', typeIds)
-
         // Create lookup map
         const conceptsMap = new Map()
         concepts?.forEach(concept => {
           conceptsMap.set(concept.id, concept.name)
         })
-
         // Group by month
         const monthlyData: MonthlyFlowData[] = months.map(month => {
           const monthStart = startOfMonth(month)
@@ -238,7 +210,6 @@ export function useMonthlyFlowData(organizationId: string | undefined, projectId
           
           let income = 0
           let expenses = 0
-
           movements.forEach(movement => {
             const movementDate = new Date(movement.movement_date)
             if (movementDate >= monthStart && movementDate <= monthEnd) {
@@ -252,7 +223,6 @@ export function useMonthlyFlowData(organizationId: string | undefined, projectId
               }
             }
           })
-
           return {
             month: format(month, 'MMM yyyy', { locale: es }),
             income,
@@ -260,7 +230,6 @@ export function useMonthlyFlowData(organizationId: string | undefined, projectId
             net: income - expenses
           }
         })
-
         return monthlyData
       } catch (error) {
         console.error('Error in useMonthlyFlowData:', error)
@@ -270,24 +239,20 @@ export function useMonthlyFlowData(organizationId: string | undefined, projectId
     enabled: !!organizationId
   })
 }
-
 export function useWalletBalances(organizationId: string | undefined, projectId: string | undefined, timePeriod: string = 'desde-siempre') {
   return useQuery({
     queryKey: ['wallet-balances', organizationId, projectId, timePeriod],
     queryFn: async (): Promise<WalletBalance[]> => {
       if (!organizationId || !supabase) return []
-
       try {
         // Get movements data
         let movementsQuery = supabase
           .from('movements')
           .select('amount, type_id, wallet_id, movement_date')
           .eq('organization_id', organizationId)
-
         if (projectId) {
           movementsQuery = movementsQuery.eq('project_id', projectId)
         }
-
         // Apply date filtering if needed
         const dateRange = getDateRange(timePeriod)
         if (dateRange) {
@@ -295,17 +260,13 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
             .gte('movement_date', dateRange.start.toISOString())
             .lte('movement_date', dateRange.end.toISOString())
         }
-
         const { data: movements, error } = await movementsQuery
-
         if (error) throw error
         if (!movements || movements.length === 0) {
           console.log('No movements found for wallet balances')
           return []
         }
-
         console.log('Movements found for wallets:', movements.length)
-
         // Get unique IDs
         const typeIds = Array.from(new Set(movements.map(m => m.type_id).filter(Boolean)))
         const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean)))
@@ -317,21 +278,17 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
           supabase.from('movement_concepts').select('id, name').in('id', typeIds),
           supabase.from('wallets').select('id, name').in('id', walletIds)
         ])
-
         // Create lookup maps
         const conceptsMap = new Map()
         conceptsResult.data?.forEach(concept => {
           conceptsMap.set(concept.id, concept.name)
         })
-
         const walletsMap = new Map()
         walletsResult.data?.forEach(wallet => {
           walletsMap.set(wallet.id, wallet.name)
         })
-
         // Calculate balances by wallet
         const walletBalances: { [key: string]: number } = {}
-
         movements.forEach(movement => {
           const walletName = walletsMap.get(movement.wallet_id) || 'Sin billetera'
           const amount = movement.amount || 0
@@ -340,14 +297,12 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
           if (!walletBalances[walletName]) {
             walletBalances[walletName] = 0
           }
-
           if (typeName.includes('ingreso')) {
             walletBalances[walletName] += Math.abs(amount)
           } else {
             walletBalances[walletName] -= Math.abs(amount)
           }
         })
-
         // Generate colors - using hardcoded HSL values like ExpensesByCategory
         const colors = [
           'hsl(110, 40%, 50%)',
@@ -356,9 +311,7 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
           'hsl(43, 74%, 66%)',
           'hsl(0, 87%, 67%)'
         ]
-
         console.log('Wallet balances calculated:', walletBalances)
-
         // Convert to array - show absolute values for all balances
         const result: WalletBalance[] = Object.entries(walletBalances)
           .map(([walletName, balance], index) => ({
@@ -367,7 +320,6 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
             color: colors[index % colors.length]
           }))
           .filter(item => item.balance > 0.01) // Filter only very small amounts
-
         console.log('Final wallet chart data:', result)
         return result
       } catch (error) {
@@ -378,13 +330,11 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
     enabled: !!organizationId
   })
 }
-
 export function useRecentMovements(organizationId: string | undefined, projectId: string | undefined, limit: number = 5, timePeriod: string = 'desde-siempre') {
   return useQuery({
     queryKey: ['recent-movements', organizationId, projectId, limit, timePeriod],
     queryFn: async () => {
       if (!organizationId || !supabase) return []
-
       try {
         // Get recent movements
         let movementsQuery = supabase
@@ -393,11 +343,9 @@ export function useRecentMovements(organizationId: string | undefined, projectId
           .eq('organization_id', organizationId)
           .order('movement_date', { ascending: false })
           .limit(limit)
-
         if (projectId) {
           movementsQuery = movementsQuery.eq('project_id', projectId)
         }
-
         // Apply date filtering if needed
         const dateRange = getDateRange(timePeriod)
         if (dateRange) {
@@ -405,12 +353,9 @@ export function useRecentMovements(organizationId: string | undefined, projectId
             .gte('movement_date', dateRange.start.toISOString())
             .lte('movement_date', dateRange.end.toISOString())
         }
-
         const { data: movements, error } = await movementsQuery
-
         if (error) throw error
         if (!movements || movements.length === 0) return []
-
         // Get unique type IDs
         const typeIds = Array.from(new Set(movements.map(m => m.type_id).filter(Boolean)))
         
@@ -419,13 +364,11 @@ export function useRecentMovements(organizationId: string | undefined, projectId
           .from('movement_concepts')
           .select('id, name')
           .in('id', typeIds)
-
         // Create lookup map
         const conceptsMap = new Map()
         concepts?.forEach(concept => {
           conceptsMap.set(concept.id, concept.name)
         })
-
         // Add concept names to movements
         const enrichedMovements = movements.map(movement => ({
           ...movement,
@@ -433,7 +376,6 @@ export function useRecentMovements(organizationId: string | undefined, projectId
             name: conceptsMap.get(movement.type_id) || 'Desconocido'
           }
         }))
-
         return enrichedMovements
       } catch (error) {
         console.error('Error in useRecentMovements:', error)
@@ -443,20 +385,17 @@ export function useRecentMovements(organizationId: string | undefined, projectId
     enabled: !!organizationId
   })
 }
-
 interface ExpensesCategoryData {
   category: string
   amount: number
   percentage: number
   color: string
 }
-
 export function useExpensesByCategory(organizationId: string | undefined, projectId: string | undefined, timePeriod: string = 'desde-siempre') {
   return useQuery({
     queryKey: ['expenses-by-category', organizationId, projectId, timePeriod],
     queryFn: async (): Promise<ExpensesCategoryData[]> => {
       if (!organizationId || !supabase) return []
-
       try {
         // First, get the EGRESO type concept IDs
         const { data: egresoTypes } = await supabase
@@ -482,11 +421,9 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
           .eq('organization_id', organizationId)
           .in('type_id', egresoTypeIds) // Only EGRESO movements
           .neq('amount', 0) // Exclude zero amounts
-
         if (projectId) {
           movementsQuery = movementsQuery.eq('project_id', projectId)
         }
-
         // Apply date filtering if needed
         const dateRange = getDateRange(timePeriod)
         if (dateRange) {
@@ -494,15 +431,12 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
             .gte('movement_date', dateRange.start.toISOString())
             .lte('movement_date', dateRange.end.toISOString())
         }
-
         const { data: movements, error } = await movementsQuery
-
         if (error) throw error
         
         if (!movements || movements.length === 0) {
           return []
         }
-
         // Get unique category IDs
         const categoryIds = Array.from(new Set(movements.map(m => m.category_id).filter(Boolean)))
         
@@ -511,17 +445,14 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
           .from('movement_concepts')
           .select('id, name')
           .in('id', categoryIds)
-
         // Create lookup map
         const categoriesMap = new Map()
         categories?.forEach(category => {
           categoriesMap.set(category.id, category.name)
         })
-
         // Group by category and sum amounts
         const categoryTotals = new Map<string, number>()
         let totalExpenses = 0
-
         // Process expense movements by category
         movements.forEach((movement: any) => {
           const categoryName = categoriesMap.get(movement.category_id) || 'Sin Categoría'
@@ -530,7 +461,6 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
           categoryTotals.set(categoryName, (categoryTotals.get(categoryName) || 0) + amount)
           totalExpenses += amount
         })
-
         // Convert to array with percentages and colors
         const colors = [
           "hsl(110, 40%, 50%)",
@@ -544,7 +474,6 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
           "hsl(120, 60%, 40%)",
           "hsl(300, 70%, 60%)"
         ]
-
         const result: ExpensesCategoryData[] = Array.from(categoryTotals.entries())
           .map(([category, amount], index) => ({
             category,
@@ -554,9 +483,6 @@ export function useExpensesByCategory(organizationId: string | undefined, projec
           }))
           .sort((a, b) => b.amount - a.amount) // Sort by amount descending
           .filter(item => item.amount > 0) // Only include positive amounts
-
-
-
         return result
       } catch (error) {
         console.error('Error in useExpensesByCategory:', error)

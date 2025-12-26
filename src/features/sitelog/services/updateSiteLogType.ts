@@ -1,10 +1,8 @@
 import { supabase } from '@/lib/supabase';
-
 export interface UpdateSiteLogTypeData {
   name?: string;
   description?: string | null;
 }
-
 /**
  * Actualiza un tipo de bitácora personalizado de una organización.
  * Solo se pueden actualizar tipos que pertenecen a la organización (no del sistema).
@@ -23,11 +21,9 @@ export async function updateSiteLogType(
   if (!supabase) {
     throw new Error('Supabase client not available');
   }
-
   if (!typeId || !organizationId) {
     throw new Error('Missing required parameters: typeId and organizationId are required');
   }
-
   // Actualizar solo si pertenece a la organización (no tipos del sistema)
   const { data: updatedType, error } = await supabase
     .from('site_log_types')
@@ -36,11 +32,9 @@ export async function updateSiteLogType(
     .eq('organization_id', organizationId)
     .select()
     .single();
-
   if (error) {
     console.error('Error updating site log type:', error);
     throw error;
   }
-
   return updatedType;
 }

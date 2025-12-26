@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FolderPlus, Pencil } from 'lucide-react';
-
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -11,7 +10,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useCreateCategory, useUpdateCategory, type ForumCategory } from '../services';
 import { useToast } from '@/hooks/use-toast';
-
 const categorySchema = z.object({
   name: z.string().min(1, 'El nombre es requerido').max(100, 'Máximo 100 caracteres'),
   description: z.string().optional(),
@@ -19,32 +17,26 @@ const categorySchema = z.object({
   color: z.string().optional(),
   allowed_roles: z.array(z.string()).default(['public']),
 });
-
 type CategoryFormData = z.infer<typeof categorySchema>;
-
 interface ForumCategoryFormProps {
   modalData?: {
     category?: ForumCategory;
-    mode?: 'create' | 'edit';
+    mode?: 'create'| 'edit';
   };
   onClose: () => void;
 }
-
 const ROLE_OPTIONS = [
-  { value: 'public', label: 'Público' },
-  { value: 'founder', label: 'Fundadores' },
-  { value: 'admin', label: 'Administradores' },
+  { value: 'public', label: 'Público'},
+  { value: 'founder', label: 'Fundadores'},
+  { value: 'admin', label: 'Administradores'},
 ];
-
 export default function ForumCategoryForm({ modalData, onClose }: ForumCategoryFormProps) {
   const { toast } = useToast();
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();
-
   const category = modalData?.category;
-  const mode = modalData?.mode || (category ? 'edit' : 'create');
-  const isEditing = mode === 'edit' && !!category;
-
+  const mode = modalData?.mode || (category ? 'edit': 'create');
+  const isEditing = mode === 'edit'&& !!category;
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
@@ -55,7 +47,6 @@ export default function ForumCategoryForm({ modalData, onClose }: ForumCategoryF
       allowed_roles: ['public'],
     },
   });
-
   useEffect(() => {
     if (isEditing && category) {
       form.reset({
@@ -67,7 +58,6 @@ export default function ForumCategoryForm({ modalData, onClose }: ForumCategoryF
       });
     }
   }, [category, isEditing, form]);
-
   const onSubmit = async (data: CategoryFormData) => {
     try {
       if (isEditing && category) {
@@ -102,22 +92,19 @@ export default function ForumCategoryForm({ modalData, onClose }: ForumCategoryF
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || `No se pudo ${isEditing ? 'actualizar' : 'crear'} la categoría`,
+        description: error.message || `No se pudo ${isEditing ? 'actualizar': 'crear'} la categoría`,
         variant: 'destructive',
       });
     }
   };
-
   const isPending = createMutation.isPending || updateMutation.isPending;
-
   return (
     <ModalLayout onClose={onClose} size="md">
       <ModalHeader
-        title={isEditing ? 'Editar Categoría' : 'Nueva Categoría'}
-        description={isEditing ? 'Modifica los datos de la categoría' : 'Crea una nueva categoría para el foro'}
+        title={isEditing ? 'Editar Categoría': 'Nueva Categoría'}
+        description={isEditing ? 'Modifica los datos de la categoría': 'Crea una nueva categoría para el foro'}
         icon={isEditing ? Pencil : FolderPlus}
       />
-
       <ModalBody>
         <Form {...form}>
           <form className="space-y-4">
@@ -138,7 +125,6 @@ export default function ForumCategoryForm({ modalData, onClose }: ForumCategoryF
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="description"
@@ -157,7 +143,6 @@ export default function ForumCategoryForm({ modalData, onClose }: ForumCategoryF
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="icon"
@@ -175,7 +160,6 @@ export default function ForumCategoryForm({ modalData, onClose }: ForumCategoryF
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="color"
@@ -193,7 +177,6 @@ export default function ForumCategoryForm({ modalData, onClose }: ForumCategoryF
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="allowed_roles"
@@ -237,11 +220,10 @@ export default function ForumCategoryForm({ modalData, onClose }: ForumCategoryF
           </form>
         </Form>
       </ModalBody>
-
       <ModalFooter
         leftLabel="Cancelar"
         onLeftClick={onClose}
-        submitText={isEditing ? 'Guardar Cambios' : 'Crear Categoría'}
+        submitText={isEditing ? 'Guardar Cambios': 'Crear Categoría'}
         onSubmit={form.handleSubmit(onSubmit)}
         isSubmitting={isPending}
       />

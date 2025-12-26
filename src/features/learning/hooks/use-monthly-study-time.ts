@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getMonthlyStudyTime } from '../services';
 import { LEARNING_QUERY_KEYS } from '../constants';
-
 /**
  * Hook para obtener el tiempo de estudio del mes actual.
  * 

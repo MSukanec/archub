@@ -9,7 +9,6 @@ import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
 import { getGeneralCostCategoryUsageCount } from '@/features/general-costs/services/generalCostCategories';
 import type { GeneralCostCategory } from '@/features/general-costs/types';
-
 export default function GeneralCostsSettingsView() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -19,35 +18,29 @@ export default function GeneralCostsSettingsView() {
   const { data: categories = [], isLoading } = useGeneralCostCategories(organizationId ?? undefined);
   const deleteMutation = useDeleteGeneralCostCategory();
   const replaceMutation = useReplaceGeneralCostCategory(organizationId);
-
   const sortedCategories = [...categories].sort((a, b) => 
     a.name.toLowerCase().localeCompare(b.name.toLowerCase())
   );
-
   const handleAddCategory = () => {
     openModal('generalCostCategory', { isEditing: false });
   };
-
   const handleEditCategory = (category: GeneralCostCategory) => {
     openModal('generalCostCategory', { 
       category,
       isEditing: true 
     });
   };
-
   const handleDeleteCategory = async (category: GeneralCostCategory) => {
     if (!organizationId) return;
-
     try {
       const usageCount = await getGeneralCostCategoryUsageCount(category.id);
       
       const otherCategories = categories.filter(c => c.id !== category.id);
       const canReplace = usageCount > 0 && otherCategories.length > 0;
-
       const consequences: string[] = [];
       if (usageCount > 0) {
         consequences.push(
-          `${usageCount} gasto${usageCount === 1 ? '' : 's'} tiene${usageCount === 1 ? '' : 'n'} esta categoría asignada`
+          `${usageCount} gasto${usageCount === 1 ? '': 's'} tiene${usageCount === 1 ? '': 'n'} esta categoría asignada`
         );
         if (canReplace) {
           consequences.push('Podés reemplazarlos con otra categoría o dejarlos sin categoría asignada');
@@ -55,16 +48,14 @@ export default function GeneralCostsSettingsView() {
           consequences.push('Los gastos quedarán sin categoría asignada');
         }
       }
-
       const replacementOptions = otherCategories
-        .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
+        .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base'}))
         .map(c => ({
-          label: c.name + (c.is_system ? ' (Sistema)' : ''),
+          label: c.name + (c.is_system ? '(Sistema)': ''),
           value: c.id
         }));
-
       openModal('delete-confirmation', {
-        mode: canReplace ? 'replace' : 'delete',
+        mode: canReplace ? 'replace': 'delete',
         title: '¿Eliminar categoría?',
         description: `¿Estás seguro de que querés eliminar la categoría "${category.name}"?`,
         itemName: category.name,
@@ -108,7 +99,6 @@ export default function GeneralCostsSettingsView() {
       });
     }
   };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -116,7 +106,6 @@ export default function GeneralCostsSettingsView() {
       </div>
     );
   }
-
   return (
     <div className="p-6 space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -142,7 +131,6 @@ export default function GeneralCostsSettingsView() {
             Puedes crear categorías personalizadas para adaptar la gestión de gastos a las necesidades de tu organización.
           </p>
         </div>
-
         <div className="space-y-3">
           {sortedCategories.map((category) => (
             <div 
@@ -190,7 +178,6 @@ export default function GeneralCostsSettingsView() {
               </div>
             </div>
           ))}
-
           {sortedCategories.length === 0 && (
             <div className="p-8 text-center rounded-lg border border-dashed border-border">
               <FolderOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />

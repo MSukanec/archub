@@ -1,6 +1,5 @@
 import { MarketingLayout } from "@/layouts/marketing";
 import { FoundersContent, HeroSection } from "@/features/shared-content/founders";
-
 export default function FoundersPage() {
   return (
     <MarketingLayout

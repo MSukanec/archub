@@ -1,13 +1,11 @@
 import { SectionHeader } from './SectionHeader';
-
 interface CourseDetailsSectionProps {
   course?: any;
   title?: string;
   subtitle?: string;
   description?: string;
-  variant?: 'default' | 'no-container';
+  variant?: 'default'| 'no-container';
 }
-
 export function CourseDetailsSection({ 
   course,
   title = "DETALLES DEL CURSO",
@@ -16,7 +14,6 @@ export function CourseDetailsSection({
   variant = 'default'
 }: CourseDetailsSectionProps) {
   if (!course) return null;
-
   const content = (
     <div className="space-y-12">
       <SectionHeader
@@ -24,7 +21,6 @@ export function CourseDetailsSection({
         subtitle={subtitle}
         description={description}
       />
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-background rounded-lg border shadow-sm p-6 space-y-4">
           <div className="space-y-2">
@@ -35,7 +31,6 @@ export function CourseDetailsSection({
               Detalles Completos
             </h3>
           </div>
-
           <ul className="space-y-3 text-sm sm:text-base text-muted-foreground">
             {course.course_name && (
               <li className="flex gap-3">
@@ -71,7 +66,6 @@ export function CourseDetailsSection({
             </li>
           </ul>
         </div>
-
         <div className="bg-background rounded-lg border shadow-sm p-6 space-y-4">
           <div className="space-y-2">
             <p className="text-xs sm:text-sm md:text-base uppercase tracking-wide font-semibold text-accent">
@@ -81,7 +75,6 @@ export function CourseDetailsSection({
               Tu Suscripción
             </h3>
           </div>
-
           <ul className="space-y-3 text-sm sm:text-base text-muted-foreground">
             <li className="flex gap-3">
               <span className="font-semibold text-foreground">TIPO:</span>
@@ -112,11 +105,9 @@ export function CourseDetailsSection({
       </div>
     </div>
   );
-
   if (variant === 'no-container') {
     return <section className="py-16 sm:py-20">{content}</section>;
   }
-
   return (
     <section className="py-16 sm:py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

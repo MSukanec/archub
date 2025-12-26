@@ -2,7 +2,6 @@ import React from 'react';
 import DataRowCard from '@/components/shared/DataRowCard';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
-
 // Interface para el producto usando la estructura actual de products_view
 interface Product {
   id: string;
@@ -26,15 +25,13 @@ interface Product {
   avg_price?: number;
   providers_count?: number;
 }
-
 interface AdminProductRowProps {
   product: Product;
   onClick?: () => void;
   selected?: boolean;
-  density?: 'compact' | 'normal' | 'comfortable';
+  density?: 'compact'| 'normal'| 'comfortable';
   className?: string;
 }
-
 // Helper para obtener las iniciales del producto
 const getProductInitials = (product: Product): string => {
   const material = product.material || 'P';
@@ -45,7 +42,6 @@ const getProductInitials = (product: Product): string => {
   }
   return material.slice(0, 2).toUpperCase();
 };
-
 // Componente para mostrar solo el botón de enlace
 const LinkButton = ({ url }: { url?: string }) => {
   const handleLinkClick = (e: React.MouseEvent) => {
@@ -54,9 +50,7 @@ const LinkButton = ({ url }: { url?: string }) => {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
-
   if (!url) return null;
-
   return (
     <Button
       variant="ghost"
@@ -69,7 +63,6 @@ const LinkButton = ({ url }: { url?: string }) => {
     </Button>
   );
 };
-
 export default function AdminProductRow({ 
   product, 
   onClick, 
@@ -90,21 +83,18 @@ export default function AdminProductRow({
           {(() => {
             const hierarchy = product.category_hierarchy || 'Sin categoría';
             // Extraer solo la primera categoría (antes del primer " > ")
-            const firstCategory = hierarchy.split(' > ')[0];
+            const firstCategory = hierarchy.split('> ')[0];
             return firstCategory;
           })()}
         </div>
-
         {/* Segunda fila - Material */}
         <div className="font-semibold text-xs truncate">
           {product.material || 'Sin material'}
         </div>
-
         {/* Tercera fila - Marca - Modelo */}
         <div className="font-semibold text-sm truncate">
           {product.brand ? `${product.brand} - ${product.name}` : product.name}
         </div>
-
         {/* Cuarta fila - Unidad - Precio */}
         <div className="text-xs text-muted-foreground truncate">
           {(() => {
@@ -115,7 +105,6 @@ export default function AdminProductRow({
             return `${unitName} - ${price}`;
           })()}
         </div>
-
         {/* Quinta fila - Link */}
         {product.url && (
           <div className="text-xs text-muted-foreground truncate mt-1">
@@ -123,12 +112,10 @@ export default function AdminProductRow({
           </div>
         )}
       </div>
-
       {/* Espacio mínimo para chevron si existe */}
       {onClick && <div className="w-2" />}
     </>
   );
-
   // Usar el nuevo DataRowCard con avatar
   return (
     <DataRowCard
@@ -144,6 +131,5 @@ export default function AdminProductRow({
     </DataRowCard>
   );
 }
-
 // Export del tipo para uso externo
 export type { Product };

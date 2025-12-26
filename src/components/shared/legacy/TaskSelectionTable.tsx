@@ -8,7 +8,6 @@ import { Search, Package, CheckSquare, List, FolderOpen } from 'lucide-react';
 import { useConstructionTasks } from '@/hooks/use-construction-tasks';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectContext } from '@/stores/projectContext';
-
 export interface SelectedTask {
   task_instance_id: string;
   display_name: string;
@@ -17,15 +16,12 @@ export interface SelectedTask {
   unit_symbol: string | null;
   task_code: string;
 }
-
-type GroupingType = 'none' | 'rubro';
-
+type GroupingType = 'none'| 'rubro';
 interface TaskSelectionTableProps {
   selectedTasks: SelectedTask[];
   onTasksChange: (tasks: SelectedTask[]) => void;
   excludeTaskIds?: string[]; // IDs de tareas que ya están en el presupuesto
 }
-
 export const TaskSelectionTable = React.memo(function TaskSelectionTable({ 
   selectedTasks, 
   onTasksChange, 
@@ -40,13 +36,11 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
     selectedProjectId || '',
     currentOrganizationId || ''
   );
-
   // Debug logging to understand data structure
   React.useEffect(() => {
     if (allTasks.length > 0) {
     }
   }, [allTasks]);
-
   // Filtrar tareas disponibles (excluir las que ya están en el presupuesto)
   const availableTasks = useMemo(() => {
     const filtered = allTasks.filter(task => 
@@ -54,7 +48,6 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
     );
     return filtered;
   }, [allTasks, excludeTaskIds]);
-
   // Filtrar tareas por término de búsqueda
   const filteredTasks = useMemo(() => {
     if (!searchTerm.trim()) {
@@ -76,7 +69,6 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
     
     return filtered;
   }, [availableTasks, searchTerm]);
-
   // Agrupar tareas por rubro
   const tasksByRubro = useMemo(() => {
     const groups: { [key: string]: any[] } = {};
@@ -92,7 +84,6 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
     
     return groups;
   }, [filteredTasks]);
-
   const handleTaskToggle = (task: any, isChecked: boolean) => {
     const selectedTask: SelectedTask = {
       task_instance_id: task.task_instance_id,
@@ -102,14 +93,12 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
       unit_symbol: task.task?.unit_symbol || task.unit_symbol || null,
       task_code: task.task_code || task.task?.code
     };
-
     if (isChecked) {
       onTasksChange([...selectedTasks, selectedTask]);
     } else {
       onTasksChange(selectedTasks.filter(t => t.task_instance_id !== task.task_instance_id));
     }
   };
-
   const handleSelectAllRubro = (rubroTasks: any[], isChecked: boolean) => {
     if (isChecked) {
       const newTasks = rubroTasks.map((task: any) => ({
@@ -130,19 +119,15 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
       onTasksChange(selectedTasks.filter(t => !rubroTaskIds.includes(t.task_instance_id)));
     }
   };
-
   const isTaskSelected = (taskId: string) => {
     return selectedTasks.some(t => t.task_instance_id === taskId);
   };
-
   const isRubroFullySelected = (rubroTasks: any[]) => {
     return rubroTasks.length > 0 && rubroTasks.every((task: any) => isTaskSelected(task.task_instance_id));
   };
-
   const isRubroPartiallySelected = (rubroTasks: any[]) => {
     return rubroTasks.some((task: any) => isTaskSelected(task.task_instance_id)) && !isRubroFullySelected(rubroTasks);
   };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -150,7 +135,6 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
       </div>
     );
   }
-
   return (
     <div className="space-y-4">
       {/* Search and Grouping Controls */}
@@ -184,7 +168,6 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
           </SelectContent>
         </Select>
       </div>
-
       {/* Selection Summary */}
       {selectedTasks.length > 0 && (
         <Card className="border-accent/20 bg-accent/5">
@@ -192,15 +175,14 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
             <div className="flex items-center gap-2">
               <CheckSquare className="w-4 h-4 text-accent" />
               <span className="text-sm font-medium">
-                {selectedTasks.length} tarea{selectedTasks.length !== 1 ? 's' : ''} seleccionada{selectedTasks.length !== 1 ? 's' : ''}
+                {selectedTasks.length} tarea{selectedTasks.length !== 1 ? 's': ''} seleccionada{selectedTasks.length !== 1 ? 's': ''}
               </span>
             </div>
           </CardContent>
         </Card>
       )}
-
       {/* Render based on grouping type */}
-      {grouping === 'rubro' ? (
+      {grouping === 'rubro'? (
         // Grouped by Rubro View
         <div className="space-y-2">
           {Object.entries(tasksByRubro).map(([rubroName, rubroTasks]) => (
@@ -277,7 +259,6 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
           </CardContent>
         </Card>
       )}
-
       {filteredTasks.length === 0 && searchTerm && (
         <Card>
           <CardContent className="p-8 text-center">
@@ -289,7 +270,6 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
           </CardContent>
         </Card>
       )}
-
       {availableTasks.length === 0 && (
         <Card>
           <CardContent className="p-8 text-center">

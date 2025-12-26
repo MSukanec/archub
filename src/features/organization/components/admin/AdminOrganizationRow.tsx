@@ -3,7 +3,6 @@ import DataRowCard from '@/components/shared/DataRowCard';
 import { cn } from '@/lib/utils';
 import { Star, Crown, Zap } from 'lucide-react';
 import { getOrganizationInitials } from '@/utils/initials';
-
 // Interface para la organización (usando la estructura real de la app)
 interface Organization {
   id: string;
@@ -22,20 +21,13 @@ interface Organization {
   members_count?: number;
   projects_count?: number;
 }
-
 interface OrganizationRowProps {
   organization: Organization;
   onClick?: () => void;
   selected?: boolean;
-  density?: 'compact' | 'normal' | 'comfortable';
+  density?: 'compact'| 'normal'| 'comfortable';
   className?: string;
 }
-
-
-
-
-
-
 // Componente PlanBadge local para mostrar el plan de la organización
 const PlanBadge = ({ plan }: { plan?: Organization['plan'] }) => {
   const planName = plan?.name?.toLowerCase() || 'free';
@@ -43,32 +35,30 @@ const PlanBadge = ({ plan }: { plan?: Organization['plan'] }) => {
   return (
     <div className={cn(
       'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-white',
-      planName === 'free' ? 'bg-[var(--plan-free-bg)]' : '',
-      planName === 'pro' ? 'bg-[var(--plan-pro-bg)]' : '',
-      planName === 'teams' ? 'bg-[var(--plan-teams-bg)]' : ''
+      planName === 'free'? 'bg-[var(--plan-free-bg)]': '',
+      planName === 'pro'? 'bg-[var(--plan-pro-bg)]': '',
+      planName === 'teams'? 'bg-[var(--plan-teams-bg)]': ''
     )}>
-      {planName === 'free' && <Star className="w-3 h-3" />}
-      {planName === 'pro' && <Crown className="w-3 h-3" />}
-      {planName === 'teams' && <Zap className="w-3 h-3" />}
+      {planName === 'free'&& <Star className="w-3 h-3" />}
+      {planName === 'pro'&& <Crown className="w-3 h-3" />}
+      {planName === 'teams'&& <Zap className="w-3 h-3" />}
       <span className="capitalize">{plan?.name || 'Free'}</span>
     </div>
   );
 };
-
 // Componente para mostrar métricas de la organización
 const OrganizationMetrics = ({ membersCount, projectsCount }: { membersCount?: number; projectsCount?: number }) => {
   return (
     <div className="text-right space-y-1">
       <div className="text-xs text-muted-foreground">
-        {membersCount || 0} {(membersCount || 0) === 1 ? 'miembro' : 'miembros'}
+        {membersCount || 0} {(membersCount || 0) === 1 ? 'miembro': 'miembros'}
       </div>
       <div className="text-xs text-muted-foreground">
-        {projectsCount || 0} {(projectsCount || 0) === 1 ? 'proyecto' : 'proyectos'}
+        {projectsCount || 0} {(projectsCount || 0) === 1 ? 'proyecto': 'proyectos'}
       </div>
     </div>
   );
 };
-
 export function AdminOrganizationRow({ 
   organization, 
   onClick, 
@@ -86,13 +76,11 @@ export function AdminOrganizationRow({
         <div className="font-semibold text-sm truncate">
           {organization.name}
         </div>
-
         {/* Plan Badge como subtitle */}
         <div className="mt-1">
           <PlanBadge plan={organization.plan} />
         </div>
       </div>
-
       {/* Trailing Section - Métricas */}
       <div className="flex items-center">
         <OrganizationMetrics 
@@ -104,11 +92,10 @@ export function AdminOrganizationRow({
       </div>
     </>
   );
-
   // Usar el nuevo DataRowCard
   return (
     <DataRowCard
-      avatarUrl={organization.logo_url && organization.logo_url.trim() !== '' ? organization.logo_url : undefined}
+      avatarUrl={organization.logo_url && organization.logo_url.trim() !== ''? organization.logo_url : undefined}
       avatarFallback={getOrganizationInitials(organization.name)}
       selected={selected}
       density={density}
@@ -120,6 +107,5 @@ export function AdminOrganizationRow({
     </DataRowCard>
   );
 }
-
 // Export del tipo para uso externo
 export type { Organization };
