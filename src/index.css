@@ -159,15 +159,6 @@ body[data-scroll-locked] {
   --warning-text: hsl(240, 10%, 4%);
   --info-neutral-text: hsl(0, 0%, 100%);
 
-  /* Charts */
-  --chart-1: hsl(76, 100%, 40%);
-  --chart-2: hsl(173, 58%, 39%);
-  --chart-3: hsl(197, 37%, 24%);
-  --chart-4: hsl(43, 74%, 66%);
-  --chart-5: hsl(0, 87%, 67%);
-  --chart-grid-text: hsl(0, 0%, 40%);
-  --chart-ring-bg: hsl(0, 0%, 85%, 0.4);
-
   /* Tables */
   --table-header-bg: hsl(0, 0%, 97%);
   --table-header-fg: hsl(0, 0%, 20%);
@@ -335,15 +326,6 @@ body[data-scroll-locked] {
   --warning-text: hsl(240, 10%, 4%);
   --info-neutral-text: hsl(0, 0%, 100%);
 
-  /* Charts */
-  --chart-1: hsl(210, 40%, 55%);
-  --chart-2: hsl(173, 58%, 45%);
-  --chart-3: hsl(197, 37%, 35%);
-  --chart-4: hsl(43, 74%, 70%);
-  --chart-5: hsl(27, 87%, 70%);
-  --chart-grid-text: hsl(0, 0%, 40%);
-  --chart-ring-bg: hsl(0, 0%, 30%, 0.3);
-
   /* Checkbox */
   --checkbox-bg: hsl(0, 0%, 12%);
   --checkbox-border: hsl(0, 0%, 30%);
@@ -396,7 +378,6 @@ body[data-scroll-locked] {
   --warning: hsl(45, 90%, 50%);
   --pending: hsl(200, 30%, 40%);
   --info: hsl(197, 37%, 24%);
-  --neutral: hsl(0, 0%, 50%);
 
   /* Plan Badge Colors */
   --plan-free: hsl(76, 100%, 40%);
@@ -415,6 +396,29 @@ body[data-scroll-locked] {
   --positive: hsl(80, 90%, 40%);
   --negative: hsl(0, 75%, 60%);
   --neutral: hsl(0, 0%, 50%);
+}
+
+/* ========================================
+   🎨 CHART COLORS - Theme Independent
+   ======================================== */
+:root, .dark {
+  /* Light theme chart colors (1-5) */
+  --chart-1: hsl(76, 100%, 40%);
+  --chart-2: hsl(173, 58%, 39%);
+  --chart-3: hsl(197, 37%, 24%);
+  --chart-4: hsl(43, 74%, 66%);
+  --chart-5: hsl(0, 87%, 67%);
+
+  /* Dark theme chart colors (6-10) */
+  --chart-6: hsl(210, 40%, 55%);
+  --chart-7: hsl(173, 58%, 45%);
+  --chart-8: hsl(197, 37%, 35%);
+  --chart-9: hsl(43, 74%, 70%);
+  --chart-10: hsl(27, 87%, 70%);
+
+  /* Chart utilities */
+  --chart-grid-text: hsl(0, 0%, 40%);
+  --chart-ring-bg: hsl(0, 0%, 85%, 0.4);
 }
 
 /* ========================================
