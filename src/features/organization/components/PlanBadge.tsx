@@ -1,9 +1,7 @@
 import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { Star, Crown, Users, Zap } from "lucide-react";
-import { useProjectContext } from "@/stores/projectContext";
 
 interface PlanBadgeProps {
   isExpanded: boolean;
@@ -12,19 +10,6 @@ interface PlanBadgeProps {
 export default function PlanBadge({ isExpanded }: PlanBadgeProps) {
   const { data: userData } = useCurrentUser();
   const [, navigate] = useLocation();
-  const { currentOrganizationId } = useProjectContext();
-
-  // Fetch current organization to get its plan
-  const { data: organizationData } = useQuery({
-    queryKey: ['/api/organizations', currentOrganizationId],
-    queryFn: async () => {
-      if (!currentOrganizationId) return null;
-      const response = await fetch(`/api/organizations/${currentOrganizationId}`);
-      if (!response.ok) return null;
-      return response.json();
-    },
-    enabled: !!currentOrganizationId,
-  });
 
   // Colors from index.css
   const planColors = {
@@ -33,11 +18,8 @@ export default function PlanBadge({ isExpanded }: PlanBadgeProps) {
     teams: '#8b5cf6'      // --plan-teams: hsl(271, 76%, 53%)
   };
 
-  // Get plan from current organization (primary source)
-  // Falls back to user subscription plan if organization plan not available
-  const organizationPlan = organizationData?.plan?.name?.toLowerCase();
-  const userPlan = userData?.plan?.name?.toLowerCase();
-  const currentPlan = organizationPlan || userPlan || 'free';
+  // Get plan from current organization (userData.organization is the current organization)
+  const currentPlan = userData?.organization?.plan?.name?.toLowerCase() || 'free';
   const bgColor = planColors[currentPlan as keyof typeof planColors];
   const borderColor = planColors[currentPlan as keyof typeof planColors];
 
