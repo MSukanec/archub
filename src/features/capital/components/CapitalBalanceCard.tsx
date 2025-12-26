@@ -24,62 +24,71 @@ interface CapitalBalanceCardProps {
   onPartnerClick?: () => void;
 }
 
-function getContributionConfig(status: PartnerCapitalKPI['contribution_status']) {
+interface BadgeConfig {
+  icon: any;
+  label: string;
+  badgeVariant: 'neutral' | 'success';
+  className?: string;
+}
+
+function getContributionConfig(status: PartnerCapitalKPI['contribution_status']): BadgeConfig {
   switch (status) {
     case 'equilibrado':
       return {
         icon: Scale,
         label: 'En equilibrio',
-        badgeVariant: 'success' as const,
+        badgeVariant: 'neutral',
       };
     case 'sobre_aportado':
       return {
         icon: TrendingUp,
         label: 'Sobre aportado',
-        badgeVariant: 'info' as const,
+        badgeVariant: 'success',
       };
     case 'bajo_aportado':
       return {
         icon: TrendingDown,
         label: 'Bajo aportado',
-        badgeVariant: 'warning' as const,
+        badgeVariant: 'neutral',
+        className: 'bg-red-100 dark:bg-red-950 text-red-900 dark:text-red-100 border-red-300 dark:border-red-800',
       };
     case 'sin_porcentaje':
     default:
       return {
         icon: Minus,
         label: 'Sin % asignado',
-        badgeVariant: 'neutral' as const,
+        badgeVariant: 'neutral',
       };
   }
 }
 
-function getNetConfig(status: PartnerCapitalKPI['net_status']) {
+function getNetConfig(status: PartnerCapitalKPI['net_status']): BadgeConfig {
   switch (status) {
     case 'equilibrado':
       return {
         icon: Scale,
         label: 'En equilibrio',
-        badgeVariant: 'success' as const,
+        badgeVariant: 'neutral',
       };
     case 'arriba':
       return {
         icon: TrendingUp,
         label: 'Capital arriba',
-        badgeVariant: 'info' as const,
+        badgeVariant: 'success',
       };
     case 'abajo':
       return {
         icon: TrendingDown,
         label: 'Capital abajo',
-        badgeVariant: 'warning' as const,
+        badgeVariant: 'neutral',
+        className: 'bg-red-100 dark:bg-red-950 text-red-900 dark:text-red-100 border-red-300 dark:border-red-800',
       };
     case 'sin_porcentaje':
     default:
       return {
         icon: Minus,
         label: 'Sin % asignado',
-        badgeVariant: 'neutral' as const,
+        badgeVariant: 'neutral',
       };
   }
 }
@@ -172,7 +181,7 @@ export function CapitalBalanceCard({
             </div>
             {partner.contribution_status !== 'sin_porcentaje' && (
               <div className="flex gap-2">
-                <Badge variant={contributionConfig.badgeVariant} className="text-xs">
+                <Badge variant={contributionConfig.badgeVariant} className={cn('text-xs', contributionConfig.className)}>
                   <ContributionIcon className="h-3 w-3 mr-1" />
                   {contributionConfig.label}
                 </Badge>
@@ -226,7 +235,7 @@ export function CapitalBalanceCard({
             </div>
             {partner.net_status !== 'sin_porcentaje' && (
               <div className="flex gap-2">
-                <Badge variant={netConfig.badgeVariant} className="text-xs">
+                <Badge variant={netConfig.badgeVariant} className={cn('text-xs', netConfig.className)}>
                   <NetIcon className="h-3 w-3 mr-1" />
                   {netConfig.label}
                 </Badge>

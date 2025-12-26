@@ -130,19 +130,6 @@ export function CapitalBalancesView() {
           </StatCardMeta>
         </StatCard>
 
-        <StatCard data-testid="stat-card-total-ajustes">
-          <StatCardTitle showArrow={false}>
-            <Scale className="h-4 w-4" />
-            Total Ajustes
-          </StatCardTitle>
-          <StatCardValue className={totalAdjustments >= 0 ? "text-[var(--positive)]" : "text-[var(--negative)]"}>
-            {totalAdjustments > 0 ? '+' : ''}{currencySymbol} {formatCurrency(totalAdjustments)}
-          </StatCardValue>
-          <StatCardMeta>
-            {totalAdjustments === 0 ? 'Sin ajustes' : 'Ajustes confirmados'}
-          </StatCardMeta>
-        </StatCard>
-
         <StatCard data-testid="stat-card-saldo-neto">
           <StatCardTitle showArrow={false}>
             <Wallet className="h-4 w-4" />
