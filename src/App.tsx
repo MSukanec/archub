@@ -103,12 +103,12 @@ const PortalAuthCallback = lazy(() => import("@/pages/client-portal/PortalAuthCa
 
 // Learning Pages (importado normalmente para evitar loader)
 import LearningDashboardPage from "@/pages/learning/LearningDashboardPage";
-import CoursesPage from "@/pages/learning/CoursesPage";
+import CoursesListPage from "@/pages/learning/CoursesListPage";
 
 // Founders Portal (Lazy Loaded - solo fundadores)
 const FoundersPortalPage = lazy(() => import("@/features/founders-portal").then(m => ({ default: m.FoundersPortalPage })));
 const CourseInfoPage = lazy(() => import("@/pages/learning/CourseInfoPage"));
-const CourseDetailsPage = lazy(() => import("@/pages/learning/CourseDetailsPage"));
+const CoursePage = lazy(() => import("@/pages/learning/CoursePage"));
 const CourseLandingPrivate = lazy(() => import("@/pages/professional/learning/CourseLanding"));
 const PaymentReturnPage = lazy(() => import("@/pages/learning/PaymentReturnPage"));
 const CheckoutPage = lazy(() => import("@/pages/checkout/CheckoutPage"));
@@ -261,7 +261,7 @@ function Router() {
         
         {/* Learning Routes */}
         <Route path="/learning/dashboard" component={LearningDashboardPage} />
-        <Route path="/learning/courses" component={CoursesPage} />
+        <Route path="/learning/courses" component={CoursesListPage} />
         <Route path="/learning/courses/:slug/info">
           <Suspense fallback={<LazyLoadFallback />}>
             <CourseInfoPage />
@@ -269,7 +269,7 @@ function Router() {
         </Route>
         <Route path="/learning/courses/:id">
           <Suspense fallback={<LazyLoadFallback />}>
-            <CourseDetailsPage />
+            <CoursePage />
           </Suspense>
         </Route>
         <Route path="/learning/landing/:slug">
