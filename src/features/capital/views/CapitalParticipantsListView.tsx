@@ -177,6 +177,20 @@ export function CapitalParticipantsListView() {
       },
     },
     {
+      key: 'ownership_percentage',
+      label: 'Participación',
+      type: 'short-text' as const,
+      sortable: true,
+      sortType: 'number' as const,
+      align: 'right' as const,
+      render: (partner: EnrichedPartner) => {
+        if (partner.ownership_percentage === null || partner.ownership_percentage === undefined) {
+          return <span className="text-muted-foreground">—</span>;
+        }
+        return <span className="font-medium">{partner.ownership_percentage.toFixed(1)}%</span>;
+      },
+    },
+    {
       key: 'email',
       label: 'Mail',
       type: 'long-text' as const,

@@ -180,6 +180,7 @@ export function CapitalParticipantForm({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: capitalKeys.participantsList(orgId || '') });
       queryClient.invalidateQueries({ queryKey: capitalKeys.partnerContactIds(orgId || '') });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.kpiList(orgId || '') });
       toast({
         title: 'Socio agregado',
         description: 'El socio ha sido agregado correctamente',
@@ -217,6 +218,8 @@ export function CapitalParticipantForm({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: capitalKeys.participantsList(orgId || '') });
       queryClient.invalidateQueries({ queryKey: capitalKeys.partnerContactIds(orgId || '') });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.partner(partnerId || '') });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.kpiList(orgId || '') });
       toast({
         title: 'Socio actualizado',
         description: 'Los datos del socio han sido actualizados',
