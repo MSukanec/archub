@@ -16,20 +16,19 @@ export {
   type UpdatePreferencesData 
 } from './services';
 
-// Admin Modals
-export { UserFormModal } from './modals/admin/UserFormModal';
-export { PlanFormModal } from './modals/admin/PlanFormModal';
-export { PlanPriceFormModal } from './modals/admin/PlanPriceFormModal';
-export { NotificationFormModal } from './modals/admin/NotificationFormModal';
-export { SupportConversationStartModal } from './modals/admin/SupportConversationStartModal';
-export { AnnouncementFormModal } from './modals/admin/AnnouncementFormModal';
-export { ChangelogFormModal } from './modals/admin/ChangelogFormModal';
-export { default as ResetTestDataModal } from './modals/admin/ResetTestDataModal';
-
-// Plan Modals
-export { PlanUpgradeModal } from './modals/plans/PlanUpgradeModal';
+// Modals
+export { UserFormModal } from './modals/UserFormModal';
+export { PlanFormModal } from './modals/PlanFormModal';
+export { PlanPriceFormModal } from './modals/PlanPriceFormModal';
+export { NotificationFormModal } from './modals/NotificationFormModal';
+export { SupportConversationStartModal } from './modals/SupportConversationStartModal';
+export { AnnouncementFormModal } from './modals/AnnouncementFormModal';
+export { ChangelogFormModal } from './modals/ChangelogFormModal';
+export { default as ResetTestDataModal } from './modals/ResetTestDataModal';
+export { PlanUpgradeModal } from './modals/PlanUpgradeModal';
 export { DowngradeModal } from './modals/DowngradeModal';
 export { UpgradeModal } from './modals/UpgradeModal';
+export { InvitationModal } from './modals/InvitationModal';
 
 // Auth Components
 export { AuthGuard } from './components/AuthGuard';

@@ -36,9 +36,19 @@ src/features/users/
 │   ├── AdminChangelogRow.tsx      # Admin changelog row
 │   ├── Step1UserData.tsx          # Onboarding step
 │   └── MemberRow.tsx              # Member list row
-├── modals/
-│   ├── admin/              # Admin modals (UserFormModal, etc.)
-│   └── plans/              # Plan upgrade modals
+├── modals/                    # Flattened: NO SUBFOLDERS (12 modals)
+│   ├── UserFormModal.tsx
+│   ├── PlanFormModal.tsx
+│   ├── PlanPriceFormModal.tsx
+│   ├── NotificationFormModal.tsx
+│   ├── SupportConversationStartModal.tsx
+│   ├── AnnouncementFormModal.tsx
+│   ├── ChangelogFormModal.tsx
+│   ├── ResetTestDataModal.tsx
+│   ├── PlanUpgradeModal.tsx
+│   ├── DowngradeModal.tsx
+│   ├── UpgradeModal.tsx
+│   └── InvitationModal.tsx
 └── forms/                  # User-related forms
 ```
 
@@ -131,3 +141,4 @@ Uses semantic badge variants:
 2025-12-25 - Flattened components/ - removed all subfolders, moved 16 files directly to components/
 2025-12-26 - Consolidated onboarding into users feature: moved onboarding/services/checklist.ts → users/services/onboardingChecklist.ts, deleted src/features/onboarding/, updated imports in use-update-checklist.ts to use centralized query keys
 2025-12-26 - Removed 4 legacy components: NotificationBellHeader, UserQuickAccess, SupportPanel, OnlineUsersIndicator (unused)
+2025-12-26 - Flattened modals/ - removed admin/ and plans/ subfolders, moved 12 modal files directly to modals/, updated all imports
