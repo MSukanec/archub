@@ -17,12 +17,12 @@ export interface HeatmapGridProps {
   columns?: number
 }
 
-const DEFAULT_COLOR_SCALE = (value: number): { bg: string; text: string } => {
+const DEFAULT_COLOR_SCALE = (value: number): { bg: string; text: string; bgColor?: string } => {
   if (value === 0) return { bg: 'bg-muted', text: 'text-muted-foreground' }
-  if (value < 25) return { bg: '[background-color:var(--chart-5)]', text: 'text-white' }
-  if (value < 50) return { bg: '[background-color:var(--chart-4)]', text: 'text-gray-900 dark:text-gray-100' }
-  if (value < 75) return { bg: '[background-color:var(--chart-3)]', text: 'text-white' }
-  return { bg: '[background-color:var(--chart-1)]', text: 'text-white' }
+  if (value < 25) return { bg: '', text: 'text-white', bgColor: '#f44747' }
+  if (value < 50) return { bg: '', text: 'text-gray-900 dark:text-gray-100', bgColor: '#d4a574' }
+  if (value < 75) return { bg: '', text: 'text-white', bgColor: '#1c4a6b' }
+  return { bg: '', text: 'text-white', bgColor: '#84cc16' }
 }
 
 export function HeatmapGrid({
@@ -67,6 +67,7 @@ export function HeatmapGrid({
                 ${colors.text} ${colors.bg}
                 transition-all hover:scale-105 cursor-pointer shadow-sm
               `}
+              style={colors.bgColor ? { backgroundColor: colors.bgColor } : undefined}
               title={`${item.label}: ${valueFormatter(item.value)}${item.count !== undefined ? ` (${item.count} items)` : ''}`}
             >
               <div className="text-xs font-medium text-center">{item.label}</div>
@@ -78,14 +79,14 @@ export function HeatmapGrid({
           )
         })}
       </div>
-      <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+      <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground overflow-hidden">
         <span>Low</span>
-        <div className="flex gap-1">
-          <div className="w-3 h-3 bg-muted rounded-sm border" />
-          <div className="w-3 h-3 [background-color:var(--chart-5)] rounded-sm border" />
-          <div className="w-3 h-3 [background-color:var(--chart-4)] rounded-sm border" />
-          <div className="w-3 h-3 [background-color:var(--chart-3)] rounded-sm border" />
-          <div className="w-3 h-3 [background-color:var(--chart-1)] rounded-sm border" />
+        <div className="flex gap-1 shrink-0">
+          <div className="w-3 h-3 bg-muted rounded-sm border flex-shrink-0" />
+          <div className="w-3 h-3 rounded-sm border flex-shrink-0" style={{ backgroundColor: '#f44747' }} />
+          <div className="w-3 h-3 rounded-sm border flex-shrink-0" style={{ backgroundColor: '#d4a574' }} />
+          <div className="w-3 h-3 rounded-sm border flex-shrink-0" style={{ backgroundColor: '#1c4a6b' }} />
+          <div className="w-3 h-3 rounded-sm border flex-shrink-0" style={{ backgroundColor: '#84cc16' }} />
         </div>
         <span>High</span>
       </div>
