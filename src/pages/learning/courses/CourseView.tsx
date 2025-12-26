@@ -7,13 +7,13 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { useCourseOverview, useCourseEnrollment, useLastLessonInProgress, useCoursePlayerStore } from '@/features/learning';
 
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
-import CourseDashboardTab from './view/CourseDashboardTab';
-import CourseContentTab from './view/CourseContentTab';
-import CoursePlayerTab from './view/CoursePlayerTab';
-import CourseNotesTab from './view/CourseNotesTab';
-import CourseMarkersTab from './view/CourseMarkersTab';
-import CourseForumTab from './view/CourseForumTab';
-import CourseFeedbackTab from './view/CourseFeedbackTab';
+import CourseDashboardView from '@/features/learning/views/course/CourseDashboardView';
+import CourseContentView from '@/features/learning/views/course/CourseContentView';
+import CoursePlayerView from '@/features/learning/views/course/CoursePlayerView';
+import CourseNotesView from '@/features/learning/views/course/CourseNotesView';
+import CourseMarkersView from '@/features/learning/views/course/CourseMarkersView';
+import CourseForumView from '@/features/learning/views/course/CourseForumView';
+import CourseFeedbackView from '@/features/learning/views/course/CourseFeedbackView';
 
 export default function CourseView() {
   const { id } = useParams<{ id: string }>();
@@ -263,12 +263,12 @@ export default function CourseView() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'Visión General':
-        return <CourseDashboardTab courseId={course?.id} />;
+        return <CourseDashboardView courseId={course?.id} />;
       case 'Contenido':
-        return <CourseContentTab courseId={course?.id} courseSlug={id} />;
+        return <CourseContentView courseId={course?.id} courseSlug={id} />;
       case 'Reproductor':
         return (
-          <CoursePlayerTab 
+          <CoursePlayerView 
             courseId={course?.id} 
             onNavigationStateChange={setNavigationState}
             initialLessonId={currentLessonId || lessonParam || undefined}
@@ -276,13 +276,13 @@ export default function CourseView() {
           />
         );
       case 'Apuntes':
-        return <CourseNotesTab courseId={course?.id} courseSlug={id} />;
+        return <CourseNotesView courseId={course?.id} courseSlug={id} />;
       case 'Marcadores':
-        return <CourseMarkersTab courseId={course?.id} courseSlug={id} />;
+        return <CourseMarkersView courseId={course?.id} courseSlug={id} />;
       case 'Foro':
-        return <CourseForumTab courseId={course?.id} />;
+        return <CourseForumView courseId={course?.id} />;
       case 'Feedback':
-        return <CourseFeedbackTab courseId={course?.id} />;
+        return <CourseFeedbackView courseId={course?.id} />;
       default:
         return null;
     }
