@@ -21,7 +21,8 @@ src/features/users/
 │   └── useCurrentUser.ts          # Main user data hook (uses usersKeys.current())
 ├── services/
 │   ├── index.ts                   # Service exports
-│   └── userProfileService.ts      # Profile update operations
+│   ├── userProfileService.ts      # Profile update operations
+│   └── onboardingChecklist.ts     # Onboarding checklist management (from src/features/onboarding)
 ├── components/                    # Flattened: NO SUBFOLDERS
 │   ├── AuthGuard.tsx              # Authentication protection
 │   ├── AuthAdmin.tsx              # Admin auth component
@@ -132,3 +133,4 @@ Uses semantic badge variants:
 2025-12-25 - Fixed badge variants and cache invalidation guards
 2025-12-25 - Added hooks/ and services/ with useCurrentUser and userProfileService
 2025-12-25 - Flattened components/ - removed all subfolders, moved 16 files directly to components/
+2025-12-26 - Consolidated onboarding into users feature: moved onboarding/services/checklist.ts → users/services/onboardingChecklist.ts, deleted src/features/onboarding/, updated imports in use-update-checklist.ts to use centralized query keys

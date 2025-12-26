@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateHomeChecklist } from '@/features/onboarding/services/checklist';
+import { updateHomeChecklist } from '@/features/users/services/onboardingChecklist';
+import { usersKeys } from '@/core/query-keys';
 
 interface UpdateChecklistParams {
   key: string;
@@ -32,7 +33,7 @@ export function useUpdateChecklist() {
     },
     onSuccess: () => {
       // Invalidar cache del usuario para reflejar el checklist actualizado
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      queryClient.invalidateQueries({ queryKey: usersKeys.current() });
     },
     onError: (error) => {
       console.error('Error in useUpdateChecklist:', error);
