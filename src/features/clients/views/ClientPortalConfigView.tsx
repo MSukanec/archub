@@ -54,11 +54,11 @@ const SECTION_CONFIGS: PortalSectionConfig[] = [
   },
 ];
 
-interface ClientPortalConfigTabProps {
+interface ClientPortalConfigViewProps {
   projectId?: string;
 }
 
-export function ClientPortalConfigTab({ projectId }: ClientPortalConfigTabProps) {
+export function ClientPortalConfigView({ projectId }: ClientPortalConfigViewProps) {
   const { toast } = useToast();
   const queryKey = ['/api/client-portal', projectId, 'config'];
 
@@ -276,3 +276,5 @@ export function ClientPortalConfigTab({ projectId }: ClientPortalConfigTabProps)
     </div>
   );
 }
+
+export default ClientPortalConfigView;

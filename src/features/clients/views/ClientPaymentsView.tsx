@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, CheckCircle2, AlertCircle, Calendar, Upload, Download, Filter, X } from 'lucide-react'
-import { convertToBaseCurrency, formatKPI, format as formatMoney } from '@/lib/money'
+import { useState, useMemo, useEffect } from 'react';
+import { DollarSign, Plus, Edit, Trash2, Paperclip, CheckCircle2, Calendar, Download, Filter, X } from 'lucide-react'
+import { formatKPI, format as formatMoney } from '@/lib/money'
 import { calculateMonetaryKPI, calculateCountKPI, calculateTextKPI, formatBreakdown } from '@/lib/kpis'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
@@ -38,7 +38,7 @@ import { PaymentReceiptPDF, type PaymentReceiptData } from '@/features/pdf'
 import { pdf } from '@react-pdf/renderer'
 import { useIsAdmin } from '@/hooks/use-admin-permissions'
 
-interface ClientPaymentsTabProps {
+interface ClientPaymentsViewProps {
   projectId?: string;
   initialFilterMonth?: string;
   initialFilterClient?: string;
@@ -56,14 +56,13 @@ interface PaymentMetrics {
   count_confirmed: number;
   count_pending: number;
   count_rejected: number;
-  count_skipped: number; // Payments skipped due to missing exchange_rate
+  count_skipped: number;
   latest_payment_date: string | null;
-  // Breakdown by original currency (not converted)
   confirmed_by_currency: Array<{ currency_symbol: string; amount: number }>;
   pending_by_currency: Array<{ currency_symbol: string; amount: number }>;
 }
 
-export default function ClientPaymentsTab({ projectId, initialFilterMonth, initialFilterClient, onClearDrillDown }: ClientPaymentsTabProps) {
+export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilterClient, onClearDrillDown }: ClientPaymentsViewProps) {
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
   const { selectedProjectId } = useProjectContext();
@@ -78,20 +77,12 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
   const { data: projectData } = useProject(activeProjectId || undefined);
   const projectName = projectData?.name
   
-  // Get all projects for organization-level import
   const { data: projectsData } = useProjects(organizationId);
-  
-  // Get organization wallets for import
   const { data: organizationWallets } = useOrganizationWallets(organizationId);
-  
-  // Get organization currencies for import
   const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId);
-  
-  // Get organization members to find current member for created_by FK
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
   const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
 
-  // Filter states - initialized with drill-down filters if provided
   const [filterWallet, setFilterWallet] = useState<string>('all');
   const [filterCurrency, setFilterCurrency] = useState<string>('all');
   const [filterHasSchedule, setFilterHasSchedule] = useState<string>('all');
@@ -101,7 +92,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterMonth, setFilterMonth] = useState<string>(initialFilterMonth || 'all');
 
-  // Sync drill-down filters when props change
   useEffect(() => {
     if (initialFilterMonth !== undefined) {
       setFilterMonth(initialFilterMonth || 'all');
@@ -114,25 +104,20 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
     }
   }, [initialFilterClient]);
 
-  // Multi-select state
   const [selectedPayments, setSelectedPayments] = useState<ClientPaymentWithRelations[]>([]);
 
-  // Use feature hooks to get client payments, commitments, and all project clients
   const { data: paymentsData, isLoading } = useClientPayments(activeProjectId || undefined, organizationId);
   const { data: commitmentsData } = useClientCommitments(activeProjectId || undefined, organizationId);
   const { data: projectClientsData } = useProjectClients(activeProjectId || undefined, organizationId);
 
-  // Use payments data directly
   const allPayments = useMemo(() => {
     if (!paymentsData) return [];
     return paymentsData;
   }, [paymentsData]);
 
-  // Determine the commitment currency (the most common currency in commitments)
   const commitmentCurrency = useMemo(() => {
     if (!commitmentsData || commitmentsData.length === 0) return null;
     
-    // Count occurrences of each currency in commitments
     const currencyCount = new Map<string, { count: number; currency: NonNullable<typeof commitmentsData[0]['currency']> }>();
     
     commitmentsData.forEach(commitment => {
@@ -151,7 +136,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
       }
     });
     
-    // Find the most common currency
     const entries = Array.from(currencyCount.values());
     if (entries.length === 0) return null;
     
@@ -162,7 +146,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
     return mostCommon.currency;
   }, [commitmentsData]);
 
-  // Calculate KPIs using headless system (use commitmentCurrency as base)
   const metricsKPIs = useMemo(() => {
     const confirmedPayments = allPayments.filter(p => p.status === 'confirmed');
     const latestDate = allPayments.length > 0 
@@ -199,7 +182,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
     };
   }, [allPayments, commitmentCurrency]);
 
-  // Keep metricsData for backward compatibility
   const metricsData = useMemo<PaymentMetrics>(() => {
     return {
       total_count: metricsKPIs.total_count,
@@ -219,7 +201,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
     };
   }, [metricsKPIs]);
 
-  // Extract unique values for filters
   const filterOptions = useMemo(() => {
     const wallets = new Set<string>();
     const currencies = new Set<string>();
@@ -234,9 +215,7 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
         const clientName = formatContactName(payment.client.contact);
         if (clientName && clientName !== 'Cliente') clients.add(clientName);
       }
-      // Unit comes from commitment, not project client
       if (payment.commitment?.unit_name) units.add(payment.commitment.unit_name);
-      // Extract month from payment date
       if (payment.payment_date) {
         const date = parseLocalDate(payment.payment_date);
         if (date) {
@@ -255,36 +234,20 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
     };
   }, [allPayments]);
 
-  // Apply filters
   const clientPayments = useMemo(() => {
     return allPayments.filter(payment => {
-      // Filter by wallet
       if (filterWallet !== 'all' && payment.wallet?.wallets?.name !== filterWallet) return false;
-      
-      // Filter by currency
       if (filterCurrency !== 'all' && payment.currency?.code !== filterCurrency) return false;
-      
-      // Filter by has schedule
       if (filterHasSchedule === 'yes' && !payment.schedule_id) return false;
       if (filterHasSchedule === 'no' && payment.schedule_id) return false;
-      
-      // Filter by has commitment
       if (filterHasCommitment === 'yes' && !payment.commitment_id) return false;
       if (filterHasCommitment === 'no' && payment.commitment_id) return false;
-      
-      // Filter by client
       if (filterClient !== 'all') {
         const clientName = formatContactName(payment.client?.contact);
         if (clientName !== filterClient) return false;
       }
-      
-      // Filter by unit (from commitment)
       if (filterUnit !== 'all' && payment.commitment?.unit_name !== filterUnit) return false;
-      
-      // Filter by status
       if (filterStatus !== 'all' && payment.status !== filterStatus) return false;
-      
-      // Filter by month
       if (filterMonth !== 'all' && payment.payment_date) {
         const date = parseLocalDate(payment.payment_date);
         if (date) {
@@ -292,12 +255,10 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
           if (paymentMonth !== filterMonth) return false;
         }
       }
-      
       return true;
     });
   }, [allPayments, filterWallet, filterCurrency, filterHasSchedule, filterHasCommitment, filterClient, filterUnit, filterStatus, filterMonth]);
 
-  // Delete payment mutation using feature hook
   const deletePaymentMutation = useDeleteClientPayment();
 
   const handleEdit = (payment: ClientPaymentWithRelations) => {
@@ -393,7 +354,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
     }
   };
 
-  // Bulk delete handler
   const handleBulkDelete = () => {
     if (!organizationId || !activeProjectId || selectedPayments.length === 0) return;
 
@@ -423,7 +383,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
           }
         }
         
-        // Clear selection after bulk delete
         setSelectedPayments([]);
         
         if (failCount > 0) {
@@ -455,7 +414,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
       return;
     }
 
-    // Definir el schema de importación para pagos de cliente
     const targetSchema: TargetField[] = [
       {
         field: 'payment_date',
@@ -474,7 +432,7 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
           entityName: 'client',
           labelKey: 'label',
           valueKey: 'value',
-          options: [], // Will be populated dynamically with availableClients
+          options: [],
         },
       },
       {
@@ -519,7 +477,7 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
           valueKey: 'value',
           options: (organizationWallets || []).map(ow => ({
             label: ow.wallets?.name || 'Sin nombre',
-            value: ow.id, // Use organization_wallets.id (FK target for client_payments.wallet_id)
+            value: ow.id,
           })),
         },
       },
@@ -557,24 +515,19 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
       },
     ];
 
-    // Build wallet value map from organization wallets
-    // IMPORTANT: client_payments.wallet_id is FK to organization_wallets.id, NOT wallets.id
     const walletValueMap: Record<string, string> = {};
     (organizationWallets || []).forEach(ow => {
       if (ow.wallets?.name && ow.id) {
         const normalizedName = ow.wallets.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-        walletValueMap[normalizedName] = ow.id; // Use organization_wallets.id, not wallet_id
+        walletValueMap[normalizedName] = ow.id;
       }
     });
 
-    // Build currency value map from organization currencies
     const currencyValueMap: Record<string, string> = {};
     (organizationCurrencies || []).forEach(oc => {
       if (oc.currency?.code && oc.currency_id) {
-        // Map by code (lowercase)
         const normalizedCode = oc.currency.code.toLowerCase().trim();
         currencyValueMap[normalizedCode] = oc.currency_id;
-        // Also map by name (lowercase, without accents)
         if (oc.currency.name) {
           const normalizedName = oc.currency.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
           currencyValueMap[normalizedName] = oc.currency_id;
@@ -582,7 +535,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
       }
     });
 
-    // Value map para traducir valores del CSV a IDs reales
     const valueMapConfig: Record<string, Record<string, string>> = {
       currency_code: currencyValueMap,
       status: {
@@ -594,16 +546,12 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
       wallet_name: walletValueMap,
     };
 
-    // Contexto de proyecto para la importación - always pass project context with name
     const projectContext: ProjectContext = activeProjectId 
       ? { type: 'project', projectId: activeProjectId, projectName: projectName || undefined }
       : { type: 'organization', organizationId: organizationId!, organizationName: organizationName || undefined };
 
-    // Build available clients list for foreign-key resolution using formatContactName
-
     const availableClientsMap = new Map<string, { id: string; name: string }>();
     
-    // Add clients from projectClientsData (primary source)
     if (projectClientsData && projectClientsData.length > 0) {
       projectClientsData.forEach(client => {
         if (client.contact && client.id) {
@@ -615,7 +563,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
       });
     }
     
-    // Add clients from commitments
     if (commitmentsData && commitmentsData.length > 0) {
       commitmentsData.forEach(commitment => {
         if (commitment.project_client?.contact && commitment.client_id) {
@@ -627,7 +574,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
       });
     }
     
-    // Add clients from existing payments
     allPayments.forEach(payment => {
       if (payment.client?.contact && payment.client_id) {
         const clientName = formatContactName(payment.client.contact);
@@ -639,7 +585,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
 
     const availableClients = Array.from(availableClientsMap.values());
 
-    // Abrir modal de importación universal
     openModal('universal-import', {
       config: {
         entityName: 'Pago de Cliente',
@@ -695,7 +640,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
             }
           });
 
-          // Obtener IDs de monedas
           const currenciesMap = new Map<string, string>();
           allPayments.forEach(payment => {
             if (payment.currency) {
@@ -703,18 +647,15 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
             }
           });
           
-          // Agregar valueMapConfig como fallback (en caso de que no haya pagos existentes)
           if (currenciesMap.size === 0) {
             for (const [code, id] of Object.entries(valueMapConfig.currency_code || {})) {
               currenciesMap.set(code, id);
             }
           }
 
-          // Obtener billeteras
           const walletsMap = new Map<string, string>();
           let defaultWalletId: string | null = null;
           
-          // First try to get from existing payments
           allPayments.forEach(payment => {
             if (payment.wallet?.wallets?.name && payment.wallet_id) {
               walletsMap.set(payment.wallet.wallets.name.toLowerCase(), payment.wallet_id);
@@ -724,45 +665,37 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
             }
           });
           
-          // Fallback to organization wallets if no payments exist
-          // IMPORTANT: client_payments.wallet_id is FK to organization_wallets.id, NOT wallets.id
           if (walletsMap.size === 0 && organizationWallets && organizationWallets.length > 0) {
             organizationWallets.forEach(ow => {
               if (ow.wallets?.name && ow.id) {
                 const normalizedName = ow.wallets.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-                walletsMap.set(normalizedName, ow.id); // Use organization_wallets.id
+                walletsMap.set(normalizedName, ow.id);
                 if (!defaultWalletId && ow.is_default) {
-                  defaultWalletId = ow.id; // Use organization_wallets.id
+                  defaultWalletId = ow.id;
                 }
               }
             });
-            // If no default wallet, use the first one
             if (!defaultWalletId && organizationWallets.length > 0) {
-              defaultWalletId = organizationWallets[0].id; // Use organization_wallets.id
+              defaultWalletId = organizationWallets[0].id;
             }
           }
 
-          // Validar que TODOS los clientes existan ANTES de importar
           const invalidRows: Array<{ index: number; reason: string }> = [];
           const validRowsToImport: typeof rows = [];
 
           rows.forEach((row, idx) => {
             const errors: string[] = [];
             
-            // Validar proyecto (para importación a nivel organización)
             const projectId = row._projectId;
             if (!projectId && !activeProjectId) {
               errors.push('Proyecto no especificado');
             }
             
-            // Validar cliente (opcional - client_id puede ser null)
             const clientNameInput = (row._clientId || row.client_id || row.client_name || '') as string;
             const clientName = clientNameInput.toLowerCase().trim();
             let clientId: string | null = null;
             
-            // Si hay un nombre de cliente, intentar resolverlo
             if (clientNameInput.trim()) {
-              // Check if it's already a UUID (from manual mapping in conflicts step)
               const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clientNameInput.trim());
               if (isUUID) {
                 clientId = clientNameInput.trim();
@@ -773,21 +706,17 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
                 }
               }
             }
-            // Si clientNameInput está vacío o es null, clientId queda como null (permitido)
             
-            // Validar moneda
             const currencyInput = (row.currency_id || row.currency_code || '') as string;
             let currencyId: string | null = null;
             
             if (!currencyInput.trim()) {
               errors.push('Código de moneda vacío');
             } else {
-              // Check if it's already a UUID (from conflict resolution step)
               const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(currencyInput.trim());
               if (isUUID) {
                 currencyId = currencyInput.trim();
               } else {
-                // Try to resolve by code/name
                 const currencyCodeLower = currencyInput.toLowerCase().trim();
                 currencyId = currenciesMap.get(currencyCodeLower) || 
                             valueMapConfig.currency_code?.[currencyCodeLower] || null;
@@ -799,13 +728,11 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
               }
             }
             
-            // Validar monto
             const amount = parseFloat(row.amount);
             if (isNaN(amount) || amount <= 0) {
               errors.push(`Monto inválido: "${row.amount}" (debe ser un número mayor a 0)`);
             }
             
-            // Validar fecha
             const paymentDate = row.payment_date;
             if (!paymentDate) {
               errors.push('Fecha de pago vacía');
@@ -819,7 +746,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
             validRowsToImport.push({ ...row, _clientId: clientId, _currencyId: currencyId });
           });
 
-          // Si hay filas inválidas, mostrar error y detener
           if (invalidRows.length > 0) {
             const errorMsg = invalidRows.map(e => `Fila ${e.index}: ${e.reason}`).join('\n');
             toast({
@@ -830,7 +756,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
             throw new Error(`Validación fallida: ${invalidRows.length} filas inválidas`);
           }
 
-          // Si no hay billetera, mostrar error
           if (!defaultWalletId) {
             toast({
               title: 'Error de validación',
@@ -840,12 +765,10 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
             throw new Error('No hay billeteras disponibles');
           }
 
-          // Importar solo las filas válidas
           const validStatuses = ['confirmed', 'pending', 'overdue', 'cancelled'];
           let successCount = 0;
           for (const row of validRowsToImport) {
             try {
-              // Resolve wallet_id - check if it's already a UUID from conflict resolution
               let resolvedWalletId: string | null = defaultWalletId;
               if (row.wallet_name) {
                 const walletInput = String(row.wallet_name).trim();
@@ -873,14 +796,12 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
                 schedule_id: null,
               };
 
-              // El projectId puede venir del row._projectId (importación org) o activeProjectId
               const targetProjectId = row._projectId || activeProjectId;
               
               if (!targetProjectId) {
                 throw new Error('No se pudo determinar el proyecto para este pago');
               }
               
-              // Find current organization member (created_by FK references organization_members.id, NOT users.id)
               const currentMember = organizationMembers.find((m: any) => m.user_id === userData?.user?.id);
               if (!currentMember) {
                 throw new Error('No se encontró el miembro de la organización actual');
@@ -921,7 +842,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
     )
   }
 
-  // Format date helper - uses parseLocalDate to avoid timezone issues
   const formatDate = (dateString: string, formatString: string) => {
     try {
       const date = parseLocalDate(dateString);
@@ -931,31 +851,11 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
     }
   };
 
-  // Format amount with currency
   const formatAmount = (amount: number, currencySymbol: string | undefined) => {
     const symbol = currencySymbol || '$';
     return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-
-  // Format currency for KPIs (integers only, no decimals)
-  const formatCurrencyKPI = (amount: number, currencySymbol: string | null) => {
-    const formattedInteger = Math.round(amount).toLocaleString('es-AR');
-    const symbol = currencySymbol || '$';
-    return <span>{symbol} {formattedInteger}</span>;
-  };
-
-  // Format currency breakdown by original currency
-  const formatCurrencyBreakdown = (currencyData: Array<{ currency_symbol: string; amount: number }>) => {
-    if (!currencyData || currencyData.length === 0) return '-';
-    
-    return currencyData.map(({ currency_symbol, amount }) => {
-      const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      return `${currency_symbol} ${formattedAmount}`;
-    }).join(' + ');
-  };
-
-  // Table columns with semantic types per REFACTORIZACION.md
   const columns = [
     {
       key: 'payment_date',
@@ -964,7 +864,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
       sortable: true,
       render: (payment: ClientPaymentWithRelations) => formatDate(payment.payment_date, 'dd/MM/yyyy'),
     },
-    // Project column - only shown when viewing organization-wide data
     ...(activeProjectId ? [] : [{
       key: 'project',
       label: 'Proyecto',
@@ -1081,7 +980,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
     filterStatus !== 'all' ||
     filterMonth !== 'all';
 
-  // Check if we have drill-down filters from dashboard
   const hasDrillDownFilter = !!(initialFilterMonth || initialFilterClient);
   const drillDownLabel = useMemo(() => {
     const parts: string[] = [];
@@ -1117,7 +1015,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
     });
   };
 
-  // Show full empty state if no payments
   if (!isLoading && allPayments.length === 0) {
     return (
       <EmptyState
@@ -1140,7 +1037,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
 
   return (
     <div className="space-y-6">
-      {/* Drill-down filter banner */}
       {hasDrillDownFilter && drillDownLabel && (
         <div className="flex items-center justify-between bg-accent/10 border border-accent/20 rounded-lg px-4 py-3">
           <div className="flex items-center gap-2">
@@ -1162,9 +1058,7 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
         </div>
       )}
 
-      {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {/* Card 1: Total Confirmado (2 cols en desktop, full row en mobile) */}
         <StatCard className="col-span-2" data-testid="stat-card-total-confirmado">
           <StatCardTitle showArrow={false}>
             <CheckCircle2 className="w-4 h-4 inline mr-1" />
@@ -1184,7 +1078,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
           </StatCardMeta>
         </StatCard>
 
-        {/* Card 2: Total Pagos (1 col) */}
         <StatCard data-testid="stat-card-total-pagos">
           <StatCardTitle showArrow={false}>
             <DollarSign className="w-4 h-4 inline mr-1" />
@@ -1196,7 +1089,6 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
           <StatCardMeta>Cantidad de pagos registrados</StatCardMeta>
         </StatCard>
 
-        {/* Card 3: Último Pago (1 col) */}
         <StatCard data-testid="stat-card-ultimo-pago">
           <StatCardTitle showArrow={false}>
             <Calendar className="w-4 h-4 inline mr-1" />
@@ -1391,3 +1283,5 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
     </div>
   )
 }
+
+export default ClientPaymentsView;

@@ -31,9 +31,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
 import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
-import { type ClientPeriodFilter } from './Clients';
 
-interface ClientsVisionGeneralTabProps {
+export type ClientPeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all';
+
+interface ClientsDashboardViewProps {
   onNavigateToList?: () => void;
   onNavigateToPayments?: () => void;
   onNavigateToTab?: (tab: string, filters?: Record<string, unknown>) => void;
@@ -128,14 +129,14 @@ export function calculateAvailablePeriods(allPayments: any[]): Record<ClientPeri
   return result;
 }
 
-export default function ClientsVisionGeneralTab({ 
+export function ClientsDashboardView({ 
   onNavigateToList, 
   onNavigateToPayments,
   onNavigateToTab,
   onScrollToPanel,
   onFilterClient,
   selectedPeriod = 'all',
-}: ClientsVisionGeneralTabProps) {
+}: ClientsDashboardViewProps) {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   const { selectedProjectId } = useProjectContext();
@@ -629,3 +630,5 @@ export default function ClientsVisionGeneralTab({
     </div>
   );
 }
+
+export default ClientsDashboardView;

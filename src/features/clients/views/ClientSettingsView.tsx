@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getClientRoleUsageCount } from '@/features/clients/services/clientRoles';
 import type { ClientRole } from '@/features/clients/types';
 
-export default function ClientSettingsTab() {
+export function ClientSettingsView() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id ?? null;
@@ -19,7 +19,6 @@ export default function ClientSettingsTab() {
   const deleteMutation = useDeleteClientRole();
   const replaceMutation = useReplaceClientRole(organizationId);
 
-  // Sort all roles alphabetically by name (case-insensitive)
   const sortedRoles = [...clientRoles].sort((a, b) => 
     a.name.toLowerCase().localeCompare(b.name.toLowerCase())
   );
@@ -117,9 +116,7 @@ export default function ClientSettingsTab() {
 
   return (
     <div className="p-6 space-y-8">
-      {/* Sección: Roles de Cliente */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column - Descripción */}
         <div>
           <div className="flex items-center justify-between gap-2 mb-6">
             <div className="flex items-center gap-2">
@@ -143,10 +140,8 @@ export default function ClientSettingsTab() {
           </p>
         </div>
 
-        {/* Right Column - Contenido */}
         <div className="space-y-3">
 
-          {/* All roles sorted alphabetically */}
           {sortedRoles.map((role) => (
             <div 
               key={role.id}
@@ -194,7 +189,6 @@ export default function ClientSettingsTab() {
             </div>
           ))}
 
-          {/* Estado vacío */}
           {sortedRoles.length === 0 && (
             <div className="p-8 text-center rounded-lg border border-dashed border-border">
               <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -208,3 +202,5 @@ export default function ClientSettingsTab() {
     </div>
   );
 }
+
+export default ClientSettingsView;

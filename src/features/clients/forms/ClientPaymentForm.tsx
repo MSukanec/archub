@@ -649,7 +649,7 @@ function ViewPanel({
   )
 }
 
-export interface ClientPaymentFormFieldsProps {
+export interface ClientPaymentFormProps {
   projectId?: string;
   organizationId?: string;
   paymentId?: string;
@@ -660,7 +660,7 @@ export interface ClientPaymentFormFieldsProps {
   formRef?: React.RefObject<HTMLFormElement>;
 }
 
-export function ClientPaymentFormFields({ 
+export function ClientPaymentForm({ 
   projectId, 
   organizationId, 
   paymentId, 
@@ -669,7 +669,7 @@ export function ClientPaymentFormFields({
   onCancel,
   hideActions = false,
   formRef
-}: ClientPaymentFormFieldsProps) {
+}: ClientPaymentFormProps) {
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
   const [filesToUpload, setFilesToUpload] = useState<any[]>([])
@@ -1035,4 +1035,4 @@ export function ClientPaymentFormFields({
   )
 }
 
-export default ClientPaymentFormFields
+export default ClientPaymentForm

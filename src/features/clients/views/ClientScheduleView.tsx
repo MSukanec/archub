@@ -35,7 +35,7 @@ import {
 import { formatContactName } from '@/utils/contacts';
 import { cn } from '@/lib/utils';
 
-interface ClientScheduleTabProps {
+interface ClientScheduleViewProps {
   projectId?: string;
 }
 
@@ -48,7 +48,7 @@ const STATUS_CONFIG: Record<ScheduleStatus, { label: string; variant: 'pending' 
   cancelled: { label: 'Cancelada', variant: 'neutral', className: '', icon: Ban },
 };
 
-export default function ClientScheduleTab({ projectId }: ClientScheduleTabProps) {
+export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
@@ -385,7 +385,6 @@ export default function ClientScheduleTab({ projectId }: ClientScheduleTabProps)
 
   return (
     <div className="space-y-6">
-      {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard 
           className="cursor-pointer hover:border-amber-500/50 transition-colors"
@@ -452,7 +451,6 @@ export default function ClientScheduleTab({ projectId }: ClientScheduleTabProps)
         </StatCard>
       </div>
 
-      {/* Filter indicator */}
       {filterStatus !== 'all' && (
         <div className="flex items-center gap-2">
           <Badge variant="neutral" className="gap-1">
@@ -467,7 +465,6 @@ export default function ClientScheduleTab({ projectId }: ClientScheduleTabProps)
         </div>
       )}
 
-      {/* Table or Empty State */}
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -506,3 +503,5 @@ export default function ClientScheduleTab({ projectId }: ClientScheduleTabProps)
     </div>
   );
 }
+
+export default ClientScheduleView;

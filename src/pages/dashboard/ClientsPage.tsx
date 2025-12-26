@@ -4,27 +4,29 @@ import { LuHandshake } from 'react-icons/lu'
 import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal'
-import ClientsVisionGeneralTab, { calculateAvailablePeriods } from './ClientsVisionGeneralTab'
-import ClientListTab from './ClientListTab'
-import ClientObligationsTab from './ClientObligationsTab'
-import ClientPaymentsTab from './ClientPaymentsTab'
-import ClientScheduleTab from './ClientScheduleTab'
-import ClientSettingsTab from './ClientSettingsTab'
-import { ClientPortalConfigTab } from './ClientPortalConfigTab'
+import { 
+  ClientsDashboardView, 
+  ClientListView, 
+  ClientObligationsView, 
+  ClientPaymentsView,
+  ClientScheduleView,
+  ClientSettingsView,
+  ClientPortalConfigView,
+  calculateAvailablePeriods,
+  type ClientPeriodFilter,
+  useClientPayments 
+} from '@/features/clients'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useActionBarMobile } from '@/layouts'
 import { useMobile } from '@/hooks/use-mobile'
 import { useLocation, useSearch } from 'wouter'
 import { useProjectContext } from '@/stores/projectContext'
-import { useClientPayments } from '@/features/clients'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
-export type ClientPeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all'
 
 const PERIOD_OPTIONS: { value: ClientPeriodFilter; label: string }[] = [
   { value: '30d', label: 'Últimos 30 días' },
@@ -39,7 +41,7 @@ export interface ClientDrillDownFilters {
   filterClient?: string;
 }
 
-export function Clients() {
+export function ClientsPage() {
   const searchParams = useSearch();
   const urlParams = new URLSearchParams(searchParams);
   const tabFromUrl = urlParams.get('tab') || 'dashboard';
@@ -61,12 +63,10 @@ export function Clients() {
   } = useActionBarMobile()
   const isMobile = useMobile()
 
-  // Establecer contexto del sidebar al montar el componente
   useEffect(() => {
     setSidebarContext('finances')
   }, [])
 
-  // Configure mobile action bar
   useEffect(() => {
     if (isMobile) {
       setActions({
@@ -82,9 +82,7 @@ export function Clients() {
           id: 'search',
           icon: Search,
           label: 'Buscar',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
+          onClick: () => {},
         },
         create: {
           id: 'create',
@@ -100,54 +98,42 @@ export function Clients() {
           id: 'filter',
           icon: Filter,
           label: 'Filtros',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
+          onClick: () => {},
         },
         notifications: {
           id: 'notifications',
           icon: Bell,
           label: 'Notificaciones',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
+          onClick: () => {},
         },
       });
       setShowActionBar(true);
     }
 
-    // Cleanup when component unmounts
     return () => {
       if (isMobile) {
         clearActions();
       }
     };
-  }, [isMobile]) // Remove unstable function dependencies
+  }, [isMobile])
 
-  // Note: Search and filter functionality is handled automatically by the MobileActionBar component
-  // The buttons don't need special configuration - the popovers are built into the ActionBar
-  
   const projectId = selectedProjectId
   const organizationId = userData?.organization?.id
 
-  // Get payments to determine which periods have data
   const { data: allPayments = [] } = useClientPayments(projectId || undefined, organizationId)
   const availablePeriods = useMemo(() => calculateAvailablePeriods(allPayments), [allPayments])
   
-  // Force 'all' if current period has no data
   const validSelectedPeriod = useMemo(() => {
     if (availablePeriods[selectedPeriod]) return selectedPeriod
     return 'all'
   }, [selectedPeriod, availablePeriods])
   
-  // Update selected period if current one becomes invalid
   useEffect(() => {
     if (validSelectedPeriod !== selectedPeriod) {
       setSelectedPeriod(validSelectedPeriod)
     }
   }, [validSelectedPeriod, selectedPeriod])
 
-  // Crear tabs para el header
   const headerTabs = [
     {
       id: "dashboard",
@@ -187,17 +173,6 @@ export function Clients() {
     }
   ]
 
-  const handleContactsLink = () => {
-    // Cleanup mobile action bar before navigation
-    if (isMobile) {
-      clearActions();
-      setShowActionBar(false);
-    }
-    setSidebarContext('organization');
-    navigate('/contacts');
-  };
-
-  // Period selector for dashboard tab
   const getPeriodSelector = () => {
     if (activeTab !== "dashboard") return []
     
@@ -237,20 +212,7 @@ export function Clients() {
   const headerProps = {
     title: "Clientes",
     icon: LuHandshake,
-    description: (
-      <>
-        Gestiona los clientes del proyecto. Antes de ser cliente, debe ser un{' '}
-        <button
-          onClick={handleContactsLink}
-          className="hover:underline font-semibold cursor-pointer"
-          style={{ color: 'var(--accent)' }}
-          data-testid="link-to-contacts"
-        >
-          contacto
-        </button>
-        .
-      </>
-    ),
+    description: "Gestiona los clientes del proyecto. Antes de ser cliente, debe ser un contacto.",
     tabs: headerTabs,
     onTabChange: setActiveTab,
     organizationId: userData?.organization?.id,
@@ -322,7 +284,7 @@ export function Clients() {
     <Layout headerProps={headerProps} wide={false}>
       <div className="space-y-4">
         {activeTab === "dashboard" && (
-          <ClientsVisionGeneralTab 
+          <ClientsDashboardView 
             onNavigateToList={() => setActiveTab('list')}
             onNavigateToPayments={() => setActiveTab('details')}
             onNavigateToTab={(tab: string, filters?: Record<string, unknown>) => {
@@ -343,19 +305,19 @@ export function Clients() {
         )}
 
         {activeTab === "list" && (
-          <ClientListTab 
+          <ClientListView 
             projectId={projectId || undefined}
           />
         )}
 
         {activeTab === "obligations" && (
-          <ClientObligationsTab 
+          <ClientObligationsView 
             projectId={projectId || undefined}
           />
         )}
 
         {activeTab === "details" && (
-          <ClientPaymentsTab 
+          <ClientPaymentsView 
             projectId={projectId || undefined}
             initialFilterMonth={drillDownFilters.filterMonth}
             initialFilterClient={drillDownFilters.filterClient}
@@ -364,21 +326,23 @@ export function Clients() {
         )}
 
         {activeTab === "schedule" && (
-          <ClientScheduleTab 
+          <ClientScheduleView 
             projectId={projectId || undefined}
           />
         )}
 
         {activeTab === "portal" && (
-          <ClientPortalConfigTab 
+          <ClientPortalConfigView 
             projectId={projectId || undefined}
           />
         )}
 
         {activeTab === "settings" && (
-          <ClientSettingsTab />
+          <ClientSettingsView />
         )}
       </div>
     </Layout>
   )
 }
+
+export default ClientsPage;

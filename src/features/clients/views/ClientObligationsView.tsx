@@ -19,11 +19,11 @@ import {
   type CurrencyFinancial,
 } from '@/features/clients'
 
-interface ClientListTabProps {
+interface ClientObligationsViewProps {
   projectId?: string;
 }
 
-export default function ClientObligationsTab({ projectId }: ClientListTabProps) {
+export function ClientObligationsView({ projectId }: ClientObligationsViewProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
@@ -36,17 +36,14 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
   const { data: commitmentsData } = useClientCommitments(activeProjectId || undefined, organizationId);
   const { data: paymentsData } = useClientPayments(activeProjectId || undefined, organizationId);
 
-  // Transform dashboard data using mappers (no inline calculations)
   const projectClients = useMemo(() => {
     if (!dashboardData) return [];
     return mapToClientSummaries(dashboardData.clients, dashboardData.financialSummaries);
   }, [dashboardData]);
 
-  // Determine the commitment currency (the most common currency in commitments)
   const commitmentCurrency = useMemo(() => {
     if (!commitmentsData || commitmentsData.length === 0) return null;
     
-    // Count occurrences of each currency in commitments
     const currencyCount = new Map<string, { count: number; currency: NonNullable<typeof commitmentsData[0]['currency']> }>();
     
     commitmentsData.forEach(commitment => {
@@ -65,7 +62,6 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
       }
     });
     
-    // Find the most common currency
     const entries = Array.from(currencyCount.values());
     if (entries.length === 0) return null;
     
@@ -140,7 +136,6 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
     )
   }
 
-  // Format currency for KPIs (integers only, no decimals)
   const formatCurrencyKPI = (amount: number) => {
     if (!commitmentCurrency) return null;
     
@@ -149,7 +144,6 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
     return <span>{commitmentCurrency.symbol} {formattedInteger}</span>;
   };
 
-  // Format currency breakdown by original currency
   const formatCurrencyBreakdown = (currencyData: Array<{ symbol: string; amount: number }>) => {
     if (!currencyData || currencyData.length === 0) return '-';
     
@@ -159,7 +153,6 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
     }).join(' + ');
   };
 
-  // Calculate KPIs using headless system
   const kpis = useMemo(() => {
     if (!commitmentCurrency) {
       return {
@@ -232,7 +225,6 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
     openModal('client-commitment', { projectId: activeProjectId, organizationId });
   };
 
-  // Show empty state if no commitments
   if (!isLoading && (!commitmentsData || commitmentsData.length === 0)) {
     return (
       <EmptyState
@@ -254,9 +246,7 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
 
   return (
     <div className="space-y-6">
-      {/* KPIs Grid - 4 columnas, 2 por fila en mobile */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* 1. Compromiso Total */}
         <StatCard data-testid="stat-card-compromiso-total">
           <StatCardTitle showArrow={false}>
             <DollarSign className="w-4 h-4 inline mr-1" />
@@ -273,7 +263,6 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
           </StatCardMeta>
         </StatCard>
 
-        {/* 2. Pagado */}
         <StatCard data-testid="stat-card-pagado">
           <StatCardTitle showArrow={false}>
             <CheckCircle2 className="w-4 h-4 inline mr-1" />
@@ -290,7 +279,6 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
           </StatCardMeta>
         </StatCard>
 
-        {/* 3. Saldo */}
         <StatCard data-testid="stat-card-saldo">
           <StatCardTitle showArrow={false}>
             <AlertCircle className="w-4 h-4 inline mr-1" />
@@ -307,7 +295,6 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
           </StatCardMeta>
         </StatCard>
 
-        {/* 4. Items de Pago */}
         <StatCard data-testid="stat-card-items-pago">
           <StatCardTitle showArrow={false}>
             <ListChecks className="w-4 h-4 inline mr-1" />
@@ -341,3 +328,5 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
     </div>
   )
 }
+
+export default ClientObligationsView;

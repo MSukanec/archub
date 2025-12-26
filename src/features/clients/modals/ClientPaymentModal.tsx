@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { DollarSign } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
-import { ClientPaymentFormFields } from '../forms/ClientPaymentFormFields'
+import { ClientPaymentForm } from '../forms/ClientPaymentForm'
 
 interface ClientPaymentModalProps {
   modalData?: {
@@ -80,7 +80,7 @@ export function ClientPaymentModal({ modalData, onClose, mode = 'create' }: Clie
       }
     >
       <ModalBody>
-        <ClientPaymentFormFields
+        <ClientPaymentForm
           projectId={modalData?.projectId}
           organizationId={modalData?.organizationId}
           paymentId={modalData?.paymentId}

@@ -34,3 +34,6 @@ export * from './constants';
 
 // Mappers
 export * from './mappers';
+
+// Views
+export * from './views';

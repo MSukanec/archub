@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useToast } from '@/hooks/use-toast'
 import { Users, Plus, Edit, Trash2, User, Eye, UserCheck, FileText, Calendar, Send, Loader2 } from 'lucide-react'
 import { useMutation } from '@tanstack/react-query'
@@ -28,13 +28,13 @@ import {
   type CurrencyFinancial,
 } from '@/features/clients'
 
-interface ClientListTabProps {
+interface ClientListViewProps {
   projectId?: string;
 }
 
 type EnrichedClient = ProjectClientSummary & { clientName: string };
 
-export default function ClientListTab({ projectId }: ClientListTabProps) {
+export function ClientListView({ projectId }: ClientListViewProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
@@ -47,7 +47,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
 
-  // Prefetch contacts (LIGHT mode) and client roles for faster modal opening
   useQuery({
     queryKey: [`/api/contacts?organization_id=${organizationId}&mode=light`],
     enabled: !!organizationId,
@@ -60,17 +59,13 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Use feature hook to get dashboard data with financial summaries
   const { data: dashboardData, isLoading } = useClientDashboard(activeProjectId || undefined, organizationId);
 
-  // Transform dashboard data using mappers (no inline calculations)
   const projectClients = useMemo(() => {
     if (!dashboardData) return [];
     return mapToClientSummaries(dashboardData.clients, dashboardData.financialSummaries);
   }, [dashboardData]);
 
-  // Enrich projectClients with computed clientName field for sorting
-  // Priority: full_name > first_name + last_name > company_name
   const enrichedClients = useMemo<EnrichedClient[]>(() => {
     return projectClients.map(client => ({
       ...client,
@@ -80,7 +75,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     }));
   }, [projectClients]);
 
-  // Calculate metrics
   const metrics = useMemo(() => {
     if (!dashboardData) {
       return {
@@ -106,7 +100,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     };
   }, [dashboardData]);
 
-  // Delete mutation using feature hook
   const deleteClientMutation = useDeleteProjectClient();
 
   const handleDelete = async (client: ProjectClientSummary) => {
@@ -152,7 +145,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   };
 
   const handleView = (client: ProjectClientSummary) => {
-    // Prefetch client data before opening modal for instant display
     if (activeProjectId && organizationId) {
       queryClient.prefetchQuery({
         queryKey: [`/api/projects/${activeProjectId}/clients/${client.id}?organization_id=${organizationId}`],
@@ -168,7 +160,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   };
 
   const handleEdit = (client: ProjectClientSummary) => {
-    // Prefetch client data before opening modal for instant display
     if (activeProjectId && organizationId) {
       queryClient.prefetchQuery({
         queryKey: [`/api/projects/${activeProjectId}/clients/${client.id}?organization_id=${organizationId}`],
@@ -192,7 +183,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       return;
     }
 
-    // Prefetch contact data before opening modal
     if (organizationId && client.contacts.id) {
       queryClient.prefetchQuery({
         queryKey: [`/api/contacts/${client.contacts.id}?organization_id=${organizationId}`],
@@ -212,7 +202,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     });
   };
 
-  // Send portal access mutation
   const sendAccessMutation = useMutation({
     mutationFn: async (projectClientId: string) => {
       const response = await apiRequest('POST', `/api/client-portal/send-access/${projectClientId}`);
@@ -254,7 +243,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     sendAccessMutation.mutate(client.id);
   };
 
-  // Show message only if there's no organization (shouldn't happen)
   if (!organizationId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -263,7 +251,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     )
   }
 
-  // Show full empty state if no clients
   if (!isLoading && enrichedClients.length === 0) {
     return (
       <EmptyState
@@ -299,17 +286,14 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     );
   }
 
-  // Helper function to format currency
   const formatCurrency = (amount: number, currency: CurrencyFinancial['currency']) => {
     if (!currency) return `$${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     return `${currency.symbol}${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  // Helper function to render multi-currency amounts
   const renderMultiCurrency = (client: ProjectClientSummary, field: keyof Pick<CurrencyFinancial, 'total_committed_amount' | 'total_paid_amount' | 'balance_due'>) => {
     if (client.financialByCurrency.length === 0) return '-';
     
-    // Always show first currency
     const currencyData = client.financialByCurrency[0];
     if (!currencyData) return '-';
     
@@ -324,14 +308,12 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     );
   };
 
-  // Table columns
   const columns = [
     {
       key: 'clientName',
       label: 'Cliente',
       sortable: true,
       render: (client: EnrichedClient) => {
-        // La vista ya nos da la URL del avatar del usuario vinculado o la imagen del contacto
         const avatarUrl = client.contacts?.linked_user?.avatar_url 
           || (client.contacts?.image_bucket && client.contacts?.image_path 
             ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${client.contacts.image_bucket}/${client.contacts.image_path}`
@@ -380,10 +362,8 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* 3 KPIs con datos reales */}
       {projectClients.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* KPI 1: Total Clientes - Ocupa 2 columnas */}
           <StatCard data-testid="stat-card-total-clients" className="col-span-2">
             <StatCardTitle showArrow={false}>
               <Users className="w-4 h-4 inline mr-1" />
@@ -397,7 +377,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             </StatCardMeta>
           </StatCard>
 
-          {/* KPI 2: Compromisos Activos - Ocupa 1 columna */}
           <StatCard data-testid="stat-card-active-commitments">
             <StatCardTitle showArrow={false}>
               <FileText className="w-4 h-4 inline mr-1" />
@@ -411,7 +390,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             </StatCardMeta>
           </StatCard>
 
-          {/* KPI 3: Pagos Recientes - Ocupa 1 columna */}
           <StatCard data-testid="stat-card-recent-payments">
             <StatCardTitle showArrow={false}>
               <Calendar className="w-4 h-4 inline mr-1" />
@@ -508,3 +486,5 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     </div>
   )
 }
+
+export default ClientListView;

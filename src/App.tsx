@@ -32,7 +32,7 @@ import ProjectDataPage from "@/pages/dashboard/ProjectDataPage";
 
 import FinancesCapitalMovements from "@/pages/professional/capital/Capital";
 import OrganizationMovements from "@/pages/professional/movements/Movements";
-import { Clients } from "@/pages/clients/Clients";
+import { ClientsPage } from "@/pages/dashboard/ClientsPage";
 
 
 import ConstructionDashboard from "@/pages/professional/project/construction/ConstructionDashboard";
@@ -213,7 +213,7 @@ function Router() {
         {/* General Routes */}
         <Route path="/project/dashboard" component={ProjectDashboardPage} />
         <Route path="/project" component={ProjectDataPage} />
-        <Route path="/clients" component={Clients} />
+        <Route path="/clients" component={ClientsPage} />
         <Route path="/media" component={Media} />
         <Route path="/project/moodboard" component={Moodboard} />
         <Route path="/budgets" component={Budgets} />
