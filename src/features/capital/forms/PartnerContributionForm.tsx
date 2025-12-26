@@ -235,11 +235,6 @@ export function PartnerContributionForm({
     try {
       let result;
       
-      // Determinar si el exchange_rate debe ser usado o forzado a 1
-      // Si la moneda es la misma que la por defecto o si es monomoneda, exchange_rate = 1
-      const shouldUseExchangeRate = orgCurrencyContext.shouldShowExchangeRate(data.currency_id);
-      const effectiveExchangeRate = shouldUseExchangeRate ? (data.exchange_rate || 1) : 1;
-      
       if (mode === 'edit' && contributionId) {
         result = await updateMutation.mutateAsync({
           contributionId,
@@ -247,7 +242,7 @@ export function PartnerContributionForm({
             partner_id: data.partner_id,
             amount: data.amount,
             currency_id: data.currency_id,
-            exchange_rate: effectiveExchangeRate,
+            exchange_rate: data.exchange_rate || 1,
             contribution_date: formatDateForDB(data.contribution_date),
             wallet_id: data.wallet_id,
             status: data.status,
@@ -263,7 +258,7 @@ export function PartnerContributionForm({
           partner_id: data.partner_id,
           amount: data.amount,
           currency_id: data.currency_id,
-          exchange_rate: effectiveExchangeRate,
+          exchange_rate: data.exchange_rate || 1,
           contribution_date: formatDateForDB(data.contribution_date),
           wallet_id: data.wallet_id,
           status: data.status,
