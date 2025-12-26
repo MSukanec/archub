@@ -22,7 +22,7 @@ import {
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
 import { generateFinancialInsights, buildInsightContext, toInsightItems } from '@/components/insights';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { MultiSeriesTrendChart } from '@/components/charts/line/AreaTrendChart';
+import { MultiSeriesTrendChart, type MultiSeriesData } from '@/components/charts/line/AreaTrendChart';
 import { DonutChart } from '@/components/charts/pie/DonutChart';
 import { HorizontalBarChart } from '@/components/charts/bar/HorizontalBarChart';
 import { cn } from '@/lib/utils';
@@ -440,17 +440,17 @@ export function OrganizationFinancesDashboardView({
 
     return Array.from(monthlyData.entries())
       .map(([period, data]) => ({
-        period,
+        month: period,
         income: data.income,
         expense: data.expense,
         balance: data.income - data.expense
       }))
-      .sort((a, b) => a.period.localeCompare(b.period));
+      .sort((a, b) => a.month.localeCompare(b.month));
   }, [allMovements, dateFrom, defaultCurrency, ingresoTypes]);
 
   const monthlyFinancialData: MonthlyFinancialData[] = useMemo(() => {
     return incomeExpenseChartData.map(d => ({
-      month: d.period,
+      month: d.month,
       income: d.income,
       expense: d.expense,
       balance: d.balance
@@ -712,10 +712,9 @@ export function OrganizationFinancesDashboardView({
             <MultiSeriesTrendChart
               data={incomeExpenseChartData}
               height={280}
-              currencySymbol={currencySymbol}
               series={[
-                { key: 'income', name: 'Ingresos', color: 'var(--positive)' },
-                { key: 'expense', name: 'Egresos', color: 'var(--negative)' }
+                { key: 'income', label: 'Ingresos', color: 'var(--positive)', type: 'area' },
+                { key: 'expense', label: 'Egresos', color: 'var(--negative)', type: 'area' }
               ]}
               onBarClick={handleMonthDrillDown}
             />
@@ -789,6 +788,7 @@ export function OrganizationFinancesDashboardView({
 
         <ActivityCard
           title="Actividad Reciente"
+          titleIcon={<Clock className="h-5 w-5" />}
           items={recentActivityItems}
           onViewAll={onNavigateToMovements}
           emptyMessage="Sin movimientos recientes"

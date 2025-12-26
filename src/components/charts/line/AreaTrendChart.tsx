@@ -6,7 +6,7 @@ interface MonthlyTrendData {
   label?: string
 }
 
-interface MultiSeriesData {
+export interface MultiSeriesData {
   month: string
   income?: number
   expense?: number

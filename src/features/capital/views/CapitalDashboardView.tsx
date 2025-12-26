@@ -578,7 +578,8 @@ export function CapitalDashboardView({
     // Insight: Capital concentration
     if (partnerDistributionData.length > 0 && netCapital > 0) {
       const topPartnerValue = partnerDistributionData[0]?.value ?? 0;
-      const concentrationPercent = (topPartnerValue / netCapital) * 100;
+      const totalPartnerCapital = partnerDistributionData.reduce((sum, p) => sum + p.value, 0);
+      const concentrationPercent = totalPartnerCapital > 0 ? (topPartnerValue / totalPartnerCapital) * 100 : 0;
       
       if (concentrationPercent > 50) {
         items.push({
@@ -959,6 +960,9 @@ export function CapitalDashboardView({
       {/* Row 5: Insights & Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <InsightCard
+          title="Insights"
+          icon={<Lightbulb className="h-5 w-5" />}
+          description="Alertas y oportunidades de capital"
           items={capitalInsightItems}
           onAction={handleInsightAction}
           data-testid="card-insights"
@@ -966,6 +970,7 @@ export function CapitalDashboardView({
 
         <ActivityCard
           title="Actividad Reciente"
+          titleIcon={<Clock className="h-5 w-5" />}
           items={recentActivityItems}
           emptyText="No hay transacciones recientes"
           data-testid="card-recent-activity"
