@@ -1,18 +1,14 @@
-import { TrendingUp, TrendingDown, Wallet, HandHeart, Scale, ArrowUp, ArrowDown, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, HandHeart } from 'lucide-react';
 import { useMemo } from 'react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
-import { IdentityBadge } from '@/components/shared/IdentityBadge';
-import { Badge } from '@/components/ui/badge';
 import { usePartnerMovements } from '@/features/finances/hooks/use-partner-movements';
 import { usePartnerMetrics } from '@/features/finances/hooks/use-partner-metrics';
 import { usePartners, usePartnerCapitalKPI, type PartnerCapitalKPI } from '@/features/capital';
-import { cn } from '@/lib/utils';
-
-type EquilibriumStatus = PartnerCapitalKPI['equilibrium_status'];
+import { CapitalBalanceCard } from '@/features/capital/components/CapitalBalanceCard';
 
 interface EnrichedPartnerBalance {
   partnerId: string;
@@ -21,46 +17,8 @@ interface EnrichedPartnerBalance {
   ownershipPercentage: number | null;
   capitalEsperado: number | null;
   desvioCapital: number | null;
-  equilibriumStatus: EquilibriumStatus;
+  equilibriumStatus: PartnerCapitalKPI['equilibrium_status'];
   linkedUser?: { avatar_url?: string | null } | null;
-}
-
-function getEquilibriumConfig(status: EquilibriumStatus) {
-  switch (status) {
-    case 'equilibrado':
-      return {
-        icon: Scale,
-        label: 'En equilibrio',
-        badgeVariant: 'success' as const,
-        className: 'text-chart-positive',
-        bgClassName: 'bg-chart-positive/10 border-chart-positive/20',
-      };
-    case 'sobre_aportado':
-      return {
-        icon: ArrowUp,
-        label: 'Sobre aportado',
-        badgeVariant: 'info' as const,
-        className: 'text-chart-info',
-        bgClassName: 'bg-chart-info/10 border-chart-info/20',
-      };
-    case 'bajo_aportado':
-      return {
-        icon: ArrowDown,
-        label: 'Bajo aportado',
-        badgeVariant: 'warning' as const,
-        className: 'text-chart-warning',
-        bgClassName: 'bg-chart-warning/10 border-chart-warning/20',
-      };
-    case 'sin_porcentaje':
-    default:
-      return {
-        icon: Minus,
-        label: 'Sin % asignado',
-        badgeVariant: 'neutral' as const,
-        className: 'text-muted-foreground',
-        bgClassName: 'bg-muted/50 border-muted',
-      };
-  }
 }
 
 export function CapitalBalancesView() {
@@ -81,11 +39,6 @@ export function CapitalBalancesView() {
     balanceByCurrency,
     balanceByPartner,
   } = usePartnerMetrics(movements, defaultCurrency?.code);
-
-  const capitalTotal = useMemo(() => {
-    if (kpiData.length === 0) return 0;
-    return kpiData[0]?.capital_total ?? 0;
-  }, [kpiData]);
 
   const enrichedBalances = useMemo<EnrichedPartnerBalance[]>(() => {
     if (balanceByPartner.length === 0) return [];
@@ -131,11 +84,6 @@ export function CapitalBalancesView() {
       }).format(Math.abs(amount));
       return `${sym} ${formattedAmount}`;
     }).join(' + ');
-  };
-
-  const formatPercentage = (ratio: number | null) => {
-    if (ratio === null) return '—';
-    return `${(ratio * 100).toFixed(1)}%`;
   };
 
   if (!organizationId) {
@@ -232,86 +180,13 @@ export function CapitalBalancesView() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {enrichedBalances.map((partner) => {
-          const config = getEquilibriumConfig(partner.equilibriumStatus);
-          const StatusIcon = config.icon;
-          const hasPercentage = partner.ownershipPercentage !== null;
-
-          return (
-            <div
-              key={partner.partnerId}
-              data-testid={`partner-balance-card-${partner.partnerId}`}
-              className={cn(
-                "relative p-4 rounded-lg border transition-colors",
-                config.bgClassName
-              )}
-            >
-              <div className="absolute top-3 right-3">
-                <Badge variant={config.badgeVariant} className="text-xs">
-                  <StatusIcon className="h-3 w-3 mr-1" />
-                  {config.label}
-                </Badge>
-              </div>
-
-              <div className="flex items-center gap-3 mb-4">
-                <IdentityBadge
-                  name={partner.partnerName}
-                  linkedUser={partner.linkedUser}
-                  showName={false}
-                  size="md"
-                />
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm truncate">{partner.partnerName}</h3>
-                  {hasPercentage && (
-                    <span className="text-xs text-muted-foreground">
-                      {partner.ownershipPercentage?.toFixed(1)}% de participación
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">Balance Actual</div>
-                  <div className={cn(
-                    "text-lg font-bold",
-                    partner.balance >= 0 ? "text-foreground" : "text-chart-negative"
-                  )}>
-                    {partner.balance < 0 ? '-' : ''}{currencySymbol} {formatCurrency(partner.balance)}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">Capital Esperado</div>
-                  <div className="text-lg font-medium text-muted-foreground">
-                    {partner.capitalEsperado !== null 
-                      ? `${currencySymbol} ${formatCurrency(partner.capitalEsperado)}`
-                      : '—'
-                    }
-                  </div>
-                </div>
-              </div>
-
-              {hasPercentage && partner.desvioCapital !== null && (
-                <div className="mt-3 pt-3 border-t border-border/50">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Desvío</span>
-                    <span className={cn(
-                      "text-sm font-semibold",
-                      partner.desvioCapital > 0 
-                        ? "text-chart-positive" 
-                        : partner.desvioCapital < 0 
-                          ? "text-chart-negative" 
-                          : "text-muted-foreground"
-                    )}>
-                      {partner.desvioCapital > 0 ? '+' : ''}{currencySymbol} {formatCurrency(partner.desvioCapital)}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {enrichedBalances.map((partner) => (
+          <CapitalBalanceCard
+            key={partner.partnerId}
+            partner={partner}
+            currencySymbol={currencySymbol}
+          />
+        ))}
       </div>
     </div>
   );

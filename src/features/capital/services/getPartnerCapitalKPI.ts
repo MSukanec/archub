@@ -69,7 +69,7 @@ export async function getPartnerCapitalKPI(organizationId: string): Promise<Part
         ? Math.abs(desvio_capital / capital_esperado) * 100 
         : (desvio_capital === 0 ? 0 : 100);
 
-      if (desvio_porcentaje <= 1) {
+      if (desvio_porcentaje <= 5) {
         equilibrium_status = 'equilibrado';
       } else if (desvio_capital > 0) {
         equilibrium_status = 'sobre_aportado';
