@@ -1,6 +1,6 @@
 import { Bell } from 'lucide-react'
 import { FormModalHeader, FormModalFooter, FormModalLayout } from '@/components/modal'
-import { FormPanel, useAnnouncementForm, type Announcement } from '../forms/AnnouncementForm'
+import { FormPanel, ViewPanel, useAnnouncementForm, type Announcement } from '../forms/AnnouncementForm'
 
 interface AnnouncementModalProps {
   modalData?: {
@@ -43,7 +43,7 @@ export function AnnouncementModal({ modalData, onClose }: AnnouncementModalProps
   return (
     <FormModalLayout
       columns={1}
-      viewPanel={<div></div>}
+      viewPanel={<ViewPanel announcement={announcement} />}
       editPanel={<FormPanel form={form} />}
       headerContent={headerContent}
       footerContent={footerContent}

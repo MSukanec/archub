@@ -317,6 +317,89 @@ export function FormPanel({ form }: FormPanelProps) {
   )
 }
 
+interface ViewPanelProps {
+  announcement?: Announcement
+}
+
+export function ViewPanel({ announcement }: ViewPanelProps) {
+  const getTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      info: 'Información',
+      warning: 'Advertencia',
+      error: 'Error',
+      success: 'Éxito'
+    }
+    return labels[type] || type
+  }
+
+  const getAudienceLabel = (audience: string) => {
+    const labels: Record<string, string> = {
+      all: 'Todos los usuarios',
+      free: 'Solo plan Free',
+      pro: 'Solo plan Pro',
+      teams: 'Solo plan Teams'
+    }
+    return labels[audience] || audience
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <p className="text-sm text-muted-foreground mb-1">Título</p>
+        <p className="font-medium" data-testid="text-announcement-title">
+          {announcement?.title || 'Sin título'}
+        </p>
+      </div>
+      <div>
+        <p className="text-sm text-muted-foreground mb-1">Mensaje</p>
+        <p className="text-sm whitespace-pre-wrap" data-testid="text-announcement-message">
+          {announcement?.message || 'Sin mensaje'}
+        </p>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <p className="text-sm text-muted-foreground mb-1">Tipo</p>
+          <p className="text-sm" data-testid="text-announcement-type">
+            {getTypeLabel(announcement?.type || 'info')}
+          </p>
+        </div>
+        <div>
+          <p className="text-sm text-muted-foreground mb-1">Audiencia</p>
+          <p className="text-sm" data-testid="text-announcement-audience">
+            {getAudienceLabel(announcement?.audience || 'all')}
+          </p>
+        </div>
+        <div>
+          <p className="text-sm text-muted-foreground mb-1">Estado</p>
+          <p className="text-sm" data-testid="text-announcement-status">
+            {announcement?.is_active ? 'Activo' : 'Inactivo'}
+          </p>
+        </div>
+      </div>
+      {(announcement?.starts_at || announcement?.ends_at) && (
+        <div className="grid grid-cols-2 gap-4">
+          {announcement.starts_at && (
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Inicia</p>
+              <p className="text-sm" data-testid="text-announcement-starts">
+                {new Date(announcement.starts_at).toLocaleDateString()}
+              </p>
+            </div>
+          )}
+          {announcement.ends_at && (
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Termina</p>
+              <p className="text-sm" data-testid="text-announcement-ends">
+                {new Date(announcement.ends_at).toLocaleDateString()}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 interface UseAnnouncementFormOptions {
   announcement?: Announcement
   onSuccess: () => void
