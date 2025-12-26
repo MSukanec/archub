@@ -6,11 +6,13 @@ import {
   VerticalBarChart,
   HorizontalBarChart,
   GroupedBarChart,
+  SegmentedBarChart,
   DonutChart,
   ProgressRingChart,
   ComposedBarLineChart,
-  HeatmapGrid,
-  DataTable
+  FinancialFlowChart,
+  BalanceTimelineChart,
+  HeatmapGrid
 } from '@/components/charts'
 
 const MOCK_LINE_DATA = [
@@ -89,17 +91,28 @@ const MOCK_HEATMAP_DATA = [
   { label: 'Jue 3pm', value: 70 }
 ]
 
-const MOCK_TABLE_COLUMNS = [
-  { key: 'name', label: 'Nombre' },
-  { key: 'category', label: 'Categoría' },
-  { key: 'amount', label: 'Monto', align: 'right' as const }
+const MOCK_SEGMENTED_BAR_DATA = [
+  { label: 'Materiales', value: 45000 },
+  { label: 'Mano de Obra', value: 32000 },
+  { label: 'Equipos', value: 18000 },
+  { label: 'Otros', value: 5000 }
 ]
 
-const MOCK_TABLE_DATA = [
-  { id: '1', cells: { name: 'Proyecto Alpha', category: 'Desarrollo', amount: '$45,000' } },
-  { id: '2', cells: { name: 'Proyecto Beta', category: 'Marketing', amount: '$32,000' } },
-  { id: '3', cells: { name: 'Proyecto Gamma', category: 'Ventas', amount: '$28,500' } },
-  { id: '4', cells: { name: 'Proyecto Delta', category: 'Soporte', amount: '$15,000' } }
+const MOCK_FINANCIAL_FLOW_DATA = [
+  { label: 'Ene', inflow: 50000, outflow: 35000, net: 15000 },
+  { label: 'Feb', inflow: 45000, outflow: 40000, net: 5000 },
+  { label: 'Mar', inflow: 60000, outflow: 38000, net: 22000 },
+  { label: 'Abr', inflow: 55000, outflow: 42000, net: 13000 },
+  { label: 'May', inflow: 70000, outflow: 50000, net: 20000 },
+  { label: 'Jun', inflow: 65000, outflow: 45000, net: 20000 }
+]
+
+const MOCK_BALANCE_TIMELINE_DATA = [
+  { label: '1 Ene', displayLabel: '1', dailyBalance: 5000, cumulativeBalance: 5000 },
+  { label: '8 Ene', displayLabel: '8', dailyBalance: -2000, cumulativeBalance: 3000 },
+  { label: '15 Ene', displayLabel: '15', dailyBalance: 8000, cumulativeBalance: 11000 },
+  { label: '22 Ene', displayLabel: '22', dailyBalance: -3000, cumulativeBalance: 8000 },
+  { label: '29 Ene', displayLabel: '29', dailyBalance: 6000, cumulativeBalance: 14000 }
 ]
 
 interface ChartCardProps {
@@ -197,6 +210,14 @@ const ChartGalleryView = () => {
               />
             </div>
           </ChartCard>
+          <ChartCard title="SegmentedBarChart">
+            <div className="h-48">
+              <SegmentedBarChart 
+                data={MOCK_SEGMENTED_BAR_DATA}
+                height={180}
+              />
+            </div>
+          </ChartCard>
         </ChartGroup>
 
         <ChartGroup title="PIE">
@@ -240,6 +261,25 @@ const ChartGalleryView = () => {
               />
             </div>
           </ChartCard>
+          <ChartCard title="FinancialFlowChart">
+            <div className="h-48">
+              <FinancialFlowChart 
+                data={MOCK_FINANCIAL_FLOW_DATA}
+                height={180}
+                inflowLabel="Ingresos"
+                outflowLabel="Egresos"
+                netLabel="Neto"
+              />
+            </div>
+          </ChartCard>
+          <ChartCard title="BalanceTimelineChart">
+            <div className="h-48">
+              <BalanceTimelineChart 
+                data={MOCK_BALANCE_TIMELINE_DATA}
+                height={180}
+              />
+            </div>
+          </ChartCard>
         </ChartGroup>
 
         <ChartGroup title="HEATMAP">
@@ -250,15 +290,6 @@ const ChartGalleryView = () => {
                 columns={4}
               />
             </div>
-          </ChartCard>
-        </ChartGroup>
-
-        <ChartGroup title="TABLE">
-          <ChartCard title="DataTable">
-            <DataTable 
-              columns={MOCK_TABLE_COLUMNS}
-              data={MOCK_TABLE_DATA}
-            />
           </ChartCard>
         </ChartGroup>
 

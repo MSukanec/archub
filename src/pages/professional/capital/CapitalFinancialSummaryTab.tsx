@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { DollarSign, ArrowUpDown, Wallet2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -6,14 +6,16 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useRecentMovements } from '@/hooks/use-finance-dashboard-simple'
 import { useWalletCurrencyBalances } from '@/hooks/use-wallet-currency-balances'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
-import { MonthlyFlowChart } from '@/components/charts/legacy/MonthlyFlowChart'
+import { FinancialFlowChart, type FinancialFlowDataPoint } from '@/components/charts'
+import { BalanceTimelineChart, type BalanceTimelineDataPoint } from '@/components/charts'
 import { CategoryBalanceTable, CategoryBalanceRow } from '@/components/charts/CategoryBalanceTable'
-import { formatDateShort } from '@/lib/date-utils'
+import { formatDateShort, parseLocalDate } from '@/lib/date-utils'
 import { Link } from 'wouter'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { CapitalChart } from '@/components/charts/legacy/CapitalChart'
 import { useMovements } from '@/hooks/use-movements'
 import { useMovementKPIs } from '@/hooks/use-movement-kpis'
+import { format, subDays, subMonths, subYears, isAfter, startOfDay, endOfDay } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 type Period = 'Semana' | 'Mes' | 'Trimestre' | 'Año';
 
@@ -85,6 +87,69 @@ export default function FinancesDashboard() {
     })) || []
   ) || []
   const { data: recentMovements } = useRecentMovements(organizationId, effectiveProjectId, 5, 'desde-siempre')
+  
+  const capitalChartData: BalanceTimelineDataPoint[] = useMemo(() => {
+    if (!movements || movements.length === 0) return []
+    
+    const periodDays = {
+      'Semana': 7,
+      'Mes': 30,
+      'Trimestre': 90,
+      'Año': 365
+    }
+    const days = periodDays[selectedPeriod] || 90
+    const startDate = startOfDay(subDays(new Date(), days))
+    
+    const primaryCurrency = primaryBalance?.currencyCode || defaultCurrency?.code || 'ARS'
+    
+    const dateMap = new Map<string, number>()
+    
+    movements.forEach((m: any) => {
+      if (!m.movement_date) return
+      const movementDate = parseLocalDate(m.movement_date)
+      if (!isAfter(movementDate, startDate)) return
+      
+      const movementCurrency = m.currency?.code || m.currencies?.code || 'ARS'
+      if (movementCurrency !== primaryCurrency) return
+      
+      const dateKey = format(movementDate, 'yyyy-MM-dd')
+      const existing = dateMap.get(dateKey) || 0
+      const amount = m.amount || 0
+      
+      dateMap.set(dateKey, existing + amount)
+    })
+    
+    const sortedDates = Array.from(dateMap.keys()).sort()
+    let cumulative = 0
+    
+    return sortedDates.map(dateKey => {
+      const dailyBalance = dateMap.get(dateKey)!
+      cumulative += dailyBalance
+      
+      return {
+        label: format(new Date(dateKey), 'd MMM', { locale: es }),
+        displayLabel: format(new Date(dateKey), 'd MMM', { locale: es }),
+        dailyBalance,
+        cumulativeBalance: cumulative
+      }
+    })
+  }, [movements, selectedPeriod, primaryBalance?.currencyCode, defaultCurrency?.code])
+  
+  const flowChartData: FinancialFlowDataPoint[] = useMemo(() => {
+    if (!monthlyFlow || monthlyFlow.length === 0) return []
+    
+    return monthlyFlow.map((item: any) => {
+      const inflow = item.income || item.inflow || 0
+      const outflow = item.expense || item.outflow || 0
+      
+      return {
+        label: item.month || item.label || '',
+        inflow,
+        outflow,
+        net: inflow - outflow
+      }
+    })
+  }, [monthlyFlow])
   
   const formatCurrency = (amount: number) => {
     // Use the default currency for formatting
@@ -202,10 +267,10 @@ export default function FinancesDashboard() {
           </div>
           
           {/* Gráfico */}
-          <CapitalChart 
-            movements={movements} 
-            primaryCurrencyCode={primaryBalance?.currencyCode || defaultCurrency?.code || '$'}
-            selectedPeriod={selectedPeriod}
+          <BalanceTimelineChart 
+            data={capitalChartData}
+            height={250}
+            emptyText="No hay movimientos en este período"
           />
         </div>
 
@@ -288,9 +353,14 @@ export default function FinancesDashboard() {
           </div>
           
           {/* Gráfico */}
-          <MonthlyFlowChart 
-            data={monthlyFlow || []} 
-            isLoading={flowLoading} 
+          <FinancialFlowChart 
+            data={flowChartData}
+            height={280}
+            isLoading={flowLoading}
+            emptyText="No hay datos de flujo mensual"
+            inflowLabel="Ingresos"
+            outflowLabel="Egresos"
+            netLabel="Neto"
           />
         </div>
 
