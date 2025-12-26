@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { DollarSign, ArrowUpDown } from 'lucide-react'
+import { DollarSign, ArrowUpDown, Wallet2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useFinancialSummary, useMonthlyFlowData, useRecentMovements } from '@/hooks/use-finance-dashboard-simple'
 import { useWalletCurrencyBalances } from '@/hooks/use-wallet-currency-balances'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { MonthlyFlowChart } from '@/components/charts/legacy/MonthlyFlowChart'
-import { WalletCurrencyBalanceTable } from '@/components/charts/legacy/WalletCurrencyBalanceTable'
+import { CategoryBalanceTable, CategoryBalanceRow } from '@/components/charts/CategoryBalanceTable'
 import { formatDateShort } from '@/lib/date-utils'
 import { Link } from 'wouter'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -49,13 +49,39 @@ export default function FinancesDashboard() {
   const walletCurrencyData = useWalletCurrencyBalances(organizationId, effectiveProjectId)
   const walletCurrencyLoading = walletCurrencyData.isLoading
   
-  // Extract wallet balances from the KPI data structure
-  const walletCurrencyBalances = walletCurrencyData.organizationBalances?.flatMap(currency => 
+  // Helper function to get currency code (ARS, USD, etc.)
+  const getCurrencyCode = (currencyName: string) => {
+    const currencyMap: { [key: string]: string } = {
+      'peso argentino': 'ARS',
+      'pesos argentinos': 'ARS',
+      'peso': 'ARS',
+      'pesos': 'ARS',
+      'dólar estadounidense': 'USD',
+      'dolares estadounidenses': 'USD',
+      'dólar': 'USD',
+      'dólares': 'USD',
+      'dollar': 'USD',
+      'dollars': 'USD',
+      'euro': 'EUR',
+      'euros': 'EUR'
+    }
+    const normalized = currencyName.toLowerCase().trim()
+    return currencyMap[normalized] || currencyName.toUpperCase().substring(0, 3)
+  }
+
+  // Transform wallet balances to generic CategoryBalanceRow format
+  const walletBalanceRows: CategoryBalanceRow[] = walletCurrencyData.organizationBalances?.flatMap(currency => 
     currency.wallets?.map(wallet => ({
-      wallet: wallet.wallet,
-      currency: wallet.currency, 
-      balance: wallet.balance,
-      state: wallet.balance > 0 ? 'Positivo' as const : wallet.balance < 0 ? 'Negativo' as const : 'Neutro' as const
+      primaryLabel: getCurrencyCode(wallet.currency),
+      primaryIcon: DollarSign,
+      secondaryLabel: wallet.wallet,
+      secondaryIcon: Wallet2,
+      value: new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'ARS',
+        minimumFractionDigits: 0
+      }).format(Math.abs(wallet.balance)),
+      valueVariant: wallet.balance > 0 ? 'positive' as const : wallet.balance < 0 ? 'negative' as const : 'neutral' as const
     })) || []
   ) || []
   const { data: recentMovements } = useRecentMovements(organizationId, effectiveProjectId, 5, 'desde-siempre')
@@ -92,7 +118,7 @@ export default function FinancesDashboard() {
 
   // Get currency badge component
   const getCurrencyBadge = () => (
-    <Badge variant="secondary" className="text-xs">
+    <Badge variant="neutral" className="text-xs">
       {defaultCurrency?.code || 'ARS'}
     </Badge>
   )
@@ -193,7 +219,13 @@ export default function FinancesDashboard() {
               </p>
             </CardHeader>
             <CardContent className="pt-4">
-              <WalletCurrencyBalanceTable data={walletCurrencyBalances} isLoading={walletCurrencyLoading} />
+              <CategoryBalanceTable 
+                columns={['Moneda', 'Billetera', 'Balance']}
+                data={walletBalanceRows} 
+                isLoading={walletCurrencyLoading}
+                emptyMessage="No hay datos de balances disponibles"
+                emptyIcon={Wallet2}
+              />
             </CardContent>
           </Card>
 

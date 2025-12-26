@@ -19,6 +19,7 @@ Preferred communication style: Simple, everyday language.
 - **Layout Architecture**: Experience-based layouts including Dashboard Layout (authenticated app) and Marketing Layout (public-facing pages).
 - **Content Theming System**: Unified CSS theming layer with dynamic background switching.
 - **Financial Indicator Colors**: All positive/negative/neutral indicators MUST use Tailwind chart color utilities (`text-chart-positive`, `text-chart-negative`, etc.) which map to CSS variables.
+- **Chart Components (AGNOSTIC NORM)**: Charts in `src/components/charts/` must be COMPLETELY AGNOSTIC to features - no feature-specific names or content. Generic charts receive data via props; views transform feature data to generic formats. Example: `CategoryBalanceTable` (generic) vs `WalletCurrencyBalanceTable` (feature-specific, wrong).
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
