@@ -20,7 +20,7 @@ import { usePlanFeatures } from "@/hooks/usePlanFeatures";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from "@/stores/projectContext";
 import { useMobile } from "@/hooks/use-mobile";
-import { PlanUpgradeModal } from "@/features/users/modals/PlanUpgradeModal";
+import { PlanUpgradeModal } from "@/features/organization";
 
 interface PlanRestrictedProps {
   feature?: string;

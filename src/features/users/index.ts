@@ -18,17 +18,16 @@ export {
 
 // Modals
 export { UserModal } from './modals/UserModal';
-export { PlanModal } from './modals/PlanModal';
-export { PlanPriceFormModal } from './modals/PlanPriceFormModal';
 export { NotificationModal } from './modals/NotificationModal';
 export { SupportConversationStartModal } from './modals/SupportConversationStartModal';
 export { AnnouncementModal } from './modals/AnnouncementModal';
 export { ChangelogModal } from './modals/ChangelogModal';
 export { default as ResetTestDataModal } from './modals/ResetTestDataModal';
-export { PlanUpgradeModal } from './modals/PlanUpgradeModal';
-export { DowngradeModal } from './modals/DowngradeModal';
 export { UpgradeModal } from './modals/UpgradeModal';
 export { InvitationModal } from './modals/InvitationModal';
+
+// Plan Modals (re-export from organization)
+export { PlanModal, PlanUpgradeModal, DowngradeModal } from '@/features/organization';
 
 // Auth Components
 export { AuthGuard } from './components/AuthGuard';

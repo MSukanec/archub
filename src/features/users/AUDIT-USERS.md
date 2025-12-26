@@ -32,29 +32,24 @@ src/features/users/
 │   ├── UserSelectorField.tsx      # User dropdown selector
 │   ├── AdminUserRow.tsx           # Admin user list row
 │   └── AdminChangelogRow.tsx      # Admin changelog row
-├── forms/                         # Agnostic forms (7 files) - SEPARATED FROM MODALS
+├── forms/                         # Agnostic forms (6 files) - SEPARATED FROM MODALS
 │   ├── UserForm.tsx               # Exports: FormPanel, ViewPanel, useUserForm
-│   ├── PlanForm.tsx               # Exports: FormPanel, ViewPanel, usePlanForm
 │   ├── NotificationForm.tsx       # Exports: FormPanel, ViewPanel, useNotificationForm
 │   ├── AnnouncementForm.tsx       # Exports: FormPanel, ViewPanel, useAnnouncementForm
 │   ├── ChangelogForm.tsx          # Exports: FormPanel, ViewPanel, useChangelogForm
 │   ├── SupportForm.tsx            # Exports: ChatPanel, FooterPanel, useSupportChat
 │   └── OnboardingForm.tsx         # Onboarding user data form (moved from components/)
-├── modals/                        # Modal wrappers (13 files) - ENVASES ONLY
+├── modals/                        # Modal wrappers (9 files) - ENVASES ONLY
 │   ├── UserModal.tsx              # Uses UserForm
-│   ├── PlanModal.tsx              # Uses PlanForm
 │   ├── NotificationModal.tsx      # Uses NotificationForm
 │   ├── AnnouncementModal.tsx      # Uses AnnouncementForm
 │   ├── ChangelogModal.tsx         # Uses ChangelogForm
 │   ├── SupportModal.tsx           # Uses SupportForm (chat)
-│   ├── PlanPriceFormModal.tsx     # DEPRECATED
 │   ├── SupportConversationStartModal.tsx
 │   ├── ResetTestDataModal.tsx
-│   ├── PlanUpgradeModal.tsx
-│   ├── DowngradeModal.tsx
 │   ├── UpgradeModal.tsx
 │   └── InvitationModal.tsx
-└── (MemberRow.tsx & PlanBadge.tsx moved to organization/components)
+└── (MemberRow.tsx, PlanBadge.tsx, PlanForm.tsx, PlanModal.tsx, PlanUpgradeModal.tsx, DowngradeModal.tsx → organization/)
 ```
 
 ### 2. Query Keys ✅ COMPLIANT
