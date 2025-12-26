@@ -51,13 +51,6 @@ export default function UserPage() {
   };
 
   const getActionButton = () => {
-    if (activeTab === 'organizations' && isAdmin) {
-      return {
-        label: 'Nueva Organización',
-        icon: Plus,
-        onClick: () => openModal('organization')
-      };
-    }
     return undefined;
   };
 

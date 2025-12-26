@@ -33,9 +33,11 @@ export default function PlanBadge({ isExpanded }: PlanBadgeProps) {
     teams: '#8b5cf6'      // --plan-teams: hsl(271, 76%, 53%)
   };
 
-  // Get plan from current user (primary source - always accurate)
-  // userData.plan comes from the active subscription
-  const currentPlan = userData?.plan?.name?.toLowerCase() || 'free';
+  // Get plan from current organization (primary source)
+  // Falls back to user subscription plan if organization plan not available
+  const organizationPlan = organizationData?.plan?.name?.toLowerCase();
+  const userPlan = userData?.plan?.name?.toLowerCase();
+  const currentPlan = organizationPlan || userPlan || 'free';
   const bgColor = planColors[currentPlan as keyof typeof planColors];
   const borderColor = planColors[currentPlan as keyof typeof planColors];
 

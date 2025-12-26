@@ -535,7 +535,8 @@ export function LeftSidebar() {
                     // Renderizar los botones de contexto usando el sistema normal
                     return contextButtons
                       .filter((button) => {
-                        if (isButtonExcluded(userMode, button.id)) return false;
+                        if (button.isSpacer) return true;
+                        if (isButtonExcluded(userMode, button.id as any)) return false;
                         if (!button.shouldRender()) return false;
                         return true;
                       })
