@@ -305,7 +305,7 @@ function ViewPanel({
       <div className="flex items-center justify-between">
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Estado</h4>
-          <Badge variant="outline" className={cn("gap-1", statusConfig.className)}>
+          <Badge variant="neutral" className={cn("gap-1", statusConfig.className)}>
             <StatusIcon className="h-3 w-3" />
             {statusConfig.label}
           </Badge>

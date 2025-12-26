@@ -37,3 +37,6 @@ export * from './mappers';
 
 // Views
 export * from './views';
+
+// Modals
+export * from './modals';

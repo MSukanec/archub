@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useProjectContext } from '@/stores/projectContext'
 import { useProjectsLite } from '@/features/projects'
 import { cn } from '@/lib/utils'
-import { ClientPaymentFormFields } from '@/features/clients/forms/ClientPaymentFormFields'
+import { ClientPaymentForm } from '@/features/clients/forms/ClientPaymentForm'
 import { MaterialPaymentFormFields } from '@/features/materials/forms/MaterialPaymentFormFields'
 import { PersonnelPaymentFormFields } from '@/features/personnel/forms/PersonnelPaymentForm'
 import { PartnerContributionFormFields, PartnerWithdrawalFormFields } from '@/features/capital'
@@ -212,7 +212,7 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
 
     switch (selectedType) {
       case 'client_payment':
-        return <ClientPaymentFormFields {...commonProps} />
+        return <ClientPaymentForm {...commonProps} />
       case 'material_payment':
         return <MaterialPaymentFormFields {...commonProps} />
       case 'personnel_payment':
