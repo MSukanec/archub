@@ -50,21 +50,54 @@ export { DataTable } from './table/DataTable'
 export type { DataTableColumn, DataTableRow, DataTableProps } from './table/DataTable'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// LEGACY ALIASES (for backward compatibility during migration)
-// These will be removed after all imports are updated
+// EXISTING ROOT-LEVEL CHARTS (kept for backward compatibility)
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Alias: CategoryBalanceTable → DataTable
-export { DataTable as CategoryBalanceTable } from './table/DataTable'
+// CategoryBalanceTable - Unique 3-column table with icons
+export { CategoryBalanceTable } from './CategoryBalanceTable'
+export type { CategoryBalanceRow } from './CategoryBalanceTable'
 
-// Alias: CategoryBreakdownChart → DonutChart  
-export { DonutChart as CategoryBreakdownChart } from './pie/DonutChart'
+// CategoryBreakdownChart - Donut chart
+export { CategoryBreakdownChart } from './CategoryBreakdownChart'
 
-// Alias: MiniTrendChart → SparklineChart
-export { SparklineChart as MiniTrendChart } from './sparkline/SparklineChart'
+// MonthlyTrendChart & MultiSeriesTrendChart - Area/Composed charts
+export { MonthlyTrendChart, MultiSeriesTrendChart } from './MonthlyTrendChart'
 
-// Alias: MiniSparkline → SparklineChart
-export { SparklineChart as MiniSparkline } from './sparkline/SparklineChart'
+// IncomeExpenseChart - Grouped bar chart
+export { IncomeExpenseChart } from './IncomeExpenseChart'
 
-// Alias: ProgressRing → ProgressRingChart
-export { ProgressRingChart as ProgressRing } from './radial/ProgressRingChart'
+// BalanceBreakdownChart - Horizontal bar chart
+export { BalanceBreakdownChart } from './BalanceBreakdownChart'
+
+// MiniTrendChart - Mini sparkline using Recharts
+export { MiniTrendChart } from './MiniTrendChart'
+
+// MiniSparkline - SVG sparkline
+export { MiniSparkline } from './MiniSparkline'
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LEGACY FEATURE-SPECIFIC CHARTS (pending migration)
+// Import directly from their paths until migrated
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Legacy charts (will be deprecated)
+export { default as CapitalChart } from './legacy/CapitalChart'
+export { default as MonthlyFlowChart } from './legacy/MonthlyFlowChart'
+export { default as BreakdownChart } from './legacy/BreakdownChart'
+
+// Gantt charts (feature-specific, pending migration)
+export { default as BurndownChart } from './gantt/BurndownChart'
+export { default as ProgressCurve } from './gantt/ProgressCurve'
+export { default as StatusBreakdown } from './gantt/StatusBreakdown'
+export { default as TasksByPhase } from './gantt/TasksByPhase'
+export { default as WeeklyProgressHeatmap } from './gantt/WeeklyProgressHeatmap'
+export { default as WorkloadOverTime } from './gantt/WorkloadOverTime'
+export { default as DurationByRubro } from './gantt/DurationByRubro'
+export { default as CriticalPathDistribution } from './gantt/CriticalPathDistribution'
+export { default as DependencyNetwork } from './gantt/DependencyNetwork'
+
+// Course charts (feature-specific, pending migration)
+export { default as LineStreak } from './courses/LineStreak'
+export { default as MiniBar } from './courses/MiniBar'
+export { ProgressChart } from './courses/ProgressChart'
+export { default as ProgressRing } from './courses/ProgressRing'

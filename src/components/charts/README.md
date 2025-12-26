@@ -1,89 +1,145 @@
-# Charts (Nivel 1)
+# Chart Components Library
 
-## ¿Qué es un Chart de Nivel 1?
+> **Nivel 1 Pattern**: All charts are pure visualization components.
 
-Los charts de Nivel 1 son **gráficos puros y agnósticos** que:
-- Renderizan visualizaciones de datos
-- Reciben datos y configuración por props
-- **NO usan Card ni contenedores**
-- **NO tienen títulos ni headers**
-- **NO manejan layout externo**
-- **NO conocen el dominio de negocio**
+## Architecture
 
-## Responsabilidades
+```
+src/components/charts/
+├── theme.ts           # Unified styling tokens
+├── CATALOG.md         # Visual reference guide
+├── index.ts           # Central exports
+│
+├── line/              # Line & Area charts
+│   ├── TrendLineChart.tsx
+│   └── MultiLineChart.tsx
+│
+├── sparkline/         # Compact inline charts
+│   └── SparklineChart.tsx
+│
+├── bar/               # Bar charts
+│   ├── VerticalBarChart.tsx
+│   ├── HorizontalBarChart.tsx
+│   └── GroupedBarChart.tsx
+│
+├── pie/               # Pie & Donut charts
+│   └── DonutChart.tsx
+│
+├── radial/            # Radial/Progress charts
+│   └── ProgressRingChart.tsx
+│
+├── composed/          # Multi-type charts
+│   └── ComposedBarLineChart.tsx
+│
+├── heatmap/           # Heatmap grids
+│   └── HeatmapGrid.tsx
+│
+└── table/             # Data tables
+    └── DataTable.tsx
+```
 
-| SÍ hace | NO hace |
-|---------|---------|
-| Renderizar gráficos (líneas, barras, pie, etc.) | Envolver en Card |
-| Manejar tooltips internos | Agregar títulos o headers |
-| Formatear valores en ejes | Consultar datos |
-| Manejar estados loading/empty | Definir layout de página |
-| Aplicar colores y estilos visuales | Conocer dominio (gastos, materiales, etc.) |
+## Core Principles
 
-## Componentes en esta carpeta
+### What Charts DO:
+- Render data visualizations (lines, bars, pie, etc.)
+- Handle internal tooltips
+- Format axis values
+- Handle `isLoading` and empty states
+- Apply visual styles from theme.ts
 
-| Componente | Tipo | Descripción |
-|------------|------|-------------|
-| `MonthlyTrendChart` | Area Chart | Tendencia mensual con gradiente |
-| `CategoryBreakdownChart` | Donut Chart | Distribución por categoría |
+### What Charts DON'T:
+- Wrap in Card containers
+- Add titles or headers
+- Query or fetch data
+- Define page layout
+- Know business domain (expenses, materials, etc.)
 
-## Ejemplo de uso CORRECTO
+## Usage Example
 
 ```tsx
-import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+// CORRECT: Consumer adds Card and context
+import { TrendLineChart } from '@/components/charts'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 
-// El CONSUMIDOR (página o widget) agrega el Card y título
 function MyDashboard() {
+  const data = [
+    { label: 'Jan', value: 100 },
+    { label: 'Feb', value: 150 },
+    { label: 'Mar', value: 120 },
+  ]
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Evolución Mensual</CardTitle>
+        <CardTitle>Monthly Revenue</CardTitle>
       </CardHeader>
       <CardContent>
-        <MonthlyTrendChart 
-          data={myData}
-          height={280}
-        />
+        <TrendLineChart data={data} height={280} />
       </CardContent>
     </Card>
-  );
+  )
 }
 ```
 
-## Ejemplo de uso INCORRECTO
+## Theme System
+
+All charts use centralized tokens from `theme.ts`:
 
 ```tsx
-// ❌ MAL: El chart NO debe tener Card interno
-function BadChart({ data }) {
-  return (
-    <Card>  {/* ❌ NO hacer esto */}
-      <CardHeader>
-        <CardTitle>Mi Gráfico</CardTitle>  {/* ❌ NO hacer esto */}
-      </CardHeader>
-      <ResponsiveContainer>
-        <AreaChart data={data}>...</AreaChart>
-      </ResponsiveContainer>
-    </Card>
-  );
-}
+import { 
+  CHART_COLORS,      // Color palette & semantic colors
+  CHART_AXIS,        // Axis configuration
+  CHART_TOOLTIP,     // Tooltip styling
+  CHART_SHAPES,      // Shape defaults (radius, stroke, etc.)
+  getChartColor,     // Get color by index
+  getValueColor,     // Get color by positive/negative
+  formatCompact      // Number formatting
+} from '@/components/charts'
+
+// Colors
+CHART_COLORS.palette[0]  // First chart color
+CHART_COLORS.positive    // Green for positive values
+CHART_COLORS.negative    // Red for negative values
+
+// Get wrapped color by index
+getChartColor(5)  // Returns palette[0] (wraps around)
+
+// Semantic value colors
+getValueColor(100)   // Returns positive color
+getValueColor(-50)   // Returns negative color
 ```
 
-## Relación con otros niveles
+## Available Charts
 
-```
-Nivel 2 (Dashboard Blocks) ──usa──▶ Nivel 1 (Charts)
-                                         │
-                                         ▼
-                               Nivel 0 (UI Primitives)
-```
+| Import | Type | Use Case |
+|--------|------|----------|
+| `TrendLineChart` | Area | Time series with gradient fill |
+| `MultiLineChart` | Line | Compare multiple series |
+| `SparklineChart` | Mini Line | Inline KPI trends |
+| `VerticalBarChart` | Bar | Category comparison |
+| `HorizontalBarChart` | Bar | Ranked/balance data |
+| `GroupedBarChart` | Bar | Side-by-side comparison |
+| `DonutChart` | Donut | Proportions with center |
+| `ProgressRingChart` | Radial | Single percentage |
+| `ComposedBarLineChart` | Bar+Line | Combined visualization |
+| `HeatmapGrid` | Grid | Time-based intensity |
+| `DataTable` | Table | Categorized data list |
 
-Los Dashboard Blocks de Nivel 2 consumen estos charts y los envuelven en Cards con títulos.
+## Adding New Charts
 
-## Cómo agregar un nuevo Chart
+1. Create in appropriate type folder (`line/`, `bar/`, etc.)
+2. Use tokens from `theme.ts`
+3. NO Card wrappers or titles
+4. Receive `data`, `height`, `isLoading` via props
+5. Handle empty states gracefully
+6. Export from `index.ts`
+7. Add to `CATALOG.md`
 
-1. Crear el componente en esta carpeta
-2. NO usar Card ni contenedores
-3. Recibir `data`, `height`, `color`, etc. por props
-4. Manejar estados `isLoading` y `empty` internamente
-5. Usar clases Tailwind compatibles con dark mode
+## Legacy Charts (Deprecated)
+
+The following folders contain legacy charts pending migration:
+- `legacy/` - Old feature-specific charts
+- `gantt/` - Gantt-specific visualizations
+- `courses/` - Learning module charts
+
+These will be consolidated into the type-based structure.
