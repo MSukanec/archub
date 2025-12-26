@@ -9,21 +9,12 @@ import { useGeneralCostsPayments } from '../hooks/use-general-costs-payments';
 import { useGeneralCostsMonthlySummary } from '../hooks/use-general-costs-monthly-summary';
 import { useGeneralCostsByCategory } from '../hooks/use-general-costs-by-category';
 import { 
-  StatCard, 
-  StatCardTitle, 
-  StatCardValue, 
-  StatCardMeta,
-  StatCardMetaContainer,
-  StatCardSubValue,
-  StatCardTrend,
-  StatCardHistoricalComparison,
-  DashboardCard,
   ActivityCard,
-  CategoryHighlightCard,
   InsightCard,
   type ActivityItem,
   type TrendDirection
 } from '@/components/dashboard';
+import { AppCard, AppCardTitle, AppCardValue, AppCardMeta, AppCardTrend, AppCardHistoricalComparison } from '@/components/shared/AppCard';
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
 import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -672,67 +663,67 @@ export default function GeneralCostsDashboardView({
   return (
     <div className="space-y-6" data-testid="general-costs-dashboard">
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard data-testid="kpi-total-gasto">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-total-gasto">
+          <AppCardTitle>
             <DollarSign className="h-4 w-4" />
             {kpiLabels.totalTitle}
-          </StatCardTitle>
-          <StatCardValue>{defaultCurrency?.symbol} {kpis.totalGasto.formatted}</StatCardValue>
-          <StatCardMetaContainer>
+          </AppCardTitle>
+          <AppCardValue>{defaultCurrency?.symbol} {kpis.totalGasto.formatted}</AppCardValue>
+          <div className="space-y-1">
             {kpis.totalGastoTrendValue && (
-              <StatCardTrend direction={kpis.totalGastoTrend} value={kpis.totalGastoTrendValue} />
+              <AppCardTrend direction={kpis.totalGastoTrend} value={kpis.totalGastoTrendValue} />
             )}
             {!periodMeta.isShortPeriod && (
-              <StatCardHistoricalComparison 
+              <AppCardHistoricalComparison 
                 comparison={currentMonthComparison} 
                 label="vs promedio mensual"
               />
             )}
-          </StatCardMetaContainer>
-        </StatCard>
+          </div>
+        </AppCard>
 
-        <StatCard data-testid="kpi-average-monthly">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-average-monthly">
+          <AppCardTitle>
             <TrendingUp className="h-4 w-4" />
             {kpiLabels.averageTitle}
-          </StatCardTitle>
-          <StatCardValue>{defaultCurrency?.symbol} {kpis.periodAverage?.formatted ?? kpis.averageMonthly.formatted}</StatCardValue>
-          <StatCardMetaContainer>
+          </AppCardTitle>
+          <AppCardValue>{defaultCurrency?.symbol} {kpis.periodAverage?.formatted ?? kpis.averageMonthly.formatted}</AppCardValue>
+          <div className="space-y-1">
             {!periodMeta.isShortPeriod && kpis.averageMonthlyTrendValue && (
-              <StatCardTrend direction={kpis.averageMonthlyTrend} value={kpis.averageMonthlyTrendValue} />
+              <AppCardTrend direction={kpis.averageMonthlyTrend} value={kpis.averageMonthlyTrendValue} />
             )}
-            <StatCardMeta>{kpiLabels.averageHelper}</StatCardMeta>
-          </StatCardMetaContainer>
-        </StatCard>
+            <AppCardMeta>{kpiLabels.averageHelper}</AppCardMeta>
+          </div>
+        </AppCard>
 
-        <StatCard data-testid="kpi-total-payments">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-total-payments">
+          <AppCardTitle>
             <Calendar className="h-4 w-4" />
             Total Pagos
-          </StatCardTitle>
-          <StatCardValue>{kpis.totalPayments.formatted}</StatCardValue>
-          <StatCardMetaContainer>
-            <StatCardTrend 
+          </AppCardTitle>
+          <AppCardValue>{kpis.totalPayments.formatted}</AppCardValue>
+          <div className="space-y-1">
+            <AppCardTrend 
               direction={kpis.totalPaymentsTrend}
               value={`≈ ${kpis.paymentsPerMonth} pagos por mes`}
             />
-          </StatCardMetaContainer>
-        </StatCard>
+          </div>
+        </AppCard>
 
-        <StatCard data-testid="kpi-concentration">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-concentration">
+          <AppCardTitle>
             <TrendingUp className="h-4 w-4" />
             Concentración del Gasto
-          </StatCardTitle>
-          <StatCardValue>{kpis.topCategoryPercentage}%</StatCardValue>
-          <StatCardMetaContainer>
-            <StatCardMeta>{kpis.topCategoryName}</StatCardMeta>
-          </StatCardMetaContainer>
-        </StatCard>
+          </AppCardTitle>
+          <AppCardValue>{kpis.topCategoryPercentage}%</AppCardValue>
+          <div className="space-y-1">
+            <AppCardMeta>{kpis.topCategoryName}</AppCardMeta>
+          </div>
+        </AppCard>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DashboardCard 
+        <AppCard 
           title="Evolución Mensual"
           icon={<BarChart3 />}
           description="Hacé click en un punto para ver los pagos de ese mes"
@@ -745,9 +736,9 @@ export default function GeneralCostsDashboardView({
             clickable
             onBarClick={(month) => handleMonthDrillDown(month)}
           />
-        </DashboardCard>
+        </AppCard>
 
-        <DashboardCard 
+        <AppCard 
           title="Distribución por Categoría"
           icon={<PieChart />}
           description="Hacé click en una categoría para ver sus pagos"
@@ -760,7 +751,7 @@ export default function GeneralCostsDashboardView({
             clickable
             onClick={(label) => handleCategoryDrillDown(label)}
           />
-        </DashboardCard>
+        </AppCard>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
