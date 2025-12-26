@@ -66,13 +66,12 @@ export { HeatmapGrid } from './heatmap/HeatmapGrid'
 export type { HeatmapDataPoint, HeatmapGridProps } from './heatmap/HeatmapGrid'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ROOT-LEVEL CHARTS (backward compatibility)
-// These are unique charts that don't duplicate the type-based charts above
+// TABLE CHARTS
 // ═══════════════════════════════════════════════════════════════════════════
-
-// CategoryBalanceTable - Unique 3-column table with icons
 export { CategoryBalanceTable } from './table/CategoryBalanceTable'
 export type { CategoryBalanceRow } from './table/CategoryBalanceTable'
 
-// Area/Composed trend charts
+// ═══════════════════════════════════════════════════════════════════════════
+// AREA CHARTS (Line variants with gradient fill)
+// ═══════════════════════════════════════════════════════════════════════════
 export { MonthlyTrendChart, MultiSeriesTrendChart } from './line/AreaTrendChart'
