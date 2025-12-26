@@ -15,6 +15,7 @@ export {
   StatCardTitle,
   StatCardValue,
   StatCardMeta,
-  StatCardContent
+  StatCardContent,
+  DashboardCard
 } from './shared/AppCard';
 export type { TrendDirection } from './shared/AppCard';
