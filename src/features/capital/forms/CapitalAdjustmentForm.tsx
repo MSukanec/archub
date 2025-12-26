@@ -355,25 +355,6 @@ export function CapitalAdjustmentForm({
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="reason"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Razón del ajuste (opcional)</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Ej: Corrección de saldo inicial, Ajuste por diferencia de cambio..."
-                  {...field}
-                  value={field.value || ''}
-                  data-testid="input-capital-adjustment-reason"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         {(() => {
           const visibility = getCurrencyFieldsVisibility({
             context: orgCurrencyContext,
@@ -447,6 +428,25 @@ export function CapitalAdjustmentForm({
             </>
           );
         })()}
+
+        <FormField
+          control={form.control}
+          name="reason"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Razón del ajuste (opcional)</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ej: Corrección de saldo inicial, Ajuste por diferencia de cambio..."
+                  {...field}
+                  value={field.value || ''}
+                  data-testid="input-capital-adjustment-reason"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
