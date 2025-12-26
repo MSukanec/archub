@@ -11,7 +11,7 @@ create table public.capital_adjustments (
   exchange_rate numeric not null default 1,
   amount numeric(12, 2) not null,
   adjustment_date date not null default now(),
-  reason text not null,
+  reason text null,
   notes text null,
   reference text null,
   status text not null default 'confirmed'::text,
@@ -53,6 +53,13 @@ where
 create trigger capital_adjustments_set_updated_at BEFORE
 update on capital_adjustments for EACH row
 execute FUNCTION set_timestamp ();
+
+create trigger trg_update_balance_adjustment
+after INSERT
+or DELETE
+or
+update on capital_adjustments for EACH row
+execute FUNCTION update_partner_balance_after_capital_change ();
 
 ## Tabla CAPITAL_PARTICIPANTS:
 
@@ -168,10 +175,11 @@ create table public.partner_capital_balance (
   balance_amount numeric(12, 2) not null,
   balance_date date not null default now(),
   created_at timestamp with time zone not null default now(),
-  updated_at timestamp with time zone null,
+  updated_at timestamp with time zone null default now(),
   is_deleted boolean not null default false,
   deleted_at timestamp with time zone null,
   constraint partner_capital_balance_pkey primary key (id),
+  constraint partner_capital_balance_unique unique (partner_id, organization_id),
   constraint fk_balance_org foreign KEY (organization_id) references organizations (id) on delete CASCADE,
   constraint fk_balance_partner foreign KEY (partner_id) references capital_participants (id) on delete CASCADE
 ) TABLESPACE pg_default;
