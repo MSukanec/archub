@@ -18,7 +18,6 @@ import { capitalKeys } from '@/core/query-keys';
 const partnerSchema = z.object({
   contactId: z.string().min(1, 'Debe seleccionar un contacto'),
   notes: z.string().optional(),
-  status: z.enum(['active', 'inactive']).default('active'),
   ownershipPercentage: z.union([
     z.string().transform((val) => val === '' ? null : parseFloat(val)),
     z.number(),
@@ -142,7 +141,6 @@ export function CapitalParticipantForm({
     defaultValues: {
       contactId: existingPartner?.contact_id || '',
       notes: existingPartner?.notes || '',
-      status: (existingPartner?.status as 'active' | 'inactive') || 'active',
       ownershipPercentage: existingPartner?.ownership_percentage ?? null,
     },
   });
@@ -152,7 +150,6 @@ export function CapitalParticipantForm({
       form.reset({
         contactId: existingPartner.contact_id || '',
         notes: existingPartner.notes || '',
-        status: (existingPartner.status as 'active' | 'inactive') || 'active',
         ownershipPercentage: existingPartner.ownership_percentage ?? null,
       });
     }
@@ -168,7 +165,7 @@ export function CapitalParticipantForm({
           organization_id: orgId,
           contact_id: data.contactId,
           notes: data.notes || null,
-          status: data.status || 'active',
+          status: 'active',
           created_by: userData?.memberships?.[0]?.id || null,
           ownership_percentage: data.ownershipPercentage ?? null,
         })
@@ -205,7 +202,6 @@ export function CapitalParticipantForm({
         .update({
           contact_id: data.contactId,
           notes: data.notes || null,
-          status: data.status || 'active',
           ownership_percentage: data.ownershipPercentage ?? null,
           updated_at: new Date().toISOString(),
         })
@@ -313,28 +309,6 @@ export function CapitalParticipantForm({
                   renderOption={renderContactOption}
                 />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Estado</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger data-testid="select-status">
-                    <SelectValue placeholder="Seleccionar estado..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="active">Activo</SelectItem>
-                  <SelectItem value="inactive">Inactivo</SelectItem>
-                </SelectContent>
-              </Select>
               <FormMessage />
             </FormItem>
           )}
