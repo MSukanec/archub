@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { Building, Crown, Plus, Building2 } from 'lucide-react';
+import { Building, Crown, Building2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
@@ -11,7 +11,6 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useLocation } from 'wouter';
 import { useOrganizationMembers } from '@/features/organization';
 import { AdminOrganizationRow } from '@/features/organization/components/admin/AdminOrganizationRow';
-import { useGlobalModalStore } from '@/components/modal';
 import { CompactAvatarGroup } from '@/components/shared/CompactAvatarGroup';
 import { useMobile } from '@/hooks/use-mobile';
 import { usersKeys } from '@/core/query-keys';
@@ -108,7 +107,6 @@ export function UserOrganizationsView() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { openModal } = useGlobalModalStore();
   const { setCurrentProject } = useNavigationStore();
   const isMobile = useMobile();
 
@@ -199,14 +197,6 @@ export function UserOrganizationsView() {
             <Building className="mx-auto h-12 w-12 text-muted-foreground/40" />
             <h3 className="mt-4 text-lg font-semibold">No hay organizaciones</h3>
             <p className="text-muted-foreground">Crea tu primera organización para comenzar.</p>
-            <Button 
-              className="mt-4" 
-              onClick={() => openModal('organization')}
-              data-testid="button-create-organization"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Crear Organización
-            </Button>
           </div>
         )}
       </div>

@@ -4,6 +4,10 @@ interface Member {
   id: string;
   avatar_url?: string;
   full_name?: string;
+  users?: {
+    avatar_url?: string | null;
+    full_name?: string | null;
+  } | null;
 }
 
 interface CompactAvatarGroupProps {
@@ -29,8 +33,9 @@ export function CompactAvatarGroup({
   };
 
   const getInitials = (member: Member) => {
-    if (member.full_name) {
-      return member.full_name
+    const name = member.full_name || member.users?.full_name;
+    if (name) {
+      return name
         .split(' ')
         .map(n => n[0])
         .join('')
@@ -40,6 +45,14 @@ export function CompactAvatarGroup({
     return 'U';
   };
 
+  const getAvatarUrl = (member: Member) => {
+    return member.avatar_url || member.users?.avatar_url || undefined;
+  };
+
+  const getName = (member: Member) => {
+    return member.full_name || member.users?.full_name || 'Avatar';
+  };
+
   return (
     <div className="flex items-center -space-x-2">
       {displayMembers.map((member) => (
@@ -47,8 +60,8 @@ export function CompactAvatarGroup({
           key={member.id} 
           className={`${sizeClasses[size]} border-2 border-background`}
         >
-          {member.avatar_url ? (
-            <AvatarImage src={member.avatar_url} alt={member.full_name || 'Avatar'} />
+          {getAvatarUrl(member) ? (
+            <AvatarImage src={getAvatarUrl(member)} alt={getName(member)} />
           ) : (
             <AvatarFallback className="font-semibold">
               {getInitials(member)}
