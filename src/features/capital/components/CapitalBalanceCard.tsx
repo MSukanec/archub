@@ -57,10 +57,6 @@ export function CapitalBalanceCard({
   currencySymbol,
   onPartnerClick,
 }: CapitalBalanceCardProps) {
-  const contributionConfig = getContributionConfig(partner.contribution_status);
-  const netConfig = getNetConfig(partner.net_status);
-  const ContributionIcon = contributionConfig.icon;
-  const NetIcon = netConfig.icon;
   const hasPercentage = partner.ownershipPercentage !== null;
 
   const formatCurrency = (amount: number) => {
