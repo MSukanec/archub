@@ -168,16 +168,15 @@ export function CapitalAdjustmentForm({
     }
 
     try {
-      const shouldUseExchangeRate = orgCurrencyContext.shouldShowExchangeRate(data.currency_id);
-      const effectiveExchangeRate = shouldUseExchangeRate ? (data.exchange_rate || 1) : 1;
-      
       if (mode === 'edit' && adjustmentId) {
         await updateMutation.mutateAsync({
           adjustmentId,
           updates: {
+            partner_id: data.partner_id ?? null,
             amount: data.amount,
+            exchange_rate: data.exchange_rate || 1,
             adjustment_date: formatDateForDB(data.adjustment_date),
-            reason: data.reason ?? undefined,
+            reason: data.reason ?? null,
             status: data.status,
             reference: data.reference || null,
             notes: data.notes || null,
@@ -188,12 +187,12 @@ export function CapitalAdjustmentForm({
         await createMutation.mutateAsync({
           organization_id: organizationId,
           project_id: projectId || null,
-          partner_id: data.partner_id ?? undefined,
+          partner_id: data.partner_id ?? null,
           amount: data.amount,
           currency_id: data.currency_id,
-          exchange_rate: effectiveExchangeRate,
+          exchange_rate: data.exchange_rate || 1,
           adjustment_date: formatDateForDB(data.adjustment_date),
-          reason: data.reason ?? undefined,
+          reason: data.reason ?? null,
           status: data.status,
           reference: data.reference || null,
           notes: data.notes || null,
