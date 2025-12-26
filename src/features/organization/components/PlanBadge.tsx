@@ -11,6 +11,17 @@ export default function PlanBadge({ isExpanded }: PlanBadgeProps) {
   const { data: userData } = useCurrentUser();
   const [, navigate] = useLocation();
 
+  // Colors from index.css
+  const planColors = {
+    free: '#84cc16',      // --plan-free: hsl(76, 100%, 40%)
+    pro: '#1a57a0',       // --plan-pro: hsl(213, 100%, 33%)
+    teams: '#8b5cf6'      // --plan-teams: hsl(271, 76%, 53%)
+  };
+
+  const currentPlan = userData?.plan?.name?.toLowerCase() || 'free';
+  const bgColor = planColors[currentPlan as keyof typeof planColors];
+  const borderColor = planColors[currentPlan as keyof typeof planColors];
+
   return (
     <div className="flex justify-center w-full">
       <div className={cn(
@@ -18,19 +29,15 @@ export default function PlanBadge({ isExpanded }: PlanBadgeProps) {
         isExpanded ? "w-full" : "w-8 h-8"
       )}>
         {isExpanded ? (
-          <div className={cn(
-            "w-full border-2 rounded-lg p-3 transition-all duration-150 ease-out",
-            (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "border-[var(--accent)]",
-            userData?.plan?.name?.toLowerCase() === 'pro' && "border-blue-500",
-            userData?.plan?.name?.toLowerCase() === 'teams' && "border-purple-500"
-          )}>
+          <div 
+            className="w-full border-2 rounded-lg p-3 transition-all duration-150 ease-out"
+            style={{ borderColor }}
+          >
             <div className="flex items-center gap-2 mb-2 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.05s_forwards]">
-              <div className={cn(
-                "w-5 h-5 rounded-full flex items-center justify-center transition-all duration-150",
-                (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "bg-[var(--accent)]",
-                userData?.plan?.name?.toLowerCase() === 'pro' && "bg-blue-500",
-                userData?.plan?.name?.toLowerCase() === 'teams' && "bg-purple-500"
-              )}>
+              <div 
+                className="w-5 h-5 rounded-full flex items-center justify-center transition-all duration-150"
+                style={{ backgroundColor: bgColor }}
+              >
                 {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-3 h-3 text-white" />}
                 {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-3 h-3 text-white" />}
                 {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-3 h-3 text-white" />}
@@ -53,10 +60,10 @@ export default function PlanBadge({ isExpanded }: PlanBadgeProps) {
             {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && (
               <button 
                 onClick={() => navigate('/settings/pricing-plan')}
-                className={cn(
-                  "w-full py-2 px-3 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]",
-                  "bg-[var(--plan-free-bg)] hover:bg-[var(--plan-free-bg)]/80"
-                )}>
+                className="w-full py-2 px-3 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]"
+                style={{backgroundColor: planColors.free}}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
                 <Zap className="w-3 h-3" />
                 Actualizar a Pro
               </button>
@@ -65,9 +72,9 @@ export default function PlanBadge({ isExpanded }: PlanBadgeProps) {
               <button 
                 onClick={() => navigate('/settings/pricing-plan')}
                 className="w-full py-2 px-3 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]" 
-                style={{backgroundColor: 'var(--plan-pro-bg)'}} 
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(213, 100%, 28%)'} 
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--plan-pro-bg)'}>
+                style={{backgroundColor: planColors.pro}}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
                 <Crown className="w-3 h-3" />
                 Actualizar a Teams
               </button>
@@ -76,9 +83,9 @@ export default function PlanBadge({ isExpanded }: PlanBadgeProps) {
               <button 
                 onClick={() => navigate('/settings/pricing-plan')}
                 className="w-full py-2 px-3 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]" 
-                style={{backgroundColor: 'var(--plan-teams-bg)'}} 
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(271, 76%, 48%)'} 
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--plan-teams-bg)'}>
+                style={{backgroundColor: planColors.teams}}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
                 <Zap className="w-3 h-3" />
                 Plan Premium
               </button>
@@ -87,12 +94,9 @@ export default function PlanBadge({ isExpanded }: PlanBadgeProps) {
         ) : (
           <div 
             onClick={() => navigate('/settings/pricing-plan')}
-            className={cn(
-            "w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all duration-150 ease-out hover:scale-105",
-            (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "bg-[var(--plan-free-bg)]",
-            userData?.plan?.name?.toLowerCase() === 'pro' && "bg-[var(--plan-pro-bg)]",
-            userData?.plan?.name?.toLowerCase() === 'teams' && "bg-[var(--plan-teams-bg)]"
-          )}>
+            className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all duration-150 ease-out hover:scale-105"
+            style={{backgroundColor: bgColor}}
+          >
             {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && <Star className="w-4 h-4 text-white transition-all duration-150" />}
             {userData?.plan?.name?.toLowerCase() === 'pro' && <Crown className="w-4 h-4 text-white transition-all duration-150" />}
             {userData?.plan?.name?.toLowerCase() === 'teams' && <Zap className="w-4 h-4 text-white transition-all duration-150" />}
