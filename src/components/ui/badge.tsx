@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
-import { CheckCircle2, AlertCircle, AlertTriangle, Clock, Info, XCircle, Play, Check, Pause, X, Calendar, Award } from 'lucide-react'
+import { CheckCircle2, AlertCircle, AlertTriangle, Clock, Info, XCircle, Play, Check, Pause, X, Calendar, Award, TrendingUp, TrendingDown, Scale } from 'lucide-react'
 
 /**
  * SEMANTIC BADGE VARIANTS
@@ -25,6 +25,9 @@ export type BadgeVariant =
   | 'status-cancelled'
   | 'status-planning'
   | 'organization-founder'
+  | 'capital-over'
+  | 'capital-under'
+  | 'capital-equal'
 
 /**
  * Mapping of variants to their semantic color variables
@@ -47,6 +50,9 @@ const BADGE_VARIANT_MAP: Record<BadgeVariant, string> = {
   'status-cancelled': 'var(--status-cancelled)',
   'status-planning': 'var(--status-planning)',
   'organization-founder': 'var(--plan-teams)',
+  'capital-over': 'var(--capital-badge-over)',
+  'capital-under': 'var(--capital-badge-under)',
+  'capital-equal': 'var(--capital-badge-equal)',
 }
 
 /**
@@ -71,6 +77,9 @@ const variantIcons: Record<BadgeVariant, React.ReactNode | null> = {
   'status-cancelled': <X className="w-3.5 h-3.5" />,
   'status-planning': <Calendar className="w-3.5 h-3.5" />,
   'organization-founder': <Award className="w-3.5 h-3.5" />,
+  'capital-over': <TrendingUp className="w-3.5 h-3.5" />,
+  'capital-under': <TrendingDown className="w-3.5 h-3.5" />,
+  'capital-equal': <Scale className="w-3.5 h-3.5" />,
 }
 
 const badgeVariants = cva(
@@ -94,6 +103,9 @@ const badgeVariants = cva(
         "status-cancelled": "",
         "status-planning": "",
         "organization-founder": "",
+        "capital-over": "",
+        "capital-under": "",
+        "capital-equal": "",
       }
     },
     defaultVariants: {
@@ -182,6 +194,21 @@ const variantStyles: Record<BadgeVariant, React.CSSProperties> = {
     borderColor: 'var(--plan-teams)',
     backgroundColor: 'color-mix(in srgb, var(--plan-teams) 10%, transparent)',
     color: 'var(--plan-teams)',
+  },
+  'capital-over': {
+    borderColor: 'var(--capital-badge-over)',
+    backgroundColor: 'color-mix(in srgb, var(--capital-badge-over) 10%, transparent)',
+    color: 'var(--capital-badge-over)',
+  },
+  'capital-under': {
+    borderColor: 'var(--capital-badge-under)',
+    backgroundColor: 'color-mix(in srgb, var(--capital-badge-under) 10%, transparent)',
+    color: 'var(--capital-badge-under)',
+  },
+  'capital-equal': {
+    borderColor: 'var(--capital-badge-equal)',
+    backgroundColor: 'color-mix(in srgb, var(--capital-badge-equal) 10%, transparent)',
+    color: 'var(--capital-badge-equal)',
   },
 }
 

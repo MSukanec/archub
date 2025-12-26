@@ -24,63 +24,31 @@ interface CapitalBalanceCardProps {
   onPartnerClick?: () => void;
 }
 
-function getContributionConfig(status: PartnerCapitalKPI['contribution_status']) {
+function getContributionVariant(status: PartnerCapitalKPI['contribution_status']) {
   switch (status) {
     case 'equilibrado':
-      return {
-        icon: Scale,
-        label: 'En equilibrio',
-        style: { backgroundColor: 'var(--capital-badge-equal)', color: 'white' },
-      };
+      return { variant: 'capital-equal' as const, label: 'En equilibrio' };
     case 'sobre_aportado':
-      return {
-        icon: TrendingUp,
-        label: 'Sobre aportado',
-        style: { backgroundColor: 'var(--capital-badge-over)', color: 'white' },
-      };
+      return { variant: 'capital-over' as const, label: 'Sobre aportado' };
     case 'bajo_aportado':
-      return {
-        icon: TrendingDown,
-        label: 'Bajo aportado',
-        style: { backgroundColor: 'var(--capital-badge-under)', color: 'white' },
-      };
+      return { variant: 'capital-under' as const, label: 'Bajo aportado' };
     case 'sin_porcentaje':
     default:
-      return {
-        icon: Minus,
-        label: 'Sin % asignado',
-        style: { backgroundColor: 'var(--capital-badge-equal)', color: 'white' },
-      };
+      return { variant: 'capital-equal' as const, label: 'Sin % asignado' };
   }
 }
 
-function getNetConfig(status: PartnerCapitalKPI['net_status']) {
+function getNetVariant(status: PartnerCapitalKPI['net_status']) {
   switch (status) {
     case 'equilibrado':
-      return {
-        icon: Scale,
-        label: 'En equilibrio',
-        style: { backgroundColor: 'var(--capital-badge-equal)', color: 'white' },
-      };
+      return { variant: 'capital-equal' as const, label: 'En equilibrio' };
     case 'arriba':
-      return {
-        icon: TrendingUp,
-        label: 'Capital arriba',
-        style: { backgroundColor: 'var(--capital-badge-over)', color: 'white' },
-      };
+      return { variant: 'capital-over' as const, label: 'Capital arriba' };
     case 'abajo':
-      return {
-        icon: TrendingDown,
-        label: 'Capital abajo',
-        style: { backgroundColor: 'var(--capital-badge-under)', color: 'white' },
-      };
+      return { variant: 'capital-under' as const, label: 'Capital abajo' };
     case 'sin_porcentaje':
     default:
-      return {
-        icon: Minus,
-        label: 'Sin % asignado',
-        style: { backgroundColor: 'var(--capital-badge-equal)', color: 'white' },
-      };
+      return { variant: 'capital-equal' as const, label: 'Sin % asignado' };
   }
 }
 
@@ -172,13 +140,9 @@ export function CapitalBalanceCard({
             </div>
             {partner.contribution_status !== 'sin_porcentaje' && (
               <div className="flex gap-2">
-                <div 
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium"
-                  style={contributionConfig.style}
-                >
-                  <ContributionIcon className="h-3 w-3" />
-                  {contributionConfig.label}
-                </div>
+                <Badge variant={getContributionVariant(partner.contribution_status).variant}>
+                  {getContributionVariant(partner.contribution_status).label}
+                </Badge>
               </div>
             )}
           </div>
@@ -229,13 +193,9 @@ export function CapitalBalanceCard({
             </div>
             {partner.net_status !== 'sin_porcentaje' && (
               <div className="flex gap-2">
-                <div 
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium"
-                  style={netConfig.style}
-                >
-                  <NetIcon className="h-3 w-3" />
-                  {netConfig.label}
-                </div>
+                <Badge variant={getNetVariant(partner.net_status).variant}>
+                  {getNetVariant(partner.net_status).label}
+                </Badge>
               </div>
             )}
           </div>
