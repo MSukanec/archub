@@ -11,6 +11,7 @@ import { useAllWallets } from '@/hooks/use-wallets';
 import { useOrganizationWallets } from '@/features/organization';
 import { useOptimisticMutation } from '@/core/save-engine';
 import { organizationKeys } from '@/core/query-keys';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 
 export function OrganizationSettingsFinancesView() {
@@ -20,6 +21,7 @@ export function OrganizationSettingsFinancesView() {
   const { data: organizationCurrencies, isLoading: isLoadingOrgCurrencies } = useOrganizationCurrencies(organizationId);
   const { data: allWallets } = useAllWallets();
   const { data: organizationWallets } = useOrganizationWallets(organizationId);
+  const { toast } = useToast();
 
   const [defaultCurrency, setDefaultCurrency] = useState<string>('');
   const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
@@ -364,11 +366,27 @@ export function OrganizationSettingsFinancesView() {
   };
 
   const handleSecondaryCurrenciesChange = (currencyIds: string[]) => {
+    if (currencyIds.length > 1) {
+      toast({
+        title: 'Solo una moneda secundaria permitida',
+        description: 'Puedes tener como máximo 1 moneda secundaria junto con tu moneda principal.',
+        variant: 'destructive',
+      });
+      return;
+    }
     setSecondaryCurrencies(currencyIds);
     updateSecondaryCurrenciesMutation.mutate(currencyIds);
   };
 
   const handleSecondaryWalletsChange = (walletIds: string[]) => {
+    if (walletIds.length > 1) {
+      toast({
+        title: 'Solo una billetera secundaria permitida',
+        description: 'Puedes tener como máximo 1 billetera secundaria junto con tu billetera principal.',
+        variant: 'destructive',
+      });
+      return;
+    }
     setSecondaryWallets(walletIds);
     updateSecondaryWalletsMutation.mutate(walletIds);
   };
@@ -409,7 +427,7 @@ export function OrganizationSettingsFinancesView() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="secondary-currencies">Monedas Secundarias</Label>
+            <Label htmlFor="secondary-currencies">Moneda Secundaria (Opcional)</Label>
             <ComboBoxMultiSelectField
               options={availableSecondaryCurrencies.map(currency => ({
                 value: currency.id,
@@ -417,8 +435,9 @@ export function OrganizationSettingsFinancesView() {
               }))}
               value={secondaryCurrencies}
               onChange={handleSecondaryCurrenciesChange}
-              placeholder="Selecciona monedas secundarias"
+              placeholder="Selecciona 1 moneda secundaria"
             />
+            <p className="text-xs text-muted-foreground">Máximo 1 moneda secundaria permitida</p>
           </div>
         </div>
       </div>
@@ -452,7 +471,7 @@ export function OrganizationSettingsFinancesView() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="secondary-wallets">Billeteras Secundarias</Label>
+            <Label htmlFor="secondary-wallets">Billetera Secundaria (Opcional)</Label>
             <ComboBoxMultiSelectField
               options={availableSecondaryWallets.map(wallet => ({
                 value: wallet.id,
@@ -460,8 +479,9 @@ export function OrganizationSettingsFinancesView() {
               }))}
               value={secondaryWallets}
               onChange={handleSecondaryWalletsChange}
-              placeholder="Selecciona billeteras secundarias"
+              placeholder="Selecciona 1 billetera secundaria"
             />
+            <p className="text-xs text-muted-foreground">Máximo 1 billetera secundaria permitida</p>
           </div>
         </div>
       </div>
