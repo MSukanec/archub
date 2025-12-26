@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
 
 import { Table } from '@/components/shared/trees/Table';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { BreakdownChart } from '@/components/charts/legacy/BreakdownChart';
+import { BreakdownChart } from '@/components/charts/BreakdownChart';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
