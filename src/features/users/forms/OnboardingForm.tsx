@@ -10,11 +10,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-interface Step1UserDataProps {
+interface OnboardingFormProps {
   onFinish?: () => void;
 }
 
-export function Step1UserData({ onFinish }: Step1UserDataProps = {}) {
+export function OnboardingForm({ onFinish }: OnboardingFormProps = {}) {
   const { formData, updateFormData } = useOnboardingStore();
 
   // Fetch countries - using optimized hook

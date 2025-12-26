@@ -31,15 +31,15 @@ src/features/users/
 │   ├── GlobalAnnouncement.tsx     # Global notification banner
 │   ├── UserSelectorField.tsx      # User dropdown selector
 │   ├── AdminUserRow.tsx           # Admin user list row
-│   ├── AdminChangelogRow.tsx      # Admin changelog row
-│   └── Step1UserData.tsx          # Onboarding step
-├── forms/                         # Agnostic forms (6 files) - SEPARATED FROM MODALS
+│   └── AdminChangelogRow.tsx      # Admin changelog row
+├── forms/                         # Agnostic forms (7 files) - SEPARATED FROM MODALS
 │   ├── UserForm.tsx               # Exports: FormPanel, ViewPanel, useUserForm
 │   ├── PlanForm.tsx               # Exports: FormPanel, ViewPanel, usePlanForm
 │   ├── NotificationForm.tsx       # Exports: FormPanel, ViewPanel, useNotificationForm
 │   ├── AnnouncementForm.tsx       # Exports: FormPanel, ViewPanel, useAnnouncementForm
 │   ├── ChangelogForm.tsx          # Exports: FormPanel, ViewPanel, useChangelogForm
-│   └── SupportForm.tsx            # Exports: ChatPanel, FooterPanel, useSupportChat
+│   ├── SupportForm.tsx            # Exports: ChatPanel, FooterPanel, useSupportChat
+│   └── OnboardingForm.tsx         # Onboarding user data form (moved from components/)
 ├── modals/                        # Modal wrappers (13 files) - ENVASES ONLY
 │   ├── UserModal.tsx              # Uses UserForm
 │   ├── PlanModal.tsx              # Uses PlanForm

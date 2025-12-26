@@ -58,8 +58,8 @@ export { default as UserSelectorField } from './components/UserSelectorField';
 export { default as AdminUserRow } from './components/AdminUserRow';
 export { default as AdminChangelogRow } from './components/AdminChangelogRow';
 
-// Onboarding Components
-export { Step1UserData } from './components/Step1UserData';
+// Onboarding Forms
+export { OnboardingForm, OnboardingForm as Step1UserData } from './forms/OnboardingForm';
 
 // Member Components (re-export from organization)
 export { default as MemberRow } from '@/features/organization/components/MemberRow';
