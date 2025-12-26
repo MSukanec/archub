@@ -81,7 +81,6 @@ export default function GeneralCostsSettingsView() {
               description: 'La categoría se eliminó correctamente'
             });
           } catch (error) {
-            console.error('Error deleting category:', error);
             toast({
               title: 'Error',
               description: 'No se pudo eliminar la categoría',
@@ -93,12 +92,15 @@ export default function GeneralCostsSettingsView() {
           try {
             await replaceMutation.mutateAsync({ oldCategoryId: category.id, newCategoryId });
           } catch (error) {
-            console.error('Error replacing category:', error);
+            toast({
+              title: 'Error',
+              description: 'No se pudo reemplazar la categoría',
+              variant: 'destructive'
+            });
           }
         }
       });
     } catch (error) {
-      console.error('Error checking category usage:', error);
       toast({
         title: 'Error',
         description: 'No se pudo verificar el uso de la categoría',

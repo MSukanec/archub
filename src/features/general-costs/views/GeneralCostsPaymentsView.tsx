@@ -260,7 +260,6 @@ export default function GeneralCostsPaymentsView({
             });
             successCount++;
           } catch (error) {
-            console.error('Error deleting payment:', error);
             failCount++;
           }
         }
@@ -596,7 +595,6 @@ export default function GeneralCostsPaymentsView({
               });
               successCount++;
             } catch (error) {
-              console.error('Error importing row:', error);
               failCount++;
             }
             currentIndex++;
@@ -712,7 +710,6 @@ export default function GeneralCostsPaymentsView({
         description: `Se exportaron ${sortedPayments.length} pagos a PDF.`,
       });
     } catch (error) {
-      console.error('Error exporting PDF:', error);
       toast({
         title: 'Error',
         description: 'No se pudo generar el PDF. Por favor, intenta de nuevo.',

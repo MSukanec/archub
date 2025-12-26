@@ -25,13 +25,11 @@ async function getSignedUrl(bucket: string, path: string): Promise<string | null
       .createSignedUrl(path, 3600);
     
     if (error) {
-      console.error('Error creating signed URL:', error);
       return null;
     }
     
     return data?.signedUrl || null;
   } catch (error) {
-    console.error('Error in getSignedUrl:', error);
     return null;
   }
 }
@@ -117,7 +115,6 @@ export async function getGeneralCostPaymentFiles(paymentId: string, organization
 
     return files;
   } catch (error) {
-    console.error('Error fetching general cost payment files:', error);
     throw error;
   }
 }
