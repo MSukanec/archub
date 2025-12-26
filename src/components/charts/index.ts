@@ -80,12 +80,12 @@ export { MiniSparkline } from './MiniSparkline'
 // Import directly from their paths until migrated
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Legacy charts (will be deprecated)
-export { default as CapitalChart } from './legacy/CapitalChart'
-export { default as MonthlyFlowChart } from './legacy/MonthlyFlowChart'
-export { default as BreakdownChart } from './legacy/BreakdownChart'
+// Legacy charts (named exports - will be deprecated)
+export { CapitalChart } from './legacy/CapitalChart'
+export { MonthlyFlowChart } from './legacy/MonthlyFlowChart'
+export { BreakdownChart } from './legacy/BreakdownChart'
 
-// Gantt charts (feature-specific, pending migration)
+// Gantt charts (default exports - feature-specific, pending migration)
 export { default as BurndownChart } from './gantt/BurndownChart'
 export { default as ProgressCurve } from './gantt/ProgressCurve'
 export { default as StatusBreakdown } from './gantt/StatusBreakdown'
@@ -96,7 +96,7 @@ export { default as DurationByRubro } from './gantt/DurationByRubro'
 export { default as CriticalPathDistribution } from './gantt/CriticalPathDistribution'
 export { default as DependencyNetwork } from './gantt/DependencyNetwork'
 
-// Course charts (feature-specific, pending migration)
+// Course charts (mixed exports - feature-specific, pending migration)
 export { default as LineStreak } from './courses/LineStreak'
 export { default as MiniBar } from './courses/MiniBar'
 export { ProgressChart } from './courses/ProgressChart'
