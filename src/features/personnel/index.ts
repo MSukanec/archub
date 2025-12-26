@@ -13,7 +13,11 @@ export * from './types';
 export * from './constants';
 
 // Export views
-export { InsuranceView, InsuranceView as InsuranceTab } from './views/InsuranceView';
+export { InsuranceView as PersonnelInsuranceView, InsuranceView as InsuranceTab } from './views/PersonnelInsuranceView';
+export { default as PersonnelDashboardView, calculateAvailablePeriods, type PeriodFilter } from './views/PersonnelDashboardView';
+export { default as PersonnelListView } from './views/PersonnelListView';
+export { default as PersonnelAttendanceView } from './views/PersonnelAttendanceView';
+export { default as PersonnelPaymentsView } from './views/PersonnelPaymentsView';
 
 // Export components
 export { InsuranceKpis } from './components/InsuranceKpis';

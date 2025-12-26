@@ -37,7 +37,7 @@ import { Clients } from "@/pages/clients/Clients";
 
 import ConstructionDashboard from "@/pages/professional/project/construction/ConstructionDashboard";
 import Sitelog from "@/pages/sitelog/Sitelog";
-import Personnel from "@/pages/professional/personnel/Personnel";
+import PersonnelPage from "@/pages/dashboard/PersonnelPage";
 import Materials from "@/pages/professional/materials/Materials";
 import Budgets from "@/pages/professional/budgets/Budgets";
 import BudgetView from "@/pages/professional/budgets/BudgetView";
@@ -235,7 +235,7 @@ function Router() {
         <Route path="/construction/subcontracts/:id" component={SubcontractView} />
         <Route path="/construction/indirects" component={ConstructionIndirects} />
         <Route path="/construction/logs" component={Sitelog} />
-        <Route path="/construction/personnel" component={Personnel} />
+        <Route path="/construction/personnel" component={PersonnelPage} />
         <Route path="/construction/materials" component={Materials} />
         <Route path="/analysis" component={Analysis} />
         <Route path="/analysis/:id" component={TaskView} />

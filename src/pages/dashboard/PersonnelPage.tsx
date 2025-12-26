@@ -4,12 +4,17 @@ import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal'
 import { Users, Plus, Calendar, ChevronDown } from 'lucide-react'
-import { InsuranceTab, usePersonnelPayments } from '@/features/personnel'
-import { useInsuranceList } from '@/features/personnel'
-import PersonnelDashboardTab, { calculateAvailablePeriods, type PeriodFilter } from './PersonnelDashboardTab'
-import PersonnelListTab from './PersonnelListTab'
-import PersonnelAttendanceTab from './PersonnelAttendanceTab'
-import PersonnelPaymentsTab from './PersonnelPaymentsTab'
+import { 
+  InsuranceTab, 
+  usePersonnelPayments, 
+  useInsuranceList,
+  PersonnelDashboardView,
+  PersonnelListView,
+  PersonnelAttendanceView,
+  PersonnelPaymentsView,
+  calculateAvailablePeriods,
+  type PeriodFilter
+} from '@/features/personnel'
 import { DataHealthAlertMulti, type DataIssue } from '@/core/data-health'
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies'
 import {
@@ -27,7 +32,7 @@ const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
   { value: 'all', label: 'Histórico' },
 ]
 
-export default function Personnel() {
+export default function PersonnelPage() {
   const { openModal } = useGlobalModalStore()
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
   const { setSidebarContext } = useNavigationStore()
@@ -255,7 +260,7 @@ export default function Personnel() {
         )}
         
         {activeTab === 'dashboard' && (
-          <PersonnelDashboardTab
+          <PersonnelDashboardView
             projectId={selectedProjectId || undefined}
             onNavigateToPayments={() => setActiveTab('payments')}
             onNavigateToTab={(tab, filters) => {
@@ -276,7 +281,7 @@ export default function Personnel() {
         )}
 
         {activeTab === 'active' && (
-          <PersonnelListTab
+          <PersonnelListView
             openModal={openModal}
             insuranceData={insuranceData}
             selectedProjectId={selectedProjectId}
@@ -284,7 +289,7 @@ export default function Personnel() {
         )}
 
         {activeTab === 'payments' && (
-          <PersonnelPaymentsTab
+          <PersonnelPaymentsView
             projectId={selectedProjectId || undefined}
             externalFilterIssueId={activeFilterIssueId}
             onClearExternalFilter={() => setActiveFilterIssueId(null)}
@@ -293,7 +298,7 @@ export default function Personnel() {
         )}
 
         {activeTab === 'attendance' && (
-          <PersonnelAttendanceTab
+          <PersonnelAttendanceView
             openModal={openModal}
             selectedProjectId={selectedProjectId}
             currentOrganizationId={currentOrganizationId}
