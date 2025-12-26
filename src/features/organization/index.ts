@@ -18,6 +18,10 @@ export { MemberActionConfirmationForm } from './forms/MemberActionConfirmationFo
 
 export { AdminOrganizationRow } from './components/admin/AdminOrganizationRow';
 
+// Member & Plan Components
+export { default as MemberRow } from './components/MemberRow';
+export { default as PlanBadge } from './components/PlanBadge';
+
 export { OrganizationDashboardView } from './views/OrganizationDashboardView';
 export { OrganizationLocationView } from './views/OrganizationLocationView';
 export { OrganizationProfileView } from './views/OrganizationProfileView';

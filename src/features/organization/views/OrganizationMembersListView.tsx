@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 
-import MemberRow from "@/features/users/components/MemberRow";
+import MemberRow from "@/features/organization/components/MemberRow";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/lib/supabase";

@@ -41,8 +41,8 @@ export { NotificationDropdown } from './components/NotificationDropdown';
 // Support Components
 export { SupportModal } from './components/SupportModal';
 
-// Plan Components
-export { default as PlanBadge } from './components/PlanBadge';
+// Plan Components (re-export from organization)
+export { default as PlanBadge } from '@/features/organization/components/PlanBadge';
 export { PlanRestricted } from '@/components/shared/restrictions';
 
 // Restriction Components (re-export from new architecture)
@@ -61,5 +61,5 @@ export { default as AdminChangelogRow } from './components/AdminChangelogRow';
 // Onboarding Components
 export { Step1UserData } from './components/Step1UserData';
 
-// Member Components
-export { default as MemberRow } from './components/MemberRow';
+// Member Components (re-export from organization)
+export { default as MemberRow } from '@/features/organization/components/MemberRow';

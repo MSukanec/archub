@@ -22,7 +22,7 @@ import { useUnreadUserSupportMessages } from '@/hooks/use-unread-user-support-me
 import { useOpsAlertsCount } from '@/hooks/use-ops-alerts-count';
 import ButtonSidebar from "./ButtonSidebar";
 import { SidebarIconButton } from "./SidebarIconButton";
-import { PlanBadge } from "@/components/shared/PlanBadge";
+import { PlanBadge } from "@/features/organization";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { NotificationDropdown } from "@/features/users";
 import { SupportModal } from "@/features/users";
@@ -582,7 +582,7 @@ export function LeftSidebar() {
               <FounderBadge isFounder={userData?.organization?.settings?.is_founder} size="md" />
 
               {/* Botón del Plan Actual */}
-              <PlanBadge planName={userData?.organization?.plan?.name} />
+              <PlanBadge isExpanded={false} />
 
               {/* Botón de Ayuda con Popover */}
               <Popover open={helpPopoverOpen} onOpenChange={setHelpPopoverOpen}>
