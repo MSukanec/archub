@@ -25,7 +25,7 @@ import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/li
 import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { DataHealthAlertMulti, type DataIssue } from '@/core/data-health';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
+import { MonthlyTrendChart } from '@/components/charts/line/AreaTrendChart';
 import { DonutChart } from '@/components/charts/pie/DonutChart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';

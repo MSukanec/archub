@@ -33,7 +33,7 @@ import {
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
 import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
+import { MonthlyTrendChart } from '@/components/charts/line/AreaTrendChart';
 import { DonutChart } from '@/components/charts/pie/DonutChart';
 import { SparklineChart } from '@/components/charts/sparkline/SparklineChart';
 import { Skeleton } from '@/components/ui/skeleton';
