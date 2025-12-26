@@ -23,7 +23,7 @@ import { useOrganizationWallets, useOrganizationMembers } from '@/features/organ
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects } from '@/features/projects'
 import { useToast } from '@/hooks/use-toast'
-import { UserSelectorField } from '@/features/users'
+import { IdentityBadge } from '@/components/shared/IdentityBadge'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 
@@ -1115,12 +1115,18 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
     <div className="space-y-6">
       <div className="space-y-3">
         <Label>Creador de los movimientos</Label>
-        <UserSelectorField
-          users={users}
-          value={selectedCreator}
-          onChange={setSelectedCreator}
-          placeholder="Seleccionar miembro de la organización"
-        />
+        <Select value={selectedCreator} onValueChange={setSelectedCreator}>
+          <SelectTrigger>
+            <SelectValue placeholder="Seleccionar miembro de la organización" />
+          </SelectTrigger>
+          <SelectContent>
+            {users?.map((user) => (
+              <SelectItem key={user.id} value={user.id}>
+                <IdentityBadge name={user.full_name} avatarUrl={user.avatar_url} size="sm" showName={true} />
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
 

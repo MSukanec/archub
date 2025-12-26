@@ -12,7 +12,8 @@ import { useGlobalModalStore } from '@/components/modal';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { UserSelectorField } from "@/features/users";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { IdentityBadge } from "@/components/shared/IdentityBadge";
 import { useCreateKanbanCard, useUpdateKanbanCard } from "@/hooks/use-kanban";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/features/organization";
@@ -153,12 +154,18 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
             <FormItem>
               <FormLabel>Asignado a (opcional)</FormLabel>
               <FormControl>
-                <UserSelectorField
-                  users={users}
-                  value={field.value || ''}
-                  onChange={field.onChange}
-                  placeholder="Sin asignar"
-                />
+                <Select value={field.value || ''} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sin asignar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users?.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        <IdentityBadge name={user.full_name} avatarUrl={user.avatar_url} size="sm" showName={true} />
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>

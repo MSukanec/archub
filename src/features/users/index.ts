@@ -59,8 +59,6 @@ export { RoleRestricted, ContextRestricted, RestrictionOverlay, EmptyStateBlock 
 export { GlobalAnnouncementBanner, AnnouncementProvider, useAnnouncementBanner } from './components/GlobalAnnouncementBanner';
 export { GlobalAnnouncementBanner as GlobalAnnouncement } from './components/GlobalAnnouncementBanner';
 
-// Field Components
-export { default as UserSelectorField } from './components/UserSelectorField';
 
 // Admin Components
 export { default as AdminUserRow } from './components/AdminUserRow';

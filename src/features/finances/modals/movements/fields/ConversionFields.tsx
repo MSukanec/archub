@@ -5,8 +5,6 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CurrencyAmountField } from '@/components/shared/fields/CurrencyAmountField'
 
-import { UserSelectorField } from '@/features/users'
-
 // Definir el tipo para el formulario de conversión basado en el schema del archivo principal
 interface ConversionForm {
   movement_date: Date

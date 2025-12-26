@@ -5,8 +5,6 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CurrencyAmountField } from '@/components/shared/fields/CurrencyAmountField'
 
-import { UserSelectorField } from '@/features/users'
-
 // Tipo importado del componente principal
 interface TransferForm {
   movement_date: Date
