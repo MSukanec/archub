@@ -83,10 +83,3 @@ export { MonthlyTrendChart, MultiSeriesTrendChart } from './MonthlyTrendChart'
 
 // BalanceBreakdownChart - Horizontal bar chart
 export { BalanceBreakdownChart } from './BalanceBreakdownChart'
-
-// MiniTrendChart - Mini sparkline using Recharts
-export { MiniTrendChart } from './MiniTrendChart'
-
-// MiniSparkline - SVG sparkline
-export { MiniSparkline } from './MiniSparkline'
-

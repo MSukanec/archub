@@ -35,7 +35,7 @@ import { generateInsights, buildInsightContext, toInsightItems } from '@/compone
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
-import { MiniSparkline } from '@/components/charts/MiniSparkline';
+import { SparklineChart } from '@/components/charts/sparkline/SparklineChart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
@@ -605,7 +605,7 @@ export default function CapitalDashboardTab({
           </StatCardMeta>
           {sparklineData.length >= 3 && (
             <div className="mt-2">
-              <MiniSparkline data={sparklineData} height={24} />
+              <SparklineChart data={sparklineData} height={24} />
             </div>
           )}
         </StatCard>

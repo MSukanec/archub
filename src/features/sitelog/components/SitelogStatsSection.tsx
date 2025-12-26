@@ -1,7 +1,7 @@
 import { Paperclip } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
-import { MiniTrendChart } from '@/components/charts/MiniTrendChart';
+import { SparklineChart } from '@/components/charts/sparkline/SparklineChart';
 
 import { useSitelogMetrics } from '../hooks/use-sitelog-metrics';
 
@@ -48,7 +48,7 @@ export function SitelogStatsSection({ siteLogs }: SitelogStatsSectionProps) {
 
       {/* Sparkline Chart */}
       <div>
-        <MiniTrendChart 
+        <SparklineChart 
           data={timeline}
           color="var(--accent)"
         />

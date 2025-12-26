@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Plus, Edit, Trash2, Search, Filter, Bell, Layers, CheckCircle, XCircle, DollarSign } from "lucide-react";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
-import { MiniSparkline } from '@/components/charts/MiniSparkline';
+import { SparklineChart } from '@/components/charts/sparkline/SparklineChart';
 
 import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
@@ -294,7 +294,7 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
       label: 'Tendencia (6 meses)',
       sortable: false,
       render: (item: typeof enrichedGeneralCosts[0]) => (
-        <MiniSparkline 
+        <SparklineChart 
           data={item.trendData.map(d => d.value)} 
           color="var(--accent)"
         />
