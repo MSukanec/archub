@@ -25,7 +25,7 @@ interface RawParticipantRow {
 }
 
 export async function getPartnerCapitalKPI(organizationId: string): Promise<PartnerCapitalKPI[]> {
-  const [kpiResult, participantsResult] = await Promise.all([
+  const [kpiResult, participantsResult, contributionsResult] = await Promise.all([
     supabase
       .from('partner_capital_kpi_view')
       .select('partner_id, organization_id, total_balance, ownership_ratio')
@@ -35,6 +35,11 @@ export async function getPartnerCapitalKPI(organizationId: string): Promise<Part
       .select('id, ownership_percentage')
       .eq('organization_id', organizationId)
       .eq('is_deleted', false),
+    supabase
+      .from('partner_contributions')
+      .select('amount')
+      .eq('organization_id', organizationId)
+      .eq('status', 'confirmed'),
   ]);
 
   if (kpiResult.error) {
@@ -45,10 +50,15 @@ export async function getPartnerCapitalKPI(organizationId: string): Promise<Part
     throw new Error(`Failed to fetch participants: ${participantsResult.error.message}`);
   }
 
+  if (contributionsResult.error) {
+    throw new Error(`Failed to fetch partner contributions: ${contributionsResult.error.message}`);
+  }
+
   const kpiData = (kpiResult.data || []) as RawKPIRow[];
   const participants = (participantsResult.data || []) as RawParticipantRow[];
+  const contributions = (contributionsResult.data || []) as Array<{ amount: number | string | null }>;
 
-  const capital_total = kpiData.reduce((sum, row) => sum + (Number(row.total_balance) || 0), 0);
+  const capital_total = contributions.reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
 
   const participantMap = new Map(participants.map(p => [p.id, p.ownership_percentage]));
 

@@ -1,0 +1,111 @@
+A) PROMPT PARA REPLIT
+
+👉 Objetivo: corregir la vista Balances de Capital para que muestre información contablemente correcta, clara y útil.
+
+Copiá y pegá tal cual:
+
+🧠 CONTEXTO FUNCIONAL (IMPORTANTE)
+
+Estamos trabajando en el módulo Capital.
+Ya existe el porcentaje societario por socio (capital_participants.percentage).
+
+Hay dos conceptos distintos que no deben mezclarse:
+
+Capital Esperado
+
+Balance Actual de Capital
+
+Actualmente están mezclados o mal calculados.
+
+✅ DEFINICIONES CORRECTAS (OBLIGATORIAS)
+1️⃣ Capital Total Base
+
+Debe calcularse únicamente como:
+
+SUM(partner_contributions.amount)
+WHERE status = 'confirmed'
+AND organization_id = ?
+
+
+⚠️ NO usar partner_capital_balance como base.
+
+2️⃣ Capital Esperado (por socio)
+
+Debe ser:
+
+capital_esperado =
+  capital_total_confirmado × (participation_percentage / 100)
+
+
+Este valor representa:
+
+“Cuánto debería haber aportado el socio según su porcentaje”.
+
+3️⃣ Balance Actual (por socio)
+
+Debe provenir de:
+
+partner_capital_balance.balance_amount
+
+
+Este valor representa:
+
+“Cuánto capital real tiene hoy el socio considerando aportes, retiros y ajustes”.
+
+4️⃣ Desvío
+
+Debe calcularse como:
+
+desvio = balance_actual - capital_esperado
+
+🧩 MODIFICACIONES EN LA UI (CARDS DE BALANCE)
+Cada tarjeta de socio debe mostrar:
+
+Nombre + avatar
+
+Porcentaje societario
+
+Capital Esperado
+
+Balance Actual
+
+Desvío
+
+Estado visual automático:
+
+Condición	Estado
+Desvío > 0	🟢 Sobre aportado
+Desvío = 0	⚖️ En equilibrio
+Desvío < 0	🟡 Bajo aportado
+🧾 TEXTOS CLAROS EN LA UI
+
+Usar estos textos exactamente (o equivalentes):
+
+Capital Esperado
+“Según porcentaje societario”
+
+Balance Actual
+“Aportes + Retiros + Ajustes”
+
+Desvío
+“Diferencia entre balance actual y capital esperado”
+
+❌ COSAS QUE NO SE DEBEN HACER
+
+NO calcular capital esperado desde balances
+
+NO usar SUM(partner_capital_balance) como capital total
+
+NO ocultar el balance real del socio
+
+🎯 OBJETIVO FINAL
+
+Que la vista permita responder claramente:
+
+¿Cuánto debería haber puesto cada socio?
+
+¿Cuánto puso realmente?
+
+¿Quién está sobre / bajo aportado?
+
+¿Quién puede retirar utilidades?
