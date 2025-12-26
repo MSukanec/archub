@@ -252,3 +252,12 @@ export {
   AppCardContent, 
   AppCardHistoricalComparison,
 }
+
+// Legacy aliases for backward compatibility
+export {
+  AppCard as StatCard,
+  AppCardTitle as StatCardTitle,
+  AppCardValue as StatCardValue,
+  AppCardMeta as StatCardMeta,
+  AppCardContent as StatCardContent,
+}

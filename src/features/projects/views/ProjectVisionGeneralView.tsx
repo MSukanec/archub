@@ -10,7 +10,7 @@ import { projectsKeys } from '@/core/query-keys';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ActivityCard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components';
 import { Badge } from '@/components/ui/badge';
 
 export function ProjectVisionGeneralView() {

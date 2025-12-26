@@ -6,7 +6,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { Button } from '@/components/ui/button';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useGlobalModalStore } from '@/components/modal';
 import { parseLocalDate } from '@/lib/date-utils';

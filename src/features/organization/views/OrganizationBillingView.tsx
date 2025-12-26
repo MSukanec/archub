@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useOptimisticMutation } from '@/core/save-engine';
 import { useProjectContext } from '@/stores/projectContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/ActivityCard';
+import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/shared/table/Table';

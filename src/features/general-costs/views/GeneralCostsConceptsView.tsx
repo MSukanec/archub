@@ -7,7 +7,7 @@ import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Button } from "@/components/ui/button";
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal';

@@ -25,7 +25,7 @@ import { useGlobalModalStore } from '@/components/modal';
 import { format, isPast, isToday, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { parseLocalDate } from '@/lib/date-utils';
-import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/ActivityCard';
+import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components';
 import {
   useClientPaymentSchedule,
   useDeleteClientPaymentSchedule,

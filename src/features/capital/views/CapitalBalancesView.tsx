@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { TrendingUp, TrendingDown, Wallet, Scale, AlertTriangle, Crown, HandHeart } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { usePartners, usePartnerCapitalKPI, type PartnerCapitalKPI } from '@/features/capital';

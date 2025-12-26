@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { apiRequest } from '@/lib/queryClient'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ActivityCard'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components'
 import { BookOpen, CheckCircle, Clock, FileText, Bookmark, Megaphone, Info, PlayCircle, Play, MessageCircle } from 'lucide-react'
 import type { ThreadsResponse, ForumThreadWithAuthor } from '@/features/forum/services'
 import { 

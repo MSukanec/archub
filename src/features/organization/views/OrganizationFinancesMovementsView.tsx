@@ -31,7 +31,7 @@ import {
   AppCardSubValue,
   AppCardTrend,
   type TrendDirection
-} from '@/components/ActivityCard';
+} from '@/components';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown, hasMultipleCurrencies } from '@/lib/kpis';
 import { format as formatMoney } from '@/lib/money';
 import { format } from 'date-fns';

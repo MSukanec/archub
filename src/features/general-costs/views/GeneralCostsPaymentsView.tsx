@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal';
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useGeneralCostsPayments, type GeneralCostPayment } from '../hooks/use-general-costs-payments';
 import { useDeleteGeneralCostPayment } from '../hooks/use-delete-general-cost-payment';

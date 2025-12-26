@@ -18,7 +18,7 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { useToast } from '@/hooks/use-toast'
 import { queryClient } from '@/lib/queryClient'
 import ClientPaymentRow from '@/features/clients/components/ClientPaymentRow'
-import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/ActivityCard'
+import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components'
 import {
   useClientPayments,
   useDeleteClientPayment,

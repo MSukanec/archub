@@ -31,7 +31,7 @@ import {
   InsightCard,
   type ActivityItem,
   type TrendDirection
-} from '@/components/ActivityCard';
+} from '@/components';
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/line/AreaTrendChart';
