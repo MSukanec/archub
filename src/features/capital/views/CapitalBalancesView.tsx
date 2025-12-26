@@ -1,4 +1,5 @@
-import { TrendingUp, TrendingDown, Wallet, HandHeart, Scale } from 'lucide-react';
+import { useMemo } from 'react';
+import { TrendingUp, TrendingDown, Wallet, Scale, AlertTriangle, Crown, HandHeart } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
@@ -36,6 +37,40 @@ export function CapitalBalancesView() {
   const totalWithdrawals = orgTotals?.org_total_withdrawals ?? 0;
   const totalAdjustments = orgTotals?.org_total_adjustments ?? 0;
   const totalNetCapital = orgTotals?.org_total_net_capital ?? 0;
+
+  // Derived KPIs from partner-level data (aggregated from SQL view)
+  const derivedKPIs = useMemo(() => {
+    // Total absolute deviation (sum of |deviation_contribution|)
+    const totalDeviation = kpiData.reduce((sum, kpi) => {
+      return sum + Math.abs(kpi.deviation_contribution ?? 0);
+    }, 0);
+
+    // Count partners under-contributed
+    const underContributedCount = kpiData.filter(
+      kpi => kpi.contribution_status === 'bajo_aportado'
+    ).length;
+
+    // Find top over-contributor
+    const overContributors = kpiData
+      .filter(kpi => kpi.contribution_status === 'sobre_aportado' && (kpi.deviation_contribution ?? 0) > 0)
+      .sort((a, b) => (b.deviation_contribution ?? 0) - (a.deviation_contribution ?? 0));
+    
+    const topOverContributor = overContributors[0];
+    const topOverContributorPartner = topOverContributor 
+      ? partners.find(p => p.id === topOverContributor.partner_id) 
+      : null;
+    const topOverContributorName = topOverContributorPartner?.contacts?.full_name 
+      || topOverContributorPartner?.contacts?.company_name 
+      || null;
+    const topOverContributorAmount = topOverContributor?.deviation_contribution ?? 0;
+
+    return {
+      totalDeviation,
+      underContributedCount,
+      topOverContributorName,
+      topOverContributorAmount,
+    };
+  }, [kpiData, partners]);
 
   // Build enriched balances from KPI data
   const enrichedBalances: EnrichedPartnerBalance[] = kpiData.map(kpi => {
@@ -103,7 +138,21 @@ export function CapitalBalancesView() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Row 1: Core Capital Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatCard data-testid="stat-card-saldo-neto">
+          <StatCardTitle showArrow={false}>
+            <Wallet className="h-4 w-4" />
+            Capital Neto Total
+          </StatCardTitle>
+          <StatCardValue className={isPositiveNetCapital ? "text-[var(--positive)]" : "text-[var(--negative)]"}>
+            {isPositiveNetCapital ? '' : '-'}{currencySymbol} {formatCurrency(totalNetCapital)}
+          </StatCardValue>
+          <StatCardMeta>
+            Aportes - Retiros + Ajustes
+          </StatCardMeta>
+        </StatCard>
+
         <StatCard data-testid="stat-card-total-aportes">
           <StatCardTitle showArrow={false}>
             <TrendingUp className="h-4 w-4" />
@@ -129,30 +178,48 @@ export function CapitalBalancesView() {
             Retiros confirmados
           </StatCardMeta>
         </StatCard>
+      </div>
 
-        <StatCard data-testid="stat-card-saldo-neto">
+      {/* Row 2: Capital Health Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatCard data-testid="stat-card-desbalance-total">
           <StatCardTitle showArrow={false}>
-            <Wallet className="h-4 w-4" />
-            Saldo Neto
+            <Scale className="h-4 w-4" />
+            Desbalance Total
           </StatCardTitle>
-          <StatCardValue className={isPositiveNetCapital ? "text-[var(--positive)]" : "text-[var(--negative)]"}>
-            {isPositiveNetCapital ? '' : '-'}{currencySymbol} {formatCurrency(totalNetCapital)}
+          <StatCardValue className={derivedKPIs.totalDeviation > 0 ? "text-[var(--pending)]" : "text-[var(--neutral)]"}>
+            {currencySymbol} {formatCurrency(derivedKPIs.totalDeviation)}
           </StatCardValue>
           <StatCardMeta>
-            Aportes - Retiros + Ajustes
+            Suma de desvíos absolutos
           </StatCardMeta>
         </StatCard>
 
-        <StatCard data-testid="stat-card-partners-count">
+        <StatCard data-testid="stat-card-bajo-aporte">
           <StatCardTitle showArrow={false}>
-            <HandHeart className="h-4 w-4" />
-            Socios
+            <AlertTriangle className="h-4 w-4" />
+            Socios Bajo Aporte
           </StatCardTitle>
-          <StatCardValue>
-            {kpiData.length}
+          <StatCardValue className={derivedKPIs.underContributedCount > 0 ? "text-[var(--negative)]" : "text-[var(--positive)]"}>
+            {derivedKPIs.underContributedCount}
           </StatCardValue>
           <StatCardMeta>
-            Participantes con movimientos
+            {derivedKPIs.underContributedCount === 0 ? 'Todos al día' : 'Requieren atención'}
+          </StatCardMeta>
+        </StatCard>
+
+        <StatCard data-testid="stat-card-top-sobreaportado">
+          <StatCardTitle showArrow={false}>
+            <Crown className="h-4 w-4" />
+            Mayor Sobreaporte
+          </StatCardTitle>
+          <StatCardValue className="text-[var(--positive)] truncate text-lg">
+            {derivedKPIs.topOverContributorName 
+              ? `${currencySymbol} ${formatCurrency(derivedKPIs.topOverContributorAmount)}`
+              : '—'}
+          </StatCardValue>
+          <StatCardMeta className="truncate">
+            {derivedKPIs.topOverContributorName || 'Sin sobreaportes'}
           </StatCardMeta>
         </StatCard>
       </div>
