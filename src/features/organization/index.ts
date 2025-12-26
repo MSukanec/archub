@@ -13,12 +13,14 @@ export { MemberActionConfirmationModal } from './modals/MemberActionConfirmation
 export { PlanModal } from './modals/PlanModal';
 export { PlanUpgradeModal } from './modals/PlanUpgradeModal';
 export { DowngradeModal } from './modals/DowngradeModal';
+export { InvitationModal } from './modals/InvitationModal';
 
 // Forms
 export { OrganizationForm } from './forms/OrganizationForm';
 export { InviteMemberForm } from './forms/InviteMemberForm';
 export { MemberActionConfirmationForm } from './forms/MemberActionConfirmationForm';
 export { FormPanel as PlanFormPanel, ViewPanel as PlanViewPanel, usePlanForm } from './forms/PlanForm';
+export { useInvitationForm, type UseInvitationFormProps } from './forms/InvitationForm';
 
 export { AdminOrganizationRow } from './components/admin/AdminOrganizationRow';
 

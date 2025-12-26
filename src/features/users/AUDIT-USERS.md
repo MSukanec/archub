@@ -39,7 +39,7 @@ src/features/users/
 │   ├── ChangelogForm.tsx          # Exports: FormPanel, ViewPanel, useChangelogForm
 │   ├── SupportForm.tsx            # Exports: ChatPanel, FooterPanel, useSupportChat
 │   └── OnboardingForm.tsx         # Onboarding user data form (moved from components/)
-├── modals/                        # Modal wrappers (9 files) - ENVASES ONLY
+├── modals/                        # Modal wrappers (8 files) - ENVASES ONLY
 │   ├── UserModal.tsx              # Uses UserForm
 │   ├── NotificationModal.tsx      # Uses NotificationForm
 │   ├── AnnouncementModal.tsx      # Uses AnnouncementForm
@@ -47,9 +47,8 @@ src/features/users/
 │   ├── SupportModal.tsx           # Uses SupportForm (chat)
 │   ├── SupportConversationStartModal.tsx
 │   ├── ResetTestDataModal.tsx
-│   ├── UpgradeModal.tsx
-│   └── InvitationModal.tsx
-└── (MemberRow.tsx, PlanBadge.tsx, PlanForm.tsx, PlanModal.tsx, PlanUpgradeModal.tsx, DowngradeModal.tsx → organization/)
+│   └── UpgradeModal.tsx
+└── (MemberRow.tsx, PlanBadge.tsx, PlanForm.tsx, PlanModal.tsx, PlanUpgradeModal.tsx, DowngradeModal.tsx, InvitationModal.tsx, InvitationForm.tsx → organization/)
 ```
 
 ### 2. Query Keys ✅ COMPLIANT

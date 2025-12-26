@@ -21,7 +21,7 @@ import { useProjectAccentColor } from "@/features/projects";
 import { useContentBackground } from "@/hooks/use-content-background";
 import { FloatingAIChat } from "@/features/ai/components/FloatingAIChat";
 import { FloatingCourseLessons, CoursePlayerDrawerHost } from "@/features/learning";
-import { InvitationModal } from "@/features/users/modals/InvitationModal";
+import { InvitationModal } from "@/features/organization";
 import { OrganizationRemovedModal } from "@/features/organization/modals";
 import { usePendingInvitations } from "@/hooks/use-pending-invitations";
 import { useProjectReadOnly } from "@/hooks/use-project-readonly";

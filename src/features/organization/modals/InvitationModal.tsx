@@ -1,11 +1,4 @@
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { useLocation } from 'wouter';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { supabase } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
-import { useCurrentUser } from '@/hooks/use-current-user';
-import { useNavigationStore } from '@/stores/navigationStore';
 import { ChevronLeft, ChevronRight, Mail, Building2 } from 'lucide-react';
 import { FormModalLayout } from '@/components/modal';
 import { FormModalHeader } from '@/components/modal';
@@ -14,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CompactAvatarGroup } from '@/components/shared/CompactAvatarGroup';
+import { useInvitationForm, type UseInvitationFormProps } from '../forms/InvitationForm';
 import type { PendingInvitation } from '@/hooks/use-pending-invitations';
 
 interface InvitationModalProps {
@@ -24,82 +18,17 @@ interface InvitationModalProps {
 
 export function InvitationModal({ invitations, open, onClose }: InvitationModalProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { toast } = useToast();
-  const { data: user } = useCurrentUser();
-  const [, navigate] = useLocation();
-  const setCurrentProject = useNavigationStore((state) => state.setCurrentProject);
   
   const currentInvitation = invitations[currentIndex];
   const hasMultiple = invitations.length > 1;
   
   if (!open || !currentInvitation) return null;
 
-  const acceptMutation = useMutation({
-    mutationFn: async (invitationId: string) => {
-      const response = await apiRequest('POST', '/api/accept-invitation', { invitationId });
-      return response.json();
-    },
-    onSuccess: async (_data, invitationId) => {
-      const acceptedInvitation = invitations.find(inv => inv.id === invitationId);
-      
-      toast({
-        title: '¡Invitación aceptada!',
-        description: 'Te uniste exitosamente a la organización',
-      });
-      queryClient.invalidateQueries({ queryKey: ['pending-invitations', user?.user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['organization-members'] });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      
-      if (currentIndex < invitations.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      } else {
-        onClose();
-        if (acceptedInvitation && user?.user?.id) {
-          await supabase
-            .from('user_preferences')
-            .update({ last_organization_id: acceptedInvitation.organization_id })
-            .eq('user_id', user.user.id);
-          
-          setCurrentProject(null);
-          queryClient.invalidateQueries({ queryKey: ['current-user'] });
-          navigate('/organization/dashboard');
-        }
-      }
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo aceptar la invitación',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const rejectMutation = useMutation({
-    mutationFn: async (invitationId: string) => {
-      const response = await apiRequest('POST', '/api/reject-invitation', { invitationId });
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: 'Invitación rechazada',
-        description: 'Has rechazado la invitación',
-      });
-      queryClient.invalidateQueries({ queryKey: ['pending-invitations', user?.user?.id] });
-      
-      if (currentIndex < invitations.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      } else {
-        onClose();
-      }
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo rechazar la invitación',
-        variant: 'destructive',
-      });
-    },
+  const { acceptMutation, rejectMutation, isLoading } = useInvitationForm({
+    invitations,
+    currentIndex,
+    onClose,
+    setCurrentIndex,
   });
 
   const handleAccept = () => {
@@ -125,8 +54,6 @@ export function InvitationModal({ invitations, open, onClose }: InvitationModalP
       setCurrentIndex(currentIndex + 1);
     }
   };
-
-  const isLoading = acceptMutation.isPending || rejectMutation.isPending;
 
   // Header content
   const headerContent = (
