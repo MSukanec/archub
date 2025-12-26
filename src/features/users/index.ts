@@ -37,12 +37,10 @@ export { AuthAdmin } from './components/AuthAdmin';
 
 // Notification Components
 export { NotificationBell } from './components/NotificationBell';
-export { NotificationBellHeader } from './components/NotificationBellHeader';
 export { NotificationDropdown } from './components/NotificationDropdown';
 
 // Support Components
 export { SupportModal } from './components/SupportModal';
-export { SupportPanel } from './components/SupportPanel';
 
 // Plan Components
 export { default as PlanBadge } from './components/PlanBadge';
@@ -54,12 +52,8 @@ export { RoleRestricted, ContextRestricted, RestrictionOverlay, EmptyStateBlock 
 // Announcement Components
 export { GlobalAnnouncement, AnnouncementProvider, useAnnouncementBanner } from './components/GlobalAnnouncement';
 
-// Presence Components
-export { OnlineUsersIndicator } from './components/OnlineUsersIndicator';
-
 // Field Components
 export { default as UserSelectorField } from './components/UserSelectorField';
-export { UserQuickAccess } from './components/UserQuickAccess';
 
 // Admin Components
 export { default as AdminUserRow } from './components/AdminUserRow';

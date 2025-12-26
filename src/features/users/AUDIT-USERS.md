@@ -23,19 +23,15 @@ src/features/users/
 │   ├── index.ts                   # Service exports
 │   ├── userProfileService.ts      # Profile update operations
 │   └── onboardingChecklist.ts     # Onboarding checklist management (from src/features/onboarding)
-├── components/                    # Flattened: NO SUBFOLDERS
+├── components/                    # Flattened: NO SUBFOLDERS (12 active files)
 │   ├── AuthGuard.tsx              # Authentication protection
 │   ├── AuthAdmin.tsx              # Admin auth component
 │   ├── NotificationBell.tsx       # Bell icon in header
-│   ├── NotificationBellHeader.tsx # Bell with label
 │   ├── NotificationDropdown.tsx   # Notification list
 │   ├── SupportModal.tsx           # Support form modal
-│   ├── SupportPanel.tsx           # Support panel
 │   ├── PlanBadge.tsx              # Plan display badge
 │   ├── GlobalAnnouncement.tsx     # Global notification banner
-│   ├── OnlineUsersIndicator.tsx   # Presence indicator
 │   ├── UserSelectorField.tsx      # User dropdown selector
-│   ├── UserQuickAccess.tsx        # Quick user menu
 │   ├── AdminUserRow.tsx           # Admin user list row
 │   ├── AdminChangelogRow.tsx      # Admin changelog row
 │   ├── Step1UserData.tsx          # Onboarding step
@@ -134,3 +130,4 @@ Uses semantic badge variants:
 2025-12-25 - Added hooks/ and services/ with useCurrentUser and userProfileService
 2025-12-25 - Flattened components/ - removed all subfolders, moved 16 files directly to components/
 2025-12-26 - Consolidated onboarding into users feature: moved onboarding/services/checklist.ts → users/services/onboardingChecklist.ts, deleted src/features/onboarding/, updated imports in use-update-checklist.ts to use centralized query keys
+2025-12-26 - Removed 4 legacy components: NotificationBellHeader, UserQuickAccess, SupportPanel, OnlineUsersIndicator (unused)
