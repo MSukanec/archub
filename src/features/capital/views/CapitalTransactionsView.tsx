@@ -14,6 +14,7 @@ import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/componen
 import { EmptyState } from '@/components/shared/EmptyState';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/use-currencies';
+import { useOrganizationMembers } from '@/features/organization';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import {
   usePartners,
@@ -56,6 +57,7 @@ interface UnifiedTransaction {
   reason?: string;
   original: PartnerContribution | PartnerWithdrawal | CapitalAdjustment;
   linkedUser?: { avatar_url?: string | null } | null;
+  creator?: { users?: { full_name?: string | null; avatar_url?: string | null } | null } | null;
 }
 
 function formatPartnerName(partner?: { contacts: { full_name: string | null; first_name: string | null; last_name: string | null; company_name: string | null; email?: string | null } | null }): string {
@@ -82,12 +84,13 @@ export function CapitalTransactionsView({
   const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
   const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
   const { data: partners = [], isLoading: loadingPartners } = usePartners(organizationId, { enabled: !!organizationId });
+  const { data: members = [], isLoading: loadingMembers } = useOrganizationMembers(organizationId || '');
 
   const deleteContributionMutation = useDeletePartnerContribution();
   const deleteWithdrawalMutation = useDeletePartnerWithdrawal();
   const deleteAdjustmentMutation = useDeleteCapitalAdjustment();
 
-  const isLoading = loadingContributions || loadingWithdrawals || loadingAdjustments || loadingPartners;
+  const isLoading = loadingContributions || loadingWithdrawals || loadingAdjustments || loadingPartners || loadingMembers;
 
   const transactions = useMemo<UnifiedTransaction[]>(() => {
     // Use mergeCapitalMovements to unify all 3 types
@@ -130,6 +133,7 @@ export function CapitalTransactionsView({
         reference,
         reason,
         original: entry,
+        creator: (entry as any).creator,
       };
     });
   }, [contributions, withdrawals, adjustments]);
@@ -300,6 +304,12 @@ export function CapitalTransactionsView({
       type: 'medium-text' as const,
       render: (item: UnifiedTransaction) => (
         <div className="flex items-center gap-2">
+          <IdentityBadge 
+            name={item.creator?.users?.full_name || 'Sin creador'}
+            avatarUrl={item.creator?.users?.avatar_url}
+            showName={false}
+            size="sm"
+          />
           {item.type === 'contribution' ? (
             <>
               <ArrowDownCircle className="h-4 w-4 text-[var(--positive)]" />
