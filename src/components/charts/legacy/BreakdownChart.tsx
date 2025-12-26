@@ -1,42 +1,28 @@
-interface BreakdownItem {
+export interface BreakdownItem {
   label: string;
   value: number;
   icon?: React.ReactNode;
 }
 
-interface BreakdownChartProps {
+export interface BreakdownChartProps {
   data: BreakdownItem[];
   className?: string;
-  formatValue?: (value: number) => string;
+  formatValue: (value: number) => string;
+  chartColors?: string[];
 }
 
-export function BreakdownChart({ data, className = "", formatValue }: BreakdownChartProps) {
+export function BreakdownChart({ data, className = "", formatValue, chartColors = [
+  'var(--accent)',
+  'var(--accent-2)', 
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)'
+] }: BreakdownChartProps) {
   // Filtrar datos con valores válidos
   const validData = data.filter(item => item.value > 0);
   
   // Calcular el total
   const total = validData.reduce((sum, item) => sum + item.value, 0);
-  
-  // Colores CSS en orden
-  const chartColors = [
-    'var(--accent)',
-    'var(--accent-2)', 
-    'var(--chart-3)',
-    'var(--chart-4)',
-    'var(--chart-5)'
-  ];
-  
-  // Función por defecto para formatear valores
-  const defaultFormatValue = (value: number) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
-  };
-  
-  const formatFn = formatValue || defaultFormatValue;
   
   if (validData.length === 0 || total === 0) {
     return (
@@ -91,7 +77,7 @@ export function BreakdownChart({ data, className = "", formatValue }: BreakdownC
             }}
           >
             <div className="text-lg font-bold text-foreground">
-              {formatFn(segment.value)}
+              {formatValue(segment.value)}
             </div>
             <div className="text-sm text-muted-foreground">
               {segment.percentage.toFixed(1)}%

@@ -674,7 +674,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                       </div>
                       <div className="flex items-center gap-2">
                         {((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined) || (customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined)) && (
-                          <Badge variant="outline" className="text-xs">Calculado</Badge>
+                          <Badge variant="neutral" className="text-xs">Calculado</Badge>
                         )}
                         {/* NO edit button - Total is always read-only */}
                       </div>

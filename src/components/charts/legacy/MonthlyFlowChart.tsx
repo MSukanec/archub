@@ -1,23 +1,30 @@
 import React from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
-interface MonthlyFlowData {
+export interface MonthlyFlowData {
   month: string
-  income: number
-  expenses: number
+  inflow: number
+  outflow: number
   net: number
 }
 
-interface MonthlyFlowChartProps {
+export interface MonthlyFlowChartProps {
   data: MonthlyFlowData[]
   isLoading?: boolean
+  formatValue?: (value: number) => string
+  lineLabels?: { inflow: string; outflow: string; net: string }
 }
 
-export function MonthlyFlowChart({ data, isLoading }: MonthlyFlowChartProps) {
+export function MonthlyFlowChart({ 
+  data, 
+  isLoading,
+  formatValue = (v) => v.toString(),
+  lineLabels = { inflow: 'Inflow', outflow: 'Outflow', net: 'Net' }
+}: MonthlyFlowChartProps) {
   if (isLoading) {
     return (
       <div className="h-64 flex items-center justify-center">
-        <div className="text-sm text-muted-foreground">Cargando flujo mensual...</div>
+        <div className="text-sm text-muted-foreground">Loading...</div>
       </div>
     )
   }
@@ -25,17 +32,9 @@ export function MonthlyFlowChart({ data, isLoading }: MonthlyFlowChartProps) {
   if (!data || data.length === 0) {
     return (
       <div className="h-64 flex items-center justify-center">
-        <div className="text-sm text-muted-foreground">No hay datos de flujo mensual disponibles</div>
+        <div className="text-sm text-muted-foreground">No data available</div>
       </div>
     )
-  }
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0
-    }).format(value)
   }
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -45,7 +44,7 @@ export function MonthlyFlowChart({ data, isLoading }: MonthlyFlowChartProps) {
           <p className="font-medium mb-2">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: {formatCurrency(entry.value)}
+              {entry.name}: {formatValue(entry.value)}
             </p>
           ))}
         </div>
@@ -65,7 +64,7 @@ export function MonthlyFlowChart({ data, isLoading }: MonthlyFlowChartProps) {
           tickLine={{ stroke: 'var(--chart-grid-text)' }}
         />
         <YAxis 
-          tickFormatter={formatCurrency} 
+          tickFormatter={formatValue} 
           tick={{ fill: 'var(--chart-grid-text)', fontSize: 12 }}
           axisLine={{ stroke: 'var(--chart-grid-text)' }}
           tickLine={{ stroke: 'var(--chart-grid-text)' }}
@@ -76,20 +75,20 @@ export function MonthlyFlowChart({ data, isLoading }: MonthlyFlowChartProps) {
         />
         <Line 
           type="monotone" 
-          dataKey="income" 
+          dataKey="inflow" 
           stroke="var(--positive)" 
           strokeWidth={3}
-          name="Ingresos"
+          name={lineLabels.inflow}
           connectNulls={true}
           dot={{ fill: "var(--positive)", strokeWidth: 2, r: 4 }}
           activeDot={{ r: 6, fill: "var(--positive)", stroke: "#fff", strokeWidth: 2 }}
         />
         <Line 
           type="monotone" 
-          dataKey="expenses" 
+          dataKey="outflow" 
           stroke="var(--negative)" 
           strokeWidth={3}
-          name="Gastos"
+          name={lineLabels.outflow}
           connectNulls={true}
           dot={{ fill: "var(--negative)", strokeWidth: 2, r: 4 }}
           activeDot={{ r: 6, fill: "var(--negative)", stroke: "#fff", strokeWidth: 2 }}
@@ -99,7 +98,7 @@ export function MonthlyFlowChart({ data, isLoading }: MonthlyFlowChartProps) {
           dataKey="net" 
           stroke="var(--neutral)" 
           strokeWidth={4}
-          name="Flujo neto"
+          name={lineLabels.net}
           connectNulls={true}
           dot={{ fill: "var(--neutral)", strokeWidth: 2, r: 5 }}
           activeDot={{ r: 7, fill: "var(--neutral)", stroke: "#fff", strokeWidth: 2 }}
