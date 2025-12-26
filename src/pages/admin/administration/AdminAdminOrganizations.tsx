@@ -14,7 +14,7 @@ import { IdentityBadge } from '@/components/shared/IdentityBadge';
 
 import { useToast } from '@/hooks/use-toast';
 import { AdminOrganizationRow } from '@/features/organization/components/admin/AdminOrganizationRow';
-import { OrganizationDetailDrawer } from '@/features/admin';
+import { OrganizationDetailDrawer } from '@/features/legacy/components/admin/OrganizationDetailDrawer';
 
 interface Organization {
   id: string;
