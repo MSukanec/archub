@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Card } from '@/components/ui/card';
-import { DashboardCardHeader } from './internal/DashboardCardHeader';
+import { AppCardHeader } from '@/components/shared/AppCard';
 import { cn } from '@/lib/utils';
 
 export interface ActivityItem {
@@ -31,7 +31,7 @@ export function ActivityCard({
   return (
     <Card className={cn('p-4', className)} data-testid={testId}>
       {title && (
-        <DashboardCardHeader
+        <AppCardHeader
           icon={titleIcon}
           title={title}
         />

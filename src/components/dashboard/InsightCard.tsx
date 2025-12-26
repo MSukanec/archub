@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DashboardCardHeader } from './internal/DashboardCardHeader';
+import { AppCardHeader } from '@/components/shared/AppCard';
 import { cn } from '@/lib/utils';
 import { Info, AlertTriangle, CheckCircle2, XCircle, LucideIcon, ChevronRight } from 'lucide-react';
 import { type InsightAction } from './insights/types';
@@ -90,7 +90,7 @@ export function InsightCard({
   return (
     <Card className={cn('p-4', className)} data-testid={testId}>
       {title && (
-        <DashboardCardHeader
+        <AppCardHeader
           icon={titleIcon}
           title={title}
         />
