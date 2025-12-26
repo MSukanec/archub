@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Settings, Loader2 } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { useCurrentUser, type UserData } from '@/hooks/use-current-user';
 import { useSidebarStore } from '@/stores/sidebarStore';
 import { useThemeStore } from '@/stores/themeStore';
@@ -32,7 +32,7 @@ export function UserPreferencesView() {
     theme: themeValue,
   }), [sidebarDocked, themeValue]);
 
-  const { isSaving, hasUnsavedChanges } = useSaveEngine<PreferencesData>({
+  useSaveEngine<PreferencesData>({
     data: formData,
     queryKey: usersKeys.current(),
     delay: 500,
@@ -137,18 +137,6 @@ export function UserPreferencesView() {
             <div className="flex items-center gap-2">
               <Settings className="h-5 w-5 text-[var(--accent)]" />
               <h3 className="text-lg font-semibold">Preferencias</h3>
-              {(isSaving || hasUnsavedChanges) && (
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Guardando...
-                    </>
-                  ) : (
-                    'Sin guardar'
-                  )}
-                </span>
-              )}
             </div>
             <p className="text-sm text-muted-foreground">
               Configura las preferencias de tu aplicación.

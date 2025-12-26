@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Camera, User, Settings, Building, Package, Hammer, Eye, CalendarIcon, Loader2 } from 'lucide-react';
+import { Camera, User, Settings, Building, Package, Hammer, Eye, CalendarIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from 'date-fns';
@@ -75,7 +75,7 @@ export function UserBasicDataView() {
     avatarUrl,
   }), [firstName, lastName, country, birthdate, avatarUrl]);
 
-  const { isSaving, hasUnsavedChanges } = useSaveEngine<FormData>({
+  useSaveEngine<FormData>({
     data: formData,
     queryKey: usersKeys.current(),
     delay: 500,
@@ -220,18 +220,6 @@ export function UserBasicDataView() {
             <div className="flex items-center gap-2">
               <Camera className="h-5 w-5 text-[var(--accent)]" />
               <h3 className="text-lg font-semibold">Perfil</h3>
-              {(isSaving || hasUnsavedChanges) && (
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Guardando...
-                    </>
-                  ) : (
-                    'Sin guardar'
-                  )}
-                </span>
-              )}
             </div>
             <p className="text-sm text-muted-foreground">
               Esta información se mostrará públicamente, así que ten cuidado con lo que compartes.
@@ -327,14 +315,7 @@ export function UserBasicDataView() {
                 <Label className="text-sm font-medium">País</Label>
                 <Select value={country} onValueChange={setCountry}>
                   <SelectTrigger data-testid="select-country">
-                    {countriesLoading ? (
-                      <span className="text-muted-foreground flex items-center gap-2">
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                        Cargando...
-                      </span>
-                    ) : (
-                      <SelectValue placeholder="Selecciona un país" />
-                    )}
+                    <SelectValue placeholder="Selecciona un país" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">Sin seleccionar</SelectItem>
