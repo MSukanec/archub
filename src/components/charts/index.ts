@@ -79,7 +79,3 @@ export { CategoryBreakdownChart } from './CategoryBreakdownChart'
 
 // MonthlyTrendChart & MultiSeriesTrendChart - Area/Composed charts
 export { MonthlyTrendChart, MultiSeriesTrendChart } from './MonthlyTrendChart'
-
-
-// BalanceBreakdownChart - Horizontal bar chart
-export { BalanceBreakdownChart } from './BalanceBreakdownChart'

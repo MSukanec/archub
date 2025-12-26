@@ -25,7 +25,7 @@ import { generateFinancialInsights, buildInsightContext, toInsightItems } from '
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MultiSeriesTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
-import { BalanceBreakdownChart } from '@/components/charts/BalanceBreakdownChart';
+import { HorizontalBarChart } from '@/components/charts/bar/HorizontalBarChart';
 import { cn } from '@/lib/utils';
 import { Wallet, Coins } from 'lucide-react';
 import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
@@ -760,8 +760,8 @@ export function OrganizationFinancesDashboardView({
           id="currency-balances"
         >
           {currencyBalances.length > 0 ? (
-            <BalanceBreakdownChart
-              data={currencyBalances}
+            <HorizontalBarChart
+              data={currencyBalances.map(c => ({ label: c.name, value: c.balance }))}
               height={200}
             />
           ) : (
@@ -778,10 +778,9 @@ export function OrganizationFinancesDashboardView({
           id="wallet-balances"
         >
           {walletBalances.length > 0 ? (
-            <BalanceBreakdownChart
-              data={walletBalances}
+            <HorizontalBarChart
+              data={walletBalances.map(w => ({ label: w.name, value: w.balance }))}
               height={200}
-              currencySymbol={currencySymbol}
             />
           ) : (
             <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">

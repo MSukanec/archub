@@ -23,7 +23,7 @@ import { generateFinancialInsights, buildInsightContext, toInsightItems } from '
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MultiSeriesTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
-import { BalanceBreakdownChart } from '@/components/charts/BalanceBreakdownChart';
+import { HorizontalBarChart } from '@/components/charts/bar/HorizontalBarChart';
 import { cn } from '@/lib/utils';
 import { Wallet, Coins } from 'lucide-react';
 import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
@@ -707,8 +707,8 @@ export function ProjectFinancesDashboardView({
             description="Balance real en cada moneda"
             data-testid="chart-currency-balances"
           >
-            <BalanceBreakdownChart 
-              data={currencyBalances}
+            <HorizontalBarChart 
+              data={currencyBalances.map(c => ({ label: c.name, value: c.balance }))}
               height={120}
               emptyText="No hay movimientos registrados"
             />
@@ -721,8 +721,8 @@ export function ProjectFinancesDashboardView({
             description={`En ${defaultCurrency?.code || 'moneda base'}`}
             data-testid="chart-wallet-balances"
           >
-            <BalanceBreakdownChart 
-              data={walletBalances}
+            <HorizontalBarChart 
+              data={walletBalances.map(w => ({ label: w.name, value: w.balance }))}
               height={120}
               emptyText="No hay movimientos registrados"
             />
