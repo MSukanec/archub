@@ -1,0 +1,102 @@
+PROMPT A REPLIT:
+
+Quiero corregir la vista /organization/capital/balances. Ahora mismo los cálculos y signos están mal (ej: si balance_actual < capital_esperado el desvío debe ser negativo, y hoy aparece positivo). Además, la UI debe mostrar DOS conceptos “esperados” distintos para que no haya confusión.
+
+1) Definiciones y cálculos obligatorios
+Totales (solo movimientos CONFIRMADOS)
+
+total_contributions = SUM(partner_contributions.amount) WHERE status='confirmed' AND organization_id=...
+
+total_withdrawals = SUM(partner_withdrawals.amount) WHERE status='confirmed' AND organization_id=...
+
+total_adjustments = SUM(capital_adjustments.amount) WHERE status='confirmed' AND organization_id=...
+
+total_net_capital = total_contributions - total_withdrawals + total_adjustments
+
+Por socio (confirmados)
+
+partner_contributed = SUM(contributions.amount) WHERE partner_id=... AND status='confirmed'
+
+partner_withdrawn = SUM(withdrawals.amount) WHERE partner_id=... AND status='confirmed'
+
+partner_adjusted = SUM(adjustments.amount) WHERE partner_id=... AND status='confirmed'
+
+partner_balance_actual = partner_capital_balance.balance_amount (última fila por partner, o la view que ya tenemos)
+
+Esperados por socio (con % societario)
+
+Sea p = percentage / 100:
+
+expected_contribution = total_contributions * p
+
+expected_net_capital = total_net_capital * p
+
+Desvíos (con signo correcto)
+
+deviation_contribution = partner_contributed - expected_contribution
+
+deviation_net = partner_balance_actual - expected_net_capital
+
+(IMPORTANTE: usar exactamente estas fórmulas y mostrar el signo.)
+
+2) UI: cada card debe mostrar DOS bloques claros
+
+Bloque APORTES
+
+“Aportes del socio”
+
+“Aporte esperado (según %)”
+
+“Desvío de aporte” (con + o -)
+
+Bloque CAPITAL NETO
+
+“Balance actual (aportes - retiros + ajustes)”
+
+“Capital neto esperado (según %)”
+
+“Desvío neto” (con + o -)
+
+3) Badges/estados (dos badges separados)
+
+Badge 1: Estado de aporte
+
+deviation_contribution > 0 => “Sobre aportado”
+
+= 0 => “En equilibrio”
+
+< 0 => “Bajo aportado”
+
+Badge 2: Estado neto
+
+deviation_net > 0 => “Capital arriba”
+
+= 0 => “En equilibrio”
+
+< 0 => “Capital abajo”
+
+4) KPIs superiores (mantener y agregar claridad)
+
+Mantener:
+
+Total Aportes
+
+Total Retiros
+
+Socios
+
+Asegurar que “Saldo Neto” sea exactamente:
+total_net_capital = aportes - retiros + ajustes
+
+Agregar un KPI de “Ajustes” si no existe.
+
+5) Validaciones visuales rápidas (para test)
+
+Para un socio con 20%:
+
+expected_contribution debe ser total_contributions * 0.20
+
+expected_net_capital debe ser total_net_capital * 0.20
+Si partner_balance_actual < expected_net_capital, deviation_net debe ser NEGATIVO.
+
+Implementar estos cambios sin crear nuevas tablas. Usar las tablas/vistas existentes.

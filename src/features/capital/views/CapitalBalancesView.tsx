@@ -15,9 +15,13 @@ interface EnrichedPartnerBalance {
   partnerName: string;
   balance: number;
   ownershipPercentage: number | null;
-  capitalEsperado: number | null;
-  desvioCapital: number | null;
-  equilibriumStatus: PartnerCapitalKPI['equilibrium_status'];
+  partner_contributed: number;
+  expected_contribution: number | null;
+  deviation_contribution: number | null;
+  contribution_status: PartnerCapitalKPI['contribution_status'];
+  expected_net_capital: number | null;
+  deviation_net: number | null;
+  net_status: PartnerCapitalKPI['net_status'];
   linkedUser?: { avatar_url?: string | null } | null;
 }
 
@@ -40,6 +44,9 @@ export function CapitalBalancesView() {
     balanceByPartner,
   } = usePartnerMetrics(movements, defaultCurrency?.code);
 
+  // Calculate total adjustments from KPI data
+  const totalAdjustments = kpiData.length > 0 ? kpiData[0]?.total_adjustments ?? 0 : 0;
+
   const enrichedBalances = useMemo<EnrichedPartnerBalance[]>(() => {
     if (balanceByPartner.length === 0) return [];
 
@@ -55,9 +62,13 @@ export function CapitalBalancesView() {
         partnerName: balance.partnerName,
         balance: balance.balance,
         ownershipPercentage: kpi?.ownership_percentage ?? null,
-        capitalEsperado: kpi?.capital_esperado ?? null,
-        desvioCapital: kpi?.desvio_capital ?? null,
-        equilibriumStatus: kpi?.equilibrium_status ?? 'sin_porcentaje',
+        partner_contributed: kpi?.partner_contributed ?? 0,
+        expected_contribution: kpi?.expected_contribution ?? null,
+        deviation_contribution: kpi?.deviation_contribution ?? null,
+        contribution_status: kpi?.contribution_status ?? 'sin_porcentaje',
+        expected_net_capital: kpi?.expected_net_capital ?? null,
+        deviation_net: kpi?.deviation_net ?? null,
+        net_status: kpi?.net_status ?? 'sin_porcentaje',
         linkedUser: resolvedLinkedUser,
       };
     }).sort((a, b) => (b.ownershipPercentage ?? 0) - (a.ownershipPercentage ?? 0));
@@ -116,7 +127,7 @@ export function CapitalBalancesView() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard data-testid="stat-card-total-aportes">
           <StatCardTitle showArrow={false}>
             <TrendingUp className="h-4 w-4" />
@@ -175,6 +186,19 @@ export function CapitalBalancesView() {
           </StatCardValue>
           <StatCardMeta>
             Participantes con movimientos
+          </StatCardMeta>
+        </StatCard>
+
+        <StatCard data-testid="stat-card-total-ajustes">
+          <StatCardTitle showArrow={false}>
+            <Wallet className="h-4 w-4" />
+            Total Ajustes
+          </StatCardTitle>
+          <StatCardValue className={totalAdjustments >= 0 ? "text-[var(--positive)]" : "text-[var(--negative)]"}>
+            {totalAdjustments > 0 ? '+' : ''}{currencySymbol} {formatCurrency(totalAdjustments)}
+          </StatCardValue>
+          <StatCardMeta>
+            {totalAdjustments === 0 ? 'Sin ajustes' : 'Ajustes confirmados'}
           </StatCardMeta>
         </StatCard>
       </div>
