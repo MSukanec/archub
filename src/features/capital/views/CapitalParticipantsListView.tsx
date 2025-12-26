@@ -1,12 +1,3 @@
-/**
- * CapitalParticipantsListTab.tsx
- * 
- * MIGRADO AL NUEVO SISTEMA DE TABLA MODULAR
- * Fecha de migración: 2024-12-16
- * 
- * Esta pantalla usa el nuevo sistema de tabla ubicado en:
- * src/components/shared/table/
- */
 import { useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Users, Plus, Edit, Trash2, HandHeart, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
@@ -28,7 +19,7 @@ import type { Partner } from '@/features/capital/types';
 
 type EnrichedPartner = Partner & { partnerName: string };
 
-export function CapitalParticipantsListTab() {
+export function CapitalParticipantsListView() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
@@ -134,7 +125,6 @@ export function CapitalParticipantsListTab() {
         deletePartnerMutation.mutate(partner.id);
       },
       onReplace: (newId: string) => {
-        // For now, just delete without replacing
         deletePartnerMutation.mutate(partner.id);
       }
     });
@@ -202,7 +192,6 @@ export function CapitalParticipantsListTab() {
     },
   ];
 
-  // Show only empty state when no partners
   if (!isLoading && enrichedPartners.length === 0) {
     return (
       <EmptyState

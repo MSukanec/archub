@@ -38,7 +38,7 @@ interface Contact {
   linked_user: LinkedUser | LinkedUser[] | null;
 }
 
-export interface CapitalParticipantFormFieldsProps {
+export interface CapitalParticipantFormProps {
   organizationId?: string;
   partnerId?: string;
   mode: 'create' | 'edit';
@@ -48,7 +48,7 @@ export interface CapitalParticipantFormFieldsProps {
   formRef?: React.RefObject<HTMLFormElement>;
 }
 
-export function CapitalParticipantFormFields({
+export function CapitalParticipantForm({
   organizationId,
   partnerId,
   mode,
@@ -56,7 +56,7 @@ export function CapitalParticipantFormFields({
   onCancel,
   hideActions = false,
   formRef,
-}: CapitalParticipantFormFieldsProps) {
+}: CapitalParticipantFormProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const queryClient = useQueryClient();
@@ -371,4 +371,4 @@ export function CapitalParticipantFormFields({
     </Form>
   );
 }
-export const PartnerFormFields = CapitalParticipantFormFields;
+export const PartnerFormFields = CapitalParticipantForm;

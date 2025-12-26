@@ -49,7 +49,7 @@ import {
 
 export type PeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all';
 
-interface CapitalDashboardTabProps {
+interface CapitalDashboardViewProps {
   onNavigateToList?: () => void;
   onNavigateToBalances?: () => void;
   onNavigateToTransactions?: () => void;
@@ -161,14 +161,14 @@ export function calculateAvailablePeriods(
   return result;
 }
 
-export default function CapitalDashboardTab({ 
+export function CapitalDashboardView({ 
   onNavigateToList, 
   onNavigateToBalances,
   onNavigateToTransactions,
   onNavigateToTab,
   onScrollToPanel,
   selectedPeriod = 'all' 
-}: CapitalDashboardTabProps) {
+}: CapitalDashboardViewProps) {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   
@@ -660,58 +660,66 @@ export default function CapitalDashboardTab({
         >
           <StatCardTitle>
             <Users className="h-4 w-4" />
-            Socios
+            Participantes
           </StatCardTitle>
           <StatCardValue>
-            {kpis.partnersCount.value}
+            {kpis.partnersCount.count}
           </StatCardValue>
           <StatCardMeta>
-            Participantes activos
+            Socios activos
           </StatCardMeta>
         </StatCard>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DashboardCard 
+        <DashboardCard
           title="Evolución del Capital"
-          icon={<BarChart3 className="h-4 w-4" />}
-          data-testid="chart-monthly-trend"
+          icon={Clock}
+          description={`Movimientos netos mensuales`}
+          onClick={onNavigateToTransactions}
+          data-testid="card-monthly-trend"
         >
           {monthlyChartData.length >= 2 ? (
-            <MonthlyTrendChart 
-              data={monthlyChartData} 
-              height={280}
-              onBarClick={handleMonthDrillDown}
-            />
-          ) : (
-            <div className="flex items-center justify-center h-[280px] text-muted-foreground text-sm">
-              Se necesitan al menos 2 meses de datos para mostrar la tendencia
+            <div className="space-y-2">
+              <div className="h-52 overflow-hidden">
+                <MonthlyTrendChart 
+                  data={monthlyChartData} 
+                  height={200}
+                  onClick={handleMonthDrillDown}
+                  clickable
+                />
+              </div>
+              {currentMonthComparison && (
+                <StatCardHistoricalComparison comparison={currentMonthComparison} />
+              )}
             </div>
-          )}
-          {currentMonthComparison && (
-            <div className="mt-2 px-2">
-              <StatCardHistoricalComparison 
-                comparison={currentMonthComparison} 
-                label="vs promedio mensual" 
-              />
+          ) : (
+            <div className="h-52 flex items-center justify-center text-muted-foreground text-sm">
+              Necesitas al menos 2 meses de datos para ver la evolución
             </div>
           )}
         </DashboardCard>
 
-        <DashboardCard 
+        <DashboardCard
           title="Distribución por Socio"
-          icon={<PieChart className="h-4 w-4" />}
-          data-testid="chart-partner-distribution"
+          icon={PieChart}
+          description="Balance neto por participante"
+          onClick={onNavigateToBalances}
+          data-testid="card-partner-distribution"
         >
           {partnerDistributionData.length > 0 ? (
-            <DonutChart 
-              data={partnerDistributionData.map(d => ({ label: d.name, value: d.value }))} 
-              height={280}
-              onClick={handlePartnerDrillDown}
-            />
+            <div className="h-52 overflow-hidden">
+              <DonutChart 
+                data={partnerDistributionData} 
+                height={200}
+                showLegend
+                onClick={handlePartnerDrillDown}
+                clickable
+              />
+            </div>
           ) : (
-            <div className="flex items-center justify-center h-[280px] text-muted-foreground text-sm">
-              No hay datos de distribución para mostrar
+            <div className="h-52 flex items-center justify-center text-muted-foreground text-sm">
+              No hay datos de distribución
             </div>
           )}
         </DashboardCard>
@@ -719,22 +727,20 @@ export default function CapitalDashboardTab({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <InsightCard
-          title="Insights"
-          titleIcon={<Lightbulb className="h-4 w-4" />}
-          items={toInsightItems(autoInsights)}
+          insights={toInsightItems(autoInsights)}
           onAction={handleInsightAction}
-          data-testid="insights-section"
-          emptyText="No hay insights disponibles en este momento"
+          data-testid="card-insights"
         />
 
         <ActivityCard
-          title="Actividad Reciente"
-          titleIcon={<Clock className="h-4 w-4" />}
           items={recentActivityItems}
-          data-testid="activity-section"
-          emptyText="No hay actividad reciente"
+          emptyMessage="No hay transacciones recientes"
+          onViewAll={onNavigateToTransactions}
+          data-testid="card-recent-activity"
         />
       </div>
     </div>
   );
 }
+
+export default CapitalDashboardView;

@@ -10,14 +10,16 @@ export * from './services/deletePartnerWithdrawal';
 
 export * from './hooks';
 
-export { CapitalParticipantFormFields } from './forms/CapitalParticipantFormFields';
-export { PartnerContributionFormFields } from './forms/PartnerContributionFormFields';
-export { PartnerWithdrawalFormFields } from './forms/PartnerWithdrawalFormFields';
+export { CapitalParticipantForm } from './forms/CapitalParticipantForm';
+export { PartnerContributionForm } from './forms/PartnerContributionForm';
+export { PartnerWithdrawalForm } from './forms/PartnerWithdrawalForm';
 
 export { CapitalParticipantModal } from './modals/CapitalParticipantModal';
 export { PartnerContributionModal } from './modals/PartnerContributionModal';
 export { PartnerWithdrawalModal } from './modals/PartnerWithdrawalModal';
 export { CapitalTransactionModal } from './modals/CapitalTransactionModal';
+
+export * from './views';
 
 export * from './types';
 

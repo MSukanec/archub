@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { TrendingUp } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
-import { PartnerContributionFormFields } from '../forms/PartnerContributionFormFields'
+import { PartnerContributionForm } from '../forms/PartnerContributionForm'
 
 interface PartnerContributionModalProps {
   modalData?: {
@@ -80,7 +80,7 @@ export function PartnerContributionModal({ modalData, onClose, mode = 'create' }
       }
     >
       <ModalBody>
-        <PartnerContributionFormFields
+        <PartnerContributionForm
           projectId={modalData?.projectId}
           organizationId={modalData?.organizationId}
           contributionId={modalData?.contributionId}

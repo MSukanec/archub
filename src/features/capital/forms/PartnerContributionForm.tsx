@@ -62,7 +62,7 @@ function getPartnerDisplayName(partner: Partner): string {
   return 'Socio sin nombre'
 }
 
-export interface PartnerContributionFormFieldsProps {
+export interface PartnerContributionFormProps {
   projectId?: string;
   organizationId?: string;
   contributionId?: string;
@@ -73,7 +73,7 @@ export interface PartnerContributionFormFieldsProps {
   formRef?: React.RefObject<HTMLFormElement>;
 }
 
-export function PartnerContributionFormFields({ 
+export function PartnerContributionForm({ 
   projectId, 
   organizationId,
   contributionId,
@@ -82,7 +82,7 @@ export function PartnerContributionFormFields({
   onCancel,
   hideActions = false,
   formRef
-}: PartnerContributionFormFieldsProps) {
+}: PartnerContributionFormProps) {
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
   const queryClient = useQueryClient()

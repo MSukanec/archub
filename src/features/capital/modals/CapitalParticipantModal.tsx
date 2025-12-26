@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { HandHeart } from 'lucide-react';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
-import { CapitalParticipantFormFields } from '../forms/CapitalParticipantFormFields';
+import { CapitalParticipantForm } from '../forms/CapitalParticipantForm';
 
 export interface CapitalParticipantModalProps {
   modalData?: {
@@ -52,7 +52,7 @@ export function CapitalParticipantModal({ modalData, onClose }: CapitalParticipa
       footerContent={footerContent}
     >
       <ModalBody>
-        <CapitalParticipantFormFields
+        <CapitalParticipantForm
           organizationId={organizationId}
           partnerId={participantId}
           mode={isEditing ? 'edit' : 'create'}

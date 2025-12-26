@@ -1,12 +1,3 @@
-/**
- * CapitalTransactionsTab.tsx
- * 
- * MIGRADO AL NUEVO SISTEMA DE TABLA MODULAR
- * Fecha de migración: 2024-12-16
- * 
- * Esta pantalla usa el nuevo sistema de tabla ubicado en:
- * src/components/shared/table/
- */
 import { useMemo } from 'react';
 import { ArrowDownCircle, ArrowUpCircle, Edit, Trash2, Plus, TrendingUp, TrendingDown, Wallet, Receipt } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -35,7 +26,7 @@ import {
 } from '@/features/capital';
 import { PaymentStatusBadge, type PaymentStatus } from '@/components/shared/PaymentStatusBadge';
 
-interface CapitalTransactionsTabProps {
+interface CapitalTransactionsViewProps {
   activeFilterIssueId?: string | null;
   getAffectedIdsForIssue?: (issueId: string) => Set<string>;
 }
@@ -68,10 +59,10 @@ function formatPartnerName(partner?: { contacts: { full_name: string | null; fir
   return constructedName || company_name || email || 'Sin nombre';
 }
 
-export function CapitalTransactionsTab({ 
+export function CapitalTransactionsView({ 
   activeFilterIssueId, 
   getAffectedIdsForIssue = () => new Set() 
-}: CapitalTransactionsTabProps) {
+}: CapitalTransactionsViewProps) {
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
@@ -127,12 +118,10 @@ export function CapitalTransactionsTab({
     return [...contributionItems, ...withdrawalItems].sort((a, b) => {
       const dateComparison = new Date(b.date).getTime() - new Date(a.date).getTime();
       if (dateComparison !== 0) return dateComparison;
-      // Si las fechas son iguales, ordenar por fecha de creación (más recientes primero)
       return new Date(b.original.created_at).getTime() - new Date(a.original.created_at).getTime();
     });
   }, [contributions, withdrawals]);
 
-  // Enrich transactions with linkedUser from partners
   const transactionsWithLinkedUser = useMemo(() => {
     return transactions.map(transaction => {
       const partnerData = partners.find(p => p.id === transaction.partner_id);
@@ -146,19 +135,15 @@ export function CapitalTransactionsTab({
     });
   }, [transactions, partners]);
 
-  // Filtrar transacciones: mostrar todas o solo las que tienen problemas
   const filteredTransactions = useMemo(() => {
     if (!activeFilterIssueId) return transactionsWithLinkedUser;
     const issueIds = getAffectedIdsForIssue(activeFilterIssueId);
     return transactionsWithLinkedUser.filter(t => issueIds.has(t.id));
   }, [transactionsWithLinkedUser, activeFilterIssueId, getAffectedIdsForIssue]);
 
-  // KPI system - REFACTORIZADO
   const metrics = useMemo(() => {
-    // Filter confirmed transactions
     const confirmedTransactions = transactions.filter(t => t.status === 'confirmed');
     
-    // KPI: Total Aportes (contributions)
     const contributionsKPI = calculateMonetaryKPI({
       items: confirmedTransactions
         .filter(t => t.type === 'contribution')
@@ -169,10 +154,9 @@ export function CapitalTransactionsTab({
           exchange_rate: t.exchange_rate
         })),
       baseCurrencyId: defaultCurrency?.code,
-      symbol: defaultCurrency?.symbol  // Use base currency symbol
+      symbol: defaultCurrency?.symbol
     });
 
-    // KPI: Total Retiros (withdrawals)
     const withdrawalsKPI = calculateMonetaryKPI({
       items: confirmedTransactions
         .filter(t => t.type === 'withdrawal')
@@ -183,10 +167,9 @@ export function CapitalTransactionsTab({
           exchange_rate: t.exchange_rate
         })),
       baseCurrencyId: defaultCurrency?.code,
-      symbol: defaultCurrency?.symbol  // Use base currency symbol
+      symbol: defaultCurrency?.symbol
     });
 
-    // KPI: Saldo Neto (net balance = contributions - withdrawals)
     const netBalance = contributionsKPI.value - withdrawalsKPI.value;
     const netBalanceKPI = {
       ...contributionsKPI,
@@ -380,7 +363,6 @@ export function CapitalTransactionsTab({
     );
   }
 
-  // Show only empty state when no transactions
   if (transactions.length === 0) {
     return (
       <EmptyState

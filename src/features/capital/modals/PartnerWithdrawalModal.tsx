@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { TrendingDown } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
-import { PartnerWithdrawalFormFields } from '../forms/PartnerWithdrawalFormFields'
+import { PartnerWithdrawalForm } from '../forms/PartnerWithdrawalForm'
 
 interface PartnerWithdrawalModalProps {
   modalData?: {
@@ -80,7 +80,7 @@ export function PartnerWithdrawalModal({ modalData, onClose, mode = 'create' }: 
       }
     >
       <ModalBody>
-        <PartnerWithdrawalFormFields
+        <PartnerWithdrawalForm
           projectId={modalData?.projectId}
           organizationId={modalData?.organizationId}
           withdrawalId={modalData?.withdrawalId}

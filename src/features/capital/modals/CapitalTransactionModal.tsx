@@ -4,8 +4,8 @@ import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/m
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import { PartnerContributionFormFields } from '../forms/PartnerContributionFormFields'
-import { PartnerWithdrawalFormFields } from '../forms/PartnerWithdrawalFormFields'
+import { PartnerContributionForm } from '../forms/PartnerContributionForm'
+import { PartnerWithdrawalForm } from '../forms/PartnerWithdrawalForm'
 
 type TransactionType = 'contribution' | 'withdrawal'
 
@@ -74,9 +74,9 @@ export function CapitalTransactionModal({ modalData, onClose }: CapitalTransacti
 
     switch (selectedType) {
       case 'contribution':
-        return <PartnerContributionFormFields {...commonProps} />
+        return <PartnerContributionForm {...commonProps} />
       case 'withdrawal':
-        return <PartnerWithdrawalFormFields {...commonProps} />
+        return <PartnerWithdrawalForm {...commonProps} />
       default:
         return null
     }

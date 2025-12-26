@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 import { ClientPaymentForm } from '@/features/clients/forms/ClientPaymentForm'
 import { MaterialPaymentFormFields } from '@/features/materials/forms/MaterialPaymentFormFields'
 import { PersonnelPaymentFormFields } from '@/features/personnel/forms/PersonnelPaymentForm'
-import { PartnerContributionFormFields, PartnerWithdrawalFormFields } from '@/features/capital'
+import { PartnerContributionForm, PartnerWithdrawalForm } from '@/features/capital'
 import { GeneralCostPaymentFormFields } from '@/features/general-costs/forms/GeneralCostPaymentForm'
 import { WalletTransferFormFields } from '../forms/WalletTransferFormFields'
 import { CurrencyExchangeFormFields } from '../forms/CurrencyExchangeFormFields'
@@ -218,9 +218,9 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
       case 'personnel_payment':
         return <PersonnelPaymentFormFields {...commonProps} />
       case 'partner_contribution':
-        return <PartnerContributionFormFields {...commonProps} />
+        return <PartnerContributionForm {...commonProps} />
       case 'partner_withdrawal':
-        return <PartnerWithdrawalFormFields {...commonProps} />
+        return <PartnerWithdrawalForm {...commonProps} />
       case 'general_cost_payment':
         return <GeneralCostPaymentFormFields {...commonProps} />
       case 'wallet_transfer':

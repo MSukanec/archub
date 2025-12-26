@@ -121,7 +121,7 @@ import { ProjectFinancesPage } from "@/pages/dashboard/ProjectFinancesPage";
 
 // Settings Pages
 import PricingPlan from "@/pages/settings/PricingPlan";
-import Capital from "@/pages/capital/Capital";
+import CapitalPage from "@/pages/dashboard/CapitalPage";
 
 // User Page
 
@@ -250,7 +250,7 @@ function Router() {
         <Route path="/organization/billing" component={OrganizationSettingsPage} />
         <Route path="/organization/settings" component={OrganizationSettingsPage} />
         <Route path="/organization/members" component={OrganizationSettingsPage} />
-        <Route path="/organization/capital" component={Capital} />
+        <Route path="/organization/capital" component={CapitalPage} />
         <Route path="/settings/pricing-plan" component={PricingPlan} />
         
         {/* User Page */}

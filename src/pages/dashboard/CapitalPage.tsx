@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { LabLayout } from "@/layouts/lab/LabLayout";
-import CapitalDashboardTab, { calculateAvailablePeriods, type PeriodFilter } from '@/pages/capital/tabs/CapitalDashboardTab';
-import { CapitalParticipantsListTab } from '@/pages/capital/tabs/CapitalParticipantsListTab';
-import { CapitalBalancesTab } from '@/pages/capital/tabs/CapitalBalancesTab';
-import { CapitalTransactionsTab } from '@/pages/capital/tabs/CapitalTransactionsTab';
+import { CapitalDashboardView, calculateAvailablePeriods, type PeriodFilter } from '@/features/capital/views/CapitalDashboardView';
+import { CapitalParticipantsListView } from '@/features/capital/views/CapitalParticipantsListView';
+import { CapitalBalancesView } from '@/features/capital/views/CapitalBalancesView';
+import { CapitalTransactionsView } from '@/features/capital/views/CapitalTransactionsView';
 import { HandHeart, Plus, ChevronDown, Calendar } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -35,7 +35,7 @@ const CAPITAL_TABS = [
   { id: 'transactions', label: 'Transacciones' },
 ];
 
-export default function Capital() {
+export default function CapitalPage() {
   const { setSidebarLevel } = useNavigationStore();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
@@ -150,7 +150,7 @@ export default function Capital() {
     switch (activeTab) {
       case 'dashboard':
         return (
-          <CapitalDashboardTab 
+          <CapitalDashboardView 
             selectedPeriod={validSelectedPeriod}
             onNavigateToList={() => setActiveTab('list')}
             onNavigateToBalances={() => setActiveTab('balances')}
@@ -159,19 +159,19 @@ export default function Capital() {
           />
         );
       case 'list':
-        return <CapitalParticipantsListTab />;
+        return <CapitalParticipantsListView />;
       case 'balances':
-        return <CapitalBalancesTab />;
+        return <CapitalBalancesView />;
       case 'transactions':
         return (
-          <CapitalTransactionsTab 
+          <CapitalTransactionsView 
             activeFilterIssueId={activeFilterIssueId}
             getAffectedIdsForIssue={dataHealth.getAffectedIdsForIssue}
           />
         );
       default:
         return (
-          <CapitalDashboardTab 
+          <CapitalDashboardView 
             selectedPeriod={validSelectedPeriod}
             onNavigateToList={() => setActiveTab('list')}
             onNavigateToBalances={() => setActiveTab('balances')}
@@ -266,9 +266,6 @@ export default function Capital() {
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        toolbarProps={{
-          secondaryRightSlot: secondaryRightContent,
-        }}
       >
         <div className="space-y-6">
           {dataHealthAlert}

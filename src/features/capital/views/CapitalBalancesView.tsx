@@ -10,7 +10,7 @@ import { usePartnerMetrics } from '@/features/finances/hooks/use-partner-metrics
 import { usePartners } from '@/features/capital';
 import PartnerBalanceAccordion from '@/features/finances/components/PartnerBalanceAccordion';
 
-export function CapitalBalancesTab() {
+export function CapitalBalancesView() {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
 
@@ -28,7 +28,6 @@ export function CapitalBalancesTab() {
     balanceByPartner,
   } = usePartnerMetrics(movements, defaultCurrency?.code);
 
-  // Enrich balance data with linkedUser from partners
   const balanceByPartnerWithLinkedUser = useMemo(() => {
     return balanceByPartner.map(balance => {
       const partnerData = partners.find(p => p.id === balance.partnerId);
