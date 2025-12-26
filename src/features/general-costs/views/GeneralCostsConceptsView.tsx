@@ -226,6 +226,7 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
     {
       key: 'name' as const,
       label: 'Gasto General',
+      type: 'medium-text' as const,
       sortable: false,
       render: (item: typeof enrichedGeneralCosts[0]) => (
         <div className="flex flex-col gap-0.5">
@@ -239,6 +240,7 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
     {
       key: 'usage' as const,
       label: 'Uso',
+      type: 'medium-text' as const,
       sortable: false,
       render: (item: typeof enrichedGeneralCosts[0]) => {
         if (item.paymentCount === 0) {
@@ -263,6 +265,7 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
     {
       key: 'totalPaid' as const,
       label: 'Total Pagado',
+      type: 'amount' as const,
       sortable: false,
       render: (item: typeof enrichedGeneralCosts[0]) => {
         if (item.paymentCount === 0) {
@@ -292,6 +295,7 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
     {
       key: 'trend' as const,
       label: 'Tendencia (6 meses)',
+      type: 'medium-text' as const,
       sortable: false,
       render: (item: typeof enrichedGeneralCosts[0]) => (
         <SparklineChart 

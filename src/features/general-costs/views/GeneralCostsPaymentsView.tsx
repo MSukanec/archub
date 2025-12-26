@@ -874,6 +874,7 @@ export default function GeneralCostsPaymentsView({
     {
       key: 'payment_date',
       label: 'Fecha de Pago',
+      type: 'date' as const,
       sortable: true,
       align: 'left' as const,
       render: (payment: GeneralCostPayment) => formatDate(payment.payment_date),
@@ -881,6 +882,7 @@ export default function GeneralCostsPaymentsView({
     {
       key: 'general_cost',
       label: 'Gasto General',
+      type: 'medium-text' as const,
       sortable: true,
       render: (payment: GeneralCostPayment) => (
         <div className="flex items-center gap-2">
@@ -926,6 +928,7 @@ export default function GeneralCostsPaymentsView({
     {
       key: 'wallet',
       label: 'Billetera',
+      type: 'medium-text' as const,
       sortable: true,
       align: 'left' as const,
       cellClassName: 'font-bold',
@@ -934,6 +937,7 @@ export default function GeneralCostsPaymentsView({
     {
       key: 'amount',
       label: 'Monto',
+      type: 'amount' as const,
       sortable: true,
       sortType: 'number' as const,
       render: (payment: GeneralCostPayment) => (
@@ -950,6 +954,7 @@ export default function GeneralCostsPaymentsView({
     {
       key: 'status',
       label: 'Estado',
+      type: 'status' as const,
       sortable: true,
       render: (payment: GeneralCostPayment) => {
         const mappedStatus = (payment.status === 'confirmed' || payment.status === 'pending')
