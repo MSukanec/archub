@@ -68,8 +68,7 @@ export const capitalKeys = {
   // Unified movements (for dashboard)
   unifiedMovements: () => [...capitalKeys.all, 'unified-movements'] as const,
   partnerMovements: (organizationId?: NullableId, projectId?: NullableId) =>
-    [...capitalKeys.all, 'partner-movements', organizationId ?? undefined, projectId ?? undefined]
-      .filter(Boolean) as const,
+    [...capitalKeys.all, 'partner-movements', organizationId, projectId] as const,
 } as const;
 
 export type CapitalQueryKey = readonly (string | undefined)[];
