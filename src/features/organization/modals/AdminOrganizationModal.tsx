@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { Building } from 'lucide-react';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
-import { OrganizationForm } from '../forms/OrganizationForm';
+import { AdminOrganizationForm } from '../forms/AdminOrganizationForm';
 
 interface Organization {
   id: string;
@@ -23,7 +23,7 @@ interface OrganizationModalProps {
   onClose: () => void;
 }
 
-export function OrganizationModal({ modalData, onClose }: OrganizationModalProps) {
+export function AdminOrganizationModal({ modalData, onClose }: OrganizationModalProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const { organization, isEditing = false, mode: modeFromData } = modalData || {};
   
@@ -79,7 +79,7 @@ export function OrganizationModal({ modalData, onClose }: OrganizationModalProps
       }
     >
       <ModalBody>
-        <OrganizationForm
+        <AdminOrganizationForm
           organizationId={organization?.id}
           organization={organization}
           mode={mode}

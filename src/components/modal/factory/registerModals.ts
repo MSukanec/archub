@@ -1,6 +1,6 @@
 import { registerModal, ModalConfig } from './registry';
 
-import { InviteMemberModal, OrganizationModal, MemberActionConfirmationModal, UpgradeModal } from '@/features/organization';
+import { InviteMemberModal, AdminOrganizationModal, MemberActionConfirmationModal, UpgradeModal } from '@/features/organization';
 import { CapitalParticipantModal, PartnerContributionModal, PartnerWithdrawalModal, CapitalTransactionModal } from '@/features/capital';
 import { ProjectModal } from '@/features/projects';
 import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, ProfileOrganizationFormModal, MemberFormModal } from '@/features/legacy';
@@ -158,7 +158,7 @@ export function initializeModalRegistry(): void {
   registerModal('board', BoardFormModal as any, organizationConfig);
   registerModal('card', CardFormModal as any, organizationConfig);
   registerModal('list', ListFormModal as any, organizationConfig);
-  registerModal('organization', OrganizationModal as any, { ...organizationConfig, size: 'lg' });
+  registerModal('organization', AdminOrganizationModal as any, { ...organizationConfig, size: 'lg' });
   registerModal('profile-organization', ProfileOrganizationFormModal as any, organizationConfig);
   registerModal('organization-movement-concept', OrganizationMovementConceptFormModal as any, organizationConfig);
   
@@ -476,7 +476,7 @@ export function initializeModalRegistry(): void {
   });
   
   registerModal('admin-user', AdminUserModal as any, adminConfig);
-  registerModal('admin-organization', OrganizationModal as any, { ...adminConfig, size: 'lg' });
+  registerModal('admin-organization', AdminOrganizationModal as any, { ...adminConfig, size: 'lg' });
   registerModal('changelog-entry', AdminChangelogModal as any, adminConfig);
   registerModal('notification', AdminNotificationModal as any, adminConfig);
   registerModal('announcement', AdminAnnouncementModal as any, adminConfig);

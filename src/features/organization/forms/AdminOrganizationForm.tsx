@@ -43,7 +43,7 @@ export interface OrganizationFormProps {
   formRef?: React.RefObject<HTMLFormElement>;
 }
 
-export function OrganizationForm({
+export function AdminOrganizationForm({
   organizationId,
   organization,
   mode,
@@ -51,7 +51,7 @@ export function OrganizationForm({
   onCancel,
   hideActions = false,
   formRef,
-}: OrganizationFormFieldsProps) {
+}: OrganizationFormProps) {
   const { data: currentUser } = useCurrentUser();
   const internalFormRef = useRef<HTMLFormElement>(null);
   const actualFormRef = formRef || internalFormRef;

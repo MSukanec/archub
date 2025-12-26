@@ -7,7 +7,7 @@ export * from './utils';
 export { organizationKeys, userOrgPreferencesKeys } from '@/core/query-keys';
 
 // Modals (1:1 with Forms)
-export { OrganizationModal } from './modals/OrganizationModal';
+export { AdminOrganizationModal } from './modals/AdminOrganizationModal';
 export { InviteMemberModal } from './modals/InviteMemberModal';
 export { MemberActionConfirmationModal } from './modals/MemberActionConfirmationModal';
 export { PlanModal } from './modals/PlanModal';
@@ -16,8 +16,12 @@ export { DowngradeModal } from './modals/DowngradeModal';
 export { InvitationModal } from './modals/InvitationModal';
 export { UpgradeModal } from './modals/UpgradeModal';
 
+// Legacy aliases for backwards compatibility
+export { AdminOrganizationModal as OrganizationModal } from './modals/AdminOrganizationModal';
+
 // Forms
-export { OrganizationForm } from './forms/OrganizationForm';
+export { AdminOrganizationForm } from './forms/AdminOrganizationForm';
+export { AdminOrganizationForm as OrganizationForm } from './forms/AdminOrganizationForm';
 export { InviteMemberForm } from './forms/InviteMemberForm';
 export { MemberActionConfirmationForm } from './forms/MemberActionConfirmationForm';
 export { FormPanel as PlanFormPanel, ViewPanel as PlanViewPanel, usePlanForm } from './forms/PlanForm';
