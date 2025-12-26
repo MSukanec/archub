@@ -40,8 +40,8 @@ export function useCreatePartnerContribution() {
       queryClient.invalidateQueries({
         queryKey: PARTNER_QUERY_KEYS.contributions(data.organization_id, data.project_id || undefined),
       });
-      queryClient.invalidateQueries({ queryKey: ['unified-movements'] });
-      queryClient.invalidateQueries({ queryKey: ['partner-movements'] });
+      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.unifiedMovements() });
+      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.partnerMovements(data.organization_id, data.project_id) });
     },
   });
 }
@@ -66,8 +66,8 @@ export function useUpdatePartnerContribution() {
       queryClient.invalidateQueries({
         queryKey: PARTNER_QUERY_KEYS.contribution(data.id),
       });
-      queryClient.invalidateQueries({ queryKey: ['unified-movements'] });
-      queryClient.invalidateQueries({ queryKey: ['partner-movements'] });
+      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.unifiedMovements() });
+      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.partnerMovements(data.organization_id, data.project_id) });
     },
   });
 }
@@ -88,9 +88,9 @@ export function useDeletePartnerContribution() {
       queryClient.invalidateQueries({
         queryKey: PARTNER_QUERY_KEYS.contributions(variables.organizationId, variables.projectId),
       });
-      queryClient.invalidateQueries({ queryKey: ['unified-movements'] });
+      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.unifiedMovements() });
       queryClient.invalidateQueries({
-        queryKey: ['partner-movements', variables.organizationId, variables.projectId],
+        queryKey: PARTNER_QUERY_KEYS.partnerMovements(variables.organizationId, variables.projectId),
       });
     },
   });

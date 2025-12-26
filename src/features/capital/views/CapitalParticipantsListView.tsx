@@ -73,9 +73,9 @@ export function CapitalParticipantsListView() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.participants(organizationId!) });
-      queryClient.invalidateQueries({ queryKey: ['capital-contributions', organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['capital-withdrawals', organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['unified-movements'] });
+      queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.contributions(organizationId) });
+      queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.withdrawals(organizationId) });
+      queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.unifiedMovements() });
       toast({
         title: "Socio eliminado",
         description: "El socio ha sido eliminado de la organización.",

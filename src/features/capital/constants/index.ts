@@ -14,11 +14,23 @@ export const CAPITAL_PAYMENT_STATUS_OPTIONS = Object.entries(CAPITAL_PAYMENT_STA
 );
 
 export const CAPITAL_QUERY_KEYS = {
+  // Participants
   participants: (orgId: string) => ['capital-participants', orgId] as const,
+  partner: (partnerId: string) => ['capital-partner', partnerId] as const,
+  contactsForPartner: (orgId: string) => ['capital-contacts-for-partner', orgId] as const,
+  partnerContactIds: (orgId: string) => ['capital-partner-contact-ids', orgId] as const,
+  
+  // Contributions
   contributions: (orgId: string, projectId?: string) => ['capital-contributions', orgId, projectId] as const,
   contribution: (id: string) => ['capital-contribution', id] as const,
+  
+  // Withdrawals
   withdrawals: (orgId: string, projectId?: string) => ['capital-withdrawals', orgId, projectId] as const,
   withdrawal: (id: string) => ['capital-withdrawal', id] as const,
+  
+  // Unified movements (for dashboard)
+  unifiedMovements: () => ['capital-unified-movements'] as const,
+  partnerMovements: (orgId?: string, projectId?: string) => ['capital-partner-movements', orgId, projectId].filter(Boolean) as const,
 } as const;
 
 // Backward compatibility

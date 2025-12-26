@@ -66,7 +66,7 @@ export function CapitalParticipantForm({
   const orgId = organizationId || userData?.preferences?.last_organization_id;
 
   const { data: contacts = [], isLoading: contactsLoading } = useQuery<Contact[]>({
-    queryKey: ['contacts-for-partner', orgId],
+    queryKey: CAPITAL_QUERY_KEYS.contactsForPartner(orgId || ''),
     queryFn: async () => {
       if (!orgId) return [];
       
@@ -94,7 +94,7 @@ export function CapitalParticipantForm({
   });
 
   const { data: existingPartner, isLoading: partnerLoading } = useQuery({
-    queryKey: ['partner', partnerId],
+    queryKey: CAPITAL_QUERY_KEYS.partner(partnerId || ''),
     queryFn: async () => {
       if (!partnerId) return null;
       
@@ -111,7 +111,7 @@ export function CapitalParticipantForm({
   });
 
   const { data: existingPartnerContactIds = [] } = useQuery<string[]>({
-    queryKey: ['partner-contact-ids', orgId],
+    queryKey: CAPITAL_QUERY_KEYS.partnerContactIds(orgId || ''),
     queryFn: async () => {
       if (!orgId) return [];
       
@@ -168,7 +168,7 @@ export function CapitalParticipantForm({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.participants(orgId || '') });
-      queryClient.invalidateQueries({ queryKey: ['partners'] });
+      queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.partnerContactIds(orgId || '') });
       toast({
         title: 'Socio agregado',
         description: 'El socio ha sido agregado correctamente',
@@ -204,7 +204,7 @@ export function CapitalParticipantForm({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.participants(orgId || '') });
-      queryClient.invalidateQueries({ queryKey: ['partners'] });
+      queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.partnerContactIds(orgId || '') });
       toast({
         title: 'Socio actualizado',
         description: 'Los datos del socio han sido actualizados',
