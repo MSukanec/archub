@@ -21,8 +21,13 @@ import {
   usePartnerWithdrawals,
   useDeletePartnerContribution,
   useDeletePartnerWithdrawal,
+  useCapitalAdjustments,
+  useDeleteCapitalAdjustment,
+  mergeCapitalMovements,
   type PartnerContribution,
   type PartnerWithdrawal,
+  type CapitalAdjustment,
+  type LedgerEntry,
 } from '@/features/capital';
 import { PaymentStatusBadge, type PaymentStatus } from '@/components/shared/PaymentStatusBadge';
 
@@ -31,7 +36,7 @@ interface CapitalTransactionsViewProps {
   getAffectedIdsForIssue?: (issueId: string) => Set<string>;
 }
 
-type TransactionType = 'contribution' | 'withdrawal';
+type TransactionType = 'contribution' | 'withdrawal' | 'adjustment';
 
 interface UnifiedTransaction {
   id: string;
@@ -41,13 +46,15 @@ interface UnifiedTransaction {
   wallet_name: string | null;
   date: string;
   amount: number;
+  signedAmount: number;
   currency_symbol: string;
   currency_id: string;
   exchange_rate: number | null;
   status: 'confirmed' | 'pending' | 'rejected' | 'void';
   notes: string | null;
   reference: string | null;
-  original: PartnerContribution | PartnerWithdrawal;
+  reason?: string;
+  original: PartnerContribution | PartnerWithdrawal | CapitalAdjustment;
   linkedUser?: { avatar_url?: string | null } | null;
 }
 
@@ -71,56 +78,61 @@ export function CapitalTransactionsView({
 
   const { data: contributions = [], isLoading: loadingContributions } = usePartnerContributions(organizationId);
   const { data: withdrawals = [], isLoading: loadingWithdrawals } = usePartnerWithdrawals(organizationId);
+  const { data: adjustments = [], isLoading: loadingAdjustments } = useCapitalAdjustments(organizationId);
   const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
   const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
   const { data: partners = [], isLoading: loadingPartners } = usePartners(organizationId, { enabled: !!organizationId });
 
   const deleteContributionMutation = useDeletePartnerContribution();
   const deleteWithdrawalMutation = useDeletePartnerWithdrawal();
+  const deleteAdjustmentMutation = useDeleteCapitalAdjustment();
 
-  const isLoading = loadingContributions || loadingWithdrawals || loadingPartners;
+  const isLoading = loadingContributions || loadingWithdrawals || loadingAdjustments || loadingPartners;
 
   const transactions = useMemo<UnifiedTransaction[]>(() => {
-    const contributionItems: UnifiedTransaction[] = contributions.map((c) => ({
-      id: c.id,
-      type: 'contribution' as TransactionType,
-      partner_id: c.partner_id,
-      partner_name: formatPartnerName(c.partner),
-      wallet_name: (c as any).organization_wallet?.wallets?.name || null,
-      date: c.contribution_date,
-      amount: c.amount,
-      currency_symbol: c.currency?.symbol || '$',
-      currency_id: c.currency_id,
-      exchange_rate: c.exchange_rate || null,
-      status: c.status,
-      notes: c.notes,
-      reference: c.reference,
-      original: c,
-    }));
+    // Use mergeCapitalMovements to unify all 3 types
+    const ledger = mergeCapitalMovements(contributions, withdrawals, adjustments);
 
-    const withdrawalItems: UnifiedTransaction[] = withdrawals.map((w) => ({
-      id: w.id,
-      type: 'withdrawal' as TransactionType,
-      partner_id: w.partner_id,
-      partner_name: formatPartnerName(w.partner),
-      wallet_name: (w as any).organization_wallet?.wallets?.name || null,
-      date: w.withdrawal_date,
-      amount: w.amount,
-      currency_symbol: w.currency?.symbol || '$',
-      currency_id: w.currency_id,
-      exchange_rate: w.exchange_rate || null,
-      status: w.status,
-      notes: w.notes,
-      reference: w.reference,
-      original: w,
-    }));
+    return ledger.map((entry: LedgerEntry) => {
+      let date = '';
+      let wallet_name = null;
+      let reference = '';
+      let reason = '';
 
-    return [...contributionItems, ...withdrawalItems].sort((a, b) => {
-      const dateComparison = new Date(b.date).getTime() - new Date(a.date).getTime();
-      if (dateComparison !== 0) return dateComparison;
-      return new Date(b.original.created_at).getTime() - new Date(a.original.created_at).getTime();
+      if (entry.type === 'contribution') {
+        date = entry.contribution_date;
+        wallet_name = (entry as any).organization_wallet?.wallets?.name || null;
+        reference = entry.reference || '';
+      } else if (entry.type === 'withdrawal') {
+        date = entry.withdrawal_date;
+        wallet_name = (entry as any).organization_wallet?.wallets?.name || null;
+        reference = entry.reference || '';
+      } else {
+        date = entry.adjustment_date;
+        reference = entry.reference || '';
+        reason = entry.reason || '';
+      }
+
+      return {
+        id: entry.id,
+        type: entry.type,
+        partner_id: entry.partner_id,
+        partner_name: formatPartnerName(entry.partner),
+        wallet_name,
+        date,
+        amount: Math.abs(entry.signedAmount),
+        signedAmount: entry.signedAmount,
+        currency_symbol: entry.currency?.symbol || '$',
+        currency_id: entry.currency_id,
+        exchange_rate: entry.exchange_rate || null,
+        status: entry.status,
+        notes: entry.notes || null,
+        reference,
+        reason,
+        original: entry,
+      };
     });
-  }, [contributions, withdrawals]);
+  }, [contributions, withdrawals, adjustments]);
 
   const transactionsWithLinkedUser = useMemo(() => {
     return transactions.map(transaction => {
@@ -150,7 +162,7 @@ export function CapitalTransactionsView({
         .map(t => ({
           amount: t.amount,
           currency_id: t.currency_id,
-          currency: { id: t.currency_id, code: t.original.currency?.code, symbol: t.currency_symbol },
+          currency: { id: t.currency_id, code: (t.original as any).currency?.code, symbol: t.currency_symbol },
           exchange_rate: t.exchange_rate
         })),
       baseCurrencyId: defaultCurrency?.code,
@@ -163,14 +175,27 @@ export function CapitalTransactionsView({
         .map(t => ({
           amount: t.amount,
           currency_id: t.currency_id,
-          currency: { id: t.currency_id, code: t.original.currency?.code, symbol: t.currency_symbol },
+          currency: { id: t.currency_id, code: (t.original as any).currency?.code, symbol: t.currency_symbol },
           exchange_rate: t.exchange_rate
         })),
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol
     });
 
-    const netBalance = contributionsKPI.value - withdrawalsKPI.value;
+    const adjustmentsKPI = calculateMonetaryKPI({
+      items: confirmedTransactions
+        .filter(t => t.type === 'adjustment')
+        .map(t => ({
+          amount: Math.abs(t.signedAmount),
+          currency_id: t.currency_id,
+          currency: { id: t.currency_id, code: (t.original as any).currency?.code, symbol: t.currency_symbol },
+          exchange_rate: t.exchange_rate
+        })),
+      baseCurrencyId: defaultCurrency?.code,
+      symbol: defaultCurrency?.symbol
+    });
+
+    const netBalance = contributionsKPI.value - withdrawalsKPI.value + adjustmentsKPI.value;
     const netBalanceKPI = {
       ...contributionsKPI,
       value: netBalance,
@@ -180,6 +205,7 @@ export function CapitalTransactionsView({
     return {
       contributions_kpi: contributionsKPI,
       withdrawals_kpi: withdrawalsKPI,
+      adjustments_kpi: adjustmentsKPI,
       net_balance_kpi: netBalanceKPI,
     };
   }, [transactions, defaultCurrency]);
@@ -195,10 +221,16 @@ export function CapitalTransactionsView({
         contributionId: transaction.id,
         mode: 'edit',
       });
-    } else {
+    } else if (transaction.type === 'withdrawal') {
       openModal('partner-withdrawal', {
         organizationId,
         withdrawalId: transaction.id,
+        mode: 'edit',
+      });
+    } else if (transaction.type === 'adjustment') {
+      openModal('capital-adjustment', {
+        organizationId,
+        adjustmentId: transaction.id,
         mode: 'edit',
       });
     }
@@ -209,9 +241,9 @@ export function CapitalTransactionsView({
       return;
     }
 
-    const typeLabel = transaction.type === 'contribution' ? 'aporte' : 'retiro';
+    const typeLabel = transaction.type === 'contribution' ? 'aporte' : transaction.type === 'withdrawal' ? 'retiro' : 'ajuste';
     const formattedAmount = `${transaction.currency_symbol} ${transaction.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    const itemLabel = `${transaction.partner_name} - ${formattedAmount}`;
+    const itemLabel = `${transaction.partner_name || transaction.reason || 'Ajuste'} - ${formattedAmount}`;
 
     showDeleteConfirmation({
       mode: 'simple',
@@ -225,14 +257,19 @@ export function CapitalTransactionsView({
             contributionId: transaction.id,
             organizationId,
           });
-        } else {
+        } else if (transaction.type === 'withdrawal') {
           deleteWithdrawalMutation.mutate({
             withdrawalId: transaction.id,
             organizationId,
           });
+        } else {
+          deleteAdjustmentMutation.mutate({
+            adjustmentId: transaction.id,
+            organizationId,
+          });
         }
       },
-      isLoading: deleteContributionMutation.isPending || deleteWithdrawalMutation.isPending,
+      isLoading: deleteContributionMutation.isPending || deleteWithdrawalMutation.isPending || deleteAdjustmentMutation.isPending,
     });
   };
 
@@ -268,10 +305,15 @@ export function CapitalTransactionsView({
               <ArrowDownCircle className="h-4 w-4 text-[var(--positive)]" />
               <span className="text-sm">Aporte</span>
             </>
-          ) : (
+          ) : item.type === 'withdrawal' ? (
             <>
               <ArrowUpCircle className="h-4 w-4 text-[var(--negative)]" />
               <span className="text-sm">Retiro</span>
+            </>
+          ) : (
+            <>
+              <Receipt className="h-4 w-4 text-[var(--neutral)]" />
+              <span className="text-sm">Ajuste</span>
             </>
           )}
         </div>
@@ -317,8 +359,16 @@ export function CapitalTransactionsView({
       sortType: 'number' as const,
       render: (item: UnifiedTransaction) => (
         <div className="flex flex-col items-end">
-          <span className={`text-sm font-medium ${item.type === 'contribution' ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-            {item.type === 'contribution' ? '+' : '-'}{item.currency_symbol} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          <span className={`text-sm font-medium ${
+            item.type === 'contribution' 
+              ? 'text-[var(--positive)]' 
+              : item.type === 'withdrawal' 
+              ? 'text-[var(--negative)]'
+              : item.signedAmount >= 0 
+              ? 'text-[var(--positive)]' 
+              : 'text-[var(--negative)]'
+          }`}>
+            {item.signedAmount >= 0 ? '+' : '-'}{item.currency_symbol} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
           {isMultiCurrency && item.exchange_rate != null && (
             <span className="text-xs text-muted-foreground">
@@ -378,7 +428,7 @@ export function CapitalTransactionsView({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard data-testid="card-total-contributions">
           <StatCardTitle showArrow={false}>
             <TrendingUp className="h-4 w-4" />
@@ -412,6 +462,24 @@ export function CapitalTransactionsView({
             {metrics.withdrawals_kpi.breakdown && metrics.withdrawals_kpi.breakdown.length > 0
               ? kpiFormatBreakdown(metrics.withdrawals_kpi)
               : 'Sin retiros confirmados'}
+          </StatCardMeta>
+        </StatCard>
+
+        <StatCard data-testid="card-total-adjustments">
+          <StatCardTitle showArrow={false}>
+            <Receipt className="h-4 w-4" />
+            Ajustes
+          </StatCardTitle>
+          <StatCardValue className={metrics.adjustments_kpi.value >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}>
+            {metrics.adjustments_kpi.breakdown && metrics.adjustments_kpi.breakdown.length > 0
+              ? formatMoneyAmount(metrics.adjustments_kpi.value, metrics.adjustments_kpi.breakdown[0].currencySymbol)
+              : formatKPI(metrics.adjustments_kpi.value)
+            }
+          </StatCardValue>
+          <StatCardMeta>
+            {metrics.adjustments_kpi.breakdown && metrics.adjustments_kpi.breakdown.length > 0
+              ? kpiFormatBreakdown(metrics.adjustments_kpi)
+              : 'Sin ajustes confirmados'}
           </StatCardMeta>
         </StatCard>
 
@@ -461,10 +529,12 @@ export function CapitalTransactionsView({
               <div className="flex items-center gap-2">
                 {item.type === 'contribution' ? (
                   <ArrowDownCircle className="h-5 w-5 text-[var(--positive)]" />
-                ) : (
+                ) : item.type === 'withdrawal' ? (
                   <ArrowUpCircle className="h-5 w-5 text-[var(--negative)]" />
+                ) : (
+                  <Receipt className="h-5 w-5 text-[var(--neutral)]" />
                 )}
-                <span className="font-medium">{item.type === 'contribution' ? 'Aporte' : 'Retiro'}</span>
+                <span className="font-medium">{item.type === 'contribution' ? 'Aporte' : item.type === 'withdrawal' ? 'Retiro' : 'Ajuste'}</span>
               </div>
               <PaymentStatusBadge status={item.status as PaymentStatus} />
             </div>
@@ -474,8 +544,16 @@ export function CapitalTransactionsView({
             </div>
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                <span className={`text-lg font-bold ${item.type === 'contribution' ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
-                  {item.type === 'contribution' ? '+' : '-'}{item.currency_symbol} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <span className={`text-lg font-bold ${
+                  item.type === 'contribution' 
+                    ? 'text-[var(--positive)]' 
+                    : item.type === 'withdrawal' 
+                    ? 'text-[var(--negative)]'
+                    : item.signedAmount >= 0 
+                    ? 'text-[var(--positive)]' 
+                    : 'text-[var(--negative)]'
+                }`}>
+                  {item.signedAmount >= 0 ? '+' : '-'}{item.currency_symbol} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
                 {isMultiCurrency && item.exchange_rate != null && (
                   <span className="text-xs text-muted-foreground">

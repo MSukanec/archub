@@ -1,12 +1,17 @@
 export * from './services/getCapitalParticipants';
 export * from './services/getPartnerContributions';
 export * from './services/getPartnerWithdrawals';
+export * from './services/getCapitalAdjustments';
 export * from './services/createPartnerContribution';
 export * from './services/createPartnerWithdrawal';
+export * from './services/createCapitalAdjustment';
 export * from './services/updatePartnerContribution';
 export * from './services/updatePartnerWithdrawal';
+export * from './services/updateCapitalAdjustment';
 export * from './services/deletePartnerContribution';
 export * from './services/deletePartnerWithdrawal';
+export * from './services/deleteCapitalAdjustment';
+export { mergeCapitalMovements } from './services/mergeCapitalMovements';
 
 export * from './hooks';
 
