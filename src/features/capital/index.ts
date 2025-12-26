@@ -18,11 +18,13 @@ export * from './hooks';
 export { CapitalParticipantForm } from './forms/CapitalParticipantForm';
 export { PartnerContributionForm } from './forms/PartnerContributionForm';
 export { PartnerWithdrawalForm } from './forms/PartnerWithdrawalForm';
+export { CapitalAdjustmentForm } from './forms/CapitalAdjustmentForm';
 
 export { CapitalParticipantModal } from './modals/CapitalParticipantModal';
 export { PartnerContributionModal } from './modals/PartnerContributionModal';
 export { PartnerWithdrawalModal } from './modals/PartnerWithdrawalModal';
 export { CapitalTransactionModal } from './modals/CapitalTransactionModal';
+export { CapitalAdjustmentModal } from './modals/CapitalAdjustmentModal';
 
 export * from './views';
 

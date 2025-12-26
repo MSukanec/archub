@@ -1,13 +1,14 @@
 import { useRef, useState } from 'react'
-import { TrendingUp, TrendingDown, Wallet } from 'lucide-react'
+import { TrendingUp, TrendingDown, Wallet, Receipt } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { PartnerContributionForm } from '../forms/PartnerContributionForm'
 import { PartnerWithdrawalForm } from '../forms/PartnerWithdrawalForm'
+import { CapitalAdjustmentForm } from '../forms/CapitalAdjustmentForm'
 
-type TransactionType = 'contribution' | 'withdrawal'
+type TransactionType = 'contribution' | 'withdrawal' | 'adjustment'
 
 interface TransactionTypeConfig {
   id: TransactionType
@@ -34,6 +35,14 @@ const TRANSACTION_TYPES: TransactionTypeConfig[] = [
     icon: TrendingDown,
     color: 'text-[var(--negative)]',
     submitLabel: 'Registrar Retiro',
+  },
+  {
+    id: 'adjustment',
+    label: 'Ajuste de Capital',
+    description: 'Registrar ajuste positivo o negativo',
+    icon: Receipt,
+    color: 'text-[var(--neutral)]',
+    submitLabel: 'Registrar Ajuste',
   },
 ]
 
@@ -77,6 +86,8 @@ export function CapitalTransactionModal({ modalData, onClose }: CapitalTransacti
         return <PartnerContributionForm {...commonProps} />
       case 'withdrawal':
         return <PartnerWithdrawalForm {...commonProps} />
+      case 'adjustment':
+        return <CapitalAdjustmentForm {...commonProps} />
       default:
         return null
     }

@@ -1,7 +1,7 @@
 import { registerModal, ModalConfig } from './registry';
 
 import { InviteMemberModal, AdminOrganizationModal, MemberActionConfirmationModal, UpgradeModal } from '@/features/organization';
-import { CapitalParticipantModal, PartnerContributionModal, PartnerWithdrawalModal, CapitalTransactionModal } from '@/features/capital';
+import { CapitalParticipantModal, PartnerContributionModal, PartnerWithdrawalModal, CapitalTransactionModal, CapitalAdjustmentModal } from '@/features/capital';
 import { ProjectModal } from '@/features/projects';
 import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, ProfileOrganizationFormModal, MemberFormModal } from '@/features/legacy';
 import { ContactModal } from '@/features/contacts/modals/ContactModal';
@@ -154,6 +154,20 @@ export function initializeModalRegistry(): void {
         organizationId: data?.organizationId,
       },
     })
+  });
+  registerModal('capital-adjustment', CapitalAdjustmentModal as any, {
+    ...financeConfig,
+    mapDataToProps: (data) => {
+      const adjustmentId = data?.adjustmentId;
+      return {
+        modalData: {
+          projectId: data?.projectId,
+          organizationId: data?.organizationId,
+          adjustmentId,
+        },
+        mode: adjustmentId ? (data?.mode || 'edit') : (data?.mode || 'create')
+      };
+    }
   });
   registerModal('board', BoardFormModal as any, organizationConfig);
   registerModal('card', CardFormModal as any, organizationConfig);
