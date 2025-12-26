@@ -17,15 +17,25 @@ export {
 } from './services';
 
 // Modals
-export { UserModal } from './modals/UserModal';
-export { NotificationModal } from './modals/NotificationModal';
-export { SupportConversationStartModal } from './modals/SupportConversationStartModal';
-export { AnnouncementModal } from './modals/AnnouncementModal';
-export { ChangelogModal } from './modals/ChangelogModal';
-export { default as ResetTestDataModal } from './modals/ResetTestDataModal';
+export { AdminUserModal } from './modals/AdminUserModal';
+export { AdminNotificationModal } from './modals/AdminNotificationModal';
+export { AdminSupportConversationStartModal } from './modals/AdminSupportConversationStartModal';
+export { AdminAnnouncementModal } from './modals/AdminAnnouncementModal';
+export { AdminChangelogModal } from './modals/AdminChangelogModal';
+export { default as AdminResetTestDataModal } from './modals/AdminResetTestDataModal';
+export { AdminSupportModal } from './modals/AdminSupportModal';
+
+// Legacy aliases for backwards compatibility
+export { AdminUserModal as UserModal } from './modals/AdminUserModal';
+export { AdminNotificationModal as NotificationModal } from './modals/AdminNotificationModal';
+export { AdminSupportConversationStartModal as SupportConversationStartModal } from './modals/AdminSupportConversationStartModal';
+export { AdminAnnouncementModal as AnnouncementModal } from './modals/AdminAnnouncementModal';
+export { AdminChangelogModal as ChangelogModal } from './modals/AdminChangelogModal';
+export { default as ResetTestDataModal } from './modals/AdminResetTestDataModal';
+export { AdminSupportModal as SupportModal } from './modals/AdminSupportModal';
 
 // Support Forms
-export { useSupportConversationStartForm } from './forms/SupportConversationStartForm';
+export { useSupportConversationStartForm } from './forms/AdminSupportConversationStartForm';
 
 // Organization Modals & Forms (re-export from organization)
 export { PlanModal, PlanUpgradeModal, DowngradeModal, InvitationModal, UpgradeModal } from '@/features/organization';
@@ -37,9 +47,6 @@ export { AuthAdmin } from './components/AuthAdmin';
 // Notification Components
 export { NotificationBell } from './components/NotificationBell';
 export { NotificationDropdown } from './components/NotificationDropdown';
-
-// Support Components
-export { SupportModal } from './modals/SupportModal';
 
 // Plan Components (re-export from organization)
 export { default as PlanBadge } from '@/features/organization/components/PlanBadge';

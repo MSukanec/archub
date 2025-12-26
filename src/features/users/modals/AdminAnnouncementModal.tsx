@@ -1,6 +1,6 @@
 import { Bell } from 'lucide-react'
 import { FormModalHeader, FormModalFooter, FormModalLayout } from '@/components/modal'
-import { FormPanel, ViewPanel, useAnnouncementForm, type Announcement } from '../forms/AnnouncementForm'
+import { FormPanel, ViewPanel, useAnnouncementForm, type Announcement } from '../forms/AdminAnnouncementForm'
 
 interface AnnouncementModalProps {
   modalData?: {
@@ -10,7 +10,7 @@ interface AnnouncementModalProps {
   onClose: () => void
 }
 
-export function AnnouncementModal({ modalData, onClose }: AnnouncementModalProps) {
+export function AdminAnnouncementModal({ modalData, onClose }: AnnouncementModalProps) {
   const { announcement } = modalData || {}
 
   const {

@@ -1,6 +1,6 @@
 import { Bell } from 'lucide-react'
 import { FormModalHeader, FormModalFooter, FormModalLayout } from '@/components/modal'
-import { FormPanel, ViewPanel, useNotificationForm, Notification } from '../forms/NotificationForm'
+import { FormPanel, ViewPanel, useNotificationForm, Notification } from '../forms/AdminNotificationForm'
 
 interface NotificationModalProps {
   modalData?: {
@@ -10,7 +10,7 @@ interface NotificationModalProps {
   onClose: () => void
 }
 
-export function NotificationModal({ modalData, onClose }: NotificationModalProps) {
+export function AdminNotificationModal({ modalData, onClose }: NotificationModalProps) {
   const { notification } = modalData || {}
 
   const {

@@ -1,31 +1,31 @@
-import { User } from 'lucide-react'
+import { FileText } from 'lucide-react'
 import { FormModalHeader, FormModalFooter, FormModalLayout } from '@/components/modal'
-import { FormPanel, ViewPanel, useUserForm } from '../forms/UserForm'
+import { FormPanel, ViewPanel, useChangelogForm, ChangelogEntry } from '../forms/AdminChangelogForm'
 
-interface UserModalProps {
+interface ChangelogModalProps {
   modalData?: {
-    user?: any
+    entry?: ChangelogEntry
     isEditing?: boolean
   }
   onClose: () => void
 }
 
-export function UserModal({ modalData, onClose }: UserModalProps) {
-  const { user } = modalData || {}
+export function AdminChangelogModal({ modalData, onClose }: ChangelogModalProps) {
+  const { entry } = modalData || {}
 
   const {
     form,
     onSubmit,
     isSubmitting,
-  } = useUserForm({
-    user,
+  } = useChangelogForm({
+    entry,
     onSuccess: onClose,
   })
 
   const headerContent = (
     <FormModalHeader 
-      title="Editar Usuario"
-      icon={User}
+      title={entry ? 'Editar Entrada del Changelog' : 'Nueva Entrada del Changelog'}
+      icon={FileText}
     />
   )
 
@@ -33,7 +33,7 @@ export function UserModal({ modalData, onClose }: UserModalProps) {
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel="Guardar Cambios"
+      rightLabel={entry ? 'Actualizar' : 'Crear Entrada'}
       onRightClick={form.handleSubmit(onSubmit)}
       isSubmitting={isSubmitting}
     />
@@ -42,7 +42,7 @@ export function UserModal({ modalData, onClose }: UserModalProps) {
   return (
     <FormModalLayout
       columns={1}
-      viewPanel={<ViewPanel user={user} />}
+      viewPanel={<ViewPanel entry={entry} />}
       editPanel={<FormPanel form={form} />}
       headerContent={headerContent}
       footerContent={footerContent}

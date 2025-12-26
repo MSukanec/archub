@@ -25,7 +25,7 @@ import { SidebarIconButton } from "./SidebarIconButton";
 import { PlanBadge } from "@/features/organization";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { NotificationDropdown } from "@/features/users";
-import { SupportModal } from "@/features/users";
+import { AdminSupportModal as SupportModal } from "@/features/users";
 import { getUnreadCount, subscribeUserNotifications } from '@/lib/notifications';
 import { 
   Settings, 

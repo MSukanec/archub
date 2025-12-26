@@ -4,7 +4,7 @@
 
 import { Headphones } from 'lucide-react'
 import { FormModalLayout, FormModalHeader } from '@/components/modal'
-import { ChatPanel, FooterPanel, useSupportChat } from '../forms/SupportForm'
+import { ChatPanel, FooterPanel, useSupportChat } from '../forms/AdminSupportForm'
 
 interface SupportModalProps {
   open: boolean
@@ -14,7 +14,7 @@ interface SupportModalProps {
   userAvatarUrl?: string
 }
 
-export function SupportModal({ open, onOpenChange, userId, userFullName, userAvatarUrl }: SupportModalProps) {
+export function AdminSupportModal({ open, onOpenChange, userId, userFullName, userAvatarUrl }: SupportModalProps) {
   const {
     messages,
     isLoading,

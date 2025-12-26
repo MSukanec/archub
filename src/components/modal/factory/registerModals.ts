@@ -16,7 +16,7 @@ import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConf
 import { default as PaymentFeedbackModal } from '@/components/forms/PaymentFeedbackModal';
 import { UniversalImportForm } from '@/features/imports';
 import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal, MaterialPaymentModal, PurchaseOrderForm, MaterialPurchaseForm } from '@/features/materials';
-import { UserModal, ChangelogModal, NotificationModal, AnnouncementModal, SupportConversationStartModal, PlanModal, PlanPriceFormModal, DowngradeModal, ResetTestDataModal } from '@/features/users';
+import { AdminUserModal, AdminChangelogModal, AdminNotificationModal, AdminAnnouncementModal, AdminSupportConversationStartModal, PlanModal, PlanPriceFormModal, DowngradeModal, AdminResetTestDataModal } from '@/features/users';
 import SiteLogForm from '@/features/sitelog/forms/SiteLogForm';
 import { SiteLogTypeForm } from '@/features/sitelog/forms/SiteLogTypeForm';
 import { ProjectTypeModal } from '@/features/projects/modals/ProjectTypeModal';
@@ -475,17 +475,17 @@ export function initializeModalRegistry(): void {
     }),
   });
   
-  registerModal('admin-user', UserModal as any, adminConfig);
+  registerModal('admin-user', AdminUserModal as any, adminConfig);
   registerModal('admin-organization', OrganizationModal as any, { ...adminConfig, size: 'lg' });
-  registerModal('changelog-entry', ChangelogModal as any, adminConfig);
-  registerModal('notification', NotificationModal as any, adminConfig);
-  registerModal('announcement', AnnouncementModal as any, adminConfig);
-  registerModal('support-conversation-start', SupportConversationStartModal as any, adminConfig);
+  registerModal('changelog-entry', AdminChangelogModal as any, adminConfig);
+  registerModal('notification', AdminNotificationModal as any, adminConfig);
+  registerModal('announcement', AdminAnnouncementModal as any, adminConfig);
+  registerModal('support-conversation-start', AdminSupportConversationStartModal as any, adminConfig);
   registerModal('plan', PlanModal as any, adminConfig);
   registerModal('plan-price', PlanPriceFormModal as any, adminConfig);
   registerModal('downgrade', DowngradeModal as any, adminConfig);
   registerModal('upgrade', UpgradeModal as any, adminConfig);
-  registerModal('reset-test-data', ResetTestDataModal as any, { ...adminConfig, size: 'md' });
+  registerModal('reset-test-data', AdminResetTestDataModal as any, { ...adminConfig, size: 'md' });
   
   registerModal('pdf-exporter', PDFExporterModal as any, { ...generalConfig, size: 'full' });
   
