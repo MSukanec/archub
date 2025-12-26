@@ -17,6 +17,8 @@ export interface HorizontalBarChartProps {
   barSize?: number
   showZeroLine?: boolean
   colorByValue?: boolean
+  colorPositive?: string
+  colorNegative?: string
   yAxisWidth?: number
 }
 
@@ -30,6 +32,8 @@ export function HorizontalBarChart({
   barSize = CHART_SHAPES.bar.barSize,
   showZeroLine = true,
   colorByValue = true,
+  colorPositive = '#b3cc00',
+  colorNegative = '#e64c4c',
   yAxisWidth = 80,
 }: HorizontalBarChartProps) {
   if (isLoading) {
@@ -95,12 +99,21 @@ export function HorizontalBarChart({
             radius={[0, 4, 4, 0]}
             barSize={barSize}
           >
-            {data.map((entry, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={entry.color || (colorByValue ? getValueColor(entry.value) : CHART_COLORS.palette[0])}
-              />
-            ))}
+            {data.map((entry, index) => {
+              let barColor = entry.color;
+              if (!barColor && colorByValue) {
+                barColor = entry.value >= 0 ? colorPositive : colorNegative;
+              }
+              if (!barColor) {
+                barColor = CHART_COLORS.palette[0];
+              }
+              return (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={barColor}
+                />
+              );
+            })}
           </Bar>
         </BarChart>
       </ResponsiveContainer>

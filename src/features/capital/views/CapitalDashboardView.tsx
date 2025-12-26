@@ -675,13 +675,13 @@ export function CapitalDashboardView({
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[...Array(3)].map((_, i) => (
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+          {[...Array(6)].map((_, i) => (
             <Skeleton key={i} className="h-32" />
           ))}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[...Array(3)].map((_, i) => (
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+          {[...Array(6)].map((_, i) => (
             <Skeleton key={`row2-${i}`} className="h-24" />
           ))}
         </div>
@@ -732,7 +732,7 @@ export function CapitalDashboardView({
   return (
     <div className="space-y-6">
       {/* Row 1: Core Capital Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <StatCard 
           data-testid="kpi-net-capital"
           onClick={onNavigateToBalances}
@@ -809,7 +809,7 @@ export function CapitalDashboardView({
       </div>
 
       {/* Row 2: Capital Health Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <StatCard 
           data-testid="kpi-total-deviation"
           onClick={onNavigateToBalances}
@@ -923,6 +923,8 @@ export function CapitalDashboardView({
                 height={220}
                 valueFormatter={(v) => `${currencySymbol} ${formatKPI(Math.abs(v))}`}
                 colorByValue={true}
+                colorPositive="#b3cc00"
+                colorNegative="#e64c4c"
                 showZeroLine={true}
                 yAxisWidth={120}
               />
@@ -943,8 +945,8 @@ export function CapitalDashboardView({
               <GroupedBarChart 
                 data={expectedVsRealData}
                 series={[
-                  { key: 'expected', name: 'Esperado', color: '#6b7280' },
-                  { key: 'real', name: 'Real', color: '#22c55e' }
+                  { key: 'expected', name: 'Esperado', color: '#808080' },
+                  { key: 'real', name: 'Real', color: '#b3cc00' }
                 ]}
                 height={220}
                 valueFormatter={(v) => `${currencySymbol} ${formatKPI(v)}`}
