@@ -2,28 +2,33 @@ import React from 'react';
 import { Document, Page, StyleSheet } from '@react-pdf/renderer';
 import { PdfBlock } from '../types/types';
 import { pdfBlocks } from '../services/pdfService';
+
 const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
     backgroundColor: '#FFFFFF',
   },
 });
+
 interface PdfConfig {
-  pageSize: 'A4'| 'LETTER';
-  orientation: 'portrait'| 'landscape';
+  pageSize: 'A4' | 'LETTER';
+  orientation: 'portrait' | 'landscape';
   margin: number;
 }
+
 interface FooterConfig {
   text: string;
   showDivider: boolean;
 }
+
 interface TableConfig {
   titleSize: number;
   bodySize: number;
   showTableBorder: boolean;
   showRowDividers: boolean;
-  groupBy: 'fase'| 'rubro'| 'fases-y-rubros';
+  groupBy: 'fase' | 'rubro' | 'fases-y-rubros';
 }
+
 interface HeaderConfig {
   title?: string;
   subtitle?: string;
@@ -39,8 +44,9 @@ interface HeaderConfig {
   logoUrl?: string;
   logoSize?: number;
   showDivider?: boolean;
-  layout?: 'row'| 'column';
+  layout?: 'row' | 'column';
 }
+
 interface PdfDocumentProps {
   blocks: PdfBlock[];
   config?: PdfConfig;
@@ -48,6 +54,7 @@ interface PdfDocumentProps {
   tableConfig?: TableConfig;
   headerConfig?: HeaderConfig;
 }
+
 export const PdfDocument: React.FC<PdfDocumentProps> = ({ blocks, config, footerConfig, tableConfig, headerConfig }) => {
   const pageConfig = config || { pageSize: 'A4', orientation: 'portrait', margin: 20 };
   
@@ -56,6 +63,7 @@ export const PdfDocument: React.FC<PdfDocumentProps> = ({ blocks, config, footer
     ...styles.page,
     padding: pageConfig.margin,
   };
+
   return (
     <Document>
       <Page 
@@ -73,16 +81,16 @@ export const PdfDocument: React.FC<PdfDocumentProps> = ({ blocks, config, footer
           let blockData = block.data;
           let blockConfig = block.config;
           
-          if (block.type === 'footer'&& footerConfig) {
+          if (block.type === 'footer' && footerConfig) {
             blockData = { ...block.data, text: footerConfig.text, showDivider: footerConfig.showDivider };
           }
           
-          if (block.type === 'header'&& headerConfig) {
+          if (block.type === 'header' && headerConfig) {
             blockData = { ...block.data, ...headerConfig };
             blockConfig = { ...block.config, ...headerConfig };
           }
           
-          if ((block.type === 'budgetTable'|| block.type === 'tableHeader'|| block.type === 'tableContent'|| block.type === 'totals') && tableConfig) {
+          if ((block.type === 'budgetTable' || block.type === 'tableHeader' || block.type === 'tableContent' || block.type === 'totals') && tableConfig) {
             blockData = { ...block.data, ...tableConfig };
             blockConfig = { ...block.config, ...tableConfig };
           }

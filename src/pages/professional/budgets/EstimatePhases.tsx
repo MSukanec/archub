@@ -1,6 +1,7 @@
 import { Settings } from 'lucide-react'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { PhaseOrderManager } from '@/components/shared/construction/PhaseOrderManager'
+
 interface EstimatePhasesProps {
   projectPhases: any[]
   onReorder: (reorderedPhases: any[]) => void
@@ -8,6 +9,7 @@ interface EstimatePhasesProps {
   onDelete: (phaseId: string) => void
   isUpdating: boolean
 }
+
 export function EstimatePhases({ 
   projectPhases, 
   onReorder, 
@@ -24,6 +26,7 @@ export function EstimatePhases({
       />
     )
   }
+
   return (
     <PhaseOrderManager
       phases={projectPhases}

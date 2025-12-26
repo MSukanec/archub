@@ -7,6 +7,7 @@ import { BlockedRestricted, ComingSoonCard } from "@/components/shared/restricti
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useMultipleFeatureFlags } from "@/hooks/use-feature-flags";
 import type { Plan, BillingPeriod, PricingMode } from "../types";
+
 interface PlanCardProps {
   plan: Plan;
   billingPeriod: BillingPeriod;
@@ -16,6 +17,7 @@ interface PlanCardProps {
   billableSeats?: number;
   onSelect: (plan: Plan) => void;
 }
+
 export function PlanCard({
   plan,
   billingPeriod,
@@ -49,20 +51,24 @@ export function PlanCard({
   
   const status = getStatus();
   const isMaintenanceBlocked = isDisabledByFlag && !isAdmin;
+
   const getMonthlyEquivalent = () => {
     if (billingPeriod === 'annual') {
       return (plan.annual_amount / 12).toFixed(2);
     }
     return plan.monthly_amount.toFixed(2);
   };
+
   const getTotalPrice = () => {
     if (billingPeriod === 'annual') {
       return plan.annual_amount.toFixed(2);
     }
     return plan.monthly_amount.toFixed(2);
   };
+
   const monthlyPrice = getMonthlyEquivalent();
   const totalPrice = getTotalPrice();
+
   const getButtonText = () => {
     if (isCurrentPlan) return 'Tu plan actual';
     if (!isAuthenticated) return 'Comenzar';
@@ -71,6 +77,7 @@ export function PlanCard({
   
   // Block if plan is not active (based on is_active field from database)
   const isBlocked = plan.is_active === false;
+
   const getButtonColor = () => {
     if (isCurrentPlan) return undefined;
     if (isFree) return '#84cc16';
@@ -78,6 +85,7 @@ export function PlanCard({
     if (isTeams) return '#8B5CF6';
     return undefined;
   };
+
   return (
     <ComingSoonCard status={status}>
       <div
@@ -105,6 +113,7 @@ export function PlanCard({
         )}>
           {config.cardHeader}
         </div>
+
         <div className="flex items-center gap-3">
           <Icon 
             className="h-6 w-6" 
@@ -119,6 +128,7 @@ export function PlanCard({
             {plan.name}
           </h3>
         </div>
+
         <div className="py-2">
           {isDisabledByFlag ? (
             <div className="flex items-baseline gap-1">
@@ -166,7 +176,7 @@ export function PlanCard({
                   /mes
                 </span>
               </div>
-              {billingPeriod === 'annual'&& (
+              {billingPeriod === 'annual' && (
                 <div className={cn(
                   "text-xs mt-1",
                   isPopular ? "text-gray-500" : "text-[var(--text-muted)]"
@@ -174,7 +184,7 @@ export function PlanCard({
                   USD {totalPrice} al año
                 </div>
               )}
-              {plan.billing_type === 'per_user'&& isTeams && (
+              {plan.billing_type === 'per_user' && isTeams && (
                 <>
                   <div className={cn(
                     "text-xs mt-0.5",
@@ -189,7 +199,7 @@ export function PlanCard({
                     )}>
                       Costo estimado: USD {(billableSeats * Number(monthlyPrice)).toFixed(2)}/mes
                       <span className="text-[10px] ml-1">
-                        ({billableSeats} miembro{billableSeats > 1 ? 's': ''} × ${monthlyPrice})
+                        ({billableSeats} miembro{billableSeats > 1 ? 's' : ''} × ${monthlyPrice})
                       </span>
                     </div>
                   )}
@@ -198,6 +208,7 @@ export function PlanCard({
             </>
           )}
         </div>
+
         <BlockedRestricted
           isBlocked={isBlocked && !isCurrentPlan}
           title="Plan no disponible"
@@ -218,9 +229,10 @@ export function PlanCard({
             disabled={isCurrentPlan || isMaintenanceBlocked}
             data-testid={`button-select-plan-${plan.name.toLowerCase()}`}
           >
-            {isMaintenanceBlocked ? 'En mantenimiento': getButtonText()}
+            {isMaintenanceBlocked ? 'En mantenimiento' : getButtonText()}
           </Button>
         </BlockedRestricted>
+
         <div className="space-y-3 pt-4 border-t border-white/10">
           <div className={cn(
             "text-[10px] font-bold uppercase tracking-wider",
@@ -248,12 +260,13 @@ export function PlanCard({
             })}
           </div>
         </div>
+
         <div className="space-y-3 pt-4 border-t border-white/10">
           <div className={cn(
             "text-[10px] font-bold uppercase tracking-wider",
             isPopular ? "text-gray-500" : "text-[var(--text-muted)]"
           )}>
-            {plan.name.toLowerCase() === 'free'? 'Incluye': `Todo en ${plan.name.toLowerCase() === 'pro'? 'Free': 'Pro'}, más:`}
+            {plan.name.toLowerCase() === 'free' ? 'Incluye' : `Todo en ${plan.name.toLowerCase() === 'pro' ? 'Free' : 'Pro'}, más:`}
           </div>
           <ul className="space-y-2.5">
             {config.features.map((feature, idx) => (

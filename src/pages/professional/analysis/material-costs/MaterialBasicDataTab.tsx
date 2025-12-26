@@ -1,6 +1,7 @@
 import { Calendar, User, Package, Ruler, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { FormSubsectionButton } from '@/components/modal';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -8,10 +9,12 @@ import { useGlobalModalStore } from '@/components/modal';
 import { useLocation } from 'wouter';
 import { useDeleteMaterial } from '@/features/materials';
 import { Badge } from '@/components/ui/badge';
+
 interface MaterialBasicDataTabProps {
   material: any;
   onTabChange?: (tab: string) => void;
 }
+
 export function MaterialBasicDataTab({ 
   material,
   onTabChange 
@@ -26,7 +29,7 @@ export function MaterialBasicDataTab({
   // Determinar si el usuario puede editar este material
   // ADMIN: puede editar todo (sistema y organización)
   // Usuario normal: solo puede editar materiales de su organización (no sistema)
-  const canEdit = userData?.role?.name === 'Administrador'|| !isSystemMaterial;
+  const canEdit = userData?.role?.name === 'Administrador' || !isSystemMaterial;
   
   // Función para eliminar material
   const handleDeleteMaterial = () => {
@@ -47,6 +50,7 @@ export function MaterialBasicDataTab({
       }
     });
   };
+
   return (
     <div className="space-y-6">
       {/* Cards principales */}
@@ -70,11 +74,11 @@ export function MaterialBasicDataTab({
                       <Badge 
                         variant={isSystemMaterial ? "default" : "secondary"}
                         className={`text-xs ${isSystemMaterial 
-                          ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90'
+                          ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
                           : 'bg-[var(--accent-2)] text-white hover:bg-[var(--accent-2)]/90'
                         }`}
                       >
-                        {isSystemMaterial ? 'Sistema': 'Organización'}
+                        {isSystemMaterial ? 'Sistema' : 'Organización'}
                       </Badge>
                     </div>
                   </div>
@@ -92,11 +96,13 @@ export function MaterialBasicDataTab({
                   </div>
                 )}
               </div>
+
               {/* Nombre del Material */}
               <div className="p-3 rounded-lg bg-muted/30">
                 <p className="text-sm font-medium mb-2">Nombre</p>
                 <p className="text-sm text-muted-foreground">{material.name}</p>
               </div>
+
               {/* Categoría */}
               {material.category_name && (
                 <div className="p-3 rounded-lg bg-muted/30">
@@ -104,6 +110,7 @@ export function MaterialBasicDataTab({
                   <p className="text-sm text-muted-foreground">{material.category_name}</p>
                 </div>
               )}
+
               {/* Tipo de Material */}
               {material.material_type && (
                 <div className="p-3 rounded-lg bg-muted/30">
@@ -111,6 +118,7 @@ export function MaterialBasicDataTab({
                   <p className="text-sm text-muted-foreground">{material.material_type}</p>
                 </div>
               )}
+
               {/* Unidad de Cómputo */}
               <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                 <Ruler className="h-4 w-4 text-muted-foreground" />
@@ -124,6 +132,7 @@ export function MaterialBasicDataTab({
             </div>
           </CardContent>
         </Card>
+
         {/* Card derecha - Información de Precios */}
         <Card className="h-full flex flex-col">
           <CardHeader 
@@ -142,6 +151,7 @@ export function MaterialBasicDataTab({
                   </p>
                 </div>
               )}
+
               {/* Rango de Precios */}
               {(material.min_price !== null || material.max_price !== null) && (
                 <div className="grid grid-cols-2 gap-3">
@@ -163,15 +173,17 @@ export function MaterialBasicDataTab({
                   )}
                 </div>
               )}
+
               {/* Contador de Productos */}
               {material.product_count !== null && material.product_count !== undefined && (
                 <div className="p-3 rounded-lg bg-muted/30">
                   <p className="text-sm font-medium mb-2">Productos Asociados</p>
                   <p className="text-lg font-semibold">
-                    {material.product_count} producto{material.product_count !== 1 ? 's': ''}
+                    {material.product_count} producto{material.product_count !== 1 ? 's' : ''}
                   </p>
                 </div>
               )}
+
               {/* Botón Eliminar material al final - Solo si puede editar */}
               {canEdit && (
                 <div className="mt-6 pt-3 border-t">

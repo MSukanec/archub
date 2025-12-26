@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { OrganizationWallet } from '../types';
+
 /**
  * Obtiene todas las billeteras activas de una organización con sus relaciones.
  * 

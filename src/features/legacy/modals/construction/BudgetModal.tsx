@@ -23,6 +23,7 @@ import { CalendarIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 // Removed navigationStore import - using userData.preferences.last_project_id instead;
+
 const budgetSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
@@ -32,7 +33,9 @@ const budgetSchema = z.object({
   exchange_rate: z.number().optional(),
   created_at: z.date()
 });
+
 type BudgetFormData = z.infer<typeof budgetSchema>;
+
 interface BudgetFormModalProps {
   modalData?: {
     budget?: any;
@@ -41,6 +44,7 @@ interface BudgetFormModalProps {
   };
   onClose: () => void;
 }
+
 export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
   const { budget, onSuccess } = modalData || {};
   const { setPanel } = useModalPanelStore();
@@ -53,6 +57,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
   
   // Determinar si mostrar campos de moneda (más de una moneda disponible)
   const showCurrencyFields = organizationCurrencies.length > 1;
+
   const form = useForm<BudgetFormData>({
     resolver: zodResolver(budgetSchema),
     defaultValues: {
@@ -65,6 +70,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       created_at: budget?.created_at ? new Date(budget.created_at) : new Date()
     }
   });
+
   useEffect(() => {
     if (budget) {
       form.reset({
@@ -89,16 +95,19 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
     }
     setPanel('edit');
   }, [budget, form, setPanel]);
+
   const createBudgetMutation = useMutation({
     mutationFn: async (data: BudgetFormData) => {
       if (!userData?.organization?.id || !userData?.preferences?.last_project_id) {
         throw new Error('Missing required data');
       }
+
       // Find current member ID from organization members
       const currentMember = members?.find(member => member.user_id === userData.user.id)
       if (!currentMember) {
         throw new Error('No se encontró el miembro de la organización')
       }
+
       const budgetData = {
         name: data.name,
         description: data.description || null,
@@ -112,15 +121,18 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
         updated_at: new Date().toISOString(),
         created_by: currentMember.id
       };
+
       // Get the authentication token
       const { data: session } = await supabase.auth.getSession();
       if (!session.session?.access_token) {
         throw new Error('No authentication token available');
       }
+
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${session.session.access_token}`
       };
+
       if (isEditing && budget) {
         // Use server endpoint for updating
         const response = await fetch(`/api/budgets/${budget.id}`, {
@@ -128,9 +140,11 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
           headers,
           body: JSON.stringify(budgetData),
         })
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
+
         return await response.json()
       } else {
         // Use server endpoint for creating
@@ -139,9 +153,11 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
           headers,
           body: JSON.stringify(budgetData),
         })
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
+
         return await response.json()
       }
     },
@@ -173,11 +189,13 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       });
     }
   });
+
   const handleCancel = () => {
     form.reset();
     setPanel('view');
     onClose(); // CERRAR EL MODAL COMPLETAMENTE
   };
+
   const onSubmit = async (data: BudgetFormData) => {
     if (!userData?.organization?.id) {
       toast({
@@ -187,8 +205,10 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       });
       return;
     }
+
     createBudgetMutation.mutate(data);
   };
+
   const viewPanel = (
     <div className="space-y-4">
       <div>
@@ -200,32 +220,37 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
         <h4 className="font-medium">Descripción</h4>
         <p className="text-muted-foreground mt-1">{budget?.description || 'Sin descripción'}</p>
       </div>
+
       <div>
         <h4 className="font-medium">Estado</h4>
         <p className="text-muted-foreground mt-1">
-          {budget?.status === 'draft'? 'Borrador': 
-           budget?.status === 'approved'? 'Aprobado': 
-           budget?.status === 'in_progress'? 'En progreso': 
-           budget?.status === 'completed'? 'Completado': 
+          {budget?.status === 'draft' ? 'Borrador' : 
+           budget?.status === 'approved' ? 'Aprobado' : 
+           budget?.status === 'in_progress' ? 'En progreso' : 
+           budget?.status === 'completed' ? 'Completado' : 
            budget?.status || 'Sin estado'}
         </p>
       </div>
+
       <div>
         <h4 className="font-medium">Versión</h4>
         <p className="text-muted-foreground mt-1">{budget?.version || 'Sin versión'}</p>
       </div>
+
       <div>
         <h4 className="font-medium">Moneda</h4>
         <p className="text-muted-foreground mt-1">
           {organizationCurrencies?.find(oc => oc.currency.id === budget?.currency_id)?.currency?.code || 'Sin moneda'}
         </p>
       </div>
+
       {budget?.exchange_rate && (
         <div>
           <h4 className="font-medium">Tipo de cambio</h4>
           <p className="text-muted-foreground mt-1">{budget.exchange_rate}</p>
         </div>
       )}
+
       <div>
         <h4 className="font-medium">Fecha de creación</h4>
         <p className="text-muted-foreground mt-1">
@@ -234,6 +259,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       </div>
     </div>
   );
+
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -295,6 +321,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
             )}
           />
         </div>
+
         {/* Nombre */}
         <FormField
           control={form.control}
@@ -312,6 +339,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
             </FormItem>
           )}
         />
+
         {/* Descripción */}
         <FormField
           control={form.control}
@@ -331,6 +359,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
             </FormItem>
           )}
         />
+
         {/* Campos de moneda - Solo cuando hay más de una moneda */}
         {showCurrencyFields && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -358,6 +387,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="exchange_rate"
@@ -380,6 +410,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
             />
           </div>
         )}
+
         {/* Estado */}
         <FormField
           control={form.control}
@@ -407,6 +438,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       </form>
     </Form>
   );
+
   const headerContent = (
     <FormModalHeader 
       title={isEditing ? "Editar Presupuesto" : "Nuevo Presupuesto"}
@@ -414,6 +446,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       icon={Calculator}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       cancelText="Cancelar"
@@ -424,6 +457,7 @@ export function BudgetFormModal({ modalData, onClose }: BudgetFormModalProps) {
       showLoadingSpinner={createBudgetMutation.isPending}
     />
   );
+
   return (
     <FormModalLayout
       columns={1}

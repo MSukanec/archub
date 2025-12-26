@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchCourseLandingBySlug } from '../services';
 import { mapModulesWithLessons, calculateCourseStats } from '../mappers';
 import type { CourseLandingData } from '../types';
+
 /**
  * Fetch complete course landing data by slug
  * PUBLIC endpoint - no authentication required
@@ -19,6 +20,7 @@ export function useCourseLanding(slug: string) {
       );
       
       const stats = calculateCourseStats(modulesWithLessons);
+
       return {
         course: rawData.course,
         modules: modulesWithLessons,

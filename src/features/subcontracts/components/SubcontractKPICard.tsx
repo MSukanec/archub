@@ -2,6 +2,7 @@ import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { formatIntlCurrency } from '@/lib/currency-formatter'
+
 interface SubcontractKPICardProps {
   title: string
   value: number
@@ -13,6 +14,7 @@ interface SubcontractKPICardProps {
   formatter?: (value: number) => string
   currencyCode?: string
 }
+
 export function SubcontractKPICard({
   title,
   value,
@@ -36,6 +38,7 @@ export function SubcontractKPICard({
       </Card>
     )
   }
+
   return (
     <Card className="h-full relative overflow-hidden">
       <CardContent className="p-4 h-full flex flex-col">

@@ -16,52 +16,60 @@ import { useDeleteThread, type ForumThreadWithAuthor } from '../services';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import { useToast } from '@/hooks/use-toast';
+
 function getInitials(name: string): string {
   return name
-    .split('')
+    .split(' ')
     .slice(0, 2)
     .map((word) => word[0])
     .join('')
     .toUpperCase();
 }
+
 function stripHtmlTags(html: string): string {
   return html
-    .replace(/<[^>]*>/g, '')
-    .replace(/&nbsp;/g, '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/\s+/g, '')
+    .replace(/\s+/g, ' ')
     .trim();
 }
+
 interface ThreadCardProps {
   thread: ForumThreadWithAuthor;
   onClick?: () => void;
 }
+
 export function ThreadCard({ thread, onClick }: ThreadCardProps) {
   const { toast } = useToast();
   const { openModal } = useGlobalModalStore();
   const { data: currentUser } = useCurrentUser();
   const isAdmin = useIsAdmin();
   const deleteMutation = useDeleteThread();
+
   const authorName = thread.author?.full_name || 'Anónimo';
   const organizationName = thread.organization?.name;
   
-  const rawContent = typeof thread.content === 'string'
+  const rawContent = typeof thread.content === 'string' 
     ? thread.content 
     : thread.content?.text || '';
   const plainText = stripHtmlTags(rawContent);
   const contentPreview = plainText
-    ? plainText.slice(0, 150) + (plainText.length > 150 ? '...': '')
+    ? plainText.slice(0, 150) + (plainText.length > 150 ? '...' : '')
     : null;
+
   const currentUserId = currentUser?.user?.id;
   const isAuthor = currentUserId && thread.author_id === currentUserId;
   const canManage = isAuthor || isAdmin;
+
   const handleEditThread = (e: React.MouseEvent) => {
     e.stopPropagation();
-    openModal('forum-thread', { thread, mode: 'edit'});
+    openModal('forum-thread', { thread, mode: 'edit' });
   };
+
   const handleDeleteThread = (e: React.MouseEvent) => {
     e.stopPropagation();
     openModal('delete-confirmation', {
@@ -91,10 +99,11 @@ export function ThreadCard({ thread, onClick }: ThreadCardProps) {
       },
     });
   };
+
   return (
     <Card
       className={`cursor-pointer transition-all hover:shadow-md hover:border-accent/30 ${
-        thread.is_pinned ? 'border-accent/40 bg-accent/5': ''
+        thread.is_pinned ? 'border-accent/40 bg-accent/5' : ''
       }`}
       onClick={onClick}
       data-testid={`thread-card-${thread.id}`}
@@ -107,6 +116,7 @@ export function ThreadCard({ thread, onClick }: ThreadCardProps) {
               {getInitials(authorName)}
             </AvatarFallback>
           </Avatar>
+
           <div className="flex-1 min-w-0">
             {/* Row 1: Author info + time */}
             <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-1">
@@ -125,16 +135,19 @@ export function ThreadCard({ thread, onClick }: ThreadCardProps) {
                 })}
               </span>
             </div>
+
             {/* Row 2: Title */}
             <h3 className="font-semibold text-[var(--text-default)] line-clamp-1 mb-1">
               {thread.title}
             </h3>
+
             {/* Row 3: Content preview */}
             {contentPreview && (
               <p className="text-sm text-[var(--text-muted)] line-clamp-2 mb-2">
                 {contentPreview}
               </p>
             )}
+
             {/* Row 4: Badge */}
             {thread.category && (
               <Badge className="text-xs bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90">
@@ -142,6 +155,7 @@ export function ThreadCard({ thread, onClick }: ThreadCardProps) {
               </Badge>
             )}
           </div>
+
           <div className="flex flex-col items-end gap-2 text-xs text-[var(--text-muted)]">
             <div className="flex items-center gap-1" title="Respuestas">
               <MessageSquare className="h-3.5 w-3.5" />

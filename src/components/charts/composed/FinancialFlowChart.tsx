@@ -1,11 +1,13 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { CHART_AXIS, CHART_STATES, CHART_DIMENSIONS, CHART_SHAPES } from '../theme'
+
 export interface FinancialFlowDataPoint {
   label: string
   inflow: number
   outflow: number
   net: number
 }
+
 export interface FinancialFlowChartProps {
   data: FinancialFlowDataPoint[]
   height?: number
@@ -20,6 +22,7 @@ export interface FinancialFlowChartProps {
   outflowColor?: string
   netColor?: string
 }
+
 export function FinancialFlowChart({
   data,
   height = CHART_DIMENSIONS.height.lg,
@@ -41,6 +44,7 @@ export function FinancialFlowChart({
       </div>
     )
   }
+
   if (!data || data.length === 0) {
     return (
       <div style={{ height }} className={CHART_STATES.empty.className}>
@@ -48,6 +52,7 @@ export function FinancialFlowChart({
       </div>
     )
   }
+
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -79,7 +84,7 @@ export function FinancialFlowChart({
               return null
             }}
           />
-          <Legend wrapperStyle={{ fontSize: '12px'}} />
+          <Legend wrapperStyle={{ fontSize: '12px' }} />
           <Line
             type="monotone"
             dataKey="inflow"

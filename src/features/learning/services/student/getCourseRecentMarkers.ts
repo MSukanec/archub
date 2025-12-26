@@ -1,4 +1,5 @@
 import { apiRequest } from '@/lib/queryClient';
+
 /**
  * Obtiene los marcadores recientes de un curso.
  * 
@@ -16,6 +17,7 @@ export async function getCourseRecentMarkers(courseId: string): Promise<any[]> {
   if (!courseId) {
     return [];
   }
+
   const response = await apiRequest('GET', `/api/courses/${courseId}/recent-markers`);
   return await response.json();
 }

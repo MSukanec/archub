@@ -14,15 +14,19 @@
  *   type: 'text'
  * });
  */
+
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { normalizeStringValue } from './normalizeValue';
-export type FieldType = 'text'| 'textarea'| 'select'| 'toggle';
+
+export type FieldType = 'text' | 'textarea' | 'select' | 'toggle';
+
 export interface AutosaveFieldOptions<T> {
   initialValue: T;
   onSave: (value: T) => void;
   type?: FieldType;
   normalize?: boolean;
 }
+
 export interface AutosaveFieldReturn<T> {
   value: T;
   setValue: (value: T) => void;
@@ -32,6 +36,7 @@ export interface AutosaveFieldReturn<T> {
   isDirty: boolean;
   reset: (newValue: T) => void;
 }
+
 export function useAutosaveField<T>({
   initialValue,
   onSave,
@@ -42,6 +47,7 @@ export function useAutosaveField<T>({
   const [isDirty, setIsDirty] = useState(false);
   const initialValueRef = useRef<T>(initialValue);
   const isHydratedRef = useRef(false);
+
   useEffect(() => {
     if (!isHydratedRef.current) {
       setValue(initialValue);
@@ -49,6 +55,7 @@ export function useAutosaveField<T>({
       isHydratedRef.current = true;
     }
   }, [initialValue]);
+
   const normalizeValue = useCallback((val: T): T => {
     if (!normalize) return val;
     if (typeof val === 'string') {
@@ -56,6 +63,7 @@ export function useAutosaveField<T>({
     }
     return val;
   }, [normalize]);
+
   const triggerSave = useCallback(() => {
     if (!isDirty) return;
     
@@ -71,10 +79,11 @@ export function useAutosaveField<T>({
     initialValueRef.current = normalizedValue;
     setIsDirty(false);
   }, [value, isDirty, normalizeValue, onSave]);
+
   const onChange = useCallback((valueOrEvent: T | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     let newValue: T;
     
-    if (valueOrEvent && typeof valueOrEvent === 'object'&& 'target'in valueOrEvent) {
+    if (valueOrEvent && typeof valueOrEvent === 'object' && 'target' in valueOrEvent) {
       newValue = (valueOrEvent as React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>).target.value as unknown as T;
     } else {
       newValue = valueOrEvent as T;
@@ -83,8 +92,8 @@ export function useAutosaveField<T>({
     setValue(newValue);
     setIsDirty(true);
     
-    if (type === 'select'|| type === 'toggle') {
-      const normalizedValue = normalize && typeof newValue === 'string'
+    if (type === 'select' || type === 'toggle') {
+      const normalizedValue = normalize && typeof newValue === 'string' 
         ? normalizeStringValue(newValue) as unknown as T 
         : newValue;
       onSave(normalizedValue);
@@ -92,22 +101,26 @@ export function useAutosaveField<T>({
       setIsDirty(false);
     }
   }, [type, normalize, onSave]);
+
   const onBlur = useCallback(() => {
-    if (type === 'text'|| type === 'textarea') {
+    if (type === 'text' || type === 'textarea') {
       triggerSave();
     }
   }, [type, triggerSave]);
+
   const onKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter'&& type === 'text') {
+    if (e.key === 'Enter' && type === 'text') {
       e.preventDefault();
       triggerSave();
     }
   }, [type, triggerSave]);
+
   const reset = useCallback((newValue: T) => {
     setValue(newValue);
     initialValueRef.current = newValue;
     setIsDirty(false);
   }, []);
+
   return {
     value,
     setValue,

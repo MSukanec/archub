@@ -11,6 +11,7 @@ import {
   type Insurance 
 } from '@/features/personnel/services/insurances'
 import { useToast } from '@/hooks/use-toast'
+
 export const useInsuranceList = (filters: InsuranceFilters = {}) => {
   return useQuery({
     queryKey: ['insurances', filters.project_id, filters],
@@ -18,6 +19,7 @@ export const useInsuranceList = (filters: InsuranceFilters = {}) => {
     staleTime: 1000 * 60 * 5 // 5 minutes
   })
 }
+
 export const useInsurance = (id?: string) => {
   return useQuery({
     queryKey: ['insurance', id],
@@ -25,9 +27,11 @@ export const useInsurance = (id?: string) => {
     enabled: !!id
   })
 }
+
 export const useCreateInsurance = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+
   return useMutation({
     mutationFn: createInsurance,
     onSuccess: () => {
@@ -47,9 +51,11 @@ export const useCreateInsurance = () => {
     }
   })
 }
+
 export const useUpdateInsurance = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: Partial<Insurance> }) =>
       updateInsurance(id, payload),
@@ -70,9 +76,11 @@ export const useUpdateInsurance = () => {
     }
   })
 }
+
 export const useDeleteInsurance = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+
   return useMutation({
     mutationFn: deleteInsurance,
     onSuccess: () => {
@@ -92,9 +100,11 @@ export const useDeleteInsurance = () => {
     }
   })
 }
+
 export const useRenewInsurance = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+
   return useMutation({
     mutationFn: ({ prevId, payload }: { 
       prevId: string; 
@@ -124,8 +134,10 @@ export const useRenewInsurance = () => {
     }
   })
 }
+
 export const useUploadCertificate = () => {
   const { toast } = useToast()
+
   return useMutation({
     mutationFn: ({ contactId, file }: { contactId: string; file: File }) =>
       uploadCertificate(contactId, file),

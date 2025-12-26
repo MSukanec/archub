@@ -1,10 +1,12 @@
 import { supabase } from '@/lib/supabase';
 import type { PinBoard } from '../types';
+
 export interface CreateBoardInput {
   name: string;
   description?: string | null;
   project_id: string;
 }
+
 export async function createBoard(input: CreateBoardInput): Promise<PinBoard> {
   const { data: sessionData } = await supabase.auth.getSession();
   const token = sessionData?.session?.access_token;

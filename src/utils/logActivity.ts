@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 interface LogActivityParams {
   organization_id: string;
   user_id: string;
@@ -7,6 +8,7 @@ interface LogActivityParams {
   target_id: string;
   metadata?: object;
 }
+
 /**
  * Registra actividad en la organización usando la función Supabase log_organization_activity
  * 
@@ -21,7 +23,7 @@ interface LogActivityParams {
  *   action: 'create_movement',
  *   target_table: 'movements',
  *   target_id: newMovement.id,
- *   metadata: { amount: 1500.00, description: 'Pago de materiales'}
+ *   metadata: { amount: 1500.00, description: 'Pago de materiales' }
  * });
  * ```
  */
@@ -39,6 +41,7 @@ export async function logActivity({
       console.debug(`Skipping activity log for temporary ID: ${target_id}`);
       return;
     }
+
     // Insertar directamente en organization_activity_logs para evitar problemas con la función de Supabase
     const { data, error } = await supabase
       .from('organization_activity_logs')
@@ -51,6 +54,7 @@ export async function logActivity({
         metadata,
         created_at: new Date().toISOString()
       });
+
     if (error) {
       console.error('Error logging activity:', error);
       // No lanzamos el error para evitar que interrumpa el flujo principal
@@ -62,6 +66,7 @@ export async function logActivity({
     // pero lo registramos para debugging
   }
 }
+
 // Tipos de acciones predefinidas para mayor consistencia
 export const ACTIVITY_ACTIONS = {
   // Movimientos financieros
@@ -122,6 +127,7 @@ export const ACTIVITY_ACTIONS = {
   DELETE_MATERIAL: 'delete_material',
   CREATE_PURCHASE: 'create_purchase'
 } as const;
+
 // Tabla de mapeo para target_table
 export const TARGET_TABLES = {
   MOVEMENTS: 'movements',

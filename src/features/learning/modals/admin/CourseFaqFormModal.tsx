@@ -13,23 +13,28 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createCourseFaq, updateCourseFaq } from '../../services';
 import type { CourseFaq } from '@shared/schema';
+
 // Schema de validación Zod
 const courseFaqSchema = z.object({
   question: z.string().min(1, 'La pregunta es requerida'),
   answer: z.string().min(1, 'La respuesta es requerida'),
   sort_index: z.number().int().min(0, 'El orden debe ser 0 o mayor').default(0),
 });
+
 type CourseFaqFormData = z.infer<typeof courseFaqSchema>;
+
 interface CourseFaqFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   courseId: string;
   faq?: CourseFaq | null;
 }
+
 export function CourseFaqFormModal({ isOpen, onClose, courseId, faq }: CourseFaqFormModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = React.useState(false);
+
   // Configurar form con React Hook Form
   const form = useForm<CourseFaqFormData>({
     resolver: zodResolver(courseFaqSchema),
@@ -39,6 +44,7 @@ export function CourseFaqFormModal({ isOpen, onClose, courseId, faq }: CourseFaq
       sort_index: 0,
     }
   });
+
   // Cargar datos cuando se edita una FAQ
   React.useEffect(() => {
     if (faq) {
@@ -55,11 +61,13 @@ export function CourseFaqFormModal({ isOpen, onClose, courseId, faq }: CourseFaq
       });
     }
   }, [faq, form]);
+
   // Función de cierre
   const handleClose = () => {
     form.reset();
     onClose();
   };
+
   // Mutation para crear FAQ
   const createMutation = useMutation({
     mutationFn: (data: CourseFaqFormData) => createCourseFaq({
@@ -86,6 +94,7 @@ export function CourseFaqFormModal({ isOpen, onClose, courseId, faq }: CourseFaq
       });
     }
   });
+
   // Mutation para actualizar FAQ
   const updateMutation = useMutation({
     mutationFn: (data: CourseFaqFormData) => updateCourseFaq(faq!.id, {
@@ -111,6 +120,7 @@ export function CourseFaqFormModal({ isOpen, onClose, courseId, faq }: CourseFaq
       });
     }
   });
+
   // Handler de submit
   const onSubmit = async (data: CourseFaqFormData) => {
     setIsLoading(true);
@@ -124,6 +134,7 @@ export function CourseFaqFormModal({ isOpen, onClose, courseId, faq }: CourseFaq
       setIsLoading(false);
     }
   };
+
   // Panel de edición (Formulario)
   const editPanel = (
     <Form {...form}>
@@ -145,6 +156,7 @@ export function CourseFaqFormModal({ isOpen, onClose, courseId, faq }: CourseFaq
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="answer"
@@ -163,6 +175,7 @@ export function CourseFaqFormModal({ isOpen, onClose, courseId, faq }: CourseFaq
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="sort_index"
@@ -185,26 +198,30 @@ export function CourseFaqFormModal({ isOpen, onClose, courseId, faq }: CourseFaq
       </form>
     </Form>
   );
+
   // Header con título, descripción e ícono
   const headerContent = (
     <FormModalHeader 
-      title={faq ? 'Editar FAQ': 'Nueva FAQ'}
-      description={faq ? 'Actualiza la pregunta frecuente del curso': 'Crea una nueva pregunta frecuente para la landing page del curso'}
+      title={faq ? 'Editar FAQ' : 'Nueva FAQ'}
+      description={faq ? 'Actualiza la pregunta frecuente del curso' : 'Crea una nueva pregunta frecuente para la landing page del curso'}
       icon={HelpCircle}
     />
   );
+
   // Footer con botones
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={faq ? 'Actualizar': 'Crear'}
+      rightLabel={faq ? 'Actualizar' : 'Crear'}
       onRightClick={form.handleSubmit(onSubmit)}
       isSubmitting={isLoading}
     />
   );
+
   // Guard: Solo renderizar si el modal está abierto
   if (!isOpen) return null;
+
   // Layout final
   return (
     <FormModalLayout

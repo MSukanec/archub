@@ -3,6 +3,7 @@ import { Package, Plus, Edit, Trash2, Eye, Award, DollarSign, TrendingUp, Users,
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useLocation } from "wouter";
+
 import { Table, Column } from '@/components/shared/table';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,7 @@ import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal';
@@ -18,11 +20,13 @@ import SubcontractRow from "@/features/subcontracts/components/SubcontractRow";
 import { useQuery } from '@tanstack/react-query';
 import { useMobile } from '@/hooks/use-mobile';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
+
 interface SubcontractListProps {
   filterByStatus?: string;
   filterByType?: string;
 }
-export default function SubcontractList({ filterByStatus = 'all', filterByType = 'all'}: SubcontractListProps) {
+
+export default function SubcontractList({ filterByStatus = 'all', filterByType = 'all' }: SubcontractListProps) {
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
@@ -31,7 +35,8 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
   
   // Estado para controles del TableTopBar
   const [searchQuery, setSearchQuery] = useState('');
-  const [currencyView, setCurrencyView] = useState<'discriminado'| 'pesificado'| 'dolarizado'>('discriminado');
+  const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
+
   // Función para crear subcontrato
   const handleCreateSubcontract = () => {
     openModal('subcontract', {
@@ -45,13 +50,16 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
   // Datos de subcontratos con análisis de pagos
   const { data: subcontracts = [], isLoading } = useSubcontracts(selectedProjectId || null);
   const { data: subcontractAnalysis = [], isLoading: isLoadingAnalysis } = useSubcontractAnalysis(selectedProjectId || null);
+
   // Cálculos para KPIs de subcontratos
   const kpiData = useMemo(() => {
     if (subcontracts.length === 0) return null;
+
     const totalSubcontracts = subcontracts.length;
     const awardedSubcontracts = subcontracts.filter(s => s.status === 'awarded');
     const pendingSubcontracts = subcontracts.filter(s => s.status === 'pending');
     const inProgressSubcontracts = subcontracts.filter(s => s.status === 'in_progress');
+
     // Calcular valores totales usando los campos correctos de la base de datos
     const totalAwardedValueARS = awardedSubcontracts.reduce((sum, s) => {
       // Los subcontratos adjudicados tienen amount_total
@@ -68,6 +76,7 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
       ars: totalAwardedValueARS,
       usd: totalAwardedValueUSD
     };
+
     // Calcular saldo restante usando los campos correctos del análisis
     const totalPaidARS = subcontractAnalysis.reduce((sum, analysis) => {
       // subcontractAnalysis tiene pagoALaFecha
@@ -75,6 +84,7 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
     }, 0);
     
     const remainingBalanceARS = totalAwardedValueARS - totalPaidARS;
+
     // Distribución por estado
     const statusDistribution = {
       awarded: awardedSubcontracts.length,
@@ -82,6 +92,7 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
       inProgress: inProgressSubcontracts.length,
       other: totalSubcontracts - awardedSubcontracts.length - pendingSubcontracts.length - inProgressSubcontracts.length
     };
+
     return {
       totalSubcontracts,
       awardedCount: awardedSubcontracts.length,
@@ -94,17 +105,19 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
       awardedPercentage: (awardedSubcontracts.length / totalSubcontracts) * 100
     };
   }, [subcontracts, currencyView]);
+
   // Función para convertir montos según la vista seleccionada
   const convertAmount = (amountARS: number, amountUSD: number, originalCurrency: string = 'ARS') => {
     if (currencyView === 'discriminado') {
-      return originalCurrency === 'USD'? amountUSD : amountARS;
+      return originalCurrency === 'USD' ? amountUSD : amountARS;
     } else if (currencyView === 'pesificado') {
-      return originalCurrency === 'USD'? amountUSD * (subcontracts[0]?.exchange_rate || 1) : amountARS;
+      return originalCurrency === 'USD' ? amountUSD * (subcontracts[0]?.exchange_rate || 1) : amountARS;
     } else if (currencyView === 'dolarizado') {
-      return originalCurrency === 'ARS'? amountARS / (subcontracts[0]?.exchange_rate || 1) : amountUSD;
+      return originalCurrency === 'ARS' ? amountARS / (subcontracts[0]?.exchange_rate || 1) : amountUSD;
     }
     return amountARS;
   };
+
   // Función para formatear montos con el símbolo correcto
   const formatSingleCurrency = (amountARS: number, amountUSD: number, originalCurrency: string = 'ARS') => {
     const convertedAmount = convertAmount(amountARS, amountUSD, originalCurrency);
@@ -112,7 +125,7 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
     if (currencyView === 'discriminado') {
       return new Intl.NumberFormat('es-AR', {
         style: 'currency',
-        currency: originalCurrency === 'USD'? 'USD': 'ARS',
+        currency: originalCurrency === 'USD' ? 'USD' : 'ARS',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
       }).format(convertedAmount);
@@ -138,6 +151,7 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
       maximumFractionDigits: 0
     }).format(convertedAmount);
   };
+
   // Combinar datos de subcontratos con análisis de pagos
   const enrichedSubcontracts = subcontracts.map(subcontract => {
     const analysis = subcontractAnalysis.find(a => a.id === subcontract.id);
@@ -151,6 +165,7 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
       }
     };
   });
+
   // Filtrar subcontratos por búsqueda y filtros móviles
   const filteredSubcontracts = enrichedSubcontracts.filter(subcontract => {
     // Búsqueda por texto
@@ -160,7 +175,7 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
     const searchMatch = !searchQuery || titleMatch || codeMatch;
     
     // Filtro por status
-    const statusMatch = filterByStatus === 'all'|| subcontract.status === filterByStatus;
+    const statusMatch = filterByStatus === 'all' || subcontract.status === filterByStatus;
     
     // Filtro por tipo (asumiendo que se puede determinar del título)
     let typeMatch = true;
@@ -171,8 +186,10 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
     
     return searchMatch && statusMatch && typeMatch;
   });
+
   // Router navigation
   const [, setLocation] = useLocation();
+
   // Función para editar subcontrato
   const handleEdit = (subcontract: any) => {
     openModal('subcontract', {
@@ -183,6 +200,7 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
       subcontractId: subcontract.id
     });
   };
+
   // Función para eliminar subcontrato
   const handleDelete = (subcontract: any) => {
     openModal('delete-confirmation', {
@@ -194,16 +212,18 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
       }
     });
   };
+
   // Función para ver detalle
   const handleView = (id: string) => {
     setLocation(`/construction/subcontracts/${id}`);
   };
+
   // Configuración de las columnas de la tabla
   const columns: Column<any>[] = [
     {
       key: 'title',
       label: 'Subcontrato',
-      type: 'long-text'as const,
+      type: 'long-text' as const,
       render: (subcontract: any) => (
         <div>
           <div className="font-medium">{subcontract.title}</div>
@@ -216,10 +236,10 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
     {
       key: 'contact',
       label: 'Subcontratista',
-      type: 'medium-text'as const,
+      type: 'medium-text' as const,
       render: (subcontract: any) => {
         const contact = subcontract.contact || subcontract.winner_bid?.contacts;
-        if (subcontract.status === 'awarded'&& contact) {
+        if (subcontract.status === 'awarded' && contact) {
           const contactName = contact.full_name || 
             contact.company_name ||
             `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
@@ -247,7 +267,7 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
     {
       key: 'status',
       label: 'Estado',
-      type: 'status'as const,
+      type: 'status' as const,
       render: (subcontract: any) => {
         const status = subcontract.status;
         
@@ -276,43 +296,44 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
     {
       key: 'amount',
       label: 'Monto Total',
-      type: 'amount'as const,
+      type: 'amount' as const,
       render: (subcontract: any) => {
         const amountARS = subcontract.amount_total || 0;
         const amountUSD = amountARS / (subcontract.exchange_rate || 1);
-        const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f'? 'USD': 'ARS';
+        const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS';
         return formatSingleCurrency(amountARS, amountUSD, originalCurrency);
       }
     },
     {
       key: 'paid_amount',
       label: 'A la Fecha',
-      type: 'amount'as const,
+      type: 'amount' as const,
       render: (subcontract: any) => {
         const analysis = subcontract.analysis;
         if (!analysis) return '-';
         
         const paidARS = analysis.pagoALaFecha || 0;
         const paidUSD = analysis.pagoALaFechaUSD || 0;
-        const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f'? 'USD': 'ARS';
+        const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS';
         return formatSingleCurrency(paidARS, paidUSD, originalCurrency);
       }
     },
     {
       key: 'balance',
       label: 'Saldo',
-      type: 'amount'as const,
+      type: 'amount' as const,
       render: (subcontract: any) => {
         const analysis = subcontract.analysis;
         if (!analysis) return '-';
         
         const balanceARS = analysis.saldo || 0;
         const balanceUSD = analysis.saldoUSD || 0;
-        const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f'? 'USD': 'ARS';
+        const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS';
         return formatSingleCurrency(balanceARS, balanceUSD, originalCurrency);
       }
     }
   ];
+
   if (isLoading || isLoadingAnalysis) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -320,24 +341,25 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
       </div>
     );
   }
+
   return (
     <div className="space-y-6">
       {/* KPI Cards */}
       {kpiData && (
-        <div className={`grid ${isMobile ? 'grid-cols-2 gap-3': 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'}`}>
+        <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'}`}>
           {/* Total Subcontratos */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
-            <CardContent className={`${isMobile ? 'p-3': 'p-6'}`}>
-              <div className={`space-y-${isMobile ? '2': '4'}`}>
+            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
+              <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
-                  <p className={`${isMobile ? 'text-xs': 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Subcontratos': 'Total Subcontratos'}
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+                    {isMobile ? 'Subcontratos' : 'Total Subcontratos'}
                   </p>
-                  <Package className={`${isMobile ? 'h-4 w-4': 'h-6 w-6'}`} style={{ color: 'var(--accent)'}} />
+                  <Package className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
                 {/* Mini gráfico de barras - altura fija */}
-                <div className={`flex items-end gap-1 ${isMobile ? 'h-6': 'h-8'}`}>
+                <div className={`flex items-end gap-1 ${isMobile ? 'h-6' : 'h-8'}`}>
                   {Array.from({ length: 6 }).map((_, i) => (
                     <div
                       key={i}
@@ -352,27 +374,28 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
                 </div>
                 
                 <div>
-                  <p className={`${isMobile ? 'text-lg': 'text-2xl'} font-bold`}>{kpiData.totalSubcontracts}</p>
-                  <p className={`${isMobile ? 'text-xs': 'text-xs'} text-muted-foreground`}>
+                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>{kpiData.totalSubcontracts}</p>
+                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
                     {kpiData.awardedCount} adjudicados
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
+
           {/* Valor Adjudicado */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
-            <CardContent className={`${isMobile ? 'p-3': 'p-6'}`}>
-              <div className={`space-y-${isMobile ? '2': '4'}`}>
+            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
+              <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
-                  <p className={`${isMobile ? 'text-xs': 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Adjudicado': 'Valor Adjudicado'}
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+                    {isMobile ? 'Adjudicado' : 'Valor Adjudicado'}
                   </p>
-                  <Award className={`${isMobile ? 'h-4 w-4': 'h-6 w-6'}`} style={{ color: 'var(--accent)'}} />
+                  <Award className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
                 {/* Gráfico de línea de tendencia - altura fija */}
-                <div className={`${isMobile ? 'h-6': 'h-8'} relative`}>
+                <div className={`${isMobile ? 'h-6' : 'h-8'} relative`}>
                   <svg className="w-full h-full" viewBox="0 0 100 32">
                     <path
                       d="M 0,24 Q 25,20 50,12 T 100,8"
@@ -386,34 +409,35 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
                 </div>
                 
                 <div>
-                  <p className={`${isMobile ? 'text-lg': 'text-2xl'} font-bold`}>
-                    {currencyView === 'pesificado'
+                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
+                    {currencyView === 'pesificado' 
                       ? `$${kpiData.totalValues.ars.toLocaleString('es-AR')}`
                       : currencyView === 'dolarizado'
                       ? `US$${kpiData.totalValues.usd.toLocaleString('es-AR')}`
                       : `$${kpiData.totalValues.ars.toLocaleString('es-AR')}`
                     }
                   </p>
-                  <p className={`${isMobile ? 'text-xs': 'text-xs'} text-muted-foreground`}>
+                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
                     {((kpiData.awardedCount / kpiData.totalSubcontracts) * 100).toFixed(1)}%
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
+
           {/* Saldo Restante */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
-            <CardContent className={`${isMobile ? 'p-3': 'p-6'}`}>
-              <div className={`space-y-${isMobile ? '2': '4'}`}>
+            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
+              <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
-                  <p className={`${isMobile ? 'text-xs': 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Saldo': 'Saldo Restante'}
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+                    {isMobile ? 'Saldo' : 'Saldo Restante'}
                   </p>
-                  <CreditCard className={`${isMobile ? 'h-4 w-4': 'h-6 w-6'}`} style={{ color: 'var(--accent)'}} />
+                  <CreditCard className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
                 {/* Barra de progreso de pagos - altura fija */}
-                <div className={`${isMobile ? 'h-6': 'h-8'} flex items-center`}>
+                <div className={`${isMobile ? 'h-6' : 'h-8'} flex items-center`}>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className="h-2 rounded-full transition-all duration-300"
@@ -426,29 +450,30 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
                 </div>
                 
                 <div>
-                  <p className={`${isMobile ? 'text-lg': 'text-2xl'} font-bold`}>
+                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
                     ${(kpiData.remainingBalanceARS || 0).toLocaleString('es-AR')}
                   </p>
-                  <p className={`${isMobile ? 'text-xs': 'text-xs'} text-muted-foreground`}>
+                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
                     Pendiente
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
+
           {/* Estado General */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200">
-            <CardContent className={`${isMobile ? 'p-3': 'p-6'}`}>
-              <div className={`space-y-${isMobile ? '2': '4'}`}>
+            <CardContent className={`${isMobile ? 'p-3' : 'p-6'}`}>
+              <div className={`space-y-${isMobile ? '2' : '4'}`}>
                 <div className="flex items-center justify-between">
-                  <p className={`${isMobile ? 'text-xs': 'text-sm'} text-muted-foreground`}>
-                    {isMobile ? 'Estado': 'Estado General'}
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
+                    {isMobile ? 'Estado' : 'Estado General'}
                   </p>
-                  <Users className={`${isMobile ? 'h-4 w-4': 'h-6 w-6'}`} style={{ color: 'var(--accent)'}} />
+                  <Users className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'}`} style={{ color: 'var(--accent)' }} />
                 </div>
                 
                 {/* Gráfico de área llena - altura fija */}
-                <div className={`${isMobile ? 'h-6': 'h-8'} relative`}>
+                <div className={`${isMobile ? 'h-6' : 'h-8'} relative`}>
                   <svg className="w-full h-full" viewBox="0 0 100 32">
                     <defs>
                       <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
@@ -464,8 +489,8 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
                 </div>
                 
                 <div>
-                  <p className={`${isMobile ? 'text-lg': 'text-2xl'} font-bold`}>{kpiData.awardedPercentage.toFixed(0)}%</p>
-                  <p className={`${isMobile ? 'text-xs': 'text-xs'} text-muted-foreground`}>
+                  <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>{kpiData.awardedPercentage.toFixed(0)}%</p>
+                  <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-muted-foreground`}>
                     Adjudicación
                   </p>
                 </div>
@@ -474,12 +499,13 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
           </Card>
         </div>
       )}
+
       {/* Lista/Tabla de Subcontratos */}
       {filteredSubcontracts.length === 0 ? (
         <EmptyState
           icon={<Package className="w-12 h-12 text-muted-foreground" />}
           title="No hay subcontratos"
-          description={searchQuery ? "No se encontraron subcontratos que coincidan con tu búsqueda." : "Aún no has creado ningún subcontrato. Haz clic en 'Nuevo Subcontrato'para comenzar."}
+          description={searchQuery ? "No se encontraron subcontratos que coincidan con tu búsqueda." : "Aún no has creado ningún subcontrato. Haz clic en 'Nuevo Subcontrato' para comenzar."}
           action={
             <Button
               onClick={handleCreateSubcontract}
@@ -522,7 +548,7 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
               icon: Trash2,
               label: 'Eliminar',
               onClick: () => handleDelete(subcontract),
-              variant: 'destructive'as const
+              variant: 'destructive' as const
             }
           ]}
         />

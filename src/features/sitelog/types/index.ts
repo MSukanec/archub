@@ -1,13 +1,19 @@
-export type WeatherType = 'sunny'| 'partly_cloudy'| 'cloudy'| 'rain'| 'storm'| 'snow'| 'fog'| 'windy'| 'hail'| 'none';
-export type SeverityLevel = 'low'| 'medium'| 'high'| 'critical';
-export type SiteLogStatus = 'pending'| 'review'| 'approved'| 'closed';
-export type TimePeriod = 'days'| 'weeks'| 'months';
-export type ActivityTimePeriod = 'week'| 'month'| 'year';
+export type WeatherType = 'sunny' | 'partly_cloudy' | 'cloudy' | 'rain' | 'storm' | 'snow' | 'fog' | 'windy' | 'hail' | 'none';
+
+export type SeverityLevel = 'low' | 'medium' | 'high' | 'critical';
+
+export type SiteLogStatus = 'pending' | 'review' | 'approved' | 'closed';
+
+export type TimePeriod = 'days' | 'weeks' | 'months';
+
+export type ActivityTimePeriod = 'week' | 'month' | 'year';
+
 export interface SiteLogFileInput {
   file: File;
   title: string;
   description?: string;
 }
+
 /**
  * Archivo de galería de bitácora con toda la información necesaria para mostrar en UI
  */
@@ -44,6 +50,7 @@ export interface SitelogGalleryFile {
     type_name: string;
   };
 }
+
 export interface SiteLogAttendee {
   id: string;
   contact_id: string;
@@ -52,6 +59,7 @@ export interface SiteLogAttendee {
   departure_time?: string;
   notes?: string;
 }
+
 export interface SiteLog {
   id: string;
   log_date: string;
@@ -67,28 +75,32 @@ export interface SiteLog {
   organization_id: string;
   project_id: string;
 }
+
 export interface SiteLogTimelineData {
   date: string;
   files: number;
   attendees: number;
 }
+
 export interface SiteLogActivityUser {
   user_id: string;
   full_name: string;
   avatar_url?: string;
   activity_count: number;
 }
+
 export interface SiteLogActivity {
   date: string;
   users: SiteLogActivityUser[];
   total: number;
 }
+
 export interface AttendeeData {
   id: string;
   personnel_id: string;
   contact_id: string;
   contact_type: string;
-  attendance_type: 'full'| 'half';
+  attendance_type: 'full' | 'half';
   hours_worked: number;
   description: string;
   arrival_time: string;

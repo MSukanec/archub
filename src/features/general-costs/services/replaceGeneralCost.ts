@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 /**
  * Replaces all references of an old general cost with a new one, then deletes the old cost.
  * 
@@ -15,14 +16,17 @@ export async function replaceGeneralCost(oldCostId: string, newCostId: string): 
   if (!supabase) {
     throw new Error('Supabase client not initialized');
   }
+
   // Step 1: Update all payments pointing to oldCostId to newCostId
   const { error: updateError } = await supabase
     .from('general_costs_payments')
     .update({ general_cost_id: newCostId })
     .eq('general_cost_id', oldCostId);
+
   if (updateError) {
     throw new Error(`Failed to update payments: ${updateError.message}`);
   }
+
   // Step 2: Soft delete the old general cost
   const { error: deleteError } = await supabase
     .from('general_costs')
@@ -31,8 +35,10 @@ export async function replaceGeneralCost(oldCostId: string, newCostId: string): 
       deleted_at: new Date().toISOString()
     })
     .eq('id', oldCostId);
+
   if (deleteError) {
     throw new Error(`Failed to delete general cost: ${deleteError.message}`);
   }
+
   return { oldId: oldCostId, newId: newCostId };
 }

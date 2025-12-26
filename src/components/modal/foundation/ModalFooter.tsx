@@ -1,7 +1,9 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+
 type ButtonVariant = "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+
 interface ModalFooterProps {
   leftLabel?: string;
   onLeftClick?: () => void;
@@ -72,6 +74,7 @@ interface ModalFooterProps {
     icon?: React.ReactNode;
   }>;
 }
+
 export function ModalFooter({
   leftLabel,
   onLeftClick,
@@ -178,7 +181,7 @@ export function ModalFooter({
     
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
-        event.key === 'Enter'&&
+        event.key === 'Enter' &&
         !event.ctrlKey &&
         !event.shiftKey &&
         !event.altKey &&
@@ -224,7 +227,7 @@ export function ModalFooter({
     <div className="p-2 border-t border-[var(--card-border)] mt-auto relative z-0">
       {showValidationErrors && validationErrorCount > 0 && (
         <div className="px-2 py-1 text-xs text-destructive bg-destructive/10 rounded mb-2">
-          {validationErrorCount} error{validationErrorCount > 1 ? 'es': ''} de validación
+          {validationErrorCount} error{validationErrorCount > 1 ? 'es' : ''} de validación
         </div>
       )}
       
@@ -321,4 +324,5 @@ export function ModalFooter({
     </div>
   );
 }
+
 export { ModalFooter as FormModalFooter };

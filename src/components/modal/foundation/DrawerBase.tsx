@@ -3,7 +3,9 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-export type DrawerSnapPoint = 'auto'| 'half'| 'full';
+
+export type DrawerSnapPoint = 'auto' | 'half' | 'full';
+
 export interface DrawerBaseProps {
   children: ReactNode;
   isOpen: boolean;
@@ -25,6 +27,7 @@ export interface DrawerBaseProps {
   
   ariaLabel?: string;
 }
+
 export function DrawerBase({
   children,
   isOpen,
@@ -90,7 +93,7 @@ export function DrawerBase({
   
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape'&& dismissible) {
+      if (e.key === 'Escape' && dismissible) {
         onClose();
       }
     };
@@ -139,7 +142,7 @@ export function DrawerBase({
         )}
         style={{
           transform: dragY > 0 ? `translateY(${dragY}px)` : undefined,
-          transition: isDragging ? 'none': 'transform 0.2s ease-out',
+          transition: isDragging ? 'none' : 'transform 0.2s ease-out',
         }}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={handleTouchStart}
@@ -182,4 +185,5 @@ export function DrawerBase({
   
   return createPortal(content, document.body);
 }
+
 export default DrawerBase;

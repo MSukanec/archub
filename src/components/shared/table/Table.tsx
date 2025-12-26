@@ -16,7 +16,9 @@ import {
   groupData,
 } from "./utils";
 import { DEFAULT_ITEMS_PER_PAGE } from "./constants";
+
 const EMPTY_ARRAY: any[] = [];
+
 export function Table<T = any>({
   columns,
   data,
@@ -52,10 +54,12 @@ export function Table<T = any>({
   const { shouldHideActions } = useProjectReadOnlyContext();
   const hideActions = hideActionsProp ?? shouldHideActions;
   const [searchInputValue, setSearchInputValue] = useState("");
+
   const { sortKey, sortDirection, handleSort, getSortedData } = useTableSort({
     columns,
     defaultSort,
   });
+
   const {
     searchValue,
     setSearchValue,
@@ -67,9 +71,11 @@ export function Table<T = any>({
     externalSearchValue: topBar?.searchValue,
     onExternalSearchChange: topBar?.onSearchChange,
   });
+
   const filteredData = useMemo(() => {
     return getFilteredData(data);
   }, [data, getFilteredData]);
+
   const processedData = useMemo(() => {
     if (getIsInactive) {
       const { active, inactive } = separateActiveInactive(
@@ -82,12 +88,15 @@ export function Table<T = any>({
     }
     return getSortedData(filteredData);
   }, [filteredData, getSortedData, getIsInactive]);
+
   const groupedData = useMemo(() => {
     return groupData(processedData, groupBy);
   }, [processedData, groupBy]);
+
   const flattenedData = useMemo(() => {
     return Object.values(groupedData).flat();
   }, [groupedData]);
+
   const {
     currentPage,
     totalPages,
@@ -100,9 +109,11 @@ export function Table<T = any>({
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
     totalItems: flattenedData.length,
   });
+
   const paginatedData = useMemo(() => {
     return getPaginatedData(flattenedData);
   }, [flattenedData, getPaginatedData]);
+
   const {
     selectedItems,
     isItemSelected,
@@ -116,12 +127,14 @@ export function Table<T = any>({
     getItemId,
     pageData: paginatedData,
   });
+
   const hasActions = !!rowActions;
   const gridTemplateColumns = getGridTemplateColumns(
     columns,
     selectable,
     hasActions
   );
+
   const handleSearchChange = (value: string) => {
     setSearchInputValue(value);
     if (topBar?.onSearchChange) {
@@ -130,6 +143,7 @@ export function Table<T = any>({
       setSearchValue(value);
     }
   };
+
   const handleClearFilters = () => {
     if (topBar?.onClearFilters) {
       topBar.onClearFilters();
@@ -138,11 +152,14 @@ export function Table<T = any>({
       setSearchInputValue("");
     }
   };
+
   const combinedIsFilterActive =
     topBar?.isFilterActive ?? (isFilterActive || searchInputValue.length > 0);
+
   const hasOriginalData = data.length > 0;
   const hasFilteredData = filteredData.length > 0;
   const hasActiveSearch = searchValue.length > 0 || searchInputValue.length > 0;
+
   if (isLoading) {
     return (
       <TableLoadingSkeleton
@@ -153,6 +170,7 @@ export function Table<T = any>({
       />
     );
   }
+
   return (
     <div className={cn("space-y-3 border-2 border-[var(--accent)] rounded-lg p-2", className)}>
       <TableDesktop
@@ -205,6 +223,7 @@ export function Table<T = any>({
         onNextPage={goToNextPage}
         onPrevPage={goToPreviousPage}
       />
+
       <TableMobile
         columns={columns}
         data={data}
@@ -233,6 +252,7 @@ export function Table<T = any>({
     </div>
   );
 }
+
 export type { TableProps } from "./types";
 export type {
   Column,

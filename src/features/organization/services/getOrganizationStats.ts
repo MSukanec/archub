@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { subDays } from 'date-fns';
 import type { OrganizationStats } from '../types';
+
 /**
  * Obtiene estadísticas generales de una organización.
  * 
@@ -24,28 +25,35 @@ export async function getOrganizationStats(
       financialMovementsLast30Days: 0
     };
   }
+
   try {
     const thirtyDaysAgo = subDays(new Date(), 30);
+
     const { count: activeProjectsCount } = await supabase
       .from('projects')
       .select('*', { count: 'exact', head: true })
       .eq('organization_id', organizationId)
       .eq('is_active', true)
       .eq('is_deleted', false);
+
     const { count: documentsCount } = await supabase
       .from('design_documents')
       .select('*', { count: 'exact', head: true })
       .eq('organization_id', organizationId)
       .gte('created_at', thirtyDaysAgo.toISOString());
+
     const { count: tasksCount } = await supabase
       .from('tasks')
       .select('*', { count: 'exact', head: true });
+
     const { data: movements } = await supabase
       .from('movements')
       .select('amount')
       .eq('organization_id', organizationId)
       .gte('movement_date', thirtyDaysAgo.toISOString());
+
     const totalMovements = movements?.reduce((sum, movement) => sum + (movement.amount || 0), 0) || 0;
+
     return {
       activeProjects: activeProjectsCount || 0,
       documentsLast30Days: documentsCount || 0,

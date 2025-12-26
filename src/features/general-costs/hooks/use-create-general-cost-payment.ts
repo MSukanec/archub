@@ -2,6 +2,7 @@ import { useOptimisticMutation } from '@/core/save-engine';
 import { createGeneralCostPayment } from '../services/createGeneralCostPayment';
 import { generalCostsKeys } from '@/core/query-keys';
 import type { InsertGeneralCostPayment, GeneralCostPayment } from '../types';
+
 export function useCreateGeneralCostPayment(organizationId: string | null) {
   return useOptimisticMutation({
     mutationFn: (payment: InsertGeneralCostPayment) => createGeneralCostPayment(payment),

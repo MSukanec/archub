@@ -1,9 +1,11 @@
 import { CHART_COLORS, CHART_STATES, CHART_DIMENSIONS } from '../theme'
+
 export interface HeatmapDataPoint {
   label: string
   value: number
   count?: number
 }
+
 export interface HeatmapGridProps {
   data: HeatmapDataPoint[]
   height?: number
@@ -14,13 +16,15 @@ export interface HeatmapGridProps {
   colorScale?: (value: number) => { bg: string; text: string; bgColor?: string }
   columns?: number
 }
+
 const DEFAULT_COLOR_SCALE = (value: number): { bg: string; text: string; bgColor?: string } => {
-  if (value === 0) return { bg: 'bg-muted', text: 'text-muted-foreground'}
-  if (value < 25) return { bg: '', text: 'text-white', bgColor: '#f44747'}
-  if (value < 50) return { bg: '', text: 'text-gray-900 dark:text-gray-100', bgColor: '#d4a574'}
-  if (value < 75) return { bg: '', text: 'text-white', bgColor: '#1c4a6b'}
-  return { bg: '', text: 'text-white', bgColor: '#84cc16'}
+  if (value === 0) return { bg: 'bg-muted', text: 'text-muted-foreground' }
+  if (value < 25) return { bg: '', text: 'text-white', bgColor: '#f44747' }
+  if (value < 50) return { bg: '', text: 'text-gray-900 dark:text-gray-100', bgColor: '#d4a574' }
+  if (value < 75) return { bg: '', text: 'text-white', bgColor: '#1c4a6b' }
+  return { bg: '', text: 'text-white', bgColor: '#84cc16' }
 }
+
 export function HeatmapGrid({
   data,
   height = CHART_DIMENSIONS.height.lg,
@@ -38,6 +42,7 @@ export function HeatmapGrid({
       </div>
     )
   }
+
   if (!data || data.length === 0) {
     return (
       <div style={{ height }} className={CHART_STATES.empty.className}>
@@ -45,6 +50,7 @@ export function HeatmapGrid({
       </div>
     )
   }
+
   return (
     <div style={{ height }} className="flex flex-col">
       <div 
@@ -77,10 +83,10 @@ export function HeatmapGrid({
         <span>Low</span>
         <div className="flex gap-1 shrink-0">
           <div className="w-3 h-3 bg-muted rounded-sm border flex-shrink-0" />
-          <div className="w-3 h-3 rounded-sm border flex-shrink-0" style={{ backgroundColor: '#f44747'}} />
-          <div className="w-3 h-3 rounded-sm border flex-shrink-0" style={{ backgroundColor: '#d4a574'}} />
-          <div className="w-3 h-3 rounded-sm border flex-shrink-0" style={{ backgroundColor: '#1c4a6b'}} />
-          <div className="w-3 h-3 rounded-sm border flex-shrink-0" style={{ backgroundColor: '#84cc16'}} />
+          <div className="w-3 h-3 rounded-sm border flex-shrink-0" style={{ backgroundColor: '#f44747' }} />
+          <div className="w-3 h-3 rounded-sm border flex-shrink-0" style={{ backgroundColor: '#d4a574' }} />
+          <div className="w-3 h-3 rounded-sm border flex-shrink-0" style={{ backgroundColor: '#1c4a6b' }} />
+          <div className="w-3 h-3 rounded-sm border flex-shrink-0" style={{ backgroundColor: '#84cc16' }} />
         </div>
         <span>High</span>
       </div>

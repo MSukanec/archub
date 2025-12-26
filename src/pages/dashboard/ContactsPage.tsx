@@ -8,20 +8,25 @@ import { Button } from '@/components/ui/button';
 import { UserPlus } from 'lucide-react';
 import { ContactsView } from '@/features/contacts/views/ContactsView';
 import { ContactSettingsView } from '@/features/contacts/views/ContactSettingsView';
+
 const CONTACTS_TABS = [
-  { id: 'contacts', label: 'Contactos'},
-  { id: 'settings', label: 'Ajustes'},
+  { id: 'contacts', label: 'Contactos' },
+  { id: 'settings', label: 'Ajustes' },
 ];
+
 export function ContactsPage() {
   const [activeTab, setActiveTab] = useState('contacts');
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const organizationId = userData?.organization?.id;
+
   const layoutPreference = userData?.preferences?.layout || 'experimental';
   const isLabLayout = layoutPreference === 'lab';
+
   const handleNewContact = () => {
     openModal('contact', { isEditing: false });
   };
+
   const headerProps = {
     icon: LuContact,
     title: "Contactos",
@@ -30,13 +35,14 @@ export function ContactsPage() {
     onTabChange: setActiveTab,
     organizationId,
     showMembers: false,
-    actionButton: activeTab === 'contacts'? {
+    actionButton: activeTab === 'contacts' ? {
       label: "Agregar Contacto",
       icon: UserPlus,
       onClick: handleNewContact
     } : undefined,
   };
-  const labActionButton = activeTab === 'contacts'? (
+
+  const labActionButton = activeTab === 'contacts' ? (
     <Button
       size="sm"
       onClick={handleNewContact}
@@ -46,12 +52,14 @@ export function ContactsPage() {
       Agregar Contacto
     </Button>
   ) : null;
+
   const renderContent = () => {
     if (activeTab === 'settings') {
       return <ContactSettingsView />;
     }
     return <ContactsView />;
   };
+
   if (isLabLayout) {
     return (
       <LabLayout 
@@ -69,6 +77,7 @@ export function ContactsPage() {
       </LabLayout>
     );
   }
+
   return (
     <Layout headerProps={headerProps} wide>
       {renderContent()}

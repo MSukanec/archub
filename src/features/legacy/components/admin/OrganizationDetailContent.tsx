@@ -22,6 +22,7 @@ import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField';
 import { DrawerSection } from '@/components/drawer';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+
 interface OrganizationMember {
   id: string;
   user_id: string;
@@ -40,6 +41,7 @@ interface OrganizationMember {
     name: string;
   } | null;
 }
+
 interface OrganizationSubscription {
   id: string;
   status: string;
@@ -55,6 +57,7 @@ interface OrganizationSubscription {
     slug: string;
   } | null;
 }
+
 interface Organization {
   id: string;
   name: string;
@@ -81,12 +84,14 @@ interface Organization {
   projects_count: number;
   last_seen_at: string | null;
 }
+
 export interface OrganizationDetailContentProps {
   organization: Organization;
   onSuccess?: () => void;
   onCancel?: () => void;
   hideActions?: boolean;
 }
+
 function useOrganizationMembers(organizationId: string) {
   return useQuery({
     queryKey: ['admin-organization-members', organizationId],
@@ -131,6 +136,7 @@ function useOrganizationMembers(organizationId: string) {
     enabled: !!organizationId
   });
 }
+
 function useOrganizationSubscription(organizationId: string) {
   return useQuery({
     queryKey: ['admin-organization-subscription', organizationId],
@@ -173,6 +179,7 @@ function useOrganizationSubscription(organizationId: string) {
     enabled: !!organizationId
   });
 }
+
 function useOrganizationRoles() {
   return useQuery({
     queryKey: ['organization-roles'],
@@ -188,6 +195,7 @@ function useOrganizationRoles() {
     }
   });
 }
+
 interface AdminUser {
   id: string;
   email: string;
@@ -195,11 +203,13 @@ interface AdminUser {
   avatar_url?: string;
   is_active: boolean;
 }
+
 function useAdminUsers() {
   return useQuery<AdminUser[]>({
     queryKey: ['/api/admin/users'],
   });
 }
+
 export function OrganizationDetailContent({
   organization,
   onSuccess,
@@ -246,11 +256,11 @@ export function OrganizationDetailContent({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-organization-members', organization.id] });
-      toast({ title: 'Miembro actualizado'});
+      toast({ title: 'Miembro actualizado' });
     },
     onError: (error) => {
       console.error('Error updating member:', error);
-      toast({ title: 'Error al actualizar', variant: 'destructive'});
+      toast({ title: 'Error al actualizar', variant: 'destructive' });
     }
   });
   
@@ -277,7 +287,7 @@ export function OrganizationDetailContent({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-organization-members', organization.id] });
       queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
-      toast({ title: 'Miembro agregado correctamente'});
+      toast({ title: 'Miembro agregado correctamente' });
       setShowAddMember(false);
       setNewMemberUserId('');
       setNewMemberRoleId('');
@@ -285,7 +295,7 @@ export function OrganizationDetailContent({
       onSuccess?.();
     },
     onError: (error: Error) => {
-      toast({ title: 'Error', description: error.message, variant: 'destructive'});
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     }
   });
   
@@ -303,14 +313,15 @@ export function OrganizationDetailContent({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-organization-members', organization.id] });
       queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
-      toast({ title: 'Miembro eliminado'});
+      toast({ title: 'Miembro eliminado' });
       onSuccess?.();
     },
     onError: (error) => {
       console.error('Error deleting member:', error);
-      toast({ title: 'Error al eliminar miembro', variant: 'destructive'});
+      toast({ title: 'Error al eliminar miembro', variant: 'destructive' });
     }
   });
+
   const handleToggleBillable = (member: OrganizationMember) => {
     updateMemberMutation.mutate({
       memberId: member.id,
@@ -326,7 +337,7 @@ export function OrganizationDetailContent({
   
   const handleAddMember = () => {
     if (!newMemberUserId || !newMemberRoleId) {
-      toast({ title: 'Completa todos los campos', variant: 'destructive'});
+      toast({ title: 'Completa todos los campos', variant: 'destructive' });
       return;
     }
     addMemberMutation.mutate();
@@ -350,8 +361,8 @@ export function OrganizationDetailContent({
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Estado</p>
-            <Badge variant={organization.is_active ? 'default': 'secondary'}>
-              {organization.is_active ? 'Activa': 'Inactiva'}
+            <Badge variant={organization.is_active ? 'default' : 'secondary'}>
+              {organization.is_active ? 'Activa' : 'Inactiva'}
             </Badge>
           </div>
           <div>
@@ -383,7 +394,7 @@ export function OrganizationDetailContent({
             </Badge>
             {subscription && (
               <span className="text-xs text-muted-foreground">
-                {subscription.billing_period === 'annual'? 'Anual': 'Mensual'}
+                {subscription.billing_period === 'annual' ? 'Anual' : 'Mensual'}
               </span>
             )}
           </div>
@@ -568,10 +579,10 @@ export function OrganizationDetailContent({
                       {member.role?.name || 'Sin rol'}
                     </Badge>
                     
-                    <div className="flex items-center gap-1" title={member.is_billable ? 'Facturable': 'No facturable'}>
+                    <div className="flex items-center gap-1" title={member.is_billable ? 'Facturable' : 'No facturable'}>
                       <DollarSign className={cn(
                         'h-3 w-3',
-                        member.is_billable ? 'text-green-500': 'text-muted-foreground'
+                        member.is_billable ? 'text-green-500' : 'text-muted-foreground'
                       )} />
                       <Switch
                         checked={member.is_billable}
@@ -611,4 +622,5 @@ export function OrganizationDetailContent({
     </div>
   );
 }
+
 export default OrganizationDetailContent;

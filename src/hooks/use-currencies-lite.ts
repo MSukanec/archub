@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+
 export interface CurrencyLite {
   id: string
   name: string
   symbol: string
   code: string
 }
+
 export const useCurrenciesLite = () => {
   return useQuery<CurrencyLite[]>({
     queryKey: ['currencies-lite'],

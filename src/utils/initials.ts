@@ -13,14 +13,15 @@
  */
 export function getOrganizationInitials(name: string): string {
   // Handle empty, null, undefined, or whitespace-only strings
-  if (!name || typeof name !== 'string'|| !name.trim()) {
+  if (!name || typeof name !== 'string' || !name.trim()) {
     return 'OR';
   }
+
   // Normalize: trim and collapse multiple spaces into single spaces
-  const normalized = name.trim().replace(/\s+/g, '');
+  const normalized = name.trim().replace(/\s+/g, ' ');
   
   // Split by spaces to get words
-  const words = normalized.split('').filter(word => word.length > 0);
+  const words = normalized.split(' ').filter(word => word.length > 0);
   
   if (words.length === 0) {
     return 'OR';
@@ -49,6 +50,7 @@ export function getOrganizationInitials(name: string): string {
   // Multiple words: take first letter of first two words
   return (words[0][0] + words[1][0]).toUpperCase();
 }
+
 /**
  * Generate project avatar initials
  * 
@@ -64,14 +66,15 @@ export function getOrganizationInitials(name: string): string {
  */
 export function getProjectInitials(name: string): string {
   // Handle empty, null, undefined, or whitespace-only strings
-  if (!name || typeof name !== 'string'|| !name.trim()) {
+  if (!name || typeof name !== 'string' || !name.trim()) {
     return 'PR';
   }
+
   // Normalize: trim and collapse multiple spaces into single spaces
-  const normalized = name.trim().replace(/\s+/g, '');
+  const normalized = name.trim().replace(/\s+/g, ' ');
   
   // Split by spaces to get words
-  const words = normalized.split('').filter(word => word.length > 0);
+  const words = normalized.split(' ').filter(word => word.length > 0);
   
   if (words.length === 0) {
     return 'PR';

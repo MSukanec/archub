@@ -4,6 +4,7 @@
  * Centralized query keys for user-related data.
  * Following the pattern established by other features.
  */
+
 export const usersKeys = {
   all: () => ['users'] as const,
   
@@ -17,4 +18,5 @@ export const usersKeys = {
   
   organizations: (userId: string) => ['user-organizations', userId] as const,
 } as const;
+
 export type UsersQueryKey = ReturnType<typeof usersKeys[keyof typeof usersKeys]>;

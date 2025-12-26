@@ -3,9 +3,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, Briefcase } from "lucide-react";
 import { getPlanConfig } from "../data/plans-config";
+
 export function EnterpriseCard() {
   const [, navigate] = useLocation();
   const config = getPlanConfig('enterprise');
+
   return (
     <div className="max-w-6xl mx-auto">
       <Card className="border border-[var(--border-default)] overflow-hidden">

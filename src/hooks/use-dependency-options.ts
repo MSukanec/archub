@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { TaskParameterDependencyOption, InsertTaskParameterDependencyOption } from "@shared/schema";
+
 // Hook para obtener opciones de dependencia por dependency_id
 export function useDependencyOptions(dependencyId: string | null) {
   return useQuery({
@@ -20,6 +21,7 @@ export function useDependencyOptions(dependencyId: string | null) {
     enabled: !!dependencyId
   });
 }
+
 // Hook para guardar opciones de dependencia (reemplaza las existentes)
 export function useSaveDependencyOptions() {
   const queryClient = useQueryClient();
@@ -82,6 +84,7 @@ export function useSaveDependencyOptions() {
     },
   });
 }
+
 // Hook para obtener dependencias donde un parámetro es hijo
 export function useParameterAsChild(parameterId: string | null) {
   return useQuery({
@@ -104,6 +107,7 @@ export function useParameterAsChild(parameterId: string | null) {
     enabled: !!parameterId
   });
 }
+
 // Hook para obtener opciones configuradas para una dependencia específica
 export function useConfiguredOptionsForDependency(dependencyId: string | null) {
   return useQuery({

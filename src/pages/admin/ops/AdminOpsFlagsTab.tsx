@@ -25,19 +25,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+
 const CATEGORY_CONFIG: Record<string, { label: string; icon: typeof Flag; color: string }> = {
-  subscriptions: { label: 'Suscripciones', icon: CreditCard, color: 'bg-blue-500/10 text-blue-500'},
-  courses: { label: 'Cursos', icon: BookOpen, color: 'bg-green-500/10 text-green-500'},
-  payments: { label: 'Pagos', icon: CreditCard, color: 'bg-purple-500/10 text-purple-500'},
-  general: { label: 'General', icon: Settings, color: 'bg-gray-500/10 text-gray-500'},
+  subscriptions: { label: 'Suscripciones', icon: CreditCard, color: 'bg-blue-500/10 text-blue-500' },
+  courses: { label: 'Cursos', icon: BookOpen, color: 'bg-green-500/10 text-green-500' },
+  payments: { label: 'Pagos', icon: CreditCard, color: 'bg-purple-500/10 text-purple-500' },
+  general: { label: 'General', icon: Settings, color: 'bg-gray-500/10 text-gray-500' },
 };
+
 export default function AdminOpsFlagsTab() {
   const { toast } = useToast();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [newFlag, setNewFlag] = useState({ key: '', description: '', category: 'general'});
+  const [newFlag, setNewFlag] = useState({ key: '', description: '', category: 'general' });
+
   const { data: flags = [], isLoading } = useQuery<FeatureFlag[]>({
     queryKey: ['/api/admin/ops/feature-flags'],
   });
+
   const updateMutation = useMutation({
     mutationFn: async ({ id, value }: { id: string; value: boolean }) => {
       const res = await apiRequest('PATCH', `/api/admin/ops/feature-flags/${id}`, { value });
@@ -46,42 +50,45 @@ export default function AdminOpsFlagsTab() {
     onSuccess: (data) => {
       toast({ 
         title: 'Flag actualizado', 
-        description: `${data.key} ahora está ${data.value ? 'activado': 'desactivado'}` 
+        description: `${data.key} ahora está ${data.value ? 'activado' : 'desactivado'}` 
       });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/ops/feature-flags'] });
     },
     onError: (error: any) => {
-      toast({ title: 'Error', description: error.message, variant: 'destructive'});
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     },
   });
+
   const createMutation = useMutation({
     mutationFn: async (data: { key: string; description: string; category: string }) => {
       const res = await apiRequest('POST', '/api/admin/ops/feature-flags', data);
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: 'Flag creado'});
+      toast({ title: 'Flag creado' });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/ops/feature-flags'] });
       setCreateDialogOpen(false);
-      setNewFlag({ key: '', description: '', category: 'general'});
+      setNewFlag({ key: '', description: '', category: 'general' });
     },
     onError: (error: any) => {
-      toast({ title: 'Error', description: error.message, variant: 'destructive'});
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     },
   });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const res = await apiRequest('DELETE', `/api/admin/ops/feature-flags/${id}`);
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: 'Flag eliminado'});
+      toast({ title: 'Flag eliminado' });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/ops/feature-flags'] });
     },
     onError: (error: any) => {
-      toast({ title: 'Error', description: error.message, variant: 'destructive'});
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     },
   });
+
   const columns: Column<FeatureFlag>[] = useMemo(() => [
     {
       key: 'key',
@@ -127,13 +134,14 @@ export default function AdminOpsFlagsTab() {
             disabled={updateMutation.isPending}
             data-testid={`switch-flag-${flag.key}`}
           />
-          <span className={`text-xs font-medium ${flag.value ? 'text-positive': 'text-negative'}`}>
-            {flag.value ? 'ON': 'OFF'}
+          <span className={`text-xs font-medium ${flag.value ? 'text-positive' : 'text-negative'}`}>
+            {flag.value ? 'ON' : 'OFF'}
           </span>
         </div>
       ),
     },
   ], [updateMutation]);
+
   return (
     <div className="space-y-6" data-testid="admin-ops-flags-tab">
       <div className="flex items-center justify-between">
@@ -152,6 +160,7 @@ export default function AdminOpsFlagsTab() {
           Nuevo Flag
         </Button>
       </div>
+
       <Table
         columns={columns}
         data={flags}
@@ -161,16 +170,17 @@ export default function AdminOpsFlagsTab() {
           title: 'No hay flags',
           description: 'Crea tu primer feature flag para controlar funcionalidades.',
         }}
-        defaultSort={{ key: 'category', direction: 'asc'}}
+        defaultSort={{ key: 'category', direction: 'asc' }}
         rowActions={(flag: FeatureFlag) => [
           {
             label: 'Eliminar',
             icon: Trash2,
             onClick: () => deleteMutation.mutate(flag.id),
-            variant: 'destructive'as const,
+            variant: 'destructive' as const,
           },
         ]}
       />
+
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -227,7 +237,7 @@ export default function AdminOpsFlagsTab() {
               disabled={!newFlag.key || createMutation.isPending}
               data-testid="button-submit-flag"
             >
-              {createMutation.isPending ? 'Creando...': 'Crear'}
+              {createMutation.isPending ? 'Creando...' : 'Crear'}
             </Button>
           </DialogFooter>
         </DialogContent>

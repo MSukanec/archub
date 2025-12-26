@@ -3,12 +3,15 @@
  * 
  * React Query mutation para eliminar categorías de materiales.
  */
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteMaterialCategory } from '../services/deleteMaterialCategory';
 import { MATERIALS_QUERY_KEYS } from '../../constants';
 import { toast } from '@/hooks/use-toast';
+
 export function useDeleteMaterialCategory() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (id: string) => deleteMaterialCategory(id),
     onSuccess: () => {

@@ -19,11 +19,13 @@ import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationMembers } from '@/features/organization'
 import { formatContactName } from '@/utils/contacts'
 import { cn } from '@/lib/utils'
+import { 
   useProjectClients, 
   useClientCommitment, 
   useCreateClientCommitment, 
   useUpdateClientCommitment 
 } from '@/features/clients/hooks'
+
 const clientCommitmentSchema = z.object({
   created_by: z.string().min(1, 'Creador es requerido'),
   client_id: z.string().min(1, 'Cliente es requerido'),
@@ -40,7 +42,7 @@ const clientCommitmentSchema = z.object({
   index_type: z.enum(['cac', 'uvi', 'ipc', 'custom_index']).optional(),
   index_frequency: z.enum(['monthly', 'quarterly']).optional(),
 }).superRefine((data, ctx) => {
-  if (data.commitment_method === 'installments_fixed'|| data.commitment_method === 'installments_indexed') {
+  if (data.commitment_method === 'installments_fixed' || data.commitment_method === 'installments_indexed') {
     if (!data.installments_count || data.installments_count <= 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -87,8 +89,11 @@ const clientCommitmentSchema = z.object({
     }
   }
 })
+
 type ClientCommitmentFormData = z.infer<typeof clientCommitmentSchema>
+
 // ============= INLINE SUBCOMPONENTS =============
+
 // Sección de Plan de Cuotas (inline)
 function InstallmentsPlanSection({ form }: { form: any }) {
   return (
@@ -117,6 +122,7 @@ function InstallmentsPlanSection({ form }: { form: any }) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="installments_frequency"
@@ -141,6 +147,7 @@ function InstallmentsPlanSection({ form }: { form: any }) {
           )}
         />
       </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <FormField
           control={form.control}
@@ -177,6 +184,7 @@ function InstallmentsPlanSection({ form }: { form: any }) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="installments_distribution"
@@ -202,6 +210,7 @@ function InstallmentsPlanSection({ form }: { form: any }) {
     </div>
   )
 }
+
 // Sección de Indexación (inline)
 function InstallmentsIndexingSection({ form }: { form: any }) {
   return (
@@ -232,6 +241,7 @@ function InstallmentsIndexingSection({ form }: { form: any }) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="index_frequency"
@@ -257,6 +267,7 @@ function InstallmentsIndexingSection({ form }: { form: any }) {
     </div>
   )
 }
+
 // Aviso Informacional (inline)
 function InformationalNotice({ message }: { message: string }) {
   return (
@@ -270,6 +281,7 @@ function InformationalNotice({ message }: { message: string }) {
     </div>
   )
 }
+
 // Subcomponente: Formulario para create/edit
 function FormPanel({
   form,
@@ -289,6 +301,7 @@ function FormPanel({
   isLoading: boolean;
 }) {
   const commitmentMethod = form.watch('commitment_method')
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -299,6 +312,7 @@ function FormPanel({
       </div>
     )
   }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -329,6 +343,7 @@ function FormPanel({
             </FormItem>
           )}
         />
+
         {/* Row 2: Unidad Funcional (opcional) */}
         <FormField
           control={form.control}
@@ -348,6 +363,7 @@ function FormPanel({
             </FormItem>
           )}
         />
+
         {/* Row 3: Moneda / Monto Comprometido / Tipo de Cambio (3 columnas) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <FormField
@@ -379,6 +395,7 @@ function FormPanel({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="amount"
@@ -403,6 +420,7 @@ function FormPanel({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="exchange_rate"
@@ -425,6 +443,7 @@ function FormPanel({
             )}
           />
         </div>
+
         {/* Row 4: Método de Compromiso */}
         <FormField
           control={form.control}
@@ -460,6 +479,7 @@ function FormPanel({
             </FormItem>
           )}
         />
+
         {/* Row 5: Descripción de la unidad (opcional) - en su propia fila */}
         <FormField
           control={form.control}
@@ -480,23 +500,28 @@ function FormPanel({
             </FormItem>
           )}
         />
+
         {/* Conditional sections based on commitment method */}
-        {(commitmentMethod === 'installments_fixed'|| commitmentMethod === 'installments_indexed') && (
+        {(commitmentMethod === 'installments_fixed' || commitmentMethod === 'installments_indexed') && (
           <InstallmentsPlanSection form={form} />
         )}
-        {commitmentMethod === 'installments_indexed'&& (
+
+        {commitmentMethod === 'installments_indexed' && (
           <InstallmentsIndexingSection form={form} />
         )}
-        {commitmentMethod === 'milestones'&& (
+
+        {commitmentMethod === 'milestones' && (
           <InformationalNotice message="Las cuotas serán generadas automáticamente según los hitos del proyecto." />
         )}
-        {commitmentMethod === 'custom'&& (
+
+        {commitmentMethod === 'custom' && (
           <InformationalNotice message="El plan de pagos será definido manualmente después de crear el compromiso." />
         )}
       </form>
     </Form>
   )
 }
+
 // Subcomponente: Vista de lectura
 function ViewPanel({
   existingCommitment,
@@ -519,6 +544,7 @@ function ViewPanel({
         return method
     }
   }
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -546,12 +572,14 @@ function ViewPanel({
           </div>
         </div>
       </div>
+
       <div>
         <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Método de Compromiso</h4>
         <span className="text-base font-medium" data-testid="text-commitment-method">
           {getCommitmentMethodLabel(existingCommitment.commitment_method || 'fixed')}
         </span>
       </div>
+
       {existingCommitment.unit_description && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Descripción de la Unidad</h4>
@@ -560,14 +588,15 @@ function ViewPanel({
           </p>
         </div>
       )}
+
       <div className="pt-4 border-t border-border">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground">
           <div data-testid="text-commitment-created-at">
-            <span className="font-medium">Creado:</span> {format(new Date(existingCommitment.created_at), "dd/MM/yyyy 'a las'HH:mm", { locale: es })}
+            <span className="font-medium">Creado:</span> {format(new Date(existingCommitment.created_at), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
           </div>
           {existingCommitment.updated_at && existingCommitment.updated_at !== existingCommitment.created_at && (
             <div data-testid="text-commitment-updated-at">
-              <span className="font-medium">Actualizado:</span> {format(new Date(existingCommitment.updated_at), "dd/MM/yyyy 'a las'HH:mm", { locale: es })}
+              <span className="font-medium">Actualizado:</span> {format(new Date(existingCommitment.updated_at), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
             </div>
           )}
         </div>
@@ -575,6 +604,7 @@ function ViewPanel({
     </div>
   )
 }
+
 interface ClientCommitmentFormProps {
   modalData?: {
     projectId?: string;
@@ -582,25 +612,30 @@ interface ClientCommitmentFormProps {
     commitmentId?: string;
   };
   onClose: () => void;
-  mode?: 'create'| 'edit'| 'view';
+  mode?: 'create' | 'edit' | 'view';
 }
-export function ClientCommitmentForm({ modalData, onClose, mode = 'create'}: ClientCommitmentFormProps) {
+
+export function ClientCommitmentForm({ modalData, onClose, mode = 'create' }: ClientCommitmentFormProps) {
   const { projectId, organizationId, commitmentId } = modalData || {}
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
+
   // Fetch existing commitment data for edit/view mode
   const { data: existingCommitment, isLoading: loadingCommitment } = useClientCommitment(
     commitmentId,
     organizationId
   )
+
   // Hooks para obtener datos
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
   const { data: projectClients, isLoading: clientsLoading } = useProjectClients(projectId, organizationId)
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
+
   // Find current member
   const currentMember = useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
   }, [members, userData?.user?.id])
+
   const form = useForm<ClientCommitmentFormData>({
     resolver: zodResolver(clientCommitmentSchema),
     defaultValues: {
@@ -620,10 +655,12 @@ export function ClientCommitmentForm({ modalData, onClose, mode = 'create'}: Cli
       index_frequency: undefined,
     }
   })
-  const isLoading = currenciesLoading || clientsLoading || membersLoading || ((mode === 'edit'|| mode === 'view') && loadingCommitment)
+
+  const isLoading = currenciesLoading || clientsLoading || membersLoading || ((mode === 'edit' || mode === 'view') && loadingCommitment)
+
   // Load existing commitment data
   React.useEffect(() => {
-    if (existingCommitment && (mode === 'edit'|| mode === 'view')) {
+    if (existingCommitment && (mode === 'edit' || mode === 'view')) {
       form.reset({
         created_by: existingCommitment.created_by || currentMember?.id || '',
         client_id: existingCommitment.client_id || '',
@@ -642,9 +679,10 @@ export function ClientCommitmentForm({ modalData, onClose, mode = 'create'}: Cli
       })
     }
   }, [existingCommitment, mode, form, currentMember?.id])
+
   // Initialize default values for create mode
   React.useEffect(() => {
-    if (mode === 'create'&& !commitmentId && currentMember?.id) {
+    if (mode === 'create' && !commitmentId && currentMember?.id) {
       form.setValue('created_by', currentMember.id)
       
       if (currencies && currencies.length > 0) {
@@ -656,12 +694,14 @@ export function ClientCommitmentForm({ modalData, onClose, mode = 'create'}: Cli
       }
     }
   }, [currencies, mode, commitmentId, currentMember?.id, form])
+
   // Mutations for create/update
   const createCommitmentMutation = useCreateClientCommitment()
   const updateCommitmentMutation = useUpdateClientCommitment()
+
   const onSubmit = async (data: ClientCommitmentFormData) => {
     try {
-      if (mode === 'edit'&& commitmentId) {
+      if (mode === 'edit' && commitmentId) {
         await updateCommitmentMutation.mutateAsync({
           commitmentId,
           updates: {
@@ -705,7 +745,7 @@ export function ClientCommitmentForm({ modalData, onClose, mode = 'create'}: Cli
       }
       
       toast({
-        title: mode === 'edit'? 'Compromiso actualizado': 'Compromiso creado',
+        title: mode === 'edit' ? 'Compromiso actualizado' : 'Compromiso creado',
         description: mode === 'edit'
           ? 'El compromiso ha sido actualizado correctamente'
           : 'El compromiso ha sido creado correctamente',
@@ -715,14 +755,16 @@ export function ClientCommitmentForm({ modalData, onClose, mode = 'create'}: Cli
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Error al ${mode === 'edit'? 'actualizar': 'crear'} el compromiso: ${error.message || 'Error desconocido'}`,
+        description: `Error al ${mode === 'edit' ? 'actualizar' : 'crear'} el compromiso: ${error.message || 'Error desconocido'}`,
       })
     }
   }
+
   const handleClose = () => {
     form.reset()
     onClose()
   }
+
   const getHeader = () => {
     switch (mode) {
       case 'view':
@@ -743,7 +785,9 @@ export function ClientCommitmentForm({ modalData, onClose, mode = 'create'}: Cli
         };
     }
   };
+
   const header = getHeader();
+
   return (
     <ModalLayout onClose={handleClose} size="lg">
       <ModalHeader
@@ -751,8 +795,9 @@ export function ClientCommitmentForm({ modalData, onClose, mode = 'create'}: Cli
         description={header.description}
         icon={DollarSign}
       />
+
       <ModalBody>
-        {mode === 'view'? (
+        {mode === 'view' ? (
           existingCommitment && <ViewPanel existingCommitment={existingCommitment} />
         ) : (
           <FormPanel
@@ -766,18 +811,19 @@ export function ClientCommitmentForm({ modalData, onClose, mode = 'create'}: Cli
           />
         )}
       </ModalBody>
-      {mode !== 'view'&& (
+
+      {mode !== 'view' && (
         <ModalFooter
           leftLabel="Cancelar"
           onLeftClick={handleClose}
-          rightLabel={mode === 'edit'? 'Guardar Cambios': 'Crear Compromiso'}
+          rightLabel={mode === 'edit' ? 'Guardar Cambios' : 'Crear Compromiso'}
           onRightClick={form.handleSubmit(onSubmit)}
           isSubmitting={createCommitmentMutation.isPending || updateCommitmentMutation.isPending}
           submitDisabled={!form.formState.isValid || createCommitmentMutation.isPending || updateCommitmentMutation.isPending || !currentMember?.id}
         />
       )}
       
-      {mode === 'view'&& (
+      {mode === 'view' && (
         <ModalFooter
           leftLabel="Cerrar"
           onLeftClick={handleClose}

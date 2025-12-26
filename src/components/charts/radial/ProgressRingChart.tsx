@@ -1,5 +1,6 @@
 import { ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis } from 'recharts'
 import { CHART_COLORS, CHART_STATES, CHART_SHAPES, CHART_DIMENSIONS, CHART_TYPOGRAPHY, formatPercent } from '../theme'
+
 export interface ProgressRingChartProps {
   value: number
   color?: string
@@ -8,6 +9,7 @@ export interface ProgressRingChartProps {
   isLoading?: boolean
   showPercentage?: boolean
 }
+
 export function ProgressRingChart({
   value = 0,
   color = CHART_COLORS.accent,
@@ -23,8 +25,10 @@ export function ProgressRingChart({
       </div>
     )
   }
+
   const normalizedValue = Math.max(0, Math.min(100, value))
   const data = [{ name: 'progress', value: normalizedValue, fill: color }]
+
   return (
     <div className="relative w-full" style={{ height }} data-testid="chart-progress-ring">
       <ResponsiveContainer>

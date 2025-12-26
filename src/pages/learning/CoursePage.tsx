@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useCourseOverview, useCourseEnrollment, useLastLessonInProgress, useCoursePlayerStore } from '@/features/learning';
+
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import CourseDashboardView from '@/features/learning/views/course/CourseDashboardView';
 import CourseContentView from '@/features/learning/views/course/CourseContentView';
@@ -13,6 +14,7 @@ import CourseNotesView from '@/features/learning/views/course/CourseNotesView';
 import CourseMarkersView from '@/features/learning/views/course/CourseMarkersView';
 import CourseForumView from '@/features/learning/views/course/CourseForumView';
 import CourseFeedbackView from '@/features/learning/views/course/CourseFeedbackView';
+
 export default function CourseView() {
   const { id } = useParams<{ id: string }>();
   const [location, navigate] = useLocation();
@@ -75,6 +77,7 @@ export default function CourseView() {
   
   // 🚀 Usar hooks del feature learning
   const { data: course, isLoading: courseLoading } = useCourseOverview(id);
+
   // Detect if coming from successful payment
   const enrolledParam = urlParams.get('enrolled');
   
@@ -83,6 +86,7 @@ export default function CourseView() {
     course?.id,
     userData?.user?.id
   );
+
   // 🚀 Get last lesson in progress (for smart "Continue Course" button)
   const { data: lastLesson } = useLastLessonInProgress(
     course?.id,
@@ -91,14 +95,16 @@ export default function CourseView() {
   
   // Force refetch if coming from payment
   useEffect(() => {
-    if (enrolledParam === 'true'&& course?.id && userData?.user?.id) {
+    if (enrolledParam === 'true' && course?.id && userData?.user?.id) {
       refetchEnrollment();
       // Clean URL parameter
       const newUrl = window.location.pathname + (window.location.search.replace(/[?&]enrolled=true/, '').replace(/^\?$/, '') || '');
       window.history.replaceState({}, '', newUrl);
     }
   }, [enrolledParam, course?.id, userData?.user?.id, refetchEnrollment]);
+
   const isLoading = courseLoading || enrollmentLoading;
+
   const headerTabs = [
     {
       id: 'Visión General',
@@ -138,6 +144,7 @@ export default function CourseView() {
       badge: 'Nuevo'
     }
   ];
+
   // State to hold CoursePlayerTab navigation data
   const [navigationState, setNavigationState] = useState<{
     hasPrev: boolean;
@@ -148,6 +155,7 @@ export default function CourseView() {
     isMarkingComplete: boolean;
     isCompleted: boolean;
   } | null>(null);
+
   const headerProps = {
     icon: BookOpen,
     title: course?.title || "Curso",
@@ -158,7 +166,7 @@ export default function CourseView() {
     isViewMode: true,
     tabs: headerTabs,
     onTabChange: handleTabChange,
-    ...(activeTab === 'Visión General'&& {
+    ...(activeTab === 'Visión General' && {
       actions: [
         <Button
           key="continue"
@@ -177,7 +185,7 @@ export default function CourseView() {
         </Button>
       ]
     }),
-    ...(activeTab === 'Reproductor'&& navigationState && {
+    ...(activeTab === 'Reproductor' && navigationState && {
       actions: [
         <Button
           key="previous"
@@ -204,6 +212,7 @@ export default function CourseView() {
       ]
     })
   };
+
   if (isLoading) {
     return (
       <Layout headerProps={headerProps} wide={false}>
@@ -215,6 +224,7 @@ export default function CourseView() {
       </Layout>
     );
   }
+
   if (!course) {
     return (
       <Layout headerProps={headerProps} wide={false}>
@@ -227,6 +237,7 @@ export default function CourseView() {
       </Layout>
     );
   }
+
   // SECURITY: Check if user is enrolled before showing course content
   // enrollment is { isEnrolled: boolean }, so we must check the property, not the object itself
   if (!enrollment?.isEnrolled) {
@@ -248,6 +259,7 @@ export default function CourseView() {
       </Layout>
     );
   }
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'Visión General':
@@ -275,6 +287,7 @@ export default function CourseView() {
         return null;
     }
   };
+
   return (
     <Layout headerProps={headerProps} wide={false}>
       {renderTabContent()}

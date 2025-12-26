@@ -1,4 +1,5 @@
 import { CheckCircle, Zap, Clock } from "lucide-react";
+
 export function HowToJoinSection() {
   return (
     <section className="py-20 -mx-6" data-testid="section-how-to-join">
@@ -12,6 +13,7 @@ export function HowToJoinSection() {
               El proceso es simple y directo
             </p>
           </div>
+
           <div className="bg-card rounded-2xl border p-8 sm:p-12">
             <div className="space-y-6">
               <div className="flex items-start gap-4">
@@ -26,6 +28,7 @@ export function HowToJoinSection() {
                   </p>
                 </div>
               </div>
+
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                   <Zap className="h-5 w-5 text-primary-foreground" />
@@ -38,6 +41,7 @@ export function HowToJoinSection() {
                   </p>
                 </div>
               </div>
+
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
                   <Clock className="h-5 w-5 text-white" />

@@ -9,19 +9,22 @@ import { format, addDays, eachDayOfInterval, isWeekend, isToday, startOfDay, sub
 import { es } from 'date-fns/locale'
 import { Tabs } from '@/components/shared/Tabs'
 import { parseLocalDate } from '@/lib/date-utils'
+
 interface Worker {
   id: string
   name: string
   avatar_url?: string
   contactType?: string
   contactTypeId?: string
-  status?: string // 'active'| 'inactive'| null
+  status?: string // 'active' | 'inactive' | null
 }
+
 interface AttendanceRecord {
   workerId: string
   day: string
-  status: 'full'| 'half'| 'absent'| 'sick'
+  status: 'full' | 'half' | 'absent' | 'sick'
 }
+
 interface AttendanceGradebookProps {
   workers?: Worker[]
   attendance?: AttendanceRecord[]
@@ -29,6 +32,7 @@ interface AttendanceGradebookProps {
   triggerTodayCenter?: boolean
   onEditAttendance?: (workerId: string, date: Date, existingAttendance?: any) => void
 }
+
 const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
   workers = [],
   attendance = [],
@@ -47,6 +51,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
         endDate: addDays(today, 3)
       }
     }
+
     // Find the earliest attendance date - use parseLocalDate to avoid timezone issues
     const attendanceDates = attendance.map(record => parseLocalDate(record.day)).filter(d => d !== null).sort((a, b) => a!.getTime() - b!.getTime()) as Date[]
     const firstAttendanceDate = attendanceDates[0]
@@ -57,22 +62,26 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
     
     // End at 3 days after today
     const calculatedEndDate = addDays(today, 3)
+
     return {
       startDate: calculatedStartDate,
       endDate: calculatedEndDate
     }
   }, [attendance])
+
   // Generate date range
   const dateRange = React.useMemo(() => {
     const dates = eachDayOfInterval({ start: startDate, end: endDate })
     return dates
   }, [startDate, endDate])
+
   // Generate month headers for timeline
   const monthHeaders = React.useMemo(() => {
     const headers: { month: string; start: number; span: number }[] = []
     let currentMonth = ''
     let monthStart = 0
     let monthSpan = 0
+
     dateRange.forEach((date, index) => {
       const monthYear = format(date, 'MMMM yyyy', { locale: es })
       
@@ -94,6 +103,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
         monthSpan++
       }
     })
+
     // Add last month
     if (currentMonth && monthSpan > 0) {
       headers.push({
@@ -102,8 +112,10 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
         span: monthSpan
       })
     }
+
     return headers
   }, [dateRange])
+
   // Group workers by contact type
   const groupedWorkers = React.useMemo(() => {
     const groups: { [key: string]: Worker[] } = {}
@@ -120,8 +132,10 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
       }
       groups[contactType].push(worker)
     })
+
     return groups
   }, [workers])
+
   // Timeline element state - declared early to avoid reference errors
   const [timelineElement, setTimelineElement] = React.useState<HTMLDivElement | null>(null)
   
@@ -137,6 +151,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
       }
     }
   }, [timelineElement, dateRange])
+
   // Auto-scroll to show the last day at the right edge on component load
   React.useEffect(() => {
     if (timelineElement && dateRange.length > 0) {
@@ -151,15 +166,18 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
       }, 100)
     }
   }, [timelineElement, dateRange])
+
   // Center on today when HOY button is triggered (responds to any change in triggerTodayCenter)
   React.useEffect(() => {
     if (timelineElement) {
       setTimeout(centerTimelineOnToday, 100)
     }
   }, [triggerTodayCenter, timelineElement, centerTimelineOnToday])
+
   // Drag functionality for timeline scrolling
   const [isDragging, setIsDragging] = React.useState(false)
   const [dragStart, setDragStart] = React.useState({ x: 0, scrollLeft: 0 })
+
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!timelineElement) return
     setIsDragging(true)
@@ -168,6 +186,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
       scrollLeft: timelineElement.scrollLeft,
     })
   }
+
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !timelineElement) return
     e.preventDefault()
@@ -175,31 +194,36 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
     const walk = (x - dragStart.x) * 2 // Scroll speed multiplier
     timelineElement.scrollLeft = dragStart.scrollLeft - walk
   }
+
   const handleMouseUp = () => {
     setIsDragging(false)
   }
+
   const handleMouseLeave = () => {
     setIsDragging(false)
   }
+
   // Smooth scroll functionality for hover navigation
   const scrollIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
   
-  const startSmoothScroll = (direction: 'left'| 'right') => {
+  const startSmoothScroll = (direction: 'left' | 'right') => {
     if (scrollIntervalRef.current) return
     
     scrollIntervalRef.current = setInterval(() => {
       if (timelineElement) {
-        const scrollAmount = direction === 'left'? -2 : 2 // Small increments for smooth scroll
+        const scrollAmount = direction === 'left' ? -2 : 2 // Small increments for smooth scroll
         timelineElement.scrollLeft += scrollAmount
       }
     }, 16) // ~60fps for smooth animation
   }
+
   const stopSmoothScroll = () => {
     if (scrollIntervalRef.current) {
       clearInterval(scrollIntervalRef.current)
       scrollIntervalRef.current = null
     }
   }
+
   // Cleanup interval on unmount
   React.useEffect(() => {
     return () => {
@@ -208,11 +232,13 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
       }
     }
   }, [])
+
   const getAttendanceStatus = (workerId: string, date: Date) => {
     const dayString = format(date, 'yyyy-MM-dd')
     const record = attendance.find(a => a.workerId === workerId && a.day === dayString)
     return record?.status || null
   }
+
   const getAttendanceColor = (status: string | null, isWeekendDay: boolean) => {
     if (isWeekendDay) {
       return "bg-gray-100 opacity-50"
@@ -230,14 +256,18 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
         return "bg-gray-200"
     }
   }
+
   const getInitials = (name: string) => {
     return name
-      .split('')
+      .split(' ')
       .map(n => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 2)
   }
+
+
+
   return (
     <div className="relative border border-border rounded-lg overflow-hidden bg-card w-full max-w-full min-w-0">
       {/* Header with title and export */}
@@ -269,6 +299,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
               <span className="text-[var(--table-header-fg)] whitespace-nowrap">Enfermedad</span>
             </div>
           </div>
+
           {/* Export Button */}
           {onExportAttendance && (
             <Button onClick={onExportAttendance} variant="outline" size="sm">
@@ -286,6 +317,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
             Personal / Asistencia
           </div>
         </div>
+
         {/* Timeline Header - Days */}
         <div 
           className="flex-1 overflow-x-auto" 
@@ -332,10 +364,10 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
                     key={date.getTime()} 
                     className={`flex items-center justify-center text-xs font-medium border-r border-[var(--table-header-border)]/30 last:border-r-0 ${
                       isWeekendDay 
-                        ? 'text-[var(--table-header-fg)]/60'
+                        ? 'text-[var(--table-header-fg)]/60' 
                         : 'text-[var(--table-header-fg)]'
-                    } ${isTodayDate ? 'bg-[var(--accent)] text-white': ''}`}
-                    style={{ width: '65px', minWidth: '65px'}}
+                    } ${isTodayDate ? 'bg-[var(--accent)] text-white' : ''}`}
+                    style={{ width: '65px', minWidth: '65px' }}
                   >
                     {format(date, 'EEE d', { locale: es })}
                   </div>
@@ -345,6 +377,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
           </div>
         </div>
       </div>
+
       {/* Main Content */}
       <div className="relative flex">
         {/* Fixed Personnel Names Column */}
@@ -368,7 +401,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
                       const shouldShowBorder = !isLastWorkerInGroup || !isLastGroup
                       
                       return (
-                        <div key={worker.id} className={`h-12 px-2 md:px-4 bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors flex items-center ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]': ''} ${worker.status && worker.status !== 'active'? 'opacity-50': ''}`}>
+                        <div key={worker.id} className={`h-12 px-2 md:px-4 bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors flex items-center ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]' : ''} ${worker.status && worker.status !== 'active' ? 'opacity-50' : ''}`}>
                           <Avatar className="h-8 w-8 flex-shrink-0">
                             <AvatarImage src={worker.avatar_url} alt={worker.name} />
                             <AvatarFallback className="text-xs font-medium">
@@ -376,7 +409,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
                             </AvatarFallback>
                           </Avatar>
                           <div className="ml-2 md:ml-3 min-w-0 flex-1">
-                            <div className={`text-xs md:text-sm font-medium text-[var(--table-row-fg)] truncate ${worker.status && worker.status !== 'active'? 'line-through': ''}`}>{worker.name}</div>
+                            <div className={`text-xs md:text-sm font-medium text-[var(--table-row-fg)] truncate ${worker.status && worker.status !== 'active' ? 'line-through' : ''}`}>{worker.name}</div>
                           </div>
                         </div>
                       );
@@ -390,6 +423,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
               )}
             </div>
           </div>
+
         {/* Timeline Content with synchronized scrolling */}
         <div 
           ref={setTimelineElement}
@@ -418,8 +452,8 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
                       return (
                         <div 
                           key={`${contactType}-header-${date.getTime()}`} 
-                          className={`flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0 ${isTodayDate ? 'bg-[var(--accent)]/20 border-l-2 border-r-2 border-[var(--accent)]': ''}`}
-                          style={{ width: '65px', minWidth: '65px'}}
+                          className={`flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0 ${isTodayDate ? 'bg-[var(--accent)]/20 border-l-2 border-r-2 border-[var(--accent)]' : ''}`}
+                          style={{ width: '65px', minWidth: '65px' }}
                         >
                           {/* Empty space for contact type header */}
                         </div>
@@ -437,7 +471,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
                     return (
                       <div 
                         key={worker.id} 
-                        className={`h-12 flex bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]': ''} ${isInactive ? 'opacity-50': ''}`}
+                        className={`h-12 flex bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]' : ''} ${isInactive ? 'opacity-50' : ''}`}
                       >
                         {dateRange.map((date) => {
                           const status = getAttendanceStatus(worker.id, date)
@@ -446,11 +480,11 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
                           return (
                             <div 
                               key={`${worker.id}-${date.getTime()}`} 
-                              className={`flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0 ${isTodayDate ? 'bg-[var(--accent)]/20 border-l-2 border-r-2 border-[var(--accent)]': ''}`}
-                              style={{ width: '65px', minWidth: '65px'}}
+                              className={`flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0 ${isTodayDate ? 'bg-[var(--accent)]/20 border-l-2 border-r-2 border-[var(--accent)]' : ''}`}
+                              style={{ width: '65px', minWidth: '65px' }}
                             >
                               {isWeekendDay || isInactive ? (
-                                <div className={`w-6 h-6 rounded-full ${getAttendanceColor(status, isWeekendDay)} flex items-center justify-center ${isInactive ? 'cursor-not-allowed': ''}`}>
+                                <div className={`w-6 h-6 rounded-full ${getAttendanceColor(status, isWeekendDay)} flex items-center justify-center ${isInactive ? 'cursor-not-allowed' : ''}`}>
                                   <span className="text-xs text-gray-400">×</span>
                                 </div>
                               ) : (
@@ -490,4 +524,5 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
     </div>
   )
 }
+
 export default AttendanceGradebook

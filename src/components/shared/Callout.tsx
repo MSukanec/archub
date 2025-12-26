@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { LucideIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
 interface CalloutButton {
   label: string;
   onClick: (e?: React.MouseEvent) => void;
 }
+
 interface CalloutProps {
   icon?: LucideIcon;
   title?: string;
@@ -18,6 +20,7 @@ interface CalloutProps {
   className?: string;
   onClick?: () => void;
 }
+
 export function Callout({ 
   icon: Icon, 
   title, 
@@ -36,6 +39,7 @@ export function Callout({
   
   if (isVolumetric) {
     if (isClosed) return null;
+
     return (
       <div
         className={cn(
@@ -57,6 +61,7 @@ export function Callout({
             {text || children}
           </span>
         </div>
+
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {allButtons.map((btn, index) => (
             <Button
@@ -91,7 +96,8 @@ export function Callout({
       </div>
     );
   }
-  const Component = onClick ? 'button': 'div';
+
+  const Component = onClick ? 'button' : 'div';
   
   return (
     <Component

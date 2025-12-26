@@ -30,6 +30,7 @@ import {
 } from '@/features/materials/hooks/use-material-purchases'
 import { FileUploader } from '@/components/shared/fields/FileUploader'
 import { uploadFile, deleteFile } from '@/lib/storage'
+
 const materialPurchaseSchema = z.object({
   purchase_date: z.date({
     required_error: "Fecha es requerida",
@@ -44,7 +45,9 @@ const materialPurchaseSchema = z.object({
   status: z.enum(['pending', 'partially_paid', 'paid', 'cancelled']),
   notes: z.string().optional().nullable(),
 })
+
 type MaterialPurchaseFormData = z.infer<typeof materialPurchaseSchema>
+
 function ViewPanel({
   existingPurchase,
   currencies,
@@ -59,6 +62,7 @@ function ViewPanel({
   
   const currency = currencies?.find(c => c.currency?.id === existingPurchase.currency_id)?.currency
   const currencySymbol = currency?.symbol || '$'
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between pb-4 border-b border-border">
@@ -81,14 +85,16 @@ function ViewPanel({
           {statusInfo.label}
         </Badge>
       </div>
+
       {existingPurchase.provider && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Proveedor</h4>
           <span className="text-sm font-medium" data-testid="text-material-purchase-provider">
-            {existingPurchase.provider.company_name || existingPurchase.provider.full_name || [existingPurchase.provider.first_name, existingPurchase.provider.last_name].filter(Boolean).join('') || '-'}
+            {existingPurchase.provider.company_name || existingPurchase.provider.full_name || [existingPurchase.provider.first_name, existingPurchase.provider.last_name].filter(Boolean).join(' ') || '-'}
           </span>
         </div>
       )}
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Subtotal</h4>
@@ -103,12 +109,14 @@ function ViewPanel({
           </span>
         </div>
       </div>
+
       <div>
         <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Total</h4>
         <span className="text-lg font-bold" data-testid="text-material-purchase-total">
           {currencySymbol} {Number(existingPurchase.total_amount || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
         </span>
       </div>
+
       {existingPurchase.exchange_rate && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Tipo de Cambio</h4>
@@ -117,6 +125,7 @@ function ViewPanel({
           </span>
         </div>
       )}
+
       {existingPurchase.notes && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Notas</h4>
@@ -125,6 +134,7 @@ function ViewPanel({
           </p>
         </div>
       )}
+
       {attachments.length > 0 && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Archivos Adjuntos</h4>
@@ -148,14 +158,15 @@ function ViewPanel({
           </div>
         </div>
       )}
+
       <div className="pt-4 border-t border-border">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground">
           <div data-testid="text-material-purchase-created-at">
-            <span className="font-medium">Creado:</span> {format(new Date(existingPurchase.created_at), "dd/MM/yyyy 'a las'HH:mm", { locale: es })}
+            <span className="font-medium">Creado:</span> {format(new Date(existingPurchase.created_at), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
           </div>
           {existingPurchase.updated_at && existingPurchase.updated_at !== existingPurchase.created_at && (
             <div data-testid="text-material-purchase-updated-at">
-              <span className="font-medium">Actualizado:</span> {format(new Date(existingPurchase.updated_at), "dd/MM/yyyy 'a las'HH:mm", { locale: es })}
+              <span className="font-medium">Actualizado:</span> {format(new Date(existingPurchase.updated_at), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
             </div>
           )}
         </div>
@@ -163,6 +174,7 @@ function ViewPanel({
     </div>
   )
 }
+
 interface MaterialPurchaseFormProps {
   modalData?: {
     projectId?: string;
@@ -170,26 +182,31 @@ interface MaterialPurchaseFormProps {
     purchaseId?: string;
   };
   onClose: () => void;
-  mode?: 'create'| 'edit'| 'view';
+  mode?: 'create' | 'edit' | 'view';
 }
-export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: MaterialPurchaseFormProps) {
+
+export function MaterialPurchaseForm({ modalData, onClose, mode = 'create' }: MaterialPurchaseFormProps) {
   const { projectId, organizationId, purchaseId } = modalData || {}
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [filesToUpload, setFilesToUpload] = useState<any[]>([])
   const [attachments, setAttachments] = useState<any[]>([])
+
   const { data: existingPurchase, isLoading: loadingPurchase } = useMaterialPurchase(
     projectId,
     purchaseId,
     organizationId
   )
+
   const { data: contacts = [], isLoading: contactsLoading } = useContacts(organizationId)
   const { data: currencies = [], isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
   const { data: members = [] } = useOrganizationMembers(organizationId || '')
+
   const currentMember = useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
   }, [members, userData?.user?.id])
+
   const providerOptions = useMemo(() => {
     if (!contacts) return []
     return contacts
@@ -197,13 +214,15 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
         value: contact.id,
         label: contact.company_name || contact.full_name || contact.first_name || 'Sin nombre'
       }))
-      .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base'}))
+      .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
   }, [contacts])
+
   const defaultCurrencyId = useMemo(() => {
     if (currencies.length === 0) return ''
     const primary = currencies.find((c: any) => c.is_primary)
     return primary?.currency?.id || currencies[0]?.currency?.id || ''
   }, [currencies])
+
   const form = useForm<MaterialPurchaseFormData>({
     resolver: zodResolver(materialPurchaseSchema),
     defaultValues: {
@@ -219,9 +238,11 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
       notes: '',
     }
   })
-  const isLoading = contactsLoading || currenciesLoading || ((mode === 'edit'|| mode === 'view') && loadingPurchase)
+
+  const isLoading = contactsLoading || currenciesLoading || ((mode === 'edit' || mode === 'view') && loadingPurchase)
+
   useEffect(() => {
-    if (existingPurchase && (mode === 'edit'|| mode === 'view')) {
+    if (existingPurchase && (mode === 'edit' || mode === 'view')) {
       const purchaseDate = parseLocalDate(existingPurchase.purchase_date) || new Date()
       
       form.reset({
@@ -238,11 +259,13 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
       })
     }
   }, [existingPurchase, mode, form, defaultCurrencyId])
+
   useEffect(() => {
-    if (mode === 'create'&& defaultCurrencyId && !form.getValues('currency_id')) {
+    if (mode === 'create' && defaultCurrencyId && !form.getValues('currency_id')) {
       form.setValue('currency_id', defaultCurrencyId)
     }
   }, [defaultCurrencyId, mode, form])
+
   useEffect(() => {
     const fetchAttachments = async () => {
       if (!purchaseId || !organizationId || !projectId) return
@@ -277,7 +300,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
       }
     }
     
-    if (mode === 'edit'|| mode === 'view') {
+    if (mode === 'edit' || mode === 'view') {
       fetchAttachments()
     }
   }, [purchaseId, organizationId, projectId, mode])
@@ -294,8 +317,10 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
       isExisting: true,
     }))
   }, [attachments])
+
   const createPurchaseMutation = useCreateMaterialPurchase()
   const updatePurchaseMutation = useUpdateMaterialPurchase()
+
   const handleExistingFileDelete = async (fileId: string) => {
     try {
       await deleteFile(fileId, false)
@@ -313,6 +338,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
       })
     }
   }
+
   const onSubmit = async (data: MaterialPurchaseFormData) => {
     try {
       const purchaseData = {
@@ -327,11 +353,14 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
         status: data.status,
         notes: data.notes || null,
       }
+
       let purchaseResult;
+
       if (mode === 'create') {
         if (!projectId || !organizationId) {
           throw new Error('Missing required parameters')
         }
+
         purchaseResult = await createPurchaseMutation.mutateAsync({
           purchaseData,
           projectId,
@@ -341,6 +370,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
         if (!projectId || !purchaseId || !organizationId) {
           throw new Error('Missing required parameters')
         }
+
         purchaseResult = await updatePurchaseMutation.mutateAsync({
           projectId,
           purchaseId,
@@ -348,7 +378,9 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
           organizationId,
         })
       }
+
       const createdPurchaseId = purchaseResult?.id || purchaseId
+
       if (filesToUpload.length > 0 && createdPurchaseId) {
         if (!organizationId) {
           toast({
@@ -358,6 +390,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
           })
           return
         }
+
         for (const fileInput of filesToUpload) {
           try {
             console.log('[MaterialPurchaseForm] Uploading file:', {
@@ -396,8 +429,9 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
         queryClient.invalidateQueries({ queryKey: ['material-purchase-media', createdPurchaseId] })
         setFilesToUpload([])
       }
+
       toast({
-        title: mode === 'edit'? 'Compra actualizada': 'Compra creada',
+        title: mode === 'edit' ? 'Compra actualizada' : 'Compra creada',
         description: mode === 'edit'
           ? 'La compra de materiales se ha actualizado correctamente.'
           : 'La compra de materiales se ha registrado correctamente.',
@@ -412,7 +446,9 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
       })
     }
   }
+
   const isMutating = createPurchaseMutation.isPending || updatePurchaseMutation.isPending
+
   const getTitle = () => {
     switch (mode) {
       case 'create':
@@ -425,6 +461,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
         return 'Compra de Materiales'
     }
   }
+
   const getDescription = () => {
     switch (mode) {
       case 'create':
@@ -437,6 +474,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
         return ''
     }
   }
+
   return (
     <ModalLayout onClose={onClose}>
       <ModalHeader
@@ -452,7 +490,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
               <p className="text-sm text-muted-foreground mt-2">Cargando datos...</p>
             </div>
           </div>
-        ) : mode === 'view'&& existingPurchase ? (
+        ) : mode === 'view' && existingPurchase ? (
           <ViewPanel existingPurchase={existingPurchase} currencies={currencies} attachments={attachments} />
         ) : (
           <Form {...form}>
@@ -496,6 +534,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="status"
@@ -522,6 +561,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
                   )}
                 />
               </div>
+
               <FormField
                 control={form.control}
                 name="provider_id"
@@ -543,6 +583,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
                   </FormItem>
                 )}
               />
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -569,6 +610,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="invoice_number"
@@ -588,6 +630,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
                   )}
                 />
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
@@ -613,6 +656,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="tax_amount"
@@ -635,6 +679,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="currency_id"
@@ -662,6 +707,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
                   )}
                 />
               </div>
+
               <FormField
                 control={form.control}
                 name="exchange_rate"
@@ -684,6 +730,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="notes"
@@ -704,6 +751,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
                   </FormItem>
                 )}
               />
+
               <div>
                 <FileUploader
                   mode="multiple"
@@ -721,18 +769,18 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
           </Form>
         )}
       </ModalBody>
-      {mode !== 'view'&& (
+      {mode !== 'view' && (
         <ModalFooter
           leftLabel="Cancelar"
           onLeftClick={onClose}
-          rightLabel={mode === 'edit'? 'Guardar Cambios': 'Crear Compra'}
+          rightLabel={mode === 'edit' ? 'Guardar Cambios' : 'Crear Compra'}
           onRightClick={form.handleSubmit(onSubmit)}
           isSubmitting={isMutating}
           submitDisabled={isMutating || isLoading}
         />
       )}
       
-      {mode === 'view'&& (
+      {mode === 'view' && (
         <ModalFooter
           leftLabel="Cerrar"
           onLeftClick={onClose}
@@ -741,4 +789,5 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create'}: Mat
     </ModalLayout>
   )
 }
+
 export default MaterialPurchaseForm

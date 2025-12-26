@@ -6,7 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { cn } from '@/lib/utils'
 import { BoardFormFields } from '../forms/BoardFormFields'
 import { PinFormFields } from '../forms/PinFormFields'
-type ItemType = 'board'| 'pin'
+
+type ItemType = 'board' | 'pin'
+
 interface ItemTypeConfig {
   id: ItemType
   label: string
@@ -15,6 +17,7 @@ interface ItemTypeConfig {
   color: string
   submitLabel: string
 }
+
 const ITEM_TYPES: ItemTypeConfig[] = [
   {
     id: 'board',
@@ -33,6 +36,7 @@ const ITEM_TYPES: ItemTypeConfig[] = [
     submitLabel: 'Crear Pin',
   },
 ]
+
 interface NewMoodboardItemModalProps {
   modalData?: {
     projectId?: string
@@ -40,28 +44,34 @@ interface NewMoodboardItemModalProps {
   }
   onClose: () => void
 }
+
 export function NewMoodboardItemModal({ modalData, onClose }: NewMoodboardItemModalProps) {
   const formRef = useRef<HTMLFormElement>(null)
   const [selectedType, setSelectedType] = useState<ItemType | null>(null)
+
   const selectedConfig = selectedType 
     ? ITEM_TYPES.find(t => t.id === selectedType) 
     : null
+
   const handleSubmit = () => {
     if (formRef.current) {
       formRef.current.requestSubmit()
     }
   }
+
   const renderFormFields = () => {
     if (!selectedType) return null
+
     const commonProps = {
       projectId: modalData?.projectId,
       organizationId: modalData?.organizationId,
-      mode: 'create'as const,
+      mode: 'create' as const,
       onSuccess: onClose,
       onCancel: onClose,
       hideActions: true,
       formRef,
     }
+
     switch (selectedType) {
       case 'board':
         return <BoardFormFields {...commonProps} />
@@ -71,6 +81,7 @@ export function NewMoodboardItemModal({ modalData, onClose }: NewMoodboardItemMo
         return null
     }
   }
+
   return (
     <ModalLayout 
       onClose={onClose} 
@@ -118,6 +129,7 @@ export function NewMoodboardItemModal({ modalData, onClose }: NewMoodboardItemMo
             </SelectContent>
           </Select>
         </div>
+
         {selectedType && (
           <div className="pt-4 border-t">
             {renderFormFields()}
@@ -127,4 +139,5 @@ export function NewMoodboardItemModal({ modalData, onClose }: NewMoodboardItemMo
     </ModalLayout>
   )
 }
+
 export default NewMoodboardItemModal

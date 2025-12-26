@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getOrganizationActivity } from '../services';
 import { organizationKeys } from '@/core/query-keys';
+
 export function useOrganizationActivity(organizationId: string | undefined) {
   return useQuery({
     queryKey: organizationKeys.activity(organizationId),

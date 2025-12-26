@@ -36,9 +36,11 @@ import { siteLogSchema, type SiteLogFormData } from '../schemas';
 import type { SiteLogFileInput } from '../types';
 import { useSiteLogTypes } from '../hooks/use-sitelog-types';
 import { useSiteLogFiles } from '../hooks/use-sitelog-files';
+
 interface SiteLogModalProps {
   data?: any;
 }
+
 export function SiteLogModal({ data }: SiteLogModalProps) {
   const { toast } = useToast();
   const { closeModal } = useGlobalModalStore();
@@ -51,8 +53,8 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   // Plan features para restricciones
   const currentOrganization = currentUser?.organizations?.find(org => org.id === currentOrganizationId);
   const currentPlanName = currentOrganization?.plan?.name?.toLowerCase() || 'free';
-  const isPro = currentPlanName === 'pro'|| currentPlanName === 'teams'|| currentPlanName === 'enterprise';
-  const isTeams = currentPlanName === 'teams'|| currentPlanName === 'enterprise';
+  const isPro = currentPlanName === 'pro' || currentPlanName === 'teams' || currentPlanName === 'enterprise';
+  const isTeams = currentPlanName === 'teams' || currentPlanName === 'enterprise';
   
   // Query para obtener tipos de bitácora
   const { data: siteLogTypes = [], isLoading: typesLoading } = useSiteLogTypes(
@@ -62,7 +64,9 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [filesToUpload, setFilesToUpload] = useState<SiteLogFileInput[]>([]);
   const [existingSiteLogFiles, setExistingSiteLogFiles] = useState<any[]>([]);
+
   const queryClient = useQueryClient();
+
   // Inicializar el panel correcto según si es creación o edición
   useEffect(() => {
     const siteLogId = data?.data?.id || data?.id;
@@ -79,21 +83,25 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       setPanel('view');
     }
   }, [data, setPanel]);
+
   // Query para obtener archivos existentes de la bitácora
   const { data: siteLogFiles = [], isLoading: filesLoading } = useSiteLogFiles(
     data?.id || data?.data?.id,
     currentOrganizationId || undefined
   );
+
   // Mutación para subir archivos de bitácora
   const uploadFilesMutation = useMutation({
     mutationFn: async ({ files, siteLogId }: { files: SiteLogFileInput[], siteLogId: string }) => {
       if (!currentOrganizationId || !selectedProjectId) {
         throw new Error('No hay proyecto u organización seleccionada');
       }
+
       const currentMember = members.find((m: any) => m.user_id === currentUser?.user?.id);
       if (!currentMember) {
         throw new Error('No se encontró el miembro de la organización para el usuario actual');
       }
+
       return await uploadSiteLogFiles(
         files,
         siteLogId,
@@ -135,22 +143,26 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       });
     }
   });
+
   // Mutación para crear/actualizar bitácoras
   const siteLogMutation = useMutation({
     mutationFn: async (formData: SiteLogFormData) => {
       if (!currentOrganizationId || !selectedProjectId) {
         throw new Error('No hay proyecto u organización seleccionada');
       }
+
       // Obtener el organization_member.id del usuario actual
       const currentMember = members.find((m: any) => m.user_id === currentUser?.user?.id);
       if (!currentMember) {
         throw new Error('No se encontró el miembro de la organización para el usuario actual');
       }
+
       // Validar que entry_type_id sea un UUID válido
       const entryTypeId = formData.entry_type_id || defaultType?.id;
       if (!entryTypeId) {
         throw new Error('Tipo de bitácora no especificado');
       }
+
       const siteLogData = {
         log_date: formData.log_date,
         created_by: currentMember.id,
@@ -164,10 +176,12 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         project_id: selectedProjectId,
         organization_id: currentOrganizationId
       };
+
       const siteLogId = data?.data?.id || data?.id;
       const savedSiteLog = siteLogId
         ? await updateSiteLog(siteLogId, siteLogData)
         : await createSiteLog(siteLogData);
+
       return savedSiteLog;
     },
     onSuccess: async (savedSiteLog) => {
@@ -200,6 +214,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       });
     }
   });
+
   // Obtener el tipo por defecto - Priorizar is_default=true, si no, tomar el primero
   const defaultType = siteLogTypes.find((t: any) => t.is_default) || siteLogTypes[0];
   
@@ -225,6 +240,9 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       form.setValue('entry_type_id', defaultType.id);
     }
   }, [defaultType, data, form]);
+
+
+
   useEffect(() => {
     if (data) {
       // Los datos pueden venir anidados en data.data, normalizar
@@ -245,10 +263,13 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       setUploadedFiles(siteLogData.files || []);
     }
   }, [data, form, defaultType]);
+
   const onSubmit = async (formData: SiteLogFormData) => {
     siteLogMutation.mutate(formData);
   };
+
   const isLoading = siteLogMutation.isPending;
+
   const viewPanel = (
     <div className="space-y-6">
       <div className="text-center">
@@ -275,12 +296,13 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       )}
     </div>
   );
+
   const editPanel = (
     <Form {...form}>
       <form 
         onSubmit={form.handleSubmit(onSubmit)} 
         onKeyDown={(e) => {
-          if (e.key === 'Enter'&& !e.shiftKey) {
+          if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             form.handleSubmit(onSubmit)();
           }
@@ -335,6 +357,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
               );
             }}
           />
+
           <FormField
             control={form.control}
             name="entry_type_id"
@@ -346,7 +369,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                     <Badge 
                       variant="outline" 
                       className="ml-2 text-[10px] border-0 text-white" 
-                      style={{ backgroundColor: 'hsl(213, 100%, 33%)'}}
+                      style={{ backgroundColor: 'hsl(213, 100%, 33%)' }}
                     >
                       PRO
                     </Badge>
@@ -386,6 +409,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
             )}
           />
         </div>
+
         {/* Fila 2: Clima / Severidad */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
@@ -417,6 +441,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="severity"
@@ -441,6 +466,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
             )}
           />
         </div>
+
         {/* Fila 3: Público / Estado */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
@@ -454,7 +480,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                     <Badge 
                       variant="outline" 
                       className="ml-2 text-[10px] border-0 text-white" 
-                      style={{ backgroundColor: 'hsl(271, 76%, 53%)'}}
+                      style={{ backgroundColor: 'hsl(271, 76%, 53%)' }}
                     >
                       TEAMS
                     </Badge>
@@ -479,6 +505,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="status"
@@ -490,7 +517,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                     <Badge 
                       variant="outline" 
                       className="ml-2 text-[10px] border-0 text-white" 
-                      style={{ backgroundColor: 'hsl(271, 76%, 53%)'}}
+                      style={{ backgroundColor: 'hsl(271, 76%, 53%)' }}
                     >
                       TEAMS
                     </Badge>
@@ -518,6 +545,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
             )}
           />
         </div>
+
         {/* Comentarios */}
         <FormField
           control={form.control}
@@ -536,6 +564,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
             </FormItem>
           )}
         />
+
         {/* Fotos y Videos */}
         <div className="space-y-4">
           <FormSubsectionButton
@@ -551,7 +580,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
           {/* Mini-galería de imágenes y videos */}
           {(() => {
             // Filtrar imágenes y videos de ambas fuentes
-            const existingMedia = siteLogFiles.filter(file => file.file_type === 'image'|| file.file_type === 'video');
+            const existingMedia = siteLogFiles.filter(file => file.file_type === 'image' || file.file_type === 'video');
             const newMedia = filesToUpload.filter(fileInput => {
               const type = fileInput.file.type;
               return type.startsWith('image/') || type.startsWith('video/');
@@ -565,13 +594,13 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
                 {/* Media existente */}
                 {existingMedia.map((file) => (
                   <div key={`existing-${file.id}`} className="relative aspect-square rounded overflow-hidden bg-muted">
-                    {file.file_type === 'image'? (
+                    {file.file_type === 'image' ? (
                       <img
                         src={file.file_url || ''}
                         alt=""
                         className="w-full h-full object-cover"
                       />
-                    ) : file.file_type === 'video'? (
+                    ) : file.file_type === 'video' ? (
                       <>
                         <video 
                           src={file.file_url || ''}
@@ -619,11 +648,13 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
             );
           })()}
         </div>
+
         {/* Botón submit oculto */}
-        <button type="submit" style={{ display: 'none'}} />
+        <button type="submit" style={{ display: 'none' }} />
       </form>
     </Form>
   );
+
   const mediaSubform = (
     <MediaForm 
       filesToUpload={filesToUpload}
@@ -631,13 +662,17 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       siteLogFiles={siteLogFiles}
     />
   );
+
   const handleSubmit = () => {
     form.handleSubmit(onSubmit)();
   };
+
   const handleEditClick = () => {
     setPanel('edit');
   };
+
   const siteLogId = data?.data?.id || data?.id;
+
   // Configurar botones del footer según el panel actual
   const getFooterConfig = () => {
     if (currentPanel === 'view') {
@@ -669,7 +704,9 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       };
     }
   };
+
   const footerConfig = getFooterConfig();
+
   // Configurar header dinámico según el panel actual
   const getHeaderConfig = () => {
     if (currentPanel === 'subform') {
@@ -681,8 +718,10 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
           description: 'Adjunta archivos multimedia al registro de bitácora'
         }
       };
+
       const config = subformHeaders[currentSubform || ''];
       if (!config) return null;
+
       // Ya no necesitamos showBackButton ni onBackClick - FormModalLayout lo agrega automáticamente
       return (
         <FormModalHeader
@@ -692,6 +731,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
         />
       );
     }
+
     // Header por defecto para view/edit
     return (
       <FormModalHeader
@@ -701,6 +741,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       />
     );
   };
+
   return (
     <FormModalLayout 
       onClose={closeModal}
@@ -708,7 +749,7 @@ export function SiteLogModal({ data }: SiteLogModalProps) {
       viewPanel={viewPanel}
       editPanel={editPanel}
       subformPanel={
-        currentSubform === 'files'? mediaSubform :
+        currentSubform === 'files' ? mediaSubform :
         null
       }
       headerContent={getHeaderConfig()}

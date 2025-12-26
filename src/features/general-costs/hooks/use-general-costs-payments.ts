@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useOptimisticMutation } from '@/core/save-engine';
 import { supabase } from '@/lib/supabase';
 import { generalCostsKeys } from '@/core/query-keys';
+
 export interface GeneralCostPayment {
   id: string;
   organization_id: string;
@@ -15,7 +16,7 @@ export interface GeneralCostPayment {
   updated_at: string;
   wallet_id: string | null;
   general_cost_id: string | null;
-  status: 'confirmed'| 'pending'| 'rejected'| 'void';
+  status: 'confirmed' | 'pending' | 'rejected' | 'void';
   created_by: string | null;
   attachments_count?: number;
   general_cost?: {
@@ -66,14 +67,17 @@ export interface GeneralCostPayment {
     };
   }>;
 }
+
 export function useGeneralCostsPayments(organizationId: string | undefined) {
   return useQuery({
     queryKey: generalCostsKeys.paymentList(organizationId),
     queryFn: async () => {
       if (!organizationId) return [];
+
       if (!supabase) {
         throw new Error('Supabase client not initialized');
       }
+
       const { data, error } = await supabase
         .from('general_costs_payments')
         .select(`
@@ -131,9 +135,11 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
         .eq('organization_id', organizationId)
         .eq('is_deleted', false)
         .order('payment_date', { ascending: false });
+
       if (error) {
         throw error;
       }
+
       return (data || []).map(payment => {
         const walletData = Array.isArray(payment.wallet) ? payment.wallet[0] : payment.wallet;
         const generalCost = Array.isArray(payment.general_cost) ? payment.general_cost[0] : payment.general_cost;
@@ -164,12 +170,14 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
     staleTime: 30000,
   });
 }
+
 export function useDeleteGeneralCostPaymentInline(organizationId: string | null) {
   return useOptimisticMutation({
     mutationFn: async ({ paymentId, organizationId: orgId }: { paymentId: string; organizationId: string }) => {
       if (!supabase) {
         throw new Error('Supabase client not initialized');
       }
+
       const { error } = await supabase
         .from('general_costs_payments')
         .update({
@@ -178,9 +186,11 @@ export function useDeleteGeneralCostPaymentInline(organizationId: string | null)
         })
         .eq('id', paymentId)
         .eq('organization_id', orgId);
+
       if (error) {
         throw error;
       }
+
       return { paymentId };
     },
     queryKey: generalCostsKeys.paymentList(organizationId),

@@ -5,6 +5,7 @@ import { useCourseLanding, useCourseEnrollment, useCourseProgress } from '@/feat
 import { CourseLandingShell } from '@/features/shared-content/courses';
 import { Header } from '@/layouts/marketing/components/Header';
 import { Footer } from '@/layouts/marketing/components/Footer';
+
 export default function CourseLanding() {
   const { slug } = useParams<{ slug: string }>();
   const [location, navigate] = useLocation();
@@ -12,15 +13,18 @@ export default function CourseLanding() {
   const { data, isLoading, error } = useCourseLanding(slug || '');
   const { data: enrollmentData } = useCourseEnrollment(data?.course?.id, userData?.user?.id);
   const { data: progressData } = useCourseProgress(data?.course?.id);
+
   const isEnrolled = enrollmentData?.isEnrolled || false;
   const progressPercentage = (() => {
     if (!progressData || progressData.length === 0) return 0;
     const completed = progressData.filter(p => p.is_completed).length;
     return Math.round((completed / progressData.length) * 100);
   })();
+
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth'});
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [location]);
+
   useEffect(() => {
     if (!data?.course) return;
     
@@ -31,8 +35,10 @@ export default function CourseLanding() {
       keywords: (course.seo_keywords || []).join(', '),
       ogImage: course.og_image_url || course.cover_url || '',
     };
+
     const originalTitle = document.title;
     document.title = seo.title;
+
     const setMetaTag = (property: string, content: string) => {
       let tag = document.querySelector(`meta[property="${property}"]`);
       if (tag) {
@@ -44,14 +50,17 @@ export default function CourseLanding() {
         document.head.appendChild(tag);
       }
     };
+
     setMetaTag("og:title", seo.title);
     setMetaTag("og:description", seo.description);
     setMetaTag("og:type", "website");
     if (seo.ogImage) setMetaTag("og:image", seo.ogImage);
+
     return () => {
       document.title = originalTitle;
     };
   }, [data]);
+
   const handleCTAClick = () => {
     if (isEnrolled) {
       navigate(`/learning/courses/${data?.course?.slug}`);
@@ -61,7 +70,9 @@ export default function CourseLanding() {
       navigate('/register');
     }
   };
-  const ctaButtonText = isEnrolled ? 'CONTINUAR CURSO': 'INSCRIBIRME';
+
+  const ctaButtonText = isEnrolled ? 'CONTINUAR CURSO' : 'INSCRIBIRME';
+
   if (isLoading) {
     return (
       <div className="min-h-screen">
@@ -75,6 +86,7 @@ export default function CourseLanding() {
       </div>
     );
   }
+
   if (error || !data) {
     return (
       <div className="min-h-screen">
@@ -91,6 +103,7 @@ export default function CourseLanding() {
       </div>
     );
   }
+
   return (
     <div className="min-h-screen">
       <Header />

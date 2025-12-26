@@ -3,22 +3,25 @@ import { Progress } from '@/components/ui/progress';
 import { CheckCircle, Clock, BookOpen, Award } from 'lucide-react';
 import type { Course } from '@shared/schema';
 import type { CourseStats } from '../../types';
+
 interface HeroSectionProps {
   course: Course;
   stats: CourseStats;
   isEnrolled?: boolean;
   progressPercentage?: number;
 }
+
 export function HeroSection({ course, stats, isEnrolled = false, progressPercentage = 0 }: HeroSectionProps) {
   const hasCover = !!course.cover_url;
   
   const titleClass = hasCover 
-    ? 'text-white'
+    ? 'text-white' 
     : 'text-foreground';
   
   const textClass = hasCover 
-    ? 'text-gray-200'
+    ? 'text-gray-200' 
     : 'text-muted-foreground';
+
   return (
     <section className="relative h-screen flex items-center overflow-hidden">
       {/* Background Image with Parallax (desktop only) */}
@@ -33,6 +36,7 @@ export function HeroSection({ course, stats, isEnrolled = false, progressPercent
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
       )}
+
       {/* Content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-3xl">
@@ -42,12 +46,15 @@ export function HeroSection({ course, stats, isEnrolled = false, progressPercent
               {course.badge_text}
             </Badge>
           )}
+
           <h1 className={`text-3xl sm:text-5xl lg:text-7xl font-bold tracking-tight mb-6 ${titleClass}`}>
             {course.title}
           </h1>
+
           <p className={`text-base sm:text-lg leading-relaxed mb-8 ${textClass}`}>
             {course.short_description}
           </p>
+
           {/* Progress Bar - Only show when enrolled */}
           {isEnrolled && (
             <div className="mb-8 max-w-xs space-y-2">
@@ -58,6 +65,7 @@ export function HeroSection({ course, stats, isEnrolled = false, progressPercent
               <Progress value={progressPercentage} className="h-2" data-testid="hero-progress-bar" />
             </div>
           )}
+
           {/* Stats */}
           <div className="flex flex-wrap gap-4 sm:gap-6">
             <div className="flex items-center gap-2 text-xs sm:text-sm md:text-base">

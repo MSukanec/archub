@@ -8,6 +8,7 @@ import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
 import { getClientRoleUsageCount } from '@/features/clients/services/clientRoles';
 import type { ClientRole } from '@/features/clients/types';
+
 export function ClientSettingsView() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -17,29 +18,35 @@ export function ClientSettingsView() {
   const { data: clientRoles = [], isLoading } = useClientRoles(organizationId ?? undefined);
   const deleteMutation = useDeleteClientRole();
   const replaceMutation = useReplaceClientRole(organizationId);
+
   const sortedRoles = [...clientRoles].sort((a, b) => 
     a.name.toLowerCase().localeCompare(b.name.toLowerCase())
   );
+
   const handleAddRole = () => {
     openModal('clientRole', { isEditing: false });
   };
+
   const handleEditRole = (role: ClientRole) => {
     openModal('clientRole', { 
       clientRole: role,
       isEditing: true 
     });
   };
+
   const handleDeleteRole = async (role: ClientRole) => {
     if (!organizationId) return;
+
     try {
       const usageCount = await getClientRoleUsageCount(role.id);
       
       const otherRoles = clientRoles.filter(r => r.id !== role.id);
       const canReplace = usageCount > 0 && otherRoles.length > 0;
+
       const consequences: string[] = [];
       if (usageCount > 0) {
         consequences.push(
-          `${usageCount} cliente${usageCount === 1 ? '': 's'} tiene${usageCount === 1 ? '': 'n'} este rol asignado`
+          `${usageCount} cliente${usageCount === 1 ? '' : 's'} tiene${usageCount === 1 ? '' : 'n'} este rol asignado`
         );
         if (canReplace) {
           consequences.push('Podés reemplazarlos con otro rol o dejarlos sin rol asignado');
@@ -47,14 +54,16 @@ export function ClientSettingsView() {
           consequences.push('Los clientes quedarán sin rol asignado');
         }
       }
+
       const replacementOptions = otherRoles
-        .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base'}))
+        .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
         .map(r => ({
-          label: r.name + (r.is_default ? '(Sistema)': ''),
+          label: r.name + (r.is_default ? ' (Sistema)' : ''),
           value: r.id
         }));
+
       openModal('delete-confirmation', {
-        mode: canReplace ? 'replace': 'delete',
+        mode: canReplace ? 'replace' : 'delete',
         title: '¿Eliminar rol de cliente?',
         description: `¿Estás seguro de que querés eliminar el rol "${role.name}"?`,
         itemName: role.name,
@@ -96,6 +105,7 @@ export function ClientSettingsView() {
       });
     }
   };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -103,6 +113,7 @@ export function ClientSettingsView() {
       </div>
     );
   }
+
   return (
     <div className="p-6 space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -128,7 +139,9 @@ export function ClientSettingsView() {
             Puedes crear roles personalizados para adaptar la gestión de clientes a las necesidades de tu organización.
           </p>
         </div>
+
         <div className="space-y-3">
+
           {sortedRoles.map((role) => (
             <div 
               key={role.id}
@@ -175,6 +188,7 @@ export function ClientSettingsView() {
               </div>
             </div>
           ))}
+
           {sortedRoles.length === 0 && (
             <div className="p-8 text-center rounded-lg border border-dashed border-border">
               <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -188,4 +202,5 @@ export function ClientSettingsView() {
     </div>
   );
 }
+
 export default ClientSettingsView;

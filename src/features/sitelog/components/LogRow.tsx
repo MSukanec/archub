@@ -3,6 +3,7 @@ import DataRowCard from '@/components/shared/DataRowCard';
 import { SwipeableCard } from '@/layouts';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { 
   Star, 
   Edit, 
   Trash2,
@@ -25,6 +26,7 @@ import { es } from 'date-fns/locale';
   Thermometer
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+
 // Interfaces
 interface SiteLog {
   id: string;
@@ -41,6 +43,7 @@ interface SiteLog {
   files?: any[];
   attendees?: any[];
 }
+
 interface LogRowProps {
   siteLog: SiteLog;
   onClick?: (siteLog: SiteLog) => void;
@@ -48,22 +51,24 @@ interface LogRowProps {
   onDelete?: (siteLog: SiteLog) => void;
   onToggleFavorite?: (siteLogId: string) => void;
   selected?: boolean;
-  density?: 'compact'| 'normal'| 'comfortable';
+  density?: 'compact' | 'normal' | 'comfortable';
   enableSwipe?: boolean;
   className?: string;
 }
+
 // Entry type configurations
 const entryTypes = {
-  avance_de_obra: { label: 'Avance de Obra', icon: TrendingUp, color: 'bg-green-100 text-green-800'},
-  visita_tecnica: { label: 'Visita Técnica', icon: Eye, color: 'bg-blue-100 text-blue-800'},
-  problema_detectado: { label: 'Problema', icon: AlertTriangle, color: 'bg-red-100 text-red-800'},
-  pedido_material: { label: 'Pedido Material', icon: Package, color: 'bg-orange-100 text-orange-800'},
-  nota_climatica: { label: 'Nota Climática', icon: StickyNote, color: 'bg-yellow-100 text-yellow-800'},
-  decision: { label: 'Decisión', icon: CheckCircle, color: 'bg-purple-100 text-purple-800'},
-  inspeccion: { label: 'Inspección', icon: Eye, color: 'bg-indigo-100 text-indigo-800'},
-  foto_diaria: { label: 'Foto Diaria', icon: Camera, color: 'bg-gray-100 text-gray-800'},
-  registro_general: { label: 'Registro General', icon: FileText, color: 'bg-teal-100 text-teal-800'}
+  avance_de_obra: { label: 'Avance de Obra', icon: TrendingUp, color: 'bg-green-100 text-green-800' },
+  visita_tecnica: { label: 'Visita Técnica', icon: Eye, color: 'bg-blue-100 text-blue-800' },
+  problema_detectado: { label: 'Problema', icon: AlertTriangle, color: 'bg-red-100 text-red-800' },
+  pedido_material: { label: 'Pedido Material', icon: Package, color: 'bg-orange-100 text-orange-800' },
+  nota_climatica: { label: 'Nota Climática', icon: StickyNote, color: 'bg-yellow-100 text-yellow-800' },
+  decision: { label: 'Decisión', icon: CheckCircle, color: 'bg-purple-100 text-purple-800' },
+  inspeccion: { label: 'Inspección', icon: Eye, color: 'bg-indigo-100 text-indigo-800' },
+  foto_diaria: { label: 'Foto Diaria', icon: Camera, color: 'bg-gray-100 text-gray-800' },
+  registro_general: { label: 'Registro General', icon: FileText, color: 'bg-teal-100 text-teal-800' }
 };
+
 const weatherTypes = {
   sunny: { icon: Sun, label: "Soleado" },
   partly_cloudy: { icon: CloudSun, label: "Parcialmente nublado" },
@@ -75,16 +80,18 @@ const weatherTypes = {
   wind: { icon: Wind, label: "Viento" },
   hot: { icon: Thermometer, label: "Caluroso" }
 };
+
 // Helper para obtener iniciales
 const getInitials = (name: string): string => {
   if (!name) return "U";
   return name
-    .split('')
+    .split(' ')
     .map(n => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
 };
+
 export default function LogRow({
   siteLog,
   onClick,
@@ -102,19 +109,23 @@ export default function LogRow({
   if (!entryTypeConfig) {
     return null;
   }
+
   // Obtener avatar y nombre del creador
   const creatorName = siteLog.creator?.full_name || 'Usuario';
   const avatarUrl = siteLog.creator?.avatar_url;
   const avatarFallback = getInitials(creatorName);
+
   // Contar elementos adjuntos
   const totalFiles = siteLog.files?.length || 0;
   const totalAttendees = siteLog.attendees?.length || 0;
   
   const hasAttachments = totalFiles > 0 || totalAttendees > 0;
+
   // Filtrar solo imágenes de los archivos
   const imageFiles = siteLog.files?.filter(file => 
-    file.file_type === 'image'|| file.mime_type?.startsWith('image/')
+    file.file_type === 'image' || file.mime_type?.startsWith('image/')
   ) || [];
+
   // Contenido del card usando el nuevo sistema
   const cardContent = (
     <>
@@ -126,6 +137,7 @@ export default function LogRow({
             {entryTypeConfig.label}
           </span>
         </div>
+
         {/* Fecha y clima */}
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
           <span>
@@ -141,6 +153,7 @@ export default function LogRow({
             </>
           )}
         </div>
+
         {/* Mini-galería de thumbnails (hasta 8 imágenes) */}
         {imageFiles.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">
@@ -161,6 +174,7 @@ export default function LogRow({
           </div>
         )}
       </div>
+
       {/* Columna trailing - Estado de favorito */}
       <div className="flex items-center">
         {siteLog.is_favorite && (
@@ -169,6 +183,7 @@ export default function LogRow({
       </div>
     </>
   );
+
   // Crear el card base usando DataRowCard
   const logCard = (
     <DataRowCard
@@ -183,7 +198,9 @@ export default function LogRow({
       {cardContent}
     </DataRowCard>
   );
+
   return logCard;
 }
+
 // Export del tipo para uso externo
 export type { SiteLog };

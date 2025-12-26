@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+
 export interface TaskCategory {
   id: string
   name: string
@@ -8,6 +9,7 @@ export interface TaskCategory {
   position?: string
   created_at: string
 }
+
 export function useTaskCategories() {
   return useQuery({
     queryKey: ['task-categories'],
@@ -16,20 +18,24 @@ export function useTaskCategories() {
         console.error('Supabase client not initialized')
         throw new Error('Supabase client not initialized')
       }
+
       console.log('Fetching task categories...')
       const { data, error } = await supabase
         .from('task_categories')
         .select('*')
         .order('name')
+
       if (error) {
         console.error('Error fetching task categories:', error)
         throw error
       }
+
       console.log('Task categories data:', data)
       return data as TaskCategory[]
     }
   })
 }
+
 // Hook to get top-level categories (parent_id === null)
 export function useTopLevelCategories() {
   const { data: allCategories = [], ...rest } = useTaskCategories()
@@ -43,6 +49,7 @@ export function useTopLevelCategories() {
     ...rest
   }
 }
+
 // Hook to get subcategories by parent_id
 export function useSubcategories(parentId: string | null) {
   const { data: allCategories = [], ...rest } = useTaskCategories()
@@ -56,6 +63,7 @@ export function useSubcategories(parentId: string | null) {
     ...rest
   }
 }
+
 // Hook to get element categories by parent_id
 export function useElementCategories(parentId: string | null) {
   const { data: allCategories = [], ...rest } = useTaskCategories()
@@ -69,6 +77,7 @@ export function useElementCategories(parentId: string | null) {
     ...rest
   }
 }
+
 // Hook to get units
 export function useUnits() {
   return useQuery({
@@ -77,18 +86,22 @@ export function useUnits() {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
+
       const { data, error } = await supabase
         .from('units')
         .select('*')
         .order('name')
+
       if (error) {
         console.error('Error fetching units:', error)
         throw error
       }
+
       return data || []
     }
   })
 }
+
 // Hook to get actions
 export function useActions() {
   return useQuery({
@@ -97,18 +110,22 @@ export function useActions() {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
+
       const { data, error } = await supabase
         .from('actions')
         .select('*')
         .order('name')
+
       if (error) {
         console.error('Error fetching actions:', error)
         throw error
       }
+
       return data || []
     }
   })
 }
+
 // Hook to get task elements
 export function useElements() {
   return useQuery({
@@ -117,14 +134,17 @@ export function useElements() {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
+
       const { data, error } = await supabase
         .from('task_elements')
         .select('*')
         .order('name')
+
       if (error) {
         console.error('Error fetching task elements:', error)
         throw error
       }
+
       return data || []
     }
   })

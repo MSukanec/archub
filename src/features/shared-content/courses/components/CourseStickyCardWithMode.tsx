@@ -10,11 +10,14 @@ import { BlockedRestricted, ComingSoonCard } from '@/components/shared/restricti
 import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import type { CoursesMode } from '../types';
 import type { ItemStatus } from '@shared/schema';
-type PricingTab = 'course'| 'founders';
+
+type PricingTab = 'course' | 'founders';
+
 const pricingTabs = [
-  { value: 'course', label: 'Solo Curso'},
+  { value: 'course', label: 'Solo Curso' },
   { value: 'founders', label: 'Fundadores', icon: <Crown className="w-3 h-3" /> },
 ];
+
 interface CourseStickyCardWithModeProps {
   mode: CoursesMode;
   course: any;
@@ -23,8 +26,9 @@ interface CourseStickyCardWithModeProps {
   progressPercentage: number;
   onCTAClick: () => void;
   ctaButtonText: string;
-  variant?: 'fixed'| 'in-grid';
+  variant?: 'fixed' | 'in-grid';
 }
+
 export function CourseStickyCardWithMode({ 
   mode,
   course, 
@@ -43,7 +47,7 @@ export function CourseStickyCardWithMode({
   // Checkout is now open to all users
   const isCheckoutBlocked = false;
   
-  const foundersUrl = mode === 'dashboard'? '/settings/founders': '/founders';
+  const foundersUrl = mode === 'dashboard' ? '/settings/founders' : '/founders';
   
   // When in-grid, the card is positioned by the parent grid, no fixed positioning needed
   if (variant === 'in-grid') {
@@ -59,6 +63,7 @@ export function CourseStickyCardWithMode({
               />
             </div>
           )}
+
           <CardContent className="p-5 space-y-4">
             {isEnrolled && (
               <div className="space-y-2">
@@ -69,6 +74,7 @@ export function CourseStickyCardWithMode({
                 <Progress value={progressPercentage} className="h-2" data-testid="progress-bar" />
               </div>
             )}
+
             {!isEnrolled && (
               <div className="space-y-4">
                 <Tabs 
@@ -78,7 +84,7 @@ export function CourseStickyCardWithMode({
                   fullWidth
                 />
                 
-                {pricingTab === 'course'&& course.price && (
+                {pricingTab === 'course' && course.price && (
                   <div className="space-y-1">
                     <div className="flex items-baseline gap-2">
                       <span className="text-4xl font-bold text-primary" data-testid="text-course-price">
@@ -89,7 +95,7 @@ export function CourseStickyCardWithMode({
                   </div>
                 )}
                 
-                {pricingTab === 'founders'&& (
+                {pricingTab === 'founders' && (
                   <div className="space-y-3 p-3 rounded-lg bg-accent/10 border border-accent/20">
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-accent" />
@@ -106,6 +112,7 @@ export function CourseStickyCardWithMode({
                 )}
               </div>
             )}
+
             <div className="space-y-2 text-sm">
               <div className="flex items-start gap-2">
                 <BookOpen className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
@@ -132,8 +139,9 @@ export function CourseStickyCardWithMode({
                 <span>Avalado por Graphisoft Argentina</span>
               </div>
             </div>
+
             <div className="pt-2 space-y-3">
-              {pricingTab === 'course'|| isEnrolled ? (
+              {pricingTab === 'course' || isEnrolled ? (
                 <BlockedRestricted 
                   isBlocked={!isEnrolled && course.is_active === false}
                   title="Curso no disponible"
@@ -162,7 +170,7 @@ export function CourseStickyCardWithMode({
                 </Button>
               )}
               
-              {pricingTab === 'course'&& !isEnrolled && (
+              {pricingTab === 'course' && !isEnrolled && (
                 <button
                   onClick={() => navigate(foundersUrl)}
                   className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-accent/10 border border-accent/20 hover:bg-accent/20 transition-colors group"
@@ -221,7 +229,7 @@ export function CourseStickyCardWithMode({
         }
       `}</style>
       <div 
-        className={`hidden xl:block course-sticky-card-fixed ${mode === 'dashboard'? 'dashboard-mode': ''}`}
+        className={`hidden xl:block course-sticky-card-fixed ${mode === 'dashboard' ? 'dashboard-mode' : ''}`}
       >
       <div className="sticky top-24">
         <ComingSoonCard status={status}>
@@ -235,6 +243,7 @@ export function CourseStickyCardWithMode({
               />
             </div>
           )}
+
           <CardContent className="p-5 space-y-4">
             {isEnrolled && (
               <div className="space-y-2">
@@ -245,6 +254,7 @@ export function CourseStickyCardWithMode({
                 <Progress value={progressPercentage} className="h-2" data-testid="progress-bar" />
               </div>
             )}
+
             {!isEnrolled && (
               <div className="space-y-4">
                 <Tabs 
@@ -254,7 +264,7 @@ export function CourseStickyCardWithMode({
                   fullWidth
                 />
                 
-                {pricingTab === 'course'&& course.price && (
+                {pricingTab === 'course' && course.price && (
                   <div className="space-y-1">
                     <div className="flex items-baseline gap-2">
                       <span className="text-4xl font-bold text-primary" data-testid="text-course-price">
@@ -265,7 +275,7 @@ export function CourseStickyCardWithMode({
                   </div>
                 )}
                 
-                {pricingTab === 'founders'&& (
+                {pricingTab === 'founders' && (
                   <div className="space-y-3 p-3 rounded-lg bg-accent/10 border border-accent/20">
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-accent" />
@@ -282,6 +292,7 @@ export function CourseStickyCardWithMode({
                 )}
               </div>
             )}
+
             <div className="space-y-2 text-sm">
               <div className="flex items-start gap-2">
                 <BookOpen className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
@@ -308,8 +319,9 @@ export function CourseStickyCardWithMode({
                 <span>Avalado por Graphisoft Argentina</span>
               </div>
             </div>
+
             <div className="pt-2 space-y-3">
-              {pricingTab === 'course'|| isEnrolled ? (
+              {pricingTab === 'course' || isEnrolled ? (
                 <BlockedRestricted 
                   isBlocked={!isEnrolled && course.is_active === false}
                   title="Curso no disponible"
@@ -338,7 +350,7 @@ export function CourseStickyCardWithMode({
                 </Button>
               )}
               
-              {pricingTab === 'course'&& !isEnrolled && (
+              {pricingTab === 'course' && !isEnrolled && (
                 <button
                   onClick={() => navigate(foundersUrl)}
                   className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-accent/10 border border-accent/20 hover:bg-accent/20 transition-colors group"
@@ -369,6 +381,7 @@ export function CourseStickyCardWithMode({
     </>
   );
 }
+
 interface MobileBottomBarProps {
   mode: CoursesMode;
   course: any;
@@ -379,6 +392,7 @@ interface MobileBottomBarProps {
   ctaButtonText: string;
   isCheckoutBlocked: boolean;
 }
+
 function MobileBottomBar({
   mode,
   course,
@@ -391,7 +405,7 @@ function MobileBottomBar({
 }: MobileBottomBarProps) {
   const [, navigate] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-  const foundersUrl = mode === 'dashboard'? '/settings/founders': '/founders';
+  const foundersUrl = mode === 'dashboard' ? '/settings/founders' : '/founders';
   
   return (
     <div className="xl:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg">

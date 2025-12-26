@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { RefreshCw, Shield, Upload, Calendar } from 'lucide-react'
+
 import { FormModalLayout } from '@/components/modal'
 import { FormModalHeader } from '@/components/modal'
 import { FormModalFooter } from '@/components/modal'
@@ -16,8 +17,10 @@ import { es } from 'date-fns/locale'
 import { CalendarIcon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
+
 import { useRenewInsurance, useUploadCertificate } from '@/features/personnel'
 import { InsuranceStatusRow } from '@/features/personnel/services/insurances'
+
 const renewInsuranceSchema = z.object({
   new_coverage_end: z.date({
     required_error: 'La nueva fecha de vencimiento es requerida'
@@ -27,24 +30,32 @@ const renewInsuranceSchema = z.object({
   reminder_days: z.array(z.number()).optional(),
   notes: z.string().optional()
 })
+
 type RenewInsuranceForm = z.infer<typeof renewInsuranceSchema>
+
 interface RenewInsuranceFormModalProps {
   modalData?: {
     insurance: InsuranceStatusRow
   }
   onClose: () => void
 }
+
 const DEFAULT_REMINDER_DAYS = [30, 15, 7]
+
 export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFormModalProps) {
   const [reminderDays, setReminderDays] = useState<number[]>(modalData?.insurance?.reminder_days || DEFAULT_REMINDER_DAYS)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
   const renewInsurance = useRenewInsurance()
   const uploadCertificate = useUploadCertificate()
+
   if (!modalData?.insurance) {
     return null
   }
+
   const { insurance } = modalData
+
   const form = useForm<RenewInsuranceForm>({
     resolver: zodResolver(renewInsuranceSchema),
     defaultValues: {
@@ -55,9 +66,11 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
       notes: ''
     }
   })
+
   const onSubmit = async (data: RenewInsuranceForm) => {
     try {
       let newCertificateAttachmentId: string | null = null
+
       // Upload new certificate if provided
       if (selectedFile) {
         newCertificateAttachmentId = await uploadCertificate.mutateAsync({
@@ -65,6 +78,7 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
           file: selectedFile
         })
       }
+
       const payload = {
         coverage_start: insurance.coverage_end, // El nuevo inicio es el final del anterior
         coverage_end: data.new_coverage_end.toISOString().split('T')[0],
@@ -73,15 +87,18 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
         certificate_attachment_id: newCertificateAttachmentId,
         notes: data.notes || undefined
       }
+
       await renewInsurance.mutateAsync({
         prevId: insurance.id,
         payload
       })
+
       onClose()
     } catch (error) {
       console.error('Error renewing insurance:', error)
     }
   }
+
   const handleReminderToggle = (days: number) => {
     if (reminderDays.includes(days)) {
       setReminderDays(reminderDays.filter(d => d !== days))
@@ -89,12 +106,14 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
       setReminderDays([...reminderDays, days].sort((a, b) => b - a))
     }
   }
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
       setSelectedFile(file)
     }
   }
+
   const getInsuranceTypeLabel = (type: string) => {
     const types: Record<string, string> = {
       'ART': 'ART',
@@ -106,6 +125,7 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
     }
     return types[type] || type
   }
+
   const editPanel = (
     <Form {...form}>
       <div className="space-y-6">
@@ -135,6 +155,7 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
             )}
           </div>
         </div>
+
         {/* Nueva fecha de vencimiento */}
         <FormField
           control={form.control}
@@ -170,6 +191,7 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
             </FormItem>
           )}
         />
+
         {/* Información actualizada */}
         <div className="grid grid-cols-2 gap-4">
           <FormField
@@ -185,6 +207,7 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="new_provider"
@@ -199,6 +222,7 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
             )}
           />
         </div>
+
         {/* Recordatorios */}
         <div>
           <FormLabel>Recordatorios de Vencimiento</FormLabel>
@@ -217,6 +241,7 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
             </div>
           </div>
         </div>
+
         {/* Notas */}
         <FormField
           control={form.control}
@@ -236,6 +261,7 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
             </FormItem>
           )}
         />
+
         {/* Nuevo certificado */}
         <div>
           <FormLabel>Nuevo Certificado de Cobertura</FormLabel>
@@ -269,12 +295,14 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
       </div>
     </Form>
   )
+
   const headerContent = (
     <FormModalHeader 
       title="Renovar Seguro"
       icon={RefreshCw}
     />
   )
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -285,6 +313,7 @@ export function RenewInsuranceFormModal({ modalData, onClose }: RenewInsuranceFo
       showLoadingSpinner={renewInsurance.isPending}
     />
   )
+
   return (
     <FormModalLayout
       columns={1}

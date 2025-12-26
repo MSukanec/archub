@@ -1,7 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { LucideIcon } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
-type SidebarLevel = 'general'| 'organization'| 'project'| 'construction'| 'finances'| 'library'| 'provider'| 'admin'| 'community'| 'learning'
+
+type SidebarLevel = 'general' | 'organization' | 'project' | 'construction' | 'finances' | 'library' | 'provider' | 'admin' | 'community' | 'learning'
+
 interface MiniEmptyStateProps {
   message: string;
   buttonText: string;
@@ -9,6 +11,7 @@ interface MiniEmptyStateProps {
   icon?: LucideIcon;
   sidebarLevel?: SidebarLevel;
 }
+
 export function MiniEmptyState({ 
   message, 
   buttonText, 
@@ -17,12 +20,14 @@ export function MiniEmptyState({
   sidebarLevel
 }: MiniEmptyStateProps) {
   const { setSidebarLevel } = useNavigationStore();
+
   const handleClick = () => {
     if (sidebarLevel) {
       setSidebarLevel(sidebarLevel);
     }
     onClick();
   };
+
   return (
     <div className="flex flex-col items-center justify-center gap-2 py-4 px-3 text-center bg-muted/30 dark:bg-muted/20 rounded-md border border-accent">
       {Icon && (

@@ -9,7 +9,9 @@
  * - subcontract_payments (future)
  * - general_cost_payments (future)
  */
+
 // ========== Core Financial Movement Type ==========
+
 /**
  * Unified financial movement type that represents ANY payment in the system.
  * This type is designed to match the columns from the legacy MovementsList.tsx page.
@@ -35,7 +37,7 @@ export interface FinancialMovement {
   
   // Payment metadata
   wallet_id: string | null;
-  status: 'confirmed'| 'pending'| 'rejected'| 'void';
+  status: 'confirmed' | 'pending' | 'rejected' | 'void';
   file_url: string | null;
   
   // Audit fields
@@ -57,6 +59,7 @@ export interface FinancialMovement {
   general_cost_id: string | null;
   partner_id: string | null;
 }
+
 /**
  * Financial movement with all relations populated.
  * This matches the structure of the old Movement type from MovementsList.tsx
@@ -136,7 +139,9 @@ export interface FinancialMovementWithRelations extends FinancialMovement {
     name: string;
   } | null;
 }
+
 // ========== Filters and Search ==========
+
 export interface FinancialMovementsFilters {
   search?: string;
   movement_type?: string;
@@ -147,7 +152,9 @@ export interface FinancialMovementsFilters {
   date_from?: string;
   date_to?: string;
 }
+
 // ========== Statistics ==========
+
 export interface FinancialMovementStats {
   total_movements: number;
   total_income: number;

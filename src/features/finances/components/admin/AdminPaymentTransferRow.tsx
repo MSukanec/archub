@@ -4,13 +4,14 @@ import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { CheckCircle2, XCircle, AlertCircle, FileText, User } from 'lucide-react'
+
 interface BankTransferPayment {
   id: string;
   user_id: string;
   course_price_id: string;
   amount: number;
   currency: string;
-  status: 'pending'| 'approved'| 'rejected';
+  status: 'pending' | 'approved' | 'rejected';
   image_bucket: string | null;
   image_path: string | null;
   created_at: string;
@@ -32,11 +33,13 @@ interface BankTransferPayment {
     };
   };
 }
+
 interface AdminPaymentTransferRowProps {
   payment: BankTransferPayment;
   onViewReceipt: (payment: BankTransferPayment) => void;
-  density?: 'compact'| 'comfortable';
+  density?: 'compact' | 'comfortable';
 }
+
 export default function AdminPaymentTransferRow({
   payment,
   onViewReceipt,
@@ -66,15 +69,17 @@ export default function AdminPaymentTransferRow({
       </Badge>
     );
   };
+
   const getInitials = (name: string | null) => {
     if (!name) return 'U';
     return name
-      .split('')
+      .split(' ')
       .map(n => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 2);
   };
+
   return (
     <DataRowCard
       avatarUrl={payment.users?.avatar_url || undefined}
@@ -90,16 +95,19 @@ export default function AdminPaymentTransferRow({
           <span className="text-muted-foreground">Usuario: </span>
           <span className="font-medium">{payment.users?.full_name || 'Sin nombre'}</span>
         </div>
+
         {/* Email: valor */}
         <div className="text-sm truncate">
           <span className="text-muted-foreground">Email: </span>
           <span>{payment.users?.email}</span>
         </div>
+
         {/* Curso: valor */}
         <div className="text-sm truncate">
           <span className="text-muted-foreground">Curso: </span>
           <span className="font-medium">{payment.course_prices?.courses?.title || 'N/A'}</span>
         </div>
+
         {/* Monto: valor */}
         <div className="text-sm">
           <span className="text-muted-foreground">Monto: </span>
@@ -111,6 +119,7 @@ export default function AdminPaymentTransferRow({
             }).format(payment.amount)}
           </span>
         </div>
+
         {/* Fecha: valor + badge */}
         <div className="text-sm flex items-center gap-2 flex-wrap">
           <div>

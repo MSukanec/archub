@@ -1,11 +1,13 @@
 import { uploadFile } from '@/lib/storage';
 import type { SiteLogFileInput } from '../types';
+
 export interface CompressionStats {
   totalOriginalSize: number;
   totalCompressedSize: number;
   filesCompressed: number;
   totalFiles: number;
 }
+
 /**
  * Sube archivos multimedia y los vincula a una bitácora usando la nueva arquitectura unificada de 3 buckets.
  * 
@@ -14,7 +16,7 @@ export interface CompressionStats {
  *    - Comprime imágenes automáticamente según el preset 'sitelog-photo'
  *    - Sube archivo a bucket 'private-assets'
  *    - Crea registro en 'media_files'
- *    - Crea vínculo en 'media_links'con site_log_id
+ *    - Crea vínculo en 'media_links' con site_log_id
  * 
  * Path de almacenamiento: private-assets/organizations/{org_id}/sitelogs/{project_id}/{unique_id}.ext
  * 
@@ -36,21 +38,25 @@ export async function uploadSiteLogFiles(
   if (!files || files.length === 0) {
     throw new Error('No hay archivos para subir');
   }
+
   const stats: CompressionStats = {
     totalOriginalSize: 0,
     totalCompressedSize: 0,
     filesCompressed: 0,
     totalFiles: files.length
   };
+
   for (const { file, title, description } of files) {
     try {
       if (!file || file.size === 0) {
         continue;
       }
+
       const metadata: Record<string, any> = {};
       if (title && title !== file.name) {
         metadata.custom_file_name = title;
       }
+
       const result = await uploadFile(file, {
         entity: 'sitelog_attachment',
         organization_id: organizationId,
@@ -64,6 +70,7 @@ export async function uploadSiteLogFiles(
         description: description || undefined,
         metadata: Object.keys(metadata).length > 0 ? metadata : undefined
       });
+
       // Acumular stats
       if (result.compressionStats) {
         stats.totalOriginalSize += result.compressionStats.originalSize;
@@ -77,5 +84,6 @@ export async function uploadSiteLogFiles(
       throw error;
     }
   }
+
   return stats;
 }

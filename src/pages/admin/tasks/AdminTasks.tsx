@@ -10,19 +10,23 @@ import AdminTaskCategories from './AdminTaskCategories';
 import AdminTaskDivisions from './AdminTaskDivisions';
 import AdminTaskParameters from './AdminTaskParameters';
 import AdminActionsList from './AdminActionsList';
+
 const TASKS_TABS = [
-  { id: 'tareas', label: 'Tareas'},
-  { id: 'parametros', label: 'Parámetros'},
-  { id: 'categorias', label: 'Categorías'},
-  { id: 'divisiones', label: 'Rubros'},
-  { id: 'acciones', label: 'Acciones'}
+  { id: 'tareas', label: 'Tareas' },
+  { id: 'parametros', label: 'Parámetros' },
+  { id: 'categorias', label: 'Categorías' },
+  { id: 'divisiones', label: 'Rubros' },
+  { id: 'acciones', label: 'Acciones' }
 ];
+
 const AdminTasks = () => {
   const [activeTab, setActiveTab] = useState('tareas');
   const { openModal } = useGlobalModalStore();
   const { data: userData } = useCurrentUser();
+
   const layoutPreference = userData?.preferences?.layout || 'experimental';
   const isLabLayout = layoutPreference === 'lab';
+
   const renderView = () => {
     switch (activeTab) {
       case 'tareas':
@@ -39,6 +43,7 @@ const AdminTasks = () => {
         return <AdminTaskList />;
     }
   };
+
   const handleCreate = () => {
     switch (activeTab) {
       case 'tareas':
@@ -58,6 +63,7 @@ const AdminTasks = () => {
         break;
     }
   };
+
   const getCreateLabel = () => {
     switch (activeTab) {
       case 'tareas': return 'Nueva Tarea';
@@ -68,6 +74,7 @@ const AdminTasks = () => {
       default: return 'Nuevo';
     }
   };
+
   const secondaryRightContent = (
     <div className="flex items-center gap-3">
       <Button
@@ -80,6 +87,7 @@ const AdminTasks = () => {
       </Button>
     </div>
   );
+
   if (isLabLayout) {
     return (
       <LabLayout 
@@ -97,10 +105,12 @@ const AdminTasks = () => {
       </LabLayout>
     );
   }
+
   const tabs = TASKS_TABS.map(tab => ({
     ...tab,
     isActive: activeTab === tab.id
   }));
+
   const getActionButton = () => {
     switch (activeTab) {
       case 'tareas':
@@ -141,6 +151,7 @@ const AdminTasks = () => {
         };
     }
   };
+
   const headerProps = {
     title: 'Tareas',
     icon: ListTodo,
@@ -150,6 +161,7 @@ const AdminTasks = () => {
     onTabChange: setActiveTab,
     actionButton: getActionButton()
   };
+
   return (
     <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
@@ -158,4 +170,5 @@ const AdminTasks = () => {
     </Layout>
   );
 };
+
 export default AdminTasks;

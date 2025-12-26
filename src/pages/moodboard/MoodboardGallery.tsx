@@ -4,9 +4,11 @@ import { Palette } from 'lucide-react';
 import { usePins } from '@/features/moodboard';
 import type { Pin } from '@/features/moodboard';
 import { useProjectContext } from '@/stores/projectContext';
+
 interface MoodboardGalleryProps {
   boardId?: string;
 }
+
 export function MoodboardGallery({ boardId }: MoodboardGalleryProps) {
   const { currentOrganizationId, selectedProjectId } = useProjectContext();
   
@@ -15,6 +17,7 @@ export function MoodboardGallery({ boardId }: MoodboardGalleryProps) {
     isLoading, 
     error 
   } = usePins(currentOrganizationId || undefined, selectedProjectId || undefined);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64" data-testid="loading-moodboard">
@@ -25,6 +28,7 @@ export function MoodboardGallery({ boardId }: MoodboardGalleryProps) {
       </div>
     );
   }
+
   if (error) {
     return (
       <EmptyState
@@ -34,6 +38,7 @@ export function MoodboardGallery({ boardId }: MoodboardGalleryProps) {
       />
     );
   }
+
   // Si estamos viendo un tablero específico, filtrar pins de ese tablero
   const filteredPins = boardId 
     ? pins.filter((pin: Pin) => {
@@ -42,6 +47,7 @@ export function MoodboardGallery({ boardId }: MoodboardGalleryProps) {
         return true;
       })
     : pins;
+
   if (filteredPins.length === 0) {
     return (
       <EmptyState
@@ -51,6 +57,7 @@ export function MoodboardGallery({ boardId }: MoodboardGalleryProps) {
       />
     );
   }
+
   const galleryItems = filteredPins
     .filter((pin: Pin) => pin.signed_url || pin.image_url)
     .map((pin: Pin) => ({
@@ -62,11 +69,12 @@ export function MoodboardGallery({ boardId }: MoodboardGalleryProps) {
       file_size: undefined,
       created_at: pin.created_at,
       project_id: pin.project_id || '',
-      project_name: pin.project_id ? 'Proyecto': 'Organización',
+      project_name: pin.project_id ? 'Proyecto' : 'Organización',
       description: pin.source_url || undefined,
       visibility: 'organization',
       created_by: 'Extensión Chrome'
     }));
+
   return (
     <div className="space-y-6" data-testid="moodboard-gallery">
       <GalleryComponent
@@ -81,3 +89,4 @@ export function MoodboardGallery({ boardId }: MoodboardGalleryProps) {
     </div>
   );
 }
+

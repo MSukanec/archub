@@ -2,9 +2,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deletePersonnel } from '../services';
 import { PERSONNEL_QUERY_KEYS } from '../constants';
 import { useToast } from '@/hooks/use-toast';
+
 export function useDeletePersonnel(organizationId: string | null = null) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
   return useMutation({
     mutationFn: ({ personnelId, organizationId: orgId }: { personnelId: string; organizationId: string }) =>
       deletePersonnel(personnelId, orgId),

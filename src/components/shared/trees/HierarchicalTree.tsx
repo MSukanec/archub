@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
 // Drag and Drop imports
 import {
   DndContext,
@@ -27,8 +28,10 @@ import {
 import {
   CSS,
 } from '@dnd-kit/utilities';
+
 // Remove the import since TaskGroupAdmin doesn't exist
 // import { TaskGroupAdmin } from '@/hooks/use-task-categories-admin';
+
 interface CategoryTreeNode {
   id: string;
   name: string;
@@ -39,6 +42,7 @@ interface CategoryTreeNode {
   parent_id?: string | null;
   order?: number;
 }
+
 interface HierarchicalTreeProps {
   categories: CategoryTreeNode[];
   expandedCategories: Set<string>;
@@ -58,8 +62,10 @@ interface HierarchicalTreeProps {
   
   // Show order number prop
   showOrderNumber?: boolean;
+
   level?: number;
 }
+
 export function HierarchicalTree({
   categories,
   expandedCategories,
@@ -79,11 +85,12 @@ export function HierarchicalTree({
   
   // Show order number prop
   showOrderNumber = false,
+
   level = 0
 }: HierarchicalTreeProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
-  const [dropPosition, setDropPosition] = useState<'before'| 'after'| 'child'| null>(null);
+  const [dropPosition, setDropPosition] = useState<'before' | 'after' | 'child' | null>(null);
   
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -91,12 +98,15 @@ export function HierarchicalTree({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
   };
+
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
     setOverId(over?.id as string || null);
+
     if (over && active.id !== over.id) {
       const rect = over.rect;
       if (rect && event.activatorEvent) {
@@ -149,20 +159,25 @@ export function HierarchicalTree({
       setDropPosition(null);
     }
   };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     const currentDropPosition = dropPosition; // Store current value before clearing
+
     setActiveId(null);
     setOverId(null);
     setDropPosition(null);
+
     if (!over || active.id === over.id) return;
+
     // Handle parent-child relationship change
-    if (currentDropPosition === 'child'&& onParentChange) {
+    if (currentDropPosition === 'child' && onParentChange) {
       onParentChange(active.id as string, over.id as string);
       return;
     }
+
     // Handle reordering - SIMPLIFIED LOGIC
-    if ((currentDropPosition === 'before'|| currentDropPosition === 'after') && onReorder) {
+    if ((currentDropPosition === 'before' || currentDropPosition === 'after') && onReorder) {
       const oldIndex = categories.findIndex((item) => item.id === active.id);
       const targetIndex = categories.findIndex((item) => item.id === over.id);
       
@@ -207,29 +222,32 @@ export function HierarchicalTree({
       transition,
       isDragging,
     } = useSortable({ id: category.id });
+
     const style = {
       transform: CSS.Transform.toString(transform),
       transition,
       opacity: isDragging ? 0.5 : 1,
     };
+
     const isDropTarget = overId === category.id && activeId !== category.id;
+
     return (
       <div className="relative">
         {/* Drop indicators */}
         {isDropTarget && (
           <>
             {/* Before drop zone */}
-            {dropPosition === 'before'&& (
+            {dropPosition === 'before' && (
               <div className="absolute -top-1 left-0 right-0 h-0.5 bg-primary rounded-full z-10" />
             )}
             
             {/* Child drop zone */}
-            {dropPosition === 'child'&& (
+            {dropPosition === 'child' && (
               <div className="absolute inset-0 border-2 border-dashed border-primary bg-primary/5 rounded-md z-10" />
             )}
             
             {/* After drop zone */}
-            {dropPosition === 'after'&& (
+            {dropPosition === 'after' && (
               <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full z-10" />
             )}
           </>
@@ -286,7 +304,7 @@ export function HierarchicalTree({
         {/* Category Item */}
         <div 
           className={`group flex items-center justify-between rounded-md p-2 mb-1 hover:bg-accent/50 transition-colors cursor-pointer ${
-            hasIncompleteTemplates ? 'bg-orange-50 border border-orange-200 dark:bg-orange-950/20 dark:border-orange-800': 'bg-card border border-border'
+            hasIncompleteTemplates ? 'bg-orange-50 border border-orange-200 dark:bg-orange-950/20 dark:border-orange-800' : 'bg-card border border-border'
           }`}
           style={{ marginLeft: `${indentation}px` }}
           onClick={() => hasChildCategories && onToggleExpanded(category.id)}
@@ -340,6 +358,7 @@ export function HierarchicalTree({
                   )}
                 </div>
               )}
+
             </div>
           </div>
           
@@ -415,6 +434,7 @@ export function HierarchicalTree({
             />
           </div>
         )}
+
         {/* Task Groups - 4th level (show for 3rd level categories with 3-letter codes) */}
         {category.code && category.code.length === 3 && category.taskGroups && category.taskGroups.length > 0 && isExpanded && (
           <div className="mt-1">
@@ -432,11 +452,14 @@ export function HierarchicalTree({
                   
                   <div className="flex items-center space-x-2 flex-1">
                     <span className="text-sm font-medium text-accent">{taskGroup.name}</span>
+
                   </div>
                 </div>
                 
                 {/* Right side: Task group actions - SAME AS CATEGORIES */}
                 <div className="flex items-center space-x-1">
+
+
                   {onEditTaskGroup && (
                     <Button
                       variant="ghost"
@@ -478,6 +501,7 @@ export function HierarchicalTree({
       return renderCategoryContent(category, currentLevel);
     }
   };
+
   // Wrap in drag and drop context if enabled
   if (enableDragAndDrop) {
     return (

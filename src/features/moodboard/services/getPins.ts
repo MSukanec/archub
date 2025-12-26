@@ -1,5 +1,6 @@
 import { apiRequest } from '@/lib/queryClient';
 import type { Pin } from '../types';
+
 export async function getPins(organizationId?: string, projectId?: string): Promise<Pin[]> {
   const params = new URLSearchParams();
   
@@ -25,5 +26,6 @@ export async function getPins(organizationId?: string, projectId?: string): Prom
   if (!data || !Array.isArray(data)) {
     return [];
   }
+
   return data;
 }

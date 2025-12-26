@@ -9,16 +9,19 @@ import { Label } from '@/components/ui/label';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+
 interface Parameter {
   id: string;
   slug: string;
 }
+
 export function AddParameterToCanvasModal() {
   const { data: modalData, type: modalType, open, closeModal } = useGlobalModalStore();
   const [selectedParameterId, setSelectedParameterId] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
   // Obtener todos los parámetros disponibles
   const { data: parameters = [], isLoading: parametersLoading } = useQuery({
     queryKey: ['all-parameters'],
@@ -34,8 +37,10 @@ export function AddParameterToCanvasModal() {
       return data as Parameter[];
     }
   });
+
   // Todos los parámetros están disponibles (se pueden crear múltiples nodos del mismo parámetro)
   const availableParameters = parameters;
+
   const handleAdd = async () => {
     if (!selectedParameterId) {
       toast({
@@ -45,6 +50,7 @@ export function AddParameterToCanvasModal() {
       });
       return;
     }
+
     setIsSubmitting(true);
     
     try {
@@ -66,19 +72,24 @@ export function AddParameterToCanvasModal() {
           y: centerY,
           visible_options: [] // Sin opciones visibles inicialmente
         });
+
       if (error) throw error;
+
       // Invalidar las queries para actualizar el canvas automáticamente
       await queryClient.invalidateQueries({ queryKey: ['parameter-positions'] });
       await queryClient.invalidateQueries({ queryKey: ['parameter-dependencies-flow'] });
       await queryClient.invalidateQueries({ queryKey: ['parameters-with-options'] });
+
       toast({
         title: "Éxito",
         description: "Parámetro agregado al canvas"
       });
+
       // Notificar al callback del padre si existe
       if (modalData?.onAdd) {
         modalData.onAdd(selectedParameterId);
       }
+
       closeModal();
     } catch (error) {
       console.error('Error adding parameter to canvas:', error);
@@ -91,12 +102,15 @@ export function AddParameterToCanvasModal() {
       setIsSubmitting(false);
     }
   };
+
   const viewPanel = null;
+
   // Convertir parámetros a formato ComboBoxWriteField
   const comboBoxOptions = availableParameters.map(param => ({
     value: param.id,
     label: param.slug
   }));
+
   const editPanel = (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -116,6 +130,7 @@ export function AddParameterToCanvasModal() {
           className="w-full"
         />
       </div>
+
       {availableParameters.length === 0 && !parametersLoading && (
         <div className="text-sm text-muted-foreground">
           No hay parámetros disponibles en el sistema.
@@ -123,22 +138,26 @@ export function AddParameterToCanvasModal() {
       )}
     </div>
   );
+
   const headerContent = (
     <FormModalHeader 
       title="Agregar Parámetro al Canvas"
       icon={Plus}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={closeModal}
-      rightLabel={isSubmitting ? 'Agregando...': 'Agregar Parámetro'}
+      rightLabel={isSubmitting ? 'Agregando...' : 'Agregar Parámetro'}
       onRightClick={handleAdd}
       submitDisabled={isSubmitting || !selectedParameterId || availableParameters.length === 0}
     />
   );
+
   if (!open || modalType !== 'add-parameter-to-canvas') return null;
+
   return (
     <FormModalLayout
       columns={1}

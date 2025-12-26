@@ -41,6 +41,7 @@ import { useFlowBlocking } from "@/hooks/use-flow-blocking";
 import { FlowBlockedBanner } from "@/components/shared/FlowBlockedBanner";
 import mercadoPagoLogo from "/MercadoPago_logo.png";
 import paypalLogo from "/Paypal_2014_logo.png";
+
 interface ProrationData {
   hasActiveSubscription: boolean;
   currentPlan: { id: string; name: string; slug: string } | null;
@@ -61,11 +62,12 @@ interface ProrationData {
   finalPrice: { usd: number; ars: number };
   savings: { usd: number; ars: number };
 }
+
 interface ValidatedCoupon {
   valid: boolean;
   coupon_id: string;
   code: string;
-  type: 'percentage'| 'fixed';
+  type: 'percentage' | 'fixed';
   amount: number;
   discount_usd: number;
   discount_ars: number;
@@ -73,6 +75,7 @@ interface ValidatedCoupon {
   final_price_ars: number;
   is_full_discount: boolean;
 }
+
 async function fetchWithTimeout(url: string, init: RequestInit = {}, ms = 15000) {
   const ctrl = new AbortController();
   const id = setTimeout(() => ctrl.abort(), ms);
@@ -83,7 +86,9 @@ async function fetchWithTimeout(url: string, init: RequestInit = {}, ms = 15000)
     clearTimeout(id);
   }
 }
+
 type PaymentMethod = "mercadopago" | "paypal";
+
 interface PlanData {
   id: string;
   name: string;
@@ -92,43 +97,55 @@ interface PlanData {
   monthly_amount: string;
   annual_amount: string;
 }
+
 export default function SubscriptionCheckout() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { setSidebarLevel, sidebarLevel } = useNavigationStore();
+
   const params = new URLSearchParams(window.location.search);
   const planSlug = params.get("plan") || "";
   const billingPeriod = params.get("billing") || "annual";
+
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [loading, setLoading] = useState(false);
   const [isPaymentInitiated, setIsPaymentInitiated] = useState(false);
+
   const { isBlocked: isCheckoutBlocked, message: checkoutBlockedMessage } = useFlowBlocking('billing_checkout');
+
   useEffect(() => {
     const previousLevel = sidebarLevel;
     
     setSidebarLevel('general');
+
     return () => {
       setSidebarLevel(previousLevel);
     };
   }, [setSidebarLevel]);
+
   const currentProvider = selectedMethod === "paypal" ? "paypal" : "mercadopago";
   const currentCurrency = selectedMethod === "paypal" ? "USD" : "ARS";
+
   const [planData, setPlanData] = useState<PlanData | null>(null);
   const [exchangeRate, setExchangeRate] = useState<number>(1);
   const [priceLoading, setPriceLoading] = useState(true);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [prorationData, setProrationData] = useState<ProrationData | null>(null);
   const [prorationLoading, setProrationLoading] = useState(false);
+
   const { data: userData } = useCurrentUser();
   const { data: countries = [] } = useCountries();
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [mercadopagoEmail, setMercadopagoEmail] = useState("");
   const [country, setCountry] = useState("");
   const [phone, setPhone] = useState("");
+
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptCommunications, setAcceptCommunications] = useState(false);
+
   const [needsInvoice, setNeedsInvoice] = useState(false);
   const [isCompany, setIsCompany] = useState(false);
   const [companyName, setCompanyName] = useState("");
@@ -136,10 +153,12 @@ export default function SubscriptionCheckout() {
   const [billingAddress, setBillingAddress] = useState("");
   const [billingCity, setBillingCity] = useState("");
   const [billingPostcode, setBillingPostcode] = useState("");
+
   const [couponCode, setCouponCode] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState<string | null>(null);
   const [validatedCoupon, setValidatedCoupon] = useState<ValidatedCoupon | null>(null);
+
   useEffect(() => {
     if (planSlug) {
       const loadPlanData = async () => {
@@ -149,6 +168,7 @@ export default function SubscriptionCheckout() {
           .select("id, name, slug, features, monthly_amount, annual_amount")
           .eq("slug", planSlug)
           .single();
+
         if (error) {
           console.error("Error loading plan:", error);
           toast({
@@ -159,12 +179,15 @@ export default function SubscriptionCheckout() {
           setPriceLoading(false);
           return;
         }
+
         setPlanData(data);
         setPriceLoading(false);
       };
+
       loadPlanData();
     }
   }, [planSlug, toast]);
+
   useEffect(() => {
     if (planSlug && organizationId) {
       const loadProration = async () => {
@@ -177,6 +200,7 @@ export default function SubscriptionCheckout() {
             setProrationLoading(false);
             return;
           }
+
           const API_BASE = getApiBase();
           const res = await fetch(`${API_BASE}/api/checkout/calculate-proration`, {
             method: 'POST',
@@ -190,6 +214,7 @@ export default function SubscriptionCheckout() {
               billing_period: billingPeriod,
             }),
           });
+
           if (res.ok) {
             const result = await res.json();
             console.log('[Proration] API Response:', result);
@@ -212,11 +237,13 @@ export default function SubscriptionCheckout() {
           setProrationLoading(false);
         }
       };
+
       loadProration();
     } else {
       console.log('[Proration] Waiting for data - planSlug:', planSlug, 'organizationId:', organizationId);
     }
   }, [planSlug, organizationId, billingPeriod]);
+
   useEffect(() => {
     if (selectedMethod === 'mercadopago') {
       const loadExchangeRate = async () => {
@@ -227,18 +254,22 @@ export default function SubscriptionCheckout() {
           .eq("to_currency", "ARS")
           .eq("is_active", true)
           .single();
+
         if (error) {
           console.error("Error loading exchange rate:", error);
           setExchangeRate(1500);
           return;
         }
+
         setExchangeRate(parseFloat(data.rate));
       };
+
       loadExchangeRate();
     } else {
       setExchangeRate(1);
     }
   }, [selectedMethod]);
+
   useEffect(() => {
     if (userData) {
       setFirstName(userData.user_data?.first_name || "");
@@ -250,23 +281,27 @@ export default function SubscriptionCheckout() {
       if (userData.user_data?.phone_e164) {
         setPhone(fromE164(userData.user_data.phone_e164));
       }
+
       if (userData.organization?.id) {
         setOrganizationId(userData.organization.id);
       }
     }
   }, [userData]);
+
   useEffect(() => {
     if (country && selectedMethod === null) {
-      const isArgentina = country === 'Argentina'|| country === 'argentina'|| country === 'AR'|| country === 'ARG';
-      const defaultMethod: PaymentMethod = isArgentina ? 'mercadopago': 'paypal';
+      const isArgentina = country === 'Argentina' || country === 'argentina' || country === 'AR' || country === 'ARG';
+      const defaultMethod: PaymentMethod = isArgentina ? 'mercadopago' : 'paypal';
       console.log('[Checkout] Auto-selecting payment method:', defaultMethod, 'for country:', country);
       setSelectedMethod(defaultMethod);
     }
   }, [country, selectedMethod]);
+
   useEffect(() => {
     if (!needsInvoice || !userData?.user?.id) {
       return;
     }
+
     const loadBillingProfile = async () => {
       try {
         const { data, error } = await supabase
@@ -274,10 +309,12 @@ export default function SubscriptionCheckout() {
           .select('*')
           .eq('user_id', userData.user.id)
           .maybeSingle();
+
         if (error) {
           console.error('[billing_profiles] Error loading profile:', error);
           return;
         }
+
         if (data) {
           if (!isCompany && data.is_company) setIsCompany(data.is_company);
           if (!companyName && data.company_name) setCompanyName(data.company_name);
@@ -290,13 +327,16 @@ export default function SubscriptionCheckout() {
         console.error('[billing_profiles] Unexpected error:', e);
       }
     };
+
     loadBillingProfile();
   }, [needsInvoice, userData?.user?.id]);
+
   useEffect(() => {
     if (!planSlug) {
       navigate("/settings/pricing-plan");
     }
   }, [planSlug, navigate]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
@@ -309,12 +349,14 @@ export default function SubscriptionCheckout() {
           firstName.trim() &&
           email.trim() &&
           country;
+
         if (isFormValid && !(e.target instanceof HTMLTextAreaElement)) {
           e.preventDefault();
           handleContinue();
         }
       }
     };
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [
@@ -327,8 +369,10 @@ export default function SubscriptionCheckout() {
     email,
     country,
   ]);
+
   const saveBillingProfile = async (userId: string) => {
     if (!needsInvoice) return;
+
     try {
       const billingData = {
         user_id: userId,
@@ -340,11 +384,13 @@ export default function SubscriptionCheckout() {
         postcode: billingPostcode || null,
         country: country,
       };
+
       const { data: existing } = await supabase
         .from('billing_profiles')
         .select('id')
         .eq('user_id', userId)
         .maybeSingle();
+
       if (existing) {
         await supabase
           .from('billing_profiles')
@@ -359,8 +405,10 @@ export default function SubscriptionCheckout() {
       console.error('Error saving billing profile:', error);
     }
   };
+
   const getBillingData = () => {
     if (!needsInvoice) return null;
+
     return {
       is_company: isCompany,
       company_name: isCompany ? companyName : null,
@@ -373,21 +421,27 @@ export default function SubscriptionCheckout() {
       country: country,
     };
   };
+
   const handleValidateCoupon = async () => {
     if (!couponCode.trim() || !planData?.id) return;
+
     if (!selectedMethod) {
       setCouponError("Seleccioná un método de pago antes de aplicar un cupón");
       return;
     }
+
     setCouponLoading(true);
     setCouponError(null);
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
         setCouponError("Debes iniciar sesión para aplicar un cupón");
         return;
       }
-      const currency = selectedMethod === 'paypal'? 'USD': 'ARS';
+
+      const currency = selectedMethod === 'paypal' ? 'USD' : 'ARS';
+
       const API_BASE = getApiBase();
       const res = await fetch(`${API_BASE}/api/checkout/validate-subscription-coupon`, {
         method: 'POST',
@@ -402,18 +456,21 @@ export default function SubscriptionCheckout() {
           currency,
         }),
       });
+
       const result = await res.json();
+
       if (!res.ok || !result.ok) {
         setCouponError(result.error || "Cupón inválido");
         setValidatedCoupon(null);
         return;
       }
+
       setValidatedCoupon(result.data);
       setCouponCode("");
       
       toast({
         title: "Cupón aplicado",
-        description: `Descuento de ${result.data.type === 'percentage'? `${result.data.amount}%` : `$${result.data.discount_usd} USD`} aplicado correctamente`,
+        description: `Descuento de ${result.data.type === 'percentage' ? `${result.data.amount}%` : `$${result.data.discount_usd} USD`} aplicado correctamente`,
       });
     } catch (error: any) {
       console.error('[Coupon] Error validating:', error);
@@ -423,6 +480,7 @@ export default function SubscriptionCheckout() {
       setCouponLoading(false);
     }
   };
+
   const handleRemoveCoupon = () => {
     setValidatedCoupon(null);
     setCouponCode("");
@@ -433,6 +491,7 @@ export default function SubscriptionCheckout() {
       description: "El cupón ha sido removido de tu pedido",
     });
   };
+
   const handleMercadoPagoPayment = async () => {
     // Double-click protection: prevent if already initiated
     if (isPaymentInitiated) {
@@ -443,6 +502,7 @@ export default function SubscriptionCheckout() {
     try {
       setIsPaymentInitiated(true);
       setLoading(true);
+
       const {
         data: { session },
         error: sessionError,
@@ -450,20 +510,28 @@ export default function SubscriptionCheckout() {
       if (sessionError || !session?.access_token) {
         throw new Error("Debes iniciar sesión para suscribirte");
       }
+
       const {
         data: { user: authUser },
       } = await supabase.auth.getUser();
       if (!authUser) throw new Error("No se pudo obtener el usuario autenticado");
+
       const userRecord = await getUserByAuthId(authUser.id);
+
       if (!userRecord?.id) {
         throw new Error("No se pudo obtener el ID interno del usuario");
       }
+
       await saveBillingProfile(userRecord.id);
+
       if (!organizationId) {
         throw new Error("No se encontró la organización del usuario");
       }
+
       const hasProration = prorationData?.hasActiveSubscription && (prorationData?.savings?.ars ?? 0) > 0;
+
       const API_BASE = getApiBase();
+
       if (hasProration) {
         const upgradeBody = {
           plan_slug: planSlug,
@@ -471,8 +539,11 @@ export default function SubscriptionCheckout() {
           billing_period: billingPeriod,
           payer_email: mercadopagoEmail || email,
         };
+
         console.log("[MP] Creando preferencia de upgrade híbrido (pago único + recurrente)…", upgradeBody);
+
         const mpUrl = `${API_BASE}/api/checkout/mp/create-upgrade-preference`;
+
         const res = await fetchWithTimeout(
           mpUrl,
           {
@@ -485,6 +556,7 @@ export default function SubscriptionCheckout() {
           },
           15000
         );
+
         const text = await res.text();
         let payload: any;
         try {
@@ -492,11 +564,13 @@ export default function SubscriptionCheckout() {
         } catch {
           payload = { error: text };
         }
+
         console.log("[MP] Respuesta create-upgrade-preference:", {
           status: res.status,
           ok: res.ok,
           data: payload,
         });
+
         if (!res.ok) {
           console.error("[MP] Error al crear preferencia de upgrade:", payload);
           throw new Error(
@@ -505,13 +579,16 @@ export default function SubscriptionCheckout() {
               : `create-upgrade-preference falló: status=${res.status}`
           );
         }
+
         if (!payload?.init_point) {
           throw new Error("La preferencia no tiene init_point");
         }
+
         console.log("[MP] Redirigiendo a pago único de upgrade:", payload.init_point);
         window.location.assign(payload.init_point);
         return;
       }
+
       const requestBody = {
         user_id: userRecord.id,
         product_type: 'subscription',
@@ -523,8 +600,11 @@ export default function SubscriptionCheckout() {
         payer_email: mercadopagoEmail || email,
         ...(validatedCoupon && { coupon_code: validatedCoupon.code }),
       };
+
       console.log("[MP] Creando suscripción recurrente (nueva)…", requestBody);
+
       const mpUrl = `${API_BASE}/api/checkout/mp/create-recurring`;
+
       const res = await fetchWithTimeout(
         mpUrl,
         {
@@ -537,6 +617,7 @@ export default function SubscriptionCheckout() {
         },
         15000
       );
+
       const text = await res.text();
       let payload: any;
       try {
@@ -544,11 +625,13 @@ export default function SubscriptionCheckout() {
       } catch {
         payload = { error: text };
       }
+
       console.log("[MP] Respuesta create-preference:", {
         status: res.status,
         ok: res.ok,
         data: payload,
       });
+
       if (!res.ok) {
         console.error("[MP] Error al crear preferencia:", payload);
         throw new Error(
@@ -557,6 +640,7 @@ export default function SubscriptionCheckout() {
             : `create-preference falló: status=${res.status}`
         );
       }
+
       if (payload?.gifted) {
         // Invalidate all subscription-related queries to refresh UI immediately
         // Use predicate to match all variants of organization and billing queries
@@ -581,9 +665,11 @@ export default function SubscriptionCheckout() {
         navigate("/organization/billing?subscription=success");
         return;
       }
+
       if (!payload?.init_point) {
         throw new Error("La preferencia no tiene init_point");
       }
+
       console.log("[MP] Redirigiendo a:", payload.init_point);
       window.location.assign(payload.init_point);
     } catch (error: any) {
@@ -599,6 +685,7 @@ export default function SubscriptionCheckout() {
       setLoading(false);
     }
   };
+
   const handlePayPalPayment = async () => {
     // Double-click protection: prevent if already initiated
     if (isPaymentInitiated) {
@@ -609,6 +696,7 @@ export default function SubscriptionCheckout() {
     setIsPaymentInitiated(true);
     try {
       setLoading(true);
+
       const {
         data: { session },
         error: sessionError,
@@ -616,30 +704,40 @@ export default function SubscriptionCheckout() {
       if (sessionError || !session?.access_token) {
         throw new Error("Debes iniciar sesión para suscribirte");
       }
+
       const {
         data: { user: authUser },
       } = await supabase.auth.getUser();
       if (!authUser) {
         throw new Error("No se pudo obtener el usuario");
       }
+
       const userRecord = await getUserByAuthId(authUser.id);
+
       if (!userRecord) {
         throw new Error("No se pudo obtener el ID del usuario");
       }
+
       await saveBillingProfile(userRecord.id);
+
       if (!organizationId) {
         throw new Error("No se encontró la organización del usuario");
       }
-      const baseAmount = billingPeriod === 'annual'
+
+      const baseAmount = billingPeriod === 'annual' 
         ? parseFloat(planData?.annual_amount || '0')
         : parseFloat(planData?.monthly_amount || '0');
+
       if (!baseAmount || baseAmount <= 0) {
         throw new Error("Precio inválido");
       }
+
       const isUpgrade = prorationData?.hasActiveSubscription && (prorationData?.savings?.usd ?? 0) > 0;
+
       const description = isUpgrade
-        ? `Upgrade ${prorationData?.currentPlan?.name} → ${planData?.name || planSlug} - ${billingPeriod === 'annual'? 'Anual': 'Mensual'}`
-        : `Suscripción ${planData?.name || planSlug} - ${billingPeriod === 'annual'? 'Anual': 'Mensual'}`;
+        ? `Upgrade ${prorationData?.currentPlan?.name} → ${planData?.name || planSlug} - ${billingPeriod === 'annual' ? 'Anual' : 'Mensual'}`
+        : `Suscripción ${planData?.name || planSlug} - ${billingPeriod === 'annual' ? 'Anual' : 'Mensual'}`;
+
       const billing = getBillingData();
       const requestBody = {
         user_id: userRecord.id,
@@ -653,13 +751,15 @@ export default function SubscriptionCheckout() {
         ...(billing && { billing }),
         ...(validatedCoupon && { coupon_code: validatedCoupon.code }),
       };
+
       const API_BASE = getApiBase();
       
       const paypalUrl = isUpgrade
         ? `${API_BASE}/api/checkout/paypal/create-upgrade`
         : `${API_BASE}/api/checkout/paypal/create-subscription`;
       
-      console.log(`[PayPal] ${isUpgrade ? 'Creando orden de upgrade prorrateado': 'Creando orden de suscripción'}…`, requestBody);
+      console.log(`[PayPal] ${isUpgrade ? 'Creando orden de upgrade prorrateado' : 'Creando orden de suscripción'}…`, requestBody);
+
       const res = await fetchWithTimeout(
         paypalUrl,
         {
@@ -672,6 +772,7 @@ export default function SubscriptionCheckout() {
         },
         15000
       );
+
       const text = await res.text();
       let payload: any;
       try {
@@ -679,15 +780,18 @@ export default function SubscriptionCheckout() {
       } catch {
         payload = { ok: false, error: text };
       }
+
       console.log("[PayPal] Respuesta create-order:", {
         status: res.status,
         ok: res.ok,
         data: payload,
       });
+
       if (!res.ok || !payload?.ok) {
         console.error("[PayPal] Error al crear orden:", payload);
         throw new Error(payload?.error || `HTTP ${res.status}`);
       }
+
       if (payload?.gifted) {
         // Invalidate all subscription-related queries to refresh UI immediately
         // Use predicate to match all variants of organization and billing queries
@@ -712,11 +816,13 @@ export default function SubscriptionCheckout() {
         navigate("/organization/billing?subscription=success");
         return;
       }
+
       const approvalUrl = payload.approval_url;
       if (!approvalUrl) {
         console.error("[PayPal] No approval URL in payload:", payload);
         throw new Error("No se recibió la URL de aprobación de PayPal");
       }
+
       console.log("[PayPal] Redirigiendo a:", approvalUrl);
       window.location.assign(approvalUrl);
     } catch (error: any) {
@@ -730,6 +836,7 @@ export default function SubscriptionCheckout() {
       setLoading(false);
     }
   };
+
   const handleContinue = async () => {
     // Check if flow is blocked
     if (isCheckoutBlocked) {
@@ -740,6 +847,7 @@ export default function SubscriptionCheckout() {
       });
       return;
     }
+
     // Early exit if payment already initiated
     if (isPaymentInitiated || loading) {
       console.warn('[Checkout] Payment already in progress, ignoring click');
@@ -747,6 +855,7 @@ export default function SubscriptionCheckout() {
     }
     const trimmedFirstName = firstName.trim();
     const trimmedEmail = email.trim();
+
     if (!trimmedFirstName) {
       toast({
         title: "Nombre requerido",
@@ -755,6 +864,7 @@ export default function SubscriptionCheckout() {
       });
       return;
     }
+
     if (!trimmedEmail) {
       toast({
         title: "Email requerido",
@@ -763,6 +873,7 @@ export default function SubscriptionCheckout() {
       });
       return;
     }
+
     if (!country) {
       toast({
         title: "País requerido",
@@ -771,6 +882,7 @@ export default function SubscriptionCheckout() {
       });
       return;
     }
+
     if (!acceptTerms) {
       toast({
         title: "Términos y condiciones",
@@ -779,6 +891,7 @@ export default function SubscriptionCheckout() {
       });
       return;
     }
+
     if (!acceptCommunications) {
       toast({
         title: "Aceptación requerida",
@@ -787,6 +900,7 @@ export default function SubscriptionCheckout() {
       });
       return;
     }
+
     if (!selectedMethod) {
       toast({
         title: "Seleccioná un método de pago",
@@ -795,6 +909,7 @@ export default function SubscriptionCheckout() {
       });
       return;
     }
+
     if (needsInvoice) {
       if (isCompany && !companyName.trim()) {
         toast({
@@ -821,6 +936,7 @@ export default function SubscriptionCheckout() {
         return;
       }
     }
+
     if (userData?.user?.id) {
       try {
         const {
@@ -837,6 +953,7 @@ export default function SubscriptionCheckout() {
               normalizedPhone = toE164(phone, countryData.alpha_3);
             }
           }
+
           const profileData: any = {
             user_id: userData.user.id,
             first_name: trimmedFirstName,
@@ -861,6 +978,7 @@ export default function SubscriptionCheckout() {
         console.error("Error saving profile data:", error);
       }
     }
+
     switch (selectedMethod) {
       case "mercadopago":
         handleMercadoPagoPayment();
@@ -870,6 +988,7 @@ export default function SubscriptionCheckout() {
         break;
     }
   };
+
   const calculatePrice = useMemo(() => {
     if (!planData) return { 
       amount: '0.00', 
@@ -883,7 +1002,7 @@ export default function SubscriptionCheckout() {
       isFullDiscount: false
     };
     
-    const basePrice = billingPeriod === 'annual'
+    const basePrice = billingPeriod === 'annual' 
       ? parseFloat(planData.annual_amount) 
       : parseFloat(planData.monthly_amount);
     
@@ -971,10 +1090,13 @@ export default function SubscriptionCheckout() {
       isUpgrade: hasPayPalProration
     };
   }, [planData, billingPeriod, selectedMethod, exchangeRate, prorationData, validatedCoupon]);
+
   const finalPrice = calculatePrice.numericAmount;
+
   if (!planSlug) {
     return null;
   }
+
   const headerProps = {
     icon: ShoppingCart,
     title: "Suscripción",
@@ -993,7 +1115,9 @@ export default function SubscriptionCheckout() {
       </Button>
     ]
   };
+
   const planFeatures = planData?.features?.features || [];
+
   return (
     <Layout headerProps={headerProps}>
       <div className="max-w-7xl mx-auto py-6 lg:py-8">
@@ -1002,10 +1126,12 @@ export default function SubscriptionCheckout() {
             Suscribirse al Plan {planData?.name || planSlug}
           </h1>
           <p className="text-muted-foreground mt-2">
-            Completá tu suscripción de forma segura - Facturación {billingPeriod === 'annual'? 'Anual': 'Mensual'}
+            Completá tu suscripción de forma segura - Facturación {billingPeriod === 'annual' ? 'Anual' : 'Mensual'}
           </p>
         </div>
+
         <FlowBlockedBanner flowKey="billing_checkout" className="mb-6" />
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-7 order-1 lg:order-1">
             <div className="space-y-6">
@@ -1040,6 +1166,7 @@ export default function SubscriptionCheckout() {
                       />
                     </div>
                   </div>
+
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">
                       Email <span className="text-accent">*</span>
@@ -1054,6 +1181,7 @@ export default function SubscriptionCheckout() {
                       data-testid="input-email"
                     />
                   </div>
+
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">
                       País <span className="text-accent">*</span>
@@ -1071,6 +1199,7 @@ export default function SubscriptionCheckout() {
                       </SelectContent>
                     </Select>
                   </div>
+
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">
                       Teléfono
@@ -1081,6 +1210,7 @@ export default function SubscriptionCheckout() {
                       placeholder="Número de teléfono"
                     />
                   </div>
+
                   <div className="space-y-4 pt-4 border-t mt-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -1096,6 +1226,7 @@ export default function SubscriptionCheckout() {
                         data-testid="switch-needs-invoice"
                       />
                     </div>
+
                     {needsInvoice && (
                       <div className="space-y-4 pt-4">
                         <div className="flex items-center justify-between">
@@ -1109,6 +1240,7 @@ export default function SubscriptionCheckout() {
                             data-testid="switch-is-company"
                           />
                         </div>
+
                         {isCompany ? (
                           <div className="space-y-4">
                             <div className="space-y-2">
@@ -1122,6 +1254,7 @@ export default function SubscriptionCheckout() {
                                 data-testid="input-company-name"
                               />
                             </div>
+
                             <div className="space-y-2">
                               <Label className="text-sm font-medium">
                                 CUIT / VAT / GST / Tax ID <span className="text-accent">*</span>
@@ -1136,6 +1269,7 @@ export default function SubscriptionCheckout() {
                                 Número de identificación fiscal
                               </p>
                             </div>
+
                             <div className="space-y-2">
                               <Label className="text-sm font-medium">Dirección (opcional)</Label>
                               <Input
@@ -1145,6 +1279,7 @@ export default function SubscriptionCheckout() {
                                 data-testid="input-billing-address"
                               />
                             </div>
+
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <div className="space-y-2">
                                 <Label className="text-sm font-medium">Ciudad (opcional)</Label>
@@ -1182,6 +1317,7 @@ export default function SubscriptionCheckout() {
                                 Número de identificación fiscal
                               </p>
                             </div>
+
                             <div className="space-y-2">
                               <Label className="text-sm font-medium">Dirección (opcional)</Label>
                               <Input
@@ -1191,6 +1327,7 @@ export default function SubscriptionCheckout() {
                                 data-testid="input-billing-address-individual"
                               />
                             </div>
+
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <div className="space-y-2">
                                 <Label className="text-sm font-medium">Ciudad (opcional)</Label>
@@ -1218,6 +1355,7 @@ export default function SubscriptionCheckout() {
                   </div>
                 </div>
               </div>
+
               <div className="bg-card border rounded-lg p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <CreditCard className="h-5 w-5 text-accent" />
@@ -1267,6 +1405,7 @@ export default function SubscriptionCheckout() {
                       />
                     </div>
                   </div>
+
                   <div
                     className={cn(
                       "relative flex items-start space-x-4 rounded-lg border-2 p-4 cursor-pointer transition-all hover:border-accent/50",
@@ -1309,6 +1448,7 @@ export default function SubscriptionCheckout() {
               </div>
             </div>
           </div>
+
           <div className="lg:col-span-5 order-2 lg:order-2">
             <div className="lg:sticky lg:top-24 space-y-6">
               <div className="bg-card border rounded-lg p-6 shadow-sm">
@@ -1316,6 +1456,7 @@ export default function SubscriptionCheckout() {
                   <Receipt className="h-5 w-5 text-accent" />
                   <h2 className="text-lg font-semibold">Resumen de suscripción</h2>
                 </div>
+
                 {priceLoading ? (
                   <div className="space-y-3">
                     <div className="h-4 bg-muted animate-pulse rounded" />
@@ -1328,11 +1469,12 @@ export default function SubscriptionCheckout() {
                       <div className="flex items-center gap-2 mt-1">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <p className="text-sm text-muted-foreground">
-                          Facturación {billingPeriod === 'annual'? 'Anual': 'Mensual'}
+                          Facturación {billingPeriod === 'annual' ? 'Anual' : 'Mensual'}
                         </p>
                       </div>
                     </div>
-                    {billingPeriod === 'annual'&& !userData?.organization?.settings?.is_founder && (
+
+                    {billingPeriod === 'annual' && !userData?.organization?.settings?.is_founder && (
                       <div className="p-3 bg-accent/10 border border-accent/30 rounded-lg flex items-start gap-2">
                         <Crown className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
                         <div className="flex-1 text-xs text-accent/90">
@@ -1349,7 +1491,8 @@ export default function SubscriptionCheckout() {
                         </div>
                       </div>
                     )}
-                    {prorationData?.credit && prorationData.credit.daysRemaining > 0 && selectedMethod === 'mercadopago'&& (
+
+                    {prorationData?.credit && prorationData.credit.daysRemaining > 0 && selectedMethod === 'mercadopago' && (
                       <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -1368,7 +1511,8 @@ export default function SubscriptionCheckout() {
                         </p>
                       </div>
                     )}
-                    {prorationData?.credit && prorationData.credit.daysRemaining > 0 && selectedMethod === 'paypal'&& (
+
+                    {prorationData?.credit && prorationData.credit.daysRemaining > 0 && selectedMethod === 'paypal' && (
                       <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -1387,6 +1531,7 @@ export default function SubscriptionCheckout() {
                         </p>
                       </div>
                     )}
+
                     {planFeatures.length > 0 && (
                       <>
                         <Separator />
@@ -1403,7 +1548,9 @@ export default function SubscriptionCheckout() {
                         </div>
                       </>
                     )}
+
                     <Separator />
+
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <Tag className="h-4 w-4 text-accent" />
@@ -1420,7 +1567,7 @@ export default function SubscriptionCheckout() {
                                   Cupón aplicado: {validatedCoupon.code}
                                 </p>
                                 <p className="text-xs text-green-600 dark:text-green-500">
-                                  {validatedCoupon.type === 'percentage'
+                                  {validatedCoupon.type === 'percentage' 
                                     ? `${validatedCoupon.amount}% de descuento`
                                     : `$${validatedCoupon.discount_usd} USD de descuento`
                                   }
@@ -1476,7 +1623,9 @@ export default function SubscriptionCheckout() {
                         </div>
                       )}
                     </div>
+
                     <Separator />
+
                     <div className="space-y-2">
                       {(calculatePrice.hasProrationDiscount || calculatePrice.hasCouponDiscount) && (
                         <>
@@ -1538,6 +1687,7 @@ export default function SubscriptionCheckout() {
                         </div>
                       </div>
                     </div>
+
                     <div className="pt-4 space-y-2 text-xs text-muted-foreground">
                       <div className="flex items-start gap-2">
                         <CheckCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-accent" />
@@ -1545,14 +1695,16 @@ export default function SubscriptionCheckout() {
                       </div>
                       <div className="flex items-start gap-2">
                         <CheckCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-accent" />
-                        <p>Renovación automática {billingPeriod === 'annual'? 'anual': 'mensual'}</p>
+                        <p>Renovación automática {billingPeriod === 'annual' ? 'anual' : 'mensual'}</p>
                       </div>
                       <div className="flex items-start gap-2">
                         <CheckCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-accent" />
                         <p>Soporte incluido durante toda la suscripción</p>
                       </div>
                     </div>
+
                     <Separator className="my-6" />
+
                     <div className="space-y-4">
                       <div className="flex items-start gap-3">
                         <Checkbox
@@ -1584,6 +1736,7 @@ export default function SubscriptionCheckout() {
                           </a>
                         </label>
                       </div>
+
                       <div className="flex items-start gap-3">
                         <Checkbox
                           id="accept-communications"
@@ -1599,6 +1752,7 @@ export default function SubscriptionCheckout() {
                         </label>
                       </div>
                     </div>
+
                     {selectedMethod === "mercadopago" && (
                       <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg mt-4">
                         <div className="flex items-start gap-3 mb-3">
@@ -1623,6 +1777,7 @@ export default function SubscriptionCheckout() {
                         </div>
                       </div>
                     )}
+
                     <Button
                       onClick={handleContinue}
                       disabled={
@@ -1653,6 +1808,7 @@ export default function SubscriptionCheckout() {
                   </div>
                 )}
               </div>
+
               <div className="mt-4 text-center text-xs text-muted-foreground">
                 <p className="flex items-center justify-center gap-1.5">
                   <span className="inline-block w-2 h-2 rounded-full bg-green-500" />

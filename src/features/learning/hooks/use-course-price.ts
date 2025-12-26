@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCoursePricing } from '../services/student/getCoursePricing';
 import type { CoursePricing } from '../types';
+
 /**
  * Parámetros del hook useCoursePriceQuery
  */
@@ -22,6 +23,7 @@ interface UseCoursePriceParams {
    */
   provider?: string;
 }
+
 /**
  * Hook para obtener el precio de un curso.
  * 

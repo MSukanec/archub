@@ -1,6 +1,8 @@
 import { apiRequest } from '@/lib/queryClient';
 import type { MaterialPaymentWithRelations } from '../types';
+
 const BASE_URL = '/api/projects';
+
 export async function getMaterialPayments(
   projectId: string,
   organizationId: string
@@ -8,17 +10,21 @@ export async function getMaterialPayments(
   if (!organizationId || !projectId) {
     return [];
   }
+
   const response = await apiRequest(
     'GET',
     `${BASE_URL}/${projectId}/material-payments?organization_id=${organizationId}`
   );
+
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || 'Failed to fetch material payments');
   }
+
   const result = await response.json();
   return result.data || [];
 }
+
 export async function getMaterialPaymentById(
   projectId: string,
   paymentId: string,
@@ -27,17 +33,21 @@ export async function getMaterialPaymentById(
   if (!organizationId || !paymentId || !projectId) {
     return null;
   }
+
   const response = await apiRequest(
     'GET',
     `${BASE_URL}/${projectId}/material-payments/${paymentId}?organization_id=${organizationId}`
   );
+
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || 'Failed to fetch material payment');
   }
+
   const result = await response.json();
   return result.data || null;
 }
+
 export interface CreateMaterialPaymentData {
   amount: number;
   currency_id: string;
@@ -46,10 +56,11 @@ export interface CreateMaterialPaymentData {
   wallet_id?: string | null;
   notes?: string | null;
   reference?: string | null;
-  status: 'confirmed'| 'pending'| 'rejected'| 'void';
+  status: 'confirmed' | 'pending' | 'rejected' | 'void';
   purchase_id?: string | null;
   created_by?: string | null;
 }
+
 export async function createMaterialPayment(
   projectId: string,
   organizationId: string,
@@ -60,13 +71,16 @@ export async function createMaterialPayment(
     `${BASE_URL}/${projectId}/material-payments?organization_id=${organizationId}`,
     paymentData
   );
+
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || 'Failed to create material payment');
   }
+
   const result = await response.json();
   return result.data;
 }
+
 export interface UpdateMaterialPaymentData {
   amount?: number;
   currency_id?: string;
@@ -75,9 +89,10 @@ export interface UpdateMaterialPaymentData {
   wallet_id?: string | null;
   notes?: string | null;
   reference?: string | null;
-  status?: 'confirmed'| 'pending'| 'rejected'| 'void';
+  status?: 'confirmed' | 'pending' | 'rejected' | 'void';
   purchase_id?: string | null;
 }
+
 export async function updateMaterialPayment(
   projectId: string,
   paymentId: string,
@@ -89,13 +104,16 @@ export async function updateMaterialPayment(
     `${BASE_URL}/${projectId}/material-payments/${paymentId}?organization_id=${organizationId}`,
     updates
   );
+
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || 'Failed to update material payment');
   }
+
   const result = await response.json();
   return result.data;
 }
+
 export async function deleteMaterialPayment(
   projectId: string,
   paymentId: string,
@@ -105,12 +123,15 @@ export async function deleteMaterialPayment(
     'DELETE',
     `${BASE_URL}/${projectId}/material-payments/${paymentId}?organization_id=${organizationId}`
   );
+
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || 'Failed to delete material payment');
   }
+
   return true;
 }
+
 export interface PaymentAttachment {
   id: string;
   description: string | null;
@@ -124,6 +145,7 @@ export interface PaymentAttachment {
     file_size: number;
   } | null;
 }
+
 export async function getMaterialPaymentAttachments(
   projectId: string,
   paymentId: string,
@@ -132,14 +154,17 @@ export async function getMaterialPaymentAttachments(
   if (!organizationId || !paymentId || !projectId) {
     return [];
   }
+
   const response = await apiRequest(
     'GET',
     `${BASE_URL}/${projectId}/material-payments/${paymentId}/attachments?organization_id=${organizationId}`
   );
+
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || 'Failed to fetch payment attachments');
   }
+
   const result = await response.json();
   return result.data || [];
 }

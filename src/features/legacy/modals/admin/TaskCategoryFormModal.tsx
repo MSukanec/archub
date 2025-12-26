@@ -3,20 +3,25 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Package2 } from "lucide-react";
+
 import { FormModalLayout } from "@/components/modal";
 import { FormModalHeader } from "@/components/modal";
 import { FormModalFooter } from "@/components/modal";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ComboBox } from "@/components/shared/fields/ComboBoxWriteField";
+
 import { useCreateTaskCategory, useUpdateTaskCategory, TaskCategoryAdmin } from "@/hooks/use-task-categories-admin";
 import { useAllTaskCategories } from "@/hooks/use-task-categories-admin";
+
 const taskCategorySchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   code: z.string().optional(),
   parent_id: z.string().nullable().optional(),
 });
+
 type TaskCategoryFormData = z.infer<typeof taskCategorySchema>;
+
 interface TaskCategoryFormModalProps {
   modalData?: {
     editingCategory?: TaskCategoryAdmin;
@@ -24,6 +29,7 @@ interface TaskCategoryFormModalProps {
   };
   onClose: () => void;
 }
+
 export function TaskCategoryFormModal({ modalData, onClose }: TaskCategoryFormModalProps) {
   const { editingCategory, isEditing = false } = modalData || {};
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,6 +37,7 @@ export function TaskCategoryFormModal({ modalData, onClose }: TaskCategoryFormMo
   const createMutation = useCreateTaskCategory();
   const updateMutation = useUpdateTaskCategory();
   const { data: allCategories = [] } = useAllTaskCategories();
+
   const form = useForm<TaskCategoryFormData>({
     resolver: zodResolver(taskCategorySchema),
     defaultValues: {
@@ -39,6 +46,7 @@ export function TaskCategoryFormModal({ modalData, onClose }: TaskCategoryFormMo
       parent_id: editingCategory?.parent_id || null,
     },
   });
+
   // Reset form when modal opens/closes or category changes
   useEffect(() => {
     if (editingCategory) {
@@ -55,6 +63,7 @@ export function TaskCategoryFormModal({ modalData, onClose }: TaskCategoryFormMo
       });
     }
   }, [editingCategory, form]);
+
   const onSubmit = async (data: TaskCategoryFormData) => {
     setIsSubmitting(true);
     
@@ -64,6 +73,7 @@ export function TaskCategoryFormModal({ modalData, onClose }: TaskCategoryFormMo
         code: data.code || undefined,
         parent_id: data.parent_id,
       };
+
       if (editingCategory) {
         await updateMutation.mutateAsync({ 
           id: editingCategory.id, 
@@ -80,7 +90,9 @@ export function TaskCategoryFormModal({ modalData, onClose }: TaskCategoryFormMo
       setIsSubmitting(false);
     }
   };
+
   const viewPanel = null; // No view mode needed for this modal
+
   const editPanel = (
     <div className="space-y-6">
       <Form {...form}>
@@ -106,6 +118,7 @@ export function TaskCategoryFormModal({ modalData, onClose }: TaskCategoryFormMo
               </FormItem>
             )}
           />
+
           {/* Prefijo de Código - Always editable */}
           <FormField
             control={form.control}
@@ -123,6 +136,7 @@ export function TaskCategoryFormModal({ modalData, onClose }: TaskCategoryFormMo
               </FormItem>
             )}
           />
+
           {/* Nombre - Always editable */}
           <FormField
             control={form.control}
@@ -144,20 +158,23 @@ export function TaskCategoryFormModal({ modalData, onClose }: TaskCategoryFormMo
       </Form>
     </div>
   );
+
   const headerContent = (
     <FormModalHeader 
-      title={editingCategory ? 'Editar Categoría': 'Nueva Categoría'}
+      title={editingCategory ? 'Editar Categoría' : 'Nueva Categoría'}
       icon={Package2}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel={editingCategory ? 'Guardar Cambios': 'Crear Categoría'}
+      rightLabel={editingCategory ? 'Guardar Cambios' : 'Crear Categoría'}
       onRightClick={form.handleSubmit(onSubmit)}
     />
   );
+
   return (
     <FormModalLayout
       columns={1}

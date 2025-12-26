@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getLessonProgress } from '../services';
 import { LEARNING_QUERY_KEYS } from '../constants';
+
 /**
  * Hook para obtener el progreso de una lección específica.
  * 

@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 /**
  * Elimina (soft delete) un tipo de proyecto personalizado de una organización.
  * Solo se pueden eliminar tipos que pertenecen a la organización (no del sistema).
@@ -12,9 +13,11 @@ export async function deleteProjectType(typeId: string, organizationId: string) 
   if (!supabase) {
     throw new Error('Supabase client not available');
   }
+
   if (!typeId || !organizationId) {
     throw new Error('Missing required parameters: typeId and organizationId are required');
   }
+
   const { error } = await supabase
     .from('project_types')
     .update({
@@ -24,6 +27,7 @@ export async function deleteProjectType(typeId: string, organizationId: string) 
     .eq('id', typeId)
     .eq('organization_id', organizationId)
     .eq('is_deleted', false);
+
   if (error) {
     console.error('Error deleting project type:', error);
     throw error;

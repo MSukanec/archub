@@ -1,4 +1,5 @@
 import { useGlobalModalStore } from '@/components/modal'
+
 interface BillingInfo {
   hasPaidForSeat?: boolean
   creditAvailable?: number
@@ -7,6 +8,7 @@ interface BillingInfo {
   creditAmount?: number
   nextBillingDate?: string
 }
+
 interface RevokeInvitationOptions {
   memberName: string
   memberEmail: string
@@ -15,6 +17,7 @@ interface RevokeInvitationOptions {
   onConfirm: () => void | Promise<void>
   isLoading?: boolean
 }
+
 interface RemoveMemberOptions {
   memberName: string
   memberEmail: string
@@ -23,8 +26,10 @@ interface RemoveMemberOptions {
   onConfirm: () => void | Promise<void>
   isLoading?: boolean
 }
+
 export function useMemberActionConfirmation() {
   const { openModal, popModal } = useGlobalModalStore()
+
   const showRevokeInvitationConfirmation = (options: RevokeInvitationOptions) => {
     openModal('member-action-confirmation', {
       actionType: 'revoke_invitation',
@@ -36,6 +41,7 @@ export function useMemberActionConfirmation() {
       isLoading: options.isLoading || false,
     })
   }
+
   const showRemoveMemberConfirmation = (options: RemoveMemberOptions) => {
     openModal('member-action-confirmation', {
       actionType: 'remove_member',
@@ -47,6 +53,7 @@ export function useMemberActionConfirmation() {
       isLoading: options.isLoading || false,
     })
   }
+
   return {
     showRevokeInvitationConfirmation,
     showRemoveMemberConfirmation,

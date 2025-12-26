@@ -4,12 +4,15 @@
  * Maps payment status to semantic Badge variant
  * Supports light/dark mode via CSS tokens
  */
-export type ClientPaymentStatus = 'confirmed'| 'pending'| 'rejected'| 'void';
+
+export type ClientPaymentStatus = 'confirmed' | 'pending' | 'rejected' | 'void';
+
 export interface StatusBadgeConfig {
   label: string;
-  variant: 'success'| 'pending'| 'error'| 'neutral';
+  variant: 'success' | 'pending' | 'error' | 'neutral';
   className: string;
 }
+
 /**
  * Get badge configuration for a client payment status
  * 
@@ -21,22 +24,22 @@ export function getClientPaymentStatusBadgeConfig(status: ClientPaymentStatus): 
     confirmed: { 
       label: 'Confirmado', 
       variant: 'success', 
-      className: ''
+      className: '' 
     },
     pending: { 
       label: 'Pendiente', 
       variant: 'pending', 
-      className: ''
+      className: '' 
     },
     rejected: { 
       label: 'Rechazado', 
       variant: 'error', 
-      className: ''
+      className: '' 
     },
     void: { 
       label: 'Anulado', 
       variant: 'neutral', 
-      className: ''
+      className: '' 
     },
   };
   

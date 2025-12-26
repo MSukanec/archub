@@ -2,8 +2,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteSubcontractBid } from '../services';
 import { SUBCONTRACT_QUERY_KEYS } from '../constants';
 import { toast } from '@/hooks/use-toast';
+
 export function useDeleteSubcontractBid() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (bidId: string) => deleteSubcontractBid(bidId),
     onSuccess: () => {

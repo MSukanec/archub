@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { Package } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { MaterialPaymentFormFields } from '../forms/MaterialPaymentFormFields'
+
 interface MaterialPaymentModalProps {
   modalData?: {
     projectId?: string;
@@ -9,10 +10,12 @@ interface MaterialPaymentModalProps {
     paymentId?: string;
   };
   onClose: () => void;
-  mode?: 'create'| 'edit'| 'view';
+  mode?: 'create' | 'edit' | 'view';
 }
-export function MaterialPaymentModal({ modalData, onClose, mode = 'create'}: MaterialPaymentModalProps) {
+
+export function MaterialPaymentModal({ modalData, onClose, mode = 'create' }: MaterialPaymentModalProps) {
   const formRef = useRef<HTMLFormElement>(null)
+
   const getHeader = () => {
     switch (mode) {
       case 'view':
@@ -33,6 +36,7 @@ export function MaterialPaymentModal({ modalData, onClose, mode = 'create'}: Mat
         };
     }
   };
+
   const getSubmitText = () => {
     switch (mode) {
       case 'view':
@@ -44,6 +48,7 @@ export function MaterialPaymentModal({ modalData, onClose, mode = 'create'}: Mat
         return 'Registrar Pago';
     }
   };
+
   const handleSubmit = () => {
     if (mode === 'view') {
       onClose();
@@ -51,7 +56,9 @@ export function MaterialPaymentModal({ modalData, onClose, mode = 'create'}: Mat
       formRef.current.requestSubmit();
     }
   };
+
   const header = getHeader();
+
   return (
     <ModalLayout 
       onClose={onClose} 
@@ -87,4 +94,5 @@ export function MaterialPaymentModal({ modalData, onClose, mode = 'create'}: Mat
     </ModalLayout>
   )
 }
+
 export default MaterialPaymentModal

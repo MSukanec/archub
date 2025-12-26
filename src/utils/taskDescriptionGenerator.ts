@@ -9,12 +9,15 @@ export async function generateTaskDescription(
   parameterOptions: Record<string, any[]> = {}
 ): Promise<string> {
   if (!nameTemplate) return nameTemplate;
+
   // Import supabase client for database access
   const { supabase } = await import('@/lib/supabase');
   let result = nameTemplate;
+
   if (!paramValues || Object.keys(paramValues).length === 0) {
     return result;
   }
+
   // Get all parameter IDs to fetch their information
   const paramNames = Object.keys(paramValues);
   
@@ -23,10 +26,12 @@ export async function generateTaskDescription(
     .from('task_parameters')
     .select('name, type, expression_template')
     .in('name', paramNames);
+
   if (error) {
     console.error('Error fetching parameters:', error);
     return nameTemplate;
   }
+
   // For select type parameters, get parameter values
   const selectParamValues = Object.entries(paramValues)
     .filter(([paramName]) => {
@@ -35,16 +40,19 @@ export async function generateTaskDescription(
     })
     .map(([, value]) => value)
     .filter(value => typeof value === 'string'); // Only string values can be found in parameter_values
+
   let parameterValuesData: any[] = [];
   if (selectParamValues.length > 0) {
     const { data: valuesData, error: valuesError } = await supabase
       .from('task_parameter_options')
       .select('name, label, parameter_id, task_parameters!inner(expression_template)')
       .in('name', selectParamValues);
+
     if (!valuesError) {
       parameterValuesData = valuesData || [];
     }
   }
+
   // Replace placeholders AND literal parameter values
   Object.entries(paramValues).forEach(([paramName, paramValue]) => {
     const placeholder = `{{${paramName}}}`;
@@ -70,7 +78,7 @@ export async function generateTaskDescription(
           replacementText = String(paramValue);
         }
       } else if (parameter.type === 'boolean') {
-        replacementText = paramValue ? 'Sí': 'No';
+        replacementText = paramValue ? 'Sí' : 'No';
       } else {
         // For text, number types, use expression_template if available
         if (parameter.expression_template) {
@@ -95,9 +103,11 @@ export async function generateTaskDescription(
       }
     }
   });
+
   // Clean up multiple spaces and trim the final result
-  return result.replace(/\s+/g, '').trim();
+  return result.replace(/\s+/g, ' ').trim();
 }
+
 /**
  * Utility function to generate task descriptions for preview
  * Uses expression_template from parameters to format the replacement text
@@ -109,7 +119,9 @@ export function generatePreviewDescription(
   parameterOptions: Record<string, any[]>
 ): string {
   if (!nameTemplate || !parameters) return nameTemplate;
+
   let result = nameTemplate;
+
   // Replace {{parameter}} placeholders with expression_template formatted values
   (parameters || []).forEach(param => {
     const placeholder = `{{${param.name}}}`;
@@ -132,7 +144,7 @@ export function generatePreviewDescription(
             replacementText = optionLabel;
           }
         } else if (param.type === 'boolean') {
-          replacementText = value ? 'Sí': 'No';
+          replacementText = value ? 'Sí' : 'No';
         } else {
           // For other types (text, number), use expression_template if available
           if (param.expression_template) {
@@ -149,6 +161,7 @@ export function generatePreviewDescription(
       }
     }
   });
+
   // Clean up multiple spaces and trim the final result
-  return result.replace(/\s+/g, '').trim();
+  return result.replace(/\s+/g, ' ').trim();
 }

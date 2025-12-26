@@ -8,6 +8,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { useClientPayments, useClientDashboard } from '@/features/clients';
 import { useProjectContext } from '@/stores/projectContext';
+import { 
   AppCard, 
   AppCardTitle, 
   AppCardValue, 
@@ -29,7 +30,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
 import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
-export type ClientPeriodFilter = '30d'| '3m'| '6m'| '1y'| 'all';
+
+export type ClientPeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all';
+
 interface ClientsDashboardViewProps {
   onNavigateToList?: () => void;
   onNavigateToPayments?: () => void;
@@ -38,6 +41,7 @@ interface ClientsDashboardViewProps {
   onFilterClient?: (clientId: string) => void;
   selectedPeriod?: ClientPeriodFilter;
 }
+
 function getDateFromForPeriod(period: ClientPeriodFilter): Date | null {
   if (period === 'all') return null;
   
@@ -62,6 +66,7 @@ function getDateFromForPeriod(period: ClientPeriodFilter): Date | null {
   result.setHours(0, 0, 0, 0);
   return result;
 }
+
 function getPreviousPeriodDateRange(period: ClientPeriodFilter): { from: Date; to: Date } | null {
   const now = new Date();
   const to = new Date(now);
@@ -94,6 +99,7 @@ function getPreviousPeriodDateRange(period: ClientPeriodFilter): { from: Date; t
   from.setHours(0, 0, 0, 0);
   return { from, to };
 }
+
 export function calculateAvailablePeriods(allPayments: any[]): Record<ClientPeriodFilter, boolean> {
   const confirmedPayments = allPayments.filter(p => p.status === 'confirmed');
   
@@ -121,6 +127,7 @@ export function calculateAvailablePeriods(allPayments: any[]): Record<ClientPeri
   
   return result;
 }
+
 export function ClientsDashboardView({ 
   onNavigateToList, 
   onNavigateToPayments,
@@ -134,6 +141,7 @@ export function ClientsDashboardView({
   const { selectedProjectId } = useProjectContext();
   
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
+
   const handleInsightAction = useCallback((action: InsightAction) => {
     switch (action.type) {
       case 'navigate':
@@ -159,6 +167,7 @@ export function ClientsDashboardView({
         break;
     }
   }, [onNavigateToList, onNavigateToPayments, onNavigateToTab, onScrollToPanel, onFilterClient]);
+
   const handleMonthDrillDown = useCallback((month: string) => {
     if (onNavigateToTab) {
       onNavigateToTab('payments', { filterMonth: month });
@@ -166,6 +175,7 @@ export function ClientsDashboardView({
       onNavigateToPayments?.();
     }
   }, [onNavigateToTab, onNavigateToPayments]);
+
   const handleClientDrillDown = useCallback((clientName: string) => {
     if (onNavigateToTab) {
       onNavigateToTab('payments', { filterClient: clientName });
@@ -173,15 +183,21 @@ export function ClientsDashboardView({
       onNavigateToPayments?.();
     }
   }, [onNavigateToTab, onNavigateToPayments]);
+
   const { data: allPayments = [], isLoading: isLoadingPayments } = useClientPayments(selectedProjectId || undefined, organizationId);
   const { data: dashboardData, isLoading: isLoadingDashboard } = useClientDashboard(selectedProjectId || undefined, organizationId);
+
   const isLoading = isLoadingPayments || isLoadingDashboard;
+
   const dateFrom = useMemo(() => getDateFromForPeriod(selectedPeriod), [selectedPeriod]);
+
   const periodMeta = useMemo(() => {
     const now = new Date();
     return getPeriodMeta(dateFrom, now);
   }, [dateFrom]);
+
   const kpiLabels = useMemo(() => getKPILabels(periodMeta), [periodMeta]);
+
   const confirmedPayments = useMemo(() => {
     const confirmed = allPayments.filter(p => p.status === 'confirmed');
     
@@ -194,6 +210,7 @@ export function ClientsDashboardView({
       return paymentDateAtMidnight >= dateFrom;
     });
   }, [allPayments, dateFrom]);
+
   const currentPeriodPaymentsForComparison = useMemo(() => {
     if (selectedPeriod !== 'all') return confirmedPayments;
     
@@ -209,6 +226,7 @@ export function ClientsDashboardView({
       return paymentDateAtMidnight >= oneYearAgo;
     });
   }, [allPayments, selectedPeriod, confirmedPayments]);
+
   const previousPeriodPayments = useMemo(() => {
     const previousRange = getPreviousPeriodDateRange(selectedPeriod);
     if (!previousRange) return [];
@@ -221,6 +239,7 @@ export function ClientsDashboardView({
       return paymentDateAtMidnight >= previousRange.from && paymentDateAtMidnight < previousRange.to;
     });
   }, [allPayments, selectedPeriod]);
+
   const kpis = useMemo(() => {
     const totalCobrado = calculateMonetaryKPI({
       items: confirmedPayments.map(p => ({
@@ -233,6 +252,7 @@ export function ClientsDashboardView({
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
+
     const currentPeriodTotalForTrend = calculateMonetaryKPI({
       items: currentPeriodPaymentsForComparison.map(p => ({
         amount: p.amount,
@@ -244,6 +264,7 @@ export function ClientsDashboardView({
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
+
     const previousTotalCobrado = calculateMonetaryKPI({
       items: previousPeriodPayments.map(p => ({
         amount: p.amount,
@@ -255,41 +276,49 @@ export function ClientsDashboardView({
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
+
     let totalCobradoTrend: TrendDirection = 'neutral';
     let totalCobradoTrendValue = '';
     if (previousTotalCobrado.value > 0) {
       const change = ((currentPeriodTotalForTrend.value - previousTotalCobrado.value) / previousTotalCobrado.value) * 100;
-      totalCobradoTrend = change > 0 ? 'up': change < 0 ? 'down': 'neutral';
-      const periodLabel = selectedPeriod === 'all'? 'vs año anterior': 'vs período anterior';
-      totalCobradoTrendValue = `${change > 0 ? '+': ''}${Math.round(change)}% ${periodLabel}`;
+      totalCobradoTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
+      const periodLabel = selectedPeriod === 'all' ? 'vs año anterior' : 'vs período anterior';
+      totalCobradoTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% ${periodLabel}`;
     }
+
     const months = new Set(confirmedPayments.map(p => {
       const date = parseLocalDate(p.payment_date);
       if (!date) return '';
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     }).filter(m => m !== ''));
     const monthCount = months.size || 1;
+
     const averageMonthlyItems = confirmedPayments.map(p => ({
       amount: p.amount / monthCount,
       currency_id: p.currency_id,
       currency: p.currency,
       exchange_rate: p.exchange_rate
     }));
+
     const averageMonthly = calculateMonetaryKPI({
       items: averageMonthlyItems,
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
+
     const totalPayments = calculateCountKPI({
       count: confirmedPayments.length,
       label: 'pagos'
     });
+
     const paymentsPerMonth = monthCount > 0 ? Math.round(confirmedPayments.length / monthCount) : 0;
+
     const totalClients = calculateCountKPI({
       count: dashboardData?.clients?.length || 0,
       label: 'clientes'
     });
+
     const periodDivisor = periodMeta.isShortPeriod ? periodMeta.daysCount : monthCount;
     const periodAverageItems = confirmedPayments.map(p => ({
       amount: p.amount / periodDivisor,
@@ -297,12 +326,14 @@ export function ClientsDashboardView({
       currency: p.currency,
       exchange_rate: p.exchange_rate
     }));
+
     const periodAverage = calculateMonetaryKPI({
       items: periodAverageItems,
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
+
     return {
       totalCobrado,
       totalCobradoTrend,
@@ -316,6 +347,7 @@ export function ClientsDashboardView({
       monthCount
     };
   }, [confirmedPayments, defaultCurrency, previousPeriodPayments, selectedPeriod, currentPeriodPaymentsForComparison, periodMeta, dashboardData?.clients?.length]);
+
   const monthlyChartData = useMemo(() => {
     const monthlyTotals = new Map<string, number>();
     
@@ -329,15 +361,17 @@ export function ClientsDashboardView({
         defaultCurrency?.code,
         payment.amount,
         payment.exchange_rate ?? null,
-        { quoteCurrency: 'USD'}
+        { quoteCurrency: 'USD' }
       );
       
       monthlyTotals.set(monthKey, (monthlyTotals.get(monthKey) || 0) + amount);
     });
+
     return Array.from(monthlyTotals.entries())
       .map(([month, value]) => ({ month, value }))
       .sort((a, b) => a.month.localeCompare(b.month));
   }, [confirmedPayments, defaultCurrency]);
+
   const currentMonthComparison = useMemo(() => {
     if (monthlyChartData.length < 2) return null;
     
@@ -351,6 +385,7 @@ export function ClientsDashboardView({
       stableThresholdPercent: 5
     });
   }, [monthlyChartData]);
+
   const clientChartData = useMemo(() => {
     const clientTotals = new Map<string, number>();
     
@@ -365,16 +400,18 @@ export function ClientsDashboardView({
         defaultCurrency?.code,
         payment.amount,
         payment.exchange_rate ?? null,
-        { quoteCurrency: 'USD'}
+        { quoteCurrency: 'USD' }
       );
       
       clientTotals.set(clientName, (clientTotals.get(clientName) || 0) + amount);
     });
+
     return Array.from(clientTotals.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 8);
   }, [confirmedPayments, defaultCurrency]);
+
   const autoInsights = useMemo(() => {
     const context = buildInsightContext({
       totalGasto: kpis.totalCobrado.value,
@@ -391,6 +428,7 @@ export function ClientsDashboardView({
     });
     return generateInsights(context, 3);
   }, [kpis, clientChartData, monthlyChartData, confirmedPayments, periodMeta]);
+
   const recentActivityItems = useMemo((): ActivityItem[] => {
     return [...confirmedPayments]
       .sort((a, b) => {
@@ -418,7 +456,7 @@ export function ClientsDashboardView({
                     defaultCurrency?.code,
                     payment.amount,
                     payment.exchange_rate ?? null,
-                    { quoteCurrency: 'USD'}
+                    { quoteCurrency: 'USD' }
                   ),
                   defaultCurrency?.symbol || '$'
                 )}
@@ -434,6 +472,7 @@ export function ClientsDashboardView({
         };
       });
   }, [confirmedPayments, defaultCurrency]);
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -449,6 +488,7 @@ export function ClientsDashboardView({
       </div>
     );
   }
+
   if (!selectedProjectId) {
     return (
       <EmptyState 
@@ -459,6 +499,7 @@ export function ClientsDashboardView({
       />
     );
   }
+
   if (allPayments.length === 0) {
     return (
       <EmptyState 
@@ -478,6 +519,7 @@ export function ClientsDashboardView({
       />
     );
   }
+
   return (
     <div className="space-y-6" data-testid="clients-dashboard">
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -499,6 +541,7 @@ export function ClientsDashboardView({
             )}
           </AppCardMetaContainer>
         </AppCard>
+
         <AppCard data-testid="kpi-average-monthly">
           <AppCardTitle>
             <TrendingUp className="h-4 w-4" />
@@ -509,6 +552,7 @@ export function ClientsDashboardView({
             <AppCardMeta>{kpiLabels.averageHelper}</AppCardMeta>
           </AppCardMetaContainer>
         </AppCard>
+
         <AppCard data-testid="kpi-total-payments">
           <AppCardTitle>
             <Receipt className="h-4 w-4" />
@@ -519,6 +563,7 @@ export function ClientsDashboardView({
             <AppCardMeta>≈ {kpis.paymentsPerMonth} pagos por mes</AppCardMeta>
           </AppCardMetaContainer>
         </AppCard>
+
         <AppCard data-testid="kpi-total-clients">
           <AppCardTitle>
             <Users className="h-4 w-4" />
@@ -530,6 +575,7 @@ export function ClientsDashboardView({
           </AppCardMetaContainer>
         </AppCard>
       </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AppCard 
           title="Evolución de Cobros"
@@ -545,6 +591,7 @@ export function ClientsDashboardView({
             onBarClick={(month) => handleMonthDrillDown(month)}
           />
         </AppCard>
+
         <AppCard 
           title="Distribución por Cliente"
           icon={<PieChart />}
@@ -560,6 +607,7 @@ export function ClientsDashboardView({
           />
         </AppCard>
       </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <InsightCard
           title="Insights"
@@ -569,6 +617,7 @@ export function ClientsDashboardView({
           onAction={handleInsightAction}
           data-testid="insights-section"
         />
+
         <ActivityCard
           title="Actividad Reciente"
           titleIcon={<Clock />}
@@ -580,4 +629,5 @@ export function ClientsDashboardView({
     </div>
   );
 }
+
 export default ClientsDashboardView;

@@ -6,9 +6,11 @@
  * 
  * Colors reference CSS variables from index.css
  */
+
 // ═══════════════════════════════════════════════════════════════════════════
 // COLOR PALETTE
 // ═══════════════════════════════════════════════════════════════════════════
+
 export const CHART_COLORS = {
   // Primary palette for categories/series (10 colors: 1-5 from light, 6-10 from dark)
   // Only add new colors beyond these if absolutely necessary (11+)
@@ -40,13 +42,16 @@ export const CHART_COLORS = {
   // Background for radial charts
   ringBackground: 'var(--chart-ring-bg)',
 }
+
 // Get color by index (wraps around palette)
 export function getChartColor(index: number): string {
   return CHART_COLORS.palette[index % CHART_COLORS.palette.length]
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPOGRAPHY
 // ═══════════════════════════════════════════════════════════════════════════
+
 export const CHART_TYPOGRAPHY = {
   // Axis tick labels
   axisTick: {
@@ -78,9 +83,11 @@ export const CHART_TYPOGRAPHY = {
     fontWeight: 400,
   },
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // AXIS STYLING
 // ═══════════════════════════════════════════════════════════════════════════
+
 export const CHART_AXIS = {
   // Common axis props
   xAxis: {
@@ -102,9 +109,11 @@ export const CHART_AXIS = {
     vertical: false,
   },
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // TOOLTIP STYLING
 // ═══════════════════════════════════════════════════════════════════════════
+
 export const CHART_TOOLTIP = {
   // Container styling (for Recharts contentStyle)
   container: {
@@ -118,9 +127,11 @@ export const CHART_TOOLTIP = {
   // CSS class for custom tooltip
   className: 'rounded-lg p-3 shadow-lg border border-border bg-popover text-popover-foreground',
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // SHAPE STYLING
 // ═══════════════════════════════════════════════════════════════════════════
+
 export const CHART_SHAPES = {
   // Bar chart
   bar: {
@@ -155,9 +166,11 @@ export const CHART_SHAPES = {
     cornerRadius: 10,
   },
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // DEFAULT DIMENSIONS
 // ═══════════════════════════════════════════════════════════════════════════
+
 export const CHART_DIMENSIONS = {
   // Standard heights
   height: {
@@ -174,9 +187,11 @@ export const CHART_DIMENSIONS = {
     withLegend: { top: 10, right: 10, bottom: 30, left: 0 },
   },
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // LOADING & EMPTY STATES
 // ═══════════════════════════════════════════════════════════════════════════
+
 export const CHART_STATES = {
   loading: {
     className: 'flex items-center justify-center',
@@ -188,9 +203,11 @@ export const CHART_STATES = {
     textClassName: 'text-sm text-muted-foreground',
   },
 }
+
 // ═══════════════════════════════════════════════════════════════════════════
 // HELPER FUNCTIONS
 // ═══════════════════════════════════════════════════════════════════════════
+
 /**
  * Get value color based on positive/negative
  */
@@ -199,6 +216,7 @@ export function getValueColor(value: number): string {
   if (value < 0) return CHART_COLORS.negative
   return CHART_COLORS.neutral
 }
+
 /**
  * Format number for display (compact notation)
  */
@@ -208,6 +226,7 @@ export function formatCompact(value: number, locale = 'es-AR'): string {
     compactDisplay: 'short',
   }).format(value)
 }
+
 /**
  * Format percentage
  */

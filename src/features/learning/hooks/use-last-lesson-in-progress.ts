@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getLastLessonInProgress } from '../services';
 import { LEARNING_QUERY_KEYS } from '../constants';
+
 /**
  * Hook para obtener la última lección en progreso del usuario.
  * 

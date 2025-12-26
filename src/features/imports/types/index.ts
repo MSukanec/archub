@@ -1,4 +1,5 @@
-export type FieldType = 'string'| 'number'| 'date'| 'currency'| 'boolean'| 'foreign-key';
+export type FieldType = 'string' | 'number' | 'date' | 'currency' | 'boolean' | 'foreign-key';
+
 export interface TargetField {
   field: string;
   label: string;
@@ -12,14 +13,17 @@ export interface TargetField {
     options: Array<{ label: string; value: string }>;
   };
 }
+
 export type ProjectContext = 
   | { type: 'project'; projectId: string; projectName?: string }
   | { type: 'organization'; organizationId: string; organizationName?: string };
+
 export interface FieldHelpMessage {
   message: string;
   linkText: string;
   linkPath: string;
 }
+
 export interface ImportConfig {
   entityName: string;
   entityNamePlural: string;
@@ -41,24 +45,28 @@ export interface ImportConfig {
   /** Mensajes de ayuda para campos específicos (se muestran en conflictos) */
   fieldHelpMessages?: Record<string, FieldHelpMessage>;
 }
+
 export interface ParsedData {
   headers: string[];
   rows: any[][];
   fileName: string;
-  fileType: 'csv'| 'xlsx'| 'xls';
+  fileType: 'csv' | 'xlsx' | 'xls';
   totalRows: number;
 }
+
 export interface ColumnMapping {
   [columnIndex: number]: string | null;
 }
+
 export interface ValidationError {
   row: number;
   column: string;
   field: string;
   message: string;
   value: any;
-  severity: 'error'| 'warning';
+  severity: 'error' | 'warning';
 }
+
 export interface ConflictItem {
   field: string;
   originalValue: string;
@@ -66,9 +74,11 @@ export interface ConflictItem {
   resolved?: boolean;
   resolvedValue?: string;
 }
+
 export interface ManualMapping {
   [key: string]: string | null;
 }
+
 export interface ImportStep {
   id: number;
   name: string;
@@ -76,6 +86,7 @@ export interface ImportStep {
   completed: boolean;
   current: boolean;
 }
+
 export interface ImportState {
   currentStep: number;
   parsedData: ParsedData | null;
@@ -86,6 +97,7 @@ export interface ImportState {
   selectedRows: Set<number>;
   isProcessing: boolean;
 }
+
 export const IMPORT_STEPS: ImportStep[] = [
   { id: 1, name: 'Vista Previa', description: 'Revisar datos importados', completed: false, current: true },
   { id: 2, name: 'Mapeo', description: 'Asignar columnas', completed: false, current: false },

@@ -3,6 +3,7 @@ import { upsertLessonNote } from '../services';
 import { LEARNING_QUERY_KEYS } from '../constants';
 import type { UpsertLessonNotePayload } from '../types';
 import { useToast } from '@/hooks/use-toast';
+
 /**
  * Hook para crear o actualizar una nota de lección.
  * 
@@ -15,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 export function useUpsertLessonNote() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
   return useMutation({
     mutationFn: (payload: UpsertLessonNotePayload) => upsertLessonNote(payload),
     onSuccess: (data, variables) => {
@@ -22,6 +24,7 @@ export function useUpsertLessonNote() {
       queryClient.invalidateQueries({
         queryKey: LEARNING_QUERY_KEYS.lessonNotes(variables.lessonId),
       });
+
       toast({
         title: "Nota guardada",
         description: "La nota ha sido guardada correctamente",

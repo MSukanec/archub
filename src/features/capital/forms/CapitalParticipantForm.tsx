@@ -15,23 +15,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { usePartners } from '@/features/capital';
 import { capitalKeys } from '@/core/query-keys';
+
 const partnerSchema = z.object({
   contactId: z.string().min(1, 'Debe seleccionar un contacto'),
   notes: z.string().optional(),
   ownershipPercentage: z.union([
-    z.string().transform((val) => val === ''? null : parseFloat(val)),
+    z.string().transform((val) => val === '' ? null : parseFloat(val)),
     z.number(),
     z.null(),
   ]).refine((val) => val === null || (val >= 0 && val <= 100), {
     message: 'El porcentaje debe estar entre 0 y 100',
   }).optional().nullable(),
 });
+
 type PartnerFormData = z.infer<typeof partnerSchema>;
+
 interface LinkedUser {
   id: string;
   full_name: string | null;
   avatar_url: string | null;
 }
+
 interface Contact {
   id: string;
   first_name: string | null;
@@ -41,15 +45,17 @@ interface Contact {
   company_name: string | null;
   linked_user: LinkedUser | LinkedUser[] | null;
 }
+
 export interface CapitalParticipantFormProps {
   organizationId?: string;
   partnerId?: string;
-  mode: 'create'| 'edit';
+  mode: 'create' | 'edit';
   onSuccess: () => void;
   onCancel: () => void;
   hideActions?: boolean;
   formRef?: React.RefObject<HTMLFormElement>;
 }
+
 export function CapitalParticipantForm({
   organizationId,
   partnerId,
@@ -64,7 +70,9 @@ export function CapitalParticipantForm({
   const queryClient = useQueryClient();
   const internalFormRef = useRef<HTMLFormElement>(null);
   const actualFormRef = formRef || internalFormRef;
+
   const orgId = organizationId || userData?.preferences?.last_organization_id;
+
   const { data: allPartners = [] } = usePartners(orgId);
   const { data: contacts = [], isLoading: contactsLoading } = useQuery<Contact[]>({
     queryKey: capitalKeys.contactsForPartner(orgId || ''),
@@ -85,6 +93,7 @@ export function CapitalParticipantForm({
         .eq('organization_id', orgId)
         .eq('is_deleted', false)
         .order('first_name');
+
       if (error) {
         throw error;
       }
@@ -92,6 +101,7 @@ export function CapitalParticipantForm({
     },
     enabled: !!orgId,
   });
+
   const { data: existingPartner, isLoading: partnerLoading } = useQuery({
     queryKey: capitalKeys.partner(partnerId || ''),
     queryFn: async () => {
@@ -102,11 +112,13 @@ export function CapitalParticipantForm({
         .select('id, contact_id, notes, status, ownership_percentage')
         .eq('id', partnerId)
         .single();
+
       if (error) throw error;
       return data;
     },
     enabled: !!partnerId && mode === 'edit',
   });
+
   const { data: existingPartnerContactIds = [] } = useQuery<string[]>({
     queryKey: capitalKeys.partnerContactIds(orgId || ''),
     queryFn: async () => {
@@ -117,6 +129,7 @@ export function CapitalParticipantForm({
         .select('contact_id')
         .eq('organization_id', orgId)
         .eq('is_deleted', false);
+
       if (error) {
         return [];
       }
@@ -124,6 +137,7 @@ export function CapitalParticipantForm({
     },
     enabled: !!orgId && mode === 'create',
   });
+
   const form = useForm<PartnerFormData>({
     resolver: zodResolver(partnerSchema),
     defaultValues: {
@@ -132,6 +146,7 @@ export function CapitalParticipantForm({
       ownershipPercentage: existingPartner?.ownership_percentage ?? null,
     },
   });
+
   React.useEffect(() => {
     if (existingPartner && mode === 'edit') {
       form.reset({
@@ -141,9 +156,11 @@ export function CapitalParticipantForm({
       });
     }
   }, [existingPartner, mode, form]);
+
   const createMutation = useMutation({
     mutationFn: async (data: PartnerFormData) => {
       if (!orgId) throw new Error('No hay organización seleccionada');
+
       const { data: result, error } = await supabase
         .from('capital_participants')
         .insert({
@@ -155,6 +172,7 @@ export function CapitalParticipantForm({
           ownership_percentage: data.ownershipPercentage ?? null,
         })
         .select();
+
       if (error) throw error;
       return result;
     },
@@ -176,9 +194,11 @@ export function CapitalParticipantForm({
       });
     },
   });
+
   const updateMutation = useMutation({
     mutationFn: async (data: PartnerFormData) => {
       if (!partnerId) throw new Error('ID de socio no encontrado');
+
       const { data: result, error } = await supabase
         .from('capital_participants')
         .update({
@@ -189,6 +209,7 @@ export function CapitalParticipantForm({
         })
         .eq('id', partnerId)
         .select();
+
       if (error) throw error;
       return result;
     },
@@ -211,10 +232,11 @@ export function CapitalParticipantForm({
       });
     },
   });
+
   const handleSubmit = async (data: PartnerFormData) => {
     // Validar que la sumatoria no exceda 100%
     if (data.ownershipPercentage !== null && data.ownershipPercentage !== undefined) {
-      const otherPartners = allPartners.filter((p: any) => mode === 'edit'? p.id !== partnerId : true);
+      const otherPartners = allPartners.filter((p: any) => mode === 'edit' ? p.id !== partnerId : true);
       const otherPercentageSum = otherPartners.reduce((sum: number, p: any) => sum + (p.ownership_percentage || 0), 0);
       const totalPercentage = otherPercentageSum + data.ownershipPercentage;
       
@@ -227,12 +249,14 @@ export function CapitalParticipantForm({
         return;
       }
     }
+
     if (mode === 'edit') {
       await updateMutation.mutateAsync(data);
     } else {
       await createMutation.mutateAsync(data);
     }
   };
+
   const getContactDisplayName = (contact: Contact): string => {
     const linkedUser = Array.isArray(contact.linked_user) 
       ? contact.linked_user[0] 
@@ -245,11 +269,12 @@ export function CapitalParticipantForm({
            contact.email ||
            'Sin nombre';
   };
+
   const contactOptions = useMemo(() => {
     if (!contacts || !Array.isArray(contacts)) return [];
     
     // In create mode, filter out contacts that are already partners
-    const availableContacts = mode === 'create'
+    const availableContacts = mode === 'create' 
       ? contacts.filter(contact => !existingPartnerContactIds.includes(contact.id))
       : contacts;
     
@@ -259,6 +284,7 @@ export function CapitalParticipantForm({
       contact, // Include full contact object for rendering
     }));
   }, [contacts, existingPartnerContactIds, mode]);
+
   const renderContactOption = (option: any) => {
     const contact = option.contact as Contact;
     const displayName = getContactDisplayName(contact);
@@ -271,7 +297,9 @@ export function CapitalParticipantForm({
       />
     );
   };
+
   const isLoading = contactsLoading || partnerLoading || createMutation.isPending || updateMutation.isPending;
+
   return (
     <Form {...form}>
       <form 
@@ -303,6 +331,7 @@ export function CapitalParticipantForm({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="ownershipPercentage"
@@ -316,10 +345,10 @@ export function CapitalParticipantForm({
                   min="0"
                   max="100"
                   placeholder="Ej: 25.5"
-                  value={field.value === null || field.value === undefined ? '': field.value}
+                  value={field.value === null || field.value === undefined ? '' : field.value}
                   onChange={(e) => {
                     const val = e.target.value;
-                    field.onChange(val === ''? null : parseFloat(val));
+                    field.onChange(val === '' ? null : parseFloat(val));
                   }}
                   data-testid="input-ownership-percentage"
                 />
@@ -331,6 +360,7 @@ export function CapitalParticipantForm({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="notes"
@@ -350,6 +380,7 @@ export function CapitalParticipantForm({
             </FormItem>
           )}
         />
+
         {!hideActions && (
           <div className="flex justify-end gap-2 pt-4">
             <Button
@@ -366,7 +397,7 @@ export function CapitalParticipantForm({
               disabled={isLoading}
               data-testid="button-submit"
             >
-              {isLoading ? 'Guardando...': mode === 'edit'? 'Actualizar': 'Agregar Socio'}
+              {isLoading ? 'Guardando...' : mode === 'edit' ? 'Actualizar' : 'Agregar Socio'}
             </Button>
           </div>
         )}

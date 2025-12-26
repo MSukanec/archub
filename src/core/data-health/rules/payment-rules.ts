@@ -1,4 +1,5 @@
 import type { DataHealthRule, NormalizedPayment, DataIssue } from '../types';
+
 export const paymentsWithoutCategoryRule: DataHealthRule<NormalizedPayment> = {
   id: 'payments-without-category',
   name: 'Pagos sin categoría',
@@ -9,11 +10,12 @@ export const paymentsWithoutCategoryRule: DataHealthRule<NormalizedPayment> = {
     const affected = payments.filter(p => !p.categoryId && !p.categoryName);
     
     if (affected.length === 0) return null;
+
     return {
       id: `${ctx.organizationId}-payments-without-category`,
       ruleId: 'payments-without-category',
       title: 'Pagos sin categoría',
-      description: `${affected.length} pago${affected.length > 1 ? 's': ''} no tiene${affected.length > 1 ? 'n': ''} categoría asignada. Esto afecta los análisis de distribución por categoría.`,
+      description: `${affected.length} pago${affected.length > 1 ? 's' : ''} no tiene${affected.length > 1 ? 'n' : ''} categoría asignada. Esto afecta los análisis de distribución por categoría.`,
       severity: 'warning',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(p => ({ 
@@ -29,6 +31,7 @@ export const paymentsWithoutCategoryRule: DataHealthRule<NormalizedPayment> = {
     };
   },
 };
+
 export const paymentsMissingExchangeRateRule: DataHealthRule<NormalizedPayment> = {
   id: 'payments-missing-exchange-rate',
   name: 'Cotización de moneda no configurada',
@@ -48,11 +51,12 @@ export const paymentsMissingExchangeRateRule: DataHealthRule<NormalizedPayment> 
     });
     
     if (affected.length === 0) return null;
+
     return {
       id: `${ctx.organizationId}-payments-missing-exchange-rate`,
       ruleId: 'payments-missing-exchange-rate',
-      title: `${affected.length} pago${affected.length > 1 ? 's': ''} sin cotización válida`,
-      description: `Tu organización opera con múltiples monedas. ${affected.length} pago${affected.length > 1 ? 's': ''} no ${affected.length > 1 ? 'tienen': 'tiene'} cotización válida (debe ser mayor a 1). Sin esta información, el sistema no puede convertir correctamente los montos a la moneda base.\n\nEjemplos de cotización válida:\n• Si tu moneda base es ARS: 1 USD = 1400 ARS\n• Si tu moneda base es USD: 1 ARS = 0.0007 USD\n\nSin la cotización correcta, los totales del balance y los reportes financieros serán incorrectos.`,
+      title: `${affected.length} pago${affected.length > 1 ? 's' : ''} sin cotización válida`,
+      description: `Tu organización opera con múltiples monedas. ${affected.length} pago${affected.length > 1 ? 's' : ''} no ${affected.length > 1 ? 'tienen' : 'tiene'} cotización válida (debe ser mayor a 1). Sin esta información, el sistema no puede convertir correctamente los montos a la moneda base.\n\nEjemplos de cotización válida:\n• Si tu moneda base es ARS: 1 USD = 1400 ARS\n• Si tu moneda base es USD: 1 ARS = 0.0007 USD\n\nSin la cotización correcta, los totales del balance y los reportes financieros serán incorrectos.`,
       severity: 'critical',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(p => ({ 
@@ -68,6 +72,7 @@ export const paymentsMissingExchangeRateRule: DataHealthRule<NormalizedPayment> 
     };
   },
 };
+
 export const paymentsWithFutureDateRule: DataHealthRule<NormalizedPayment> = {
   id: 'payments-with-future-date',
   name: 'Pagos con fecha futura',
@@ -80,6 +85,7 @@ export const paymentsWithFutureDateRule: DataHealthRule<NormalizedPayment> = {
     const toleranceDays = ctx.dateToleranceDays ?? 0;
     const toleranceDate = new Date(today);
     toleranceDate.setDate(toleranceDate.getDate() + toleranceDays);
+
     const affected = payments.filter(p => {
       if (!p.paymentDate) return false;
       const paymentDate = new Date(p.paymentDate);
@@ -87,11 +93,12 @@ export const paymentsWithFutureDateRule: DataHealthRule<NormalizedPayment> = {
     });
     
     if (affected.length === 0) return null;
+
     return {
       id: `${ctx.organizationId}-payments-with-future-date`,
       ruleId: 'payments-with-future-date',
       title: 'Pagos con fecha futura',
-      description: `${affected.length} pago${affected.length > 1 ? 's': ''} tiene${affected.length > 1 ? 'n': ''} fecha posterior a hoy. Verificá que las fechas sean correctas.`,
+      description: `${affected.length} pago${affected.length > 1 ? 's' : ''} tiene${affected.length > 1 ? 'n' : ''} fecha posterior a hoy. Verificá que las fechas sean correctas.`,
       severity: 'info',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(p => ({ 
@@ -107,6 +114,7 @@ export const paymentsWithFutureDateRule: DataHealthRule<NormalizedPayment> = {
     };
   },
 };
+
 export const paymentsWithoutConceptRule: DataHealthRule<NormalizedPayment> = {
   id: 'payments-without-concept',
   name: 'Pagos sin concepto',
@@ -117,11 +125,12 @@ export const paymentsWithoutConceptRule: DataHealthRule<NormalizedPayment> = {
     const affected = payments.filter(p => !p.conceptId && !p.conceptName);
     
     if (affected.length === 0) return null;
+
     return {
       id: `${ctx.organizationId}-payments-without-concept`,
       ruleId: 'payments-without-concept',
       title: 'Pagos sin concepto',
-      description: `${affected.length} pago${affected.length > 1 ? 's': ''} no está${affected.length > 1 ? 'n': ''} asociado${affected.length > 1 ? 's': ''} a un concepto. Los análisis por concepto pueden ser incompletos.`,
+      description: `${affected.length} pago${affected.length > 1 ? 's' : ''} no está${affected.length > 1 ? 'n' : ''} asociado${affected.length > 1 ? 's' : ''} a un concepto. Los análisis por concepto pueden ser incompletos.`,
       severity: 'warning',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(p => ({ 
@@ -137,6 +146,7 @@ export const paymentsWithoutConceptRule: DataHealthRule<NormalizedPayment> = {
     };
   },
 };
+
 export const allPaymentRules: DataHealthRule<NormalizedPayment>[] = [
   paymentsWithoutCategoryRule,
   paymentsMissingExchangeRateRule,

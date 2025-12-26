@@ -28,11 +28,14 @@
  *   )
  * }
  */
+
 /** Type alias para IDs que pueden ser null o undefined */
 type NullableId = string | null | undefined;
+
 export const projectsKeys = {
   /** Base key para todos los datos de projects */
   all: ['projects'] as const,
+
   // ═══════════════════════════════════════════════════════════════
   // LISTAS DE PROYECTOS
   // ═══════════════════════════════════════════════════════════════
@@ -47,6 +50,7 @@ export const projectsKeys = {
   /** Conteo de proyectos */
   count: (organizationId: NullableId) => 
     [...projectsKeys.all, 'count', organizationId ?? undefined] as const,
+
   // ═══════════════════════════════════════════════════════════════
   // DETALLES DE PROYECTO INDIVIDUAL
   // ═══════════════════════════════════════════════════════════════
@@ -65,6 +69,7 @@ export const projectsKeys = {
   /** Datos extendidos del proyecto (tabla project_data) */
   data: (projectId: NullableId) => 
     [...projectsKeys.details(), projectId ?? undefined, 'data'] as const,
+
   // ═══════════════════════════════════════════════════════════════
   // ASSETS DEL PROYECTO (IMÁGENES)
   // ═══════════════════════════════════════════════════════════════
@@ -75,6 +80,7 @@ export const projectsKeys = {
   /** URL de imagen del proyecto */
   image: (projectId: NullableId) => 
     [...projectsKeys.assets(), projectId ?? undefined, 'image'] as const,
+
   // ═══════════════════════════════════════════════════════════════
   // ESTADÍSTICAS Y ACTIVIDAD
   // ═══════════════════════════════════════════════════════════════
@@ -86,6 +92,7 @@ export const projectsKeys = {
   /** Historial de actividad */
   activity: (organizationId: NullableId, projectId: NullableId) => 
     [...projectsKeys.all, 'activity', organizationId ?? undefined, projectId ?? undefined] as const,
+
   // ═══════════════════════════════════════════════════════════════
   // CONFIGURACIÓN (TIPOS Y MODALIDADES)
   // ═══════════════════════════════════════════════════════════════
@@ -104,5 +111,6 @@ export const projectsKeys = {
   modalityList: (organizationId: NullableId) => 
     [...projectsKeys.modalities(), organizationId ?? undefined] as const,
 } as const;
+
 /** Tipo de las query keys de projects */
 export type ProjectsQueryKey = readonly (string | undefined)[];

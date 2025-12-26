@@ -13,13 +13,16 @@ import type {
   ForumThreadWithAuthor,
   ThreadsResponse,
 } from '@/features/forum/services';
+
 interface CourseForumTabProps {
   courseId: string;
 }
+
 export default function CourseForumTab({ courseId }: CourseForumTabProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedThread, setSelectedThread] = useState<ForumThreadWithAuthor | null>(null);
   const { openModal } = useGlobalModalStore();
+
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<ForumCategoryWithCounts[]>({
     queryKey: ['/api/forum/courses', courseId, 'categories'],
     queryFn: async () => {
@@ -30,10 +33,11 @@ export default function CourseForumTab({ courseId }: CourseForumTabProps) {
     enabled: !!courseId,
     staleTime: 60 * 1000,
   });
+
   const { data: threadsData, isLoading: threadsLoading } = useQuery<ThreadsResponse>({
-    queryKey: ['/api/forum/courses', courseId, 'threads', { category: selectedCategory || 'all'}],
+    queryKey: ['/api/forum/courses', courseId, 'threads', { category: selectedCategory || 'all' }],
     queryFn: async () => {
-      const categoryParam = selectedCategory && selectedCategory !== 'all'? `&category=${selectedCategory}` : '';
+      const categoryParam = selectedCategory && selectedCategory !== 'all' ? `&category=${selectedCategory}` : '';
       const res = await apiRequest('GET', `/api/forum/courses/${courseId}/threads?page=1&limit=50${categoryParam}`);
       if (!res.ok) throw new Error('Failed to fetch threads');
       return res.json();
@@ -41,21 +45,27 @@ export default function CourseForumTab({ courseId }: CourseForumTabProps) {
     enabled: !!courseId,
     staleTime: 30 * 1000,
   });
+
   const threads = threadsData?.threads || [];
+
   const handleCategorySelect = (categorySlug: string | null) => {
     setSelectedCategory(categorySlug);
     setSelectedThread(null);
   };
+
   const handleThreadClick = (thread: ForumThreadWithAuthor) => {
     setSelectedThread(thread);
   };
+
   const handleBack = () => {
     setSelectedThread(null);
   };
+
   const currentCategory = useMemo(() => {
     if (!selectedCategory) return null;
     return categories.find(c => c.slug === selectedCategory) || null;
   }, [selectedCategory, categories]);
+
   const renderSidebar = () => {
     if (categoriesLoading) {
       return (
@@ -66,6 +76,7 @@ export default function CourseForumTab({ courseId }: CourseForumTabProps) {
         </div>
       );
     }
+
     if (categories.length === 0) {
       return (
         <div className="text-center py-8 text-[var(--text-muted)]" data-testid="course-forum-no-categories">
@@ -75,6 +86,7 @@ export default function CourseForumTab({ courseId }: CourseForumTabProps) {
         </div>
       );
     }
+
     return (
       <CategoryList
         categories={categories}
@@ -83,6 +95,7 @@ export default function CourseForumTab({ courseId }: CourseForumTabProps) {
       />
     );
   };
+
   const renderContent = () => {
     if (selectedThread) {
       return (
@@ -92,6 +105,7 @@ export default function CourseForumTab({ courseId }: CourseForumTabProps) {
         />
       );
     }
+
     if (categories.length === 0 && !categoriesLoading) {
       return (
         <div className="text-center py-12" data-testid="course-forum-empty">
@@ -105,6 +119,7 @@ export default function CourseForumTab({ courseId }: CourseForumTabProps) {
         </div>
       );
     }
+
     return (
       <ThreadList
         threads={threads}
@@ -115,6 +130,7 @@ export default function CourseForumTab({ courseId }: CourseForumTabProps) {
       />
     );
   };
+
   return (
     <div data-testid="course-forum-tab">
       <ForumLayout

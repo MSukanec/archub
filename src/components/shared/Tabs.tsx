@@ -1,11 +1,13 @@
 import React from 'react'
 import { cn } from '@/lib/utils'
+
 interface Tab {
   value: string
   label: string
   icon?: React.ReactNode
   badge?: string
 }
+
 interface TabsProps {
   tabs: Tab[]
   value: string
@@ -13,6 +15,7 @@ interface TabsProps {
   className?: string
   fullWidth?: boolean
 }
+
 export function Tabs({ tabs, value, onValueChange, className, fullWidth = false }: TabsProps) {
   return (
     <div 

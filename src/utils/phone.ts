@@ -93,6 +93,7 @@ const DIAL_CODE_MAP: Record<string, string> = {
   'GHA': '+233',  // Ghana
   'ETH': '+251',  // Etiopía
 };
+
 // Reglas específicas por país para móviles
 // Estas reglas se aplican DESPUÉS de remover el 0 inicial
 const MOBILE_RULES: Record<string, { requiresPrefix?: string; removePrefixes?: string[] }> = {
@@ -112,6 +113,7 @@ const MOBILE_RULES: Record<string, { requiresPrefix?: string; removePrefixes?: s
     // Ya está incluido en el número local, no hace falta agregarlo
   }
 };
+
 /**
  * Convierte un número de teléfono local a formato E.164 internacional
  * 
@@ -134,6 +136,7 @@ export function toE164(
   if (!trimmed) {
     return '';
   }
+
   // Remover espacios, guiones, paréntesis y puntos
   let cleaned = trimmed.replace(/[\s\-().]/g, '');
   
@@ -147,6 +150,7 @@ export function toE164(
     console.warn('[toE164] No country code provided, cannot convert to E.164');
     return '';
   }
+
   const dialCode = DIAL_CODE_MAP[countryAlpha3.toUpperCase()];
   
   if (!dialCode) {
@@ -205,6 +209,7 @@ export function toE164(
   
   return result;
 }
+
 /**
  * Extrae el número de teléfono sin código de país para mostrarlo en PhoneField
  * 
@@ -265,6 +270,7 @@ export function fromE164(e164Phone: string): string {
   // If we still can't parse it, return the whole thing without the +
   return withoutPlus;
 }
+
 /**
  * Valida si un número de teléfono es válido en formato E.164
  * 
@@ -286,6 +292,7 @@ export function isValidE164(e164Phone: string): boolean {
   
   return true;
 }
+
 /**
  * Formatea un número E.164 para WhatsApp
  * WhatsApp acepta números con o sin +, pero es más confiable con +
@@ -302,6 +309,7 @@ export function formatForWhatsApp(e164Phone: string): string {
   const phoneNumber = e164Phone.replace('+', '');
   return `https://wa.me/${phoneNumber}`;
 }
+
 /**
  * Formatea un número E.164 para mostrar de forma legible
  * 

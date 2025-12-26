@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { CapitalAdjustment, CapitalAdjustmentCreateInput } from '../types';
+
 export async function createCapitalAdjustment(input: CapitalAdjustmentCreateInput): Promise<CapitalAdjustment> {
   const { data, error } = await supabase
     .from('capital_adjustments')
@@ -19,6 +20,7 @@ export async function createCapitalAdjustment(input: CapitalAdjustmentCreateInpu
     })
     .select()
     .single();
+
   if (error) throw error;
   return data as CapitalAdjustment;
 }

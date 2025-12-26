@@ -31,6 +31,7 @@ import {
   PERSONNEL_PAYMENT_QUERY_KEYS,
 } from '@/features/personnel'
 import { getPersonnelPaymentStatusBadgeConfig } from '../utils/statusBadge'
+
 const personnelPaymentSchema = z.object({
   payment_date: z.date({
     required_error: "Fecha de pago es requerida",
@@ -44,7 +45,9 @@ const personnelPaymentSchema = z.object({
   reference: z.string().optional(),
   notes: z.string().optional(),
 })
+
 type PersonnelPaymentFormData = z.infer<typeof personnelPaymentSchema>
+
 export function FormPanel({
   form,
   onSubmit,
@@ -85,8 +88,9 @@ export function FormPanel({
           label: name
         }
       })
-      .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base'}))
+      .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
   }, [personnel])
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -97,6 +101,7 @@ export function FormPanel({
       </div>
     )
   }
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -138,6 +143,7 @@ export function FormPanel({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="personnel_id"
@@ -160,6 +166,7 @@ export function FormPanel({
           )}
         />
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
@@ -190,6 +197,7 @@ export function FormPanel({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="amount"
@@ -215,6 +223,7 @@ export function FormPanel({
           )}
         />
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
@@ -245,6 +254,7 @@ export function FormPanel({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="exchange_rate"
@@ -267,6 +277,7 @@ export function FormPanel({
           )}
         />
       </div>
+
       <FormField
         control={form.control}
         name="status"
@@ -292,6 +303,7 @@ export function FormPanel({
           </FormItem>
         )}
       />
+
       <FormField
         control={form.control}
         name="notes"
@@ -310,6 +322,7 @@ export function FormPanel({
           </FormItem>
         )}
       />
+
       <FormField
         control={form.control}
         name="reference"
@@ -327,6 +340,7 @@ export function FormPanel({
           </FormItem>
         )}
       />
+
       <div>
         <FileUploader
           mode="multiple"
@@ -352,6 +366,7 @@ export function FormPanel({
     </div>
   )
 }
+
 export function ViewPanel({
   existingPayment,
   attachments,
@@ -382,6 +397,7 @@ export function ViewPanel({
           </div>
         </div>
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Fecha de Pago</h4>
@@ -407,18 +423,21 @@ export function ViewPanel({
           })()}
         </div>
       </div>
+
       {existingPayment.reference && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Referencia</h4>
           <span className="text-sm" data-testid="text-personnel-payment-reference">{existingPayment.reference}</span>
         </div>
       )}
+
       {existingPayment.notes && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Notas</h4>
           <p className="text-sm bg-muted/30 p-3 rounded-md" data-testid="text-personnel-payment-notes">{existingPayment.notes}</p>
         </div>
       )}
+
       {attachments.length > 0 && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Archivos Adjuntos</h4>
@@ -442,14 +461,15 @@ export function ViewPanel({
           </div>
         </div>
       )}
+
       <div className="pt-4 border-t border-border">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground">
           <div data-testid="text-personnel-payment-created-at">
-            <span className="font-medium">Creado:</span> {format(new Date(existingPayment.created_at), "dd/MM/yyyy 'a las'HH:mm", { locale: es })}
+            <span className="font-medium">Creado:</span> {format(new Date(existingPayment.created_at), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
           </div>
           {existingPayment.updated_at && existingPayment.updated_at !== existingPayment.created_at && (
             <div data-testid="text-personnel-payment-updated-at">
-              <span className="font-medium">Actualizado:</span> {format(new Date(existingPayment.updated_at), "dd/MM/yyyy 'a las'HH:mm", { locale: es })}
+              <span className="font-medium">Actualizado:</span> {format(new Date(existingPayment.updated_at), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
             </div>
           )}
         </div>
@@ -457,16 +477,18 @@ export function ViewPanel({
     </div>
   )
 }
+
 export interface PersonnelPaymentFormFieldsProps {
   projectId?: string;
   organizationId?: string;
   paymentId?: string;
-  mode: 'create'| 'edit'| 'view';
+  mode: 'create' | 'edit' | 'view';
   onSuccess: () => void;
   onCancel: () => void;
   hideActions?: boolean;
   formRef?: React.RefObject<HTMLFormElement>;
 }
+
 export function PersonnelPaymentFormFields({ 
   projectId, 
   organizationId, 
@@ -482,18 +504,22 @@ export function PersonnelPaymentFormFields({
   const queryClient = useQueryClient()
   const [filesToUpload, setFilesToUpload] = useState<any[]>([])
   const [attachments, setAttachments] = useState<any[]>([])
+
   const { data: existingPayment, isLoading: loadingPayment } = usePersonnelPayment(
     projectId,
     paymentId,
     organizationId
   )
+
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId || '')
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
   const { data: personnel, isLoading: personnelLoading } = useProjectPersonnel(projectId, organizationId)
+
   const currentMember = useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
   }, [members, userData?.user?.id])
+
   const form = useForm<PersonnelPaymentFormData>({
     resolver: zodResolver(personnelPaymentSchema),
     defaultValues: {
@@ -508,9 +534,11 @@ export function PersonnelPaymentFormFields({
       notes: '',
     }
   })
-  const isLoading = currenciesLoading || walletsLoading || membersLoading || personnelLoading || ((mode === 'edit'|| mode === 'view') && loadingPayment)
+
+  const isLoading = currenciesLoading || walletsLoading || membersLoading || personnelLoading || ((mode === 'edit' || mode === 'view') && loadingPayment)
+
   useEffect(() => {
-    if (existingPayment && (mode === 'edit'|| mode === 'view')) {
+    if (existingPayment && (mode === 'edit' || mode === 'view')) {
       const paymentDate = parseLocalDate(existingPayment.payment_date) || new Date()
       
       form.reset({
@@ -526,6 +554,7 @@ export function PersonnelPaymentFormFields({
       })
     }
   }, [existingPayment, mode, form])
+
   useEffect(() => {
     const fetchAttachments = async () => {
       if (!paymentId || !organizationId || !projectId) return
@@ -560,10 +589,11 @@ export function PersonnelPaymentFormFields({
       }
     }
     
-    if (mode === 'edit'|| mode === 'view') {
+    if (mode === 'edit' || mode === 'view') {
       fetchAttachments()
     }
   }, [paymentId, organizationId, projectId, mode])
+
   const existingFiles = useMemo(() => {
     if (!attachments || attachments.length === 0) return []
     
@@ -576,8 +606,9 @@ export function PersonnelPaymentFormFields({
       isExisting: true,
     }))
   }, [attachments])
+
   useEffect(() => {
-    if (mode === 'create'&& !paymentId) {
+    if (mode === 'create' && !paymentId) {
       if (currencies && currencies.length > 0) {
         const defaultCurrency = currencies.find(c => c.is_default)
         const currencyId = defaultCurrency?.currency?.id || currencies[0].currency?.id
@@ -595,8 +626,10 @@ export function PersonnelPaymentFormFields({
       }
     }
   }, [currencies, wallets, mode, paymentId, form])
+
   const createPaymentMutation = useCreatePersonnelPayment()
   const updatePaymentMutation = useUpdatePersonnelPayment()
+
   const handleExistingFileDelete = useCallback(async (fileId: string) => {
     try {
       await deleteFile(fileId, false)
@@ -614,12 +647,14 @@ export function PersonnelPaymentFormFields({
       })
     }
   }, [queryClient, paymentId, toast])
+
   const isSubmitting = createPaymentMutation.isPending || updatePaymentMutation.isPending
+
   const onSubmit = async (data: PersonnelPaymentFormData) => {
     try {
       let paymentResult;
       
-      if (mode === 'edit'&& paymentId) {
+      if (mode === 'edit' && paymentId) {
         paymentResult = await updatePaymentMutation.mutateAsync({
           projectId: projectId || '',
           paymentId,
@@ -654,6 +689,7 @@ export function PersonnelPaymentFormFields({
           organizationId: organizationId || '',
         })
       }
+
       const createdPaymentId = paymentResult?.id || paymentId
       
       if (filesToUpload.length > 0 && createdPaymentId) {
@@ -666,6 +702,7 @@ export function PersonnelPaymentFormFields({
           })
           return;
         }
+
         for (const fileInput of filesToUpload) {
           try {
             console.log('[PersonnelPaymentFormFields] Uploading file:', {
@@ -716,8 +753,9 @@ export function PersonnelPaymentFormFields({
         queryClient.invalidateQueries({ queryKey: PERSONNEL_PAYMENT_QUERY_KEYS.payments(projectId) })
         setFilesToUpload([])
       }
+
       toast({
-        title: mode === 'edit'? 'Pago actualizado': 'Pago registrado',
+        title: mode === 'edit' ? 'Pago actualizado' : 'Pago registrado',
         description: mode === 'edit'
           ? 'El pago de personal ha sido actualizado correctamente'
           : 'El pago de personal ha sido registrado correctamente',
@@ -729,10 +767,11 @@ export function PersonnelPaymentFormFields({
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Error al ${mode === 'edit'? 'actualizar': 'registrar'} el pago: ${error.message || 'Error desconocido'}`,
+        description: `Error al ${mode === 'edit' ? 'actualizar' : 'registrar'} el pago: ${error.message || 'Error desconocido'}`,
       })
     }
   }
+
   if (mode === 'view') {
     return (
       <div className="space-y-6 w-full">
@@ -756,6 +795,7 @@ export function PersonnelPaymentFormFields({
       </div>
     )
   }
+
   return (
     <Form {...form}>
       <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
@@ -792,7 +832,7 @@ export function PersonnelPaymentFormFields({
               className="flex-[3]"
               data-testid="button-personnel-payment-submit"
             >
-              {isSubmitting ? 'Guardando...': mode === 'edit'? 'Guardar Cambios': 'Registrar Pago'}
+              {isSubmitting ? 'Guardando...' : mode === 'edit' ? 'Guardar Cambios' : 'Registrar Pago'}
             </Button>
           </div>
         )}
@@ -800,4 +840,5 @@ export function PersonnelPaymentFormFields({
     </Form>
   )
 }
+
 export default PersonnelPaymentFormFields

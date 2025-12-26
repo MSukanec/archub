@@ -9,18 +9,23 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 interface OnboardingFormProps {
   onFinish?: () => void;
 }
+
 export function OnboardingForm({ onFinish }: OnboardingFormProps = {}) {
   const { formData, updateFormData } = useOnboardingStore();
+
   // Fetch countries - using optimized hook
   const { data: countries, isLoading: loadingCountries } = useCountries();
+
   const handleFinish = () => {
     if (formData.first_name && formData.last_name && formData.country && formData.birthdate && formData.organization_name && onFinish) {
       onFinish();
     }
   };
+
   const handleBirthdateChange = (date: Date | undefined) => {
     if (date) {
       // Usar componentes de fecha en lugar de toISOString() para evitar problemas de timezone
@@ -29,9 +34,10 @@ export function OnboardingForm({ onFinish }: OnboardingFormProps = {}) {
       const day = String(date.getDate()).padStart(2, '0');
       updateFormData({ birthdate: `${year}-${month}-${day}` });
     } else {
-      updateFormData({ birthdate: ''});
+      updateFormData({ birthdate: '' });
     }
   };
+
   const getBirthdateValue = () => {
     if (formData.birthdate) {
       // Parsear la fecha correctamente manteniendo timezone local
@@ -40,6 +46,7 @@ export function OnboardingForm({ onFinish }: OnboardingFormProps = {}) {
     }
     return undefined;
   };
+
   return (
     <div className="w-full max-w-md space-y-8">
       <div className="space-y-2 text-center">
@@ -48,12 +55,13 @@ export function OnboardingForm({ onFinish }: OnboardingFormProps = {}) {
           Cuéntanos un poco más sobre ti para comenzar
         </p>
       </div>
+
       <div className="space-y-4">
         {/* Nombre y Apellido */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="first_name" className="text-xs font-medium leading-none">
-              Nombre/s <span style={{ color: 'var(--accent)'}}>*</span>
+              Nombre/s <span style={{ color: 'var(--accent)' }}>*</span>
             </Label>
             <Input
               id="first_name"
@@ -67,7 +75,7 @@ export function OnboardingForm({ onFinish }: OnboardingFormProps = {}) {
           
           <div className="space-y-2">
             <Label htmlFor="last_name" className="text-xs font-medium leading-none">
-              Apellido/s <span style={{ color: 'var(--accent)'}}>*</span>
+              Apellido/s <span style={{ color: 'var(--accent)' }}>*</span>
             </Label>
             <Input
               id="last_name"
@@ -79,11 +87,12 @@ export function OnboardingForm({ onFinish }: OnboardingFormProps = {}) {
             />
           </div>
         </div>
+
         {/* País y Fecha de Nacimiento */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="country" className="text-xs font-medium leading-none">
-              País <span style={{ color: 'var(--accent)'}}>*</span>
+              País <span style={{ color: 'var(--accent)' }}>*</span>
             </Label>
             <Select
               value={formData.country}
@@ -109,7 +118,7 @@ export function OnboardingForm({ onFinish }: OnboardingFormProps = {}) {
           
           <div className="space-y-2">
             <Label htmlFor="birthdate" className="text-xs font-medium leading-none">
-              Fecha de Nacimiento <span style={{ color: 'var(--accent)'}}>*</span>
+              Fecha de Nacimiento <span style={{ color: 'var(--accent)' }}>*</span>
             </Label>
             <Popover>
               <PopoverTrigger asChild>
@@ -136,10 +145,11 @@ export function OnboardingForm({ onFinish }: OnboardingFormProps = {}) {
             </Popover>
           </div>
         </div>
+
         {/* Nombre de Organización */}
         <div className="space-y-2">
           <Label htmlFor="organization_name" className="text-xs font-medium leading-none">
-            Nombre de Organización / Empresa <span style={{ color: 'var(--accent)'}}>*</span>
+            Nombre de Organización / Empresa <span style={{ color: 'var(--accent)' }}>*</span>
           </Label>
           <Input
             id="organization_name"
@@ -150,11 +160,12 @@ export function OnboardingForm({ onFinish }: OnboardingFormProps = {}) {
             data-testid="input-organization-name"
           />
         </div>
+
         <Button 
           onClick={handleFinish}
           disabled={!formData.first_name || !formData.last_name || !formData.country || !formData.birthdate || !formData.organization_name}
           className="w-full h-11"
-          style={{ backgroundColor: 'var(--accent)', color: 'white'}}
+          style={{ backgroundColor: 'var(--accent)', color: 'white' }}
           data-testid="button-finish-onboarding"
         >
           Finalizar configuración

@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FolderPlus, Pencil } from 'lucide-react';
+
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -12,6 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import type { ForumCategory } from '../services';
+
 const categorySchema = z.object({
   name: z.string().min(1, 'El nombre es requerido').max(100, 'Máximo 100 caracteres'),
   description: z.string().optional(),
@@ -19,22 +21,27 @@ const categorySchema = z.object({
   color: z.string().optional(),
   is_read_only: z.boolean().optional(),
 });
+
 type CategoryFormData = z.infer<typeof categorySchema>;
+
 interface CourseForumCategoryFormProps {
   modalData?: {
     courseId: string;
     category?: ForumCategory;
-    mode?: 'create'| 'edit';
+    mode?: 'create' | 'edit';
   };
   onClose: () => void;
 }
+
 export default function CourseForumCategoryForm({ modalData, onClose }: CourseForumCategoryFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
   const courseId = modalData?.courseId;
   const category = modalData?.category;
-  const mode = modalData?.mode || (category ? 'edit': 'create');
-  const isEditing = mode === 'edit'&& !!category;
+  const mode = modalData?.mode || (category ? 'edit' : 'create');
+  const isEditing = mode === 'edit' && !!category;
+
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
@@ -45,6 +52,7 @@ export default function CourseForumCategoryForm({ modalData, onClose }: CourseFo
       is_read_only: false,
     },
   });
+
   useEffect(() => {
     if (isEditing && category) {
       form.reset({
@@ -56,6 +64,7 @@ export default function CourseForumCategoryForm({ modalData, onClose }: CourseFo
       });
     }
   }, [category, isEditing, form]);
+
   const createMutation = useMutation({
     mutationFn: async (data: CategoryFormData) => {
       const res = await apiRequest('POST', `/api/forum/courses/${courseId}/categories`, data);
@@ -67,13 +76,14 @@ export default function CourseForumCategoryForm({ modalData, onClose }: CourseFo
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/forum/courses', courseId, 'categories'] });
-      toast({ title: 'Categoría creada', description: 'La categoría se ha creado correctamente'});
+      toast({ title: 'Categoría creada', description: 'La categoría se ha creado correctamente' });
       onClose();
     },
     onError: (error: any) => {
-      toast({ title: 'Error', description: error.message, variant: 'destructive'});
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     },
   });
+
   const updateMutation = useMutation({
     mutationFn: async (data: CategoryFormData) => {
       const res = await apiRequest('PATCH', `/api/forum/categories/${category!.id}`, data);
@@ -85,13 +95,14 @@ export default function CourseForumCategoryForm({ modalData, onClose }: CourseFo
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/forum/courses', courseId, 'categories'] });
-      toast({ title: 'Categoría actualizada', description: 'Los cambios se han guardado'});
+      toast({ title: 'Categoría actualizada', description: 'Los cambios se han guardado' });
       onClose();
     },
     onError: (error: any) => {
-      toast({ title: 'Error', description: error.message, variant: 'destructive'});
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     },
   });
+
   const onSubmit = (data: CategoryFormData) => {
     if (isEditing) {
       updateMutation.mutate(data);
@@ -99,14 +110,17 @@ export default function CourseForumCategoryForm({ modalData, onClose }: CourseFo
       createMutation.mutate(data);
     }
   };
+
   const isPending = createMutation.isPending || updateMutation.isPending;
+
   return (
     <ModalLayout onClose={onClose} size="md">
       <ModalHeader
-        title={isEditing ? 'Editar Categoría': 'Nueva Categoría'}
-        description={isEditing ? 'Modifica los datos de la categoría': 'Crea una nueva categoría para el foro del curso'}
+        title={isEditing ? 'Editar Categoría' : 'Nueva Categoría'}
+        description={isEditing ? 'Modifica los datos de la categoría' : 'Crea una nueva categoría para el foro del curso'}
         icon={isEditing ? Pencil : FolderPlus}
       />
+
       <ModalBody>
         <Form {...form}>
           <form className="space-y-4">
@@ -127,6 +141,7 @@ export default function CourseForumCategoryForm({ modalData, onClose }: CourseFo
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="description"
@@ -145,6 +160,7 @@ export default function CourseForumCategoryForm({ modalData, onClose }: CourseFo
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="icon"
@@ -162,6 +178,7 @@ export default function CourseForumCategoryForm({ modalData, onClose }: CourseFo
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="color"
@@ -179,6 +196,7 @@ export default function CourseForumCategoryForm({ modalData, onClose }: CourseFo
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="is_read_only"
@@ -203,10 +221,11 @@ export default function CourseForumCategoryForm({ modalData, onClose }: CourseFo
           </form>
         </Form>
       </ModalBody>
+
       <ModalFooter
         leftLabel="Cancelar"
         onLeftClick={onClose}
-        submitText={isEditing ? 'Guardar Cambios': 'Crear Categoría'}
+        submitText={isEditing ? 'Guardar Cambios' : 'Crear Categoría'}
         onSubmit={form.handleSubmit(onSubmit)}
         isSubmitting={isPending}
       />

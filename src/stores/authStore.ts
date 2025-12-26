@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
+
 interface AuthState {
   user: User | null;
   loading: boolean;
@@ -15,41 +16,52 @@ interface AuthState {
   logout: () => Promise<void>;
   setCompletingOnboarding: (completing: boolean) => void;
 }
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   loading: true,
   initialized: false,
   completingOnboarding: false,
   authSubscription: undefined,
+
   initialize: async () => {
     const state = get();
     if (state.initialized) {
       return;
     }
+
+
     set({ loading: true });
+
     if (!supabase) {
       set({ user: null, loading: false, initialized: true });
       return;
     }
+
     try {
       const { data, error } = await supabase.auth.getSession();
+
       if (error) {
         set({ user: null, loading: false, initialized: true });
         return;
       }
+
       const user = data.session?.user ?? null;
+
+
       set({
         user,
         loading: false,
         initialized: true,
       });
+
       // Set up auth state change listener
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         // Silently handle auth state changes - no console log
         
-        if (event === 'SIGNED_OUT'|| !session?.user) {
+        if (event === 'SIGNED_OUT' || !session?.user) {
           set({ user: null, loading: false });
-        } else if (event === 'SIGNED_IN'|| event === 'TOKEN_REFRESHED') {
+        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           set({ user: session.user, loading: false });
         }
       });
@@ -60,26 +72,34 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ user: null, loading: false, initialized: true });
     }
   },
+
   signIn: async (email: string, password: string) => {
     if (!supabase) {
       throw new Error("Supabase client not initialized");
     }
+
     set({ loading: true });
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+
     if (error) {
       set({ loading: false });
       throw error;
     }
+
     set({ user: data.user, loading: false });
   },
+
   signUp: async (email: string, password: string, fullName: string) => {
     if (!supabase) {
       throw new Error("Supabase client not initialized");
     }
+
     set({ loading: true });
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -89,18 +109,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
       }
     });
+
     if (error) {
       set({ loading: false });
       throw error;
     }
+
     // Don't set user immediately as email confirmation is required
     set({ loading: false });
   },
+
   signInWithGoogle: async () => {
     if (!supabase) {
       throw new Error("Supabase client not initialized");
     }
+
     set({ loading: true });
+
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -112,11 +137,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           }
         }
       });
+
       if (error) {
         // Silently handle OAuth errors
         set({ loading: false });
         throw error;
       }
+
       // The redirect will happen automatically - no console log
     } catch (error) {
       // Silently handle Google sign-in errors
@@ -124,6 +151,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       throw error;
     }
   },
+
   logout: async () => {
     if (!supabase) {
       // Silently handle missing client
@@ -137,7 +165,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ user: null, loading: false, initialized: true });
       
       // Sign out from Supabase synchronously - no await to avoid delay
-      supabase.auth.signOut({ scope: 'global'}).catch(() => {}); // Fire and forget
+      supabase.auth.signOut({ scope: 'global' }).catch(() => {}); // Fire and forget
       
       // Clear ALL Supabase tokens synchronously  
       try {
@@ -184,6 +212,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     }
   },
+
   setCompletingOnboarding: (completing: boolean) => {
     set({ completingOnboarding: completing });
   },

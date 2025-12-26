@@ -18,9 +18,11 @@ import {
   mapToClientSummaries,
   type CurrencyFinancial,
 } from '@/features/clients'
+
 interface ClientObligationsViewProps {
   projectId?: string;
 }
+
 export function ClientObligationsView({ projectId }: ClientObligationsViewProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -29,13 +31,16 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
   
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
+
   const { data: dashboardData, isLoading } = useClientDashboard(activeProjectId || undefined, organizationId);
   const { data: commitmentsData } = useClientCommitments(activeProjectId || undefined, organizationId);
   const { data: paymentsData } = useClientPayments(activeProjectId || undefined, organizationId);
+
   const projectClients = useMemo(() => {
     if (!dashboardData) return [];
     return mapToClientSummaries(dashboardData.clients, dashboardData.financialSummaries);
   }, [dashboardData]);
+
   const commitmentCurrency = useMemo(() => {
     if (!commitmentsData || commitmentsData.length === 0) return null;
     
@@ -66,7 +71,9 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
     
     return mostCommon.currency;
   }, [commitmentsData]);
+
   const deleteCommitmentMutation = useDeleteClientCommitment();
+
   const handleEditCommitment = (commitment: NonNullable<typeof commitmentsData>[0]) => {
     openModal('client-commitment', {
       projectId: activeProjectId,
@@ -75,6 +82,7 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
       mode: 'edit',
     });
   };
+
   const handleDeleteCommitment = async (commitmentId: string, clientName: string) => {
     if (!activeProjectId || !organizationId) {
       toast({
@@ -84,6 +92,7 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
       });
       return;
     }
+
     openModal('delete-confirmation', {
       mode: 'dangerous',
       title: 'Eliminar Compromiso',
@@ -97,6 +106,7 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
             organizationId,
             projectId: activeProjectId!,
           });
+
           toast({
             title: 'Compromiso eliminado',
             description: 'El compromiso ha sido eliminado correctamente',
@@ -111,11 +121,13 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
       },
     });
   };
+
   const handleAddClient = () => {
     openModal('project-client', {
       projectId: activeProjectId,
     });
   };
+
   if (!organizationId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -123,6 +135,7 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
       </div>
     )
   }
+
   const formatCurrencyKPI = (amount: number) => {
     if (!commitmentCurrency) return null;
     
@@ -130,14 +143,16 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
     
     return <span>{commitmentCurrency.symbol} {formattedInteger}</span>;
   };
+
   const formatCurrencyBreakdown = (currencyData: Array<{ symbol: string; amount: number }>) => {
     if (!currencyData || currencyData.length === 0) return '-';
     
     return currencyData.map(({ symbol, amount }) => {
       const formattedAmount = amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       return `${symbol} ${formattedAmount}`;
-    }).join('+ ');
+    }).join(' + ');
   };
+
   const kpis = useMemo(() => {
     if (!commitmentCurrency) {
       return {
@@ -152,6 +167,7 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
         totalBalanceDue: 0,
       };
     }
+
     const committedItems = projectClients.flatMap(client => 
       client.financialByCurrency.map(financial => ({
         amount: financial.total_committed_amount,
@@ -168,25 +184,30 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
       currency: payment.currency,
       exchange_rate: payment.exchange_rate
     }));
+
     const totalCommittedKPI = calculateMonetaryKPI({
       items: committedItems,
       baseCurrencyId: commitmentCurrency?.code || commitmentCurrency?.id,
       symbol: commitmentCurrency?.symbol
     });
+
     const totalPaidKPI = calculateMonetaryKPI({
       items: paidItems,
       baseCurrencyId: commitmentCurrency?.code || commitmentCurrency?.id,
       symbol: commitmentCurrency?.symbol
     });
+
     const totalBalance = totalCommittedKPI.value - totalPaidKPI.value;
     const totalBalanceKPI = {
       ...totalCommittedKPI,
       value: totalBalance,
       formatted: formatKPI(totalBalance)
     };
+
     const totalScheduleItems = projectClients.reduce((sum, client) => sum + (client.financialByCurrency.reduce((s, f) => s + (f.total_schedule_items || 0), 0)), 0);
     const totalSchedulePaid = projectClients.reduce((sum, client) => sum + (client.financialByCurrency.reduce((s, f) => s + (f.schedule_paid || 0), 0)), 0);
     const schedulePercentage = totalScheduleItems > 0 ? (totalSchedulePaid / totalScheduleItems) * 100 : 0;
+
     return {
       totalCommittedKPI,
       totalPaidKPI,
@@ -199,9 +220,11 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
       totalBalanceDue: totalBalance,
     };
   }, [projectClients, paymentsData, commitmentCurrency]);
+
   const handleAddCommitment = () => {
     openModal('client-commitment', { projectId: activeProjectId, organizationId });
   };
+
   if (!isLoading && (!commitmentsData || commitmentsData.length === 0)) {
     return (
       <EmptyState
@@ -220,6 +243,7 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
       />
     );
   }
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -238,6 +262,7 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
             }
           </AppCardMeta>
         </AppCard>
+
         <AppCard data-testid="stat-card-pagado">
           <AppCardTitle showArrow={false}>
             <CheckCircle2 className="w-4 h-4 inline mr-1" />
@@ -253,6 +278,7 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
             }
           </AppCardMeta>
         </AppCard>
+
         <AppCard data-testid="stat-card-saldo">
           <AppCardTitle showArrow={false}>
             <AlertCircle className="w-4 h-4 inline mr-1" />
@@ -268,6 +294,7 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
             }
           </AppCardMeta>
         </AppCard>
+
         <AppCard data-testid="stat-card-items-pago">
           <AppCardTitle showArrow={false}>
             <ListChecks className="w-4 h-4 inline mr-1" />
@@ -279,6 +306,7 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
           <AppCardMeta>{kpis.schedulePercentage.toFixed(1)}% completado</AppCardMeta>
         </AppCard>
       </div>
+
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <div className="text-muted-foreground">Cargando compromisos...</div>
@@ -300,4 +328,5 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
     </div>
   )
 }
+
 export default ClientObligationsView;

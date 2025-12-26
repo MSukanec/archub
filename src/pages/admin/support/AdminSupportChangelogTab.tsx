@@ -9,6 +9,7 @@ import { Edit, Trash2, FileText } from 'lucide-react'
 import { formatDateCompact } from '@/lib/date-utils'
 import { useGlobalModalStore } from '@/components/modal'
 import AdminChangelogRow from '@/features/users/components/AdminChangelogRow'
+
 interface ChangelogEntry {
   id: string;
   title: string;
@@ -25,15 +26,18 @@ interface ChangelogEntry {
     avatar_url?: string;
   } | null;
 }
+
 const AdminSupportChangelogTab = () => {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { openModal } = useGlobalModalStore()
+
   // Fetch changelog entries (usando la misma lógica que AdminChangelogs.tsx)
   const { data: changelogEntries = [], isLoading } = useQuery({
     queryKey: ['admin-changelog-entries'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
+
       const { data, error } = await supabase
         .from('changelog_entries')
         .select(`
@@ -47,10 +51,12 @@ const AdminSupportChangelogTab = () => {
           created_by
         `)
         .order('created_at', { ascending: false });
+
       if (error) {
         console.error('Error fetching changelog entries:', error);
         throw error;
       }
+
       // Obtener los usuarios creadores
       const creatorIds = Array.from(new Set(data.map(entry => entry.created_by).filter(Boolean)));
       
@@ -58,17 +64,21 @@ const AdminSupportChangelogTab = () => {
         .from('users')
         .select('id, full_name, email, avatar_url')
         .in('id', creatorIds) : { data: [], error: null };
+
       // Mapear entradas con sus creadores
       const entriesWithCreators = data.map(entry => ({
         ...entry,
         creator: usersResult.data?.find(user => user.id === entry.created_by) || null
       }));
+
       return entriesWithCreators;
     }
   })
+
   const handleEdit = (entry: ChangelogEntry) => {
     openModal('changelog-entry', { entry, isEditing: true });
   };
+
   const handleDelete = (entry: ChangelogEntry) => {
     openModal('delete-confirmation', {
       title: 'Eliminar entrada del changelog',
@@ -92,6 +102,7 @@ const AdminSupportChangelogTab = () => {
       }
     });
   };
+
   const getTypeBadgeVariant = (type: string) => {
     switch (type) {
       case 'Novedad':
@@ -104,6 +115,7 @@ const AdminSupportChangelogTab = () => {
         return 'outline';
     }
   };
+
   const columns = [
     {
       key: 'title',
@@ -141,8 +153,8 @@ const AdminSupportChangelogTab = () => {
       label: 'Público',
       width: '15%',
       render: (entry: ChangelogEntry) => (
-        <Badge variant={entry.is_public ? 'default': 'secondary'} className="text-xs">
-          {entry.is_public ? 'Sí': 'No'}
+        <Badge variant={entry.is_public ? 'default' : 'secondary'} className="text-xs">
+          {entry.is_public ? 'Sí' : 'No'}
         </Badge>
       )
     },
@@ -157,6 +169,7 @@ const AdminSupportChangelogTab = () => {
       )
     }
   ]
+
   return (
     <div className="space-y-6">
       {/* Changelog Entries Table */}
@@ -174,7 +187,7 @@ const AdminSupportChangelogTab = () => {
             icon: Trash2,
             label: 'Eliminar',
             onClick: () => handleDelete(entry),
-            variant: 'destructive'as const
+            variant: 'destructive' as const
           }
         ]}
         renderCard={(entry) => (
@@ -196,4 +209,5 @@ const AdminSupportChangelogTab = () => {
     </div>
   )
 }
+
 export default AdminSupportChangelogTab

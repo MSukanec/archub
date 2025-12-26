@@ -7,7 +7,7 @@
  * RULES:
  * 1. NEVER save on onChange - only updates local draft
  * 2. Save triggers: onBlur, Enter key, select/toggle change
- * 3. All data normalized before save (''→ null, trim strings)
+ * 3. All data normalized before save ('' → null, trim strings)
  * 4. Dirty checking to avoid unnecessary saves
  * 
  * USAGE:
@@ -34,10 +34,13 @@
  *   onKeyDown={nameField.onKeyDown}
  * />
  */
+
 export { useAutosaveController } from './useAutosaveController';
 export type { AutosaveControllerOptions, AutosaveControllerReturn } from './useAutosaveController';
+
 export { useAutosaveField } from './useAutosaveField';
 export type { AutosaveFieldOptions, AutosaveFieldReturn, FieldType } from './useAutosaveField';
+
 export { 
   normalizeStringValue, 
   normalizeFormData, 

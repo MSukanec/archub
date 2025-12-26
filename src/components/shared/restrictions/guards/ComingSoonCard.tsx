@@ -3,12 +3,14 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import type { ItemStatus } from "@shared/schema";
+
 interface ComingSoonCardProps {
   status: ItemStatus;
   children: React.ReactNode;
   className?: string;
   showBadge?: boolean;
 }
+
 const statusConfig = {
   available: {
     icon: CheckCircle,
@@ -29,6 +31,7 @@ const statusConfig = {
     isBlocking: true,
   },
 } as const;
+
 export function ComingSoonCard({
   status,
   children,
@@ -37,12 +40,15 @@ export function ComingSoonCard({
 }: ComingSoonCardProps) {
   const isAdmin = useIsAdmin();
   const config = statusConfig[status];
+
   if (!config) {
     return <>{children}</>;
   }
+
   const Icon = config.icon;
   const shouldShowVisualBlock = config.isBlocking;
   const shouldBlockInteraction = config.isBlocking && !isAdmin;
+
   return (
     <div
       className={cn("relative", shouldBlockInteraction && "select-none", className)}
@@ -54,7 +60,7 @@ export function ComingSoonCard({
       )}>
         {children}
       </div>
-      {showBadge && status !== 'available'&& (
+      {showBadge && status !== 'available' && (
         <Badge
           className={cn(
             "absolute top-3 right-3 z-10 text-xs px-2 py-1 shadow-lg pointer-events-none",
@@ -69,4 +75,5 @@ export function ComingSoonCard({
     </div>
   );
 }
+
 export default ComingSoonCard;

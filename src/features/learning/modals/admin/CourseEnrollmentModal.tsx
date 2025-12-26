@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Users, CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 import { FormModalLayout } from '@/components/modal';
 import { FormModalHeader } from '@/components/modal';
 import { FormModalFooter } from '@/components/modal';
@@ -15,9 +16,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+
 const enrollmentSchema = z.object({
   user_id: z.string().min(1, 'El usuario es requerido'),
   course_id: z.string().min(1, 'El curso es requerido'),
@@ -26,7 +29,9 @@ const enrollmentSchema = z.object({
   }),
   expires_at: z.string().optional(),
 });
+
 type EnrollmentFormData = z.infer<typeof enrollmentSchema>;
+
 interface Enrollment {
   id: string;
   user_id: string;
@@ -37,6 +42,7 @@ interface Enrollment {
   users?: { full_name: string; email: string };
   courses?: { title: string; slug: string };
 }
+
 interface CourseEnrollmentModalProps {
   modalData?: {
     enrollment?: Enrollment;
@@ -44,14 +50,17 @@ interface CourseEnrollmentModalProps {
   };
   onClose: () => void;
 }
+
 export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   
   const { enrollment, isEditing = false } = modalData || {};
+
   // Hooks
   const { setPanel } = useModalPanelStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
   // Fetch users from backend API (bypasses RLS)
   const { data: users = [] } = useQuery({
     queryKey: ['admin-users'],
@@ -86,6 +95,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
     },
     enabled: !!supabase
   });
+
   // Fetch courses from backend API (bypasses RLS)
   const { data: courses = [] } = useQuery({
     queryKey: ['admin-courses'],
@@ -122,19 +132,23 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
     },
     enabled: !!supabase
   });
+
   // Transform users and courses to ComboBox options
   const userOptions = users.map((user: any) => ({
     value: user.id,
     label: `${user.full_name} (${user.email})`
   }));
+
   const courseOptions = courses.map((course: any) => ({
     value: course.id,
     label: course.title
   }));
+
   // Force edit mode when modal opens
   useEffect(() => {
     setPanel('edit');
   }, [setPanel]);
+
   // Form setup
   const form = useForm<EnrollmentFormData>({
     resolver: zodResolver(enrollmentSchema),
@@ -145,6 +159,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
       expires_at: '',
     }
   });
+
   // Load editing data
   useEffect(() => {
     if (isEditing && enrollment) {
@@ -163,6 +178,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
       });
     }
   }, [isEditing, enrollment, form]);
+
   const createEnrollmentMutation = useMutation({
     mutationFn: async (data: EnrollmentFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -210,6 +226,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
       });
     }
   });
+
   const updateEnrollmentMutation = useMutation({
     mutationFn: async (data: EnrollmentFormData) => {
       if (!supabase || !enrollment?.id) throw new Error('Enrollment ID is required');
@@ -257,6 +274,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
       });
     }
   });
+
   const onSubmit = async (data: EnrollmentFormData) => {
     setIsLoading(true);
     
@@ -272,8 +290,10 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
       setIsLoading(false);
     }
   };
+
   // View panel (not needed for this modal as it's always in edit mode)
   const viewPanel = null;
+
   // Edit panel with form
   const editPanel = (
     <Form {...form}>
@@ -300,6 +320,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
             </FormItem>
           )}
         />
+
         {/* Course Selection with ComboBox */}
         <FormField
           control={form.control}
@@ -322,6 +343,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
             </FormItem>
           )}
         />
+
         {/* Status */}
         <FormField
           control={form.control}
@@ -346,6 +368,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
             </FormItem>
           )}
         />
+
         {/* Expiration Date */}
         <FormField
           control={form.control}
@@ -396,6 +419,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
       </form>
     </Form>
   );
+
   const headerContent = (
     <FormModalHeader 
       title={isEditing ? "Editar Inscripción" : "Nueva Inscripción"}
@@ -403,6 +427,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
       icon={Users}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -411,6 +436,7 @@ export function CourseEnrollmentModal({ modalData, onClose }: CourseEnrollmentMo
       onRightClick={form.handleSubmit(onSubmit)}
     />
   );
+
   return (
     <FormModalLayout
       columns={1}

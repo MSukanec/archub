@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Building2, FileText, Users, Globe } from 'lucide-react';
+
 import { AvatarUploader } from '@/components/shared/fields/AvatarUploader';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { PhoneField } from '@/components/shared/fields/PhoneField';
+
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useAutosaveController, normalizeStringValue } from '@/core/autosave';
 import { organizationKeys } from '@/core/query-keys';
@@ -14,14 +16,17 @@ import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { getOrganizationInitials } from '@/utils/initials';
 import { uploadOrgLogo } from '@/lib/storage';
+
 export function OrganizationProfileView() {
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
   const organizationId = userData?.organization?.id;
+
   const [isHydrated, setIsHydrated] = useState(false);
   const hasHydratedRef = useRef(false);
+
   const { data: organizationData, isSuccess: organizationDataSuccess } = useQuery({
     queryKey: organizationKeys.data(organizationId),
     queryFn: async () => {
@@ -42,6 +47,7 @@ export function OrganizationProfileView() {
     },
     enabled: !!organizationId && !!supabase
   });
+
   const { data: organizationInfo, isSuccess: organizationInfoSuccess } = useQuery({
     queryKey: organizationKeys.info(organizationId),
     queryFn: async () => {
@@ -63,6 +69,7 @@ export function OrganizationProfileView() {
     },
     enabled: !!organizationId && !!supabase
   });
+
   const [organizationName, setOrganizationName] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
   const [description, setDescription] = useState('');
@@ -71,10 +78,12 @@ export function OrganizationProfileView() {
   const [website, setWebsite] = useState('');
   const [taxId, setTaxId] = useState('');
   const [isLogoUploading, setIsLogoUploading] = useState(false);
+
   const saveController = useAutosaveController({
     queryKey: organizationKeys.data(organizationId),
     saveFn: async (dataToSave: any) => {
       if (!organizationId || !supabase) throw new Error('Organization or Supabase not available');
+
       const normalizedData = {
         name: normalizeStringValue(dataToSave.name),
         description: normalizeStringValue(dataToSave.description),
@@ -83,13 +92,16 @@ export function OrganizationProfileView() {
         website: normalizeStringValue(dataToSave.website),
         tax_id: normalizeStringValue(dataToSave.tax_id),
       };
+
       if (normalizedData.name !== undefined && normalizedData.name !== null) {
         const { error: orgError } = await supabase
           .from('organizations')
           .update({ name: normalizedData.name })
           .eq('id', organizationId);
+
         if (orgError) throw orgError;
       }
+
       const organizationDataFields = {
         description: normalizedData.description,
         phone: normalizedData.phone,
@@ -97,16 +109,19 @@ export function OrganizationProfileView() {
         website: normalizedData.website,
         tax_id: normalizedData.tax_id,
       };
+
       const { data: existingData } = await supabase
         .from('organization_data')
         .select('id')
         .eq('organization_id', organizationId)
         .single();
+
       if (existingData) {
         const { error } = await supabase
           .from('organization_data')
           .update(organizationDataFields)
           .eq('organization_id', organizationId);
+
         if (error) throw error;
       } else {
         const { error } = await supabase
@@ -115,6 +130,7 @@ export function OrganizationProfileView() {
             organization_id: organizationId,
             ...organizationDataFields
           });
+
         if (error) throw error;
       }
     },
@@ -122,7 +138,9 @@ export function OrganizationProfileView() {
     errorMessage: "No se pudieron guardar los cambios",
     debounceMs: 500,
   });
+
   const { isSaving, hasUnsavedChanges } = saveController;
+
   const getCurrentFormData = useCallback(() => ({
     name: organizationName,
     description,
@@ -131,11 +149,13 @@ export function OrganizationProfileView() {
     website,
     tax_id: taxId
   }), [organizationName, description, phone, email, website, taxId]);
+
   const isFormValid = useCallback((formData: any): boolean => {
     const nameValue = formData.name?.trim();
     if (!nameValue) return false;
     return true;
   }, []);
+
   const handleTextFieldBlur = useCallback(() => {
     if (!isHydrated) return;
     
@@ -144,8 +164,9 @@ export function OrganizationProfileView() {
     
     saveController.save(formData);
   }, [isHydrated, saveController, getCurrentFormData, isFormValid]);
+
   const handleTextFieldKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter'&& !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (!isHydrated) return;
       
@@ -155,15 +176,19 @@ export function OrganizationProfileView() {
       saveController.save(formData);
     }
   }, [isHydrated, saveController, getCurrentFormData, isFormValid]);
+
   useEffect(() => {
     setIsHydrated(false);
     hasHydratedRef.current = false;
   }, [organizationId]);
+
   useEffect(() => {
     if (!organizationInfoSuccess || !organizationDataSuccess || hasHydratedRef.current) {
       return;
     }
+
     hasHydratedRef.current = true;
+
     if (organizationInfo) {
       setOrganizationName(organizationInfo.name || '');
       if (organizationInfo.image_bucket && organizationInfo.image_path) {
@@ -175,6 +200,7 @@ export function OrganizationProfileView() {
         setLogoUrl('');
       }
     }
+
     if (organizationData) {
       setDescription(organizationData.description || '');
       setPhone(organizationData.phone || '');
@@ -182,6 +208,7 @@ export function OrganizationProfileView() {
       setWebsite(organizationData.website || '');
       setTaxId(organizationData.tax_id || '');
     }
+
     setTimeout(() => {
       setIsHydrated(true);
       
@@ -195,6 +222,7 @@ export function OrganizationProfileView() {
       });
     }, 100);
   }, [organizationInfo, organizationData, organizationInfoSuccess, organizationDataSuccess, saveController]);
+
   const handleLogoSelect = async (file: File) => {
     if (!organizationId) return;
     
@@ -233,6 +261,7 @@ export function OrganizationProfileView() {
       setIsLogoUploading(false);
     }
   };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -248,6 +277,7 @@ export function OrganizationProfileView() {
             Sube el logo oficial de tu organización. Este logo se mostrará en documentos, reportes y comunicaciones oficiales.
           </p>
         </div>
+
         <div>
           <AvatarUploader
             avatarUrl={logoUrl}
@@ -258,7 +288,9 @@ export function OrganizationProfileView() {
           />
         </div>
       </div>
+
       <hr className="border-t border-[var(--section-divider)] my-8" />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
           <div className="flex items-center gap-2 mb-6">
@@ -269,6 +301,7 @@ export function OrganizationProfileView() {
             Datos fundamentales de la organización que se usarán en todo el sistema. Estos campos son la base para proyectos, documentos y comunicaciones.
           </p>
         </div>
+
         <div>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -282,6 +315,7 @@ export function OrganizationProfileView() {
                 onKeyDown={handleTextFieldKeyDown}
               />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="description">Descripción</Label>
               <Textarea 
@@ -296,7 +330,9 @@ export function OrganizationProfileView() {
           </div>
         </div>
       </div>
+
       <hr className="border-t border-[var(--section-divider)] my-8" />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
           <div className="flex items-center gap-2 mb-6">
@@ -307,6 +343,7 @@ export function OrganizationProfileView() {
             Datos de contacto de la organización. Esta información estará disponible para todo el equipo y se usará en comunicaciones oficiales.
           </p>
         </div>
+
         <div>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -318,6 +355,7 @@ export function OrganizationProfileView() {
                 placeholder="Número de teléfono"
               />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input 
@@ -330,6 +368,7 @@ export function OrganizationProfileView() {
                 onKeyDown={handleTextFieldKeyDown}
               />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="website">Sitio Web</Label>
               <Input 
@@ -345,7 +384,9 @@ export function OrganizationProfileView() {
           </div>
         </div>
       </div>
+
       <hr className="border-t border-[var(--section-divider)] my-8" />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
           <div className="flex items-center gap-2 mb-6">
@@ -356,6 +397,7 @@ export function OrganizationProfileView() {
             Datos fiscales y legales de la organización. Esta información se usa en facturación, contratos y documentación oficial.
           </p>
         </div>
+
         <div>
           <div className="space-y-4">
             <div className="space-y-2">

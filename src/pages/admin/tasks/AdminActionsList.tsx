@@ -1,20 +1,25 @@
 import { useState } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Table } from '@/components/shared/trees/Table'
 import { useGlobalModalStore } from '@/components/modal'
 import { useTaskKinds, useDeleteTaskKind, type TaskKind } from '@/hooks/use-actions'
+
 import { Edit, Trash2 } from 'lucide-react'
 import { exportToExcel, createExportColumns } from '@/lib/export-utils'
+
 const AdminActionsList = () => {
   const { openModal } = useGlobalModalStore()
   
   // Data from useTaskKinds hook
   const { data: taskKinds = [], isLoading } = useTaskKinds()
   const deleteTaskKindMutation = useDeleteTaskKind()
+
   const handleEdit = (taskKind: TaskKind) => {
     // Por ahora usamos un modal genérico, luego crearemos el modal específico para task kinds
     console.log('Editar acción:', taskKind)
   }
+
   const handleDelete = (taskKind: TaskKind) => {
     openModal('delete-confirmation', {
       title: 'Eliminar Acción',
@@ -26,9 +31,11 @@ const AdminActionsList = () => {
       mode: 'dangerous'
     })
   }
+
   // Handle Excel export
   const handleExportToExcel = async () => {
     if (taskKinds.length === 0) return
+
     try {
       const exportColumns = createExportColumns(columns)
       await exportToExcel({
@@ -40,6 +47,7 @@ const AdminActionsList = () => {
       console.error('Error exporting to Excel:', error)
     }
   }
+
   // Table columns configuration
   const columns = [
     {
@@ -79,12 +87,13 @@ const AdminActionsList = () => {
               ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
               : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
           }`}>
-            {taskKind.is_active ? 'Activo': 'Inactivo'}
+            {taskKind.is_active ? 'Activo' : 'Inactivo'}
           </span>
         </div>
       ),
     },
   ]
+
   return (
     <div className="space-y-6">
       <Table
@@ -101,7 +110,7 @@ const AdminActionsList = () => {
             icon: Trash2,
             label: 'Eliminar',
             onClick: () => handleDelete(taskKind),
-            variant: 'destructive'as const
+            variant: 'destructive' as const
           }
         ]}
         emptyState={{
@@ -112,4 +121,5 @@ const AdminActionsList = () => {
     </div>
   )
 }
+
 export default AdminActionsList

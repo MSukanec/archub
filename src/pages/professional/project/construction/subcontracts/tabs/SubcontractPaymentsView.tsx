@@ -11,9 +11,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency as globalFormatCurrency } from "@/lib/currency-formatter";
 import { useCurrentUser } from "@/hooks/use-current-user";
+
 interface SubcontractPaymentsViewProps {
   subcontract: any;
 }
+
 export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsViewProps) {
   const { data: userData } = useCurrentUser();
   
@@ -35,16 +37,17 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
     enabled: !!userData?.organization?.id && !!userData?.preferences?.default_currency
   });
   
-  const [currencyView, setCurrencyView] = useState<'discriminado'| 'pesificado'| 'dolarizado'>('discriminado');
+  const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
   
   // Actualizar la vista de moneda cuando se cargue la moneda por defecto
   useEffect(() => {
     if (defaultCurrency) {
       // Si la moneda por defecto es USD, mostrar en dólares, si no, en pesos/moneda local
-      const newView = defaultCurrency.code === 'USD'? 'dolarizado': 'pesificado';
+      const newView = defaultCurrency.code === 'USD' ? 'dolarizado' : 'pesificado';
       setCurrencyView(newView);
     }
   }, [defaultCurrency]);
+
   // Query para obtener los pagos específicos de este subcontrato
   const { data: subcontractPayments = [], isLoading: isLoadingPayments } = useQuery({
     queryKey: ['subcontract-payments', subcontract.id],
@@ -74,15 +77,18 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
         .eq('subcontract_id', subcontract.id)
         .eq('movements.organization_id', userData.organization?.id)
         .order('movements(movement_date)', { ascending: false });
+
       if (error) {
         console.error('Error fetching subcontract payments:', error);
         return [];
       }
+
       return (data || []).map((item: any) => {
         const contact = item.subcontract.contact;
         const contactName = contact 
           ? (contact.full_name || contact.company_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim())
           : 'Sin adjudicar';
+
         return {
           id: item.id,
           movement_date: item.movements.movement_date,
@@ -99,13 +105,15 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
     },
     enabled: !!subcontract.id && !!userData?.organization?.id
   });
+
   const formatCurrency = (amount: number, symbol: string = '$') => {
     return globalFormatCurrency(amount, symbol);
   };
+
   // Función para convertir montos según la vista de moneda
   const convertAmount = (amountARS: number, amountUSD: number, currencyCode: string) => {
     if (currencyView === 'discriminado') {
-      return currencyCode === 'USD'? amountUSD : amountARS;
+      return currencyCode === 'USD' ? amountUSD : amountARS;
     } else if (currencyView === 'pesificado') {
       return amountARS; // Siempre mostrar en ARS
     } else if (currencyView === 'dolarizado') {
@@ -113,11 +121,12 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
     }
     return amountARS;
   };
+
   const formatSingleCurrency = (amountARS: number, amountUSD: number, originalCurrency: string = 'ARS') => {
     const convertedAmount = convertAmount(amountARS, amountUSD, originalCurrency);
     
     if (currencyView === 'discriminado') {
-      return formatCurrency(convertedAmount, originalCurrency === 'USD'? 'US$': '$');
+      return formatCurrency(convertedAmount, originalCurrency === 'USD' ? 'US$' : '$');
     } else if (currencyView === 'pesificado') {
       return formatCurrency(convertedAmount, '$');
     } else if (currencyView === 'dolarizado') {
@@ -125,6 +134,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
     }
     return formatCurrency(convertedAmount, '$');
   };
+
   // Generar datos para el gráfico de pagos por mes
   const generatePaymentsChartData = () => {
     if (!subcontractPayments || subcontractPayments.length === 0) return [];
@@ -144,7 +154,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
       }
       
       // Convertir a la moneda por defecto de la organización
-      const amount = defaultCurrency?.code === 'USD'
+      const amount = defaultCurrency?.code === 'USD' 
         ? payment.amount / payment.exchange_rate
         : payment.amount;
         
@@ -156,7 +166,9 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
     return Object.values(paymentsByMonth)
       .sort((a, b) => a.month.localeCompare(b.month));
   };
+
   const paymentsChartData = generatePaymentsChartData();
+
   // Calcular el total acumulado hasta cada pago
   const paymentsWithProgress = useMemo(() => {
     if (subcontractPayments.length === 0 || !subcontract.amount_total) return [];
@@ -173,6 +185,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
       };
     });
   }, [subcontractPayments, subcontract.amount_total]);
+
   // Columnas para la tabla de pagos con el orden correcto
   const paymentsColumns = [
     {
@@ -262,6 +275,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
       }
     }
   ];
+
   if (subcontractPayments.length === 0 && !isLoadingPayments) {
     return (
       <EmptyState
@@ -278,6 +292,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
       />
     );
   }
+
   return (
     <div className="space-y-6">
       {/* Gráfico de pagos por mes */}
@@ -287,6 +302,7 @@ export function SubcontractPaymentsView({ subcontract }: SubcontractPaymentsView
         currencySymbol={defaultCurrency?.symbol || '$'}
         title={`Pagos del Subcontrato: ${subcontract.title}`}
       />
+
       {/* Tabla de pagos del subcontrato */}
       <Table
         columns={paymentsColumns}

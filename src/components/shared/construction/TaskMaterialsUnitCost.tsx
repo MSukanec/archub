@@ -1,9 +1,12 @@
 import { useTaskMaterials } from '@/hooks/use-generated-tasks'
+
 interface TaskMaterialsUnitCostProps {
   task: any
 }
+
 export default function TaskMaterialsUnitCost({ task }: TaskMaterialsUnitCostProps) {
   const { data: materials = [], isLoading } = useTaskMaterials(task.task_id || task.id)
+
   // Calcular SOLO el costo por unidad (sin multiplicar por cantidad)
   const costPerUnit = materials.reduce((sum, material) => {
     // materials_view puede ser array o objeto
@@ -12,6 +15,7 @@ export default function TaskMaterialsUnitCost({ task }: TaskMaterialsUnitCostPro
     const quantity = material.amount || 0;
     return sum + (quantity * unitPrice);
   }, 0)
+
   // Formatear el costo
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -21,12 +25,15 @@ export default function TaskMaterialsUnitCost({ task }: TaskMaterialsUnitCostPro
       maximumFractionDigits: 0
     }).format(amount)
   }
+
   if (isLoading) {
     return <span className="text-xs text-muted-foreground">...</span>
   }
+
   if (costPerUnit === 0) {
     return <span className="text-xs text-muted-foreground">–</span>
   }
+
   return (
     <span className="text-xs font-medium text-foreground">
       {formatCost(costPerUnit)}

@@ -11,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { Vote, Clock, Check, XCircle } from 'lucide-react';
 import { useFounderVotes, useCastVote, useFounderVote, type VoteTopic } from '../services';
 import { useToast } from '@/hooks/use-toast';
+
 function VoteResults({ topic }: { topic: VoteTopic }) {
   const totalVotes = topic.total_votes || 0;
   
@@ -24,7 +25,7 @@ function VoteResults({ topic }: { topic: VoteTopic }) {
         return (
           <div key={option.id} className="space-y-1">
             <div className="flex items-center justify-between text-sm">
-              <span className={`${isUserVote ? 'font-medium text-accent': 'text-[var(--text-default)]'}`}>
+              <span className={`${isUserVote ? 'font-medium text-accent' : 'text-[var(--text-default)]'}`}>
                 {option.option_text}
                 {isUserVote && <Check className="h-4 w-4 inline ml-1 text-accent" />}
               </span>
@@ -42,6 +43,7 @@ function VoteResults({ topic }: { topic: VoteTopic }) {
     </div>
   );
 }
+
 function VoteCard({ topic: initialTopic }: { topic: VoteTopic }) {
   const { toast } = useToast();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -52,8 +54,9 @@ function VoteCard({ topic: initialTopic }: { topic: VoteTopic }) {
   const deadline = currentTopic.voting_deadline ? new Date(currentTopic.voting_deadline) : null;
   const isPastDeadline = deadline && deadline < new Date();
   const hasVoted = !!currentTopic.user_voted_option_id;
-  const isActive = currentTopic.status === 'active'&& !isPastDeadline;
+  const isActive = currentTopic.status === 'active' && !isPastDeadline;
   const showResults = hasVoted || isPastDeadline || currentTopic.status === 'closed';
+
   const handleVote = async () => {
     if (!selectedOption) return;
     
@@ -74,16 +77,17 @@ function VoteCard({ topic: initialTopic }: { topic: VoteTopic }) {
       });
     }
   };
+
   return (
     <Card data-testid={`card-vote-${currentTopic.id}`}>
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base font-medium">{currentTopic.title}</CardTitle>
           <Badge 
-            variant={isActive ? 'default': 'secondary'}
+            variant={isActive ? 'default' : 'secondary'}
             className="shrink-0"
           >
-            {isActive ? 'Activa': 'Cerrada'}
+            {isActive ? 'Activa' : 'Cerrada'}
           </Badge>
         </div>
         {currentTopic.description && (
@@ -93,7 +97,7 @@ function VoteCard({ topic: initialTopic }: { topic: VoteTopic }) {
           <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
             <Clock className="h-3.5 w-3.5" />
             <span>
-              {isPastDeadline ? 'Cerrado': 'Cierra'}: {format(deadline, "d 'de'MMMM, yyyy", { locale: es })}
+              {isPastDeadline ? 'Cerrado' : 'Cierra'}: {format(deadline, "d 'de' MMMM, yyyy", { locale: es })}
             </span>
           </div>
         )}
@@ -128,7 +132,7 @@ function VoteCard({ topic: initialTopic }: { topic: VoteTopic }) {
               className="w-full"
               data-testid={`button-vote-${currentTopic.id}`}
             >
-              {castVoteMutation.isPending ? 'Votando...': 'Votar'}
+              {castVoteMutation.isPending ? 'Votando...' : 'Votar'}
             </Button>
           </div>
         )}
@@ -136,6 +140,7 @@ function VoteCard({ topic: initialTopic }: { topic: VoteTopic }) {
     </Card>
   );
 }
+
 function VotingSkeleton() {
   return (
     <div className="space-y-4">
@@ -159,11 +164,14 @@ function VotingSkeleton() {
     </div>
   );
 }
+
 export function FounderVoting() {
   const { data: votes, isLoading, error } = useFounderVotes();
+
   if (isLoading) {
     return <VotingSkeleton />;
   }
+
   if (error) {
     return (
       <div className="text-center py-8 text-[var(--text-muted)]">
@@ -171,6 +179,7 @@ export function FounderVoting() {
       </div>
     );
   }
+
   if (!votes || votes.length === 0) {
     return (
       <div className="text-center py-12">
@@ -181,10 +190,12 @@ export function FounderVoting() {
       </div>
     );
   }
-  const activeVotes = votes.filter(v => v.status === 'active'&& 
+
+  const activeVotes = votes.filter(v => v.status === 'active' && 
     (!v.voting_deadline || new Date(v.voting_deadline) >= new Date()));
-  const closedVotes = votes.filter(v => v.status === 'closed'|| 
+  const closedVotes = votes.filter(v => v.status === 'closed' || 
     (v.voting_deadline && new Date(v.voting_deadline) < new Date()));
+
   return (
     <div className="space-y-6">
       {activeVotes.length > 0 && (
@@ -197,6 +208,7 @@ export function FounderVoting() {
           ))}
         </div>
       )}
+
       {closedVotes.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-sm font-medium text-[var(--text-muted)] uppercase tracking-wider">

@@ -1,9 +1,14 @@
 import { ReactNode, ComponentType } from "react";
 import { TableColumnType } from "./tableColumnTypes";
+
 export type SortDirection = "asc" | "desc" | null;
+
 export type SortType = "string" | "number" | "date";
+
 export type ColumnAlignment = "left" | "center" | "right";
+
 export type TableMode = "default" | "budget" | "construction";
+
 export interface Column<T = any> {
   key: keyof T | string;
   label: string;
@@ -17,21 +22,25 @@ export interface Column<T = any> {
   labelClassName?: string;
   align?: ColumnAlignment;
 }
+
 export interface RowAction {
   label: string;
   icon: ComponentType<{ className?: string }>;
   onClick: () => void;
   variant?: "default" | "destructive";
 }
+
 export interface PrimaryRowAction {
   label: string;
   onClick: () => void;
 }
+
 export interface LeadingRowAction {
   label: string;
   icon: ComponentType<{ className?: string }>;
   onClick: () => void;
 }
+
 export interface EmptyStateConfig {
   icon?: ReactNode;
   title: string;
@@ -43,20 +52,24 @@ export interface EmptyStateConfig {
     onClick: () => void;
   };
 }
+
 export interface TabConfig {
   value: string;
   label: string;
   icon?: ReactNode;
 }
+
 export interface GroupingOption {
   value: string;
   label: string;
 }
+
 export interface BulkActions {
   onDelete?: () => void;
   onExport?: () => void;
   customActions?: ReactNode;
 }
+
 export interface TopBarConfig {
   tabs?: string[];
   activeTab?: string;
@@ -99,15 +112,18 @@ export interface TopBarConfig {
   };
   bulkActions?: BulkActions;
 }
+
 /** @deprecated Use topBar instead */
 export interface HeaderActions {
   leftActions?: ReactNode;
   rightActions?: ReactNode;
 }
+
 export interface DefaultSort {
   key: string;
   direction: "asc" | "desc";
 }
+
 export interface TableProps<T = any> {
   columns: Column<T>[];
   data: T[];
@@ -143,19 +159,23 @@ export interface TableProps<T = any> {
   showInactiveSeparator?: boolean;
   hideActions?: boolean;
 }
+
 export interface TableSortState {
   sortKey: string | null;
   sortDirection: SortDirection;
 }
+
 export interface TableFilterState {
   searchValue: string;
   filters: Record<string, any>;
 }
+
 export interface TablePaginationState {
   currentPage: number;
   itemsPerPage: number;
   totalItems: number;
 }
+
 export interface TableSelectionState<T> {
   selectedItems: T[];
   isAllSelected: boolean;

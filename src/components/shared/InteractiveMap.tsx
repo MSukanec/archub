@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import { MapPin } from 'lucide-react';
+
 /**
  * Generic reusable map item interface
  * Consumers should extend this with their specific properties
@@ -16,6 +17,7 @@ export interface MapItem {
   logo?: string;
   [key: string]: any; // Allow additional properties per use case
 }
+
 interface InteractiveMapProps<T extends MapItem> {
   items: T[];
   isLoading: boolean;
@@ -25,16 +27,20 @@ interface InteractiveMapProps<T extends MapItem> {
   height?: number;
   emptyMessage?: string;
 }
+
 function MapController({ items }: { items: MapItem[] }) {
   const map = useMap();
+
   useEffect(() => {
     if (items.length > 0) {
       const bounds = L.latLngBounds(items.map(i => [i.lat, i.lng]));
       map.fitBounds(bounds, { padding: [50, 50] });
     }
   }, [items, map]);
+
   return null;
 }
+
 export function InteractiveMap<T extends MapItem>({
   items,
   isLoading,
@@ -77,7 +83,7 @@ export function InteractiveMap<T extends MapItem>({
             transform: translateX(-50%);
             width: 40px;
             height: 40px;
-            background-color: ${logoUrl ? 'white': (color || '#84cc16')};
+            background-color: ${logoUrl ? 'white' : (color || '#84cc16')};
             border-radius: 50%;
             border: 3px solid white;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -95,6 +101,7 @@ export function InteractiveMap<T extends MapItem>({
       popupAnchor: [0, -52],
     });
   };
+
   const createClusterCustomIcon = (cluster: any) => {
     const count = cluster.getChildCount();
     let size = 40;
@@ -107,6 +114,7 @@ export function InteractiveMap<T extends MapItem>({
       size = 50;
       fontSize = '16px';
     }
+
     return L.divIcon({
       html: `
         <div style="
@@ -131,6 +139,7 @@ export function InteractiveMap<T extends MapItem>({
       iconSize: L.point(size, size),
     });
   };
+
   if (isLoading) {
     return (
       <div style={{ width: '100%', height: `${height}px` }} className="flex items-center justify-center bg-gray-100 rounded-lg">
@@ -141,6 +150,7 @@ export function InteractiveMap<T extends MapItem>({
       </div>
     );
   }
+
   if (error) {
     return (
       <div style={{ width: '100%', height: `${height}px` }} className="flex items-center justify-center bg-gray-100 rounded-lg">
@@ -150,6 +160,7 @@ export function InteractiveMap<T extends MapItem>({
       </div>
     );
   }
+
   return (
     <div className="w-full relative" style={{ height: `${height}px` }}>
       {items.length === 0 && (
@@ -198,6 +209,7 @@ export function InteractiveMap<T extends MapItem>({
             ))}
           </MarkerClusterGroup>
         )}
+
         {items.length > 0 && <MapController items={items} />}
       </MapContainer>
     </div>

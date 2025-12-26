@@ -21,12 +21,13 @@ import { usePartners, useCreateCapitalAdjustment, useUpdateCapitalAdjustment, us
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { IdentityBadge } from '@/components/shared/IdentityBadge'
 import type { Partner } from '../types'
+
 const capitalAdjustmentSchema = z.object({
   adjustment_date: z.date({
     required_error: "Fecha es requerida",
   }),
   partner_id: z.string().optional().nullable(),
-  amount: z.number().refine(val => val !== 0, { message: 'El monto no puede ser 0'}),
+  amount: z.number().refine(val => val !== 0, { message: 'El monto no puede ser 0' }),
   currency_id: z.string().min(1, 'Moneda es requerida'),
   exchange_rate: z.number().min(0.0001, 'Tipo de cambio debe ser mayor a 0').optional().nullable(),
   reason: z.string().optional().nullable(),
@@ -34,7 +35,9 @@ const capitalAdjustmentSchema = z.object({
   reference: z.string().optional(),
   notes: z.string().optional(),
 })
+
 type CapitalAdjustmentFormData = z.infer<typeof capitalAdjustmentSchema>
+
 function getPartnerDisplayName(partner: Partner): string {
   if (!partner?.contacts) return 'Socio sin nombre'
   
@@ -54,16 +57,18 @@ function getPartnerDisplayName(partner: Partner): string {
   }
   return 'Socio sin nombre'
 }
+
 export interface CapitalAdjustmentFormProps {
   projectId?: string;
   organizationId?: string;
   adjustmentId?: string;
-  mode: 'create'| 'edit'| 'view';
+  mode: 'create' | 'edit' | 'view';
   onSuccess: () => void;
   onCancel: () => void;
   hideActions?: boolean;
   formRef?: React.RefObject<HTMLFormElement>;
 }
+
 export function CapitalAdjustmentForm({ 
   projectId, 
   organizationId,
@@ -76,20 +81,24 @@ export function CapitalAdjustmentForm({
 }: CapitalAdjustmentFormProps) {
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
+
   const { data: partners = [], isLoading: partnersLoading } = usePartners(organizationId, { enabled: !!organizationId })
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
   
   const orgCurrencyContext = useOrgCurrencyContext(organizationId)
+
   const createMutation = useCreateCapitalAdjustment()
   const updateMutation = useUpdateCapitalAdjustment()
   const { data: existingAdjustment, isLoading: loadingAdjustment } = useCapitalAdjustment(
     adjustmentId,
     organizationId
   )
+
   const currentMember = useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
   }, [members, userData?.user?.id])
+
   const partnerOptions = useMemo(() => {
     return partners.map(partner => {
       const linkedUser = Array.isArray(partner.contacts?.linked_user) 
@@ -100,8 +109,9 @@ export function CapitalAdjustmentForm({
         label: getPartnerDisplayName(partner),
         linkedUser,
       };
-    }).sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base'}))
+    }).sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
   }, [partners])
+
   const form = useForm<CapitalAdjustmentFormData>({
     resolver: zodResolver(capitalAdjustmentSchema),
     defaultValues: {
@@ -116,9 +126,11 @@ export function CapitalAdjustmentForm({
       notes: '',
     }
   })
+
   const isLoading = partnersLoading || currenciesLoading || membersLoading || loadingAdjustment
+
   useEffect(() => {
-    if (existingAdjustment && (mode === 'edit'|| mode === 'view')) {
+    if (existingAdjustment && (mode === 'edit' || mode === 'view')) {
       const adjustmentDate = parseLocalDate(existingAdjustment.adjustment_date) || new Date()
       
       form.reset({
@@ -134,8 +146,9 @@ export function CapitalAdjustmentForm({
       })
     }
   }, [existingAdjustment, mode, form])
+
   useEffect(() => {
-    if (mode === 'create'&& !adjustmentId) {
+    if (mode === 'create' && !adjustmentId) {
       if (orgCurrencyContext.defaultCurrencyId && !orgCurrencyContext.isLoading) {
         form.setValue('currency_id', orgCurrencyContext.defaultCurrencyId)
       } else if (!currenciesLoading && currencies && currencies.length > 0) {
@@ -143,6 +156,7 @@ export function CapitalAdjustmentForm({
       }
     }
   }, [currencies, currenciesLoading, mode, adjustmentId, form, orgCurrencyContext.defaultCurrencyId, orgCurrencyContext.isLoading])
+
   const onSubmit = async (data: CapitalAdjustmentFormData) => {
     if (!organizationId || !currentMember) {
       toast({
@@ -152,8 +166,9 @@ export function CapitalAdjustmentForm({
       })
       return
     }
+
     try {
-      if (mode === 'edit'&& adjustmentId) {
+      if (mode === 'edit' && adjustmentId) {
         await updateMutation.mutateAsync({
           adjustmentId,
           updates: {
@@ -185,11 +200,13 @@ export function CapitalAdjustmentForm({
           created_by: currentMember.id,
         })
       }
-      const successMessage = mode === 'edit'? 'actualizado': 'registrado';
+
+      const successMessage = mode === 'edit' ? 'actualizado' : 'registrado';
       toast({
         title: `Ajuste ${successMessage}`,
         description: `El ajuste de capital se ha ${successMessage} correctamente`,
       })
+
       onSuccess()
     } catch (error: any) {
       toast({
@@ -199,6 +216,7 @@ export function CapitalAdjustmentForm({
       })
     }
   }
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -209,6 +227,7 @@ export function CapitalAdjustmentForm({
       </div>
     )
   }
+
   return (
     <Form {...form}>
       <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -251,6 +270,7 @@ export function CapitalAdjustmentForm({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="partner_id"
@@ -281,6 +301,7 @@ export function CapitalAdjustmentForm({
             )}
           />
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -308,6 +329,7 @@ export function CapitalAdjustmentForm({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="status"
@@ -332,6 +354,7 @@ export function CapitalAdjustmentForm({
             )}
           />
         </div>
+
         {(() => {
           const visibility = getCurrencyFieldsVisibility({
             context: orgCurrencyContext,
@@ -376,6 +399,7 @@ export function CapitalAdjustmentForm({
                       )}
                     />
                   )}
+
                   {visibility.showExchangeRate && (
                     <FormField
                       control={form.control}
@@ -404,6 +428,7 @@ export function CapitalAdjustmentForm({
             </>
           );
         })()}
+
         <FormField
           control={form.control}
           name="reason"
@@ -422,6 +447,7 @@ export function CapitalAdjustmentForm({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="notes"
@@ -440,6 +466,7 @@ export function CapitalAdjustmentForm({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="reference"
@@ -457,6 +484,7 @@ export function CapitalAdjustmentForm({
             </FormItem>
           )}
         />
+
         {!hideActions && (
           <div className="flex gap-2 pt-4 border-t">
             <button
@@ -474,9 +502,9 @@ export function CapitalAdjustmentForm({
               data-testid="button-submit-capital-adjustment"
             >
               {createMutation.isPending || updateMutation.isPending 
-                ? 'Guardando...'
-                : mode === 'edit'
-                ? 'Actualizar Ajuste'
+                ? 'Guardando...' 
+                : mode === 'edit' 
+                ? 'Actualizar Ajuste' 
                 : 'Registrar Ajuste'
               }
             </button>

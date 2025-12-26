@@ -7,6 +7,7 @@ import { getIconComponent } from './CategoryList';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import type { ForumThreadWithAuthor, ForumCategoryWithCounts } from '../services';
+
 interface ThreadListProps {
   threads: ForumThreadWithAuthor[];
   isLoading?: boolean;
@@ -14,6 +15,7 @@ interface ThreadListProps {
   selectedCategory?: ForumCategoryWithCounts | null;
   onNewThread?: () => void;
 }
+
 function ThreadListSkeleton() {
   return (
     <div className="space-y-3" data-testid="thread-list-skeleton">
@@ -39,6 +41,7 @@ function ThreadListSkeleton() {
     </div>
   );
 }
+
 export function ThreadList({
   threads,
   isLoading,
@@ -47,18 +50,23 @@ export function ThreadList({
   onNewThread,
 }: ThreadListProps) {
   const isAdmin = useIsAdmin();
+
   if (isLoading) {
     return <ThreadListSkeleton />;
   }
+
   const hasThreads = threads.length > 0;
   const canCreateThread = !selectedCategory?.is_read_only || isAdmin;
   const pinnedThreads = threads.filter((t) => t.is_pinned);
   const regularThreads = threads.filter((t) => !t.is_pinned);
+
   const sortedRegularThreads = [...regularThreads].sort((a, b) => {
     return new Date(b.last_activity_at || b.created_at).getTime() -
            new Date(a.last_activity_at || a.created_at).getTime();
   });
+
   const CategoryIcon = selectedCategory ? getIconComponent(selectedCategory.icon) : MessageSquare;
+
   return (
     <div className="space-y-4" data-testid="thread-list">
       {selectedCategory && (
@@ -110,7 +118,7 @@ export function ThreadList({
                 <div className="flex items-center gap-4 mt-3 text-xs text-[var(--text-muted)]">
                   <span className="flex items-center gap-1.5">
                     <MessageSquare className="w-3.5 h-3.5" />
-                    {selectedCategory.thread_count ?? 0} {(selectedCategory.thread_count ?? 0) === 1 ? 'tema': 'temas'}
+                    {selectedCategory.thread_count ?? 0} {(selectedCategory.thread_count ?? 0) === 1 ? 'tema' : 'temas'}
                   </span>
                 </div>
               </div>
@@ -118,13 +126,15 @@ export function ThreadList({
           </div>
         </div>
       )}
+
       {!selectedCategory && hasThreads && (
         <div className="flex items-center gap-3">
           <span className="text-sm text-[var(--text-muted)]">
-            {threads.length} {threads.length === 1 ? 'tema': 'temas'}
+            {threads.length} {threads.length === 1 ? 'tema' : 'temas'}
           </span>
         </div>
       )}
+
       {!hasThreads && (
         <EmptyState
           icon={<MessageSquare />}
@@ -144,6 +154,7 @@ export function ThreadList({
           }
         />
       )}
+
       {pinnedThreads.length > 0 && (
         <div className="space-y-2">
           {pinnedThreads.map((thread) => (
@@ -155,6 +166,7 @@ export function ThreadList({
           ))}
         </div>
       )}
+
       {sortedRegularThreads.length > 0 && (
         <div className="space-y-2">
           {sortedRegularThreads.map((thread) => (

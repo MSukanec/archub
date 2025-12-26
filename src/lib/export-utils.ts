@@ -1,15 +1,18 @@
 import * as XLSX from 'xlsx'
+
 interface ExportColumn {
   key: string
   label: string
   render?: (item: any) => any
 }
+
 interface ExportOptions {
   filename?: string
   sheetName?: string
   columns: ExportColumn[]
   data: any[]
 }
+
 /**
  * Exports data to Excel file
  */
@@ -20,6 +23,7 @@ export function exportToExcel(options: ExportOptions) {
     columns,
     data
   } = options
+
   // Create workbook and worksheet
   const workbook = XLSX.utils.book_new()
   
@@ -36,11 +40,11 @@ export function exportToExcel(options: ExportOptions) {
       if (col.render) {
         // If there's a render function, try to extract text content
         const rendered = col.render(item)
-        if (typeof rendered === 'string'|| typeof rendered === 'number') {
+        if (typeof rendered === 'string' || typeof rendered === 'number') {
           return rendered
         }
         // For React components or complex objects, try to extract text
-        if (rendered && typeof rendered === 'object'&& rendered.props) {
+        if (rendered && typeof rendered === 'object' && rendered.props) {
           // Try to extract text from React elements
           return extractTextFromReactElement(rendered)
         }
@@ -63,6 +67,7 @@ export function exportToExcel(options: ExportOptions) {
   // Write file
   XLSX.writeFile(workbook, filename)
 }
+
 /**
  * Helper function to get nested object values
  */
@@ -71,11 +76,12 @@ function getNestedValue(obj: any, path: string): any {
     return current && current[key] !== undefined ? current[key] : null
   }, obj)
 }
+
 /**
  * Helper function to extract text from React elements
  */
 function extractTextFromReactElement(element: any): string {
-  if (typeof element === 'string'|| typeof element === 'number') {
+  if (typeof element === 'string' || typeof element === 'number') {
     return String(element)
   }
   
@@ -94,6 +100,7 @@ function extractTextFromReactElement(element: any): string {
   
   return String(element || '')
 }
+
 /**
  * Helper function to create export columns from table columns
  */

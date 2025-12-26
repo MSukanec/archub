@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useCoursePlayerStore, useCourseProgress, CourseMarkersSimple } from '@/features/learning';
 import { useCourseSidebarStore } from '@/stores/sidebarStore';
 import { PlayerDrawer } from './PlayerDrawer';
+
 export function CoursePlayerDrawerHost() {
   const [match, params] = useRoute('/learning/courses/:courseSlug');
   const [location] = useLocation();
@@ -29,12 +30,14 @@ export function CoursePlayerDrawerHost() {
   
   const isOnCoursePlayerTab = match && !!params?.courseSlug && activeTab === 'Reproductor';
   const courseSlug = isOnCoursePlayerTab ? params?.courseSlug : null;
+
   const storeLessonId = useCoursePlayerStore(s => s.currentLessonId);
   const goToLesson = useCoursePlayerStore(s => s.goToLesson);
   const vimeoPlayer = useCoursePlayerStore(s => s.vimeoPlayer);
   const { currentLessonId: sidebarLessonId, modules, lessons } = useCourseSidebarStore();
   
   const activeLessonId = storeLessonId || sidebarLessonId || null;
+
   const { data: course } = useQuery({
     queryKey: ['course', courseSlug],
     queryFn: async () => {
@@ -52,6 +55,7 @@ export function CoursePlayerDrawerHost() {
     },
     enabled: !!courseSlug && !!supabase && isOnCoursePlayerTab
   });
+
   const { data: progressData = [] } = useCourseProgress(course?.id);
   
   const progressMap = useMemo(() => {
@@ -61,15 +65,19 @@ export function CoursePlayerDrawerHost() {
     });
     return map;
   }, [progressData]);
+
   const handleLessonSelect = useCallback((lessonId: string) => {
     goToLesson(lessonId, null);
   }, [goToLesson]);
+
   const handleMarkerLessonSelect = useCallback((lessonId: string, timeSec: number | null) => {
     goToLesson(lessonId, timeSec);
   }, [goToLesson]);
+
   if (!isOnCoursePlayerTab || modules.length === 0) {
     return null;
   }
+
   return (
     <PlayerDrawer
       modules={modules}

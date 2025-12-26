@@ -1,5 +1,6 @@
 import { useProjectContext } from '@/stores/projectContext';
 import { useProject } from '@/features/projects';
+
 /**
  * Hook that determines if the current project is in read-only mode.
  * A project is read-only when is_over_limit is true (soft-locked due to plan limits).

@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
+import { 
   useCreateGeneralCostCategory, 
   useUpdateGeneralCostCategory, 
   useDeleteGeneralCostCategory,
@@ -19,14 +20,18 @@ import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
 import { useReplaceGeneralCostCategory } from '../hooks/use-replace-general-cost-category';
 import { getGeneralCostCategoryUsageCount } from '../services/generalCostCategories';
 import type { GeneralCostCategory } from '../types';
+
 const categorySchema = z.object({
   name: z.string().min(1, 'El nombre de la categoría es requerido').max(100),
   description: z.string().max(500).nullable().optional(),
 });
+
 type CategoryFormData = z.infer<typeof categorySchema>;
+
 interface FormPanelProps {
   form: ReturnType<typeof useForm<CategoryFormData>>;
 }
+
 export function FormPanel({ form }: FormPanelProps) {
   return (
     <Form {...form}>
@@ -72,11 +77,13 @@ export function FormPanel({ form }: FormPanelProps) {
     </Form>
   );
 }
+
 interface ViewPanelProps {
   category: GeneralCostCategory;
   onEdit: () => void;
   onDelete: () => void;
 }
+
 export function ViewPanel({ category, onEdit, onDelete }: ViewPanelProps) {
   return (
     <div className="space-y-6">
@@ -86,6 +93,7 @@ export function ViewPanel({ category, onEdit, onDelete }: ViewPanelProps) {
           {category.name}
         </p>
       </div>
+
       {category.description && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Descripción</h4>
@@ -94,6 +102,7 @@ export function ViewPanel({ category, onEdit, onDelete }: ViewPanelProps) {
           </p>
         </div>
       )}
+
       <div className="pt-4 border-t border-border">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground">
           <div data-testid="text-category-created-at">
@@ -106,6 +115,7 @@ export function ViewPanel({ category, onEdit, onDelete }: ViewPanelProps) {
           )}
         </div>
       </div>
+
       {category.is_system ? (
         <div className="pt-4 border-t border-border">
           <Badge variant="neutral" data-testid="badge-system-category">
@@ -137,11 +147,13 @@ export function ViewPanel({ category, onEdit, onDelete }: ViewPanelProps) {
     </div>
   );
 }
+
 interface UseCategoryFormOptions {
   category?: GeneralCostCategory;
-  mode: 'create'| 'edit'| 'view';
+  mode: 'create' | 'edit' | 'view';
   onSuccess: () => void;
 }
+
 export function useCategoryForm({ category, mode: initialMode, onSuccess }: UseCategoryFormOptions) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -154,7 +166,8 @@ export function useCategoryForm({ category, mode: initialMode, onSuccess }: UseC
   const replaceMutation = useReplaceGeneralCostCategory(organizationId);
   const { data: allCategories = [] } = useGeneralCostCategories(organizationId ?? undefined);
   
-  const [currentMode, setCurrentMode] = useState<'create'| 'edit'| 'view'>(initialMode);
+  const [currentMode, setCurrentMode] = useState<'create' | 'edit' | 'view'>(initialMode);
+
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
@@ -162,6 +175,7 @@ export function useCategoryForm({ category, mode: initialMode, onSuccess }: UseC
       description: null,
     }
   });
+
   useEffect(() => {
     if (category) {
       form.reset({
@@ -175,19 +189,23 @@ export function useCategoryForm({ category, mode: initialMode, onSuccess }: UseC
       });
     }
   }, [category, form]);
+
   const handleEditClick = () => {
     setCurrentMode('edit');
   };
+
   const handleDeleteClick = async () => {
     if (!category || !organizationId) return;
+
     try {
       const count = await getGeneralCostCategoryUsageCount(category.id);
+
       if (count === 0) {
         pushModal('delete-confirmation', {
           title: '¿Eliminar categoría?',
           description: 'Esta acción no se puede deshacer',
           itemName: category.name,
-          mode: 'delete'as const,
+          mode: 'delete' as const,
           consequences: ['La categoría será eliminada permanentemente'],
           onDelete: async () => {
             await deleteMutation.mutateAsync({ categoryId: category.id, organizationId });
@@ -196,6 +214,7 @@ export function useCategoryForm({ category, mode: initialMode, onSuccess }: UseC
         });
       } else {
         const otherCategories = allCategories.filter((c) => c.id !== category.id);
+
         if (otherCategories.length === 0) {
           toast({
             title: 'No se puede eliminar',
@@ -205,21 +224,22 @@ export function useCategoryForm({ category, mode: initialMode, onSuccess }: UseC
           });
           return;
         }
+
         pushModal('delete-confirmation', {
           title: '¿Eliminar categoría?',
           description: 'Esta categoría tiene gastos asociados',
           itemName: category.name,
-          mode: 'replace'as const,
+          mode: 'replace' as const,
           consequences: [
-            `${count} gasto${count === 1 ? '': 's'} será${count === 1 ? '': 'n'} afectado${count === 1 ? '': 's'}`,
+            `${count} gasto${count === 1 ? '' : 's'} será${count === 1 ? '' : 'n'} afectado${count === 1 ? '' : 's'}`,
             'Puedes reemplazarlos con otra categoría o eliminarlos sin referencia',
           ],
           replacementOptions: otherCategories
             .sort((a, b) =>
-              a.name.localeCompare(b.name, 'es', { sensitivity: 'base'})
+              a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
             )
             .map((c) => ({
-              label: c.name + (c.is_system ? '(Sistema)': ''),
+              label: c.name + (c.is_system ? ' (Sistema)' : ''),
               value: c.id,
             })),
           onDelete: async () => {
@@ -243,6 +263,7 @@ export function useCategoryForm({ category, mode: initialMode, onSuccess }: UseC
       });
     }
   };
+
   const onSubmit = (data: CategoryFormData) => {
     if (!organizationId) {
       toast({
@@ -252,7 +273,8 @@ export function useCategoryForm({ category, mode: initialMode, onSuccess }: UseC
       });
       return;
     }
-    if (currentMode === 'edit'&& category) {
+
+    if (currentMode === 'edit' && category) {
       updateMutation.mutate({
         categoryId: category.id,
         updates: {
@@ -273,6 +295,7 @@ export function useCategoryForm({ category, mode: initialMode, onSuccess }: UseC
       onSuccess();
     }
   };
+
   return {
     form,
     onSubmit,

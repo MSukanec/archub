@@ -1,10 +1,11 @@
 import DataRowCard from '@/components/shared/DataRowCard';
 import { Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+
 interface Coupon {
   id: string;
   code: string;
-  type: 'percent'| 'fixed';
+  type: 'percent' | 'fixed';
   amount: number;
   is_active: boolean;
   starts_at?: string;
@@ -17,19 +18,22 @@ interface Coupon {
   created_at: string;
   total_uses?: number;
 }
+
 interface AdminCourseCouponRowProps {
   coupon: Coupon;
   onClick?: () => void;
   selected?: boolean;
-  density?: 'compact'| 'normal'| 'comfortable';
+  density?: 'compact' | 'normal' | 'comfortable';
   className?: string;
 }
+
 // Función para determinar el estado del cupón
 const getCouponStatus = (coupon: Coupon) => {
   const now = new Date();
   const isExpired = coupon.expires_at && new Date(coupon.expires_at) < now;
   const notStarted = coupon.starts_at && new Date(coupon.starts_at) > now;
   const limitReached = coupon.max_redemptions && (coupon.total_uses || 0) >= coupon.max_redemptions;
+
   let status = 'Activo';
   let color = 'var(--accent)';
   
@@ -46,8 +50,10 @@ const getCouponStatus = (coupon: Coupon) => {
     status = 'Límite alcanzado';
     color = '#ef4444';
   }
+
   return { status, color };
 };
+
 // Componente para mostrar los usos del cupón
 const CouponUsage = ({ coupon }: { coupon: Coupon }) => {
   return (
@@ -63,6 +69,7 @@ const CouponUsage = ({ coupon }: { coupon: Coupon }) => {
     </div>
   );
 };
+
 export default function AdminCourseCouponRow({ 
   coupon, 
   onClick, 
@@ -72,6 +79,7 @@ export default function AdminCourseCouponRow({
 }: AdminCourseCouponRowProps) {
   
   const { status, color } = getCouponStatus(coupon);
+
   const cardContent = (
     <>
       {/* Columna de contenido (principal) */}
@@ -80,14 +88,16 @@ export default function AdminCourseCouponRow({
         <div className="font-bold text-sm font-mono truncate">
           {coupon.code}
         </div>
+
         {/* Segunda fila - Tipo y descuento */}
         <div className="text-xs text-muted-foreground">
-          {coupon.type === 'percent'? 'Porcentaje': 'Monto Fijo'} - {''}
+          {coupon.type === 'percent' ? 'Porcentaje' : 'Monto Fijo'} - {' '}
           <span className="font-medium">
-            {coupon.type === 'percent'? `${coupon.amount}%` : `$${coupon.amount}`}
+            {coupon.type === 'percent' ? `${coupon.amount}%` : `$${coupon.amount}`}
           </span>
         </div>
       </div>
+
       {/* Trailing Section - Estado y Usos */}
       <div className="flex flex-col items-end gap-2 flex-shrink-0">
         {/* Estado */}
@@ -107,10 +117,12 @@ export default function AdminCourseCouponRow({
       </div>
     </>
   );
+
   // Obtener iniciales del código del cupón (primeras 2 letras)
   const getInitials = () => {
     return coupon.code.slice(0, 2).toUpperCase();
   };
+
   return (
     <DataRowCard
       avatarFallback={getInitials()}
@@ -124,4 +136,5 @@ export default function AdminCourseCouponRow({
     </DataRowCard>
   );
 }
+
 export type { Coupon };

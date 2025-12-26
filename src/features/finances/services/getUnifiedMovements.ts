@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 /**
  * Tipo que representa un movimiento de la vista unified_financial_movements_view
  */
@@ -17,7 +18,7 @@ export interface UnifiedMovement {
   created_by: string | null;
   created_at: string;
   updated_at: string;
-  movement_type: 'client_payment'| 'material_payment'| 'personnel_payment'| 'partner_contribution'| 'partner_withdrawal'| 'general_cost_payment';
+  movement_type: 'client_payment' | 'material_payment' | 'personnel_payment' | 'partner_contribution' | 'partner_withdrawal' | 'general_cost_payment';
   client_id: string | null;
   material_id: string | null;
   personnel_id: string | null;
@@ -30,6 +31,7 @@ export interface UnifiedMovement {
   creator_avatar_url: string | null;
   entity_name: string | null;
 }
+
 /**
  * Movimiento unificado con relaciones pobladas
  */
@@ -53,6 +55,7 @@ export interface UnifiedMovementWithRelations extends UnifiedMovement {
   signed_amount: number;
   has_attachments: boolean;
 }
+
 /**
  * Obtiene todos los movimientos financieros unificados de la vista.
  * Las relaciones se obtienen por separado porque las vistas no tienen FK automáticas.
@@ -74,28 +77,35 @@ export async function getUnifiedMovements(
   if (!organizationId) {
     return [];
   }
+
   let query = supabase
     .from('unified_financial_movements_view')
     .select('*')
     .eq('organization_id', organizationId)
     .order('payment_date', { ascending: false });
+
   if (projectId) {
     query = query.eq('project_id', projectId);
   }
+
   const { data: movements, error } = await query;
+
   if (error) {
     console.error('Error fetching unified movements:', error);
     return [];
   }
+
   if (!movements || movements.length === 0) {
     return [];
   }
+
   // Collect IDs for batch queries
   const projectIds = Array.from(new Set(movements.map(m => m.project_id).filter(Boolean))) as string[];
   const currencyIds = Array.from(new Set(movements.map(m => m.currency_id).filter(Boolean))) as string[];
   const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean))) as string[];
-  const materialIds = Array.from(new Set(movements.filter(m => m.movement_type === 'material_payment'&& m.material_id).map(m => m.material_id).filter(Boolean))) as string[];
-  const personnelIds = Array.from(new Set(movements.filter(m => m.movement_type === 'personnel_payment'&& m.personnel_id).map(m => m.personnel_id).filter(Boolean))) as string[];
+  const materialIds = Array.from(new Set(movements.filter(m => m.movement_type === 'material_payment' && m.material_id).map(m => m.material_id).filter(Boolean))) as string[];
+  const personnelIds = Array.from(new Set(movements.filter(m => m.movement_type === 'personnel_payment' && m.personnel_id).map(m => m.personnel_id).filter(Boolean))) as string[];
+
   // Build separate ID arrays for each payment type for media_links query
   const clientPaymentIdSet = new Set(movements.filter(m => m.movement_type === 'client_payment').map(m => m.id));
   const materialPaymentIdSet = new Set(movements.filter(m => m.movement_type === 'material_payment').map(m => m.id));
@@ -103,6 +113,7 @@ export async function getUnifiedMovements(
   const partnerContributionIdSet = new Set(movements.filter(m => m.movement_type === 'partner_contribution').map(m => m.id));
   const partnerWithdrawalIdSet = new Set(movements.filter(m => m.movement_type === 'partner_withdrawal').map(m => m.id));
   const generalCostPaymentIdSet = new Set(movements.filter(m => m.movement_type === 'general_cost_payment').map(m => m.id));
+
   // Build the OR filter parts only for types that have payments
   const orFilterParts: string[] = [];
   if (clientPaymentIdSet.size > 0) {
@@ -123,6 +134,7 @@ export async function getUnifiedMovements(
   if (generalCostPaymentIdSet.size > 0) {
     orFilterParts.push(`general_cost_payment_id.in.(${Array.from(generalCostPaymentIdSet).join(',')})`);
   }
+
   // Fetch relations (projects, currencies, wallets), materials, personnel, and attachments
   const [projectsResult, currenciesResult, walletsResult, materialsResult, personnelResult, attachmentsResult] = await Promise.all([
     projectIds.length > 0 
@@ -146,6 +158,7 @@ export async function getUnifiedMovements(
           .or(orFilterParts.join(','))
       : { data: [], error: null },
   ]);
+
   const projectsMap = new Map((projectsResult.data || []).map(p => [p.id, p]));
   const currenciesMap = new Map((currenciesResult.data || []).map(c => [c.id, c]));
   const walletsMap = new Map((walletsResult.data || []).map((w: any) => [
@@ -164,14 +177,15 @@ export async function getUnifiedMovements(
     if (link.partner_withdrawal_id) attachmentsSet.add(link.partner_withdrawal_id);
     if (link.general_cost_payment_id) attachmentsSet.add(link.general_cost_payment_id);
   });
+
   return movements.map((movement: any) => {
     let entityName = movement.entity_name;
     
     // Enrich entity_name only for material and personnel if missing
     if (!entityName) {
-      if (movement.movement_type === 'material_payment'&& movement.material_id) {
+      if (movement.movement_type === 'material_payment' && movement.material_id) {
         entityName = materialsMap.get(movement.material_id) || null;
-      } else if (movement.movement_type === 'personnel_payment'&& movement.personnel_id) {
+      } else if (movement.movement_type === 'personnel_payment' && movement.personnel_id) {
         entityName = personnelMap.get(movement.personnel_id) || null;
       }
     }
@@ -187,6 +201,7 @@ export async function getUnifiedMovements(
     };
   });
 }
+
 /**
  * Obtiene estadísticas resumidas de los movimientos
  */
@@ -211,6 +226,7 @@ export async function getUnifiedMovementsStats(
       total_expenses += m.amount;
     }
   });
+
   return {
     total_income,
     total_expenses,

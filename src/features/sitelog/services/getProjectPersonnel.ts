@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 /**
  * Obtiene el personal asignado a un proyecto específico.
  * 
@@ -14,6 +15,7 @@ export async function getProjectPersonnel(projectId: string, organizationId: str
   if (!supabase || !projectId || !organizationId) {
     return [];
   }
+
   const { data, error } = await supabase
     .from('project_personnel')
     .select(`
@@ -27,6 +29,7 @@ export async function getProjectPersonnel(projectId: string, organizationId: str
     `)
     .eq('project_id', projectId)
     .eq('organization_id', organizationId);
+
   if (error) throw error;
   
   return data || [];

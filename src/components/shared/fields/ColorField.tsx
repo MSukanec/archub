@@ -1,6 +1,7 @@
 import React, { forwardRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+
 interface ColorFieldProps {
   value: string;
   onChange: (value: string) => void;
@@ -8,6 +9,7 @@ interface ColorFieldProps {
   disabled?: boolean;
   className?: string;
 }
+
 export const ColorField = forwardRef<HTMLInputElement, ColorFieldProps>(
   ({ value, onChange, placeholder = '#000000', disabled, className }, ref) => {
     // Función para convertir nombres de colores CSS a hex
@@ -51,6 +53,7 @@ export const ColorField = forwardRef<HTMLInputElement, ColorFieldProps>(
       };
       return colorMap[colorName.toLowerCase()] || colorName;
     };
+
     // Función para normalizar el valor del color
     const normalizeColor = (inputValue: string): string => {
       if (!inputValue) return "#ffffff";
@@ -79,21 +82,26 @@ export const ColorField = forwardRef<HTMLInputElement, ColorFieldProps>(
       // Si no es válido, mantener el valor original
       return inputValue;
     };
+
     const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const inputValue = e.target.value;
       onChange(inputValue);
     };
+
     const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       onChange(e.target.value);
     };
+
     const handleBlur = () => {
       const normalized = normalizeColor(value || "");
       if (normalized !== value) {
         onChange(normalized);
       }
     };
+
     const displayValue = value || "#ffffff";
     const isValidColor = /^#[0-9a-f]{3}$|^#[0-9a-f]{6}$/i.test(displayValue);
+
     return (
       <div className={cn("flex", className)}>
         {/* Color Picker Button - Siguiendo el patrón de CurrencyAmountField */}
@@ -110,9 +118,10 @@ export const ColorField = forwardRef<HTMLInputElement, ColorFieldProps>(
             onChange={handleColorChange}
             disabled={disabled}
             className="w-8 h-6 rounded border-0 cursor-pointer disabled:cursor-not-allowed"
-            style={{ background: 'none'}}
+            style={{ background: 'none' }}
           />
         </div>
+
         {/* Text Input - Siguiendo el patrón de CurrencyAmountField */}
         <Input
           ref={ref}
@@ -132,4 +141,5 @@ export const ColorField = forwardRef<HTMLInputElement, ColorFieldProps>(
     );
   }
 );
+
 ColorField.displayName = 'ColorField';

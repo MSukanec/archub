@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useGoogleMapsScript } from './useGoogleMapsScript';
 import { Loader2, AlertCircle } from 'lucide-react';
+
 interface GoogleMapProps {
   apiKey: string;
   center: { lat: number; lng: number };
@@ -10,6 +11,7 @@ interface GoogleMapProps {
   draggable?: boolean;
   onMarkerDragEnd?: (lat: number, lng: number) => void;
 }
+
 export function GoogleMap({
   apiKey,
   center,
@@ -24,6 +26,7 @@ export function GoogleMap({
   const markerRef = useRef<google.maps.Marker | null>(null);
   const { isLoaded, loadError } = useGoogleMapsScript({ apiKey });
   const [mapError, setMapError] = useState<string | null>(null);
+
   // Get --accent color from CSS variable
   const getAccentColor = () => {
     if (typeof window === 'undefined') return '#84cc16';
@@ -32,6 +35,7 @@ export function GoogleMap({
       .trim();
     return accentColor || '#84cc16';
   };
+
   // Create custom marker icon with --accent color
   const createCustomMarkerIcon = () => {
     const accentColor = getAccentColor();
@@ -46,13 +50,15 @@ export function GoogleMap({
     `;
     
     return {
-      url: 'data:image/svg+xml;charset=UTF-8,'+ encodeURIComponent(svg),
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
       scaledSize: new google.maps.Size(32, 48),
       anchor: new google.maps.Point(16, 48)
     };
   };
+
   useEffect(() => {
     if (!isLoaded || !mapRef.current) return;
+
     try {
       // Initialize map
       const map = new google.maps.Map(mapRef.current, {
@@ -70,7 +76,9 @@ export function GoogleMap({
           }
         ]
       });
+
       mapInstanceRef.current = map;
+
       // Add marker with custom icon
       const marker = new google.maps.Marker({
         position: center,
@@ -80,7 +88,9 @@ export function GoogleMap({
         draggable: draggable,
         icon: createCustomMarkerIcon()
       });
+
       markerRef.current = marker;
+
       // Add drag end listener if callback provided
       if (draggable && onMarkerDragEnd) {
         marker.addListener('dragend', (event: google.maps.MapMouseEvent) => {
@@ -91,6 +101,7 @@ export function GoogleMap({
           }
         });
       }
+
       // Add info window
       const infoWindow = new google.maps.InfoWindow({
         content: `<div class="p-2">
@@ -98,9 +109,10 @@ export function GoogleMap({
           <p class="text-sm text-muted-foreground">
             Lat: ${center.lat.toFixed(6)}, Lng: ${center.lng.toFixed(6)}
           </p>
-          ${draggable ? '<p class="text-xs text-muted-foreground mt-1">Arrastra el pin para mover la ubicación</p>': ''}
+          ${draggable ? '<p class="text-xs text-muted-foreground mt-1">Arrastra el pin para mover la ubicación</p>' : ''}
         </div>`
       });
+
       marker.addListener('click', () => {
         infoWindow.open(map, marker);
       });
@@ -109,24 +121,28 @@ export function GoogleMap({
       setMapError('Error al cargar el mapa');
     }
   }, [isLoaded, apiKey, markerTitle, draggable]);
+
   // Update map center and marker when coordinates change
   useEffect(() => {
     if (!mapInstanceRef.current || !markerRef.current) return;
+
     mapInstanceRef.current.setCenter(center);
     markerRef.current.setPosition(center);
   }, [center]);
+
   if (loadError || mapError) {
     return (
       <div className={`${className} border border-dashed border-muted-foreground/30 rounded-lg flex items-center justify-center bg-muted/30`}>
         <div className="text-center p-4">
           <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
           <p className="text-sm text-muted-foreground">
-            {loadError ? 'Error cargando Google Maps': mapError}
+            {loadError ? 'Error cargando Google Maps' : mapError}
           </p>
         </div>
       </div>
     );
   }
+
   if (!isLoaded) {
     return (
       <div className={`${className} border border-dashed border-muted-foreground/30 rounded-lg flex items-center justify-center bg-muted/30`}>
@@ -137,6 +153,7 @@ export function GoogleMap({
       </div>
     );
   }
+
   return (
     <div className={className}>
       <div ref={mapRef} className="h-full w-full rounded-lg" />

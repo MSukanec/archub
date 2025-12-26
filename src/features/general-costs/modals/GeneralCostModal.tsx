@@ -2,16 +2,19 @@ import { Receipt, Eye, Edit } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { useGlobalModalStore } from '@/components/modal'
 import { FormPanel, ViewPanel, useGeneralCostForm } from '../forms/GeneralCostForm'
+
 interface GeneralCostModalProps {
   modalData?: {
     generalCostId?: string
   }
   onClose: () => void
-  mode?: 'create'| 'edit'| 'view'
+  mode?: 'create' | 'edit' | 'view'
 }
-export default function GeneralCostModal({ modalData, onClose, mode = 'create'}: GeneralCostModalProps) {
+
+export default function GeneralCostModal({ modalData, onClose, mode = 'create' }: GeneralCostModalProps) {
   const { openModal } = useGlobalModalStore()
   const generalCostId = modalData?.generalCostId
+
   const {
     form,
     onSubmit,
@@ -24,6 +27,7 @@ export default function GeneralCostModal({ modalData, onClose, mode = 'create'}:
     mode,
     onSuccess: onClose,
   })
+
   const getHeader = () => {
     switch (mode) {
       case 'view':
@@ -44,8 +48,10 @@ export default function GeneralCostModal({ modalData, onClose, mode = 'create'}:
         }
     }
   }
+
   const header = getHeader()
-  if ((mode === 'edit'|| mode === 'view') && generalCostLoading) {
+
+  if ((mode === 'edit' || mode === 'view') && generalCostLoading) {
     return (
       <ModalLayout onClose={onClose} size="md">
         <ModalHeader title="Cargando..." />
@@ -57,7 +63,8 @@ export default function GeneralCostModal({ modalData, onClose, mode = 'create'}:
       </ModalLayout>
     )
   }
-  if (mode === 'view'&& !editingGeneralCost) {
+
+  if (mode === 'view' && !editingGeneralCost) {
     return (
       <ModalLayout onClose={onClose} size="md">
         <ModalHeader title="Gasto no encontrado" />
@@ -68,35 +75,39 @@ export default function GeneralCostModal({ modalData, onClose, mode = 'create'}:
       </ModalLayout>
     )
   }
+
   return (
     <ModalLayout onClose={onClose} size="md">
       <ModalHeader
         title={header.title}
         description={header.description}
-        icon={mode === 'view'? Eye : mode === 'edit'? Edit : Receipt}
+        icon={mode === 'view' ? Eye : mode === 'edit' ? Edit : Receipt}
       />
+
       <ModalBody>
-        {mode === 'view'&& editingGeneralCost ? (
+        {mode === 'view' && editingGeneralCost ? (
           <ViewPanel generalCost={editingGeneralCost} />
         ) : (
           <FormPanel form={form} categories={categories} />
         )}
       </ModalBody>
-      {mode !== 'view'&& (
+
+      {mode !== 'view' && (
         <ModalFooter
           leftLabel="Cancelar"
           onLeftClick={onClose}
-          submitText={mode === 'create'? 'Crear': 'Actualizar'}
+          submitText={mode === 'create' ? 'Crear' : 'Actualizar'}
           onSubmit={form.handleSubmit(onSubmit)}
           isSubmitting={isSubmitting}
         />
       )}
-      {mode === 'view'&& (
+
+      {mode === 'view' && (
         <ModalFooter
           leftLabel="Cerrar"
           onLeftClick={onClose}
           submitText="Editar"
-          onSubmit={() => openModal('generalCost', { generalCostId: editingGeneralCost?.id, mode: 'edit'})}
+          onSubmit={() => openModal('generalCost', { generalCostId: editingGeneralCost?.id, mode: 'edit' })}
         />
       )}
     </ModalLayout>

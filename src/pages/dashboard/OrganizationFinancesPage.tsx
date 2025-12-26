@@ -12,17 +12,20 @@ import {
   calculateAvailablePeriods,
   type PeriodFilter
 } from "@/features/organization";
+
 const FINANCES_TABS = [
   { id: "dashboard", label: "Visión General" },
   { id: "movements", label: "Movimientos" },
 ];
+
 const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
-  { value: '30d', label: 'Últimos 30 días'},
-  { value: '3m', label: 'Últimos 3 meses'},
-  { value: '6m', label: 'Últimos 6 meses'},
-  { value: '1y', label: 'Último año'},
-  { value: 'all', label: 'Histórico'},
+  { value: '30d', label: 'Últimos 30 días' },
+  { value: '3m', label: 'Últimos 3 meses' },
+  { value: '6m', label: 'Últimos 6 meses' },
+  { value: '1y', label: 'Último año' },
+  { value: 'all', label: 'Histórico' },
 ];
+
 export function OrganizationFinancesPage() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all');
@@ -30,6 +33,7 @@ export function OrganizationFinancesPage() {
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const organizationId = userData?.organization?.id;
+
   const { data: allMovements = [] } = useUnifiedMovements(organizationId, null);
   const availablePeriods = useMemo(() => calculateAvailablePeriods(allMovements), [allMovements]);
   
@@ -37,6 +41,7 @@ export function OrganizationFinancesPage() {
     if (availablePeriods[selectedPeriod]) return selectedPeriod;
     return 'all';
   }, [selectedPeriod, availablePeriods]);
+
   const periodContent = (
     <Popover open={periodPopoverOpen} onOpenChange={setPeriodPopoverOpen}>
       <PopoverTrigger asChild>
@@ -80,6 +85,7 @@ export function OrganizationFinancesPage() {
       </PopoverContent>
     </Popover>
   );
+
   const headerProps = {
     icon: DollarSign,
     title: "Finanzas",
@@ -96,6 +102,7 @@ export function OrganizationFinancesPage() {
       onClick: () => openModal('unified-payment', {}),
     } : undefined,
   };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case "dashboard":
@@ -118,6 +125,7 @@ export function OrganizationFinancesPage() {
         );
     }
   };
+
   return (
     <Layout 
       headerProps={headerProps}

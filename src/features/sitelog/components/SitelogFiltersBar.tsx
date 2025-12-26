@@ -2,6 +2,7 @@ import { Calendar as CalendarIcon, Filter, X, Users, FileType } from 'lucide-rea
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useMemo } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -10,11 +11,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+
 import { useSitelogFiltersStore } from '../stores/useSitelogFiltersStore';
 import { ENTRY_TYPE_OPTIONS } from '../constants';
+
 interface SitelogFiltersBarProps {
   siteLogs: any[];
 }
+
 export function SitelogFiltersBar({ siteLogs }: SitelogFiltersBarProps) {
   const {
     creator,
@@ -25,6 +29,7 @@ export function SitelogFiltersBar({ siteLogs }: SitelogFiltersBarProps) {
     setTypeFilter,
     resetFilters
   } = useSitelogFiltersStore();
+
   // Extract unique creators from siteLogs
   const creators = useMemo(() => {
     const uniqueCreators = new Map();
@@ -38,6 +43,7 @@ export function SitelogFiltersBar({ siteLogs }: SitelogFiltersBarProps) {
     });
     return Array.from(uniqueCreators.values());
   }, [siteLogs]);
+
   // Calculate active filters count
   const activeFiltersCount = useMemo(() => {
     let count = 0;
@@ -46,7 +52,9 @@ export function SitelogFiltersBar({ siteLogs }: SitelogFiltersBarProps) {
     if (type.length > 0) count++;
     return count;
   }, [creator, dateRange, type]);
+
   const hasActiveFilters = activeFiltersCount > 0;
+
   return (
     <div className="flex items-center gap-2">
       {/* Creator Filter */}
@@ -125,6 +133,7 @@ export function SitelogFiltersBar({ siteLogs }: SitelogFiltersBarProps) {
           </div>
         </PopoverContent>
       </Popover>
+
       {/* Date Range Filter */}
       <Popover>
         <PopoverTrigger asChild>
@@ -181,6 +190,7 @@ export function SitelogFiltersBar({ siteLogs }: SitelogFiltersBarProps) {
           </div>
         </PopoverContent>
       </Popover>
+
       {/* Entry Type Filter */}
       <Popover>
         <PopoverTrigger asChild>
@@ -251,6 +261,7 @@ export function SitelogFiltersBar({ siteLogs }: SitelogFiltersBarProps) {
           </div>
         </PopoverContent>
       </Popover>
+
       {/* Clear All Filters */}
       {hasActiveFilters && (
         <Button

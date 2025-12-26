@@ -15,6 +15,7 @@ import { useMobile } from '@/hooks/use-mobile';
 import { useLocation } from 'wouter';
 import { useGlobalModalStore } from '@/components/modal';
 import { ProjectBasicDataView, ProjectLocationView, ProjectSettingsView } from '@/features/projects';
+
 export default function ProjectDataPage() {
   const [activeTab, setActiveTab] = useState('basic');
   const [showShareBottomSheet, setShowShareBottomSheet] = useState(false);
@@ -26,10 +27,12 @@ export default function ProjectDataPage() {
   const isMobile = useMobile();
   const [, navigate] = useLocation();
   const { openModal } = useGlobalModalStore();
+
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('project');
   }, [setSidebarContext]);
+
   // Get project location data for sharing
   const { data: projectLocationData } = useQuery({
     queryKey: ['project-data', selectedProjectId],
@@ -51,6 +54,7 @@ export default function ProjectDataPage() {
     },
     enabled: !!selectedProjectId && !!supabase && activeTab === 'location'
   });
+
   // Helper functions for sharing location data (memoized)
   const copyLocationDataToClipboard = useCallback(async () => {
     if (!projectLocationData) {
@@ -61,12 +65,15 @@ export default function ProjectDataPage() {
       });
       return;
     }
+
     const dataText = `📍 UBICACIÓN DEL PROYECTO
+
 Dirección: ${projectLocationData.address_full || 'No especificada'}
 ${projectLocationData.city ? `Ciudad: ${projectLocationData.city}\n` : ''}${projectLocationData.state ? `Provincia/Estado: ${projectLocationData.state}\n` : ''}${projectLocationData.country ? `País: ${projectLocationData.country}\n` : ''}${projectLocationData.zip_code ? `Código Postal: ${projectLocationData.zip_code}\n` : ''}
 ${projectLocationData.lat && projectLocationData.lng ? `Coordenadas: ${projectLocationData.lat}, ${projectLocationData.lng}\n` : ''}${projectLocationData.location_type ? `Tipo de ubicación: ${projectLocationData.location_type}\n` : ''}${projectLocationData.accessibility_notes ? `Notas de accesibilidad: ${projectLocationData.accessibility_notes}\n` : ''}
 ---
 Generado desde Seencel`;
+
     try {
       await navigator.clipboard.writeText(dataText);
       toast({
@@ -81,6 +88,7 @@ Generado desde Seencel`;
       });
     }
   }, [projectLocationData, toast]);
+
   const shareLocationViaWhatsApp = useCallback(() => {
     if (!projectLocationData) {
       toast({
@@ -90,15 +98,19 @@ Generado desde Seencel`;
       });
       return;
     }
+
     const message = `📍 *UBICACIÓN DEL PROYECTO*
+
 *Dirección:* ${projectLocationData.address_full || 'No especificada'}
 ${projectLocationData.city ? `*Ciudad:* ${projectLocationData.city}\n` : ''}${projectLocationData.state ? `*Provincia/Estado:* ${projectLocationData.state}\n` : ''}${projectLocationData.country ? `*País:* ${projectLocationData.country}\n` : ''}${projectLocationData.zip_code ? `*Código Postal:* ${projectLocationData.zip_code}\n` : ''}
 ${projectLocationData.lat && projectLocationData.lng ? `*Coordenadas:* ${projectLocationData.lat}, ${projectLocationData.lng}\n` : ''}${projectLocationData.lat && projectLocationData.lng ? `*Google Maps:* https://www.google.com/maps?q=${projectLocationData.lat},${projectLocationData.lng}\n` : ''}${projectLocationData.location_type ? `*Tipo de ubicación:* ${projectLocationData.location_type}\n` : ''}${projectLocationData.accessibility_notes ? `*Notas de accesibilidad:* ${projectLocationData.accessibility_notes}\n` : ''}
 ---
 _Compartido desde Seencel_`;
+
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
   }, [projectLocationData, toast]);
+
   const shareLocationViaEmail = useCallback(() => {
     if (!projectLocationData) {
       toast({
@@ -108,15 +120,19 @@ _Compartido desde Seencel_`;
       });
       return;
     }
+
     const subject = encodeURIComponent('Ubicación del Proyecto');
     const body = encodeURIComponent(`UBICACIÓN DEL PROYECTO
+
 Dirección: ${projectLocationData.address_full || 'No especificada'}
 ${projectLocationData.city ? `Ciudad: ${projectLocationData.city}\n` : ''}${projectLocationData.state ? `Provincia/Estado: ${projectLocationData.state}\n` : ''}${projectLocationData.country ? `País: ${projectLocationData.country}\n` : ''}${projectLocationData.zip_code ? `Código Postal: ${projectLocationData.zip_code}\n` : ''}
 ${projectLocationData.lat && projectLocationData.lng ? `Coordenadas: ${projectLocationData.lat}, ${projectLocationData.lng}\n` : ''}${projectLocationData.lat && projectLocationData.lng ? `Google Maps: https://www.google.com/maps?q=${projectLocationData.lat},${projectLocationData.lng}\n` : ''}${projectLocationData.location_type ? `Tipo de ubicación: ${projectLocationData.location_type}\n` : ''}${projectLocationData.accessibility_notes ? `Notas de accesibilidad: ${projectLocationData.accessibility_notes}\n` : ''}
 ---
 Generado desde Seencel`);
+
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   }, [projectLocationData, toast]);
+
   const openInGoogleMaps = useCallback(() => {
     if (!projectLocationData || !projectLocationData.lat || !projectLocationData.lng) {
       toast({
@@ -126,13 +142,16 @@ Generado desde Seencel`);
       });
       return;
     }
+
     const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${projectLocationData.lat},${projectLocationData.lng}`;
     window.open(mapsUrl, '_blank');
   }, [projectLocationData, toast]);
+
   // Mobile Action Bar handlers (memoized to prevent popover teardown)
   const handleGoHome = useCallback(() => {
     navigate('/');
   }, [navigate]);
+
   const handleNotifications = useCallback(() => {
     // TODO: Implement notifications
     toast({
@@ -140,12 +159,15 @@ Generado desde Seencel`);
       description: "Funcionalidad en desarrollo"
     });
   }, [toast]);
+
   const handleShareLocation = useCallback(() => {
     setShowShareBottomSheet(true);
   }, []);
+
   // Configure Mobile Action Bar based on active tab
   useEffect(() => {
     if (!isMobile) return;
+
     const actions: Record<string, any> = {
       home: {
         id: 'home',
@@ -160,24 +182,28 @@ Generado desde Seencel`);
         onClick: handleNotifications,
       }
     };
-    // Add share button for location tab using 'create'slot
+
+    // Add share button for location tab using 'create' slot
     if (activeTab === 'location') {
       actions.create = {
         id: 'share',
         icon: Share2,
         label: 'Compartir',
         onClick: handleShareLocation,
-        variant: 'primary'as const
+        variant: 'primary' as const
       };
     }
     // Datos Básicos tab doesn't have action button (only home + notifications)
+
     setActions(actions);
     setShowActionBar(true);
+
     return () => {
       clearActions();
       setShowActionBar(false);
     };
   }, [isMobile, activeTab, handleGoHome, handleNotifications, handleShareLocation, setActions, setShowActionBar, clearActions]);
+
   const headerTabs = [
     {
       id: 'basic',
@@ -195,8 +221,9 @@ Generado desde Seencel`);
       isActive: activeTab === 'settings'
     }
   ];
+
   // Share button for location tab
-  const shareButton = activeTab === 'location'? (
+  const shareButton = activeTab === 'location' ? (
     <Popover>
       <PopoverTrigger asChild>
         <Button 
@@ -219,6 +246,7 @@ Generado desde Seencel`);
             <MapPin className="h-4 w-4" />
             <span>Abrir en Google Maps</span>
           </button>
+
           <div className="h-px bg-border my-1" />
           
           <button
@@ -251,6 +279,7 @@ Generado desde Seencel`);
       </PopoverContent>
     </Popover>
   ) : null;
+
   const headerProps = {
     icon: FileText,
     title: 'Datos Básicos',
@@ -262,6 +291,7 @@ Generado desde Seencel`);
     showMembers: true,
     showProjectSelector: true
   };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'basic':
@@ -274,6 +304,7 @@ Generado desde Seencel`);
         return <ProjectBasicDataView />;
     }
   };
+
   return (
     <>
       {/* Share Location BottomSheet (Mobile Only) */}
@@ -295,6 +326,7 @@ Generado desde Seencel`);
                 <MapPin className="h-5 w-5" />
                 <span>Abrir en Google Maps</span>
               </button>
+
               <div className="h-px bg-border my-1" />
               
               <button
@@ -336,6 +368,7 @@ Generado desde Seencel`);
           </BottomSheetBody>
         </BottomSheetContent>
       </BottomSheet>
+
       <Layout headerProps={headerProps} wide={false}>
         {renderTabContent()}
       </Layout>

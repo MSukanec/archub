@@ -27,10 +27,13 @@ import {
   type ProjectClientSummary,
   type CurrencyFinancial,
 } from '@/features/clients'
+
 interface ClientListViewProps {
   projectId?: string;
 }
+
 type EnrichedClient = ProjectClientSummary & { clientName: string };
+
 export function ClientListView({ projectId }: ClientListViewProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -43,21 +46,26 @@ export function ClientListView({ projectId }: ClientListViewProps) {
   
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
+
   useQuery({
     queryKey: [`/api/contacts?organization_id=${organizationId}&mode=light`],
     enabled: !!organizationId,
     staleTime: 5 * 60 * 1000,
   });
+
   useQuery({
     queryKey: [`/api/client-roles`],
     enabled: !!organizationId,
     staleTime: 5 * 60 * 1000,
   });
+
   const { data: dashboardData, isLoading } = useClientDashboard(activeProjectId || undefined, organizationId);
+
   const projectClients = useMemo(() => {
     if (!dashboardData) return [];
     return mapToClientSummaries(dashboardData.clients, dashboardData.financialSummaries);
   }, [dashboardData]);
+
   const enrichedClients = useMemo<EnrichedClient[]>(() => {
     return projectClients.map(client => ({
       ...client,
@@ -66,6 +74,7 @@ export function ClientListView({ projectId }: ClientListViewProps) {
                   client.contacts?.company_name || '-'
     }));
   }, [projectClients]);
+
   const metrics = useMemo(() => {
     if (!dashboardData) {
       return {
@@ -74,20 +83,25 @@ export function ClientListView({ projectId }: ClientListViewProps) {
         recentPayments: 0,
       };
     }
+
     const now = new Date();
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(now.getMonth() - 1);
+
     const recentPayments = dashboardData.payments.filter(payment => {
       const paymentDate = parseLocalDate(payment.payment_date)!;
       return paymentDate >= oneMonthAgo && paymentDate <= now;
     });
+
     return {
       totalClients: dashboardData.clients.length,
       activeCommitments: dashboardData.commitments.length,
       recentPayments: recentPayments.length,
     };
   }, [dashboardData]);
+
   const deleteClientMutation = useDeleteProjectClient();
+
   const handleDelete = async (client: ProjectClientSummary) => {
     if (!activeProjectId || !organizationId) {
       toast({
@@ -97,6 +111,7 @@ export function ClientListView({ projectId }: ClientListViewProps) {
       });
       return;
     }
+
     const clientName = client.contacts 
       ? `${client.contacts.first_name} ${client.contacts.last_name}`.trim()
       : 'Cliente';
@@ -128,6 +143,7 @@ export function ClientListView({ projectId }: ClientListViewProps) {
       },
     });
   };
+
   const handleView = (client: ProjectClientSummary) => {
     if (activeProjectId && organizationId) {
       queryClient.prefetchQuery({
@@ -142,6 +158,7 @@ export function ClientListView({ projectId }: ClientListViewProps) {
       mode: 'view',
     });
   };
+
   const handleEdit = (client: ProjectClientSummary) => {
     if (activeProjectId && organizationId) {
       queryClient.prefetchQuery({
@@ -155,6 +172,7 @@ export function ClientListView({ projectId }: ClientListViewProps) {
       clientId: client.id,
     });
   };
+
   const handleEditContact = (client: ProjectClientSummary) => {
     if (!client.contacts) {
       toast({
@@ -164,22 +182,26 @@ export function ClientListView({ projectId }: ClientListViewProps) {
       });
       return;
     }
+
     if (organizationId && client.contacts.id) {
       queryClient.prefetchQuery({
         queryKey: [`/api/contacts/${client.contacts.id}?organization_id=${organizationId}`],
         staleTime: 2 * 60 * 1000,
       });
     }
+
     openModal('contact', {
       contactId: client.contacts.id,
       mode: 'edit',
     });
   };
+
   const handleAddClient = () => {
     openModal('project-client', {
       projectId: activeProjectId,
     });
   };
+
   const sendAccessMutation = useMutation({
     mutationFn: async (projectClientId: string) => {
       const response = await apiRequest('POST', `/api/client-portal/send-access/${projectClientId}`);
@@ -208,6 +230,7 @@ export function ClientListView({ projectId }: ClientListViewProps) {
       }
     },
   });
+
   const handleSendAccess = (client: ProjectClientSummary) => {
     if (!client.contacts?.email) {
       toast({
@@ -219,6 +242,7 @@ export function ClientListView({ projectId }: ClientListViewProps) {
     }
     sendAccessMutation.mutate(client.id);
   };
+
   if (!organizationId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -226,6 +250,7 @@ export function ClientListView({ projectId }: ClientListViewProps) {
       </div>
     )
   }
+
   if (!isLoading && enrichedClients.length === 0) {
     return (
       <EmptyState
@@ -233,14 +258,14 @@ export function ClientListView({ projectId }: ClientListViewProps) {
         title="No hay clientes en este proyecto"
         description={
           <>
-            Agrega clientes para gestionar la información del proyecto. Recuerda que un cliente, antes debe ser un{''}
+            Agrega clientes para gestionar la información del proyecto. Recuerda que un cliente, antes debe ser un{' '}
             <button
               onClick={() => {
                 setSidebarLevel('organization');
                 navigate('/contacts');
               }}
               className="hover:underline font-bold cursor-pointer"
-              style={{ color: 'var(--accent)'}}
+              style={{ color: 'var(--accent)' }}
             >
               contacto
             </button>
@@ -260,11 +285,13 @@ export function ClientListView({ projectId }: ClientListViewProps) {
       />
     );
   }
+
   const formatCurrency = (amount: number, currency: CurrencyFinancial['currency']) => {
     if (!currency) return `$${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     return `${currency.symbol}${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
-  const renderMultiCurrency = (client: ProjectClientSummary, field: keyof Pick<CurrencyFinancial, 'total_committed_amount'| 'total_paid_amount'| 'balance_due'>) => {
+
+  const renderMultiCurrency = (client: ProjectClientSummary, field: keyof Pick<CurrencyFinancial, 'total_committed_amount' | 'total_paid_amount' | 'balance_due'>) => {
     if (client.financialByCurrency.length === 0) return '-';
     
     const currencyData = client.financialByCurrency[0];
@@ -274,12 +301,13 @@ export function ClientListView({ projectId }: ClientListViewProps) {
     
     return (
       <div className="flex flex-col">
-        <span className="font-semibold" style={{ fontSize: '14px'}}>
+        <span className="font-semibold" style={{ fontSize: '14px' }}>
           {formatCurrency(amount, currencyData.currency)}
         </span>
       </div>
     );
   };
+
   const columns = [
     {
       key: 'clientName',
@@ -325,12 +353,13 @@ export function ClientListView({ projectId }: ClientListViewProps) {
       render: (client: EnrichedClient) => {
         if (!client.notes) return '-';
         const truncated = client.notes.length > 100 
-          ? client.notes.substring(0, 100) + '...'
+          ? client.notes.substring(0, 100) + '...' 
           : client.notes;
         return <span className="text-muted-foreground">{truncated}</span>;
       },
     },
   ];
+
   return (
     <div className="space-y-6">
       {projectClients.length > 0 && (
@@ -347,6 +376,7 @@ export function ClientListView({ projectId }: ClientListViewProps) {
               Clientes en el proyecto
             </AppCardMeta>
           </AppCard>
+
           <AppCard data-testid="stat-card-active-commitments">
             <AppCardTitle showArrow={false}>
               <FileText className="w-4 h-4 inline mr-1" />
@@ -359,6 +389,7 @@ export function ClientListView({ projectId }: ClientListViewProps) {
               Compromisos activos
             </AppCardMeta>
           </AppCard>
+
           <AppCard data-testid="stat-card-recent-payments">
             <AppCardTitle showArrow={false}>
               <Calendar className="w-4 h-4 inline mr-1" />
@@ -373,6 +404,7 @@ export function ClientListView({ projectId }: ClientListViewProps) {
           </AppCard>
         </div>
       )}
+
       {isMobile ? (
         <div className="space-y-3 pb-20">
           {enrichedClients.map(client => (
@@ -393,21 +425,21 @@ export function ClientListView({ projectId }: ClientListViewProps) {
           data={enrichedClients}
           isLoading={isLoading}
           showDoubleHeader={false}
-          defaultSort={{ key: 'clientName', direction: 'asc'}}
+          defaultSort={{ key: 'clientName', direction: 'asc' }}
           onRowClick={handleView}
           emptyStateConfig={{
             icon: <Users className="h-12 w-12 text-muted-foreground" />,
             title: 'No hay clientes en este proyecto',
             description: (
               <>
-                Agrega clientes para gestionar la información del proyecto. Recuerda que un cliente, antes debe ser un{''}
+                Agrega clientes para gestionar la información del proyecto. Recuerda que un cliente, antes debe ser un{' '}
                 <button
                   onClick={() => {
                     setSidebarLevel('organization');
                     navigate('/contacts');
                   }}
                   className="hover:underline font-bold cursor-pointer"
-                  style={{ color: 'var(--accent)'}}
+                  style={{ color: 'var(--accent)' }}
                 >
                   contacto
                 </button>
@@ -454,4 +486,5 @@ export function ClientListView({ projectId }: ClientListViewProps) {
     </div>
   )
 }
+
 export default ClientListView;

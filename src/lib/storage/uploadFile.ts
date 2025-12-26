@@ -3,6 +3,7 @@ import { compressImage, shouldCompress } from '@/lib/imageCompression';
 import type { UploadContext, UploadResult } from './types';
 import { getEntityConfig, getCompressionPreset, getVisibility } from './config';
 import { buildStoragePath, validateContext } from './pathBuilder';
+
 export async function uploadFile(
   file: File,
   context: UploadContext
@@ -19,6 +20,7 @@ export async function uploadFile(
     }
     
     validateContext(context);
+
     const config = getEntityConfig(context.entity);
     const compressionPreset = getCompressionPreset(context.entity);
     
@@ -29,16 +31,20 @@ export async function uploadFile(
     if (shouldCompress(file)) {
       processedFile = await compressImage(file, compressionPreset);
     }
+
     const storagePath = buildStoragePath(processedFile, context);
+
     const uploadResponse = await supabase.storage
       .from(storagePath.bucket)
       .upload(storagePath.path, processedFile, {
         cacheControl: '3600',
         upsert: true
       });
+
     if (uploadResponse.error) {
       throw new Error(`Error al subir archivo al storage: ${uploadResponse.error.message || 'Verifica los permisos del bucket'}`);
     }
+
     const isPublicBucket = storagePath.bucket === 'public-assets';
     let fileUrl: string | null = null;
     
@@ -47,10 +53,12 @@ export async function uploadFile(
     }
     
     const isPublic = isPublicBucket || storagePath.bucket === 'social-assets';
+
     const fileType = getFileType(file.type);
     
     // Usar created_by_member_id si se proporciona (organization_member.id), sino usar auth user_id
     const createdById = context.created_by_member_id || session?.user?.id || context.user_id;
+
     const { data: mediaFile, error: mediaFileError } = await supabase
       .from('media_files')
       .insert({
@@ -67,11 +75,14 @@ export async function uploadFile(
       })
       .select()
       .single();
+
     if (mediaFileError || !mediaFile) {
       await supabase.storage.from(storagePath.bucket).remove([storagePath.path]);
       throw new Error(`Error al registrar archivo: ${mediaFileError?.message || 'Unknown error'}`);
     }
+
     let mediaLinkId: string | undefined;
+
     if (context.link_to) {
       const visibility = getVisibility(context.entity);
       
@@ -83,6 +94,7 @@ export async function uploadFile(
         is_cover: context.is_cover || false,
         created_by: createdById
       };
+
       // Add optional fields ONLY if they are defined
       if (context.organization_id) mediaLinkData.organization_id = context.organization_id;
       // Use project_id from link_to if available, otherwise from context
@@ -116,6 +128,7 @@ export async function uploadFile(
         .insert(mediaLinkData)
         .select()
         .single();
+
       if (mediaLinkError) {
         throw new Error(`Error al vincular archivo: ${mediaLinkError.message}`);
       }
@@ -124,10 +137,12 @@ export async function uploadFile(
         mediaLinkId = mediaLink.id;
       }
     }
+
     const urlWithCacheBust = `${fileUrl}?t=${Date.now()}`;
     
     // Calcular stats de compresión
     const wasCompressed = originalSize !== processedFile.size;
+
     return {
       media_file_id: mediaFile.id,
       media_link_id: mediaLinkId,
@@ -144,7 +159,8 @@ export async function uploadFile(
     throw error;
   }
 }
-function getFileType(mimeType: string): 'image'| 'video'| 'pdf'| 'doc'| 'other'{
+
+function getFileType(mimeType: string): 'image' | 'video' | 'pdf' | 'doc' | 'other' {
   if (mimeType.startsWith('image/')) return 'image';
   if (mimeType.startsWith('video/')) return 'video';
   if (mimeType === 'application/pdf') return 'pdf';
@@ -156,6 +172,7 @@ function getFileType(mimeType: string): 'image'| 'video'| 'pdf'| 'doc'| 'other'{
   ) return 'doc';
   return 'other';
 }
+
 export async function deleteFile(
   mediaFileId: string,
   hardDelete: boolean = false
@@ -166,21 +183,26 @@ export async function deleteFile(
       .select('bucket, file_path, is_deleted')
       .eq('id', mediaFileId)
       .single();
+
     if (fetchError || !mediaFile) {
       throw new Error('Media file not found');
     }
+
     if (hardDelete) {
       const { error: storageError } = await supabase.storage
         .from(mediaFile.bucket)
         .remove([mediaFile.file_path]);
+
       await supabase
         .from('media_links')
         .delete()
         .eq('media_file_id', mediaFileId);
+
       const { error: deleteError } = await supabase
         .from('media_files')
         .delete()
         .eq('id', mediaFileId);
+
       if (deleteError) {
         throw new Error(`Error al eliminar archivo: ${deleteError.message}`);
       }
@@ -189,6 +211,7 @@ export async function deleteFile(
         .from('media_files')
         .update({ is_deleted: true, updated_at: new Date().toISOString() })
         .eq('id', mediaFileId);
+
       if (softDeleteError) {
         throw new Error(`Error al marcar archivo como eliminado: ${softDeleteError.message}`);
       }

@@ -3,11 +3,13 @@ import { BookOpen, Bookmark, Play, CheckCircle2, Circle, ChevronRight } from 'lu
 import { cn } from '@/lib/utils';
 import { Tabs } from '@/components/shared/Tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+
 interface Module {
   id: string;
   title: string;
   sort_index: number;
 }
+
 interface Lesson {
   id: string;
   title: string;
@@ -15,6 +17,7 @@ interface Lesson {
   sort_index: number;
   duration_sec?: number;
 }
+
 interface PlayerDrawerProps {
   modules: Module[];
   lessons: Lesson[];
@@ -23,6 +26,7 @@ interface PlayerDrawerProps {
   onLessonSelect: (lessonId: string) => void;
   markersContent?: React.ReactNode;
 }
+
 export function PlayerDrawer({
   modules,
   lessons,
@@ -33,6 +37,7 @@ export function PlayerDrawer({
 }: PlayerDrawerProps) {
   const [expandedModuleId, setExpandedModuleId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('lecciones');
+
   useEffect(() => {
     if (activeLessonId && lessons.length > 0) {
       const currentLesson = lessons.find(l => l.id === activeLessonId);
@@ -41,19 +46,23 @@ export function PlayerDrawer({
       }
     }
   }, [activeLessonId, lessons]);
+
   const toggleModule = (moduleId: string) => {
     setExpandedModuleId(prev => prev === moduleId ? null : moduleId);
   };
+
   const formatDuration = (seconds?: number) => {
     if (!seconds) return null;
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
   const tabs = [
     { value: 'lecciones', label: 'Lecciones', icon: <BookOpen className="h-3.5 w-3.5" /> },
     { value: 'marcadores', label: 'Marcadores', icon: <Bookmark className="h-3.5 w-3.5" /> }
   ];
+
   return (
     <div className="h-full p-1 rounded-lg bg-[var(--content-bg)]">
       <div className="w-[298px] h-full flex flex-col bg-card rounded-lg border border-border overflow-hidden min-w-0">
@@ -69,7 +78,8 @@ export function PlayerDrawer({
           fullWidth
         />
       </div>
-      {activeTab === 'lecciones'&& (
+
+      {activeTab === 'lecciones' && (
         <ScrollArea className="flex-1 w-full min-w-0 overflow-hidden">
           <div className="flex flex-col py-2 px-2 w-full min-w-0">
             {modules.map((module) => {
@@ -115,6 +125,7 @@ export function PlayerDrawer({
                       {completedCount}/{totalCount}
                     </span>
                   </button>
+
                   {isModuleExpanded && (
                     <div className="px-3 pb-2">
                       {moduleLessons.map((lesson) => {
@@ -175,7 +186,8 @@ export function PlayerDrawer({
           </div>
         </ScrollArea>
       )}
-      {activeTab === 'marcadores'&& (
+
+      {activeTab === 'marcadores' && (
         <ScrollArea className="flex-1 overflow-hidden">
           <div className="p-3">
             {markersContent || (

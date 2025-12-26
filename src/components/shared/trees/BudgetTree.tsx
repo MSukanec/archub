@@ -16,6 +16,7 @@ import { useTaskMaterials } from '@/hooks/use-generated-tasks';
 import { useTaskLabor } from '@/hooks/use-task-labor';
 import { useOrganizationTaskPrice } from '@/hooks/use-organization-task-prices';
 import { useBudgets, useUpdateBudget } from '@/hooks/use-budgets';
+
 // Drag and Drop imports
 import {
   DndContext,
@@ -37,6 +38,7 @@ import {
 import {
   CSS,
 } from '@dnd-kit/utilities';
+
 interface BudgetTask {
   id: string;
   task_id?: string;
@@ -51,8 +53,10 @@ interface BudgetTask {
   description?: string;
   [key: string]: any;
 }
+
 // Shared grid column template for consistent alignment
 const GRID_COLUMNS = "32px 60px 1fr 100px 100px 120px 120px 100px 120px 110px 80px";
+
 interface BudgetTreeProps {
   tasks: BudgetTask[];
   budgetId?: string;
@@ -64,6 +68,7 @@ interface BudgetTreeProps {
   onAddTask?: () => void;
   onTotalsChange?: (totalSubtotals: number, totalFinals: number) => void;
 }
+
 // Component for subtotal calculation (Cantidad x Costo Unitario)
 const SubtotalDisplay = ({ task, quantity, archubCost, onPureSubtotalChange }: { 
   task: any; 
@@ -76,6 +81,7 @@ const SubtotalDisplay = ({ task, quantity, archubCost, onPureSubtotalChange }: {
   
   // Calculate subtotal (quantity × unit_price)
   const subtotal = quantity * unitPrice;
+
   // Report pure subtotal change
   useEffect(() => {
     if (onPureSubtotalChange && subtotal >= 0) {
@@ -83,6 +89,7 @@ const SubtotalDisplay = ({ task, quantity, archubCost, onPureSubtotalChange }: {
       onPureSubtotalChange(taskId, subtotal);
     }
   }, [onPureSubtotalChange, subtotal, task]);
+
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -91,22 +98,27 @@ const SubtotalDisplay = ({ task, quantity, archubCost, onPureSubtotalChange }: {
       maximumFractionDigits: 2
     }).format(amount);
   };
+
   if (subtotal === 0) {
     return <span className="text-xs text-muted-foreground">–</span>;
   }
+
   return (
     <span className="text-xs font-medium text-foreground">
       {formatCost(subtotal)}
     </span>
   );
 };
+
 // Component for cost breakdown popover content
 const TaskCostBreakdown = ({ task }: { task: any }) => {
   // For construction tasks, use task.task_id (the generated task ID), for other tasks use task.id
   const taskId = task.task_id || task.id;
   const { data: materials = [], isLoading: materialsLoading } = useTaskMaterials(taskId);
   const { data: labor = [], isLoading: laborLoading } = useTaskLabor(taskId);
+
   const isLoading = materialsLoading || laborLoading;
+
   // Calcular total de materiales por unidad
   const materialsTotalPerUnit = materials.reduce((sum, material) => {
     const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
@@ -114,6 +126,7 @@ const TaskCostBreakdown = ({ task }: { task: any }) => {
     const quantity = material.amount || 0;
     return sum + (quantity * unitPrice);
   }, 0);
+
   // Calcular total de mano de obra por unidad
   const laborTotalPerUnit = labor.reduce((sum, laborItem) => {
     const laborView = laborItem.labor_view;
@@ -121,7 +134,9 @@ const TaskCostBreakdown = ({ task }: { task: any }) => {
     const quantity = laborItem.quantity || 0;
     return sum + (quantity * unitPrice);
   }, 0);
+
   const totalPerUnit = materialsTotalPerUnit + laborTotalPerUnit;
+
   return (
     <div className="w-full">
       {/* Header */}
@@ -131,6 +146,7 @@ const TaskCostBreakdown = ({ task }: { task: any }) => {
           Costos por unidad
         </h3>
       </div>
+
       {/* Content */}
       <div className="p-3 max-h-64 overflow-auto">
         {isLoading ? (
@@ -231,6 +247,7 @@ const TaskCostBreakdown = ({ task }: { task: any }) => {
           </div>
         )}
       </div>
+
       {/* Footer - Solo se muestra si hay materiales o mano de obra */}
       {!isLoading && (materials.length > 0 || labor.length > 0) && (
         <div className="px-3 py-2 flex items-center justify-between border-t border-[var(--card-border)]">
@@ -243,6 +260,7 @@ const TaskCostBreakdown = ({ task }: { task: any }) => {
     </div>
   );
 };
+
 // Inline Margin Editor Component
 const InlineMarginEditor = ({ 
   taskId, 
@@ -255,10 +273,12 @@ const InlineMarginEditor = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(currentMargin.toString());
+
   // Update input value when currentMargin changes
   useEffect(() => {
     setInputValue(currentMargin.toString());
   }, [currentMargin]);
+
   const handleSave = () => {
     const numValue = parseFloat(inputValue) || 0;
     if (!isNaN(numValue)) {
@@ -266,10 +286,12 @@ const InlineMarginEditor = ({
     }
     setIsEditing(false);
   };
+
   const handleCancel = () => {
     setInputValue(currentMargin.toString());
     setIsEditing(false);
   };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSave();
@@ -277,12 +299,14 @@ const InlineMarginEditor = ({
       handleCancel();
     }
   };
+
   const formatDisplayValue = (value: number) => {
     return new Intl.NumberFormat('es-AR', { 
       minimumFractionDigits: 1,
       maximumFractionDigits: 1 
     }).format(value);
   };
+
   if (isEditing) {
     return (
       <Input
@@ -300,6 +324,7 @@ const InlineMarginEditor = ({
       />
     );
   }
+
   return (
     <button
       onClick={() => setIsEditing(true)}
@@ -312,6 +337,7 @@ const InlineMarginEditor = ({
     </button>
   );
 };
+
 // Task Action Buttons Component for Budget
 const TaskActionButtons = ({ 
   task, 
@@ -323,6 +349,7 @@ const TaskActionButtons = ({
   onDeleteTask?: (taskId: string) => void; 
 }) => {
   const [, navigate] = useLocation();
+
   // Handle view task navigation with source tracking
   const handleViewTask = () => {
     // Ensure we have a task_id to navigate to
@@ -339,6 +366,7 @@ const TaskActionButtons = ({
     // Navigate to task view using the correct route
     navigate(`/analysis/${task.task_id}`);
   };
+
   // Eye button for viewing task details - only show if task_id exists
   const viewButton = task.task_id ? (
     <Button
@@ -351,6 +379,7 @@ const TaskActionButtons = ({
       <Eye className="h-4 w-4" />
     </Button>
   ) : null;
+
   return (
     <div className="flex items-center gap-1">
       {/* View button (outside popover) */}
@@ -399,6 +428,7 @@ const TaskActionButtons = ({
     </div>
   );
 };
+
 // Budget Summary Row Component
 const BudgetSummaryRow = ({ 
   totalSubtotals, 
@@ -432,8 +462,10 @@ const BudgetSummaryRow = ({
     setLocalTaxPct(initialTaxPct.toString());
   }, [initialDiscountPct, initialDiscountAmount, initialTaxPct]);
   const [editingField, setEditingField] = useState<string | null>(null);
+
   // State for tracking changes to save
   const [budgetUpdates, setBudgetUpdates] = useState<{ discount_pct?: number; tax_pct?: number }>({});
+
   // Debounced save function
   const { isSaving } = useAutoSave({
     data: budgetUpdates,
@@ -445,15 +477,18 @@ const BudgetSummaryRow = ({
     delay: 500,
     enabled: true
   });
+
   // Calculate discount amount based on percentage
   const calculateDiscountAmount = (percentage: number) => {
     return (totalFinals * percentage) / 100;
   };
+
   // Calculate final totals
   const discountValue = discountPct > 0 ? calculateDiscountAmount(discountPct) : discountAmount;
   const totalAfterDiscount = totalFinals - discountValue;
   const taxAmount = (totalAfterDiscount * taxPct) / 100;
   const grandTotal = totalAfterDiscount + taxAmount;
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -462,12 +497,14 @@ const BudgetSummaryRow = ({
       maximumFractionDigits: 2
     }).format(amount);
   };
+
   const formatPercentage = (value: number) => {
     return new Intl.NumberFormat('es-AR', { 
       minimumFractionDigits: 1,
       maximumFractionDigits: 1 
     }).format(value);
   };
+
   // Handle discount percentage change
   const handleDiscountPctChange = (value: string) => {
     setLocalDiscountPct(value);
@@ -476,6 +513,7 @@ const BudgetSummaryRow = ({
     setDiscountAmount(0); // Reset fixed amount when using percentage
     setBudgetUpdates({ discount_pct: numValue });
   };
+
   // Handle Tax percentage change
   const handleTaxPctChange = (value: string) => {
     setLocalTaxPct(value);
@@ -483,6 +521,7 @@ const BudgetSummaryRow = ({
     setTaxPct(numValue);
     setBudgetUpdates(prev => ({ ...prev, tax_pct: numValue }));
   };
+
   const handleKeyDown = (e: React.KeyboardEvent, field: string) => {
     if (e.key === 'Enter') {
       setEditingField(null);
@@ -496,8 +535,10 @@ const BudgetSummaryRow = ({
       setEditingField(null);
     }
   };
+
   // Percentage of total (always 100% for summary)
   const percentageOfTotal = 100;
+
   return (
     <div>
       {/* Summary Title Row - Separador */}
@@ -521,6 +562,7 @@ const BudgetSummaryRow = ({
         <div></div> {/* Empty space for percentage column */}
         <div></div> {/* Empty space for actions column */}
       </div>
+
       {/* Subtotal General Row */}
       <div className="relative">
         <div 
@@ -556,6 +598,7 @@ const BudgetSummaryRow = ({
           }}
         />
       </div>
+
       {/* Discount Row */}
       <div className="relative">
         <div 
@@ -574,7 +617,7 @@ const BudgetSummaryRow = ({
           <div className="flex items-center font-medium" style={{ color: "var(--table-row-fg)" }}> {/* SUBTOTAL column with editable percentage */}
             <span className="mr-1">Descuento</span>
             <span className="text-gray-600">(</span>
-            {editingField === 'discount'? (
+            {editingField === 'discount' ? (
               <Input
                 type="number"
                 value={localDiscountPct}
@@ -619,6 +662,7 @@ const BudgetSummaryRow = ({
           }}
         />
       </div>
+
       {/* Base para IVA Row */}
       <div className="relative">
         <div 
@@ -654,6 +698,7 @@ const BudgetSummaryRow = ({
           }}
         />
       </div>
+
       {/* IVA Row */}
       <div className="relative">
         <div 
@@ -672,7 +717,7 @@ const BudgetSummaryRow = ({
           <div className="flex items-center font-medium" style={{ color: "var(--table-row-fg)" }}> {/* SUBTOTAL column with editable percentage */}
             <span className="mr-1">IVA</span>
             <span className="text-gray-600">(</span>
-            {editingField === 'tax'? (
+            {editingField === 'tax' ? (
               <Input
                 type="number"
                 value={localTaxPct}
@@ -717,6 +762,7 @@ const BudgetSummaryRow = ({
           }}
         />
       </div>
+
       {/* Total Final Row */}
       <div 
         className="grid gap-4 px-4 py-3 text-sm font-bold"
@@ -741,6 +787,7 @@ const BudgetSummaryRow = ({
     </div>
   );
 };
+
 // Inline Description Editor Component
 const InlineDescriptionEditor = ({ 
   taskId, 
@@ -753,18 +800,22 @@ const InlineDescriptionEditor = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(currentDescription || '');
+
   // Update input value when currentDescription changes
   useEffect(() => {
     setInputValue(currentDescription || '');
   }, [currentDescription]);
+
   const handleSave = () => {
     onDescriptionChange(taskId, inputValue);
     setIsEditing(false);
   };
+
   const handleCancel = () => {
     setInputValue(currentDescription || '');
     setIsEditing(false);
   };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSave();
@@ -772,6 +823,7 @@ const InlineDescriptionEditor = ({
       handleCancel();
     }
   };
+
   if (isEditing) {
     return (
       <Input
@@ -787,6 +839,7 @@ const InlineDescriptionEditor = ({
       />
     );
   }
+
   return (
     <button
       onClick={() => setIsEditing(true)}
@@ -800,6 +853,7 @@ const InlineDescriptionEditor = ({
     </button>
   );
 };
+
 // Inline Cost Type Editor Component
 const InlineCostTypeEditor = ({ 
   task,
@@ -822,10 +876,12 @@ const InlineCostTypeEditor = ({
         return 'Ambos';
     }
   };
+
   const handleCostScopeChange = (newCostScope: string) => {
     onCostScopeChange(task.id, newCostScope);
     setIsOpen(false);
   };
+
   return (
     <div className="flex items-center">
       <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -883,6 +939,7 @@ const InlineCostTypeEditor = ({
     </div>
   );
 };
+
 // Inline Unit Cost Editor Component
 const InlineUnitCostEditor = ({ 
   task,
@@ -893,16 +950,18 @@ const InlineUnitCostEditor = ({
   task: any;
   archubCost: number;
   organizationCost: number;
-  onCostTypeChange?: (costType: 'archub'| 'organization'| 'independent') => void;
+  onCostTypeChange?: (costType: 'archub' | 'organization' | 'independent') => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [costType, setCostType] = useState<'archub'| 'organization'| 'independent'>('archub');
+  const [costType, setCostType] = useState<'archub' | 'organization' | 'independent'>('archub');
   const [customCost, setCustomCost] = useState<number>(task.unit_price || 0);
   
   const updateBudgetItem = useUpdateBudgetItem();
-  const displayCost = costType === 'archub'? archubCost : 
-                    costType === 'organization'? organizationCost : 
+
+  const displayCost = costType === 'archub' ? archubCost : 
+                    costType === 'organization' ? organizationCost : 
                     customCost;
+
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -911,8 +970,9 @@ const InlineUnitCostEditor = ({
       maximumFractionDigits: 2
     }).format(amount);
   };
+
   // Function to save unit price to database
-  const saveUnitPrice = async (newCostType: 'archub'| 'organization'| 'independent', newCustomCost?: number) => {
+  const saveUnitPrice = async (newCostType: 'archub' | 'organization' | 'independent', newCustomCost?: number) => {
     let unitPrice = 0;
     
     switch (newCostType) {
@@ -936,23 +996,27 @@ const InlineUnitCostEditor = ({
       console.error('Error saving unit price:', error);
     }
   };
+
   // Handle cost type change
-  const handleCostTypeChange = async (newType: 'archub'| 'organization'| 'independent') => {
+  const handleCostTypeChange = async (newType: 'archub' | 'organization' | 'independent') => {
     setCostType(newType);
     onCostTypeChange?.(newType);
     await saveUnitPrice(newType);
   };
+
   // Handle custom cost save
   const handleCustomCostSave = async () => {
     await saveUnitPrice('independent', customCost);
     setIsOpen(false);
   };
+
   // Handle Enter key on custom cost input
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleCustomCostSave();
     }
   };
+
   return (
     <div className="flex items-center justify-end">
       <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -1014,7 +1078,8 @@ const InlineUnitCostEditor = ({
                 <span className="text-xs text-[var(--card-fg)]">Costo Independiente</span>
               </label>
             </div>
-            {costType === 'independent'&& (
+
+            {costType === 'independent' && (
               <div className="mt-3 space-y-2">
                 <label className="block text-xs text-[var(--muted-fg)] mb-1">
                   Costo personalizado:
@@ -1022,7 +1087,7 @@ const InlineUnitCostEditor = ({
                 <div className="flex gap-2">
                   <Input
                     type="number"
-                    value={customCost === 0 ? '': customCost}
+                    value={customCost === 0 ? '' : customCost}
                     onChange={(e) => setCustomCost(parseFloat(e.target.value) || 0)}
                     onKeyDown={handleKeyDown}
                     className="h-8 text-xs flex-1"
@@ -1037,11 +1102,12 @@ const InlineUnitCostEditor = ({
                     disabled={updateBudgetItem.isPending}
                     className="h-8 px-3 text-xs"
                   >
-                    {updateBudgetItem.isPending ? '...': 'OK'}
+                    {updateBudgetItem.isPending ? '...' : 'OK'}
                   </Button>
                 </div>
               </div>
             )}
+
             <div className="pt-2 border-t border-[var(--card-border)]">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-[var(--muted-fg)]">Costo actual:</span>
@@ -1056,6 +1122,7 @@ const InlineUnitCostEditor = ({
     </div>
   );
 };
+
 // Inline Quantity Editor Component
 const InlineQuantityEditor = ({ 
   taskId, 
@@ -1070,10 +1137,12 @@ const InlineQuantityEditor = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(currentQuantity.toString());
+
   // Update input value when currentQuantity changes
   useEffect(() => {
     setInputValue(currentQuantity.toString());
   }, [currentQuantity]);
+
   const handleSave = () => {
     const numValue = parseFloat(inputValue) || 0;
     if (!isNaN(numValue)) {
@@ -1081,10 +1150,12 @@ const InlineQuantityEditor = ({
     }
     setIsEditing(false);
   };
+
   const handleCancel = () => {
     setInputValue(currentQuantity.toString());
     setIsEditing(false);
   };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSave();
@@ -1092,12 +1163,14 @@ const InlineQuantityEditor = ({
       handleCancel();
     }
   };
+
   const formatDisplayValue = (value: number) => {
     return new Intl.NumberFormat('es-AR', { 
       minimumFractionDigits: 2,
       maximumFractionDigits: 2 
     }).format(value);
   };
+
   if (isEditing) {
     return (
       <Input
@@ -1114,6 +1187,7 @@ const InlineQuantityEditor = ({
       />
     );
   }
+
   return (
     <button
       onClick={() => setIsEditing(true)}
@@ -1126,6 +1200,7 @@ const InlineQuantityEditor = ({
     </button>
   );
 };
+
 // Sortable Item component for drag and drop
 const SortableTaskItem = ({ 
   task, 
@@ -1173,10 +1248,12 @@ const SortableTaskItem = ({
     transition,
     isDragging,
   } = useSortable({ id: task.id });
+
   // Calculate costs once per task to avoid duplicate queries
   const { data: materials = [] } = useTaskMaterials(task.task_id || task.id);
   const { data: labor = [] } = useTaskLabor(task.task_id || task.id);
   const { data: organizationTaskPrice } = useOrganizationTaskPrice(task.task_id || task.id);
+
   const archubCost = useMemo(() => {
     const materialsCost = materials.reduce((sum, material) => {
       const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
@@ -1184,12 +1261,14 @@ const SortableTaskItem = ({
       const quantity = material.amount || 0;
       return sum + (quantity * unitPrice);
     }, 0);
+
     const laborCost = labor.reduce((sum, laborItem) => {
       const laborView = laborItem.labor_view;
       const unitPrice = laborView?.avg_price || 0;
       const quantity = laborItem.quantity || 0;
       return sum + (quantity * unitPrice);
     }, 0);
+
     // Calculate cost based on LOCAL cost_scope for immediate recalculation
     const costScope = localCostScopes[task.id] || task.cost_scope || 'materials_and_labor';
     switch (costScope) {
@@ -1202,12 +1281,15 @@ const SortableTaskItem = ({
         return materialsCost + laborCost;
     }
   }, [materials, labor, task.cost_scope, localCostScopes, task.id]);
+
   const organizationCost = organizationTaskPrice?.total_unit_cost || 0;
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
+
   // Get task display name
   const getTaskName = (task: BudgetTask) => {
     const customName = task.custom_name || task.task?.display_name;
@@ -1215,13 +1297,16 @@ const SortableTaskItem = ({
       ? customName 
       : (task.task?.display_name || 'Sin nombre');
   };
+
   // Helper function to get cost scope value for the Select component
   const getCostScopeValue = (costScope: string | undefined) => {
     return costScope || 'materials_and_labor'; // default value
   };
+
+
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
-      <div className={`group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors ${!isLastInGroup ? 'border-b border-[var(--table-row-border)]': ''}`} 
+      <div className={`group grid gap-4 px-4 py-3 bg-[var(--table-row-bg)] text-[var(--table-row-fg)] text-xs hover:bg-[var(--table-row-hover-bg)] transition-colors ${!isLastInGroup ? 'border-b border-[var(--table-row-border)]' : ''}`} 
            style={{ gridTemplateColumns: GRID_COLUMNS }}>
         
         {/* Drag handle */}
@@ -1299,7 +1384,7 @@ const SortableTaskItem = ({
                 disabled={isIndependentCost}
                 className={`h-4 w-4 p-0 ${
                   isIndependentCost 
-                    ? 'text-muted-foreground cursor-not-allowed opacity-50'
+                    ? 'text-muted-foreground cursor-not-allowed opacity-50' 
                     : 'text-[var(--accent-2)] hover:text-[var(--accent-2)] opacity-70 hover:opacity-100'
                 }`}
               >
@@ -1366,6 +1451,7 @@ const SortableTaskItem = ({
     </div>
   );
 };
+
 // Function to calculate group subtotal sum using real taskSubtotals
 const calculateGroupSubtotalSum = (groupTasks: BudgetTask[], taskSubtotals: { [taskId: string]: number }) => {
   // Sum the real subtotals from taskSubtotals
@@ -1374,6 +1460,7 @@ const calculateGroupSubtotalSum = (groupTasks: BudgetTask[], taskSubtotals: { [t
     return sum + taskSubtotal;
   }, 0);
 };
+
 // Function to calculate group pure subtotal sum using pureSubtotals (without margins)
 const calculateGroupPureSubtotalSum = (groupTasks: BudgetTask[], pureSubtotals: { [taskId: string]: number }) => {
   // Sum the pure subtotals from pureSubtotals (without margins)
@@ -1383,6 +1470,7 @@ const calculateGroupPureSubtotalSum = (groupTasks: BudgetTask[], pureSubtotals: 
     return sum + pureSubtotal;
   }, 0);
 };
+
 // Group Header component  
 const GroupHeader = ({ 
   groupName, 
@@ -1411,8 +1499,10 @@ const GroupHeader = ({
   };
   
   const groupPercentage = totalSubtotal > 0 ? ((groupSubtotal / totalSubtotal) * 100).toFixed(1) : '0.0';
+
   // Use the calculateGroupPureSubtotalSum function with pure subtotals (without margins)
   const groupPureSubtotalSum = calculateGroupPureSubtotalSum(groupTasks, pureSubtotals);
+
   return (
     <div 
       className="grid gap-4 px-4 py-3 text-xs font-medium"
@@ -1432,7 +1522,7 @@ const GroupHeader = ({
       </div>
       {/* Group name - spans Description, Type, Quantity columns */}
       <div className="col-span-3">
-        {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea': 'tareas'})
+        {groupName} ({tasksCount} {tasksCount === 1 ? 'tarea' : 'tareas'})
       </div>
       {/* Empty Unit Cost column */}
       <div></div>
@@ -1455,6 +1545,8 @@ const GroupHeader = ({
     </div>
   );
 };
+
+
 export function BudgetTree({ 
   tasks, 
   budgetId,
@@ -1481,6 +1573,7 @@ export function BudgetTree({
   const [localCostScopes, setLocalCostScopes] = useState<{ [taskId: string]: string }>({});
   const { data: userData } = useCurrentUser();
   const updateBudgetItemMutation = useUpdateBudgetItem();
+
   
   // Initialize local quantities, margins, and cost scopes from tasks
   useEffect(() => {
@@ -1498,6 +1591,7 @@ export function BudgetTree({
     setLocalMargins(initialMargins);
     setLocalCostScopes(initialCostScopes);
   }, [tasks]);
+
   // Create save function for auto-save
   const saveQuantityChanges = useCallback(async (quantities: { [taskId: string]: number }) => {
     // Find changes that need to be saved
@@ -1505,6 +1599,7 @@ export function BudgetTree({
       const originalTask = tasks.find(task => task.id === taskId);
       return originalTask && originalTask.quantity !== quantity;
     });
+
     // Save each changed task
     for (const [taskId, quantity] of changedTasks) {
       try {
@@ -1518,12 +1613,14 @@ export function BudgetTree({
       }
     }
   }, [tasks, updateBudgetItemMutation]);
+
   // Create save function for margin changes
   const saveMarginChanges = useCallback(async (margins: { [taskId: string]: number }) => {
     const changedTasks = Object.entries(margins).filter(([taskId, margin]) => {
       const originalTask = tasks.find(task => task.id === taskId);
       return originalTask && (originalTask.markup_pct || 0) !== margin;
     });
+
     for (const [taskId, margin] of changedTasks) {
       try {
         await updateBudgetItemMutation.mutateAsync({
@@ -1536,17 +1633,19 @@ export function BudgetTree({
       }
     }
   }, [tasks, updateBudgetItemMutation]);
+
   // Create save function for cost scope changes
   const saveCostScopeChanges = useCallback(async (costScopes: { [taskId: string]: string }) => {
     const changedTasks = Object.entries(costScopes).filter(([taskId, costScope]) => {
       const originalTask = tasks.find(task => task.id === taskId);
       return originalTask && (originalTask.cost_scope || 'materials_and_labor') !== costScope;
     });
+
     for (const [taskId, costScope] of changedTasks) {
       try {
         await updateBudgetItemMutation.mutateAsync({
           id: taskId,
-          cost_scope: costScope as 'materials_and_labor'| 'materials_only'| 'labor_only',
+          cost_scope: costScope as 'materials_and_labor' | 'materials_only' | 'labor_only',
           unit_price: 0 // Reset to 0 so the new archubCost based on cost_scope is used
         });
       } catch (error) {
@@ -1555,6 +1654,7 @@ export function BudgetTree({
       }
     }
   }, [tasks, updateBudgetItemMutation]);
+
   // Handle description changes
   const handleDescriptionChange = useCallback((taskId: string, description: string) => {
     updateBudgetItemMutation.mutate({
@@ -1562,6 +1662,7 @@ export function BudgetTree({
       description: description,
     });
   }, [updateBudgetItemMutation]);
+
   // Handle local margin changes
   const handleMarginChange = useCallback((taskId: string, margin: number) => {
     setLocalMargins(prev => ({
@@ -1569,6 +1670,7 @@ export function BudgetTree({
       [taskId]: margin
     }));
   }, []);
+
   // Handle local cost scope changes
   const handleCostScopeChange = useCallback((taskId: string, costScope: string) => {
     setLocalCostScopes(prev => ({
@@ -1576,6 +1678,7 @@ export function BudgetTree({
       [taskId]: costScope
     }));
   }, []);
+
   // Use auto-save for quantity changes
   const { isSaving: isSavingQuantities } = useAutoSave({
     data: localQuantities,
@@ -1583,6 +1686,7 @@ export function BudgetTree({
     delay: 1000, // Wait 1 second after user stops typing
     enabled: true
   });
+
   // Use auto-save for margin changes
   const { isSaving: isSavingMargins } = useAutoSave({
     data: localMargins,
@@ -1590,6 +1694,7 @@ export function BudgetTree({
     delay: 750, // Wait 750ms after user stops typing
     enabled: true
   });
+
   // Use auto-save for cost scope changes
   const { isSaving: isSavingCostScopes } = useAutoSave({
     data: localCostScopes,
@@ -1597,6 +1702,7 @@ export function BudgetTree({
     delay: 500, // Wait 500ms after user stops typing (faster for scope changes)
     enabled: true
   });
+
   // Handle local quantity changes
   const handleLocalQuantityChange = (taskId: string, quantity: number) => {
     setLocalQuantities(prev => ({
@@ -1639,6 +1745,7 @@ export function BudgetTree({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
   // Group tasks by division_name
   const groupedTasks = useMemo(() => {
     const groups: { [key: string]: BudgetTask[] } = {};
@@ -1690,8 +1797,10 @@ export function BudgetTree({
       groupPureSubtotals: groupSums
     };
   }, [groupedTasks, pureSubtotals]);
+
   // Calculate total subtotals and finals across all groups and report to parent
   const lastTotalsRef = useRef<{ totalSubtotals: number; totalFinals: number } | null>(null);
+
   useEffect(() => {
     if (onTotalsChange && Object.keys(pureSubtotals).length > 0 && Object.keys(taskSubtotals).length > 0) {
       // Filter pureSubtotals to only include tasks that are also in taskSubtotals (active tasks)
@@ -1715,13 +1824,17 @@ export function BudgetTree({
       }
     }
   }, [pureSubtotals, taskSubtotals, onTotalsChange]);
+
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
   };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
+
     if (!over || active.id === over.id) return;
+
     // Find which group the dragged and target tasks belong to
     const draggedTask = tasks.find(task => task.id === active.id);
     const targetTask = tasks.find(task => task.id === over.id);
@@ -1732,13 +1845,16 @@ export function BudgetTree({
     if ((draggedTask.division_name || 'Sin categoría') !== (targetTask.division_name || 'Sin categoría')) {
       return;
     }
+
     const sourceIndex = tasks.findIndex((task) => task.id === active.id);
     const destinationIndex = tasks.findIndex((task) => task.id === over.id);
+
     if (sourceIndex !== destinationIndex && onReorder) {
       // Call onReorder with the new pattern: sourceIndex, destinationIndex, draggedTask
       onReorder(sourceIndex, destinationIndex, draggedTask);
     }
   };
+
   if (tasks.length === 0) {
     return (
       <div className="flex items-center justify-center h-32 text-muted-foreground">
@@ -1755,6 +1871,7 @@ export function BudgetTree({
       </div>
     );
   }
+
   return (
     <DndContext
       sensors={sensors}
@@ -1786,6 +1903,7 @@ export function BudgetTree({
           <div className="text-right">% de Incidencia</div>
           <div className="text-center">Acciones</div>
         </div>
+
         {/* Groups */}
         {Object.entries(groupedTasks).map(([groupName, groupTasks], groupIndex) => (
           <div key={groupName}>
@@ -1829,6 +1947,7 @@ export function BudgetTree({
             </SortableContext>
           </div>
         ))}
+
         {/* Budget Summary Row */}
         <BudgetSummaryRow 
           totalSubtotals={totalSubtotal}

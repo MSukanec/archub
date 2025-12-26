@@ -26,6 +26,7 @@ import {
 } from "./types";
 import { getColumnAlignment, getJustifyClass } from "./utils";
 import { TABLE_LABELS } from "./constants";
+
 interface TableDesktopProps<T> {
   columns: Column<T>[];
   data: T[];
@@ -76,6 +77,7 @@ interface TableDesktopProps<T> {
   onNextPage: () => void;
   onPrevPage: () => void;
 }
+
 export function TableDesktop<T>({
   columns,
   data,
@@ -135,7 +137,9 @@ export function TableDesktop<T>({
       return <ChevronDown className="ml-1 h-3 w-3 text-accent" />;
     return <ArrowUpDown className="ml-1 h-3 w-3 text-accent" />;
   };
+
   const hasActions = !!rowActions;
+
   return (
     <div className="hidden lg:block overflow-hidden rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] shadow-lg">
       <TableTopBar
@@ -148,6 +152,7 @@ export function TableDesktop<T>({
         isFilterActive={isFilterActive}
         onClearFilters={onClearFilters}
       />
+
       {headerActions && showDoubleHeader && (
         <div
           className="flex items-center justify-between px-4 py-3 border-b border-[var(--card-border)]"
@@ -164,6 +169,7 @@ export function TableDesktop<T>({
           </div>
         </div>
       )}
+
       <div
         className={cn("grid gap-2 px-4 py-3 text-xs font-medium border-b")}
         style={{
@@ -189,6 +195,7 @@ export function TableDesktop<T>({
         {columns.map((column) => {
           const alignment = getColumnAlignment(column);
           const justifyClass = getJustifyClass(alignment);
+
           return (
             <button
               key={String(column.key)}
@@ -214,6 +221,7 @@ export function TableDesktop<T>({
         })}
         {hasActions && <div></div>}
       </div>
+
       <div>
         {!hasOriginalData ? (
           emptyStateConfig ? (
@@ -281,6 +289,7 @@ export function TableDesktop<T>({
               showInactiveSeparator &&
               !prevIsInactive &&
               isInactive;
+
             return (
               <Fragment key={getItemId(item)}>
                 {showSeparator && (
@@ -310,6 +319,7 @@ export function TableDesktop<T>({
             );
           })
         ) : null}
+
         {renderFooterRow && hasFilteredData && (
           <div
             className={cn(
@@ -329,6 +339,7 @@ export function TableDesktop<T>({
           </div>
         )}
       </div>
+
       {showPagination && (
         <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--card-border)]">
           <div className="text-xs text-muted-foreground">

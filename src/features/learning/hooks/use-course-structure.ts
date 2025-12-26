@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCourseStructure } from '../services';
 import { LEARNING_QUERY_KEYS } from '../constants';
+
 /**
  * Hook para obtener la estructura completa de un curso (módulos y lecciones).
  * 

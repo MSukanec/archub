@@ -7,6 +7,7 @@ import { Edit, Trash2, Bell, AlertTriangle, Info, CheckCircle, XCircle } from 'l
 import { formatDateCompact } from '@/lib/date-utils'
 import { useGlobalModalStore } from '@/components/modal'
 import type { GlobalAnnouncement } from '@shared/schema'
+
 interface AnnouncementWithCreator extends GlobalAnnouncement {
   creator?: {
     id: string;
@@ -15,38 +16,47 @@ interface AnnouncementWithCreator extends GlobalAnnouncement {
     avatar_url?: string;
   } | null;
 }
+
 const AdminSupportAnnouncementsTab = () => {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { openModal } = useGlobalModalStore()
+
   const { data: announcements = [], isLoading } = useQuery({
     queryKey: ['admin-announcements'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
+
       const { data, error } = await supabase
         .from('global_announcements')
         .select('*')
         .order('created_at', { ascending: false });
+
       if (error) {
         console.error('Error fetching announcements:', error);
         throw error;
       }
+
       const creatorIds = Array.from(new Set(data.map(a => a.created_by).filter(Boolean)));
       
       const usersResult = creatorIds.length > 0 ? await supabase!
         .from('users')
         .select('id, full_name, email, avatar_url')
         .in('id', creatorIds) : { data: [], error: null };
+
       const announcementsWithCreators: AnnouncementWithCreator[] = data.map(announcement => ({
         ...announcement,
         creator: usersResult.data?.find(user => user.id === announcement.created_by) || null,
       }));
+
       return announcementsWithCreators;
     }
   })
+
   const handleEdit = (announcement: AnnouncementWithCreator) => {
     openModal('announcement', { announcement, isEditing: true });
   };
+
   const handleDelete = (announcement: AnnouncementWithCreator) => {
     openModal('delete-confirmation', {
       title: 'Eliminar anuncio',
@@ -78,6 +88,7 @@ const AdminSupportAnnouncementsTab = () => {
       }
     });
   };
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'info':
@@ -92,6 +103,7 @@ const AdminSupportAnnouncementsTab = () => {
         return <Bell className="h-3.5 w-3.5" />;
     }
   };
+
   const getTypeBadgeVariant = (type: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (type) {
       case 'info':
@@ -106,6 +118,7 @@ const AdminSupportAnnouncementsTab = () => {
         return 'default';
     }
   };
+
   const getAudienceLabel = (audience: string | null) => {
     switch (audience) {
       case 'all':
@@ -120,6 +133,7 @@ const AdminSupportAnnouncementsTab = () => {
         return 'Todos';
     }
   };
+
   const columns = [
     {
       key: 'title',
@@ -158,8 +172,8 @@ const AdminSupportAnnouncementsTab = () => {
       label: 'Estado',
       width: '10%',
       render: (announcement: AnnouncementWithCreator) => (
-        <Badge variant={announcement.is_active ? 'secondary': 'outline'}>
-          {announcement.is_active ? 'Activo': 'Inactivo'}
+        <Badge variant={announcement.is_active ? 'secondary' : 'outline'}>
+          {announcement.is_active ? 'Activo' : 'Inactivo'}
         </Badge>
       )
     },
@@ -191,6 +205,7 @@ const AdminSupportAnnouncementsTab = () => {
       }
     }
   ];
+
   return (
     <div className="space-y-6">
       <Table
@@ -207,7 +222,7 @@ const AdminSupportAnnouncementsTab = () => {
             icon: Trash2,
             label: 'Eliminar',
             onClick: () => handleDelete(announcement),
-            variant: 'destructive'as const
+            variant: 'destructive' as const
           }
         ]}
         emptyState={
@@ -221,4 +236,5 @@ const AdminSupportAnnouncementsTab = () => {
     </div>
   );
 };
+
 export default AdminSupportAnnouncementsTab;

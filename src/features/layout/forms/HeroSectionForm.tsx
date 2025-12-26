@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast'
 import { FileUploader } from '@/components/shared/fields/FileUploader'
 import { uploadFile } from '@/lib/storage'
 import { supabase } from '@/lib/supabase'
+
 const heroSectionSchema = z.object({
   title: z.string().min(1, 'El título es requerido'),
   description: z.string().optional(),
@@ -25,14 +26,17 @@ const heroSectionSchema = z.object({
   secondary_button_action_type: z.enum(['url', 'internal_route', 'external']).default('url'),
   is_active: z.boolean().default(true),
 })
+
 type HeroSectionFormValues = z.infer<typeof heroSectionSchema>
+
 interface HeroSectionFormProps {
   modalData?: {
-    mode: 'create'| 'edit'
+    mode: 'create' | 'edit'
     section?: any
   }
   onClose: () => void
 }
+
 export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormProps) {
   const { toast } = useToast()
   const createMutation = useCreateHeroSection()
@@ -41,8 +45,10 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [imageWasRemoved, setImageWasRemoved] = useState(false)
+
   const mode = modalData?.mode || 'create'
   const section = modalData?.section
+
   const form = useForm<HeroSectionFormValues>({
     resolver: zodResolver(heroSectionSchema),
     defaultValues: {
@@ -57,6 +63,7 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
       is_active: true,
     },
   })
+
   useEffect(() => {
     if (section) {
       form.reset({
@@ -75,10 +82,12 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
       }
     }
   }, [section, form])
+
   const onSubmit = async (values: HeroSectionFormValues) => {
     try {
       setIsUploading(true)
-      if (mode === 'edit'&& section?.id) {
+
+      if (mode === 'edit' && section?.id) {
         await updateMutation.mutateAsync({ id: section.id, data: values })
         
         if (imageWasRemoved && !pendingFile) {
@@ -104,7 +113,7 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
           })
         }
         
-        toast({ title: 'Sección actualizada', description: 'Los cambios se guardaron correctamente'})
+        toast({ title: 'Sección actualizada', description: 'Los cambios se guardaron correctamente' })
       } else {
         console.log('[HeroSectionForm] Creating new section with values:', values)
         const newSection = await createMutation.mutateAsync({
@@ -123,7 +132,7 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
           console.log('[HeroSectionForm] File uploaded successfully')
         }
         
-        toast({ title: 'Sección creada', description: 'La nueva sección del carrusel se creó correctamente'})
+        toast({ title: 'Sección creada', description: 'La nueva sección del carrusel se creó correctamente' })
       }
       onClose()
     } catch (error: any) {
@@ -137,6 +146,7 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
       setIsUploading(false)
     }
   }
+
   const handleFileChange = (files: Array<{ file: File; preview?: string }>) => {
     if (files[0]?.file) {
       setPendingFile(files[0].file)
@@ -145,19 +155,23 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
       setImageWasRemoved(false)
     }
   }
+
   const handleRemoveImage = () => {
     setPendingFile(null)
     setPreviewUrl(null)
     setImageWasRemoved(true)
   }
+
   const isPending = createMutation.isPending || updateMutation.isPending || isUploading
+
   return (
     <ModalLayout onClose={onClose} size="lg">
       <ModalHeader
-        title={mode === 'edit'? 'Editar Sección Hero': 'Nueva Sección Hero'}
-        description={mode === 'edit'? 'Actualiza los detalles de la sección del carrusel': 'Crea una nueva sección para el carrusel del dashboard'}
+        title={mode === 'edit' ? 'Editar Sección Hero' : 'Nueva Sección Hero'}
+        description={mode === 'edit' ? 'Actualiza los detalles de la sección del carrusel' : 'Crea una nueva sección para el carrusel del dashboard'}
         icon={Layers}
       />
+
       <ModalBody>
         <Form {...form}>
           <form id="hero-section-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -175,6 +189,7 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="description"
@@ -192,6 +207,7 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="is_active"
@@ -206,6 +222,7 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
                   </FormItem>
                 )}
               />
+
               <div className="col-span-full">
                 <FormLabel>Imagen de Fondo</FormLabel>
                 <div className="mt-2">
@@ -225,6 +242,7 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
                 </div>
               </div>
             </div>
+
             <div className="border-t pt-4">
               <h4 className="font-medium mb-4">Botón Primario (Opcional)</h4>
               <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
@@ -241,6 +259,7 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="primary_button_action"
@@ -254,6 +273,7 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="primary_button_action_type"
@@ -278,6 +298,7 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
                 />
               </div>
             </div>
+
             <div className="border-t pt-4">
               <h4 className="font-medium mb-4">Botón Secundario (Opcional)</h4>
               <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
@@ -294,6 +315,7 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="secondary_button_action"
@@ -307,6 +329,7 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="secondary_button_action_type"
@@ -334,10 +357,11 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
           </form>
         </Form>
       </ModalBody>
+
       <ModalFooter
         leftLabel="Cancelar"
         onLeftClick={onClose}
-        submitText={isPending ? 'Guardando...': mode === 'edit'? 'Guardar Cambios': 'Crear Sección'}
+        submitText={isPending ? 'Guardando...' : mode === 'edit' ? 'Guardar Cambios' : 'Crear Sección'}
         onSubmit={form.handleSubmit(onSubmit)}
         isSubmitting={isPending}
       />

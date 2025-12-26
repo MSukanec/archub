@@ -3,11 +3,13 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
 interface ComboBoxOption {
   value: string;
   label: string;
   [key: string]: any; // Allow additional fields for custom rendering
 }
+
 interface ComboBoxProps {
   value?: string;
   onValueChange: (value: string) => void;
@@ -25,6 +27,7 @@ interface ComboBoxProps {
   searchQuery?: string;
   renderOption?: (option: ComboBoxOption, isSelected: boolean) => React.ReactNode;
 }
+
 export function ComboBox({
   value,
   onValueChange,
@@ -45,8 +48,10 @@ export function ComboBox({
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+
   // Find selected option
   const selectedOption = options.find(option => option.value === value);
+
   // Filter options based on search
   const filteredOptions = onSearchChange 
     ? options // Si hay búsqueda externa, mostrar todas las opciones que vienen del hook
@@ -56,11 +61,15 @@ export function ComboBox({
           option && option.label && 
           option.label.toLowerCase().includes(searchValue.toLowerCase())
         ); // Solo filtra cuando SÍ hay búsqueda
+
+
+
   // Check if search value would create a new option
   const searchValueToCheck = onSearchChange ? (searchQuery || '') : (searchValue || '');
   const canCreateNew = allowCreate && searchValueToCheck.trim() && 
     !options.some(option => option && option.label && 
       option.label.toLowerCase() === searchValueToCheck.toLowerCase().trim());
+
   const handleSelect = (optionValue: string) => {
     onValueChange(optionValue);
     setOpen(false);
@@ -68,8 +77,10 @@ export function ComboBox({
       setSearchValue('');
     }
   };
+
   const handleCreateNew = async () => {
     if (!searchValue.trim() || !onCreateNew) return;
+
     setIsCreating(true);
     try {
       const newOption = await onCreateNew(searchValue.trim());
@@ -82,6 +93,7 @@ export function ComboBox({
       setIsCreating(false);
     }
   };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -136,7 +148,7 @@ export function ComboBox({
                   className="cursor-pointer text-sm px-3 py-2 transition-colors hover:bg-muted focus:bg-muted flex items-center"
                 >
                   {value === option.value && (
-                    <Check className="mr-2 h-3 w-3 flex-shrink-0" style={{ color: 'var(--accent)'}} />
+                    <Check className="mr-2 h-3 w-3 flex-shrink-0" style={{ color: 'var(--accent)' }} />
                   )}
                   <div className={cn(
                     "flex-1 text-[var(--card-fg)]",
@@ -144,12 +156,12 @@ export function ComboBox({
                   )}>
                     {renderOption ? (
                       renderOption(option, value === option.value)
-                    ) : option.label && option.label.includes('- ') ? (
+                    ) : option.label && option.label.includes(' - ') ? (
                       <div className="flex items-center gap-2">
                         <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded font-mono">
-                          {option.label.split('- ')[0]}
+                          {option.label.split(' - ')[0]}
                         </span>
-                        {option.label.split('- ')[1]}
+                        {option.label.split(' - ')[1]}
                       </div>
                     ) : (
                       option.label || ''
@@ -158,6 +170,7 @@ export function ComboBox({
                 </CommandItem>
               ))}
             </CommandGroup>
+
             {canCreateNew && (
               <CommandGroup>
                 <CommandItem
@@ -166,8 +179,8 @@ export function ComboBox({
                   className="cursor-pointer text-sm px-3 py-2 transition-colors hover:bg-muted focus:bg-muted border-t border-[var(--card-border)]"
                   disabled={isCreating}
                 >
-                  {createIcon && <span className="mr-2" style={{ color: 'var(--accent)'}}>{createIcon}</span>}
-                  <span className="font-medium" style={{ color: 'var(--accent)'}}>
+                  {createIcon && <span className="mr-2" style={{ color: 'var(--accent)' }}>{createIcon}</span>}
+                  <span className="font-medium" style={{ color: 'var(--accent)' }}>
                     {isCreating 
                       ? `Creando "${searchValue.trim()}"...`
                       : createLabel(searchValue.trim())

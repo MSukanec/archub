@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+
 import { FormModalLayout } from '@/components/modal'
 import { FormModalHeader } from '@/components/modal'
 import { FormModalFooter } from '@/components/modal'
@@ -9,10 +10,14 @@ import { useModalPanelStore } from '@/components/modal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
+
 import { useCreateUnitPresentation, useUpdateUnitPresentation, UnitPresentation, NewUnitPresentationData } from '@/hooks/use-unit-presentations'
 import { useUnits } from '@/hooks/use-units'
+
 import { Ruler } from 'lucide-react'
+
 const unitPresentationSchema = z.object({
   unit_id: z.string().min(1, 'La unidad base es requerida'),
   name: z.string().min(1, 'El nombre es requerido'),
@@ -21,17 +26,20 @@ const unitPresentationSchema = z.object({
   }),
   description: z.string().optional(),
 })
+
 interface UnitPresentationFormModalProps {
   modalData: {
     editingUnitPresentation?: UnitPresentation | null
   }
   onClose: () => void
 }
+
 export function UnitPresentationFormModal({ modalData, onClose }: UnitPresentationFormModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   
   const { editingUnitPresentation } = modalData
   const isEditing = !!editingUnitPresentation
+
   // Hooks
   const createMutation = useCreateUnitPresentation()
   const updateMutation = useUpdateUnitPresentation()
@@ -39,10 +47,12 @@ export function UnitPresentationFormModal({ modalData, onClose }: UnitPresentati
   
   // Data hooks
   const { data: units = [] } = useUnits()
+
   // Force edit mode when modal opens
   useEffect(() => {
     setPanel('edit')
   }, [])
+
   // Form setup
   const form = useForm<z.infer<typeof unitPresentationSchema>>({
     resolver: zodResolver(unitPresentationSchema),
@@ -53,6 +63,7 @@ export function UnitPresentationFormModal({ modalData, onClose }: UnitPresentati
       description: '',
     },
   })
+
   // Load editing data
   useEffect(() => {
     if (isEditing && editingUnitPresentation) {
@@ -71,6 +82,7 @@ export function UnitPresentationFormModal({ modalData, onClose }: UnitPresentati
       })
     }
   }, [isEditing, editingUnitPresentation, form])
+
   const onSubmit = async (data: z.infer<typeof unitPresentationSchema>) => {
     setIsLoading(true)
     
@@ -81,6 +93,7 @@ export function UnitPresentationFormModal({ modalData, onClose }: UnitPresentati
         equivalence: parseFloat(data.equivalence),
         description: data.description || undefined,
       }
+
       if (isEditing && editingUnitPresentation) {
         await updateMutation.mutateAsync({
           id: editingUnitPresentation.id,
@@ -98,8 +111,10 @@ export function UnitPresentationFormModal({ modalData, onClose }: UnitPresentati
       setIsLoading(false)
     }
   }
+
   // View panel (not needed for this modal as it's always in edit mode)
   const viewPanel = null
+
   // Edit panel with form
   const editPanel = (
     <Form {...form}>
@@ -128,6 +143,7 @@ export function UnitPresentationFormModal({ modalData, onClose }: UnitPresentati
             </FormItem>
           )}
         />
+
         {/* Presentation Name */}
         <FormField
           control={form.control}
@@ -145,6 +161,7 @@ export function UnitPresentationFormModal({ modalData, onClose }: UnitPresentati
             </FormItem>
           )}
         />
+
         {/* Equivalence */}
         <FormField
           control={form.control}
@@ -164,6 +181,7 @@ export function UnitPresentationFormModal({ modalData, onClose }: UnitPresentati
             </FormItem>
           )}
         />
+
         {/* Description */}
         <FormField
           control={form.control}
@@ -186,12 +204,14 @@ export function UnitPresentationFormModal({ modalData, onClose }: UnitPresentati
       </form>
     </Form>
   )
+
   const headerContent = (
     <FormModalHeader 
       title={isEditing ? "Editar Unidad" : "Nueva Unidad"}
       icon={Ruler}
     />
   )
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -200,6 +220,7 @@ export function UnitPresentationFormModal({ modalData, onClose }: UnitPresentati
       onRightClick={form.handleSubmit(onSubmit)}
     />
   )
+
   return (
     <FormModalLayout
       columns={1}

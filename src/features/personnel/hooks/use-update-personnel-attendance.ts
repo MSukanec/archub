@@ -1,8 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updatePersonnelAttendance, type UpdateAttendanceParams } from '../services/updatePersonnelAttendance';
 import { toast } from '@/hooks/use-toast';
+
 export function useUpdatePersonnelAttendance() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (params: UpdateAttendanceParams) => updatePersonnelAttendance(params),
     onSuccess: () => {

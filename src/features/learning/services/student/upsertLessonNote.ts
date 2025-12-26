@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { LessonNote, UpsertLessonNotePayload } from '../types';
+
 /**
  * Crea o actualiza una nota de lección.
  * 
@@ -22,12 +23,14 @@ export async function upsertLessonNote(
   if (!body.body || typeof body.body !== 'string') {
     throw new Error('Note body must be a string');
   }
+
   const { data } = await supabase.auth.getSession();
   const session = data?.session;
   
   if (!session) {
     throw new Error('No active session');
   }
+
   const response = await fetch(`/api/lessons/${lessonId}/notes`, {
     method: 'POST',
     headers: {
@@ -37,9 +40,11 @@ export async function upsertLessonNote(
     credentials: 'include',
     body: JSON.stringify(body),
   });
+
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Failed to upsert lesson note'}));
+    const error = await response.json().catch(() => ({ error: 'Failed to upsert lesson note' }));
     throw new Error(error.error || 'Failed to upsert lesson note');
   }
+
   return await response.json();
 }

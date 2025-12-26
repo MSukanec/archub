@@ -1,10 +1,12 @@
 import { CHART_COLORS, CHART_STATES, getChartColor } from '../theme'
+
 export interface SegmentedBarDataPoint {
   label: string
   value: number
   icon?: React.ReactNode
   color?: string
 }
+
 export interface SegmentedBarChartProps {
   data: SegmentedBarDataPoint[]
   height?: number
@@ -16,6 +18,7 @@ export interface SegmentedBarChartProps {
   showValues?: boolean
   className?: string
 }
+
 export function SegmentedBarChart({
   data,
   height = 180,
@@ -34,8 +37,10 @@ export function SegmentedBarChart({
       </div>
     )
   }
+
   const validData = data.filter(item => item.value > 0)
   const total = validData.reduce((sum, item) => sum + item.value, 0)
+
   if (validData.length === 0 || total === 0) {
     return (
       <div style={{ height }} className={CHART_STATES.empty.className}>
@@ -43,12 +48,14 @@ export function SegmentedBarChart({
       </div>
     )
   }
+
   let cumulativePercentage = 0
   const segments = validData.map((item, index) => {
     const percentage = (item.value / total) * 100
     const color = item.color || getChartColor(index)
     const startPos = cumulativePercentage
     cumulativePercentage += percentage
+
     return {
       ...item,
       percentage,
@@ -57,6 +64,7 @@ export function SegmentedBarChart({
       endPos: cumulativePercentage,
     }
   })
+
   return (
     <div className={`flex flex-col ${className}`} style={{ height }}>
       <div className="relative h-16">
@@ -81,7 +89,9 @@ export function SegmentedBarChart({
           </div>
         ))}
       </div>
+
       <div className="flex-1" />
+
       <div className="relative h-8 mb-1">
         {segments.map((segment, index) => (
           <div
@@ -104,6 +114,7 @@ export function SegmentedBarChart({
           </div>
         ))}
       </div>
+
       {segments.map((segment, index) => (
         <div
           key={`line-${segment.label}-${index}`}
@@ -117,6 +128,7 @@ export function SegmentedBarChart({
           }}
         />
       ))}
+
       <div className="relative">
         <div className="flex w-full h-6 rounded-sm overflow-hidden">
           {segments.map((segment, index) => (

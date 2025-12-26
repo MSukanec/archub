@@ -52,31 +52,37 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useUnreadSupportMessages } from "@/hooks/use-unread-support-messages";
 import { useAuthStore } from "@/stores/authStore";
+
 interface MobileMenuProps {
   onClose?: () => void;
   isOpen?: boolean;
 }
+
 interface ContentProps {
   onClose: () => void;
 }
+
 function MarketingMenuContent({ onClose }: ContentProps) {
   const [location, navigate] = useLocation();
   const { user: authUser, logout: authLogout } = useAuthStore();
+
   const handleMarketingNavClick = (href: string) => {
     if (href.startsWith('#')) {
       const element = document.querySelector(href);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth'});
+        element.scrollIntoView({ behavior: 'smooth' });
       }
     } else {
       navigate(href);
     }
     onClose();
   };
+
   const handleLogout = () => {
     authLogout();
     onClose();
   };
+
   return (
     <>
       <nav>
@@ -125,7 +131,9 @@ function MarketingMenuContent({ onClose }: ContentProps) {
             </div>
           </>
         )}
+
         <div className="h-6" />
+
         {MARKETING_NAVIGATION.map((item) => (
           <div key={item.id} onClick={() => handleMarketingNavClick(item.href)}>
             <MobileMenuButton
@@ -139,10 +147,12 @@ function MarketingMenuContent({ onClose }: ContentProps) {
           </div>
         ))}
       </nav>
+
       <div className="flex-1" />
     </>
   );
 }
+
 function DashboardMenuContent({ onClose }: ContentProps) {
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
@@ -160,17 +170,21 @@ function DashboardMenuContent({ onClose }: ContentProps) {
   const currentProjectName = currentProject?.name || "Seleccionar proyecto";
   const isAdmin = useIsAdmin();
   const { toast } = useToast();
+
   const { data: notifications } = useQuery<any[]>({
     queryKey: ['/api/notifications'],
     enabled: !!userData?.user?.id,
   });
   const unreadCount = Array.isArray(notifications) ? notifications.filter((n: any) => !n.read_at).length : 0;
+
   const { data: unreadSupportCount = 0 } = useUnreadSupportMessages();
+
   const projectMutation = useMutation({
     mutationFn: async (projectId: string) => {
       if (!supabase || !userData?.user?.id || !userData?.organization?.id) {
         throw new Error('No user or organization available');
       }
+
       const { error } = await supabase
         .from('user_organization_preferences')
         .upsert(
@@ -180,8 +194,9 @@ function DashboardMenuContent({ onClose }: ContentProps) {
             last_project_id: projectId,
             updated_at: new Date().toISOString()
           },
-          { onConflict: 'user_id,organization_id'}
+          { onConflict: 'user_id,organization_id' }
         );
+
       if (error) throw error;
       return projectId;
     },
@@ -192,10 +207,11 @@ function DashboardMenuContent({ onClose }: ContentProps) {
       setExpandedProjectSelector(false);
     }
   });
+
   const isButtonActive = (href: string) => {
     if (!href || href === '#') return false;
     
-    if (href === '/organization/dashboard'|| href === '/project/dashboard'|| href === '/project') {
+    if (href === '/organization/dashboard' || href === '/project/dashboard' || href === '/project') {
       return location === href;
     }
     
@@ -204,13 +220,16 @@ function DashboardMenuContent({ onClose }: ContentProps) {
     }
     return location === href || location.startsWith(href + '/');
   };
+
   const handleProjectSelect = (projectId: string) => {
     setSelectedProject(projectId);
     projectMutation.mutate(projectId);
     onClose();
   };
+
   const organizationName = userData?.organization?.name || 'Organización';
   const userFullName = userData?.user?.full_name || userData?.user?.first_name || 'Usuario';
+
   const navigationItems = getNavigationItems({
     sidebarLevel: sidebarLevel as SidebarLevel,
     selectedProjectId,
@@ -218,17 +237,20 @@ function DashboardMenuContent({ onClose }: ContentProps) {
     organizationName,
     userFullName,
   });
+
   const handleContextChange = (newLevel: SidebarLevel) => {
     setSidebarLevel(newLevel as any);
   };
+
   const handleInternalNavigation = (href: string) => {
     navigate(href);
     onClose();
   };
+
   return (
     <>
       <div className="flex items-center h-14 px-4 bg-[var(--mobile-menu-header-bg)] relative">
-        {sidebarLevel !== 'general'? (
+        {sidebarLevel !== 'general' ? (
           <>
             <button
               onClick={() => {
@@ -263,12 +285,14 @@ function DashboardMenuContent({ onClose }: ContentProps) {
           </>
         )}
       </div>
+
       <div className="flex-1 overflow-y-auto">
         <nav>
-          {sidebarLevel === 'general'? (
+          {sidebarLevel === 'general' ? (
             <>
               {CONTEXT_BUTTONS.map((contextButton) => {
                 const hasProjects = projectsData && projectsData.length > 0;
+
                 if (contextButton.id === 'project') {
                   if (!hasProjects || !selectedProjectId) {
                     return null;
@@ -291,12 +315,15 @@ function DashboardMenuContent({ onClose }: ContentProps) {
                     />
                   );
                 }
+
                 const isActive = contextButton.href ? isButtonActive(contextButton.href) :
                   location.startsWith(`/${contextButton.id}`);
+
                 const handleClick = () => {
                   if (contextButton.adminOnly && !isAdmin) return;
                   handleContextChange(contextButton.id as SidebarLevel);
                 };
+
                 const button = (
                   <MobileMenuButton
                     icon={contextButton.icon}
@@ -307,13 +334,15 @@ function DashboardMenuContent({ onClose }: ContentProps) {
                     testId={contextButton.testId.replace('sidebar', 'mobile')}
                   />
                 );
-                if (contextButton.id === 'founders'|| contextButton.id === 'community') {
+
+                if (contextButton.id === 'founders' || contextButton.id === 'community') {
                   return (
                     <RoleRestricted key={contextButton.id} requiredRole="admin" hideCompletely showAsPreview>
                       {button}
                     </RoleRestricted>
                   );
                 }
+
                 if (contextButton.restricted === "coming_soon") {
                   return (
                     <ComingSoonRestricted key={contextButton.id}>
@@ -321,16 +350,18 @@ function DashboardMenuContent({ onClose }: ContentProps) {
                     </ComingSoonRestricted>
                   );
                 }
+
                 if (contextButton.adminOnly && !isAdmin) {
                   return null;
                 }
+
                 return <div key={contextButton.id}>{button}</div>;
               })}
             </>
           ) : (
             <>
               {navigationItems.map((entry, index) => {
-                if ('type'in entry && entry.type === 'section') {
+                if ('type' in entry && entry.type === 'section') {
                   const section = entry as NavigationSection;
                   return (
                     <div key={`section-${index}`}>
@@ -355,7 +386,7 @@ function DashboardMenuContent({ onClose }: ContentProps) {
                             isActive={isActive}
                             showChevron={false}
                             testId={item.testId || `button-mobile-${item.id}`}
-                            badgeCount={item.id === 'support'&& isAdmin ? unreadSupportCount : undefined}
+                            badgeCount={item.id === 'support' && isAdmin ? unreadSupportCount : undefined}
                           />
                         );
                         
@@ -379,7 +410,7 @@ function DashboardMenuContent({ onClose }: ContentProps) {
                   );
                 }
                 
-                if ('type'in entry && entry.type === 'section-header') {
+                if ('type' in entry && entry.type === 'section-header') {
                   return (
                     <div key={`header-${entry.id}`} className="px-6 py-2 mt-4 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--mobile-menu-item-fg)] opacity-40">
                       {entry.label}
@@ -387,7 +418,7 @@ function DashboardMenuContent({ onClose }: ContentProps) {
                   );
                 }
                 
-                if ('type'in entry && entry.type === 'spacer') {
+                if ('type' in entry && entry.type === 'spacer') {
                   return <div key={`spacer-${entry.id}`} className="h-2" />;
                 }
                 
@@ -409,7 +440,7 @@ function DashboardMenuContent({ onClose }: ContentProps) {
                     isActive={isActive}
                     showChevron={false}
                     testId={item.testId || `button-mobile-${item.id}`}
-                    badgeCount={item.id === 'support'&& isAdmin ? unreadSupportCount : undefined}
+                    badgeCount={item.id === 'support' && isAdmin ? unreadSupportCount : undefined}
                   />
                 );
                 
@@ -433,14 +464,15 @@ function DashboardMenuContent({ onClose }: ContentProps) {
           )}
         </nav>
       </div>
+
       <div className="p-4 bg-[var(--mobile-menu-footer-bg)]">
         <div className="flex items-center gap-3">
-          {sidebarLevel === 'organization'&& (
+          {sidebarLevel === 'organization' && (
             <div className="flex-1 relative">
               <button
                 onClick={() => setExpandedOrganizationSelector(!expandedOrganizationSelector)}
                 className="w-full p-3 text-left border border-[var(--mobile-menu-item-active-bg)] rounded-xl text-[var(--mobile-menu-fg)] flex items-center hover:bg-[var(--mobile-menu-item-active-bg)] transition-colors duration-150"
-                style={{ backgroundColor: 'var(--mobile-menu-item-active-bg)'}}
+                style={{ backgroundColor: 'var(--mobile-menu-item-active-bg)' }}
               >
                 <Building className="h-5 w-5 mr-3 text-[var(--accent)]" />
                 <span className="flex-1 truncate text-sm font-medium">
@@ -453,7 +485,7 @@ function DashboardMenuContent({ onClose }: ContentProps) {
               </button>
               
               {expandedOrganizationSelector && (
-                <div className="absolute bottom-full left-0 right-0 mb-2 border border-[var(--mobile-menu-border)] rounded-xl shadow-2xl max-h-40 overflow-y-auto z-10" style={{ backgroundColor: 'var(--mobile-menu-bg)'}}>
+                <div className="absolute bottom-full left-0 right-0 mb-2 border border-[var(--mobile-menu-border)] rounded-xl shadow-2xl max-h-40 overflow-y-auto z-10" style={{ backgroundColor: 'var(--mobile-menu-bg)' }}>
                   <button
                     className="w-full p-3 text-left text-sm bg-[var(--accent)] text-white"
                   >
@@ -466,12 +498,13 @@ function DashboardMenuContent({ onClose }: ContentProps) {
               )}
             </div>
           )}
-          {sidebarLevel === 'project'&& (
+
+          {sidebarLevel === 'project' && (
             <div className="flex-1 relative">
               <button
                 onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
                 className="w-full p-3 text-left border border-[var(--mobile-menu-item-active-bg)] rounded-xl text-[var(--mobile-menu-fg)] flex items-center hover:bg-[var(--mobile-menu-item-active-bg)] transition-colors duration-150"
-                style={{ backgroundColor: 'var(--mobile-menu-item-active-bg)'}}
+                style={{ backgroundColor: 'var(--mobile-menu-item-active-bg)' }}
               >
                 <FolderOpen className="h-5 w-5 mr-3 text-[var(--accent)]" />
                 <span className="flex-1 truncate text-sm font-medium">
@@ -484,7 +517,7 @@ function DashboardMenuContent({ onClose }: ContentProps) {
               </button>
               
               {expandedProjectSelector && (
-                <div className="absolute bottom-full left-0 right-0 mb-2 border border-[var(--mobile-menu-border)] rounded-xl shadow-2xl max-h-60 overflow-y-auto z-10" style={{ backgroundColor: 'var(--mobile-menu-bg)'}}>
+                <div className="absolute bottom-full left-0 right-0 mb-2 border border-[var(--mobile-menu-border)] rounded-xl shadow-2xl max-h-60 overflow-y-auto z-10" style={{ backgroundColor: 'var(--mobile-menu-bg)' }}>
                   {projectsData?.map((project: any) => (
                     <button
                       key={project.id}
@@ -501,9 +534,11 @@ function DashboardMenuContent({ onClose }: ContentProps) {
               )}
             </div>
           )}
-          {(sidebarLevel === 'admin'|| sidebarLevel === 'community'|| sidebarLevel === 'learning'|| sidebarLevel === 'general'|| sidebarLevel === 'founders') && (
+
+          {(sidebarLevel === 'admin' || sidebarLevel === 'community' || sidebarLevel === 'learning' || sidebarLevel === 'general' || sidebarLevel === 'founders') && (
             <div className="flex-1" />
           )}
+
           <div className="relative">
             <Avatar 
               className="h-11 w-11 cursor-pointer hover:opacity-80 transition-opacity border-2 border-[var(--mobile-menu-border)]"
@@ -520,7 +555,7 @@ function DashboardMenuContent({ onClose }: ContentProps) {
               <Badge 
                 className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-[10px] font-bold border-2 border-[var(--mobile-menu-footer-bg)]"
               >
-                {unreadCount > 9 ? '9+': unreadCount}
+                {unreadCount > 9 ? '9+' : unreadCount}
               </Badge>
             )}
           </div>
@@ -529,6 +564,7 @@ function DashboardMenuContent({ onClose }: ContentProps) {
     </>
   );
 }
+
 export function MobileMenu({ onClose }: MobileMenuProps = {}): React.ReactPortal | null {
   const { isOpen: storeIsOpen, mode, closeMenu } = useMobileMenuStore();
   const isMarketingMode = mode === 'marketing';
@@ -541,7 +577,9 @@ export function MobileMenu({ onClose }: MobileMenuProps = {}): React.ReactPortal
       };
     }
   }, [storeIsOpen]);
+
   if (!storeIsOpen) return null;
+
   const handleCloseMenu = (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
@@ -550,6 +588,7 @@ export function MobileMenu({ onClose }: MobileMenuProps = {}): React.ReactPortal
     closeMenu();
     onClose?.();
   };
+
   const menuContent = (
     <div className="fixed inset-0" style={{ backgroundColor: 'var(--mobile-menu-overlay-bg)', zIndex: 9999 }} onClick={() => closeMenu()}>
       <div 
@@ -573,9 +612,11 @@ export function MobileMenu({ onClose }: MobileMenuProps = {}): React.ReactPortal
                   <X className="h-5 w-5 text-[var(--mobile-menu-fg)]" />
                 </button>
               </div>
+
               <div className="flex-1 overflow-y-auto flex flex-col">
                 <MarketingMenuContent onClose={handleCloseMenu} />
               </div>
+
               <div className="p-4 bg-[var(--mobile-menu-footer-bg)]">
                 <div className="flex items-center gap-3">
                   <div className="flex-1" />
@@ -589,5 +630,6 @@ export function MobileMenu({ onClose }: MobileMenuProps = {}): React.ReactPortal
       </div>
     </div>
   );
+
   return createPortal(menuContent, document.body);
 }

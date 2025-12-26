@@ -2,11 +2,13 @@ import { Bookmark } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { getCourseMarkersUrl, type MarkerWithLesson } from '../../services/student/getCourseMarkers';
+
 interface CourseMarkersSimpleProps {
   courseId: string;
   activeLessonId: string | null;
   onMarkerClick: (lessonId: string, timeSec: number | null) => void;
 }
+
 export function CourseMarkersSimple({ 
   courseId, 
   activeLessonId, 
@@ -17,12 +19,14 @@ export function CourseMarkersSimple({
     enabled: !!courseId,
     staleTime: 1000 * 60 * 5,
   });
+
   const formatTime = (seconds: number | null): string => {
     if (seconds === null) return '0:00';
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-6">
@@ -30,6 +34,7 @@ export function CourseMarkersSimple({
       </div>
     );
   }
+
   if (markers.length === 0) {
     return (
       <div className="text-center py-6 text-muted-foreground">
@@ -38,6 +43,7 @@ export function CourseMarkersSimple({
       </div>
     );
   }
+
   return (
     <div className="space-y-1">
       {markers.map((marker) => (

@@ -17,12 +17,14 @@ import {
 } from "@/components/ui/bottom-sheet";
 import { useMobile } from "@/hooks/use-mobile";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
+
 interface BlockedRestrictedProps {
   isBlocked: boolean;
   title?: string;
   message?: string;
   children: React.ReactNode;
 }
+
 export function BlockedRestricted({
   isBlocked,
   title = "No disponible",
@@ -32,9 +34,11 @@ export function BlockedRestricted({
   const isAdmin = useIsAdmin();
   const isMobile = useMobile();
   const [open, setOpen] = useState(false);
+
   if (!isBlocked) {
     return <>{children}</>;
   }
+
   if (isAdmin) {
     return (
       <div className="opacity-60">
@@ -42,6 +46,7 @@ export function BlockedRestricted({
       </div>
     );
   }
+
   if (isMobile) {
     return (
       <>
@@ -96,6 +101,7 @@ export function BlockedRestricted({
       </>
     );
   }
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -134,4 +140,5 @@ export function BlockedRestricted({
     </Popover>
   );
 }
+
 export default BlockedRestricted;

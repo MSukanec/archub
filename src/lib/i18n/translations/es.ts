@@ -116,6 +116,7 @@ export interface TranslationKeys {
     code: string;
   };
 }
+
 export const es: TranslationKeys = {
   table: {
     search: {

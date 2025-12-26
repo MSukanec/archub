@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { FormModalLayout } from "@/components/modal";
 import { FormModalHeader } from "@/components/modal";
 import { FormModalFooter } from "@/components/modal";
+
 const budgetItemSchema = z.object({
   task_id: z.string().min(1, "Debe seleccionar una tarea"),
   quantity: z.number().min(0.01, "La cantidad debe ser mayor a 0"),
@@ -31,14 +32,18 @@ const budgetItemSchema = z.object({
   tax_pct: z.number().min(0).max(100, "El impuesto debe estar entre 0 y 100%").default(0),
   cost_scope: z.enum(['materials_and_labor', 'materials_only', 'labor_only']).default('materials_and_labor')
 });
+
 type BudgetItemFormData = z.infer<typeof budgetItemSchema>;
+
 // Tipos de costo disponibles
-type CostType = 'archub'| 'organization'| 'independent';
+type CostType = 'archub' | 'organization' | 'independent';
+
 interface CostOption {
   id: CostType;
   label: string;
   description: string;
 }
+
 interface BudgetItemModalProps {
   modalData: {
     projectId: string;
@@ -51,6 +56,7 @@ interface BudgetItemModalProps {
   };
   onClose: () => void;
 }
+
 export function BudgetItemModal({ 
   modalData, 
   onClose 
@@ -68,11 +74,14 @@ export function BudgetItemModal({
   const updateBudgetItem = useUpdateBudgetItem();
   
   const isEditing = modalData.isEditing && modalData.editingTask;
+
   // Hooks para calcular costos de Archub (materiales + mano de obra)
   const { data: materials = [], isLoading: materialsLoading } = useTaskMaterials(selectedTaskId || null);
   const { data: labor = [], isLoading: laborLoading } = useTaskLabor(selectedTaskId || null);
+
   // Hook para obtener precios de organización
   const { data: organizationTaskPrice, isLoading: orgPriceLoading } = useOrganizationTaskPrice(selectedTaskId || null);
+
   // Opciones de costo disponibles
   const costOptions: CostOption[] = [
     {
@@ -91,11 +100,14 @@ export function BudgetItemModal({
       description: 'Precio manual ingresado por ti'
     }
   ];
+
   // Debug: Log modalData al inicializar
   console.log('🔧 BudgetItemModal - modalData received:', modalData);
+
   // Calcular costo de Archub (materiales + mano de obra por unidad)
   const archubUnitCost = useMemo(() => {
     if (materialsLoading || laborLoading || !selectedTaskId) return 0;
+
     // Calcular costo de materiales por unidad
     const materialCostPerUnit = materials.reduce((sum, material) => {
       const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
@@ -103,6 +115,7 @@ export function BudgetItemModal({
       const quantity = material.amount || 0;
       return sum + (quantity * unitPrice);
     }, 0);
+
     // Calcular costo de mano de obra por unidad
     const laborCostPerUnit = labor.reduce((sum, laborItem) => {
       const laborView = laborItem.labor_view;
@@ -110,9 +123,12 @@ export function BudgetItemModal({
       const quantity = laborItem.quantity || 0;
       return sum + (quantity * unitPrice);
     }, 0);
+
     return materialCostPerUnit + laborCostPerUnit;
   }, [materials, labor, materialsLoading, laborLoading, selectedTaskId]);
+
   // Calcular unit_price según el tipo de costo seleccionado (moved after form declaration)
+
   // Formatear precios
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -122,6 +138,7 @@ export function BudgetItemModal({
       maximumFractionDigits: 2
     }).format(amount);
   };
+
   // Query para obtener la membresía actual del usuario en la organización  
   const { data: organizationMember } = useQuery({
     queryKey: ['organization-member', modalData.organizationId, userData?.user?.id],
@@ -152,6 +169,7 @@ export function BudgetItemModal({
     },
     enabled: !!userData?.user?.id && !!modalData.organizationId
   });
+
   // Hook para cargar tareas del SISTEMA y de la ORGANIZACIÓN actual
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
     queryKey: ['task-library', modalData.organizationId],
@@ -176,6 +194,8 @@ export function BudgetItemModal({
     },
     enabled: !!supabase && !!modalData.organizationId
   });
+
+
   // Configurar el formulario
   const form = useForm<BudgetItemFormData>({
     resolver: zodResolver(budgetItemSchema),
@@ -188,6 +208,7 @@ export function BudgetItemModal({
       cost_scope: 'materials_and_labor'
     }
   });
+
   // Si estamos editando, configurar los valores iniciales
   useEffect(() => {
     if (isEditing && modalData.editingTask) {
@@ -201,9 +222,11 @@ export function BudgetItemModal({
       });
     }
   }, [isEditing, modalData.editingTask, form]);
+
   // Calcular unit_price según el tipo de costo seleccionado
   useEffect(() => {
     let newUnitPrice = 0;
+
     switch (selectedCostType) {
       case 'archub':
         newUnitPrice = archubUnitCost;
@@ -216,6 +239,7 @@ export function BudgetItemModal({
         newUnitPrice = form.watch('unit_price') || 0;
         break;
     }
+
     setCalculatedUnitPrice(newUnitPrice);
     
     // Solo actualizar el formulario si no es costo independiente
@@ -223,6 +247,7 @@ export function BudgetItemModal({
       form.setValue('unit_price', newUnitPrice);
     }
   }, [selectedCostType, archubUnitCost, organizationTaskPrice, form]);
+
   // Obtener divisiones únicas para el filtro (usando division de la vista)
   const uniqueRubros = useMemo(() => {
     if (!tasks || tasks.length === 0) return [];
@@ -236,6 +261,7 @@ export function BudgetItemModal({
     console.log('🏗️ Unique rubros found:', rubros);
     return rubros;
   }, [tasks]);
+
   // Filtrar tareas según búsqueda y filtros
   const filteredTasks = useMemo(() => {
     if (!tasks || tasks.length === 0) return [];
@@ -259,6 +285,7 @@ export function BudgetItemModal({
     
     return filtered;
   }, [tasks, searchQuery, rubroFilter]);
+
   // Función para manejar la selección de tarea
   const handleTaskSelect = (taskId: string) => {
     setSelectedTaskId(taskId);
@@ -271,6 +298,7 @@ export function BudgetItemModal({
       setSelectedTaskUnit(selectedTask.unit);
     }
   };
+
   // Función para enviar el formulario
   const onSubmit = async (data: BudgetItemFormData) => {
     // Usar userData.user.id directamente si no hay organizationMember
@@ -284,6 +312,7 @@ export function BudgetItemModal({
       });
       return;
     }
+
     setIsSubmitting(true);
     
     try {
@@ -324,6 +353,7 @@ export function BudgetItemModal({
       setIsSubmitting(false);
     }
   };
+
   const viewPanel = isEditing && modalData.editingTask ? (
     <div className="space-y-4">
       <div>
@@ -339,12 +369,15 @@ export function BudgetItemModal({
           {modalData.editingTask.code || 'Sin código'}
         </p>
       </div>
+
       <div>
         <h4 className="font-medium">Cantidad</h4>
         <p className="text-muted-foreground mt-1">
           {modalData.editingTask.quantity || 0}
         </p>
       </div>
+
+
       {modalData.editingTask.created_at && (
         <div>
           <h4 className="font-medium">Fecha de Creación</h4>
@@ -359,6 +392,7 @@ export function BudgetItemModal({
       )}
     </div>
   ) : null;
+
   const editPanel = (
     <div className="space-y-4">
       {/* Filtros de búsqueda - Inline en desktop, stack en mobile */}
@@ -437,7 +471,7 @@ export function BudgetItemModal({
                   onClick={() => handleTaskSelect(task.id)}
                   className={`px-4 py-3 cursor-pointer transition-colors duration-150 grid grid-cols-[1fr,auto] gap-4 items-start ${
                     selectedTaskId === task.id 
-                      ? 'bg-accent/10 border-l-2 border-l-accent'
+                      ? 'bg-accent/10 border-l-2 border-l-accent' 
                       : 'hover:bg-muted/30'
                   }`}
                 >
@@ -472,6 +506,7 @@ export function BudgetItemModal({
           {form.formState.errors.task_id.message}
         </p>
       )}
+
       {/* Información básica - Movido debajo de la lista */}
       <div className="space-y-2">
         <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -490,7 +525,7 @@ export function BudgetItemModal({
                 form.setValue('quantity', value);
               }
             }}
-            className={`${form.formState.errors.quantity ? 'border-destructive': ''} ${selectedTaskUnit ? 'pr-12': ''}`}
+            className={`${form.formState.errors.quantity ? 'border-destructive' : ''} ${selectedTaskUnit ? 'pr-12' : ''}`}
           />
           {selectedTaskUnit && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground bg-muted/40 px-2 py-1 rounded">
@@ -504,6 +539,7 @@ export function BudgetItemModal({
           </p>
         )}
       </div>
+
       {/* Selección de tipo de costo */}
       {selectedTaskId && (
         <div className="space-y-3">
@@ -516,22 +552,23 @@ export function BudgetItemModal({
             className="space-y-3"
           >
             {costOptions.map((option) => {
-              const isLoading = option.id === 'archub'&& (materialsLoading || laborLoading);
-              const isOrgPriceAvailable = option.id === 'organization'&& organizationTaskPrice?.total_unit_cost;
-              const isDisabled = option.id === 'organization'&& !isOrgPriceAvailable && !orgPriceLoading;
+              const isLoading = option.id === 'archub' && (materialsLoading || laborLoading);
+              const isOrgPriceAvailable = option.id === 'organization' && organizationTaskPrice?.total_unit_cost;
+              const isDisabled = option.id === 'organization' && !isOrgPriceAvailable && !orgPriceLoading;
               
               let displayPrice = '—';
-              if (option.id === 'archub'&& !isLoading) {
+              if (option.id === 'archub' && !isLoading) {
                 displayPrice = formatCost(archubUnitCost);
-              } else if (option.id === 'organization'&& isOrgPriceAvailable) {
+              } else if (option.id === 'organization' && isOrgPriceAvailable) {
                 displayPrice = formatCost(organizationTaskPrice?.total_unit_cost || 0);
               } else if (option.id === 'independent') {
                 displayPrice = 'Manual';
               }
+
               return (
                 <Card key={option.id} className={`p-3 cursor-pointer transition-colors ${
-                  selectedCostType === option.id ? 'ring-2 ring-primary': 'hover:bg-muted/30'
-                } ${isDisabled ? 'opacity-50 cursor-not-allowed': ''}`}>
+                  selectedCostType === option.id ? 'ring-2 ring-primary' : 'hover:bg-muted/30'
+                } ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
                   <CardContent className="p-0">
                     <div className="flex items-start space-x-3">
                       <RadioGroupItem 
@@ -544,22 +581,22 @@ export function BudgetItemModal({
                         <div className="flex items-center justify-between">
                           <Label 
                             htmlFor={option.id} 
-                            className={`text-sm font-medium cursor-pointer ${isDisabled ? 'cursor-not-allowed': ''}`}
+                            className={`text-sm font-medium cursor-pointer ${isDisabled ? 'cursor-not-allowed' : ''}`}
                           >
                             {option.label}
                           </Label>
                           <div className="flex items-center gap-1">
                             <DollarSign className="w-3 h-3 text-muted-foreground" />
                             <span className={`text-xs font-medium ${
-                              isLoading ? 'text-muted-foreground': 'text-foreground'
+                              isLoading ? 'text-muted-foreground' : 'text-foreground'
                             }`}>
-                              {isLoading ? '...': displayPrice}
+                              {isLoading ? '...' : displayPrice}
                             </span>
                           </div>
                         </div>
                         <p className="text-xs text-muted-foreground">
                           {option.description}
-                          {isDisabled && '(No disponible para esta tarea)'}
+                          {isDisabled && ' (No disponible para esta tarea)'}
                         </p>
                       </div>
                     </div>
@@ -570,8 +607,9 @@ export function BudgetItemModal({
           </RadioGroup>
         </div>
       )}
+
       {/* Campo de precio unitario manual - Solo visible para costo independiente */}
-      {selectedCostType === 'independent'&& (
+      {selectedCostType === 'independent' && (
         <div className="space-y-2">
           <label className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Precio Unitario *
@@ -588,7 +626,7 @@ export function BudgetItemModal({
                 form.setValue('unit_price', value);
               }
             }}
-            className={form.formState.errors.unit_price ? 'border-destructive': ''}
+            className={form.formState.errors.unit_price ? 'border-destructive' : ''}
           />
           {form.formState.errors.unit_price && (
             <p className="text-xs text-destructive">
@@ -599,29 +637,32 @@ export function BudgetItemModal({
       )}
     </div>
   );
+
   const headerContent = (
     <FormModalHeader 
-      title={isEditing ? 'Editar Tarea': 'Agregar Tarea'}
+      title={isEditing ? 'Editar Tarea' : 'Agregar Tarea'}
       icon={Calendar}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel={isEditing ? 'Actualizar Tarea': 'Agregar Tarea'}
+      rightLabel={isEditing ? 'Actualizar Tarea' : 'Agregar Tarea'}
       onRightClick={form.handleSubmit(onSubmit)}
       showLoadingSpinner={isSubmitting}
       submitDisabled={!selectedTaskId}
     />
   );
+
   // Función wrapper para el submit que puede ser llamada por ENTER
   const handleSubmitWrapper = () => {
     // Validar que hay una tarea seleccionada antes de enviar
     if (!selectedTaskId) {
       form.setError('task_id', { 
         type: 'manual', 
-        message: 'Debe seleccionar una tarea'
+        message: 'Debe seleccionar una tarea' 
       });
       return;
     }
@@ -629,6 +670,7 @@ export function BudgetItemModal({
     // Llamar al submit del formulario
     form.handleSubmit(onSubmit)();
   };
+
   return (
     <FormModalLayout
       columns={1}

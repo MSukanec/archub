@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MapPin, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useGoogleMapsScript } from './useGoogleMapsScript';
+
 interface PlaceDetails {
   address_full: string;
   place_id: string;
@@ -14,6 +15,7 @@ interface PlaceDetails {
   postal_code: string;
   timezone?: string;
 }
+
 interface GooglePlacesAutocompleteProps {
   apiKey: string;
   value: string;
@@ -22,6 +24,7 @@ interface GooglePlacesAutocompleteProps {
   placeholder?: string;
   label?: string;
 }
+
 export function GooglePlacesAutocomplete({
   apiKey,
   value,
@@ -33,23 +36,28 @@ export function GooglePlacesAutocomplete({
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const { isLoaded, loadError } = useGoogleMapsScript({ apiKey, libraries: ['places'] });
-  const [status, setStatus] = useState<'idle'| 'loading'| 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
+
   // Use refs for callbacks to avoid re-initializing the autocomplete listener on every render
   const onChangeRef = useRef(onChange);
   const onPlaceSelectedRef = useRef(onPlaceSelected);
+
   // Keep refs updated with latest callback versions
   useEffect(() => {
     onChangeRef.current = onChange;
     onPlaceSelectedRef.current = onPlaceSelected;
   });
+
   // Sync external value changes to the input (e.g., when clearing the field)
   useEffect(() => {
     if (inputRef.current && value !== inputRef.current.value) {
       inputRef.current.value = value;
     }
   }, [value]);
+
   useEffect(() => {
     if (!isLoaded || !inputRef.current) return;
+
     try {
       // Initialize Google Places Autocomplete
       const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
@@ -62,7 +70,9 @@ export function GooglePlacesAutocomplete({
         ],
         types: ['address']
       });
+
       autocompleteRef.current = autocomplete;
+
       // Listen for place selection
       const handlePlaceChanged = () => {
         const place = autocomplete.getPlace();
@@ -71,13 +81,16 @@ export function GooglePlacesAutocomplete({
           setStatus('error');
           return;
         }
+
         setStatus('loading');
+
         // Extract address components
         const components = place.address_components || [];
         const getComponent = (type: string) => {
           const comp = components.find(c => c.types.includes(type));
           return comp?.long_name || '';
         };
+
         const placeDetails: PlaceDetails = {
           address_full: place.formatted_address || '',
           place_id: place.place_id || '',
@@ -88,6 +101,7 @@ export function GooglePlacesAutocomplete({
           country: getComponent('country'),
           postal_code: getComponent('postal_code')
         };
+
         // Optional: Get timezone using Geocoding API
         if (place.geometry.location) {
           const lat = place.geometry.location.lat();
@@ -97,22 +111,26 @@ export function GooglePlacesAutocomplete({
           // For now, we'll leave it empty and can add it later
           placeDetails.timezone = '';
         }
+
         // Use refs to call the latest callbacks without triggering effect re-runs
         onPlaceSelectedRef.current(placeDetails);
         onChangeRef.current(placeDetails.address_full);
         setStatus('idle');
       };
+
       autocomplete.addListener('place_changed', handlePlaceChanged);
     } catch (error) {
       console.error('Error initializing Google Places Autocomplete:', error);
       setStatus('error');
     }
+
     return () => {
       if (autocompleteRef.current) {
         google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
     };
   }, [isLoaded]); // Only re-run when isLoaded changes
+
   if (loadError) {
     return (
       <div className="space-y-2">
@@ -130,12 +148,14 @@ export function GooglePlacesAutocomplete({
       </div>
     );
   }
+
   const StatusIcon = () => {
     if (!isLoaded) return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
     if (status === 'loading') return <Loader2 className="h-4 w-4 animate-spin text-[var(--accent)]" />;
     if (status === 'error') return <AlertCircle className="h-4 w-4 text-destructive" />;
     return <MapPin className="h-4 w-4 text-[var(--accent)]" />;
   };
+
   return (
     <div className="space-y-2">
       {label && <Label>{label}</Label>}

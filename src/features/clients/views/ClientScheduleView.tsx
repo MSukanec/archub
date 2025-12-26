@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { 
   Calendar, 
   Plus, 
   Edit, 
@@ -33,34 +34,42 @@ import {
 } from '@/features/clients';
 import { formatContactName } from '@/utils/contacts';
 import { cn } from '@/lib/utils';
+
 interface ClientScheduleViewProps {
   projectId?: string;
 }
-type ScheduleStatus = 'pending'| 'paid'| 'overdue'| 'cancelled';
-const STATUS_CONFIG: Record<ScheduleStatus, { label: string; variant: 'pending'| 'success'| 'error'| 'neutral'; className: string; icon: typeof Clock }> = {
+
+type ScheduleStatus = 'pending' | 'paid' | 'overdue' | 'cancelled';
+
+const STATUS_CONFIG: Record<ScheduleStatus, { label: string; variant: 'pending' | 'success' | 'error' | 'neutral'; className: string; icon: typeof Clock }> = {
   pending: { label: 'Pendiente', variant: 'pending', className: '', icon: Clock },
   paid: { label: 'Pagada', variant: 'success', className: '', icon: CheckCircle2 },
   overdue: { label: 'Vencida', variant: 'error', className: '', icon: AlertCircle },
   cancelled: { label: 'Cancelada', variant: 'neutral', className: '', icon: Ban },
 };
+
 export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
-  const [filterStatus, setFilterStatus] = useState<'all'| ScheduleStatus>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | ScheduleStatus>('all');
   
   const organizationId = userData?.organization?.id;
   const activeProjectId = projectId || selectedProjectId;
+
   const { data: scheduleData, isLoading } = useClientPaymentSchedule(
     activeProjectId || undefined, 
     organizationId
   );
+
   const { data: commitmentsData } = useClientCommitments(
     activeProjectId || undefined,
     organizationId
   );
+
   const deleteScheduleMutation = useDeleteClientPaymentSchedule();
+
   const scheduleItems = useMemo(() => {
     if (!scheduleData) return [];
     
@@ -70,7 +79,7 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
       const clientName = contact ? formatContactName(contact) : 'Cliente desconocido';
       
       let effectiveStatus = item.status as ScheduleStatus;
-      if (effectiveStatus === 'pending'&& isPast(parseLocalDate(item.due_date)!) && !isToday(parseLocalDate(item.due_date)!)) {
+      if (effectiveStatus === 'pending' && isPast(parseLocalDate(item.due_date)!) && !isToday(parseLocalDate(item.due_date)!)) {
         effectiveStatus = 'overdue';
       }
       
@@ -82,10 +91,12 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
       };
     });
   }, [scheduleData]);
+
   const filteredItems = useMemo(() => {
     if (filterStatus === 'all') return scheduleItems;
     return scheduleItems.filter(item => item.effectiveStatus === filterStatus);
   }, [scheduleItems, filterStatus]);
+
   const kpis = useMemo(() => {
     if (!scheduleItems.length) {
       return {
@@ -100,6 +111,7 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
         currency: null,
       };
     }
+
     let totalPending = 0;
     let totalPaid = 0;
     let totalOverdue = 0;
@@ -109,7 +121,9 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
     let nextDueDate: string | null = null;
     let nextDueAmount = 0;
     let currency = scheduleItems[0]?.currency || null;
+
     const now = new Date();
+
     for (const item of scheduleItems) {
       const amount = item.amount || 0;
       
@@ -130,6 +144,7 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
         }
       }
     }
+
     return {
       totalPending,
       totalPaid,
@@ -142,6 +157,7 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
       currency,
     };
   }, [scheduleItems]);
+
   const handleDelete = async (item: typeof scheduleItems[0]) => {
     if (!activeProjectId || !organizationId) {
       toast({
@@ -151,6 +167,7 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
       });
       return;
     }
+
     openModal('delete-confirmation', {
       mode: 'dangerous',
       title: 'Eliminar Cuota',
@@ -178,6 +195,7 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
       },
     });
   };
+
   const handleEdit = (item: typeof scheduleItems[0]) => {
     openModal('client-schedule-item', {
       scheduleId: item.id,
@@ -186,6 +204,7 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
       mode: 'edit',
     });
   };
+
   const handleView = (item: typeof scheduleItems[0]) => {
     openModal('client-schedule-item', {
       scheduleId: item.id,
@@ -194,6 +213,7 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
       mode: 'view',
     });
   };
+
   const handleMarkAsPaid = (item: typeof scheduleItems[0]) => {
     openModal('client-payment', {
       projectId: activeProjectId,
@@ -205,6 +225,7 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
       prefillCurrencyId: item.currency_id,
     });
   };
+
   const handleAddScheduleItem = () => {
     openModal('client-schedule-item', {
       projectId: activeProjectId,
@@ -212,10 +233,12 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
       mode: 'create',
     });
   };
+
   const formatCurrency = (amount: number, currency: typeof kpis.currency) => {
     if (!currency) return amount.toLocaleString('es-AR');
     return `${currency.symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
+
   if (!organizationId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -223,6 +246,7 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
       </div>
     );
   }
+
   if (!activeProjectId) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
@@ -233,6 +257,7 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
       </div>
     );
   }
+
   const columns = [
     {
       key: 'due_date',
@@ -269,7 +294,7 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
                 {format(dueDate, 'dd/MM/yyyy', { locale: es })}
               </p>
               <p className="text-xs text-muted-foreground">
-                {isDueToday ? 'Vence hoy': 
+                {isDueToday ? 'Vence hoy' : 
                  isOverdue ? `Venció hace ${Math.floor((Date.now() - dueDate.getTime()) / (1000 * 60 * 60 * 24))} días` :
                  `Vence en ${Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} días`}
               </p>
@@ -328,10 +353,11 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
       },
     },
   ];
+
   const getRowActions = (item: typeof scheduleItems[0]) => {
     const actions = [];
     
-    if (item.effectiveStatus !== 'paid'&& item.effectiveStatus !== 'cancelled') {
+    if (item.effectiveStatus !== 'paid' && item.effectiveStatus !== 'cancelled') {
       actions.push({
         icon: Receipt,
         label: 'Registrar Pago',
@@ -349,18 +375,20 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
       icon: Trash2,
       label: 'Eliminar',
       onClick: () => handleDelete(item),
-      variant: 'destructive'as const,
+      variant: 'destructive' as const,
     });
     
     return actions;
   };
+
   const hasCommitments = commitmentsData && commitmentsData.length > 0;
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <AppCard 
           className="cursor-pointer hover:border-amber-500/50 transition-colors"
-          onClick={() => setFilterStatus(filterStatus === 'pending'? 'all': 'pending')}
+          onClick={() => setFilterStatus(filterStatus === 'pending' ? 'all' : 'pending')}
           data-testid="stat-pending"
         >
           <AppCardTitle>
@@ -372,9 +400,10 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
           </AppCardValue>
           <AppCardMeta>{kpis.countPending} cuotas por cobrar</AppCardMeta>
         </AppCard>
+
         <AppCard 
           className="cursor-pointer hover:border-destructive/50 transition-colors"
-          onClick={() => setFilterStatus(filterStatus === 'overdue'? 'all': 'overdue')}
+          onClick={() => setFilterStatus(filterStatus === 'overdue' ? 'all' : 'overdue')}
           data-testid="stat-overdue"
         >
           <AppCardTitle>
@@ -386,9 +415,10 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
           </AppCardValue>
           <AppCardMeta>{kpis.countOverdue} cuotas vencidas</AppCardMeta>
         </AppCard>
+
         <AppCard 
           className="cursor-pointer hover:border-green-500/50 transition-colors"
-          onClick={() => setFilterStatus(filterStatus === 'paid'? 'all': 'paid')}
+          onClick={() => setFilterStatus(filterStatus === 'paid' ? 'all' : 'paid')}
           data-testid="stat-paid"
         >
           <AppCardTitle>
@@ -400,6 +430,7 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
           </AppCardValue>
           <AppCardMeta>{kpis.countPaid} cuotas cobradas</AppCardMeta>
         </AppCard>
+
         <AppCard data-testid="stat-next-due">
           <AppCardTitle>
             <CalendarCheck className="h-4 w-4 text-blue-500" />
@@ -419,7 +450,8 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
           </AppCardMeta>
         </AppCard>
       </div>
-      {filterStatus !== 'all'&& (
+
+      {filterStatus !== 'all' && (
         <div className="flex items-center gap-2">
           <Badge variant="neutral" className="gap-1">
             Filtrando: {STATUS_CONFIG[filterStatus].label}
@@ -432,6 +464,7 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
           </Badge>
         </div>
       )}
+
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -470,4 +503,5 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
     </div>
   );
 }
+
 export default ClientScheduleView;

@@ -4,6 +4,7 @@ import { LuHandshake } from 'react-icons/lu'
 import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal'
+import { 
   ClientsDashboardView, 
   ClientListView, 
   ClientObligationsView, 
@@ -26,17 +27,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+
 const PERIOD_OPTIONS: { value: ClientPeriodFilter; label: string }[] = [
-  { value: '30d', label: 'Últimos 30 días'},
-  { value: '3m', label: 'Últimos 3 meses'},
-  { value: '6m', label: 'Últimos 6 meses'},
-  { value: '1y', label: 'Último año'},
-  { value: 'all', label: 'Histórico'},
+  { value: '30d', label: 'Últimos 30 días' },
+  { value: '3m', label: 'Últimos 3 meses' },
+  { value: '6m', label: 'Últimos 6 meses' },
+  { value: '1y', label: 'Último año' },
+  { value: 'all', label: 'Histórico' },
 ]
+
 export interface ClientDrillDownFilters {
   filterMonth?: string;
   filterClient?: string;
 }
+
 export function ClientsPage() {
   const searchParams = useSearch();
   const urlParams = new URLSearchParams(searchParams);
@@ -58,9 +62,11 @@ export function ClientsPage() {
     setSearchValue: setMobileSearchValue
   } = useActionBarMobile()
   const isMobile = useMobile()
+
   useEffect(() => {
     setSidebarContext('finances')
   }, [])
+
   useEffect(() => {
     if (isMobile) {
       setActions({
@@ -103,14 +109,17 @@ export function ClientsPage() {
       });
       setShowActionBar(true);
     }
+
     return () => {
       if (isMobile) {
         clearActions();
       }
     };
   }, [isMobile])
+
   const projectId = selectedProjectId
   const organizationId = userData?.organization?.id
+
   const { data: allPayments = [] } = useClientPayments(projectId || undefined, organizationId)
   const availablePeriods = useMemo(() => calculateAvailablePeriods(allPayments), [allPayments])
   
@@ -124,6 +133,7 @@ export function ClientsPage() {
       setSelectedPeriod(validSelectedPeriod)
     }
   }, [validSelectedPeriod, selectedPeriod])
+
   const headerTabs = [
     {
       id: "dashboard",
@@ -162,6 +172,7 @@ export function ClientsPage() {
       isActive: activeTab === "settings"
     }
   ]
+
   const getPeriodSelector = () => {
     if (activeTab !== "dashboard") return []
     
@@ -189,7 +200,7 @@ export function ClientsPage() {
                 data-testid={`option-period-${option.value}`}
               >
                 {option.label}
-                {!isAvailable && option.value !== 'all'&& <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
+                {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
               </DropdownMenuItem>
             );
           })}
@@ -197,6 +208,7 @@ export function ClientsPage() {
       </DropdownMenu>
     ]
   }
+
   const headerProps = {
     title: "Clientes",
     icon: LuHandshake,
@@ -257,6 +269,7 @@ export function ClientsPage() {
     }),
     actions: getPeriodSelector()
   }
+
   if (!organizationId) {
     return (
       <Layout headerProps={headerProps} wide={false}>
@@ -266,6 +279,7 @@ export function ClientsPage() {
       </Layout>
     )
   }
+
   return (
     <Layout headerProps={headerProps} wide={false}>
       <div className="space-y-4">
@@ -275,7 +289,7 @@ export function ClientsPage() {
             onNavigateToPayments={() => setActiveTab('details')}
             onNavigateToTab={(tab: string, filters?: Record<string, unknown>) => {
               if (tab === 'list') setActiveTab('list');
-              else if (tab === 'payments'|| tab === 'details') {
+              else if (tab === 'payments' || tab === 'details') {
                 setDrillDownFilters(filters as ClientDrillDownFilters || {});
                 setActiveTab('details');
               } else if (tab === 'obligations') {
@@ -283,22 +297,25 @@ export function ClientsPage() {
               }
             }}
             onScrollToPanel={(panelId: string) => {
-              const element = document.querySelector(`[data-testid="chart-${panelId === 'monthlyChart'? 'monthly-trend': panelId}"]`);
-              element?.scrollIntoView({ behavior: 'smooth', block: 'center'});
+              const element = document.querySelector(`[data-testid="chart-${panelId === 'monthlyChart' ? 'monthly-trend' : panelId}"]`);
+              element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }}
             selectedPeriod={validSelectedPeriod}
           />
         )}
+
         {activeTab === "list" && (
           <ClientListView 
             projectId={projectId || undefined}
           />
         )}
+
         {activeTab === "obligations" && (
           <ClientObligationsView 
             projectId={projectId || undefined}
           />
         )}
+
         {activeTab === "details" && (
           <ClientPaymentsView 
             projectId={projectId || undefined}
@@ -307,16 +324,19 @@ export function ClientsPage() {
             onClearDrillDown={() => setDrillDownFilters({})}
           />
         )}
+
         {activeTab === "schedule" && (
           <ClientScheduleView 
             projectId={projectId || undefined}
           />
         )}
+
         {activeTab === "portal" && (
           <ClientPortalConfigView 
             projectId={projectId || undefined}
           />
         )}
+
         {activeTab === "settings" && (
           <ClientSettingsView />
         )}
@@ -324,4 +344,5 @@ export function ClientsPage() {
     </Layout>
   )
 }
+
 export default ClientsPage;

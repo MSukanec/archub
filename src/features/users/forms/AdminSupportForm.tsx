@@ -6,6 +6,7 @@
  * - FooterPanel: Input para enviar mensajes
  * - useSupportChat: Hook con toda la lógica
  */
+
 import { useEffect, useState, useRef, type KeyboardEvent } from 'react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ArrowUp } from 'lucide-react'
@@ -16,12 +17,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { queryClient } from '@/lib/queryClient'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { formatTime } from '@/lib/date-utils'
+
 export interface SupportMessage {
-  sender: 'user'| 'admin'
+  sender: 'user' | 'admin'
   message: string
   created_at: string
   id?: string
 }
+
 interface ChatPanelProps {
   messages: SupportMessage[]
   isLoading: boolean
@@ -29,9 +32,11 @@ interface ChatPanelProps {
   userAvatarUrl?: string
   scrollAreaRef: React.RefObject<HTMLDivElement>
 }
+
 export function ChatPanel({ messages, isLoading, userFullName, userAvatarUrl, scrollAreaRef }: ChatPanelProps) {
   const userInitial = userFullName?.charAt(0)?.toUpperCase() || 'U'
   const hasMessages = messages.length > 0
+
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -39,6 +44,7 @@ export function ChatPanel({ messages, isLoading, userFullName, userAvatarUrl, sc
       </div>
     )
   }
+
   if (!hasMessages) {
     return (
       <div className="flex-1 px-4 py-8 flex flex-col items-center justify-center text-center">
@@ -58,6 +64,7 @@ export function ChatPanel({ messages, isLoading, userFullName, userAvatarUrl, sc
       </div>
     )
   }
+
   return (
     <ScrollArea className="flex-1 px-4" ref={scrollAreaRef}>
       <div className="py-4 space-y-4">
@@ -66,12 +73,12 @@ export function ChatPanel({ messages, isLoading, userFullName, userAvatarUrl, sc
             key={message.id || index}
             className={cn(
               "flex gap-3 items-start",
-              message.sender === 'user'? 'flex-row-reverse': 'flex-row'
+              message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'
             )}
             data-testid={`message-${message.sender}-${index}`}
           >
             <div className="flex-shrink-0 mt-1">
-              {message.sender === 'user'? (
+              {message.sender === 'user' ? (
                 <Avatar className="h-9 w-9 border-2 border-primary/20 shadow-sm">
                   <AvatarImage src={userAvatarUrl} alt={userFullName} />
                   <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
@@ -88,9 +95,10 @@ export function ChatPanel({ messages, isLoading, userFullName, userAvatarUrl, sc
                 </div>
               )}
             </div>
+
             <div className={cn(
               "flex flex-col max-w-[75%]",
-              message.sender === 'user'? 'items-end': 'items-start'
+              message.sender === 'user' ? 'items-end' : 'items-start'
             )}>
               <div
                 className={cn(
@@ -107,7 +115,7 @@ export function ChatPanel({ messages, isLoading, userFullName, userAvatarUrl, sc
               
               <div className={cn(
                 "text-xs text-[var(--text-muted)] mt-1 px-1",
-                message.sender === 'user'? 'text-right': 'text-left'
+                message.sender === 'user' ? 'text-right' : 'text-left'
               )}>
                 {formatTime(message.created_at)}
               </div>
@@ -118,6 +126,7 @@ export function ChatPanel({ messages, isLoading, userFullName, userAvatarUrl, sc
     </ScrollArea>
   )
 }
+
 interface FooterPanelProps {
   inputValue: string
   setInputValue: (value: string) => void
@@ -125,20 +134,24 @@ interface FooterPanelProps {
   isPending: boolean
   textareaRef: React.RefObject<HTMLTextAreaElement>
 }
+
 export function FooterPanel({ inputValue, setInputValue, onSend, isPending, textareaRef }: FooterPanelProps) {
   useEffect(() => {
     const textarea = textareaRef.current
     if (!textarea) return
+
     textarea.style.height = 'auto'
     const newHeight = Math.min(textarea.scrollHeight, 120)
     textarea.style.height = `${newHeight}px`
   }, [inputValue, textareaRef])
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter'&& !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       onSend()
     }
   }
+
   return (
     <div className="p-2 border-t border-[var(--card-border)] mt-auto">
       <div className="relative flex items-center gap-2 rounded-lg bg-muted px-3 py-1.5">
@@ -184,14 +197,17 @@ export function FooterPanel({ inputValue, setInputValue, onSend, isPending, text
     </div>
   )
 }
+
 interface UseSupportChatOptions {
   userId: string
   open: boolean
 }
+
 export function useSupportChat({ userId, open }: UseSupportChatOptions) {
   const [inputValue, setInputValue] = useState("")
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ['support-messages', userId],
     queryFn: async () => {
@@ -200,6 +216,7 @@ export function useSupportChat({ userId, open }: UseSupportChatOptions) {
       if (!session?.access_token) {
         return []
       }
+
       const response = await fetch('/api/support/messages', {
         method: 'GET',
         headers: {
@@ -207,6 +224,7 @@ export function useSupportChat({ userId, open }: UseSupportChatOptions) {
           'Content-Type': 'application/json'
         }
       })
+
       if (response.ok) {
         const data = await response.json()
         queryClient.invalidateQueries({ queryKey: ['unread-user-support-messages-count'] })
@@ -222,12 +240,17 @@ export function useSupportChat({ userId, open }: UseSupportChatOptions) {
     staleTime: 0,
     enabled: open,
   })
+
   useEffect(() => {
     if (!supabase || !userId || !open) return
+
     const setupRealtimeSubscription = async () => {
       const userData = await getUserByAuthId(userId)
+
       if (!userData) return
+
       const dbUserId = userData.id
+
       const channel = supabase
         .channel(`support_messages:${dbUserId}`)
         .on(
@@ -242,21 +265,25 @@ export function useSupportChat({ userId, open }: UseSupportChatOptions) {
             console.log('🔥 Realtime change:', payload)
             queryClient.invalidateQueries({ queryKey: ['support-messages', userId] })
             
-            if (payload.eventType === 'INSERT'|| payload.eventType === 'UPDATE') {
+            if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
               queryClient.invalidateQueries({ queryKey: ['unread-user-support-messages-count', userId] })
             }
           }
         )
         .subscribe()
+
       return () => {
         supabase.removeChannel(channel)
       }
     }
+
     const cleanupPromise = setupRealtimeSubscription()
+
     return () => {
       cleanupPromise.then(cleanup => cleanup?.())
     }
   }, [userId, open])
+
   useEffect(() => {
     if (scrollAreaRef.current && messages.length > 0) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
@@ -265,6 +292,7 @@ export function useSupportChat({ userId, open }: UseSupportChatOptions) {
       }
     }
   }, [messages.length])
+
   const sendMessageMutation = useMutation({
     mutationFn: async (message: string) => {
       const { data: { session } } = await supabase.auth.getSession()
@@ -272,6 +300,7 @@ export function useSupportChat({ userId, open }: UseSupportChatOptions) {
       if (!session?.access_token) {
         throw new Error("No session")
       }
+
       const response = await fetch('/api/support/messages', {
         method: 'POST',
         headers: {
@@ -280,10 +309,12 @@ export function useSupportChat({ userId, open }: UseSupportChatOptions) {
         },
         body: JSON.stringify({ message })
       })
+
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.error || 'Error al enviar mensaje')
       }
+
       return response.json()
     },
     onMutate: async (newMessage) => {
@@ -296,7 +327,7 @@ export function useSupportChat({ userId, open }: UseSupportChatOptions) {
           sender: 'user',
           message: newMessage,
           created_at: new Date().toISOString(),
-          id: 'temp-'+ Date.now()
+          id: 'temp-' + Date.now()
         }
       ])
       
@@ -312,11 +343,13 @@ export function useSupportChat({ userId, open }: UseSupportChatOptions) {
       queryClient.invalidateQueries({ queryKey: ['support-messages', userId] })
     },
   })
+
   const handleSendMessage = () => {
     const textToSend = inputValue.trim()
     if (!textToSend || sendMessageMutation.isPending) return
     sendMessageMutation.mutate(textToSend)
   }
+
   return {
     messages,
     isLoading,

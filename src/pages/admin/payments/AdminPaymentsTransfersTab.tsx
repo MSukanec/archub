@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { Table } from '@/components/shared/trees/Table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/shared/AppCard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle2, XCircle, Eye, AlertCircle, Inbox, Clock, TrendingUp, Search, Filter, Bell, Trash2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
@@ -15,13 +15,14 @@ import { useGlobalModalStore } from '@/components/modal';
 import AdminPaymentTransferRow from '@/features/finances/components/admin/AdminPaymentTransferRow';
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
+
 interface BankTransferPayment {
   id: string;
   user_id: string;
   course_price_id: string;
   amount: number;
   currency: string;
-  status: 'pending'| 'approved'| 'rejected';
+  status: 'pending' | 'approved' | 'rejected';
   image_bucket: string | null;
   image_path: string | null;
   created_at: string;
@@ -42,8 +43,9 @@ interface BankTransferPayment {
     };
   };
 }
+
 const AdminPaymentsTransfersTab = () => {
-  const [statusFilter, setStatusFilter] = useState<'all'| 'pending'| 'approved'| 'rejected'>('pending');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
   const { toast } = useToast();
   const { openModal } = useGlobalModalStore();
   const queryClient = useQueryClient();
@@ -57,13 +59,16 @@ const AdminPaymentsTransfersTab = () => {
     searchValue: mobileSearchValue,
     setSearchValue: setMobileSearchValue
   } = useActionBarMobile();
+
   const [searchValue, setSearchValue] = useState("");
+
   // Sync search values between mobile and desktop
   useEffect(() => {
     if (isMobile && mobileSearchValue !== searchValue) {
       setSearchValue(mobileSearchValue);
     }
   }, [mobileSearchValue, isMobile]);
+
   const { data: payments = [], isLoading } = useQuery<BankTransferPayment[]>({
     queryKey: ['/api/admin/payments'],
     queryFn: async () => {
@@ -79,27 +84,32 @@ const AdminPaymentsTransfersTab = () => {
       return response.json();
     },
   });
+
   const stats = useMemo(() => {
     const now = new Date();
     const currentMonthStart = startOfMonth(now);
     const currentMonthEnd = endOfMonth(now);
+
     const pendingPayments = payments.filter(p => p.status === 'pending');
     const approvedPayments = payments.filter(p => p.status === 'approved');
     
     const approvedThisMonth = approvedPayments.filter(p => 
       isWithinInterval(new Date(p.created_at), { start: currentMonthStart, end: currentMonthEnd })
     );
+
     const totalAmountThisMonth = approvedThisMonth.reduce((sum, p) => {
       if (p.currency === 'ARS') {
         return sum + p.amount;
       }
       return sum + (p.amount * 1000);
     }, 0);
+
     return {
       pending: pendingPayments.length,
       totalMonthARS: totalAmountThisMonth,
     };
   }, [payments]);
+
   const handleViewReceipt = (payment: BankTransferPayment) => {
     openModal('bank-transfer-receipt', {
       btpId: payment.id,
@@ -107,14 +117,17 @@ const AdminPaymentsTransfersTab = () => {
       hasReceipt: !!(payment.image_bucket && payment.image_path),
     });
   };
+
   // Mutation para eliminar transferencia
   const deleteMutation = useMutation({
     mutationFn: async (paymentId: string) => {
       if (!supabase) throw new Error('Supabase not available');
+
       const { error } = await supabase
         .from('bank_transfer_payments')
         .delete()
         .eq('id', paymentId);
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -133,6 +146,7 @@ const AdminPaymentsTransfersTab = () => {
       });
     },
   });
+
   const handleDeleteTransfer = (payment: BankTransferPayment) => {
     openModal('delete-confirmation', {
       title: 'Eliminar transferencia',
@@ -144,6 +158,7 @@ const AdminPaymentsTransfersTab = () => {
       onConfirm: () => deleteMutation.mutate(payment.id),
     });
   };
+
   // Filter payments by status and search
   const filteredPayments = useMemo(() => {
     return payments.filter(payment => {
@@ -158,13 +173,16 @@ const AdminPaymentsTransfersTab = () => {
           return false;
         }
       }
+
       // Status filter
-      if (statusFilter !== 'all'&& payment.status !== statusFilter) {
+      if (statusFilter !== 'all' && payment.status !== statusFilter) {
         return false;
       }
+
       return true;
     });
   }, [payments, searchValue, statusFilter]);
+
   // Configure mobile action bar
   useEffect(() => {
     if (isMobile) {
@@ -196,6 +214,7 @@ const AdminPaymentsTransfersTab = () => {
       });
       setShowActionBar(true);
     }
+
     // Cleanup when component unmounts
     return () => {
       if (isMobile) {
@@ -203,6 +222,7 @@ const AdminPaymentsTransfersTab = () => {
       }
     };
   }, [isMobile, setActions, setShowActionBar, clearActions]);
+
   // Separate effect for filter configuration
   useEffect(() => {
     if (isMobile) {
@@ -215,9 +235,9 @@ const AdminPaymentsTransfersTab = () => {
             placeholder: 'Todos los estados',
             allOptionLabel: 'Todos los estados',
             options: [
-              { value: 'pending', label: 'Pendientes'},
-              { value: 'approved', label: 'Aprobados'},
-              { value: 'rejected', label: 'Rechazados'}
+              { value: 'pending', label: 'Pendientes' },
+              { value: 'approved', label: 'Aprobados' },
+              { value: 'rejected', label: 'Rechazados' }
             ]
           }
         ],
@@ -229,6 +249,7 @@ const AdminPaymentsTransfersTab = () => {
       });
     }
   }, [statusFilter, isMobile]);
+
   const columns = [
     {
       key: 'created_at',
@@ -308,13 +329,16 @@ const AdminPaymentsTransfersTab = () => {
       },
     },
   ];
+
   const pendingCount = payments.filter(p => p.status === 'pending').length;
+
   const filterTabs = [
     { value: 'pending', label: `Pendientes (${pendingCount})` },
     { value: 'approved', label: `Aprobados (${payments.filter(p => p.status === 'approved').length})` },
     { value: 'rejected', label: `Rechazados (${payments.filter(p => p.status === 'rejected').length})` },
     { value: 'all', label: `Todos (${payments.length})` },
   ];
+
   return (
     <div className="space-y-6">
       {/* KPIs - 2 columns in one row */}
@@ -327,6 +351,7 @@ const AdminPaymentsTransfersTab = () => {
           <StatCardValue>{stats.pending}</StatCardValue>
           <StatCardMeta>pagos esperando aprobación</StatCardMeta>
         </StatCard>
+
         <StatCard>
           <div className="flex items-center justify-between">
             <StatCardTitle showArrow={false}>Total del Mes</StatCardTitle>
@@ -343,12 +368,14 @@ const AdminPaymentsTransfersTab = () => {
           <StatCardMeta>pagos aprobados este mes</StatCardMeta>
         </StatCard>
       </div>
+
       {/* Filtros con Tabs */}
       <Tabs
         tabs={filterTabs}
         value={statusFilter}
         onValueChange={(value) => setStatusFilter(value as typeof statusFilter)}
       />
+
       {/* Tabla */}
       <Table
         columns={columns}
@@ -372,13 +399,14 @@ const AdminPaymentsTransfersTab = () => {
         )}
         emptyStateConfig={{
           icon: <Inbox />,
-          title: isLoading ? 'Cargando...': 'No hay pagos',
-          description: statusFilter === 'all'
+          title: isLoading ? 'Cargando...' : 'No hay pagos',
+          description: statusFilter === 'all' 
             ? 'No se han registrado pagos por transferencia bancaria.'
-            : `No hay pagos ${statusFilter === 'pending'? 'pendientes': statusFilter === 'approved'? 'aprobados': 'rechazados'}.`
+            : `No hay pagos ${statusFilter === 'pending' ? 'pendientes' : statusFilter === 'approved' ? 'aprobados' : 'rechazados'}.`
         }}
       />
     </div>
   );
 };
+
 export default AdminPaymentsTransfersTab;

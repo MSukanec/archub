@@ -3,15 +3,18 @@ import { Card } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { SitelogGalleryFile } from '../types';
+
 interface SitelogGalleryCardProps {
   files: SitelogGalleryFile[];
 }
+
 export function SitelogGalleryCard({ files }: SitelogGalleryCardProps) {
   // Calcular estadísticas
   const totalImages = files.filter(f => f.file_type === 'image').length;
   const totalVideos = files.filter(f => f.file_type === 'video').length;
   const totalSize = files.reduce((sum, f) => sum + (f.file_size || 0), 0);
   const lastFile = files.length > 0 ? files[0] : null; // Ya vienen ordenados desc
+
   // Formatear tamaño total
   const formatSize = (bytes: number) => {
     if (bytes === 0) return '0 B';
@@ -20,10 +23,12 @@ export function SitelogGalleryCard({ files }: SitelogGalleryCardProps) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
   };
+
   // Formatear fecha del último archivo
   const lastUploadDate = lastFile
-    ? format(new Date(lastFile.created_at), "d 'de'MMMM, yyyy", { locale: es })
+    ? format(new Date(lastFile.created_at), "d 'de' MMMM, yyyy", { locale: es })
     : 'N/A';
+
   return (
     <Card className="w-full p-6" data-testid="card-sitelog-stats">
       {/* Header: Title/Value on left, KPIs on right */}
@@ -52,6 +57,7 @@ export function SitelogGalleryCard({ files }: SitelogGalleryCardProps) {
               </p>
             </div>
           </div>
+
           {/* Videos */}
           <div className="flex items-center gap-2" data-testid="stat-videos">
             <Video className="h-4 w-4 text-muted-foreground" />
@@ -62,6 +68,7 @@ export function SitelogGalleryCard({ files }: SitelogGalleryCardProps) {
               </p>
             </div>
           </div>
+
           {/* Total Size */}
           <div className="flex items-center gap-2" data-testid="stat-size">
             <HardDrive className="h-4 w-4 text-muted-foreground" />
@@ -72,6 +79,7 @@ export function SitelogGalleryCard({ files }: SitelogGalleryCardProps) {
               </p>
             </div>
           </div>
+
           {/* Last Upload */}
           <div className="flex items-center gap-2" data-testid="stat-last-upload">
             <Clock className="h-4 w-4 text-muted-foreground" />

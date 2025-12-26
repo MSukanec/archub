@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { UserCog, Trash2 } from 'lucide-react'
 import { parseLocalDate, formatDateForDB } from '@/lib/date-utils'
+
 import { FormModalLayout } from '@/components/modal'
 import { FormModalHeader } from '@/components/modal'
 import { FormModalFooter } from '@/components/modal'
@@ -17,9 +18,11 @@ import { es } from 'date-fns/locale'
 import { CalendarIcon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
+
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { usePersonnelDetail, useLaborTypes, useUpdatePersonnel } from '@/features/personnel/hooks'
+
 const personnelDataSchema = z.object({
   start_date: z.date().nullable(),
   end_date: z.date().nullable(),
@@ -36,13 +39,16 @@ const personnelDataSchema = z.object({
   message: "La fecha de salida debe ser posterior a la fecha de inicio",
   path: ["end_date"]
 })
+
 type PersonnelDataForm = z.infer<typeof personnelDataSchema>
+
 interface PersonnelDataModalProps {
   modalData?: {
     personnelRecord?: any
   }
   onClose: () => void
 }
+
 export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalProps) {
   const { toast } = useToast()
   const { data: currentUser } = useCurrentUser()
@@ -50,10 +56,12 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
   const personnelRecordId = modalData?.personnelRecord?.id
   const projectId = currentUser?.preferences?.last_project_id
   const organizationId = currentUser?.organization?.id
+
   // Use feature hooks instead of direct Supabase queries
   const { data: personnelRecord, isLoading: personnelLoading } = usePersonnelDetail(personnelRecordId)
   const { data: laborTypes = [] } = useLaborTypes()
   const updatePersonnel = useUpdatePersonnel()
+
   const form = useForm<PersonnelDataForm>({
     resolver: zodResolver(personnelDataSchema),
     defaultValues: {
@@ -64,6 +72,7 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
       notes: ''
     }
   })
+
   // Actualizar el formulario cuando los datos frescos se carguen
   React.useEffect(() => {
     if (personnelRecord) {
@@ -76,8 +85,10 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
       })
     }
   }, [personnelRecord, form])
+
   const handleSubmit = async (data: PersonnelDataForm) => {
     if (!personnelRecord?.id || !organizationId) return
+
     try {
       await updatePersonnel.mutateAsync({
         personnelId: personnelRecord.id,
@@ -99,11 +110,14 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
       console.error('Error updating personnel:', error)
     }
   }
+
   const isLoading = updatePersonnel.isPending || personnelLoading
+
   // Get contact display name
   const contactDisplayName = personnelRecord?.contact?.first_name || personnelRecord?.contact?.last_name
     ? `${personnelRecord.contact.first_name || ''} ${personnelRecord.contact.last_name || ''}`.trim()
     : personnelRecord?.contact?.full_name || 'Sin nombre'
+
   // Mostrar loading mientras se cargan los datos frescos
   if (personnelLoading) {
     return (
@@ -127,6 +141,7 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
       />
     )
   }
+
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -135,6 +150,7 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
           <p className="text-xs text-muted-foreground mb-1">Personal</p>
           <p className="font-medium">{contactDisplayName}</p>
         </div>
+
         {/* Fechas - Inline */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
@@ -172,6 +188,7 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="end_date"
@@ -208,6 +225,7 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
             )}
           />
         </div>
+
         {/* Estado y Tipo de Mano de Obra - Inline */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
@@ -234,6 +252,7 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="labor_type_id"
@@ -262,6 +281,7 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
             )}
           />
         </div>
+
         {/* Notas */}
         <FormField
           control={form.control}
@@ -284,6 +304,7 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
       </form>
     </Form>
   )
+
   const headerContent = (
     <FormModalHeader
       title="Editar Datos de Personal"
@@ -291,6 +312,7 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
       icon={UserCog}
     />
   )
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -301,6 +323,7 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
       showLoadingSpinner={isLoading}
     />
   )
+
   return (
     <FormModalLayout
       columns={1}

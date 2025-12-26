@@ -11,13 +11,15 @@ import { Loader2, Lock, Briefcase, Package, HardHat, ArrowRight } from "lucide-r
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+
 interface ModeOption {
-  type: 'professional'| 'provider'| 'worker';
+  type: 'professional' | 'provider' | 'worker';
   title: string;
   description: string;
   icon: typeof Briefcase;
   available: boolean;
 }
+
 const modeOptions: ModeOption[] = [
   {
     type: "professional",
@@ -41,6 +43,7 @@ const modeOptions: ModeOption[] = [
     available: false,
   }
 ];
+
 export default function SelectMode() {
   const [, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
@@ -49,10 +52,12 @@ export default function SelectMode() {
   const { toast } = useToast();
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
   const [hasFinished, setHasFinished] = useState(false);
+
   const updateUserTypeMutation = useMutation({
     mutationFn: async (userType: string) => {
       if (!userData?.user?.id) throw new Error('Usuario no encontrado');
       if (!supabase) throw new Error('Supabase no está configurado');
+
       const { error } = await supabase
         .from('user_preferences')
         .update({
@@ -62,13 +67,16 @@ export default function SelectMode() {
         })
         .eq('user_id', userData.user.id)
         .select();
+
       if (error) throw error;
       return { success: true };
     },
     onMutate: async (userType: string) => {
       setCompletingOnboarding(true);
       await queryClient.cancelQueries({ queryKey: ['current-user'] });
+
       const previousUserData = queryClient.getQueryData(['current-user']);
+
       queryClient.setQueryData(['current-user'], (oldData: any) => {
         if (!oldData) return oldData;
         return {
@@ -80,6 +88,7 @@ export default function SelectMode() {
           }
         };
       });
+
       return { previousUserData };
     },
     onSuccess: () => {
@@ -105,6 +114,7 @@ export default function SelectMode() {
       });
     },
   });
+
   const handleModeSelect = (modeType: string, isAvailable: boolean) => {
     if (!isAvailable) {
       toast({
@@ -113,6 +123,7 @@ export default function SelectMode() {
       });
       return;
     }
+
     if (hasFinished || updateUserTypeMutation.isPending) {
       return;
     }
@@ -123,8 +134,10 @@ export default function SelectMode() {
     
     updateUserTypeMutation.mutate(modeType);
   };
+
   const availableModes = modeOptions.filter(m => m.available);
   const upcomingModes = modeOptions.filter(m => !m.available);
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6 md:p-12">
       <div className="w-full max-w-6xl">
@@ -137,6 +150,7 @@ export default function SelectMode() {
             Elige cómo deseas usar Seencel. Podrás cambiar de modo en cualquier momento desde tu perfil.
           </p>
         </div>
+
         {/* All Modes Grid - 3 columns */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {availableModes.map((mode) => {
@@ -151,8 +165,8 @@ export default function SelectMode() {
                 className={`
                   relative overflow-hidden cursor-pointer transition-all duration-300
                   hover:border-foreground/40 hover:shadow-lg
-                  ${isSelected ? 'border-foreground shadow-lg': 'border-border'}
-                  ${isLoading ? 'opacity-50 pointer-events-none': ''}
+                  ${isSelected ? 'border-foreground shadow-lg' : 'border-border'}
+                  ${isLoading ? 'opacity-50 pointer-events-none' : ''}
                 `}
                 data-testid={`mode-select-${mode.type}`}
               >
@@ -160,28 +174,33 @@ export default function SelectMode() {
                 <div className="absolute top-0 right-0 w-32 h-32 opacity-5">
                   <Icon className="w-full h-full" strokeWidth={1} />
                 </div>
+
                 <div className="p-6 relative">
                   {/* Badge */}
                   <Badge 
                     className="mb-4 border-0 text-white"
-                    style={{ backgroundColor: 'var(--accent)'}}
+                    style={{ backgroundColor: 'var(--accent)' }}
                   >
                     Disponible
                   </Badge>
+
                   {/* Icon */}
                   <div className="mb-4">
                     <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
                       <Icon className="w-6 h-6 text-foreground" strokeWidth={1.5} />
                     </div>
                   </div>
+
                   {/* Title */}
                   <h2 className="text-2xl font-semibold mb-2">
                     {mode.title}
                   </h2>
+
                   {/* Description */}
                   <p className="text-muted-foreground leading-relaxed mb-6">
                     {mode.description}
                   </p>
+
                   {/* Action Button */}
                   <Button 
                     variant="default" 
@@ -218,6 +237,7 @@ export default function SelectMode() {
                 <div className="absolute top-0 right-0 w-24 h-24 opacity-5">
                   <Icon className="w-full h-full" strokeWidth={1} />
                 </div>
+
                 <div className="p-6 relative">
                   {/* Badge */}
                   <Badge 
@@ -227,16 +247,19 @@ export default function SelectMode() {
                     <Lock className="w-3 h-3 mr-1" />
                     Próximamente
                   </Badge>
+
                   {/* Icon */}
                   <div className="mb-4">
                     <div className="w-12 h-12 rounded-lg bg-muted/50 flex items-center justify-center">
                       <Icon className="w-6 h-6 text-muted-foreground" strokeWidth={1.5} />
                     </div>
                   </div>
+
                   {/* Title */}
                   <h2 className="text-xl font-semibold mb-2">
                     {mode.title}
                   </h2>
+
                   {/* Description */}
                   <p className="text-muted-foreground text-sm leading-relaxed">
                     {mode.description}

@@ -12,11 +12,14 @@ import {
   createMissingProjectDescription,
   createMissingPersonnelDescription,
 } from './micro/adapter';
+
 const FEATURE_TAG = 'finances';
+
 const entityLabels = {
   singular: 'movimiento',
   plural: 'movimientos',
 };
+
 export const clientPaymentsWithoutClientRule: DataHealthRule<NormalizedPayment> = createFeatureRule({
   ruleId: 'client-payments-without-client',
   featureTag: FEATURE_TAG,
@@ -37,6 +40,7 @@ export const clientPaymentsWithoutClientRule: DataHealthRule<NormalizedPayment> 
     targetIds: affectedIds,
   }),
 });
+
 export const paymentsWithoutProjectRule: DataHealthRule<NormalizedPayment> = createFeatureRule({
   ruleId: 'payments-without-project',
   featureTag: FEATURE_TAG,
@@ -60,6 +64,7 @@ export const paymentsWithoutProjectRule: DataHealthRule<NormalizedPayment> = cre
     targetIds: affectedIds,
   }),
 });
+
 export const personnelPaymentsWithoutPersonnelRule: DataHealthRule<NormalizedPayment> = createFeatureRule({
   ruleId: 'personnel-payments-without-personnel',
   featureTag: FEATURE_TAG,
@@ -78,6 +83,7 @@ export const personnelPaymentsWithoutPersonnelRule: DataHealthRule<NormalizedPay
     targetIds: affectedIds,
   }),
 });
+
 export const financesInvalidExchangeRateRule: DataHealthRule<NormalizedPayment> = createFeatureRule({
   ruleId: 'finances-invalid-exchange-rate',
   featureTag: FEATURE_TAG,
@@ -95,6 +101,7 @@ export const financesInvalidExchangeRateRule: DataHealthRule<NormalizedPayment> 
     targetIds: affectedIds,
   }),
 });
+
 export const allFinancesRules: DataHealthRule<NormalizedPayment>[] = [
   clientPaymentsWithoutClientRule,
   personnelPaymentsWithoutPersonnelRule,

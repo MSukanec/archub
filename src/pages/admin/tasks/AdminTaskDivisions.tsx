@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Plus, Tag, Filter, X, TreePine } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+
 import { HierarchicalTree } from '@/components/shared/trees/HierarchicalTree';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
+
 interface CategoryTreeNode {
   id: string;
   name: string;
@@ -15,24 +18,29 @@ interface CategoryTreeNode {
   parent_id?: string | null;
   order?: number;
 }
+
 import { useTaskDivisionsAdmin, useAllTaskDivisions, useDeleteTaskDivision, useUpdateTaskDivisionsOrder, useUpdateTaskDivision, TaskDivisionAdmin } from '@/hooks/use-task-divisions-admin';
 import { useGlobalModalStore } from '@/components/modal';
 import { toast } from '@/hooks/use-toast';
+
 const AdminTaskDivisions = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   
   // New modal system
   const { openModal } = useGlobalModalStore();
+
   const { data: divisions = [], isLoading, error, isError, refetch } = useTaskDivisionsAdmin();
   const { data: allDivisions = [] } = useAllTaskDivisions();
   const updateDivisionsOrderMutation = useUpdateTaskDivisionsOrder();
   const updateTaskDivisionMutation = useUpdateTaskDivision();
   const deleteTaskDivisionMutation = useDeleteTaskDivision();
+
   // Debug query state (only log errors)
   if (isError) {
     console.error('❌ AdminDivisions error:', error);
   }
+
   // Auto-expand divisions that have children (only on initial load)
   // Note: task_divisions are flat, so this won't do much but kept for compatibility
   React.useEffect(() => {
@@ -56,9 +64,11 @@ const AdminTaskDivisions = () => {
       }
     }
   }, [divisions, expandedCategories.size]);
+
   const handleSearch = (term: string) => {
     setSearchTerm(term);
   };
+
   const toggleCategoryExpansion = (divisionId: string) => {
     setExpandedCategories(prev => {
       const newSet = new Set(prev);
@@ -70,6 +80,7 @@ const AdminTaskDivisions = () => {
       return newSet;
     });
   };
+
   const handleDeleteDivision = (divisionId: string, divisionName: string) => {
     openModal('delete-confirmation', {
       title: "Eliminar división",
@@ -87,6 +98,7 @@ const AdminTaskDivisions = () => {
       }
     });
   };
+
   const handleEditDivision = (division: CategoryTreeNode) => {
     console.log('🔧 Editing division:', { division, divisionsLength: divisions.length });
     openModal('task-division', { 
@@ -95,9 +107,11 @@ const AdminTaskDivisions = () => {
       editingDivision: division 
     });
   };
+
   const handleCreateDivision = () => {
     openModal('task-division', { isEditing: false });
   };
+
   const handleReorderDivisions = async (reorderedDivisions: CategoryTreeNode[]) => {
     try {
       // Prepare the data for the API call
@@ -105,11 +119,13 @@ const AdminTaskDivisions = () => {
         id: division.id,
         order: index + 1
       }));
+
       await updateDivisionsOrderMutation.mutateAsync(divisionsWithOrder);
     } catch (error) {
       console.error('Error reordering divisions:', error);
     }
   };
+
   const handleParentChange = async (childId: string, newParentId: string | null) => {
     try {
       await updateTaskDivisionMutation.mutateAsync({
@@ -136,9 +152,11 @@ const AdminTaskDivisions = () => {
       });
     }
   };
+
   // Filter divisions based on search term
   const filteredDivisions = React.useMemo(() => {
     if (!searchTerm) return divisions;
+
     const filterDivisions = (divs: TaskDivisionAdmin[]): TaskDivisionAdmin[] => {
       return divs.filter(div => {
         const matchesSearch = div.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -158,8 +176,10 @@ const AdminTaskDivisions = () => {
         children: div.children ? filterDivisions(div.children) : []
       }));
     };
+
     return filterDivisions(divisions);
   }, [divisions, searchTerm]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -167,6 +187,7 @@ const AdminTaskDivisions = () => {
       </div>
     );
   }
+
   return (
     <div>
       <Card>
@@ -175,7 +196,7 @@ const AdminTaskDivisions = () => {
             <div className="text-center py-12">
               <TreePine className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium text-muted-foreground mb-2">
-                {searchTerm ? 'No se encontraron divisiones': 'No hay divisiones creadas'}
+                {searchTerm ? 'No se encontraron divisiones' : 'No hay divisiones creadas'}
               </h3>
               <p className="text-sm text-muted-foreground mb-4">
                 {searchTerm 
@@ -214,4 +235,5 @@ const AdminTaskDivisions = () => {
     </div>
   );
 }
+
 export default AdminTaskDivisions;

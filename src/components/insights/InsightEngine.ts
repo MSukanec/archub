@@ -1,5 +1,6 @@
 import { type Insight, type InsightContext, type InsightRule, type CategoryData, type PaymentsByConceptData, type MonthlyFinancialData, type ProjectFinancialData } from './types';
 import { allInsightRules, financialInsightRules } from './insightRules';
+
 /**
  * Ejecuta un conjunto de reglas custom contra el contexto.
  * Útil para dashboards que necesitan reglas específicas.
@@ -22,6 +23,7 @@ export function runInsightRules(
   
   return insights.slice(0, maxInsights);
 }
+
 /**
  * Genera insights usando las reglas por defecto.
  * Wrapper conveniente sobre runInsightRules.
@@ -29,9 +31,11 @@ export function runInsightRules(
 export function generateInsights(context: InsightContext, maxInsights: number = 3): Insight[] {
   return runInsightRules(context, allInsightRules, maxInsights);
 }
+
 export function generateFinancialInsights(context: InsightContext, maxInsights: number = 3): Insight[] {
   return runInsightRules(context, financialInsightRules, maxInsights);
 }
+
 export function buildInsightContext(params: {
   totalGasto: number;
   previousPeriodGasto: number;

@@ -3,12 +3,15 @@ import { motion } from 'framer-motion'
 import { Building } from 'lucide-react'
 import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { useNavigationStore } from '@/stores/navigationStore'
+
 export default function ConstructionDashboard() {
   const { setSidebarContext } = useNavigationStore()
+
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('construction')
   }, [setSidebarContext])
+
   return (
     <Layout 
       wide

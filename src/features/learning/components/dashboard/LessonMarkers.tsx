@@ -6,27 +6,33 @@ import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import type { CourseLessonNote } from '@shared/schema';
+
 interface LessonMarkersProps {
   lessonId: string;
   vimeoPlayer?: any | null;
   renderHeader?: (addButton: React.ReactNode) => React.ReactNode;
 }
+
 interface MarkerWithSaveStatus extends CourseLessonNote {
   isSaving?: boolean;
 }
+
 export function LessonMarkers({ lessonId, vimeoPlayer, renderHeader }: LessonMarkersProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const { toast } = useToast();
   const debounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+
   // Fetch markers with React Query (optimized backend endpoint)
   const { data: markers = [], isLoading } = useQuery<CourseLessonNote[]>({
     queryKey: [`/api/lessons/${lessonId}/markers`],
     enabled: !!lessonId,
     staleTime: 0, // Always refetch on invalidation
   });
+
   // Track current video time
   useEffect(() => {
     if (!vimeoPlayer) return;
+
     const updateTime = async () => {
       try {
         const time = await vimeoPlayer.getCurrentTime();
@@ -34,15 +40,18 @@ export function LessonMarkers({ lessonId, vimeoPlayer, renderHeader }: LessonMar
       } catch (error) {
       }
     };
+
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, [vimeoPlayer]);
+
   const formatTime = (seconds: number | null): string => {
     if (seconds === null) return '0:00';
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
   // Create marker mutation
   const createMarkerMutation = useMutation({
     mutationFn: async (time_sec: number) => {
@@ -66,6 +75,7 @@ export function LessonMarkers({ lessonId, vimeoPlayer, renderHeader }: LessonMar
       });
     }
   });
+
   // Update marker mutation
   const updateMarkerMutation = useMutation({
     mutationFn: async ({ markerId, body, is_pinned }: { markerId: string; body?: string; is_pinned?: boolean }) => {
@@ -85,6 +95,7 @@ export function LessonMarkers({ lessonId, vimeoPlayer, renderHeader }: LessonMar
       });
     }
   });
+
   // Delete marker mutation
   const deleteMarkerMutation = useMutation({
     mutationFn: async (markerId: string) => {
@@ -105,11 +116,14 @@ export function LessonMarkers({ lessonId, vimeoPlayer, renderHeader }: LessonMar
       });
     }
   });
+
   const handleAddMarker = async () => {
     if (!vimeoPlayer) return;
+
     try {
       const time = await vimeoPlayer.getCurrentTime();
       const roundedTime = Math.floor(time);
+
       // Check if marker already exists at this time
       const existingMarker = markers.find(m => m.time_sec === roundedTime);
       if (existingMarker) {
@@ -120,30 +134,37 @@ export function LessonMarkers({ lessonId, vimeoPlayer, renderHeader }: LessonMar
         });
         return;
       }
+
       createMarkerMutation.mutate(roundedTime);
     } catch (error) {
     }
   };
+
   const handleBodyChange = (markerId: string, newBody: string) => {
     // Clear existing timer for this marker
     const existingTimer = debounceTimersRef.current.get(markerId);
     if (existingTimer) {
       clearTimeout(existingTimer);
     }
+
     // Optimistic update in cache
     queryClient.setQueryData<CourseLessonNote[]>(
       [`/api/lessons/${lessonId}/markers`],
       (old = []) => old.map(m => m.id === markerId ? { ...m, body: newBody } : m)
     );
+
     // Set new timer for debounced save
     const timer = setTimeout(() => {
       updateMarkerMutation.mutate({ markerId, body: newBody });
       debounceTimersRef.current.delete(markerId);
     }, 600);
+
     debounceTimersRef.current.set(markerId, timer);
   };
+
   const handleSeekTo = async (timeSec: number | null) => {
     if (!vimeoPlayer || timeSec === null) return;
+
     try {
       await vimeoPlayer.setCurrentTime(timeSec);
       toast({
@@ -153,9 +174,11 @@ export function LessonMarkers({ lessonId, vimeoPlayer, renderHeader }: LessonMar
     } catch (error) {
     }
   };
+
   const handleDeleteMarker = (markerId: string) => {
     deleteMarkerMutation.mutate(markerId);
   };
+
   if (isLoading) {
     return (
       <div className="space-y-4 animate-pulse">
@@ -164,6 +187,7 @@ export function LessonMarkers({ lessonId, vimeoPlayer, renderHeader }: LessonMar
       </div>
     );
   }
+
   // Expose the add marker function and current time for parent components
   const addMarkerButton = (
     <Button
@@ -178,6 +202,7 @@ export function LessonMarkers({ lessonId, vimeoPlayer, renderHeader }: LessonMar
       <span>en {formatTime(currentTime)}</span>
     </Button>
   );
+
   return (
     <div className="space-y-4" data-testid="lesson-markers-container">
       {renderHeader && renderHeader(addMarkerButton)}
@@ -209,6 +234,7 @@ export function LessonMarkers({ lessonId, vimeoPlayer, renderHeader }: LessonMar
                     {formatTime(marker.time_sec)}
                   </span>
                 </button>
+
                 <Button
                   size="icon"
                   variant="ghost"
@@ -221,6 +247,7 @@ export function LessonMarkers({ lessonId, vimeoPlayer, renderHeader }: LessonMar
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
+
               {/* Segunda fila: Input de texto */}
               <Input
                 value={marker.body}

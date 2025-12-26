@@ -27,9 +27,12 @@
  *   )
  * }
  */
+
 type NullableId = string | null | undefined;
+
 export const capitalKeys = {
   all: ['capital'] as const,
+
   // Participants
   participants: () => [...capitalKeys.all, 'participants'] as const,
   participantsList: (organizationId: NullableId) =>
@@ -40,31 +43,37 @@ export const capitalKeys = {
     [...capitalKeys.all, 'contacts-for-partner', organizationId ?? undefined] as const,
   partnerContactIds: (organizationId: NullableId) =>
     [...capitalKeys.all, 'partner-contact-ids', organizationId ?? undefined] as const,
+
   // Contributions
   contributions: () => [...capitalKeys.all, 'contributions'] as const,
   contributionsList: (organizationId: NullableId, projectId?: NullableId) =>
     [...capitalKeys.contributions(), organizationId ?? undefined, projectId ?? undefined] as const,
   contribution: (contributionId: NullableId) =>
     [...capitalKeys.contributions(), contributionId ?? undefined] as const,
+
   // Withdrawals
   withdrawals: () => [...capitalKeys.all, 'withdrawals'] as const,
   withdrawalsList: (organizationId: NullableId, projectId?: NullableId) =>
     [...capitalKeys.withdrawals(), organizationId ?? undefined, projectId ?? undefined] as const,
   withdrawal: (withdrawalId: NullableId) =>
     [...capitalKeys.withdrawals(), withdrawalId ?? undefined] as const,
+
   // Adjustments
   adjustments: () => [...capitalKeys.all, 'adjustments'] as const,
   adjustmentsList: (organizationId: NullableId, projectId?: NullableId) =>
     [...capitalKeys.adjustments(), organizationId ?? undefined, projectId ?? undefined] as const,
   adjustment: (adjustmentId: NullableId) =>
     [...capitalKeys.adjustments(), adjustmentId ?? undefined] as const,
+
   // Unified movements (for dashboard)
   unifiedMovements: () => [...capitalKeys.all, 'unified-movements'] as const,
   partnerMovements: (organizationId?: NullableId, projectId?: NullableId) =>
     [...capitalKeys.all, 'partner-movements', organizationId, projectId] as const,
+
   // KPI View (ownership ratios)
   kpi: () => [...capitalKeys.all, 'kpi'] as const,
   kpiList: (organizationId: NullableId) =>
     [...capitalKeys.kpi(), organizationId ?? undefined] as const,
 } as const;
+
 export type CapitalQueryKey = readonly (string | undefined)[];

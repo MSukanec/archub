@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
+
 export interface TaskDivisionAdmin {
   id: string;
   name: string;
@@ -15,6 +16,7 @@ export interface TaskDivisionAdmin {
   updated_at?: string;
   children?: TaskDivisionAdmin[]; // Keep for compatibility with HierarchicalTree
 }
+
 export interface CreateTaskDivisionData {
   name: string;
   name_en?: string;
@@ -25,27 +27,33 @@ export interface CreateTaskDivisionData {
   is_system?: boolean;
   order?: number;
 }
+
 export interface UpdateTaskDivisionData extends CreateTaskDivisionData {
   id: string;
 }
+
 export function useAllTaskDivisions() {
   return useQuery({
     queryKey: ['all-task-divisions'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase client not initialized');
+
       const { data: divisions, error } = await supabase
         .from('task_divisions')
         .select('*')
         .order('order', { ascending: true, nullsFirst: false })
         .order('name');
+
       if (error) {
         console.error('Error fetching all divisions:', error);
         throw error;
       }
+
       return divisions || [];
     },
   });
 }
+
 export function useTaskDivisionsAdmin() {
   return useQuery({
     queryKey: ['task-divisions-admin'],
@@ -55,15 +63,18 @@ export function useTaskDivisionsAdmin() {
       if (!supabase) {
         throw new Error('Supabase client not initialized');
       }
+
       // Fetch divisions - simplified since they're not hierarchical
       const { data: divisions, error: divisionsError } = await supabase
         .from('task_divisions')
         .select('*')
         .order('order', { ascending: true, nullsFirst: false })
         .order('name');
+
       if (divisionsError) {
         throw divisionsError;
       }
+
       // Build hierarchical structure from flat data using parent_id
       const buildHierarchy = (items: any[], parentId: string | null = null): TaskDivisionAdmin[] => {
         return items
@@ -74,13 +85,16 @@ export function useTaskDivisionsAdmin() {
           }))
           .sort((a, b) => (a.order || 0) - (b.order || 0));
       };
+
       const divisionsWithChildren = buildHierarchy(divisions);
       return divisionsWithChildren;
     },
   });
 }
+
 export function useCreateTaskDivision() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (divisionData: CreateTaskDivisionData) => {
       if (!supabase) throw new Error('Supabase client not initialized');
@@ -90,10 +104,12 @@ export function useCreateTaskDivision() {
         .insert([divisionData])
         .select()
         .single();
+
       if (error) {
         console.error('Error creating division:', error);
         throw error;
       }
+
       return data;
     },
     onSuccess: () => {
@@ -114,8 +130,10 @@ export function useCreateTaskDivision() {
     },
   });
 }
+
 export function useUpdateTaskDivision() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async ({ id, ...updateData }: UpdateTaskDivisionData) => {
       if (!supabase) throw new Error('Supabase client not initialized');
@@ -126,10 +144,12 @@ export function useUpdateTaskDivision() {
         .eq('id', id)
         .select()
         .single();
+
       if (error) {
         console.error('Error updating division:', error);
         throw error;
       }
+
       return data;
     },
     onSuccess: () => {
@@ -150,8 +170,10 @@ export function useUpdateTaskDivision() {
     },
   });
 }
+
 export function useDeleteTaskDivision() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (id: string) => {
       if (!supabase) throw new Error('Supabase client not initialized');
@@ -160,6 +182,7 @@ export function useDeleteTaskDivision() {
         .from('task_divisions')
         .delete()
         .eq('id', id);
+
       if (error) {
         console.error('Error deleting division:', error);
         throw error;
@@ -183,8 +206,10 @@ export function useDeleteTaskDivision() {
     },
   });
 }
+
 export function useUpdateTaskDivisionsOrder() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (divisions: { id: string; order: number }[]) => {
       if (!supabase) throw new Error('Supabase client not initialized');
@@ -195,11 +220,13 @@ export function useUpdateTaskDivisionsOrder() {
           .from('task_divisions')
           .update({ order: division.order })
           .eq('id', division.id);
+
         if (error) {
           console.error('Error updating division order:', error);
           throw error;
         }
       });
+
       // Wait for all updates to complete
       await Promise.all(updates);
     },

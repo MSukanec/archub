@@ -1,8 +1,10 @@
 import { UseFormReturn } from 'react-hook-form'
+
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CurrencyAmountField } from '@/components/shared/fields/CurrencyAmountField'
+
 // Tipo importado del componente principal
 interface TransferForm {
   movement_date: Date
@@ -15,6 +17,7 @@ interface TransferForm {
   wallet_id_to: string
   amount: number
 }
+
 interface Props {
   form: UseFormReturn<TransferForm>
   currencies: any[]
@@ -22,9 +25,11 @@ interface Props {
   members: any[]
   concepts: any[]
 }
+
 export function TransferFields({ form, currencies, wallets, members, concepts }: Props) {
   return (
     <div className="space-y-4">
+
         {/* Billeteras Origen y Destino */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
@@ -51,6 +56,7 @@ export function TransferFields({ form, currencies, wallets, members, concepts }:
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="wallet_id_to"
@@ -76,6 +82,7 @@ export function TransferFields({ form, currencies, wallets, members, concepts }:
             )}
           />
         </div>
+
         {/* Moneda y Monto */}
         <div className="col-span-2">
           <FormItem>
@@ -101,6 +108,8 @@ export function TransferFields({ form, currencies, wallets, members, concepts }:
             <FormMessage />
           </FormItem>
         </div>
+
+
     </div>
   )
 }

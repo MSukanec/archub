@@ -15,6 +15,7 @@ import { CompactAvatarGroup } from '@/components/shared/CompactAvatarGroup';
 import { useMobile } from '@/hooks/use-mobile';
 import { usersKeys } from '@/core/query-keys';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
+
 function OrganizationCard({ 
   organization, 
   isSelected, 
@@ -25,10 +26,11 @@ function OrganizationCard({
   onSelect: (id: string) => void;
 }) {
   const { data: members = [] } = useOrganizationMembers(organization.id);
+
   return (
     <Card 
       className={`w-full cursor-pointer transition-all hover:shadow-sm border ${
-        isSelected ? 'border-[var(--accent)] bg-[var(--accent-bg)]': ''
+        isSelected ? 'border-[var(--accent)] bg-[var(--accent-bg)]' : ''
       }`}
       onClick={(e) => {
         e.stopPropagation();
@@ -59,20 +61,21 @@ function OrganizationCard({
               {isSelected && (
                 <Badge 
                   className="text-xs text-white shrink-0" 
-                  style={{ backgroundColor: 'var(--accent)'}}
+                  style={{ backgroundColor: 'var(--accent)' }}
                 >
                   Activa
                 </Badge>
               )}
             </div>
           </div>
+
           <div className="shrink-0">
             {organization.plan ? (
               <Badge 
                 variant={
-                  organization.plan.name?.toLowerCase() === 'free'? 'plan-free':
-                  organization.plan.name?.toLowerCase() === 'pro'? 'plan-pro':
-                  organization.plan.name?.toLowerCase() === 'teams'? 'plan-teams':
+                  organization.plan.name?.toLowerCase() === 'free' ? 'plan-free' :
+                  organization.plan.name?.toLowerCase() === 'pro' ? 'plan-pro' :
+                  organization.plan.name?.toLowerCase() === 'teams' ? 'plan-teams' :
                   'plan-free'
                 }
                 className="text-xs"
@@ -85,6 +88,7 @@ function OrganizationCard({
               </Badge>
             )}
           </div>
+
           <div className="shrink-0">
             <CompactAvatarGroup 
               members={members} 
@@ -97,6 +101,7 @@ function OrganizationCard({
     </Card>
   );
 }
+
 export function UserOrganizationsView() {
   const { data: userData, isLoading } = useCurrentUser();
   const [, navigate] = useLocation();
@@ -104,6 +109,7 @@ export function UserOrganizationsView() {
   const queryClient = useQueryClient();
   const { setCurrentProject } = useNavigationStore();
   const isMobile = useMobile();
+
   const organizations = userData?.organizations || [];
   const currentOrganizationId = userData?.organization?.id;
   
@@ -112,6 +118,7 @@ export function UserOrganizationsView() {
     if (b.id === currentOrganizationId) return 1;
     return 0;
   });
+
   const switchOrganization = useMutation({
     mutationFn: async (organizationId: string) => {
       const { data, error } = await supabase
@@ -141,10 +148,12 @@ export function UserOrganizationsView() {
       });
     }
   });
+
   const handleSelect = (organizationId: string) => {
     if (organizationId === currentOrganizationId) return;
     switchOrganization.mutate(organizationId);
   };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -152,6 +161,7 @@ export function UserOrganizationsView() {
       </div>
     );
   }
+
   if (!userData?.user) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -159,6 +169,7 @@ export function UserOrganizationsView() {
       </div>
     );
   }
+
   return (
     <div className="space-y-6">
       <div className={isMobile ? "space-y-2" : "space-y-2"}>

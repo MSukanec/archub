@@ -6,9 +6,11 @@ import { allFinancesRules } from '../rules/finances-rules';
 import { dataHealthToInsights } from '../adapters/insights-adapter';
 import type { DataHealthContext, DataHealthResult, NormalizedPayment, DataIssue } from '../types';
 import type { InsightItem } from '@/components/dashboard/InsightCard';
+
 const paymentEngine = new DataHealthEngine(allPaymentRules);
 const capitalEngine = new DataHealthEngine(allCapitalRules);
 const financesEngine = new DataHealthEngine(allFinancesRules);
+
 export interface UseDataHealthOptions {
   organizationId: string;
   defaultCurrencyId?: string;
@@ -17,6 +19,7 @@ export interface UseDataHealthOptions {
   enabled?: boolean;
   filterTags?: string[];
 }
+
 export interface UseDataHealthResult {
   result: DataHealthResult | null;
   insights: InsightItem[];
@@ -25,6 +28,7 @@ export interface UseDataHealthResult {
   warningCount: number;
   infoCount: number;
 }
+
 export function normalizeGeneralCostPayment(payment: {
   id: string | number;
   amount: number | string;
@@ -47,14 +51,14 @@ export function normalizeGeneralCostPayment(payment: {
     label: payment.general_cost?.name 
       ? `${payment.general_cost.name} - ${payment.payment_date || 'Sin fecha'}`
       : `Pago #${payment.id}`,
-    amount: typeof payment.amount === 'string'? parseFloat(payment.amount) : payment.amount,
+    amount: typeof payment.amount === 'string' ? parseFloat(payment.amount) : payment.amount,
     amountInBase: payment.amount_in_base != null 
-      ? (typeof payment.amount_in_base === 'string'? parseFloat(payment.amount_in_base) : payment.amount_in_base)
+      ? (typeof payment.amount_in_base === 'string' ? parseFloat(payment.amount_in_base) : payment.amount_in_base)
       : null,
     currencyId: payment.currency_id,
     currencyCode: payment.currency?.code,
     exchangeRate: payment.exchange_rate != null 
-      ? (typeof payment.exchange_rate === 'string'? parseFloat(payment.exchange_rate) : payment.exchange_rate)
+      ? (typeof payment.exchange_rate === 'string' ? parseFloat(payment.exchange_rate) : payment.exchange_rate)
       : null,
     categoryId: payment.general_cost?.category?.id?.toString() ?? null,
     categoryName: payment.general_cost?.category?.name ?? null,
@@ -67,6 +71,7 @@ export function normalizeGeneralCostPayment(payment: {
     description: payment.description,
   };
 }
+
 export function useGeneralCostsDataHealth(
   payments: Array<{
     id: string | number;
@@ -88,10 +93,12 @@ export function useGeneralCostsDataHealth(
   options: UseDataHealthOptions
 ): UseDataHealthResult {
   const { organizationId, defaultCurrencyId, isMultiCurrency, enabled = true, filterTags } = options;
+
   const result = useMemo(() => {
     if (!enabled || payments.length === 0) {
       return null;
     }
+
     const normalizedPayments = payments.map(normalizeGeneralCostPayment);
     
     const ctx: DataHealthContext = {
@@ -101,12 +108,15 @@ export function useGeneralCostsDataHealth(
       locale: 'es-AR',
       dateToleranceDays: 0,
     };
+
     return paymentEngine.check(normalizedPayments, ctx, filterTags);
   }, [payments, organizationId, defaultCurrencyId, isMultiCurrency, enabled, filterTags]);
+
   const insights = useMemo(() => {
     if (!result) return [];
     return dataHealthToInsights(result);
   }, [result]);
+
   return {
     result,
     insights,
@@ -116,6 +126,7 @@ export function useGeneralCostsDataHealth(
     infoCount: result?.stats.bySeverity.info ?? 0,
   };
 }
+
 export function normalizeUnifiedMovement(movement: {
   id: string | number;
   amount: number | string;
@@ -150,12 +161,12 @@ export function normalizeUnifiedMovement(movement: {
     label: entityLabel 
       ? `${typeLabel}: ${entityLabel} - ${movement.payment_date || 'Sin fecha'}`
       : `${typeLabel} #${movement.id} - ${movement.payment_date || 'Sin fecha'}`,
-    amount: typeof movement.amount === 'string'? parseFloat(movement.amount) : movement.amount,
+    amount: typeof movement.amount === 'string' ? parseFloat(movement.amount) : movement.amount,
     amountInBase: null,
     currencyId: movement.currency_id,
     currencyCode: movement.currency?.code,
     exchangeRate: movement.exchange_rate != null 
-      ? (typeof movement.exchange_rate === 'string'? parseFloat(movement.exchange_rate) : movement.exchange_rate)
+      ? (typeof movement.exchange_rate === 'string' ? parseFloat(movement.exchange_rate) : movement.exchange_rate)
       : null,
     categoryId: null,
     categoryName: null,
@@ -171,12 +182,14 @@ export function normalizeUnifiedMovement(movement: {
     projectId: movement.project_id,
   };
 }
+
 export interface UseFinancesDataHealthResult extends UseDataHealthResult {
   affectedIds: Set<string | number>;
   affectedIdsByIssue: Map<string, Set<string | number>>;
   issues: DataIssue[];
   getAffectedIdsForIssue: (issueId: string) => Set<string | number>;
 }
+
 export function useFinancesDataHealth(
   movements: Array<{
     id: string | number;
@@ -198,10 +211,12 @@ export function useFinancesDataHealth(
   options: UseDataHealthOptions
 ): UseFinancesDataHealthResult {
   const { organizationId, defaultCurrencyId, isMultiCurrency, enabled = true } = options;
+
   const result = useMemo(() => {
     if (!enabled || movements.length === 0) {
       return null;
     }
+
     const normalizedMovements = movements.map(normalizeUnifiedMovement);
     
     const ctx: DataHealthContext = {
@@ -211,12 +226,15 @@ export function useFinancesDataHealth(
       locale: 'es-AR',
       dateToleranceDays: 0,
     };
+
     return financesEngine.check(normalizedMovements, ctx, ['finances']);
   }, [movements, organizationId, defaultCurrencyId, isMultiCurrency, enabled]);
+
   const insights = useMemo(() => {
     if (!result) return [];
     return dataHealthToInsights(result);
   }, [result]);
+
   const affectedIds = useMemo(() => {
     if (!result) return new Set<string | number>();
     const ids = new Set<string | number>();
@@ -229,6 +247,7 @@ export function useFinancesDataHealth(
     }
     return ids;
   }, [result]);
+
   const affectedIdsByIssue = useMemo(() => {
     const map = new Map<string, Set<string | number>>();
     if (!result) return map;
@@ -243,9 +262,11 @@ export function useFinancesDataHealth(
     }
     return map;
   }, [result]);
+
   const getAffectedIdsForIssue = useCallback((issueId: string): Set<string | number> => {
     return affectedIdsByIssue.get(issueId) || new Set();
   }, [affectedIdsByIssue]);
+
   return {
     result,
     insights,
@@ -259,9 +280,10 @@ export function useFinancesDataHealth(
     getAffectedIdsForIssue,
   };
 }
+
 export interface NormalizedCapitalTransaction {
   id: string;
-  type: 'contribution'| 'withdrawal';
+  type: 'contribution' | 'withdrawal';
   partnerName: string;
   walletId: string | null;
   walletName: string | null;
@@ -270,8 +292,9 @@ export interface NormalizedCapitalTransaction {
   currencyId: string;
   exchangeRate: number | null;
 }
+
 export function normalizeCapitalTransaction(tx: NormalizedCapitalTransaction): NormalizedPayment {
-  const typeLabel = tx.type === 'contribution'? 'Aporte': 'Retiro';
+  const typeLabel = tx.type === 'contribution' ? 'Aporte' : 'Retiro';
   
   return {
     id: tx.id,
@@ -292,21 +315,25 @@ export function normalizeCapitalTransaction(tx: NormalizedCapitalTransaction): N
     description: null,
   };
 }
+
 export interface UseCapitalDataHealthResult extends UseDataHealthResult {
   affectedIds: Set<string>;
   affectedIdsByIssue: Map<string, Set<string>>;
   issues: DataIssue[];
   getAffectedIdsForIssue: (issueId: string) => Set<string>;
 }
+
 export function useCapitalDataHealth(
   transactions: NormalizedCapitalTransaction[],
   options: UseDataHealthOptions
 ): UseCapitalDataHealthResult {
   const { organizationId, defaultCurrencyId, isMultiCurrency, enabled = true } = options;
+
   const result = useMemo(() => {
     if (!enabled || transactions.length === 0) {
       return null;
     }
+
     const normalizedTransactions = transactions.map(normalizeCapitalTransaction);
     
     const ctx: DataHealthContext = {
@@ -316,12 +343,15 @@ export function useCapitalDataHealth(
       locale: 'es-AR',
       dateToleranceDays: 0,
     };
+
     return capitalEngine.check(normalizedTransactions, ctx, ['capital']);
   }, [transactions, organizationId, defaultCurrencyId, isMultiCurrency, enabled]);
+
   const insights = useMemo(() => {
     if (!result) return [];
     return dataHealthToInsights(result);
   }, [result]);
+
   const affectedIds = useMemo(() => {
     if (!result) return new Set<string>();
     const ids = new Set<string>();
@@ -334,6 +364,7 @@ export function useCapitalDataHealth(
     }
     return ids;
   }, [result]);
+
   const affectedIdsByIssue = useMemo(() => {
     const map = new Map<string, Set<string>>();
     if (!result) return map;
@@ -348,9 +379,11 @@ export function useCapitalDataHealth(
     }
     return map;
   }, [result]);
+
   const getAffectedIdsForIssue = useCallback((issueId: string): Set<string> => {
     return affectedIdsByIssue.get(issueId) || new Set();
   }, [affectedIdsByIssue]);
+
   return {
     result,
     insights,

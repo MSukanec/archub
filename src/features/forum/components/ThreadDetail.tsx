@@ -32,14 +32,16 @@ import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
 import { ImageLightbox, useImageLightbox } from '@/components/shared/viewers/ImageLightbox';
+
 function getInitials(name: string): string {
   return name
-    .split('')
+    .split(' ')
     .slice(0, 2)
     .map((word) => word[0])
     .join('')
     .toUpperCase();
 }
+
 function ThreadDetailSkeleton() {
   return (
     <div className="space-y-4" data-testid="thread-detail-skeleton">
@@ -71,10 +73,12 @@ function ThreadDetailSkeleton() {
     </div>
   );
 }
+
 interface ThreadDetailProps {
   threadSlug: string;
   onBack?: () => void;
 }
+
 export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -86,12 +90,14 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
   const deletePostMutation = useDeletePost();
   const toggleReactionMutation = useToggleReaction();
   const incrementViewMutation = useIncrementViewCount();
+
   const [replyContent, setReplyContent] = useState('');
+
   // Calculate image attachments for lightbox - must be before any conditional returns
   const imageAttachments = useMemo(() => {
     if (!thread?.attachments) return [];
     return thread.attachments
-      .filter(att => att.media_file?.file_type === 'image'&& att.media_file?.file_url)
+      .filter(att => att.media_file?.file_type === 'image' && att.media_file?.file_url)
       .map(att => ({
         id: att.id,
         url: att.media_file!.file_url!,
@@ -101,14 +107,17 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
   
   const imageUrls = useMemo(() => imageAttachments.map(img => img.url), [imageAttachments]);
   const { isOpen: isLightboxOpen, currentIndex, openLightbox, closeLightbox } = useImageLightbox(imageUrls);
+
   useEffect(() => {
     if (thread?.id) {
       incrementViewMutation.mutate(thread.id);
     }
   }, [thread?.id]);
+
   const handleSubmitReply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!replyContent.trim() || !thread) return;
+
     try {
       await createPostMutation.mutateAsync({
         thread_id: thread.id,
@@ -128,6 +137,7 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
       });
     }
   };
+
   const handleLikeThread = () => {
     if (!thread) return;
     toggleReactionMutation.mutate({
@@ -135,12 +145,14 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
       item_id: thread.id,
     });
   };
+
   const handleLikePost = (postId: string) => {
     toggleReactionMutation.mutate({
       item_type: 'post',
       item_id: postId,
     });
   };
+
   const handleEditThread = () => {
     if (!thread) return;
     openModal('forum-thread', {
@@ -153,6 +165,7 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
       mode: 'edit',
     });
   };
+
   const handleEditPost = (post: ForumPostWithAuthor) => {
     openModal('forum-post', { 
       threadId: thread?.id, 
@@ -160,6 +173,7 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
       post 
     });
   };
+
   const handleDeletePost = (postId: string) => {
     openModal('delete-confirmation', {
       mode: 'delete',
@@ -175,9 +189,11 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
       },
     });
   };
+
   if (isLoading) {
     return <ThreadDetailSkeleton />;
   }
+
   if (!thread) {
     return (
       <div className="text-center py-12">
@@ -191,6 +207,7 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
       </div>
     );
   }
+
   const authorName = thread.author?.full_name || 'Anónimo';
   const organizationName = thread.organization?.name;
   const contentText = typeof thread.content === 'string'
@@ -199,6 +216,7 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
   const likeCount = reactions?.thread?.likes ?? 0;
   const isLiked = reactions?.thread?.userReaction === 'like';
   const isThreadAuthor = userData?.user?.id && thread.author_id === userData.user.id;
+
   return (
     <div className="space-y-4" data-testid="thread-detail">
       {onBack && (
@@ -207,6 +225,7 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
           Volver
         </Button>
       )}
+
       <Card>
         <CardContent className="p-6">
           <div className="flex items-start gap-4">
@@ -214,6 +233,7 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
               <AvatarImage src={thread.author?.avatar_url || undefined} />
               <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
             </Avatar>
+
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-2">
                 {thread.is_pinned && (
@@ -230,9 +250,11 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
                   </Badge>
                 )}
               </div>
+
               <h1 className="text-xl font-semibold text-[var(--text-default)] mb-2">
                 {thread.title}
               </h1>
+
               <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] mb-4">
                 <span className="font-medium">{organizationName || authorName}</span>
                 {organizationName && <span>({authorName})</span>}
@@ -241,7 +263,7 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
                   {(() => {
                     const date = new Date(thread.created_at);
                     return isValid(date) 
-                      ? format(date, "d 'de'MMMM, yyyy 'a las'HH:mm", { locale: es })
+                      ? format(date, "d 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })
                       : 'Fecha no disponible';
                   })()}
                 </span>
@@ -251,12 +273,14 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
                   {thread.view_count || 0} vistas
                 </span>
               </div>
+
               {contentText && (
                 <div 
                   className="prose prose-sm dark:prose-invert max-w-none text-[var(--text-default)]"
                   dangerouslySetInnerHTML={{ __html: contentText }}
                 />
               )}
+
               {imageAttachments.length > 0 && (
                 <div className="mt-4">
                   <div className={cn(
@@ -283,6 +307,7 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
                   </div>
                 </div>
               )}
+
               <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[var(--card-border)]">
                 <Button
                   variant="ghost"
@@ -294,6 +319,7 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
                   <Heart className={cn('h-4 w-4', isLiked && 'fill-current')} />
                   <span>{likeCount}</span>
                 </Button>
+
                 {isThreadAuthor && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -319,11 +345,12 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
           </div>
         </CardContent>
       </Card>
+
       {thread.posts && thread.posts.length > 0 && (
         <Card>
           <CardHeader className="pb-0">
             <h2 className="text-sm font-medium text-[var(--text-default)]">
-              {thread.posts.length} {thread.posts.length === 1 ? 'respuesta': 'respuestas'}
+              {thread.posts.length} {thread.posts.length === 1 ? 'respuesta' : 'respuestas'}
             </h2>
           </CardHeader>
           <CardContent className="divide-y divide-[var(--card-border)]">
@@ -341,6 +368,7 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
           </CardContent>
         </Card>
       )}
+
       {!thread.is_locked && (
         <Card>
           <CardContent className="p-4">
@@ -359,13 +387,14 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
                   data-testid="submit-reply-button"
                 >
                   <Send className="h-4 w-4 mr-2" />
-                  {createPostMutation.isPending ? 'Enviando...': 'Responder'}
+                  {createPostMutation.isPending ? 'Enviando...' : 'Responder'}
                 </Button>
               </div>
             </form>
           </CardContent>
         </Card>
       )}
+
       {thread.is_locked && (
         <Card className="bg-[var(--muted-bg)]">
           <CardContent className="p-4 text-center">
@@ -376,6 +405,7 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
           </CardContent>
         </Card>
       )}
+
       {imageUrls.length > 0 && (
         <ImageLightbox
           images={imageUrls}

@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+
 export interface WalletLite {
   id: string
   name: string
   is_default: boolean
 }
+
 export const useWalletsLite = () => {
   return useQuery<WalletLite[]>({
     queryKey: ['wallets-lite'],

@@ -21,6 +21,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from "@/stores/projectContext";
 import { useMobile } from "@/hooks/use-mobile";
 import { PlanUpgradeModal } from "@/features/organization";
+
 interface PlanRestrictedProps {
   feature?: string;
   current?: number;
@@ -33,6 +34,7 @@ interface PlanRestrictedProps {
   modalDescription?: string;
   children: React.ReactNode;
 }
+
 export function PlanRestricted({
   feature,
   current,
@@ -51,6 +53,7 @@ export function PlanRestricted({
   const [, setLocation] = useLocation();
   const isMobile = useMobile();
   const [open, setOpen] = useState(false);
+
   // Determine if content is restricted
   // NOTE: Admins del sistema también están sujetos a las restricciones de plan
   const isRestricted = useMemo(() => {
@@ -69,15 +72,18 @@ export function PlanRestricted({
     }
     return false;
   }, [reason, selectedProjectId, feature, current, can, limit]);
+
   if (!isRestricted) {
     return <>{children}</>;
   }
+
   // Prepare plan info
   const organizationId = userData?.preferences?.last_organization_id;
   const currentOrganization = userData?.organizations?.find(
     (org) => org.id === organizationId
   );
   const currentPlan = currentOrganization?.plan?.name || "free";
+
   const getRequiredPlan = (): "pro" | "teams" => {
     if (!feature) return "pro";
     const teamsFeatures = [
@@ -90,6 +96,7 @@ export function PlanRestricted({
     }
     return "pro";
   };
+
   const requiredPlan = getRequiredPlan();
   const planColors = {
     pro: "hsl(213, 100%, 33%)",
@@ -97,6 +104,7 @@ export function PlanRestricted({
   };
   const planBgColor = planColors[requiredPlan];
   const planName = requiredPlan === "pro" ? "Pro" : "Teams";
+
   // NEW UPGRADE MODAL
   if (useUpgradeModal) {
     return (
@@ -138,6 +146,7 @@ export function PlanRestricted({
       </>
     );
   }
+
   // SMALL SIZE
   if (size === "small") {
     if (isMobile) {
@@ -219,6 +228,7 @@ export function PlanRestricted({
         </>
       );
     }
+
     // DESKTOP: Popover
     return (
       <Popover>
@@ -292,6 +302,7 @@ export function PlanRestricted({
       </Popover>
     );
   }
+
   // LARGE SIZE - with overlay
   return (
     <div className="relative w-full">
@@ -332,4 +343,5 @@ export function PlanRestricted({
     </div>
   );
 }
+
 export default PlanRestricted;

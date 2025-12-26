@@ -4,13 +4,16 @@
  * React Query mutation para actualizar un material existente.
  * Applies dual-cache invalidation strategy: invalidates both legacy and feature-based query keys.
  */
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateMaterial } from '../services/updateMaterial';
 import { MATERIALS_QUERY_KEYS } from '../constants';
 import { toast } from '@/hooks/use-toast';
 import type { UpdateMaterialData } from '../types';
+
 export function useUpdateMaterial() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateMaterialData }) => 
       updateMaterial(id, data),

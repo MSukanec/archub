@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
+import { 
   OrganizationMembersListView,
   OrganizationPermissionsView,
   OrganizationActivityLogsView,
@@ -17,7 +18,9 @@ import { useGlobalModalStore } from '@/components/modal';
 import { useLocation } from 'wouter';
 import { PlanRestricted } from "@/features/users";
 import { FEATURE_IMAGES } from '@/constants/images';
-type TabId = 'members'| 'permissions'| 'activity'| 'billing'| 'finances'| 'pdf';
+
+type TabId = 'members' | 'permissions' | 'activity' | 'billing' | 'finances' | 'pdf';
+
 export function OrganizationSettingsPage() {
   const { setSidebarLevel } = useNavigationStore();
   const { data: userData } = useCurrentUser();
@@ -25,19 +28,23 @@ export function OrganizationSettingsPage() {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState<TabId>('members');
   const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>(undefined);
+
   useEffect(() => {
     setSidebarLevel('organization');
   }, [setSidebarLevel]);
+
   const organizationId = userData?.organization?.id;
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
+
   const tabs = [
-    { id: 'members', label: 'Miembros', isActive: activeTab === 'members'},
-    { id: 'permissions', label: 'Permisos', isActive: activeTab === 'permissions'},
-    { id: 'activity', label: 'Actividad', isActive: activeTab === 'activity'},
-    { id: 'billing', label: 'Facturación', isActive: activeTab === 'billing'},
-    { id: 'finances', label: 'Finanzas', isActive: activeTab === 'finances'},
-    { id: 'pdf', label: 'Documentos PDF', isActive: activeTab === 'pdf'}
+    { id: 'members', label: 'Miembros', isActive: activeTab === 'members' },
+    { id: 'permissions', label: 'Permisos', isActive: activeTab === 'permissions' },
+    { id: 'activity', label: 'Actividad', isActive: activeTab === 'activity' },
+    { id: 'billing', label: 'Facturación', isActive: activeTab === 'billing' },
+    { id: 'finances', label: 'Finanzas', isActive: activeTab === 'finances' },
+    { id: 'pdf', label: 'Documentos PDF', isActive: activeTab === 'pdf' }
   ];
+
   const handlePdfHasChanges = (hasChanges: boolean, actions?: React.ReactNode[]) => {
     if (hasChanges && actions) {
       setHeaderActions(actions);
@@ -45,10 +52,12 @@ export function OrganizationSettingsPage() {
       setHeaderActions(undefined);
     }
   };
+
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId as TabId);
     setHeaderActions(undefined);
   };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'members':
@@ -80,6 +89,7 @@ export function OrganizationSettingsPage() {
         return <OrganizationMembersListView />;
     }
   };
+
   const getTabActions = (): React.ReactNode[] | undefined => {
     switch (activeTab) {
       case 'members':
@@ -121,6 +131,7 @@ export function OrganizationSettingsPage() {
         return undefined;
     }
   };
+
   const headerProps = {
     icon: Settings,
     title: "Ajustes de la Organización",
@@ -131,6 +142,7 @@ export function OrganizationSettingsPage() {
     onTabChange: handleTabChange,
     actions: getTabActions()
   };
+
   return (
     <Layout headerProps={headerProps}>
       {renderTabContent()}

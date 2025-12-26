@@ -4,13 +4,16 @@
  * React Query mutation para crear un nuevo material.
  * Applies dual-cache invalidation strategy: invalidates both legacy and feature-based query keys.
  */
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createMaterial } from '../services/createMaterial';
 import { MATERIALS_QUERY_KEYS } from '../constants';
 import { toast } from '@/hooks/use-toast';
 import type { NewMaterialData } from '../types';
+
 export function useCreateMaterial() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (data: NewMaterialData) => createMaterial(data),
     onSuccess: (_, variables) => {

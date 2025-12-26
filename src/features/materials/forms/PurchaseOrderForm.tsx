@@ -26,6 +26,7 @@ import {
   useUpdatePurchaseOrder,
   getPurchaseOrderStatusBadgeConfig,
 } from '@/features/materials/hooks/use-purchase-orders'
+
 const purchaseOrderItemSchema = z.object({
   id: z.string().optional(),
   description: z.string().min(1, 'Descripción es requerida'),
@@ -33,6 +34,7 @@ const purchaseOrderItemSchema = z.object({
   unit_id: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
 })
+
 const purchaseOrderSchema = z.object({
   order_date: z.date({
     required_error: "Fecha es requerida",
@@ -42,13 +44,16 @@ const purchaseOrderSchema = z.object({
   notes: z.string().optional().nullable(),
   items: z.array(purchaseOrderItemSchema).min(1, 'Debe agregar al menos un ítem'),
 })
+
 type PurchaseOrderFormData = z.infer<typeof purchaseOrderSchema>
+
 function ViewPanel({
   existingOrder,
 }: {
   existingOrder: any;
 }) {
   const statusInfo = getPurchaseOrderStatusBadgeConfig(existingOrder.status)
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between pb-4 border-b border-border">
@@ -63,7 +68,7 @@ function ViewPanel({
                 : '-'}
             </h3>
             <p className="text-sm text-muted-foreground" data-testid="text-purchase-order-items-count">
-              {existingOrder.items?.length || 0} {existingOrder.items?.length === 1 ? 'ítem': 'ítems'}
+              {existingOrder.items?.length || 0} {existingOrder.items?.length === 1 ? 'ítem' : 'ítems'}
             </p>
           </div>
         </div>
@@ -71,6 +76,7 @@ function ViewPanel({
           {statusInfo.label}
         </Badge>
       </div>
+
       {existingOrder.provider && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Proveedor</h4>
@@ -79,6 +85,7 @@ function ViewPanel({
           </span>
         </div>
       )}
+
       {existingOrder.requester?.user && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Solicitante</h4>
@@ -87,6 +94,7 @@ function ViewPanel({
           </span>
         </div>
       )}
+
       {existingOrder.approver?.user && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Aprobador</h4>
@@ -95,6 +103,7 @@ function ViewPanel({
           </span>
         </div>
       )}
+
       {existingOrder.notes && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Notas</h4>
@@ -103,6 +112,7 @@ function ViewPanel({
           </p>
         </div>
       )}
+
       <div>
         <h4 className="text-xs font-medium text-muted-foreground mb-2">Ítems</h4>
         <div className="space-y-2">
@@ -123,14 +133,15 @@ function ViewPanel({
           ))}
         </div>
       </div>
+
       <div className="pt-4 border-t border-border">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground">
           <div data-testid="text-purchase-order-created-at">
-            <span className="font-medium">Creado:</span> {format(new Date(existingOrder.created_at), "dd/MM/yyyy 'a las'HH:mm", { locale: es })}
+            <span className="font-medium">Creado:</span> {format(new Date(existingOrder.created_at), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
           </div>
           {existingOrder.updated_at && existingOrder.updated_at !== existingOrder.created_at && (
             <div data-testid="text-purchase-order-updated-at">
-              <span className="font-medium">Actualizado:</span> {format(new Date(existingOrder.updated_at), "dd/MM/yyyy 'a las'HH:mm", { locale: es })}
+              <span className="font-medium">Actualizado:</span> {format(new Date(existingOrder.updated_at), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
             </div>
           )}
         </div>
@@ -138,6 +149,7 @@ function ViewPanel({
     </div>
   )
 }
+
 interface PurchaseOrderFormProps {
   modalData?: {
     projectId?: string;
@@ -145,32 +157,39 @@ interface PurchaseOrderFormProps {
     orderId?: string;
   };
   onClose: () => void;
-  mode?: 'create'| 'edit'| 'view';
+  mode?: 'create' | 'edit' | 'view';
 }
-export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: PurchaseOrderFormProps) {
+
+export function PurchaseOrderForm({ modalData, onClose, mode = 'create' }: PurchaseOrderFormProps) {
   const { projectId, organizationId, orderId } = modalData || {}
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
+
   const { data: existingOrder, isLoading: loadingOrder } = usePurchaseOrder(
     projectId,
     orderId,
     organizationId
   )
+
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
   const { data: contacts = [], isLoading: contactsLoading } = useContacts(organizationId)
   const { data: units = [], isLoading: unitsLoading } = useUnits()
+
   const providers = useMemo(() => {
     if (!contacts) return []
     return contacts
   }, [contacts])
+
   const defaultUnitId = useMemo(() => {
     if (units.length === 0) return null
     const unitOption = units.find((u: any) => u.name?.toLowerCase() === 'unidad')
     return unitOption?.id || null
   }, [units])
+
   const currentMember = useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
   }, [members, userData?.user?.id])
+
   const form = useForm<PurchaseOrderFormData>({
     resolver: zodResolver(purchaseOrderSchema),
     defaultValues: {
@@ -178,16 +197,19 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
       provider_id: null,
       status: 'draft',
       notes: '',
-      items: [{ description: '', quantity: 1, unit_id: defaultUnitId, notes: ''}],
+      items: [{ description: '', quantity: 1, unit_id: defaultUnitId, notes: '' }],
     }
   })
+
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'items',
   })
-  const isLoading = membersLoading || contactsLoading || unitsLoading || ((mode === 'edit'|| mode === 'view') && loadingOrder)
+
+  const isLoading = membersLoading || contactsLoading || unitsLoading || ((mode === 'edit' || mode === 'view') && loadingOrder)
+
   useEffect(() => {
-    if (existingOrder && (mode === 'edit'|| mode === 'view')) {
+    if (existingOrder && (mode === 'edit' || mode === 'view')) {
       const orderDate = parseLocalDate(existingOrder.order_date) || new Date()
       
       form.reset({
@@ -203,12 +225,14 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
               unit_id: item.unit_id || null,
               notes: item.notes || '',
             }))
-          : [{ description: '', quantity: 1, unit_id: null, notes: ''}],
+          : [{ description: '', quantity: 1, unit_id: null, notes: '' }],
       })
     }
   }, [existingOrder, mode, form])
+
   const createOrderMutation = useCreatePurchaseOrder()
   const updateOrderMutation = useUpdatePurchaseOrder()
+
   const onSubmit = async (data: PurchaseOrderFormData) => {
     try {
       const orderData = {
@@ -217,6 +241,7 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
         status: data.status,
         notes: data.notes || null,
       }
+
       const itemsData = data.items.map(item => ({
         id: item.id,
         description: item.description,
@@ -224,7 +249,8 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
         unit_id: item.unit_id || null,
         notes: item.notes || null,
       }))
-      if (mode === 'edit'&& orderId) {
+
+      if (mode === 'edit' && orderId) {
         await updateOrderMutation.mutateAsync({
           projectId: projectId || '',
           orderId,
@@ -250,22 +276,26 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
           description: 'La orden de compra ha sido creada correctamente',
         })
       }
+
       onClose()
     } catch (error: any) {
       console.error('Error saving purchase order:', error)
       toast({
         variant: 'destructive',
-        title: mode === 'edit'? 'Error al actualizar': 'Error al crear',
+        title: mode === 'edit' ? 'Error al actualizar' : 'Error al crear',
         description: error.message || 'Ocurrió un error inesperado',
       })
     }
   }
-  const modalTitle = mode === 'view'
-    ? 'Detalle de Orden de Compra'
-    : mode === 'edit'
-      ? 'Editar Orden de Compra'
+
+  const modalTitle = mode === 'view' 
+    ? 'Detalle de Orden de Compra' 
+    : mode === 'edit' 
+      ? 'Editar Orden de Compra' 
       : 'Nueva Orden de Compra'
+
   const isMutating = createOrderMutation.isPending || updateOrderMutation.isPending
+
   const getHeaderDescription = () => {
     switch (mode) {
       case 'view':
@@ -277,6 +307,7 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
         return 'Crea una nueva orden de compra para solicitar materiales a tus proveedores';
     }
   };
+
   return (
     <ModalLayout onClose={onClose}>
       <ModalHeader 
@@ -285,7 +316,7 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
         icon={ShoppingCart}
       />
       <ModalBody>
-        {mode === 'view'&& existingOrder ? (
+        {mode === 'view' && existingOrder ? (
           <ViewPanel existingOrder={existingOrder} />
         ) : (
           <Form {...form}>
@@ -335,6 +366,7 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
                         </FormItem>
                       )}
                     />
+
                     <FormField
                       control={form.control}
                       name="status"
@@ -363,6 +395,7 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
                       )}
                     />
                   </div>
+
                   <FormField
                     control={form.control}
                     name="provider_id"
@@ -390,6 +423,7 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="notes"
@@ -409,10 +443,12 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
                       </FormItem>
                     )}
                   />
+
                   <div className="space-y-3">
                     <FormLabel>
                       Ítems <span className="text-red-500">*</span>
                     </FormLabel>
+
                     <div className="space-y-2">
                       {fields.map((field, index) => (
                         <div 
@@ -436,6 +472,7 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
                               </FormItem>
                             )}
                           />
+
                           <FormField
                             control={form.control}
                             name={`items.${index}.quantity`}
@@ -457,6 +494,7 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
                               </FormItem>
                             )}
                           />
+
                           <div className="flex gap-2 items-start">
                             <FormField
                               control={form.control}
@@ -500,10 +538,11 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
                           </div>
                         </div>
                       ))}
+
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => append({ description: '', quantity: 1, unit_id: defaultUnitId, notes: ''})}
+                        onClick={() => append({ description: '', quantity: 1, unit_id: defaultUnitId, notes: '' })}
                         className="w-full"
                         data-testid="button-add-item"
                       >
@@ -511,6 +550,7 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
                         Agregar ítem
                       </Button>
                     </div>
+
                     {form.formState.errors.items?.root && (
                       <p className="text-sm text-destructive">
                         {form.formState.errors.items.root.message}
@@ -523,18 +563,18 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
           </Form>
         )}
       </ModalBody>
-      {mode !== 'view'&& (
+      {mode !== 'view' && (
         <ModalFooter
           leftLabel="Cancelar"
           onLeftClick={onClose}
-          rightLabel={mode === 'edit'? 'Guardar Cambios': 'Crear Orden'}
+          rightLabel={mode === 'edit' ? 'Guardar Cambios' : 'Crear Orden'}
           onRightClick={form.handleSubmit(onSubmit)}
           isSubmitting={isMutating}
           submitDisabled={isMutating || isLoading}
         />
       )}
       
-      {mode === 'view'&& (
+      {mode === 'view' && (
         <ModalFooter
           leftLabel="Cerrar"
           onLeftClick={onClose}
@@ -543,4 +583,5 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create'}: Purcha
     </ModalLayout>
   )
 }
+
 export default PurchaseOrderForm

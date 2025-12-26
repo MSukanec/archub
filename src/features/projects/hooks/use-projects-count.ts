@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getProjectsCount } from '../services/getProjectsCount';
 import { useProjectContext } from '@/stores/projectContext';
 import { projectsKeys } from '@/core/query-keys';
+
 export function useProjectsCount(organizationId?: string | undefined) {
   const { currentOrganizationId } = useProjectContext();
   

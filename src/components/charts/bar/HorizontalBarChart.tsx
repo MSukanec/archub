@@ -1,10 +1,12 @@
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLine, Cell } from 'recharts'
 import { CHART_COLORS, CHART_TOOLTIP, CHART_STATES, CHART_DIMENSIONS, CHART_SHAPES, formatCompact, getValueColor } from '../theme'
+
 export interface HorizontalBarDataPoint {
   label: string
   value: number
   color?: string
 }
+
 export interface HorizontalBarChartProps {
   data: HorizontalBarDataPoint[]
   height?: number
@@ -19,6 +21,7 @@ export interface HorizontalBarChartProps {
   colorNegative?: string
   yAxisWidth?: number
 }
+
 export function HorizontalBarChart({
   data,
   height = CHART_DIMENSIONS.height.md,
@@ -40,6 +43,7 @@ export function HorizontalBarChart({
       </div>
     )
   }
+
   if (!data || data.length === 0) {
     return (
       <div style={{ height }} className={CHART_STATES.empty.className}>
@@ -47,6 +51,7 @@ export function HorizontalBarChart({
       </div>
     )
   }
+
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -80,7 +85,7 @@ export function HorizontalBarChart({
                 return (
                   <div className={CHART_TOOLTIP.className}>
                     <p className="font-medium text-sm mb-1">{item.label}</p>
-                    <p className={`text-sm font-semibold ${isPositive ? 'text-chart-positive': 'text-chart-negative'}`}>
+                    <p className={`text-sm font-semibold ${isPositive ? 'text-chart-positive' : 'text-chart-negative'}`}>
                       {valueFormatter(item.value)}
                     </p>
                   </div>

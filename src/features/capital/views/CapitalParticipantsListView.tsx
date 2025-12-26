@@ -6,7 +6,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { Button } from '@/components/ui/button';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/shared/AppCard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useGlobalModalStore } from '@/components/modal';
 import { parseLocalDate } from '@/lib/date-utils';
@@ -17,7 +17,9 @@ import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import type { Partner } from '@/features/capital/types';
+
 type EnrichedPartner = Partner & { partnerName: string };
+
 export function CapitalParticipantsListView() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -25,9 +27,11 @@ export function CapitalParticipantsListView() {
   const isMobile = useMobile();
   
   const organizationId = userData?.organization?.id;
+
   const { data: partners = [], isLoading } = usePartners(organizationId);
   const { data: contributions = [] } = usePartnerContributions(organizationId);
   const { data: withdrawals = [] } = usePartnerWithdrawals(organizationId);
+
   const enrichedPartners = useMemo<EnrichedPartner[]>(() => {
     return partners.map(partner => ({
       ...partner,
@@ -37,6 +41,7 @@ export function CapitalParticipantsListView() {
                   partner.contacts?.company_name || '-'
     }));
   }, [partners]);
+
   const metrics = useMemo(() => {
     const confirmedContributions = contributions.filter(c => c.status === 'confirmed');
     const confirmedWithdrawals = withdrawals.filter(w => w.status === 'confirmed');
@@ -54,6 +59,7 @@ export function CapitalParticipantsListView() {
     } else {
       assignmentStatus = `Excede en ${(totalOwnershipPercentage - 100).toFixed(1)}%`;
     }
+
     return {
       totalPartners: partners.length,
       totalContributions: confirmedContributions.length,
@@ -62,12 +68,14 @@ export function CapitalParticipantsListView() {
       assignmentStatus,
     };
   }, [partners, contributions, withdrawals]);
+
   const deletePartnerMutation = useMutation({
     mutationFn: async (partnerId: string) => {
       const { error } = await supabase
         .from('capital_participants')
         .update({ is_deleted: true })
         .eq('id', partnerId);
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -88,6 +96,7 @@ export function CapitalParticipantsListView() {
       });
     },
   });
+
   const handleDelete = (partner: EnrichedPartner) => {
     const associated = [
       ...contributions.filter(c => c.partner_id === partner.id),
@@ -100,7 +109,7 @@ export function CapitalParticipantsListView() {
     const consequences: string[] = [];
     if (associated.length > 0) {
       consequences.push(
-        `${associated.length} transacción${associated.length === 1 ? '': 'es'} relacionada${associated.length === 1 ? '': 's'} será${associated.length === 1 ? 'á': 'n'} afectada${associated.length === 1 ? '': 's'}`
+        `${associated.length} transacción${associated.length === 1 ? '' : 'es'} relacionada${associated.length === 1 ? '' : 's'} será${associated.length === 1 ? 'á' : 'n'} afectada${associated.length === 1 ? '' : 's'}`
       );
     }
     
@@ -109,9 +118,10 @@ export function CapitalParticipantsListView() {
         label: p.contacts?.full_name || `${p.contacts?.first_name || ''} ${p.contacts?.last_name || ''}`.trim() || p.contacts?.email || 'Socio',
         value: p.id
       }))
-      .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base'}));
+      .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }));
+
     openModal('delete-confirmation', {
-      mode: canReplace ? 'replace': 'delete',
+      mode: canReplace ? 'replace' : 'delete',
       title: 'Eliminar Socio',
       description: `¿Estás seguro de que quieres eliminar "${partner.partnerName}"?`,
       itemName: partner.partnerName,
@@ -126,6 +136,7 @@ export function CapitalParticipantsListView() {
       }
     });
   };
+
   const handleEdit = (partner: EnrichedPartner) => {
     openModal('partner', {
       organizationId,
@@ -133,11 +144,13 @@ export function CapitalParticipantsListView() {
       mode: 'edit',
     });
   };
+
   const handleAddPartner = () => {
     openModal('partner', {
       organizationId,
     });
   };
+
   if (!organizationId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -145,12 +158,13 @@ export function CapitalParticipantsListView() {
       </div>
     );
   }
+
   const columns: Column<EnrichedPartner>[] = [
     {
       key: 'partnerName',
       label: 'Socio',
       labelClassName: 'text-[var(--text-default)] font-semibold',
-      type: 'medium-text'as const,
+      type: 'medium-text' as const,
       sortable: true,
       render: (partner: EnrichedPartner) => {
         const contact = partner.contacts;
@@ -173,10 +187,10 @@ export function CapitalParticipantsListView() {
       key: 'ownership_percentage',
       label: 'Participación',
       labelClassName: 'text-[var(--accent)]',
-      type: 'short-text'as const,
+      type: 'short-text' as const,
       sortable: true,
-      sortType: 'number'as const,
-      align: 'right'as const,
+      sortType: 'number' as const,
+      align: 'right' as const,
       render: (partner: EnrichedPartner) => {
         if (partner.ownership_percentage === null || partner.ownership_percentage === undefined) {
           return <span className="text-muted-foreground">—</span>;
@@ -188,7 +202,7 @@ export function CapitalParticipantsListView() {
       key: 'email',
       label: 'Mail',
       labelClassName: 'text-[var(--info)]',
-      type: 'long-text'as const,
+      type: 'long-text' as const,
       sortable: true,
       render: (partner: EnrichedPartner) => {
         return partner.contacts?.email || '-';
@@ -198,13 +212,14 @@ export function CapitalParticipantsListView() {
       key: 'phone',
       label: 'Teléfono',
       labelClassName: 'text-[var(--pending)]',
-      type: 'medium-text'as const,
+      type: 'medium-text' as const,
       sortable: true,
       render: (partner: EnrichedPartner) => {
         return partner.contacts?.phone || '-';
       },
     },
   ];
+
   if (!isLoading && enrichedPartners.length === 0) {
     return (
       <EmptyState
@@ -220,6 +235,7 @@ export function CapitalParticipantsListView() {
       />
     );
   }
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -235,6 +251,7 @@ export function CapitalParticipantsListView() {
             Socios activos
           </StatCardMeta>
         </StatCard>
+
         <StatCard data-testid="stat-card-total-contributions">
           <StatCardTitle showArrow={false}>
             <TrendingUp className="h-4 w-4" />
@@ -247,6 +264,7 @@ export function CapitalParticipantsListView() {
             Aportes confirmados
           </StatCardMeta>
         </StatCard>
+
         <StatCard data-testid="stat-card-total-withdrawals">
           <StatCardTitle showArrow={false}>
             <TrendingDown className="h-4 w-4" />
@@ -259,6 +277,7 @@ export function CapitalParticipantsListView() {
             Retiros confirmados
           </StatCardMeta>
         </StatCard>
+
         <StatCard data-testid="stat-card-ownership-assignment">
           <StatCardTitle showArrow={false}>
             <TrendingUp className="h-4 w-4" />
@@ -272,12 +291,13 @@ export function CapitalParticipantsListView() {
           </StatCardMeta>
         </StatCard>
       </div>
+
       <Table
         columns={columns}
         data={enrichedPartners}
         isLoading={isLoading}
         showDoubleHeader={false}
-        defaultSort={{ key: 'partnerName', direction: 'asc'}}
+        defaultSort={{ key: 'partnerName', direction: 'asc' }}
         onRowClick={handleEdit}
         rowActions={(partner: EnrichedPartner) => [
           {

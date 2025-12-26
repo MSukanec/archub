@@ -1,5 +1,6 @@
 import { MarketingLayout } from "@/layouts/marketing";
 import { PricingContent } from "@/features/shared-content/pricing";
+
 export default function PricingPlanPublic() {
   return (
     <MarketingLayout

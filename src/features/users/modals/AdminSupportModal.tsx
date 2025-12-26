@@ -1,9 +1,11 @@
 /**
  * 💬 SupportModal - Modal wrapper para chat de soporte
  */
+
 import { Headphones } from 'lucide-react'
 import { FormModalLayout, FormModalHeader } from '@/components/modal'
 import { ChatPanel, FooterPanel, useSupportChat } from '../forms/AdminSupportForm'
+
 interface SupportModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -11,6 +13,7 @@ interface SupportModalProps {
   userFullName: string
   userAvatarUrl?: string
 }
+
 export function AdminSupportModal({ open, onOpenChange, userId, userFullName, userAvatarUrl }: SupportModalProps) {
   const {
     messages,
@@ -22,10 +25,13 @@ export function AdminSupportModal({ open, onOpenChange, userId, userFullName, us
     scrollAreaRef,
     textareaRef,
   } = useSupportChat({ userId, open })
+
   const handleClose = () => {
     onOpenChange(false)
   }
+
   if (!open) return null
+
   const headerContent = (
     <FormModalHeader
       title="Soporte"
@@ -33,6 +39,7 @@ export function AdminSupportModal({ open, onOpenChange, userId, userFullName, us
       icon={Headphones}
     />
   )
+
   const editPanel = (
     <div className="flex flex-col h-[calc(80vh-180px)] bg-[var(--content-bg)]">
       <ChatPanel
@@ -44,6 +51,7 @@ export function AdminSupportModal({ open, onOpenChange, userId, userFullName, us
       />
     </div>
   )
+
   const footerContent = (
     <FooterPanel
       inputValue={inputValue}
@@ -53,6 +61,7 @@ export function AdminSupportModal({ open, onOpenChange, userId, userFullName, us
       textareaRef={textareaRef}
     />
   )
+
   return (
     <FormModalLayout
       columns={1}

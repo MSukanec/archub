@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import type { ContactWithRelations } from '../types';
 import { mapViewToContacts } from '../mappers';
+
 /**
  * Obtiene todos los contactos activos de una organización
  * usando la vista contacts_with_relations_view.
@@ -19,13 +20,16 @@ export async function getContacts(
   if (!supabase || !organizationId) {
     return [];
   }
+
   const { data, error } = await supabase
     .from('contacts_with_relations_view')
     .select('*')
     .eq('organization_id', organizationId)
     .order('created_at', { ascending: false });
+
   if (error) {
     throw error;
   }
+
   return mapViewToContacts(data || []);
 }

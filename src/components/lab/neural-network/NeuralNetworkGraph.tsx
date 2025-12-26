@@ -1,6 +1,7 @@
 import { useCallback, useRef, useEffect, useMemo } from 'react';
 import ForceGraph2D, { ForceGraphMethods, NodeObject, LinkObject } from 'react-force-graph-2d';
 import { forceCollide } from 'd3-force';
+import { 
   GraphData, 
   GraphNode, 
   SatelliteNode,
@@ -10,6 +11,7 @@ import { forceCollide } from 'd3-force';
   StatusColors 
 } from './types';
 import { NodeRenderer, SphereNodeRenderer } from './renderers';
+
 export interface NeuralNetworkGraphProps {
   data: GraphData;
   width: number;
@@ -23,6 +25,7 @@ export interface NeuralNetworkGraphProps {
   graphRef?: React.MutableRefObject<ForceGraphMethods | undefined>;
   nodeRenderer?: NodeRenderer;
 }
+
 export function NeuralNetworkGraph({
   data,
   width,
@@ -40,6 +43,7 @@ export function NeuralNetworkGraph({
   const graphRef = externalRef || internalRef;
   const animationFrameRef = useRef<number>(0);
   const imageCacheRef = useRef<Map<string, HTMLImageElement>>(new Map());
+
   const resolvedStatusColors = useMemo(() => statusColors || getStatusColorsFromCSS(), [statusColors]);
   const resolvedCoreColor = useMemo(() => coreColor || getCoreColorFromCSS(), [coreColor]);
   
@@ -51,6 +55,7 @@ export function NeuralNetworkGraph({
     }
     return 'hsl(0, 0%, 95%)';
   }, [backgroundColor]);
+
   useEffect(() => {
     return () => {
       if (animationFrameRef.current) {
@@ -58,6 +63,7 @@ export function NeuralNetworkGraph({
       }
     };
   }, []);
+
   useEffect(() => {
     if (graphRef.current) {
       const fg = graphRef.current;
@@ -71,13 +77,13 @@ export function NeuralNetworkGraph({
       const linkForce = fg.d3Force('link');
       if (linkForce) {
         (linkForce as any).distance((link: any) => {
-          const sourceId = typeof link.source === 'object'? link.source.id : link.source;
+          const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
           if (sourceId === 'core') return 120;
-          if (typeof sourceId === 'string'&& sourceId.startsWith('type-')) return 100;
+          if (typeof sourceId === 'string' && sourceId.startsWith('type-')) return 100;
           return 80;
         });
         (linkForce as any).strength((link: any) => {
-          const sourceId = typeof link.source === 'object'? link.source.id : link.source;
+          const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
           if (sourceId === 'core') return 0.5;
           return 0.3;
         });
@@ -88,12 +94,15 @@ export function NeuralNetworkGraph({
       fg.d3ReheatSimulation();
     }
   }, [data, graphRef]);
+
   const animate = useCallback(() => {
     animationFrameRef.current = requestAnimationFrame(animate);
   }, []);
+
   const onEngineStop = useCallback(() => {
     animate();
   }, [animate]);
+
   const nodeCanvasObject = useCallback((node: NodeObject, ctx: CanvasRenderingContext2D, globalScale: number) => {
     const graphNode = node as GraphNode;
     
@@ -118,7 +127,7 @@ export function NeuralNetworkGraph({
     
     if (!source || !target || source.x === undefined || source.y === undefined || target.x === undefined || target.y === undefined) return;
     
-    const targetNode = data.nodes.find(n => n.id === (typeof target === 'object'? target.id : target));
+    const targetNode = data.nodes.find(n => n.id === (typeof target === 'object' ? target.id : target));
     if (!targetNode || targetNode.type === 'core') return;
     
     const satelliteNode = targetNode as SatelliteNode;
@@ -129,12 +138,13 @@ export function NeuralNetworkGraph({
     gradient.addColorStop(1, colors.glow);
     
     ctx.strokeStyle = gradient;
-    ctx.lineWidth = satelliteNode.status === 'critical'? 1.5 : 0.5;
+    ctx.lineWidth = satelliteNode.status === 'critical' ? 1.5 : 0.5;
     ctx.beginPath();
     ctx.moveTo(source.x, source.y);
     ctx.lineTo(target.x, target.y);
     ctx.stroke();
   }, [data.nodes, resolvedStatusColors]);
+
   const handleNodeClick = useCallback((node: NodeObject) => {
     const graphNode = node as GraphNode;
     if (graphNode.type === 'satellite') {
@@ -148,6 +158,7 @@ export function NeuralNetworkGraph({
       onCoreClick?.();
     }
   }, [onNodeClick, onCoreClick, graphRef]);
+
   return (
     <ForceGraph2D
       ref={graphRef}

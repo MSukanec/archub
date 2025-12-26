@@ -1,5 +1,6 @@
 import { useMemo, useEffect, useState } from 'react';
 import { GanttRowProps } from './types';
+
 interface GanttDependenciesProps {
   data: GanttRowProps[];
   dependencies: Array<{
@@ -17,12 +18,14 @@ interface GanttDependenciesProps {
   refreshTrigger?: number; // Trigger para forzar actualización durante drag
   onDependencyClick?: (dependency: any) => void; // Callback para manejar clicks en dependencias
 }
+
 interface TaskPosition {
   x: number;
   y: number;
   width: number;
   height: number;
 }
+
 export function GanttDependencies({
   data,
   dependencies,
@@ -42,6 +45,7 @@ export function GanttDependencies({
     dependency: any;
   }>>([]);
   const [scrollLeft, setScrollLeft] = useState(0);
+
   // console.log('GanttDependencies rendering with:', {
   //   dependenciesCount: dependencies.length,
   //   dataCount: data.length,
@@ -49,14 +53,16 @@ export function GanttDependencies({
   //   totalDays,
   //   arrowPathsCount: arrowPaths.length
   // });
+
   // Función para obtener las coordenadas de una tarea en el sistema de coordenadas del SVG
-  const getTaskPosition = (taskId: string, connectorType: 'output'| 'input'): { x: number; y: number } | null => {
+  const getTaskPosition = (taskId: string, connectorType: 'output' | 'input'): { x: number; y: number } | null => {
     const taskBarElement = document.querySelector(`[data-task-id="${taskId}"]`) as HTMLElement;
     const timelineScrollContainer = document.getElementById('timeline-content-scroll');
     
     if (!taskBarElement || !timelineScrollContainer) {
       return null;
     }
+
     const taskRect = taskBarElement.getBoundingClientRect();
     const scrollContainerRect = timelineScrollContainer.getBoundingClientRect();
     const currentScrollLeft = timelineScrollContainer.scrollLeft;
@@ -74,8 +80,10 @@ export function GanttDependencies({
       // Conector de entrada: lado izquierdo + scroll offset  
       absoluteX = (taskRect.left - scrollContainerRect.left) + currentScrollLeft;
     }
+
     return { x: absoluteX, y: relativeY };
   };
+
   // Función para generar el path SVG con offsets en ambos extremos como en tu dibujo
   const generatePath = (from: { x: number; y: number }, to: { x: number; y: number }): string => {
     const offsetRight = 20; // Offset hacia la derecha desde la tarea origen
@@ -97,22 +105,27 @@ export function GanttDependencies({
     
     return `M ${from.x} ${from.y} H ${from.x + offsetRight} V ${midY} H ${to.x - offsetLeft} V ${to.y} H ${to.x}`;
   };
+
   // Efecto para escuchar scroll y forzar re-render
   useEffect(() => {
     const timelineElement = document.getElementById('timeline-content-scroll');
     if (!timelineElement) return;
+
     const handleScroll = () => {
       setScrollLeft(timelineElement.scrollLeft);
     };
+
     timelineElement.addEventListener('scroll', handleScroll);
     return () => timelineElement.removeEventListener('scroll', handleScroll);
   }, []);
+
   // Calcular flechas con timing correcto y actualización por scroll
   useEffect(() => {
     if (!dependencies.length) {
       setArrowPaths([]);
       return;
     }
+
     const calculateArrows = () => {
       // Primero, obtener los IDs de las tareas que están realmente renderizadas
       const renderedTaskIds = new Set(
@@ -124,6 +137,7 @@ export function GanttDependencies({
         return renderedTaskIds.has(dep.predecessor_task_id) && 
                renderedTaskIds.has(dep.successor_task_id);
       });
+
       if (!validDependencies.length) {
         setArrowPaths([]);
         return;
@@ -135,6 +149,7 @@ export function GanttDependencies({
         const successorEl = document.querySelector(`[data-task-id="${dep.successor_task_id}"]`);
         return predecessorEl && successorEl;
       });
+
       if (!allTasksRendered) {
         return;
       }
@@ -142,9 +157,11 @@ export function GanttDependencies({
       const paths = validDependencies.map(dep => {
         const fromCoords = getTaskPosition(dep.predecessor_task_id, 'output');
         const toCoords = getTaskPosition(dep.successor_task_id, 'input');
+
         if (!fromCoords || !toCoords) {
           return null;
         }
+
         const pathString = generatePath(fromCoords, toCoords);
         return {
           id: dep.id,
@@ -152,16 +169,21 @@ export function GanttDependencies({
           dependency: dep
         };
       }).filter(Boolean);
+
       setArrowPaths(paths as any);
     };
+
     // Usar requestAnimationFrame para actualización instantánea y suave
     const frame = requestAnimationFrame(calculateArrows);
     
     return () => cancelAnimationFrame(frame);
   }, [dependencies, data, scrollLeft, refreshTrigger]); // Incluir refreshTrigger para recalcular durante drag
+
   if (!arrowPaths.length) {
     return null;
   }
+
+
   
   return (
     <div className="absolute top-0 left-0 h-full pointer-events-none" style={{ width: timelineWidth }}>
@@ -187,6 +209,7 @@ export function GanttDependencies({
           <polygon points="0 0, 6 2, 0 4" fill="var(--table-row-fg)" />
         </marker>
       </defs>
+
       {/* Renderizar las flechas con doble layer para mejor visibilidad */}
       {arrowPaths.map((arrow) => {
         return (

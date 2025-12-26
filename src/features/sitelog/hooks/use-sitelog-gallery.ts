@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getSitelogGalleryFiles } from '../services/getSitelogGalleryFiles';
 import type { SitelogGalleryFile } from '../types';
+
 /**
  * Hook para obtener archivos multimedia de bitácoras.
  * 

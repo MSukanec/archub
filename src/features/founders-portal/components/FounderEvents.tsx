@@ -7,17 +7,19 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, MapPin, Video, Users, CalendarX } from 'lucide-react';
 import { useFounderEvents, useRegisterEvent, useUnregisterEvent, type FounderEvent } from '../services';
 import { useToast } from '@/hooks/use-toast';
+
 function getEventTypeBadge(type: string) {
-  const typeMap: Record<string, { label: string; variant: 'default'| 'secondary'| 'outline'}> = {
-    webinar: { label: 'Webinar', variant: 'default'},
-    meetup: { label: 'Meetup', variant: 'secondary'},
-    workshop: { label: 'Taller', variant: 'outline'},
-    conference: { label: 'Conferencia', variant: 'default'},
-    networking: { label: 'Networking', variant: 'secondary'},
+  const typeMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
+    webinar: { label: 'Webinar', variant: 'default' },
+    meetup: { label: 'Meetup', variant: 'secondary' },
+    workshop: { label: 'Taller', variant: 'outline' },
+    conference: { label: 'Conferencia', variant: 'default' },
+    networking: { label: 'Networking', variant: 'secondary' },
   };
   
-  return typeMap[type] || { label: type, variant: 'outline'as const };
+  return typeMap[type] || { label: type, variant: 'outline' as const };
 }
+
 function EventCard({ event }: { event: FounderEvent }) {
   const { toast } = useToast();
   const registerMutation = useRegisterEvent();
@@ -27,6 +29,7 @@ function EventCard({ event }: { event: FounderEvent }) {
   const isPast = eventDate < new Date();
   const registrationCount = event.registrations_count || 0;
   const typeBadge = getEventTypeBadge(event.event_type);
+
   const handleRegister = async () => {
     try {
       await registerMutation.mutateAsync(event.id);
@@ -42,6 +45,7 @@ function EventCard({ event }: { event: FounderEvent }) {
       });
     }
   };
+
   const handleUnregister = async () => {
     try {
       await unregisterMutation.mutateAsync(event.id);
@@ -57,9 +61,10 @@ function EventCard({ event }: { event: FounderEvent }) {
       });
     }
   };
+
   return (
     <Card 
-      className={`${isPast ? 'opacity-60': ''}`}
+      className={`${isPast ? 'opacity-60' : ''}`}
       data-testid={`card-event-${event.id}`}
     >
       <CardContent className="p-4">
@@ -75,10 +80,11 @@ function EventCard({ event }: { event: FounderEvent }) {
               </h3>
             </div>
           </div>
+
           <div className="flex flex-wrap gap-3 text-sm text-[var(--text-muted)]">
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              <span>{format(eventDate, "d 'de'MMMM, yyyy", { locale: es })}</span>
+              <span>{format(eventDate, "d 'de' MMMM, yyyy", { locale: es })}</span>
             </div>
             
             {event.location && (
@@ -100,11 +106,13 @@ function EventCard({ event }: { event: FounderEvent }) {
               <span>{registrationCount} registrados</span>
             </div>
           </div>
+
           {event.description && (
             <p className="text-sm text-[var(--text-muted)] line-clamp-2">
               {event.description}
             </p>
           )}
+
           {!isPast && (
             <div className="flex justify-end pt-2">
               {event.is_registered ? (
@@ -115,7 +123,7 @@ function EventCard({ event }: { event: FounderEvent }) {
                   disabled={unregisterMutation.isPending}
                   data-testid={`button-unregister-${event.id}`}
                 >
-                  {unregisterMutation.isPending ? 'Cancelando...': 'Cancelar registro'}
+                  {unregisterMutation.isPending ? 'Cancelando...' : 'Cancelar registro'}
                 </Button>
               ) : (
                 <Button
@@ -124,7 +132,7 @@ function EventCard({ event }: { event: FounderEvent }) {
                   disabled={registerMutation.isPending}
                   data-testid={`button-register-${event.id}`}
                 >
-                  {registerMutation.isPending ? 'Registrando...': 'Registrarse'}
+                  {registerMutation.isPending ? 'Registrando...' : 'Registrarse'}
                 </Button>
               )}
             </div>
@@ -134,6 +142,7 @@ function EventCard({ event }: { event: FounderEvent }) {
     </Card>
   );
 }
+
 function EventsSkeleton() {
   return (
     <div className="space-y-4">
@@ -155,11 +164,14 @@ function EventsSkeleton() {
     </div>
   );
 }
+
 export function FounderEvents() {
   const { data: events, isLoading, error } = useFounderEvents();
+
   if (isLoading) {
     return <EventsSkeleton />;
   }
+
   if (error) {
     return (
       <div className="text-center py-8 text-[var(--text-muted)]">
@@ -167,6 +179,7 @@ export function FounderEvents() {
       </div>
     );
   }
+
   if (!events || events.length === 0) {
     return (
       <div className="text-center py-12">
@@ -177,8 +190,10 @@ export function FounderEvents() {
       </div>
     );
   }
+
   const upcomingEvents = events.filter(e => new Date(e.event_date) >= new Date());
   const pastEvents = events.filter(e => new Date(e.event_date) < new Date());
+
   return (
     <div className="space-y-6">
       {upcomingEvents.length > 0 && (
@@ -191,6 +206,7 @@ export function FounderEvents() {
           ))}
         </div>
       )}
+
       {pastEvents.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-sm font-medium text-[var(--text-muted)] uppercase tracking-wider">

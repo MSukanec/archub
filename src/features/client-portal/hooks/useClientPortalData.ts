@@ -1,10 +1,12 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { ClientPortalData } from '../types';
+
 interface UseClientPortalDataOptions {
   projectId: string;
   clientId?: string;
 }
+
 export function useClientPortalData({ projectId, clientId }: UseClientPortalDataOptions) {
   return useQuery<ClientPortalData>({
     queryKey: ['/api/client-portal', projectId, clientId],
@@ -34,7 +36,7 @@ export function useClientPortalData({ projectId, clientId }: UseClientPortalData
       });
       
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Error desconocido'}));
+        const error = await response.json().catch(() => ({ error: 'Error desconocido' }));
         throw new Error(error.error || 'Error al cargar datos del portal');
       }
       

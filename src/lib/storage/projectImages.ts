@@ -6,14 +6,17 @@
  * 
  * This helper ensures consistent, optimized image loading across all project image displays.
  */
-export type ProjectImageVariant = 'thumbnail'| 'card'| 'hero'| 'original';
+
+export type ProjectImageVariant = 'thumbnail' | 'card' | 'hero' | 'original';
+
 interface TransformationParams {
   width: number;
   height: number;
   quality: number;
-  format: 'webp'| 'origin';
-  resize: 'cover'| 'contain'| 'fill';
+  format: 'webp' | 'origin';
+  resize: 'cover' | 'contain' | 'fill';
 }
+
 /**
  * Configuration for each image variant
  * - thumbnail: Small previews (selectors, lists)
@@ -45,6 +48,7 @@ const VARIANT_CONFIG: Record<ProjectImageVariant, TransformationParams | null> =
   },
   original: null
 };
+
 /**
  * Extracts the storage path from a Supabase public URL
  * Example: https://xxx.supabase.co/storage/v1/object/public/project-image/org/proj/hero.jpg
@@ -62,6 +66,7 @@ function extractStoragePath(url: string): string | null {
   
   return path;
 }
+
 /**
  * Extracts the base URL (project reference) from a Supabase URL
  * Example: https://wtatvsgeivymcppowrfy.supabase.co/storage/...
@@ -71,6 +76,7 @@ function extractBaseUrl(url: string): string | null {
   const match = url.match(/(https:\/\/[^/]+\.supabase\.co)/);
   return match ? match[1] : null;
 }
+
 /**
  * Generates an optimized image URL using Supabase Storage transformations.
  * 
@@ -92,7 +98,7 @@ export function getProjectImageUrl(
   // Return null if no URL provided
   if (!imageUrl) return null;
   
-  // Return original if variant is 'original'or not transformable
+  // Return original if variant is 'original' or not transformable
   const config = VARIANT_CONFIG[variant];
   if (!config) return imageUrl;
   
@@ -121,6 +127,7 @@ export function getProjectImageUrl(
   
   return transformedUrl;
 }
+
 /**
  * Generates a blurred placeholder image URL for progressive loading.
  * Uses a tiny 40x30 heavily blurred version for instant loading.
@@ -155,6 +162,7 @@ export function getProjectImagePlaceholder(
   
   return `${baseUrl}/storage/v1/render/image/public/project-image/${storagePath}?${params.toString()}`;
 }
+
 /**
  * Generates responsive srcset for <img> elements to support different screen densities.
  * 

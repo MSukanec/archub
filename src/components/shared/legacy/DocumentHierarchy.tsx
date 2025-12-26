@@ -4,12 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useDesignDocumentFolders, useDeleteDesignDocumentFolder } from '@/hooks/use-design-document-folders';
+
 import { useDesignDocuments, useDesignDocumentsByFolder, useDeleteDesignDocument } from '@/hooks/use-design-documents';
 import { useGlobalModalStore } from '@/components/modal';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+import { 
   FolderOpen,
   FolderClosed,
   ChevronRight,
@@ -34,13 +37,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+
 interface DocumentHierarchyProps {
   className?: string;
   onDocumentSelect?: (document: any) => void;
 }
+
 interface ExpandedState {
   [key: string]: boolean;
 }
+
 const getStatusIcon = (status: string) => {
   switch (status) {
     case 'completed':
@@ -56,6 +62,7 @@ const getStatusIcon = (status: string) => {
       return <Circle className="h-4 w-4 text-gray-400" />;
   }
 };
+
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'completed':
@@ -71,12 +78,15 @@ const getStatusColor = (status: string) => {
       return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
   }
 };
+
 export function DocumentHierarchy({ className, onDocumentSelect }: DocumentHierarchyProps) {
   const [expandedFolders, setExpandedFolders] = useState<ExpandedState>({});
   const [expandedGroups, setExpandedGroups] = useState<ExpandedState>({});
   const { openModal } = useGlobalModalStore();
+
   const { data: folders, isLoading: foldersLoading } = useDesignDocumentFolders();
   const deleteFolderMutation = useDeleteDesignDocumentFolder();
+
   const toggleFolder = (folderId: string) => {
     setExpandedFolders(prev => {
       // Find if this folder is a subfolder by checking if it has a parent_id
@@ -110,15 +120,18 @@ export function DocumentHierarchy({ className, onDocumentSelect }: DocumentHiera
       return newState;
     });
   };
+
   const toggleGroup = (groupId: string) => {
     setExpandedGroups(prev => ({
       ...prev,
       [groupId]: !prev[groupId]
     }));
   };
+
   if (foldersLoading) {
     return <div className="text-center py-8">Cargando carpetas...</div>;
   }
+
   if (!folders || folders.length === 0) {
     return (
       <EmptyState
@@ -128,9 +141,11 @@ export function DocumentHierarchy({ className, onDocumentSelect }: DocumentHiera
       />
     );
   }
+
   // Filter folders to show only parent folders (no parent_id) and organize hierarchy
   const parentFolders = folders?.filter(folder => !folder.parent_id) || [];
   const subFolders = folders?.filter(folder => folder.parent_id) || [];
+
   return (
     <div className={`space-y-2 ${className}`}>
       {parentFolders.map((folder) => (
@@ -152,6 +167,7 @@ export function DocumentHierarchy({ className, onDocumentSelect }: DocumentHiera
     </div>
   );
 }
+
 interface FolderItemWithSubfoldersProps {
   folder: any;
   subfolders: any[];
@@ -165,6 +181,7 @@ interface FolderItemWithSubfoldersProps {
   isDeleting: boolean;
   onDocumentSelect?: (document: any) => void;
 }
+
 function FolderItemWithSubfolders({ 
   folder, 
   subfolders, 
@@ -181,9 +198,13 @@ function FolderItemWithSubfolders({
   const { data: groups, isLoading: groupsLoading } = useDesignDocumentGroups(folder.id);
   const { data: folderDocuments } = useDesignDocumentsByFolder(folder.id);
   const { openModal } = useGlobalModalStore();
+
+
+
   // Documents that don't belong to any group
   const ungroupedDocuments = folderDocuments?.filter(doc => !doc.group_id) || [];
   const totalDocuments = (groups?.reduce((acc, group) => acc + (group.document_count || 0), 0) || 0) + ungroupedDocuments.length;
+
   return (
     <div className="space-y-2">
       <Card className="w-full">
@@ -197,18 +218,21 @@ function FolderItemWithSubfolders({
                   <ChevronRight className="h-5 w-5" />
                 )}
               </div>
+
               <div className="flex items-center gap-2 min-w-0">
                 {isExpanded ? (
-                  <FolderOpen className="h-5 w-5 flex-shrink-0" style={{ color: 'hsl(var(--accent))'}} />
+                  <FolderOpen className="h-5 w-5 flex-shrink-0" style={{ color: 'hsl(var(--accent))' }} />
                 ) : (
-                  <FolderClosed className="h-5 w-5 flex-shrink-0" style={{ color: 'hsl(var(--accent))'}} />
+                  <FolderClosed className="h-5 w-5 flex-shrink-0" style={{ color: 'hsl(var(--accent))' }} />
                 )}
                 <span className="font-medium truncate">{folder.name}</span>
               </div>
+
               <Badge variant="outline" className="text-xs flex-shrink-0">
                 {totalDocuments}
               </Badge>
             </div>
+
             {/* Mobile-optimized action buttons */}
             <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
               {/* Show only essential actions on mobile, use dropdown for others */}
@@ -271,6 +295,7 @@ function FolderItemWithSubfolders({
                   <Trash2 className="h-3 w-3" />
                 </Button>
               </div>
+
               {/* Mobile dropdown menu */}
               <div className="sm:hidden">
                 <DropdownMenu>
@@ -288,7 +313,7 @@ function FolderItemWithSubfolders({
                       <Plus className="h-4 w-4 mr-2" />
                       Nueva subcarpeta
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => openModal('document-folder', { folderId: folder.id, folderName: folder.name, parentId: folder.parent_id, mode: 'edit'})}>
+                    <DropdownMenuItem onClick={() => openModal('document-folder', { folderId: folder.id, folderName: folder.name, parentId: folder.parent_id, mode: 'edit' })}>
                       <Edit className="h-4 w-4 mr-2" />
                       Editar carpeta
                     </DropdownMenuItem>
@@ -314,6 +339,7 @@ function FolderItemWithSubfolders({
             </div>
           </div>
         </CardHeader>
+
         {isExpanded && (
           <CardContent className="pt-0 pb-4">
             {groupsLoading ? (
@@ -340,6 +366,7 @@ function FolderItemWithSubfolders({
                     ))}
                   </div>
                 )}
+
                 {/* Document Groups (Entregas) */}
                 {groups && groups.length > 0 ? (
                   groups.map((group) => (
@@ -371,6 +398,7 @@ function FolderItemWithSubfolders({
                     </div>
                   </div>
                 )}
+
                 {/* Ungrouped Documents */}
                 {ungroupedDocuments.length > 0 && (
                   <div className="mt-4">
@@ -392,6 +420,7 @@ function FolderItemWithSubfolders({
     </div>
   );
 }
+
 interface FolderItemProps {
   folder: any;
   isExpanded: boolean;
@@ -403,13 +432,18 @@ interface FolderItemProps {
   isDeleting: boolean;
   onDocumentSelect?: (document: any) => void;
 }
+
 function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGroup, isSubfolder = false, onDeleteFolder, isDeleting, onDocumentSelect }: FolderItemProps) {
   const { data: groups, isLoading: groupsLoading } = useDesignDocumentGroups(folder.id);
   const { data: folderDocuments } = useDesignDocumentsByFolder(folder.id);
   const { openModal } = useGlobalModalStore();
+
+
+
   // Documents that don't belong to any group
   const ungroupedDocuments = folderDocuments?.filter(doc => !doc.group_id) || [];
   const totalDocuments = (groups?.reduce((acc, group) => acc + (group.document_count || 0), 0) || 0) + ungroupedDocuments.length;
+
   return (
     <Card className="w-full">
       <CardHeader className="py-3 sm:py-2 cursor-pointer hover:bg-muted/50 transition-colors" onClick={onToggle}>
@@ -422,18 +456,21 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
                 <ChevronRight className="h-5 w-5 sm:h-4 sm:w-4" />
               )}
             </div>
+
             <div className="flex items-center gap-2 min-w-0">
               {isExpanded ? (
-                <FolderOpen className="h-4 w-4 flex-shrink-0" style={{ color: 'hsl(var(--accent))'}} />
+                <FolderOpen className="h-4 w-4 flex-shrink-0" style={{ color: 'hsl(var(--accent))' }} />
               ) : (
-                <FolderClosed className="h-4 w-4 flex-shrink-0" style={{ color: 'hsl(var(--accent))'}} />
+                <FolderClosed className="h-4 w-4 flex-shrink-0" style={{ color: 'hsl(var(--accent))' }} />
               )}
               <span className="text-sm font-medium truncate">{folder.name}</span>
             </div>
+
             <Badge variant="outline" className="text-xs flex-shrink-0">
               {totalDocuments}
             </Badge>
           </div>
+
           <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
             {/* Desktop actions */}
             <div className="hidden sm:flex items-center gap-2">
@@ -495,6 +532,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
                 <Trash2 className="h-3 w-3" />
               </Button>
             </div>
+
             {/* Mobile dropdown */}
             <div className="sm:hidden">
               <DropdownMenu>
@@ -512,7 +550,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
                     <Plus className="h-4 w-4 mr-2" />
                     Nueva subcarpeta
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => openModal('document-folder', { folderId: folder.id, folderName: folder.name, parentId: folder.parent_id, mode: 'edit'})}>
+                  <DropdownMenuItem onClick={() => openModal('document-folder', { folderId: folder.id, folderName: folder.name, parentId: folder.parent_id, mode: 'edit' })}>
                     <Edit className="h-4 w-4 mr-2" />
                     Editar subcarpeta
                   </DropdownMenuItem>
@@ -538,6 +576,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
           </div>
         </div>
       </CardHeader>
+
       {isExpanded && (
         <CardContent className="pt-0 pb-3">
           {groupsLoading ? (
@@ -575,6 +614,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
                   </div>
                 </div>
               )}
+
               {/* Ungrouped Documents */}
               {ungroupedDocuments.length > 0 && (
                 <div className="mt-3">
@@ -595,6 +635,7 @@ function FolderItem({ folder, isExpanded, onToggle, expandedGroups, onToggleGrou
     </Card>
   );
 }
+
 interface GroupItemProps {
   group: any;
   folderId: string;
@@ -602,9 +643,11 @@ interface GroupItemProps {
   onToggle: () => void;
   onDocumentSelect?: (document: any) => void;
 }
+
 function GroupItem({ group, folderId, isExpanded, onToggle, onDocumentSelect }: GroupItemProps) {
   const { data: groupDocuments } = useDesignDocuments(group.id);
   const { openModal } = useGlobalModalStore();
+
   return (
     <div className="mb-3 border rounded-lg">
       <Button
@@ -630,6 +673,7 @@ function GroupItem({ group, folderId, isExpanded, onToggle, onDocumentSelect }: 
           </Badge>
         </div>
       </Button>
+
       {isExpanded && (
         <div className="px-4 sm:px-3 pb-4 sm:pb-3">
           {groupDocuments && groupDocuments.length > 0 ? (
@@ -668,13 +712,16 @@ function GroupItem({ group, folderId, isExpanded, onToggle, onDocumentSelect }: 
     </div>
   );
 }
+
 interface DocumentItemProps {
   document: any;
   onDocumentSelect?: (document: any) => void;
 }
+
 function DocumentItem({ document, onDocumentSelect }: DocumentItemProps) {
   const { openModal } = useGlobalModalStore();
   const deleteDocumentMutation = useDeleteDesignDocument();
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'aprobado':
@@ -687,26 +734,31 @@ function DocumentItem({ document, onDocumentSelect }: DocumentItemProps) {
         return <Circle className="h-3 w-3 text-gray-400 fill-current" />;
     }
   };
+
   const formatFileSize = (bytes: number) => {
     if (!bytes) return '';
     const mb = bytes / (1024 * 1024);
     return `${mb.toFixed(1)} MB`;
   };
+
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     return format(new Date(dateString), 'dd MMM yyyy', { locale: es });
   };
+
   const handleDownload = () => {
     if (document.file_url) {
       window.open(document.file_url, '_blank');
     }
   };
+
   const handleEdit = () => {
     openModal('document-upload', { 
       editingDocument: document,
       defaultFolderId: document.folder_id 
     });
   };
+
   const handleDelete = () => {
     openModal('delete-confirmation', {
       title: 'Eliminar documento',
@@ -721,11 +773,13 @@ function DocumentItem({ document, onDocumentSelect }: DocumentItemProps) {
       }
     });
   };
+
   const handleView = () => {
     if (document.file_url) {
       window.open(document.file_url, '_blank');
     }
   };
+
   return (
     <div className="px-3 py-3 hover:bg-muted/50 rounded-md transition-colors">
       {/* Mobile-first layout: stack content vertically on small screens */}
@@ -751,9 +805,9 @@ function DocumentItem({ document, onDocumentSelect }: DocumentItemProps) {
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             {/* Status text */}
             <span className="flex-shrink-0">
-              {document.status === 'aprobado'&& 'Aprobado'}
-              {document.status === 'rechazado'&& 'Rechazado'} 
-              {document.status === 'en_revision'&& 'En revisión'}
+              {document.status === 'aprobado' && 'Aprobado'}
+              {document.status === 'rechazado' && 'Rechazado'} 
+              {document.status === 'en_revision' && 'En revisión'}
               {!document.status && 'Pendiente'}
             </span>
             

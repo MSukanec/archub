@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Course } from '@shared/schema';
+
 /**
  * Hook para obtener todos los cursos desde el panel administrativo.
  * 
@@ -45,12 +46,14 @@ export function useAdminCourses() {
       
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session');
+
       const res = await fetch('/api/admin/courses', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         },
         credentials: 'include'
       });
+
       if (!res.ok) throw new Error('Failed to fetch courses');
       return res.json();
     },

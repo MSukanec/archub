@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
+
 // Tipo para el costo indirecto con sus valores
 export interface IndirectCost {
   id: string;
@@ -16,6 +17,7 @@ export interface IndirectCost {
     valid_from: string;
   };
 }
+
 // Tipo para insertar un costo indirecto
 export interface InsertIndirectCost {
   organization_id: string;
@@ -23,6 +25,7 @@ export interface InsertIndirectCost {
   description?: string | undefined;
   category_id?: string | undefined;
 }
+
 // Tipo para insertar un valor de costo indirecto
 export interface InsertIndirectCostValue {
   indirect_cost_id?: string;
@@ -30,6 +33,7 @@ export interface InsertIndirectCostValue {
   currency_id: string;
   valid_from: string;
 }
+
 // Hook para obtener costos indirectos de una organización
 export function useIndirectCosts(organizationId: string | null) {
   return useQuery({
@@ -49,6 +53,7 @@ export function useIndirectCosts(organizationId: string | null) {
         `)
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: false });
+
       if (error) {
         console.error('Error fetching indirect costs:', error);
         throw error;
@@ -65,6 +70,7 @@ export function useIndirectCosts(organizationId: string | null) {
     enabled: !!organizationId,
   });
 }
+
 // Hook para obtener un costo indirecto individual
 export function useIndirectCost(indirectCostId: string | null) {
   return useQuery({
@@ -85,15 +91,18 @@ export function useIndirectCost(indirectCostId: string | null) {
         `)
         .eq('id', indirectCostId)
         .single();
+
       if (error) throw error;
       return data;
     },
     enabled: !!indirectCostId,
   });
 }
+
 // Hook para crear un costo indirecto
 export function useCreateIndirectCost() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async ({ 
       indirectCost, 
@@ -103,13 +112,16 @@ export function useCreateIndirectCost() {
       initialValue?: InsertIndirectCostValue 
     }) => {
       if (!supabase) throw new Error('Supabase not available');
+
       // Crear el costo indirecto
       const { data: newIndirectCost, error: indirectCostError } = await supabase
         .from('indirect_costs')
         .insert(indirectCost)
         .select()
         .single();
+
       if (indirectCostError) throw indirectCostError;
+
       // Crear el valor inicial si se proporciona
       if (initialValue) {
         const valueToInsert = {
@@ -118,11 +130,14 @@ export function useCreateIndirectCost() {
           currency_id: initialValue.currency_id,
           valid_from: initialValue.valid_from,
         };
+
         const { error: valueError } = await supabase
           .from('indirect_cost_values')
           .insert(valueToInsert);
+
         if (valueError) throw valueError;
       }
+
       return newIndirectCost;
     },
     onSuccess: (data) => {
@@ -142,9 +157,11 @@ export function useCreateIndirectCost() {
     },
   });
 }
+
 // Hook para actualizar un costo indirecto
 export function useUpdateIndirectCost() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async ({ 
       indirectCostId,
@@ -156,6 +173,7 @@ export function useUpdateIndirectCost() {
       newValue?: InsertIndirectCostValue 
     }) => {
       if (!supabase) throw new Error('Supabase not available');
+
       // Actualizar el costo indirecto
       const { data: updatedIndirectCost, error: indirectCostError } = await supabase
         .from('indirect_costs')
@@ -163,7 +181,9 @@ export function useUpdateIndirectCost() {
         .eq('id', indirectCostId)
         .select()
         .single();
+
       if (indirectCostError) throw indirectCostError;
+
       // Agregar nuevo valor si se proporciona
       if (newValue) {
         const valueToInsert = {
@@ -172,11 +192,14 @@ export function useUpdateIndirectCost() {
           currency_id: newValue.currency_id,
           valid_from: newValue.valid_from,
         };
+
         const { error: valueError } = await supabase
           .from('indirect_cost_values')
           .insert(valueToInsert);
+
         if (valueError) throw valueError;
       }
+
       return updatedIndirectCost;
     },
     onSuccess: (data) => {
@@ -197,17 +220,21 @@ export function useUpdateIndirectCost() {
     },
   });
 }
+
 // Hook para eliminar un costo indirecto
 export function useDeleteIndirectCost() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (indirectCostId: string) => {
       if (!supabase) throw new Error('Supabase not available');
+
       // Hard delete - eliminar el registro
       const { error } = await supabase
         .from('indirect_costs')
         .delete()
         .eq('id', indirectCostId);
+
       if (error) throw error;
     },
     onSuccess: () => {

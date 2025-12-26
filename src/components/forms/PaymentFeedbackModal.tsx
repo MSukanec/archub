@@ -2,9 +2,10 @@ import { useGlobalModalStore } from "@/components/modal"
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from "@/components/modal"
 import { CheckCircle, XCircle, Crown, ExternalLink } from 'lucide-react'
 import { Button } from "@/components/ui/button"
+
 interface PaymentFeedbackModalProps {
   modalData?: {
-    type: 'success'| 'cancelled'
+    type: 'success' | 'cancelled'
     title?: string
     description?: string
     planName?: string
@@ -12,6 +13,7 @@ interface PaymentFeedbackModalProps {
   }
   onClose: () => void
 }
+
 export default function PaymentFeedbackModal({ modalData, onClose }: PaymentFeedbackModalProps) {
   const { closeModal } = useGlobalModalStore()
   
@@ -20,18 +22,21 @@ export default function PaymentFeedbackModal({ modalData, onClose }: PaymentFeed
   const isFounder = modalData?.isFounder || false
   
   const defaultTitle = isSuccess 
-    ? '¡Suscripción Activada!'
+    ? '¡Suscripción Activada!' 
     : 'Pago Cancelado'
   
   const defaultDescription = isSuccess
     ? `Tu suscripción${modalData?.planName ? ` ${modalData.planName}` : ''} ha sido activada correctamente. Ya podés disfrutar de todas las funcionalidades.`
     : 'El proceso de pago fue cancelado. No se realizó ningún cargo a tu cuenta.'
+
   const title = modalData?.title || defaultTitle
   const description = modalData?.description || defaultDescription
+
   const handleClose = () => {
     closeModal()
     onClose?.()
   }
+
   return (
     <ModalLayout
       onClose={handleClose}
@@ -63,6 +68,7 @@ export default function PaymentFeedbackModal({ modalData, onClose }: PaymentFeed
               {description}
             </p>
           </div>
+
           {isSuccess && isFounder && (
             <div className="rounded-lg border border-accent/30 bg-accent/5 p-4">
               <div className="flex items-start gap-3">

@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { ClientRole } from '../types';
+
 /**
  * Obtiene todos los roles de cliente de una organización.
  * 
@@ -17,6 +18,7 @@ export async function getClientRoles(
   if (!supabase || !organizationId) {
     return [];
   }
+
   // Combinar todas las condiciones en un solo OR para prevenir sobrescritura
   // WHERE (org_id = X AND (deleted IS NULL OR deleted = false)) 
   //    OR (is_default = true AND (deleted IS NULL OR deleted = false))
@@ -25,11 +27,14 @@ export async function getClientRoles(
     .select('*')
     .or(`and(organization_id.eq.${organizationId},or(is_deleted.is.null,is_deleted.eq.false)),and(is_default.eq.true,or(is_deleted.is.null,is_deleted.eq.false))`)
     .order('name', { ascending: true });
+
   if (error) {
     throw error;
   }
+
   return data || [];
 }
+
 /**
  * Obtiene un rol de cliente específico por su ID.
  * 
@@ -45,6 +50,7 @@ export async function getClientRoleById(
   if (!supabase || !organizationId || !roleId) {
     return null;
   }
+
   const { data, error } = await supabase
     .from('client_roles')
     .select('*')
@@ -52,11 +58,14 @@ export async function getClientRoleById(
     .eq('organization_id', organizationId)
     .or('is_deleted.is.null,is_deleted.eq.false')
     .single();
+
   if (error) {
     throw error;
   }
+
   return data;
 }
+
 /**
  * Crea un nuevo rol de cliente.
  * 
@@ -66,7 +75,7 @@ export async function getClientRoleById(
  * @throws {Error} Si falla la creación
  */
 export async function createClientRole(
-  role: Omit<ClientRole, 'id'| 'created_at'| 'updated_at'| 'organization_id'| 'is_deleted'| 'deleted_at'>,
+  role: Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id' | 'is_deleted' | 'deleted_at'>,
   organizationId: string
 ): Promise<ClientRole> {
   const { data, error } = await supabase
@@ -78,11 +87,14 @@ export async function createClientRole(
     })
     .select()
     .single();
+
   if (error) {
     throw error;
   }
+
   return data;
 }
+
 /**
  * Actualiza un rol de cliente existente.
  * 
@@ -94,7 +106,7 @@ export async function createClientRole(
  */
 export async function updateClientRole(
   roleId: string,
-  updates: Partial<Omit<ClientRole, 'id'| 'created_at'| 'updated_at'| 'organization_id'| 'is_deleted'| 'deleted_at'>>,
+  updates: Partial<Omit<ClientRole, 'id' | 'created_at' | 'updated_at' | 'organization_id' | 'is_deleted' | 'deleted_at'>>,
   organizationId: string
 ): Promise<ClientRole> {
   const { data, error } = await supabase
@@ -107,11 +119,14 @@ export async function updateClientRole(
     .eq('organization_id', organizationId)
     .select()
     .single();
+
   if (error) {
     throw error;
   }
+
   return data;
 }
+
 /**
  * Elimina un rol de cliente (soft delete).
  * 
@@ -135,11 +150,14 @@ export async function deleteClientRole(
     })
     .eq('id', roleId)
     .eq('organization_id', organizationId);
+
   if (error) {
     throw error;
   }
+
   return true;
 }
+
 /**
  * Cuenta cuántos project_clients tienen asignado un rol específico.
  * 
@@ -151,15 +169,19 @@ export async function getClientRoleUsageCount(roleId: string): Promise<number> {
   if (!supabase || !roleId) {
     return 0;
   }
+
   const { count, error } = await supabase
     .from('project_clients')
     .select('*', { count: 'exact', head: true })
     .eq('client_role_id', roleId);
+
   if (error) {
     throw error;
   }
+
   return count || 0;
 }
+
 /**
  * Reemplaza un rol con otro en todos los project_clients.
  * Luego elimina el rol antiguo (soft delete).
@@ -178,9 +200,11 @@ export async function replaceClientRole(
     .from('project_clients')
     .update({ client_role_id: newRoleId })
     .eq('client_role_id', oldRoleId);
+
   if (updateError) {
     throw updateError;
   }
+
   // Soft delete del rol antiguo
   const { error: deleteError } = await supabase
     .from('client_roles')
@@ -189,8 +213,10 @@ export async function replaceClientRole(
       deleted_at: new Date().toISOString()
     })
     .eq('id', oldRoleId);
+
   if (deleteError) {
     throw deleteError;
   }
+
   return { oldRoleId, newRoleId };
 }

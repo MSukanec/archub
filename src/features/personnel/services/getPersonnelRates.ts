@@ -1,9 +1,10 @@
 import { apiRequest } from '@/lib/queryClient';
+
 export interface PersonnelRate {
   id: string;
   personnel_id: string;
   organization_id: string;
-  pay_type: 'hour'| 'day'| 'month';
+  pay_type: 'hour' | 'day' | 'month';
   rate_hour: number | null;
   rate_day: number | null;
   rate_month: number | null;
@@ -22,6 +23,7 @@ export interface PersonnelRate {
     name: string;
   };
 }
+
 export async function getPersonnelRates(
   personnelId: string,
   organizationId: string
@@ -30,9 +32,11 @@ export async function getPersonnelRates(
     'GET',
     `/api/personnel/${personnelId}/rates?organization_id=${organizationId}`
   );
+
   if (response.ok) {
     return await response.json();
   }
+
   const errorData = await response.json();
   throw new Error(errorData.error || 'Failed to fetch personnel rates');
 }

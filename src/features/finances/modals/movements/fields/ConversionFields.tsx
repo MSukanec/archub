@@ -1,8 +1,10 @@
 import { UseFormReturn } from 'react-hook-form'
+
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CurrencyAmountField } from '@/components/shared/fields/CurrencyAmountField'
+
 // Definir el tipo para el formulario de conversión basado en el schema del archivo principal
 interface ConversionForm {
   movement_date: Date
@@ -18,6 +20,7 @@ interface ConversionForm {
   amount_to: number
   exchange_rate?: number
 }
+
 interface Props {
   form: UseFormReturn<ConversionForm>
   currencies: any[]
@@ -27,9 +30,11 @@ interface Props {
   movement?: any
   showExchangeRate?: boolean
 }
+
 export function ConversionFields({ form, currencies, wallets, members, concepts, movement, showExchangeRate = true }: Props) {
   return (
     <div className="space-y-4">
+
         {/* Sección ORIGEN */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
@@ -65,6 +70,7 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
                 </FormItem>
               )}
             />
+
             <div className="space-y-2">
               <FormField
                 control={form.control}
@@ -111,6 +117,7 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
             </div>
           </div>
         </div>
+
         {/* Sección DESTINO */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
@@ -146,6 +153,7 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
                 </FormItem>
               )}
             />
+
             <div className="space-y-2">
               <FormField
                 control={form.control}
@@ -191,6 +199,7 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
               />
             </div>
           </div>
+
           {/* Cotización - Solo mostrar si showExchangeRate es true */}
           {showExchangeRate && (
             <FormField
@@ -215,6 +224,8 @@ export function ConversionFields({ form, currencies, wallets, members, concepts,
             />
           )}
         </div>
+
+
     </div>
   )
 }

@@ -10,9 +10,11 @@ import { useGlobalModalStore } from '@/components/modal';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { supabase } from '@/lib/supabase';
+
 interface SubcontractBidsViewProps {
   subcontract: any;
 }
+
 export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
   const { openModal } = useGlobalModalStore();
   const queryClient = useQueryClient();
@@ -35,6 +37,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
     refetchOnWindowFocus: true,
     refetchOnMount: true
   });
+
   // Invalidar cache después de cambios
   const invalidateBids = () => {
     console.log('Invalidating bids cache for:', subcontract?.id);
@@ -42,6 +45,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
     // También forzar refetch inmediato
     refetch();
   };
+
   const handleAddBid = () => {
     openModal('subcontract-bid', {
       subcontractId: subcontract.id,
@@ -51,6 +55,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       }
     });
   };
+
   const handleEditBid = (bid: any) => {
     openModal('subcontract-bid', {
       subcontractId: subcontract.id,
@@ -62,6 +67,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       }
     });
   };
+
   const handleDeleteBid = (bid: any) => {
     openModal('delete-confirmation', {
       title: 'Eliminar Oferta',
@@ -84,10 +90,12 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       }
     });
   };
+
   const handleViewBid = (bid: any) => {
     // TODO: Implementar vista detallada de oferta
     console.log('View bid:', bid.id);
   };
+
   const handleSelectWinner = (bid: any) => {
     openModal('subcontract-award', {
       subcontract,
@@ -101,11 +109,12 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       }
     });
   };
+
   const getStatusBadge = (status: string, bidId?: string) => {
     // Si es la oferta ganadora, mostrar badge especial
     if (bidId && subcontract?.winner_bid_id === bidId) {
       return (
-        <Badge variant="default" className="text-xs" style={{ backgroundColor: 'var(--accent)', color: 'white'}}>
+        <Badge variant="default" className="text-xs" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
           <Trophy className="h-3 w-3 mr-1" />
           Ganadora
         </Badge>
@@ -123,11 +132,11 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
     
     // Estados normales cuando no hay ganadora aún
     const statusConfig = {
-      pending: { label: 'Pendiente', variant: 'secondary'as const },
-      received: { label: 'Recibida', variant: 'default'as const },
-      withdrawn: { label: 'Retirada', variant: 'destructive'as const },
-      rejected: { label: 'Rechazada', variant: 'destructive'as const },
-      awarded: { label: 'Adjudicada', variant: 'default'as const }
+      pending: { label: 'Pendiente', variant: 'secondary' as const },
+      received: { label: 'Recibida', variant: 'default' as const },
+      withdrawn: { label: 'Retirada', variant: 'destructive' as const },
+      rejected: { label: 'Rechazada', variant: 'destructive' as const },
+      awarded: { label: 'Adjudicada', variant: 'default' as const }
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
@@ -138,25 +147,29 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       </Badge>
     );
   };
+
   const formatCurrency = (amount: number, currency: string) => {
     if (!amount || !currency) return '—';
     
     const formatter = new Intl.NumberFormat('es-AR', {
       style: 'currency',
-      currency: currency === 'ARS'? 'ARS': 'USD',
+      currency: currency === 'ARS' ? 'ARS' : 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     });
     
     return formatter.format(amount);
   };
+
   // Cálculos para KPIs
   const kpiData = useMemo(() => {
     if (subcontractBids.length === 0) return null;
+
     const winningBid = subcontractBids.find((bid: any) => bid.id === subcontract?.winner_bid_id);
     const validBids = subcontractBids.filter((bid: any) => bid.amount && bid.amount > 0);
     
     if (validBids.length === 0) return null;
+
     const amounts = validBids.map((bid: any) => bid.amount);
     const lowestAmount = Math.min(...amounts);
     const highestAmount = Math.max(...amounts);
@@ -181,6 +194,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
         percentage: ((winningBid.amount - highestAmount) / highestAmount) * 100
       };
     }
+
     return {
       winningBid,
       totalBids: subcontractBids.length,
@@ -195,6 +209,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       winnerVsHighest
     };
   }, [subcontractBids, subcontract?.winner_bid_id]);
+
   // Ordenar ofertas: ganadora primero, luego por monto
   const sortedBids = useMemo(() => {
     if (!subcontractBids.length) return [];
@@ -210,6 +225,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       return amountA - amountB;
     });
   }, [subcontractBids, subcontract?.winner_bid_id]);
+
   const columns = [
     {
       key: 'supplier_name',
@@ -259,6 +275,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
       render: (item: any) => getStatusBadge(item.status, item.id)
     }
   ];
+
   return (
     <div className="space-y-6">
       {/* KPI Cards - Solo mostrar si hay ofertas */}
@@ -271,7 +288,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
               <Card className="border-yellow-200 bg-yellow-50/50 md:col-span-2">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-lg">
-                    <Award className="h-5 w-5" style={{ color: 'var(--accent)'}} />
+                    <Award className="h-5 w-5" style={{ color: 'var(--accent)' }} />
                     Oferta Ganadora
                   </CardTitle>
                 </CardHeader>
@@ -286,7 +303,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Monto</p>
-                      <p className="text-lg font-bold" style={{ color: 'var(--accent)'}}>
+                      <p className="text-lg font-bold" style={{ color: 'var(--accent)' }}>
                         {formatCurrency(kpiData.winningBid.amount, kpiData.winningBid.currencies?.code)}
                       </p>
                     </div>
@@ -302,13 +319,14 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                   </div>
                 </CardContent>
               </Card>
+
               {/* Ahorro vs Más Alta - 1 columna */}
               <Card>
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">Ahorro vs Más Alta</p>
-                      <DollarSign className="h-6 w-6" style={{ color: 'var(--accent)'}} />
+                      <DollarSign className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                     </div>
                     
                     <div className="h-8 flex items-center">
@@ -319,7 +337,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                             backgroundColor: 'var(--accent)',
                             width: kpiData.winnerVsHighest && kpiData.winnerVsHighest.percentage < 0 
                               ? `${Math.min(100, Math.abs(kpiData.winnerVsHighest.percentage) * 2)}%` 
-                              : '5%'
+                              : '5%' 
                           }}
                         />
                       </div>
@@ -342,13 +360,14 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                   </div>
                 </CardContent>
               </Card>
+
               {/* vs Promedio - 1 columna */}
               <Card>
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">vs Promedio</p>
-                      <TrendingUp className="h-6 w-6" style={{ color: 'var(--accent)'}} />
+                      <TrendingUp className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                     </div>
                     
                     <div className="h-8 relative">
@@ -372,7 +391,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                     <div>
                       <p className="text-xl font-bold">
                         {kpiData.winnerVsAverage 
-                          ? (kpiData.winnerVsAverage.amount < 0 ? '-': '+') + 
+                          ? (kpiData.winnerVsAverage.amount < 0 ? '-' : '+') + 
                             formatCurrency(Math.abs(kpiData.winnerVsAverage.amount), 'ARS')
                           : '$ 0'
                         }
@@ -380,7 +399,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                       <p className="text-xs text-muted-foreground">
                         {kpiData.winnerVsAverage 
                           ? `${Math.abs(kpiData.winnerVsAverage.percentage).toFixed(1)}% ${
-                              kpiData.winnerVsAverage.amount < 0 ? 'por debajo': 'por encima'
+                              kpiData.winnerVsAverage.amount < 0 ? 'por debajo' : 'por encima'
                             } del promedio`
                           : 'Igual al promedio'
                         }
@@ -391,6 +410,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
               </Card>
             </div>
           )}
+
           {/* Grid de KPIs Comparativos */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Total de Ofertas */}
@@ -399,7 +419,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">Total Ofertas</p>
-                    <Users className="h-6 w-6" style={{ color: 'var(--accent)'}} />
+                    <Users className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                   </div>
                   
                   {/* Mini Chart - Bar chart simple */}
@@ -426,13 +446,14 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                 </div>
               </CardContent>
             </Card>
+
             {/* Oferta Más Baja */}
             <Card>
               <CardContent className="p-6">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">Oferta Más Baja</p>
-                    <TrendingDown className="h-6 w-6" style={{ color: 'var(--accent)'}} />
+                    <TrendingDown className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                   </div>
                   
                   {/* Mini Chart - Trend line */}
@@ -463,13 +484,14 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                 </div>
               </CardContent>
             </Card>
+
             {/* Promedio */}
             <Card>
               <CardContent className="p-6">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">Promedio</p>
-                    <Target className="h-6 w-6" style={{ color: 'var(--accent)'}} />
+                    <Target className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                   </div>
                   
                   {/* Mini Chart - Area chart */}
@@ -503,13 +525,14 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                 </div>
               </CardContent>
             </Card>
+
             {/* Rango de Ofertas */}
             <Card>
               <CardContent className="p-6">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">Rango de Ofertas</p>
-                    <BarChart3 className="h-6 w-6" style={{ color: 'var(--accent)'}} />
+                    <BarChart3 className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                   </div>
                   
                   {/* Mini Chart - Range indicator */}
@@ -519,11 +542,11 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                         className="h-2 rounded-full relative"
                         style={{ 
                           backgroundColor: 'var(--accent)', 
-                          width: '100%'
+                          width: '100%' 
                         }}
                       >
-                        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white" style={{ backgroundColor: 'var(--accent)'}}></div>
-                        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white" style={{ backgroundColor: 'var(--accent)'}}></div>
+                        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white" style={{ backgroundColor: 'var(--accent)' }}></div>
+                        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white" style={{ backgroundColor: 'var(--accent)' }}></div>
                       </div>
                     </div>
                   </div>
@@ -540,8 +563,11 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
               </CardContent>
             </Card>
           </div>
+
+
         </>
       )}
+
       {/* Tabla de ofertas */}
       {sortedBids.length === 0 ? (
         <EmptyState
@@ -578,7 +604,7 @@ export function SubcontractBidsView({ subcontract }: SubcontractBidsViewProps) {
                 icon: Trash2,
                 label: 'Eliminar oferta',
                 onClick: () => handleDeleteBid(item),
-                variant: 'destructive'as const
+                variant: 'destructive' as const
               }
             );
             return actions;

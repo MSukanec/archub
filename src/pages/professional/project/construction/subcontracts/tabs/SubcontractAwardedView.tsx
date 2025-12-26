@@ -8,10 +8,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useGlobalModalStore } from '@/components/modal';
 import { EmptyState } from '@/components/shared/EmptyState';
+
 interface SubcontractAwardedViewProps {
   subcontract: any;
   onTabChange?: (tab: string) => void;
 }
+
 export function SubcontractAwardedView({ subcontract, onTabChange }: SubcontractAwardedViewProps) {
   const { openModal } = useGlobalModalStore();
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
@@ -28,31 +30,37 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
     // For now, always show empty array - no hardcoded data
     setAwardedTasks([]);
   }, [subcontract.id]);
+
   // Calcular KPIs basados en datos reales del subcontrato adjudicado
   const formatCurrency = (amount: number, currency: string = 'ARS') => {
     const formatter = new Intl.NumberFormat('es-AR', {
       style: 'currency',
-      currency: currency === 'ARS'? 'ARS': 'USD',
+      currency: currency === 'ARS' ? 'ARS' : 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     });
     return formatter.format(amount);
   };
+
   const handleEditTask = (taskId: string) => {
     setEditingTaskId(taskId);
   };
+
   const handleSaveTask = (taskId: string, updatedData: any) => {
     // TODO: Update subcontract_bid_tasks and recalculate subcontract.amount_total
     setEditingTaskId(null);
     console.log('Saving task:', taskId, updatedData);
   };
+
   const handleCancelEdit = () => {
     setEditingTaskId(null);
   };
+
   const handleUploadContract = () => {
     // TODO: Implement contract upload functionality
     console.log('Upload contract functionality to be implemented');
   };
+
   const calculateTotal = () => {
     return awardedTasks.reduce((total, task) => {
       const amount = task.amount || 0;
@@ -60,6 +68,7 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
       return total + (amount * unitPrice);
     }, 0);
   };
+
   const columns = [
     {
       key: 'task_name',
@@ -161,6 +170,7 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
       }
     }
   ];
+
   if (!isAwarded) {
     return (
       <EmptyState
@@ -176,6 +186,7 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
       />
     );
   }
+
   // Si está adjudicado pero no hay tareas, mostrar empty state específico
   if (isAwarded && awardedTasks.length === 0) {
     return (
@@ -187,10 +198,10 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">Monto Adjudicado</p>
-                  <DollarSign className="h-6 w-6" style={{ color: 'var(--accent)'}} />
+                  <DollarSign className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold" style={{ color: 'var(--accent)'}}>
+                  <p className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>
                     {subcontract.amount_total 
                       ? formatCurrency(subcontract.amount_total, 'ARS')
                       : 'Sin definir'
@@ -203,12 +214,13 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
               </div>
             </CardContent>
           </Card>
+
           <Card>
             <CardContent className="p-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">Contratista</p>
-                  <Package className="h-6 w-6" style={{ color: 'var(--accent)'}} />
+                  <Package className="h-6 w-6" style={{ color: 'var(--accent)' }} />
                 </div>
                 <div>
                   <p className="text-lg font-bold">
@@ -221,6 +233,7 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
               </div>
             </CardContent>
           </Card>
+
           <Card>
             <CardContent className="p-6">
               <div className="space-y-4">
@@ -239,6 +252,7 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
               </div>
             </CardContent>
           </Card>
+
           <Card>
             <CardContent className="p-6">
               <div className="space-y-4">
@@ -258,6 +272,7 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
             </CardContent>
           </Card>
         </div>
+
         <EmptyState
           icon={<Package />}
           title="Sin tareas definidas"
@@ -272,6 +287,7 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
       </div>
     );
   }
+
   return (
     <div className="space-y-6">
       {/* KPIs del contrato adjudicado */}
@@ -281,10 +297,10 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">Monto Adjudicado</p>
-                <DollarSign className="h-6 w-6" style={{ color: 'var(--accent)'}} />
+                <DollarSign className="h-6 w-6" style={{ color: 'var(--accent)' }} />
               </div>
               <div>
-                <p className="text-2xl font-bold" style={{ color: 'var(--accent)'}}>
+                <p className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>
                   {subcontract.amount_total 
                     ? formatCurrency(subcontract.amount_total, 'ARS')
                     : formatCurrency(calculateTotal(), 'ARS')
@@ -297,15 +313,16 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
             </div>
           </CardContent>
         </Card>
+
         <Card>
           <CardContent className="p-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">Tareas</p>
-                <Package className="h-6 w-6" style={{ color: 'var(--accent)'}} />
+                <Package className="h-6 w-6" style={{ color: 'var(--accent)' }} />
               </div>
               <div>
-                <p className="text-2xl font-bold" style={{ color: 'var(--accent)'}}>
+                <p className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>
                   {awardedTasks.length}
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -315,15 +332,16 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
             </div>
           </CardContent>
         </Card>
+
         <Card>
           <CardContent className="p-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">Estado</p>
-                <TrendingUp className="h-6 w-6" style={{ color: 'var(--accent)'}} />
+                <TrendingUp className="h-6 w-6" style={{ color: 'var(--accent)' }} />
               </div>
               <div>
-                <p className="text-lg font-bold" style={{ color: 'var(--accent)'}}>
+                <p className="text-lg font-bold" style={{ color: 'var(--accent)' }}>
                   Adjudicado
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -333,15 +351,16 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
             </div>
           </CardContent>
         </Card>
+
         <Card>
           <CardContent className="p-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">Progreso</p>
-                <Calculator className="h-6 w-6" style={{ color: 'var(--accent)'}} />
+                <Calculator className="h-6 w-6" style={{ color: 'var(--accent)' }} />
               </div>
               <div>
-                <p className="text-2xl font-bold" style={{ color: 'var(--accent)'}}>
+                <p className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>
                   0%
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -352,6 +371,7 @@ export function SubcontractAwardedView({ subcontract, onTabChange }: Subcontract
           </CardContent>
         </Card>
       </div>
+
       {/* Tabla de tareas adjudicadas */}
       <Table
         data={awardedTasks}

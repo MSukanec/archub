@@ -35,6 +35,7 @@ import {
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+
 interface SiteLogModalViewProps {
   modalData?: {
     viewingSiteLog?: any;
@@ -43,17 +44,19 @@ interface SiteLogModalViewProps {
   onEdit?: (siteLog: any) => void;
   onDelete?: (siteLog: any) => void;
 }
+
 // Entry type configurations
 const entryTypes = {
-  avance_de_obra: { label: 'Avance de Obra', icon: TrendingUp, color: 'bg-green-100 text-green-800'},
-  visita_tecnica: { label: 'Visita Técnica', icon: Eye, color: 'bg-blue-100 text-blue-800'},
-  problema_detectado: { label: 'Problema Detectado', icon: AlertTriangle, color: 'bg-red-100 text-red-800'},
-  pedido_material: { label: 'Pedido Material', icon: Package, color: 'bg-orange-100 text-orange-800'},
-  nota_climatica: { label: 'Nota Climática', icon: StickyNote, color: 'bg-yellow-100 text-yellow-800'},
-  decision: { label: 'Decisión', icon: CheckCircle, color: 'bg-purple-100 text-purple-800'},
-  inspeccion: { label: 'Inspección', icon: Eye, color: 'bg-indigo-100 text-indigo-800'},
-  foto_diaria: { label: 'Foto Diaria', icon: Camera, color: 'bg-gray-100 text-gray-800'},
+  avance_de_obra: { label: 'Avance de Obra', icon: TrendingUp, color: 'bg-green-100 text-green-800' },
+  visita_tecnica: { label: 'Visita Técnica', icon: Eye, color: 'bg-blue-100 text-blue-800' },
+  problema_detectado: { label: 'Problema Detectado', icon: AlertTriangle, color: 'bg-red-100 text-red-800' },
+  pedido_material: { label: 'Pedido Material', icon: Package, color: 'bg-orange-100 text-orange-800' },
+  nota_climatica: { label: 'Nota Climática', icon: StickyNote, color: 'bg-yellow-100 text-yellow-800' },
+  decision: { label: 'Decisión', icon: CheckCircle, color: 'bg-purple-100 text-purple-800' },
+  inspeccion: { label: 'Inspección', icon: Eye, color: 'bg-indigo-100 text-indigo-800' },
+  foto_diaria: { label: 'Foto Diaria', icon: Camera, color: 'bg-gray-100 text-gray-800' },
 };
+
 const weatherTypes = {
   sunny: { icon: Sun, label: "Soleado", color: "text-yellow-500" },
   partly_cloudy: { icon: CloudSun, label: "Parcialmente nublado", color: "text-yellow-400" },
@@ -69,13 +72,14 @@ const weatherTypes = {
   hail: { icon: CloudSnow, label: "Granizo", color: "text-blue-300" },
   none: { icon: Sun, label: "Sin especificar", color: "text-muted-foreground" }
 };
+
 export function SiteLogModalView({ modalData, onClose, onEdit, onDelete }: SiteLogModalViewProps) {
   const siteLog = modalData?.viewingSiteLog
   const { openModal } = useGlobalModalStore()
   
   // Filtrar solo imágenes para el lightbox
   const imageUrls = siteLog?.files?.filter((file: any) => 
-    file.file_type === 'image'|| file.mime_type?.startsWith('image/')
+    file.file_type === 'image' || file.mime_type?.startsWith('image/')
   ).map((file: any) => file.file_url) || []
   
   const lightbox = useImageLightbox(imageUrls)
@@ -83,39 +87,44 @@ export function SiteLogModalView({ modalData, onClose, onEdit, onDelete }: SiteL
   if (!siteLog) {
     return null
   }
+
   // Handler para abrir el modal de edición
   const handleEdit = () => {
     onClose() // Cerrar el modal de vista primero
     openModal('site-log', { data: siteLog, isEditing: true })
   }
+
   // Helper para formatear fecha
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString + 'T00:00:00')
-      return format(date, 'EEEE, dd \'de\'MMMM \'de\'yyyy', { locale: es })
+      return format(date, 'EEEE, dd \'de\' MMMM \'de\' yyyy', { locale: es })
     } catch {
       return dateString
     }
   }
+
   // Helper para obtener iniciales
   const getInitials = (name: string): string => {
     if (!name) return "U";
     return name
-      .split('')
+      .split(' ')
       .map(n => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 2);
   };
+
   // Obtener configuración del tipo desde la relación site_log_type
   const entryTypeName = siteLog.site_log_type?.name || 'Registro General';
-  const entryTypeConfig = { label: entryTypeName, icon: FileText, color: 'bg-teal-100 text-teal-800'};
+  const entryTypeConfig = { label: entryTypeName, icon: FileText, color: 'bg-teal-100 text-teal-800' };
   const weatherConfig = weatherTypes[siteLog.weather as keyof typeof weatherTypes];
   
   // Filtrar solo imágenes de los archivos
   const imageFiles = siteLog.files?.filter((file: any) => 
-    file.file_type === 'image'|| file.mime_type?.startsWith('image/')
+    file.file_type === 'image' || file.mime_type?.startsWith('image/')
   ) || [];
+
   const viewPanel = (
     <div className="space-y-6">
       {/* Fecha y creador */}
@@ -157,7 +166,10 @@ export function SiteLogModalView({ modalData, onClose, onEdit, onDelete }: SiteL
           </div>
         )}
       </div>
+
       <Separator />
+
+
       {/* Comentarios */}
       {siteLog.comments && (
         <>
@@ -173,6 +185,7 @@ export function SiteLogModalView({ modalData, onClose, onEdit, onDelete }: SiteL
           </div>
         </>
       )}
+
       {/* Galería de imágenes */}
       {imageFiles.length > 0 && (
         <>
@@ -202,6 +215,7 @@ export function SiteLogModalView({ modalData, onClose, onEdit, onDelete }: SiteL
           </div>
         </>
       )}
+
       {/* Personal asistente */}
       {siteLog.attendees && siteLog.attendees.length > 0 && (
         <>
@@ -234,14 +248,17 @@ export function SiteLogModalView({ modalData, onClose, onEdit, onDelete }: SiteL
           </div>
         </>
       )}
+
     </div>
   )
+
   const headerContent = (
     <FormModalHeader 
       title="Ver Registro de Bitácora"
       icon={Eye}
     />
   )
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cerrar"
@@ -250,6 +267,7 @@ export function SiteLogModalView({ modalData, onClose, onEdit, onDelete }: SiteL
       onRightClick={handleEdit}
     />
   )
+
   return (
     <>
       <FormModalLayout

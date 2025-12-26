@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { Pin } from '../types';
+
 export interface CreatePinInput {
   title: string;
   source_url?: string;
@@ -7,6 +8,7 @@ export interface CreatePinInput {
   board_id?: string;
   file?: File;
 }
+
 export async function createPin(input: CreatePinInput): Promise<Pin & { board_id?: string }> {
   const formData = new FormData();
   formData.append('title', input.title);

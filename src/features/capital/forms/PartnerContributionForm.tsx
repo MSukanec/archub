@@ -25,6 +25,7 @@ import { uploadFile, deleteFile } from '@/lib/storage'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Partner } from '../types'
+
 const partnerContributionSchema = z.object({
   contribution_date: z.date({
     required_error: "Fecha es requerida",
@@ -38,7 +39,9 @@ const partnerContributionSchema = z.object({
   reference: z.string().optional(),
   notes: z.string().optional(),
 })
+
 type PartnerContributionFormData = z.infer<typeof partnerContributionSchema>
+
 function getPartnerDisplayName(partner: Partner): string {
   if (!partner?.contacts) return 'Socio sin nombre'
   
@@ -58,16 +61,18 @@ function getPartnerDisplayName(partner: Partner): string {
   }
   return 'Socio sin nombre'
 }
+
 export interface PartnerContributionFormProps {
   projectId?: string;
   organizationId?: string;
   contributionId?: string;
-  mode: 'create'| 'edit'| 'view';
+  mode: 'create' | 'edit' | 'view';
   onSuccess: () => void;
   onCancel: () => void;
   hideActions?: boolean;
   formRef?: React.RefObject<HTMLFormElement>;
 }
+
 export function PartnerContributionForm({ 
   projectId, 
   organizationId,
@@ -83,21 +88,25 @@ export function PartnerContributionForm({
   const queryClient = useQueryClient()
   const [filesToUpload, setFilesToUpload] = useState<any[]>([])
   const [attachments, setAttachments] = useState<any[]>([])
+
   const { data: partners = [], isLoading: partnersLoading } = usePartners(organizationId, { enabled: !!organizationId })
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId || '')
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
   
   const orgCurrencyContext = useOrgCurrencyContext(organizationId)
+
   const createMutation = useCreatePartnerContribution()
   const updateMutation = useUpdatePartnerContribution()
   const { data: existingContribution, isLoading: loadingContribution } = usePartnerContribution(
     contributionId,
     organizationId
   )
+
   const currentMember = useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
   }, [members, userData?.user?.id])
+
   const partnerOptions = useMemo(() => {
     return partners.map(partner => {
       const linkedUser = Array.isArray(partner.contacts?.linked_user) 
@@ -108,8 +117,9 @@ export function PartnerContributionForm({
         label: getPartnerDisplayName(partner),
         linkedUser,
       };
-    }).sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base'}))
+    }).sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
   }, [partners])
+
   const form = useForm<PartnerContributionFormData>({
     resolver: zodResolver(partnerContributionSchema),
     defaultValues: {
@@ -124,10 +134,12 @@ export function PartnerContributionForm({
       notes: '',
     }
   })
+
   const isLoading = partnersLoading || currenciesLoading || walletsLoading || membersLoading || loadingContribution
+
   // Load existing contribution data in edit/view mode
   useEffect(() => {
-    if (existingContribution && (mode === 'edit'|| mode === 'view')) {
+    if (existingContribution && (mode === 'edit' || mode === 'view')) {
       const contributionDate = parseLocalDate(existingContribution.contribution_date) || new Date()
       
       form.reset({
@@ -143,10 +155,11 @@ export function PartnerContributionForm({
       })
     }
   }, [existingContribution, mode, form])
+
   // Set default wallet and currency when they load (create mode only)
   // Para organizaciones monomoneda, siempre usar la moneda por defecto
   useEffect(() => {
-    if (mode === 'create'&& !contributionId) {
+    if (mode === 'create' && !contributionId) {
       // Usar la moneda por defecto de la organización
       if (orgCurrencyContext.defaultCurrencyId && !orgCurrencyContext.isLoading) {
         form.setValue('currency_id', orgCurrencyContext.defaultCurrencyId)
@@ -156,15 +169,17 @@ export function PartnerContributionForm({
       }
     }
   }, [currencies, currenciesLoading, mode, contributionId, form, orgCurrencyContext.defaultCurrencyId, orgCurrencyContext.isLoading])
+
   useEffect(() => {
-    if (mode === 'create'&& !contributionId) {
+    if (mode === 'create' && !contributionId) {
       if (!walletsLoading && wallets && wallets.length > 0) {
         form.setValue('wallet_id', wallets[0].id || '')
       }
     }
   }, [wallets, walletsLoading, mode, contributionId, form])
+
   useEffect(() => {
-    if (mode === 'edit'|| mode === 'view') {
+    if (mode === 'edit' || mode === 'view') {
       if (existingContribution?.media_links) {
         setAttachments(existingContribution.media_links)
       } else {
@@ -172,6 +187,7 @@ export function PartnerContributionForm({
       }
     }
   }, [existingContribution, mode])
+
   const existingFiles = useMemo(() => {
     if (!attachments || attachments.length === 0) return []
     
@@ -187,6 +203,7 @@ export function PartnerContributionForm({
       }
     })
   }, [attachments])
+
   const handleExistingFileDelete = async (fileId: string) => {
     try {
       await deleteFile(fileId, false)
@@ -204,6 +221,7 @@ export function PartnerContributionForm({
       })
     }
   }
+
   const onSubmit = async (data: PartnerContributionFormData) => {
     if (!organizationId || !currentMember) {
       toast({
@@ -213,10 +231,11 @@ export function PartnerContributionForm({
       })
       return
     }
+
     try {
       let result;
       
-      if (mode === 'edit'&& contributionId) {
+      if (mode === 'edit' && contributionId) {
         result = await updateMutation.mutateAsync({
           contributionId,
           updates: {
@@ -248,7 +267,9 @@ export function PartnerContributionForm({
           created_by: currentMember.id,
         })
       }
+
       const createdContributionId = result?.id || contributionId
+
       if (filesToUpload.length > 0 && createdContributionId) {
         for (const fileInput of filesToUpload) {
           try {
@@ -275,11 +296,13 @@ export function PartnerContributionForm({
         }
         setFilesToUpload([])
       }
-      const successMessage = mode === 'edit'? 'actualizado': 'registrado';
+
+      const successMessage = mode === 'edit' ? 'actualizado' : 'registrado';
       toast({
         title: `Aporte ${successMessage}`,
         description: `El aporte de socio se ha ${successMessage} correctamente`,
       })
+
       onSuccess()
     } catch (error: any) {
       toast({
@@ -289,6 +312,7 @@ export function PartnerContributionForm({
       })
     }
   }
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -299,6 +323,7 @@ export function PartnerContributionForm({
       </div>
     )
   }
+
   return (
     <Form {...form}>
       <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -341,6 +366,7 @@ export function PartnerContributionForm({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="partner_id"
@@ -373,6 +399,7 @@ export function PartnerContributionForm({
             )}
           />
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -403,6 +430,7 @@ export function PartnerContributionForm({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="amount"
@@ -428,6 +456,7 @@ export function PartnerContributionForm({
             )}
           />
         </div>
+
         {/* Campos de moneda - visibilidad condicional basada en isMultiCurrency */}
         {(() => {
           const visibility = getCurrencyFieldsVisibility({
@@ -473,6 +502,7 @@ export function PartnerContributionForm({
                       )}
                     />
                   )}
+
                   {visibility.showExchangeRate && (
                     <FormField
                       control={form.control}
@@ -501,6 +531,7 @@ export function PartnerContributionForm({
             </>
           );
         })()}
+
         <FormField
           control={form.control}
           name="notes"
@@ -519,6 +550,7 @@ export function PartnerContributionForm({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="reference"
@@ -536,6 +568,7 @@ export function PartnerContributionForm({
             </FormItem>
           )}
         />
+
         <div>
           <FileUploader
             mode="multiple"
@@ -558,6 +591,7 @@ export function PartnerContributionForm({
             newFileBadgeText="Nuevo"
           />
         </div>
+
         {!hideActions && (
           <div className="flex gap-2 pt-4 border-t">
             <button
@@ -576,7 +610,7 @@ export function PartnerContributionForm({
             >
               {createMutation.isPending || updateMutation.isPending
                 ? 'Guardando...'
-                : mode === 'edit'? 'Guardar Cambios': 'Registrar Aporte'}
+                : mode === 'edit' ? 'Guardar Cambios' : 'Registrar Aporte'}
             </button>
           </div>
         )}

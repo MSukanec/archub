@@ -1,5 +1,6 @@
 import React from 'react'
 import { cn } from '@/lib/utils'
+
 interface EmptyStateProps {
   icon?: React.ReactNode;
   title: string;
@@ -8,8 +9,9 @@ interface EmptyStateProps {
   secondaryAction?: React.ReactNode;
   customContent?: React.ReactNode;
   className?: string;
-  buttonSize?: 'sm'| 'md'| 'lg';
+  buttonSize?: 'sm' | 'md' | 'lg';
 }
+
 export function EmptyState({
   icon,
   title,
@@ -41,6 +43,7 @@ export function EmptyState({
           transparent 12px
         )`
       }}>
+
         {/* Icon container */}
         {icon && (
           <div className="relative mb-8">
@@ -52,7 +55,7 @@ export function EmptyState({
                 color: 'var(--accent)'
               }}
             >
-              <div className="[&>svg]:w-12 [&>svg]:h-12" style={{ color: 'var(--accent)'}}>
+              <div className="[&>svg]:w-12 [&>svg]:h-12" style={{ color: 'var(--accent)' }}>
                 {icon}
               </div>
             </div>
@@ -72,7 +75,7 @@ export function EmptyState({
                 style={{ 
                   backgroundColor: 'rgba(var(--accent-rgb), 0.3)',
                   animationDelay: '0s', 
-                  animationDuration: '6s'
+                  animationDuration: '6s' 
                 }}
               ></div>
               <div 
@@ -80,7 +83,7 @@ export function EmptyState({
                 style={{ 
                   backgroundColor: 'rgba(var(--accent-rgb), 0.4)',
                   animationDelay: '2s', 
-                  animationDuration: '8s'
+                  animationDuration: '8s' 
                 }}
               ></div>
               <div 
@@ -88,7 +91,7 @@ export function EmptyState({
                 style={{ 
                   backgroundColor: 'rgba(var(--accent-rgb), 0.2)',
                   animationDelay: '4s', 
-                  animationDuration: '7s'
+                  animationDuration: '7s' 
                 }}
               ></div>
               <div 
@@ -96,18 +99,20 @@ export function EmptyState({
                 style={{ 
                   backgroundColor: 'rgba(var(--accent-rgb), 0.35)',
                   animationDelay: '1s', 
-                  animationDuration: '9s'
+                  animationDuration: '9s' 
                 }}
               ></div>
             </div>
           </div>
         )}
+
         {/* Custom Content - before main content */}
         {customContent && (
           <div className="relative z-10 w-full">
             {customContent}
           </div>
         )}
+
         {/* Content */}
         <div className="space-y-4 max-w-md mx-auto relative z-10">
           <h3 className="text-xl font-semibold text-foreground leading-tight">

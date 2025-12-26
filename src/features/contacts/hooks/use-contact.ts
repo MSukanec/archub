@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getContactById } from '../services';
 import { contactsKeys } from '@/core/query-keys';
+
 export function useContact(
   organizationId: string | undefined,
   contactId: string | undefined

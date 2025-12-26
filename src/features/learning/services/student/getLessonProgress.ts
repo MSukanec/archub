@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { CourseLessonProgress } from '@shared/schema';
+
 /**
  * Obtiene el progreso de una lección específica para el usuario actual.
  * 
@@ -18,14 +19,17 @@ export async function getLessonProgress(
   if (!lessonId || !userId) {
     return null;
   }
+
   const { data, error } = await supabase
     .from('course_lesson_progress')
     .select('*')
     .eq('lesson_id', lessonId)
     .eq('user_id', userId)
     .maybeSingle();
+
   if (error) {
     throw error;
   }
+
   return data;
 }

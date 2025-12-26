@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 /**
  * Partner contribution from Supabase with all relations
  */
@@ -14,7 +15,7 @@ export interface PartnerContributionWithRelations {
   notes: string | null;
   reference: string | null;
   wallet_id: string | null;
-  status: 'confirmed'| 'pending'| 'rejected'| 'void';
+  status: 'confirmed' | 'pending' | 'rejected' | 'void';
   created_by: string | null;
   file_url: string | null;
   created_at: string;
@@ -69,6 +70,7 @@ export interface PartnerContributionWithRelations {
     color: string;
   } | null;
 }
+
 /**
  * Get all partner contributions for an organization with optional project filtering.
  * 
@@ -84,6 +86,7 @@ export async function getPartnerContributions(
   if (!supabase || !organizationId) {
     return [];
   }
+
   let query = supabase
     .from('partner_contributions')
     .select(`
@@ -138,17 +141,22 @@ export async function getPartnerContributions(
     `)
     .eq('organization_id', organizationId)
     .or('is_deleted.is.null,is_deleted.eq.false');
+
   // Filter by project if provided
   if (projectId) {
     query = query.eq('project_id', projectId);
   }
+
   const { data, error } = await query.order('contribution_date', { ascending: false });
+
   if (error) {
     throw error;
   }
+
   if (!data || data.length === 0) {
     return [];
   }
+
   // Transform the data to match the expected structure
   return data.map(contribution => ({
     ...contribution,

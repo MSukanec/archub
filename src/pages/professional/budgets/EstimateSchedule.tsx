@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, Trash2, BarChart3, CheckSquare } from 'lucide-react'
 import { Plus } from 'lucide-react'
+
 import { EmptyState } from '@/components/shared/EmptyState'
 import { Table } from '@/components/shared/trees/Table'
+
 import { useConstructionTasksView, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
 import { useConstructionProjectPhases } from '@/hooks/use-construction-phases'
 import { useConstructionDependencies } from '@/hooks/use-construction-dependencies'
@@ -18,7 +20,9 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { GanttContainer, GanttRowProps } from '@/components/shared/gantt'
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner'
+
 import { RoleRestricted } from "@/features/users"
+
 // Función para limpiar nombres de tareas eliminando códigos y variables
 function cleanTaskDisplayName(name: string): string {
   if (!name) return 'Estimación sin nombre'
@@ -33,10 +37,11 @@ function cleanTaskDisplayName(name: string): string {
   cleanedName = cleanedName.replace(/\.\s*$/, '')
   
   // Limpiar espacios múltiples y trim
-  cleanedName = cleanedName.replace(/\s+/g, '').trim()
+  cleanedName = cleanedName.replace(/\s+/g, ' ').trim()
   
   return cleanedName || 'Estimación sin nombre'
 }
+
 export function EstimateSchedule() {
   const [activeTab, setActiveTab] = useState("gantt")
   const [groupingType, setGroupingType] = useState('rubros')
@@ -48,22 +53,29 @@ export function EstimateSchedule() {
   const deleteTask = useDeleteConstructionTask()
   const { showDeleteConfirmation } = useDeleteConfirmation()
   const { setSidebarContext } = useNavigationStore()
+
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('construction')
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Usar ProjectContext como fuente única de verdad para org/project IDs
   const projectId = selectedProjectId
   const organizationId = currentOrganizationId
+
   const { data: tasks = [], isLoading } = useConstructionTasksView(projectId || '', organizationId || '')
+
   // Obtener las fases del proyecto y dependencias
   const { data: projectPhases = [] } = useConstructionProjectPhases(projectId || '')
   const { data: dependencies = [] } = useConstructionDependencies(projectId || '')
+
   // Usar todas las tareas sin filtro de búsqueda
   const filteredTasks = tasks
+
   // Crear estructura Gantt simplificada con las tareas de la vista
   const ganttData = useMemo(() => {
     const ganttRows: any[] = [];
+
     // Agrupar tareas por phase_name usando los datos de la vista
     const tasksByPhase = filteredTasks.reduce((acc, task) => {
       const phaseName = task.phase_name || 'ESTIMACIONES SIN FASE ASIGNADA';
@@ -73,6 +85,7 @@ export function EstimateSchedule() {
       acc[phaseName].push(task);
       return acc;
     }, {} as Record<string, typeof filteredTasks>);
+
     // Procesar cada fase
     Object.entries(tasksByPhase).forEach(([phaseName, tasksInPhase]) => {
       // Agregar encabezado de fase
@@ -86,17 +99,21 @@ export function EstimateSchedule() {
         endDate: undefined,
         durationInDays: undefined
       });
+
       // Agregar las tareas de esta fase
       tasksInPhase.forEach((task) => {
         let validStartDate = task.start_date;
         let validEndDate = task.end_date;
         let validDuration = task.duration_in_days;
+
         // No forzar fecha de hoy si no hay start_date
         // Dejar validStartDate como null si no existe
+
         // Si hay start_date pero no end_date ni duration, establecer duración de 1 día
         if (validStartDate && !validEndDate && !validDuration) {
           validDuration = 1;
         }
+
         ganttRows.push({
           id: task.id,
           name: cleanTaskDisplayName(task.custom_name || 'Estimación sin nombre'),
@@ -110,12 +127,15 @@ export function EstimateSchedule() {
         });
       });
     });
+
     return ganttRows;
   }, [filteredTasks]);
+
   // Mostrar loading state sin Layout complejo para evitar renderizados costosos
   if (isLoading) {
     return <LoadingSpinner fullScreen size="lg" />
   }
+
   // Crear tabs para el header
   const headerTabs = [
     {
@@ -136,10 +156,11 @@ export function EstimateSchedule() {
       disabled: true // Bloquear esta tab
     }
   ]
+
   return (
     <div className="space-y-6">
       {/* Tab Content */}
-      {activeTab === 'gantt'&& (
+      {activeTab === 'gantt' && (
         <div className="space-y-6">
           {filteredTasks.length === 0 ? (
             <EmptyState
@@ -178,7 +199,8 @@ export function EstimateSchedule() {
           )}
         </div>
       )}
-      {activeTab === 'list'&& (
+
+      {activeTab === 'list' && (
         <div className="space-y-6">
           <RoleRestricted requiredRole="admin" hideCompletely showAsPreview>
             <div className="flex flex-col items-center justify-center py-16">
@@ -192,7 +214,8 @@ export function EstimateSchedule() {
           </RoleRestricted>
         </div>
       )}
-      {activeTab === 'analytics'&& (
+
+      {activeTab === 'analytics' && (
         <div className="space-y-6">
           <RoleRestricted requiredRole="admin" hideCompletely showAsPreview>
             <div className="flex flex-col items-center justify-center py-16">

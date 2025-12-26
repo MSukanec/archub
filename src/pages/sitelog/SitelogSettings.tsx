@@ -7,6 +7,7 @@ import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
 import { getSiteLogEntriesByType } from '@/features/sitelog/services/getSiteLogEntriesByType';
 import type { SiteLogType } from '@/features/sitelog/services/getSiteLogTypes';
+
 export default function SitelogSettings() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -16,20 +17,25 @@ export default function SitelogSettings() {
   const { data: siteLogTypes = [], isLoading } = useSiteLogTypes(organizationId);
   const deleteMutation = useDeleteSiteLogType(organizationId || null);
   const replaceMutation = useReplaceSiteLogType(organizationId || null);
+
   // Separar tipos del sistema y de la organización
   const systemTypes = siteLogTypes.filter(type => type.organization_id === null);
   const customTypes = siteLogTypes.filter(type => type.organization_id !== null);
+
   const handleAddType = () => {
     openModal('siteLogType', { isEditing: false });
   };
+
   const handleEditType = (type: SiteLogType) => {
     openModal('siteLogType', { 
       siteLogType: type,
       isEditing: true 
     });
   };
+
   const handleDeleteType = async (type: SiteLogType) => {
     if (!organizationId) return;
+
     try {
       // PASO 1: Contar entradas de bitácora que usan este tipo
       const associatedCount = await getSiteLogEntriesByType(type.id);
@@ -37,11 +43,12 @@ export default function SitelogSettings() {
       // PASO 2: Contar otros tipos disponibles para reemplazo
       const otherTypes = customTypes.filter(t => t.id !== type.id);
       const canReplace = associatedCount > 0 && otherTypes.length > 0;
+
       // PASO 3: Armar array de consecuencias
       const consequences: string[] = [];
       if (associatedCount > 0) {
         consequences.push(
-          `${associatedCount} entrada${associatedCount === 1 ? '': 's'} de bitácora será${associatedCount === 1 ? 'á': 'n'} afectada${associatedCount === 1 ? '': 's'}`
+          `${associatedCount} entrada${associatedCount === 1 ? '' : 's'} de bitácora será${associatedCount === 1 ? 'á' : 'n'} afectada${associatedCount === 1 ? '' : 's'}`
         );
         if (canReplace) {
           consequences.push('Puedes reemplazarlas con otro tipo o dejarlas sin referencia');
@@ -49,16 +56,18 @@ export default function SitelogSettings() {
           consequences.push('Las entradas quedarán sin referencia');
         }
       }
+
       // PASO 4: Armar opciones de reemplazo
       const replacementOptions = otherTypes
-        .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base'}))
+        .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
         .map(t => ({
           label: t.name,
           value: t.id
         }));
+
       // PASO 5: Abrir modal con toda la data
       openModal('delete-confirmation', {
-        mode: canReplace ? 'replace': 'delete',
+        mode: canReplace ? 'replace' : 'delete',
         title: 'Eliminar tipo de bitácora',
         description: `¿Estás seguro de que quieres eliminar "${type.name}"?`,
         itemName: type.name,
@@ -90,7 +99,7 @@ export default function SitelogSettings() {
               onSuccess: () => {
                 toast({
                   title: 'Tipo reemplazado',
-                  description: `${associatedCount} entrada${associatedCount === 1 ? '': 's'} fue${associatedCount === 1 ? '': 'ron'} migrada${associatedCount === 1 ? '': 's'} correctamente`
+                  description: `${associatedCount} entrada${associatedCount === 1 ? '' : 's'} fue${associatedCount === 1 ? '' : 'ron'} migrada${associatedCount === 1 ? '' : 's'} correctamente`
                 });
               },
               onError: (error) => {
@@ -114,6 +123,7 @@ export default function SitelogSettings() {
       });
     }
   };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -121,6 +131,7 @@ export default function SitelogSettings() {
       </div>
     );
   }
+
   return (
     <div className="p-6 space-y-8">
       {/* Sección: Tipos de Bitácora */}
@@ -148,8 +159,10 @@ export default function SitelogSettings() {
             Puedes crear tipos personalizados para adaptar la bitácora a las necesidades de tu organización.
           </p>
         </div>
+
         {/* Right Column - Contenido */}
         <div className="space-y-3">
+
           {/* Tipos del Sistema */}
           {systemTypes.length > 0 && (
             <>
@@ -178,6 +191,7 @@ export default function SitelogSettings() {
               ))}
             </>
           )}
+
           {/* Tipos Personalizados */}
           {customTypes.length > 0 && (
             <>
@@ -221,6 +235,7 @@ export default function SitelogSettings() {
               ))}
             </>
           )}
+
           {/* Estado vacío para tipos personalizados */}
           {customTypes.length === 0 && systemTypes.length === 0 && (
             <div className="p-8 text-center rounded-lg border border-dashed border-border">

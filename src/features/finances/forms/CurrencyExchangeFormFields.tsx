@@ -17,6 +17,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies, useOrgCurrencyContext } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
 import { useCreateCurrencyExchange } from '../hooks/use-financial-operations'
+
 const currencyExchangeSchema = z.object({
   operation_date: z.date({
     required_error: "Fecha es requerida",
@@ -31,16 +32,19 @@ const currencyExchangeSchema = z.object({
   message: "Las monedas deben ser diferentes",
   path: ["destination_currency_id"],
 })
+
 type CurrencyExchangeFormData = z.infer<typeof currencyExchangeSchema>
+
 export interface CurrencyExchangeFormFieldsProps {
   projectId?: string
   organizationId?: string
-  mode: 'create'| 'edit'| 'view'
+  mode: 'create' | 'edit' | 'view'
   onSuccess: () => void
   onCancel: () => void
   hideActions?: boolean
   formRef?: React.RefObject<HTMLFormElement>
 }
+
 export function CurrencyExchangeFormFields({ 
   projectId, 
   organizationId,
@@ -52,15 +56,19 @@ export function CurrencyExchangeFormFields({
 }: CurrencyExchangeFormFieldsProps) {
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
+
   const { data: wallets = [], isLoading: walletsLoading } = useOrganizationWallets(organizationId || '')
   const { data: currencies = [], isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
   
   const orgCurrencyContext = useOrgCurrencyContext(organizationId)
+
   const createMutation = useCreateCurrencyExchange()
+
   const currentMember = useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
   }, [members, userData?.user?.id])
+
   const form = useForm<CurrencyExchangeFormData>({
     resolver: zodResolver(currencyExchangeSchema),
     defaultValues: {
@@ -73,26 +81,32 @@ export function CurrencyExchangeFormFields({
       description: '',
     }
   })
+
   const isLoading = walletsLoading || currenciesLoading || membersLoading || orgCurrencyContext.isLoading
+
   useEffect(() => {
-    if (mode === 'create'&& !walletsLoading && wallets.length > 0) {
+    if (mode === 'create' && !walletsLoading && wallets.length > 0) {
       form.setValue('wallet_id', wallets[0].id || '')
     }
   }, [wallets, walletsLoading, mode, form])
+
   useEffect(() => {
-    if (mode === 'create'&& !currenciesLoading && currencies.length >= 2) {
+    if (mode === 'create' && !currenciesLoading && currencies.length >= 2) {
       form.setValue('source_currency_id', currencies[0].currency?.id || '')
       form.setValue('destination_currency_id', currencies[1].currency?.id || '')
     }
   }, [currencies, currenciesLoading, mode, form])
+
   const sourceAmount = form.watch('source_amount')
   const exchangeRate = form.watch('exchange_rate')
   const destinationAmount = sourceAmount * exchangeRate
+
   const sourceCurrencyId = form.watch('source_currency_id')
   const destinationCurrencyId = form.watch('destination_currency_id')
   
   const sourceCurrency = currencies.find(c => c.currency?.id === sourceCurrencyId)?.currency
   const destinationCurrency = currencies.find(c => c.currency?.id === destinationCurrencyId)?.currency
+
   const onSubmit = async (data: CurrencyExchangeFormData) => {
     if (!organizationId || !currentMember) {
       toast({
@@ -102,6 +116,7 @@ export function CurrencyExchangeFormFields({
       })
       return
     }
+
     try {
       await createMutation.mutateAsync({
         organization_id: organizationId,
@@ -116,10 +131,12 @@ export function CurrencyExchangeFormFields({
         created_by_user_id: currentMember.user_id,
         created_by_member_id: currentMember.id,
       })
+
       toast({
         title: "Cambio registrado",
         description: "El cambio de moneda se ha registrado correctamente",
       })
+
       onSuccess()
     } catch (error: any) {
       console.error('Error creating currency exchange:', error)
@@ -130,6 +147,7 @@ export function CurrencyExchangeFormFields({
       })
     }
   }
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -140,6 +158,7 @@ export function CurrencyExchangeFormFields({
       </div>
     )
   }
+
   if (!orgCurrencyContext.isMultiCurrency) {
     return (
       <div className="space-y-4">
@@ -152,7 +171,9 @@ export function CurrencyExchangeFormFields({
       </div>
     )
   }
+
   const availableDestinationCurrencies = currencies.filter(c => c.currency?.id !== sourceCurrencyId)
+
   return (
     <Form {...form}>
       <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -195,6 +216,7 @@ export function CurrencyExchangeFormFields({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="wallet_id"
@@ -225,6 +247,7 @@ export function CurrencyExchangeFormFields({
             )}
           />
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -255,6 +278,7 @@ export function CurrencyExchangeFormFields({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="destination_currency_id"
@@ -285,6 +309,7 @@ export function CurrencyExchangeFormFields({
             )}
           />
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
             control={form.control}
@@ -316,6 +341,7 @@ export function CurrencyExchangeFormFields({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="exchange_rate"
@@ -340,6 +366,7 @@ export function CurrencyExchangeFormFields({
               </FormItem>
             )}
           />
+
           <FormItem>
             <FormLabel>Monto Destino</FormLabel>
             <div className="relative">
@@ -356,6 +383,7 @@ export function CurrencyExchangeFormFields({
             </div>
           </FormItem>
         </div>
+
         <FormField
           control={form.control}
           name="description"
@@ -374,6 +402,7 @@ export function CurrencyExchangeFormFields({
             </FormItem>
           )}
         />
+
         {!hideActions && (
           <div className="flex gap-2 pt-4 border-t">
             <button type="button" onClick={onCancel} className="flex-1 px-4 py-2 border rounded-md">
@@ -384,7 +413,7 @@ export function CurrencyExchangeFormFields({
               disabled={createMutation.isPending} 
               className="flex-[3] px-4 py-2 bg-primary text-primary-foreground rounded-md"
             >
-              {createMutation.isPending ? 'Registrando...': 'Registrar Cambio'}
+              {createMutation.isPending ? 'Registrando...' : 'Registrar Cambio'}
             </button>
           </div>
         )}

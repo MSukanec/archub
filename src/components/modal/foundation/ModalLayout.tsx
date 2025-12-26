@@ -7,7 +7,9 @@ import { useModalPanelStore } from "../state/panelStore";
 import ModalBody from "./ModalBody";
 import { ModalErrorBoundary } from "../utils/ModalErrorBoundary";
 import { ModalReadinessState } from "../utils/modal-readiness";
-export type ModalSize = 'sm'| 'md'| 'lg'| 'xl'| 'full';
+
+export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+
 const sizeClasses: Record<ModalSize, string> = {
   sm: 'md:max-w-[400px]',
   md: 'md:max-w-[550px] md:min-w-[450px]',
@@ -15,6 +17,7 @@ const sizeClasses: Record<ModalSize, string> = {
   xl: 'md:max-w-[1000px] md:min-w-[800px]',
   full: 'md:max-w-none md:min-w-0 md:w-screen md:h-screen md:rounded-none',
 };
+
 interface ModalLayoutProps {
   /** Direct children content (new simplified API) */
   children?: ReactNode;
@@ -36,7 +39,7 @@ interface ModalLayoutProps {
   /** Función para manejar submit con ENTER key */
   onSubmit?: () => void;
   
-  /** Size variant for the modal: 'sm'| 'md'| 'lg'| 'xl'| 'full'*/
+  /** Size variant for the modal: 'sm' | 'md' | 'lg' | 'xl' | 'full' */
   size?: ModalSize;
   
   /** @deprecated Use size="xl" instead. Modal ancho (1000px en desktop) */
@@ -72,7 +75,7 @@ interface ModalLayoutProps {
   onPanelChange?: (panel: string) => void;
   
   /** Forzar panel específico (override del store) */
-  forcedPanel?: 'view'| 'edit'| 'subform';
+  forcedPanel?: 'view' | 'edit' | 'subform';
   
   /** Mostrar indicador de cambios sin guardar */
   hasUnsavedChanges?: boolean;
@@ -98,6 +101,7 @@ interface ModalLayoutProps {
   /** Position in the modal stack (for z-index calculation) */
   stackIndex?: number;
 }
+
 export function ModalLayout({
   children,
   viewPanel,
@@ -141,11 +145,14 @@ export function ModalLayout({
   const [focusableElements, setFocusableElements] = useState<HTMLElement[]>([]);
   const lastActiveElement = useRef<HTMLElement | null>(null);
   const [isMounted, setIsMounted] = useState(false);
-  const resolvedSize: ModalSize = size || (fullscreen ? 'full': wide ? 'xl': 'lg');
+
+  const resolvedSize: ModalSize = size || (fullscreen ? 'full' : wide ? 'xl' : 'lg');
+
   useEffect(() => {
     setIsMounted(true);
     return () => setIsMounted(false);
   }, []);
+
   useEffect(() => {
     lastActiveElement.current = document.activeElement as HTMLElement;
     
@@ -157,6 +164,7 @@ export function ModalLayout({
       }
     };
   }, []);
+
   const effectivePanel = forcedPanel || currentPanel;
   
   useEffect(() => {
@@ -164,6 +172,7 @@ export function ModalLayout({
       setPanel(forcedPanel);
     }
   }, [forcedPanel, currentPanel, setPanel]);
+
   useEffect(() => {
     if (isEditing && !forcedPanel) {
       setPanel('edit');
@@ -171,11 +180,13 @@ export function ModalLayout({
       setPanel('view');
     }
   }, [isEditing, forcedPanel, setPanel]);
+
   useEffect(() => {
     if (onPanelChange) {
       onPanelChange(effectivePanel);
     }
   }, [effectivePanel, onPanelChange]);
+
   useEffect(() => {
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
@@ -184,11 +195,14 @@ export function ModalLayout({
       document.body.style.overflow = originalStyle;
     };
   }, []);
+
   useEffect(() => {
     if (!trapFocus || !modalRef.current) return;
+
     const updateFocusableElements = () => {
       const modal = modalRef.current;
       if (!modal) return;
+
       const focusableSelectors = [
         'input:not([disabled])',
         'select:not([disabled])',
@@ -198,11 +212,13 @@ export function ModalLayout({
         '[tabindex]:not([tabindex="-1"])',
         '[contenteditable="true"]',
       ].join(', ');
+
       const elements = Array.from(modal.querySelectorAll(focusableSelectors)) as HTMLElement[];
       setFocusableElements(elements.filter(el => {
         return el.offsetParent !== null && !el.hasAttribute('aria-hidden');
       }));
     };
+
     updateFocusableElements();
     
     const observer = new MutationObserver(updateFocusableElements);
@@ -212,8 +228,10 @@ export function ModalLayout({
       attributes: true,
       attributeFilter: ['disabled', 'tabindex', 'aria-hidden']
     });
+
     return () => observer.disconnect();
   }, [trapFocus, effectivePanel]);
+
   useEffect(() => {
     const setInitialFocus = () => {
       if (initialFocusRef?.current) {
@@ -230,14 +248,17 @@ export function ModalLayout({
         }
       }
     };
+
     const timeoutId = setTimeout(setInitialFocus, 100);
     return () => clearTimeout(timeoutId);
   }, [initialFocusRef, autoFocusFirstInput, focusableElements, effectivePanel]);
+
   const attemptClose = useCallback(() => {
     if (canClose && !canClose()) {
       onClosePrevented?.('Custom validation failed');
       return false;
     }
+
     if (hasUnsavedChanges) {
       const confirmed = window.confirm(unsavedChangesMessage);
       if (!confirmed) {
@@ -245,22 +266,27 @@ export function ModalLayout({
         return false;
       }
     }
+
     return true;
   }, [canClose, hasUnsavedChanges, unsavedChangesMessage, onClosePrevented]);
+
   const handleClose = useCallback(() => {
     if (!attemptClose()) return;
+
     setPanel('view');
     onClose();
   }, [attemptClose, setPanel, onClose]);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape'&& !preventEscapeClose) {
+      if (event.key === 'Escape' && !preventEscapeClose) {
         event.preventDefault();
         handleClose();
         return;
       }
+
       if (
-        event.key === 'Enter'&&
+        event.key === 'Enter' &&
         onSubmit &&
         !event.ctrlKey &&
         !event.shiftKey &&
@@ -277,7 +303,8 @@ export function ModalLayout({
           onSubmit();
         }
       }
-      if (event.key === 'Tab'&& trapFocus && focusableElements.length > 0) {
+
+      if (event.key === 'Tab' && trapFocus && focusableElements.length > 0) {
         const currentIndex = focusableElements.indexOf(event.target as HTMLElement);
         
         if (event.shiftKey) {
@@ -293,6 +320,7 @@ export function ModalLayout({
         }
       }
     };
+
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [
@@ -303,6 +331,7 @@ export function ModalLayout({
     trapFocus,
     focusableElements,
   ]);
+
   const handleOverlayClick = useCallback((event: React.MouseEvent) => {
     if (preventClickOutsideClose) return;
     
@@ -310,6 +339,7 @@ export function ModalLayout({
       handleClose();
     }
   }, [preventClickOutsideClose, handleClose]);
+
   const getCurrentPanel = () => {
     if (children) {
       return children;
@@ -330,9 +360,11 @@ export function ModalLayout({
         return viewPanel;
     }
   };
+
   const isFullSize = resolvedSize === 'full';
   const calculatedZIndex = 50 + stackIndex * 10;
   const overlayOpacity = Math.min(0.8, 0.5 + stackIndex * 0.1);
+
   const modalContent = (
     <div 
       ref={overlayRef}
@@ -386,6 +418,7 @@ export function ModalLayout({
             {ariaDescription}
           </div>
         )}
+
         {hasUnsavedChanges && (
           <div className="bg-warning/10 border-b border-warning/20 px-4 py-2 flex items-center gap-2">
             <AlertCircle className="h-4 w-4 text-warning" />
@@ -394,12 +427,13 @@ export function ModalLayout({
             </span>
           </div>
         )}
+
         <div className="shrink-0 relative">
           {headerContent && (
             <>
               {isValidElement(headerContent) ? (
                 cloneElement(headerContent, {
-                  ...(effectivePanel === 'subform'&& {
+                  ...(effectivePanel === 'subform' && {
                     showBackButton: (headerContent.props as any).showBackButton ?? true,
                     onBackClick: (headerContent.props as any).onBackClick ?? (() => setPanel('edit')),
                   }),
@@ -420,6 +454,7 @@ export function ModalLayout({
             <X className="h-4 w-4" />
           </Button>
         </div>
+
         {readinessState && !readinessState.isReady ? (
           <div className="flex-1 overflow-y-auto">
             <readinessState.LoadingGate>
@@ -441,9 +476,10 @@ export function ModalLayout({
             </ModalBody>
           </div>
         )}
+
         {footerContent && (
           <div className="shrink-0" data-testid={`modal-footer-${modalId}`}>
-            {effectivePanel === 'subform'&& isValidElement(footerContent) ? (
+            {effectivePanel === 'subform' && isValidElement(footerContent) ? (
               cloneElement(footerContent, {
                 onLeftClick: () => setPanel('edit'),
                 onRightClick: (footerContent.props as any).onRightClick 
@@ -467,9 +503,11 @@ export function ModalLayout({
       </div>
     </div>
   );
+
   if (!isMounted) {
     return null;
   }
+
   return createPortal(
     <ModalErrorBoundary
       onClose={onClose}
@@ -481,4 +519,5 @@ export function ModalLayout({
     document.body
   );
 }
+
 export { ModalLayout as FormModalLayout };

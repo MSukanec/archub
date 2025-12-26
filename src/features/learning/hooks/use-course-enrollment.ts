@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+
 interface EnrollmentData {
   isEnrolled: boolean;
   expires_at?: string | null;
   started_at?: string | null;
 }
+
 /**
  * Check if the current user is enrolled in a specific course
  * 
@@ -22,6 +24,7 @@ export function useCourseEnrollment(courseId: string | undefined, userId: string
       if (!userId || !courseId) {
         return { isEnrolled: false };
       }
+
       const { data, error } = await supabase
         .from('course_enrollments')
         .select('id, status, expires_at, started_at')
@@ -29,10 +32,12 @@ export function useCourseEnrollment(courseId: string | undefined, userId: string
         .eq('user_id', userId)
         .eq('status', 'active')
         .maybeSingle();
+
       if (error) {
         console.error('Error checking enrollment:', error);
         return { isEnrolled: false };
       }
+
       return { 
         isEnrolled: !!data,
         expires_at: data?.expires_at || null,

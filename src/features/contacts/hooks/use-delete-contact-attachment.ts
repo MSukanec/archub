@@ -1,6 +1,7 @@
 import { useOptimisticMutation } from '@/core/save-engine';
 import { deleteContactAttachment } from '../services';
 import { contactsKeys } from '@/core/query-keys';
+
 export function useDeleteContactAttachment(contactId: string, organizationId: string) {
   return useOptimisticMutation({
     mutationFn: (attachmentId: string) => deleteContactAttachment(attachmentId),

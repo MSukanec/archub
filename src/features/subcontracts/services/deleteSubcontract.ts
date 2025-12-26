@@ -1,4 +1,5 @@
 import { apiRequest } from '@/lib/queryClient';
+
 export async function deleteSubcontract(
   subcontractId: string,
   organizationId: string
@@ -7,6 +8,7 @@ export async function deleteSubcontract(
     'DELETE', 
     `/api/subcontracts/${subcontractId}?organizationId=${organizationId}`
   );
+
   if (response.ok) {
     const result = await response.json();
     if (!result.success) {
@@ -14,6 +16,7 @@ export async function deleteSubcontract(
     }
     return;
   }
+
   const errorData = await response.json();
   throw new Error(errorData.error || 'Failed to delete subcontract');
 }

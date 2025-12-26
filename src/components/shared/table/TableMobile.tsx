@@ -12,6 +12,7 @@ import {
   LeadingRowAction,
 } from "./types";
 import { TABLE_LABELS } from "./constants";
+
 interface TableMobileProps<T> {
   columns: Column<T>[];
   data: T[];
@@ -37,6 +38,7 @@ interface TableMobileProps<T> {
   onNextPage: () => void;
   onPrevPage: () => void;
 }
+
 export function TableMobile<T>({
   columns,
   data,
@@ -91,6 +93,7 @@ export function TableMobile<T>({
       </div>
     );
   }
+
   if (!hasFilteredData && hasActiveSearch) {
     return (
       <div className="lg:hidden p-8 text-center">
@@ -103,10 +106,12 @@ export function TableMobile<T>({
       </div>
     );
   }
+
   return (
     <div className={cn("lg:hidden", cardSpacing)}>
       {paginatedData.map((item, index) => {
         const isInactive = getIsInactive ? getIsInactive(item) : false;
+
         if (renderCard) {
           return (
             <div
@@ -137,6 +142,7 @@ export function TableMobile<T>({
             </div>
           );
         }
+
         return (
           <div
             key={getItemId(item)}
@@ -180,6 +186,7 @@ export function TableMobile<T>({
           </div>
         );
       })}
+
       {showPagination && (
         <div className="flex items-center justify-between px-2 py-3">
           <div className="text-xs text-muted-foreground">

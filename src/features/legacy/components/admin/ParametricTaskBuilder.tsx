@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { supabase } from '@/lib/supabase'
 import { X, Sparkles, ChevronDown } from 'lucide-react'
+
 interface TaskParameter {
   id: string
   slug: string
@@ -17,23 +18,27 @@ interface TaskParameter {
   expression_template: string
   is_required?: boolean
 }
+
 interface TaskParameterOption {
   id: string
   parameter_id: string
   name: string
   label: string
 }
+
 interface TaskParameterDependency {
   id: string
   parent_parameter_id: string
   parent_option_id: string
   child_parameter_id: string
 }
+
 interface TaskParameterDependencyOption {
   id: string
   dependency_id: string
   child_option_id: string
 }
+
 interface ParameterSelection {
   parameterId: string
   optionId: string
@@ -42,6 +47,7 @@ interface ParameterSelection {
   optionName: string
   optionLabel: string
 }
+
 interface ParametricTaskBuilderProps {
   onSelectionChange?: (selections: ParameterSelection[]) => void
   onPreviewChange?: (preview: string) => void
@@ -50,8 +56,10 @@ interface ParametricTaskBuilderProps {
   initialParameters?: string | null
   initialParameterOrder?: string[] | null
 }
+
 // Variable para mantener la última vista previa
 let lastPreview = ''
+
 export const ParametricTaskBuilder = forwardRef<
   { executeCreateTaskCallback: () => void },
   ParametricTaskBuilderProps
@@ -61,20 +69,25 @@ export const ParametricTaskBuilder = forwardRef<
   const [taskPreview, setTaskPreview] = useState<string>('')
   const [openPopovers, setOpenPopovers] = useState<Record<string, boolean>>({})
   const [parameterOrder, setParameterOrder] = useState<string[]>([])
+
   // Función para ejecutar el callback de creación de tarea con datos completos
   const executeCreateTaskCallback = () => {
+
+
     
     if (onCreateTask) {
       const paramValues: Record<string, string> = {};
       selections.forEach(selection => {
         paramValues[selection.parameterSlug] = selection.optionId;
       });
+
       // Obtener los parámetros ordenados actual
       const orderedParameterIds = getOrderedParameters();
       const paramOrder = orderedParameterIds.map(paramId => {
         const parameter = parameters.find(p => p.id === paramId);
         return parameter?.slug || '';
       }).filter(Boolean);
+
       const taskData = {
         selections,
         preview: taskPreview,
@@ -82,13 +95,16 @@ export const ParametricTaskBuilder = forwardRef<
         paramOrder,
         availableParameters
       };
+
       onCreateTask(taskData);
     }
   };
+
   // Exponer la función al componente padre
   useImperativeHandle(ref, () => ({
     executeCreateTaskCallback
   }));
+
   // Hook para obtener todos los parámetros
   const { data: parameters = [] } = useQuery({
     queryKey: ['parametric-builder-parameters'],
@@ -104,9 +120,11 @@ export const ParametricTaskBuilder = forwardRef<
         console.error('Error loading parameters:', error)
         throw error
       }
+
       return data as TaskParameter[]
     }
   })
+
   // Hook para obtener todas las opciones
   const { data: allOptions = [] } = useQuery({
     queryKey: ['parametric-builder-options'],
@@ -121,9 +139,11 @@ export const ParametricTaskBuilder = forwardRef<
         console.error('Error loading options:', error)
         throw error
       }
+
       return data as TaskParameterOption[]
     }
   })
+
   // Hook para obtener dependencias
   const { data: dependencies = [] } = useQuery({
     queryKey: ['parametric-builder-dependencies'],
@@ -137,9 +157,11 @@ export const ParametricTaskBuilder = forwardRef<
         console.error('Error loading dependencies:', error)
         throw error
       }
+
       return data as TaskParameterDependency[]
     }
   })
+
   // Hook para obtener opciones de dependencias
   const { data: dependencyOptions = [] } = useQuery({
     queryKey: ['parametric-builder-dependency-options'],
@@ -153,16 +175,20 @@ export const ParametricTaskBuilder = forwardRef<
         console.error('Error loading dependency options:', error)
         throw error
       }
+
       return data as TaskParameterDependencyOption[]
     }
   })
+
   // Inicializar con "TIPO DE TAREA" al cargar (solo si no hay parámetros iniciales)
   useEffect(() => {
     const tipoTareaParam = parameters.find(p => p.slug === 'tipo_tarea')
     if (tipoTareaParam && availableParameters.length === 0 && !initialParameters) {
+
       setAvailableParameters([tipoTareaParam.id])
     }
   }, [parameters, availableParameters.length, initialParameters])
+
   // Calcular parámetros disponibles basado en selecciones actuales
   useEffect(() => {
     if (selections.length === 0) {
@@ -172,6 +198,7 @@ export const ParametricTaskBuilder = forwardRef<
       }
       return
     }
+
     const newAvailableParams: string[] = []
     
     // Siempre incluir parámetros que ya están seleccionados (para poder cambiarlos)
@@ -180,19 +207,26 @@ export const ParametricTaskBuilder = forwardRef<
         newAvailableParams.push(selection.parameterId)
       }
     })
+
     // Siempre incluir el primer parámetro si no está seleccionado
     const tipoTareaParam = parameters.find(p => p.slug === 'tipo_tarea')
     if (tipoTareaParam && !selections.some(s => s.parameterId === tipoTareaParam.id)) {
       newAvailableParams.push(tipoTareaParam.id)
     }
+
     // Para cada selección actual, buscar qué parámetros puede desbloquear
     selections.forEach(selection => {
+
       
       const relevantDependencies = dependencies.filter(
         dep => dep.parent_parameter_id === selection.parameterId && 
                dep.parent_option_id === selection.optionId
       )
+
+
+
       relevantDependencies.forEach(dep => {
+
         
         // Verificar si este parámetro hijo ya está seleccionado
         const alreadySelected = selections.some(s => s.parameterId === dep.child_parameter_id)
@@ -200,14 +234,18 @@ export const ParametricTaskBuilder = forwardRef<
           // Agregar directamente el parámetro hijo sin verificar opciones específicas
           // Esto permite que aparezca el badge hijo
           newAvailableParams.push(dep.child_parameter_id)
+
         }
       })
     })
+
+
     setAvailableParameters(newAvailableParams)
   }, [selections, parameters, dependencies, dependencyOptions])
+
   // Load initial parameters if provided (after parameters and options are loaded)
   useEffect(() => {
-    if (initialParameters && typeof initialParameters === 'string'&& parameters.length > 0 && allOptions.length > 0 && selections.length === 0) {
+    if (initialParameters && typeof initialParameters === 'string' && parameters.length > 0 && allOptions.length > 0 && selections.length === 0) {
       try {
         const parsedParams = JSON.parse(initialParameters);
         
@@ -223,7 +261,7 @@ export const ParametricTaskBuilder = forwardRef<
           if (key.length === 36 && key.includes('-')) {
             // New format: key is parameter ID, value is option ID
             parameter = parameters.find(p => p.id === key);
-            if (parameter && typeof value === 'string'&& value.length === 36 && value.includes('-')) {
+            if (parameter && typeof value === 'string' && value.length === 36 && value.includes('-')) {
               option = allOptions.find(opt => opt.id === value && opt.parameter_id === parameter!.id);
             }
           } else {
@@ -231,7 +269,7 @@ export const ParametricTaskBuilder = forwardRef<
             parameter = parameters.find(p => p.slug === key);
             if (parameter) {
               // First try to find by exact option ID
-              if (typeof value === 'string'&& value.length === 36 && value.includes('-')) {
+              if (typeof value === 'string' && value.length === 36 && value.includes('-')) {
                 option = allOptions.find(opt => opt.id === value && opt.parameter_id === parameter!.id);
               }
               
@@ -257,6 +295,7 @@ export const ParametricTaskBuilder = forwardRef<
                 const availableOptions = allOptions.filter(opt => opt.parameter_id === parameter!.id);
                 if (availableOptions.length > 0) {
                   option = availableOptions[0];
+
                 }
               }
             }
@@ -315,6 +354,7 @@ export const ParametricTaskBuilder = forwardRef<
       }
     }
   }, [initialParameters, parameters, allOptions, selections.length]);
+
   // Generar vista previa
   useEffect(() => {
     if (selections.length === 0) {
@@ -322,17 +362,21 @@ export const ParametricTaskBuilder = forwardRef<
       onPreviewChange?.('')
       return
     }
+
     console.log('🎯 Generando vista previa con selecciones:', selections)
+
     // Crear un mapa de parámetros para reemplazo usando labels legibles
     const paramMap: Record<string, string> = {}
     selections.forEach(selection => {
       paramMap[selection.parameterSlug] = selection.optionLabel
       console.log(`📝 Mapeando: {{${selection.parameterSlug}}} → ${selection.optionLabel}`)
     })
+
     // NUEVA LÓGICA: Construir frase concatenando expression_templates de parámetros seleccionados
     const processedParts: string[] = []
     
     console.log('🎯 Construyendo frase sin template base, solo con expression_templates')
+
     // Procesar cada parámetro en el orden correcto 
     const orderedParameterIds = getOrderedParameters()
     const orderedSelections = orderedParameterIds
@@ -342,6 +386,7 @@ export const ParametricTaskBuilder = forwardRef<
     orderedSelections.forEach(selection => {
       const parameter = parameters.find(p => p.id === selection.parameterId)
       if (!parameter) return
+
       console.log(`🔍 Procesando parámetro en orden: ${parameter.slug}`)
       
       // Aplicar expression_template del parámetro o usar {value} como fallback
@@ -355,11 +400,12 @@ export const ParametricTaskBuilder = forwardRef<
       // Agregar a las partes procesadas
       processedParts.push(generatedText)
     })
+
     // Unir todas las partes en una frase completa
-    let finalText = processedParts.join('')
+    let finalText = processedParts.join(' ')
     
     // Limpiar espacios extra y comas/puntos duplicados
-    finalText = finalText.replace(/\s+/g, '').trim()
+    finalText = finalText.replace(/\s+/g, ' ').trim()
     finalText = finalText.replace(/,\s*,/g, ',') // Eliminar comas duplicadas
     finalText = finalText.replace(/\.\s*\./g, '.') // Eliminar puntos duplicados
     
@@ -377,19 +423,23 @@ export const ParametricTaskBuilder = forwardRef<
     onPreviewChange?.(finalText)
     lastPreview = finalText
   }, [selections, parameters, onPreviewChange])
+
   // Notificar cambios de selección al componente padre
   useEffect(() => {
     onSelectionChange?.(selections)
   }, [selections, onSelectionChange])
+
   // Notificar cambios de orden al componente padre
   useEffect(() => {
     onOrderChange?.(parameterOrder)
   }, [parameterOrder, onOrderChange])
+
   const handleParameterSelect = (parameterId: string, optionId: string) => {
     const parameter = parameters.find(p => p.id === parameterId)
     const option = allOptions.find(o => o.id === optionId)
     
     if (!parameter || !option) return
+
     const newSelection: ParameterSelection = {
       parameterId,
       optionId,
@@ -398,9 +448,11 @@ export const ParametricTaskBuilder = forwardRef<
       optionName: option.name,
       optionLabel: option.label
     }
+
     // Remover selección anterior del mismo parámetro si existe
     const updatedSelections = selections.filter(s => s.parameterId !== parameterId)
     setSelections([...updatedSelections, newSelection])
+
     // Actualizar el orden de parámetros con inserción inteligente
     const updatedOrder = [...parameterOrder]
     if (!updatedOrder.includes(parameter.slug)) {
@@ -434,9 +486,11 @@ export const ParametricTaskBuilder = forwardRef<
       setParameterOrder(updatedOrder)
       console.log('🎯 Parameter order updated:', updatedOrder)
     }
+
     // Cerrar el popover
     setOpenPopovers(prev => ({ ...prev, [parameterId]: false }))
   }
+
   const removeSelection = (parameterId: string) => {
     const parameter = parameters.find(p => p.id === parameterId)
     const updatedSelections = selections.filter(s => s.parameterId !== parameterId)
@@ -451,6 +505,7 @@ export const ParametricTaskBuilder = forwardRef<
       !dependentParams.includes(s.parameterId)
     )
     setSelections(finalSelections)
+
     // Actualizar el orden removiendo el parámetro eliminado
     if (parameter) {
       const updatedOrder = parameterOrder.filter(slug => slug !== parameter.slug)
@@ -458,12 +513,14 @@ export const ParametricTaskBuilder = forwardRef<
       console.log('🗑️ Parameter removed from order:', parameter.slug, '→ New order:', updatedOrder)
     }
   }
+
   const getOptionsForParameter = (parameterId: string): TaskParameterOption[] => {
     // Si es el primer parámetro, mostrar todas sus opciones
     const isFirstParam = parameters.find(p => p.id === parameterId)?.slug === 'tipo_tarea'
     if (isFirstParam) {
       return allOptions.filter(opt => opt.parameter_id === parameterId)
     }
+
     // Para parámetros dependientes, filtrar opciones según dependencias
     const allowedOptionIds: string[] = []
     
@@ -481,11 +538,13 @@ export const ParametricTaskBuilder = forwardRef<
         allowedOptionIds.push(...allowedOptions)
       }
     })
+
     return allOptions.filter(opt => 
       opt.parameter_id === parameterId && 
       (allowedOptionIds.length === 0 || allowedOptionIds.includes(opt.id))
     )
   }
+
   // Función para ordenar parámetros según parameterOrder
   const getOrderedParameters = () => {
     if (parameterOrder.length === 0) {
@@ -569,6 +628,7 @@ export const ParametricTaskBuilder = forwardRef<
     
     return orderedIds
   }
+
   return (
     <div className="space-y-6">
       {/* Badges de parámetros seleccionados */}
@@ -580,6 +640,7 @@ export const ParametricTaskBuilder = forwardRef<
             const options = getOptionsForParameter(paramId)
             
             if (!parameter) return null
+
             return (
               <div key={paramId} className="flex items-center gap-2">
                 <Popover 
@@ -633,7 +694,9 @@ export const ParametricTaskBuilder = forwardRef<
           })}
         </div>
       </div>
+
       <Separator />
+
       {/* Vista previa de la tarea */}
       {taskPreview && (
         <Card>

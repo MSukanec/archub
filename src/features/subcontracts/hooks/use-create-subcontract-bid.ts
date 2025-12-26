@@ -3,8 +3,10 @@ import { createSubcontractBid } from '../services';
 import { SUBCONTRACT_QUERY_KEYS } from '../constants';
 import { toast } from '@/hooks/use-toast';
 import type { InsertSubcontractBid } from '../types';
+
 export function useCreateSubcontractBid() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (data: InsertSubcontractBid) => createSubcontractBid(data),
     onSuccess: (_, variables) => {

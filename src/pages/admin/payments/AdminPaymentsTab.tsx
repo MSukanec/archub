@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Table } from '@/components/shared/trees/Table';
 import { Badge } from '@/components/ui/badge';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/shared/AppCard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard';
 import { DollarSign, TrendingUp, CreditCard, Inbox, Search, Bell, Banknote, Edit, Trash2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { supabase } from '@/lib/supabase';
@@ -12,6 +12,7 @@ import { useMobile } from '@/hooks/use-mobile';
 import { useGlobalModalStore } from '@/components/modal';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient, apiRequest } from '@/lib/queryClient';
+
 interface Payment {
   id: string;
   provider: string;
@@ -42,6 +43,7 @@ interface Payment {
     discount?: number;
   } | null;
 }
+
 const AdminPaymentsTab = () => {
   const isMobile = useMobile();
   const { openModal } = useGlobalModalStore();
@@ -55,16 +57,20 @@ const AdminPaymentsTab = () => {
     searchValue: mobileSearchValue,
     setSearchValue: setMobileSearchValue
   } = useActionBarMobile();
+
   const [searchValue, setSearchValue] = useState("");
+
   // Sync search values between mobile and desktop
   useEffect(() => {
     if (isMobile && mobileSearchValue !== searchValue) {
       setSearchValue(mobileSearchValue);
     }
   }, [mobileSearchValue, isMobile]);
+
   const { data: payments = [], isLoading } = useQuery<Payment[]>({
     queryKey: ['/api/admin/payments/all'],
   });
+
   const { data: exchangeRateData } = useQuery({
     queryKey: ['exchange-rate-usd-ars'],
     queryFn: async () => {
@@ -83,7 +89,9 @@ const AdminPaymentsTab = () => {
       return Number(data?.rate) || 1200;
     },
   });
+
   const exchangeRate = exchangeRateData || 1200;
+
   const deletePaymentMutation = useMutation({
     mutationFn: async (paymentId: string) => {
       return apiRequest('DELETE', `/api/admin/payments/${paymentId}`);
@@ -103,12 +111,14 @@ const AdminPaymentsTab = () => {
       });
     },
   });
+
   const handleEdit = (payment: Payment) => {
     toast({
       title: 'Función no disponible',
       description: 'La edición de pagos no está disponible actualmente.',
     });
   };
+
   const handleDelete = (payment: Payment) => {
     openModal('delete-confirmation', {
       mode: 'dangerous',
@@ -120,27 +130,35 @@ const AdminPaymentsTab = () => {
       isLoading: deletePaymentMutation.isPending,
     });
   };
+
   const stats = useMemo(() => {
     const now = new Date();
     const currentMonthStart = startOfMonth(now);
     const currentMonthEnd = endOfMonth(now);
+
     const paymentsThisMonth = payments.filter(p => 
       isWithinInterval(new Date(p.created_at), { start: currentMonthStart, end: currentMonthEnd })
     );
+
     const historicalARS = payments
       .filter(p => p.currency === 'ARS')
       .reduce((sum, p) => sum + p.amount, 0);
+
     const historicalUSD = payments
       .filter(p => p.currency === 'USD')
       .reduce((sum, p) => sum + p.amount, 0);
+
     const monthlyARS = paymentsThisMonth
       .filter(p => p.currency === 'ARS')
       .reduce((sum, p) => sum + p.amount, 0);
+
     const monthlyUSD = paymentsThisMonth
       .filter(p => p.currency === 'USD')
       .reduce((sum, p) => sum + p.amount, 0);
+
     const historicalDollarized = historicalUSD + (historicalARS / exchangeRate);
     const monthlyDollarized = monthlyUSD + (monthlyARS / exchangeRate);
+
     return {
       totalPayments: payments.length,
       paymentsThisMonth: paymentsThisMonth.length,
@@ -152,9 +170,11 @@ const AdminPaymentsTab = () => {
       monthlyDollarized,
     };
   }, [payments, exchangeRate]);
+
   // Filter payments by search
   const filteredPayments = useMemo(() => {
     if (!searchValue) return payments;
+
     const search = searchValue.toLowerCase();
     return payments.filter(payment => {
       const userName = payment.users?.full_name?.toLowerCase() || '';
@@ -168,6 +188,7 @@ const AdminPaymentsTab = () => {
              provider.includes(search);
     });
   }, [payments, searchValue]);
+
   // Configure mobile action bar
   useEffect(() => {
     if (isMobile) {
@@ -187,12 +208,14 @@ const AdminPaymentsTab = () => {
       });
       setShowActionBar(true);
     }
+
     return () => {
       if (isMobile) {
         clearActions();
       }
     };
   }, [isMobile, setActions, setShowActionBar, clearActions]);
+
   // Filter configuration
   useEffect(() => {
     if (isMobile) {
@@ -205,6 +228,7 @@ const AdminPaymentsTab = () => {
       });
     }
   }, [isMobile, setFilterConfig, setMobileSearchValue]);
+
   const columns = [
     {
       key: 'created_at',
@@ -323,18 +347,21 @@ const AdminPaymentsTab = () => {
       ),
     },
   ];
+
   const formatARS = (value: number) => new Intl.NumberFormat('es-AR', {
     style: 'currency',
     currency: 'ARS',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
+
   const formatUSD = (value: number) => new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
+
   return (
     <div className="space-y-6">
       {/* KPIs - 2 columns on mobile, 4 on desktop */}
@@ -347,6 +374,7 @@ const AdminPaymentsTab = () => {
           <StatCardValue className="text-xl md:text-3xl">{stats.totalPayments}</StatCardValue>
           <StatCardMeta>Este mes: {stats.paymentsThisMonth}</StatCardMeta>
         </StatCard>
+
         <StatCard>
           <div className="flex items-center justify-between">
             <StatCardTitle showArrow={false}>Total</StatCardTitle>
@@ -357,6 +385,7 @@ const AdminPaymentsTab = () => {
           </StatCardValue>
           <StatCardMeta>Este mes: {formatUSD(stats.monthlyDollarized)}</StatCardMeta>
         </StatCard>
+
         <StatCard>
           <div className="flex items-center justify-between">
             <StatCardTitle showArrow={false}>Total (ARS)</StatCardTitle>
@@ -367,6 +396,7 @@ const AdminPaymentsTab = () => {
           </StatCardValue>
           <StatCardMeta>Este mes: {formatARS(stats.monthlyARS)}</StatCardMeta>
         </StatCard>
+
         <StatCard>
           <div className="flex items-center justify-between">
             <StatCardTitle showArrow={false}>Total (USD)</StatCardTitle>
@@ -378,6 +408,7 @@ const AdminPaymentsTab = () => {
           <StatCardMeta>Este mes: {formatUSD(stats.monthlyUSD)}</StatCardMeta>
         </StatCard>
       </div>
+
       {/* Tabla */}
       <Table
         columns={columns}
@@ -393,16 +424,17 @@ const AdminPaymentsTab = () => {
             icon: Trash2,
             label: 'Eliminar',
             onClick: () => handleDelete(payment),
-            variant: 'destructive'as const,
+            variant: 'destructive' as const,
           },
         ]}
         emptyStateConfig={{
           icon: <Inbox />,
-          title: isLoading ? 'Cargando...': 'No hay pagos',
+          title: isLoading ? 'Cargando...' : 'No hay pagos',
           description: 'No se han registrado pagos completados.'
         }}
       />
     </div>
   );
 };
+
 export default AdminPaymentsTab;

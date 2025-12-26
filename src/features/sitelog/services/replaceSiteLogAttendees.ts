@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 export interface SiteLogAttendee {
   site_log_id: string;
   personnel_id: string;
@@ -9,6 +10,7 @@ export interface SiteLogAttendee {
   project_id: string;
   organization_id: string;
 }
+
 /**
  * Reemplaza los asistentes de una bitácora.
  * 
@@ -26,23 +28,28 @@ export async function replaceSiteLogAttendees(
   if (!supabase) {
     throw new Error('Error de conexión con la base de datos');
   }
+
   // Eliminar asistentes existentes
   const { error: deleteError } = await supabase
     .from('personnel_attendees')
     .delete()
     .eq('site_log_id', siteLogId);
+
   if (deleteError) {
     console.error('Error deleting attendees:', deleteError);
     throw new Error('No se pudieron eliminar los asistentes existentes');
   }
+
   // Si no hay asistentes nuevos, terminar aquí
   if (!attendees || attendees.length === 0) {
     return;
   }
+
   // Insertar nuevos asistentes
   const { error: insertError } = await supabase
     .from('personnel_attendees')
     .insert(attendees);
+
   if (insertError) {
     console.error('Error inserting attendees:', insertError);
     throw new Error('No se pudieron agregar los nuevos asistentes');

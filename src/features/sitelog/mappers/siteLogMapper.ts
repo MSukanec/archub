@@ -1,4 +1,5 @@
 import type { SiteLog } from '../types';
+
 export function mapSiteLogFromSupabase(rawData: any): SiteLog {
   return {
     id: rawData.id,
@@ -16,6 +17,7 @@ export function mapSiteLogFromSupabase(rawData: any): SiteLog {
     project_id: rawData.project_id
   };
 }
+
 export function mapSiteLogsWithRelations(
   logs: any[],
   files: any[],

@@ -6,6 +6,7 @@ import { Inbox, Search, Bell, Edit, Trash2 } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal';
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
+
 interface PlanPrice {
   currency_code: string;
   monthly_amount: number;
@@ -13,6 +14,7 @@ interface PlanPrice {
   provider: string | null;
   is_active: boolean;
 }
+
 interface Plan {
   id: string;
   name: string;
@@ -22,6 +24,7 @@ interface Plan {
   features: any;
   plan_prices: PlanPrice[];
 }
+
 const AdminPlansTab = () => {
   const { openModal } = useGlobalModalStore();
   const isMobile = useMobile();
@@ -34,17 +37,22 @@ const AdminPlansTab = () => {
     searchValue: mobileSearchValue,
     setSearchValue: setMobileSearchValue
   } = useActionBarMobile();
+
   const [searchValue, setSearchValue] = useState("");
+
   useEffect(() => {
     if (isMobile && mobileSearchValue !== searchValue) {
       setSearchValue(mobileSearchValue);
     }
   }, [mobileSearchValue, isMobile]);
+
   const { data: plans = [], isLoading } = useQuery<Plan[]>({
     queryKey: ['/api/admin/plans'],
   });
+
   const filteredPlans = useMemo(() => {
     if (!searchValue) return plans;
+
     const search = searchValue.toLowerCase();
     return plans.filter(plan => {
       const name = plan.name?.toLowerCase() || '';
@@ -53,6 +61,7 @@ const AdminPlansTab = () => {
       return name.includes(search) || slug.includes(search);
     });
   }, [plans, searchValue]);
+
   useEffect(() => {
     if (isMobile) {
       setActions({
@@ -71,12 +80,14 @@ const AdminPlansTab = () => {
       });
       setShowActionBar(true);
     }
+
     return () => {
       if (isMobile) {
         clearActions();
       }
     };
   }, [isMobile, setActions, setShowActionBar, clearActions]);
+
   useEffect(() => {
     if (isMobile) {
       setFilterConfig({
@@ -88,15 +99,19 @@ const AdminPlansTab = () => {
       });
     }
   }, [isMobile, setFilterConfig, setSearchValue, setMobileSearchValue]);
+
   const handleRowClick = (plan: Plan) => {
     openModal('plan', { plan, isEditing: true });
   };
+
   const handleEdit = (plan: Plan) => {
     openModal('plan', { plan, isEditing: true });
   };
+
   const handleDelete = (plan: Plan) => {
     console.log('Delete plan:', plan.id);
   };
+
   const columns = [
     {
       key: 'name',
@@ -128,10 +143,12 @@ const AdminPlansTab = () => {
         if (activePrices.length === 0) {
           return <span className="text-xs text-muted-foreground">Sin precios configurados</span>;
         }
+
         // Prioritize USD, then first available
         const usdPrice = activePrices.find(p => p.currency_code === 'USD');
         const primaryPrice = usdPrice || activePrices[0];
         const otherPrices = activePrices.filter(p => p !== primaryPrice);
+
         return (
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
@@ -184,7 +201,7 @@ const AdminPlansTab = () => {
           : (plan.features ? Object.keys(plan.features).length : 0);
         return (
           <span className="text-xs text-muted-foreground">
-            {featureCount > 0 ? `${featureCount} característica${featureCount !== 1 ? 's': ''}` : 'Sin características'}
+            {featureCount > 0 ? `${featureCount} característica${featureCount !== 1 ? 's' : ''}` : 'Sin características'}
           </span>
         );
       },
@@ -198,11 +215,12 @@ const AdminPlansTab = () => {
           variant={plan.is_active ? "default" : "secondary"}
           className={plan.is_active ? "bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400" : ""}
         >
-          {plan.is_active ? 'Activo': 'Inactivo'}
+          {plan.is_active ? 'Activo' : 'Inactivo'}
         </Badge>
       ),
     },
   ];
+
   return (
     <div className="space-y-6">
       <Table
@@ -220,12 +238,12 @@ const AdminPlansTab = () => {
             icon: Trash2,
             label: 'Eliminar',
             onClick: () => handleDelete(plan),
-            variant: 'destructive'as const
+            variant: 'destructive' as const
           }
         ]}
         emptyStateConfig={{
           icon: <Inbox />,
-          title: isLoading ? 'Cargando...': 'No hay planes configurados',
+          title: isLoading ? 'Cargando...' : 'No hay planes configurados',
           description: 'Crea planes de suscripción para tus usuarios.',
           actionButton: {
             label: 'Nuevo Plan',
@@ -236,4 +254,5 @@ const AdminPlansTab = () => {
     </div>
   );
 };
+
 export default AdminPlansTab;

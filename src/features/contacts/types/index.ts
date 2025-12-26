@@ -6,6 +6,7 @@
  * - contacts_by_type_view
  * - contacts_summary_view
  */
+
 export interface Contact {
   id: string;
   organization_id: string;
@@ -31,6 +32,7 @@ export interface Contact {
   created_at: string;
   updated_at: string | null;
 }
+
 export interface ContactType {
   id: string;
   name: string;
@@ -40,6 +42,7 @@ export interface ContactType {
   created_at: string | null;
   updated_at: string;
 }
+
 export interface ContactTypeLink {
   id: string;
   contact_id: string | null;
@@ -48,6 +51,7 @@ export interface ContactTypeLink {
   created_at: string | null;
   updated_at: string | null;
 }
+
 export interface ContactAttachment {
   id: string;
   contact_id: string;
@@ -57,17 +61,19 @@ export interface ContactAttachment {
   file_name: string;
   mime_type: string | null;
   size_bytes: number | null;
-  category: 'dni_front'| 'dni_back'| 'document'| 'photo'| 'other';
+  category: 'dni_front' | 'dni_back' | 'document' | 'photo' | 'other';
   metadata: any;
   created_by: string | null;
   created_at: string;
 }
+
 export interface LinkedUser {
   id: string;
   full_name: string | null;
   email: string | null;
   avatar_url?: string | null;
 }
+
 /**
  * ContactWithRelations - Tipo que refleja la vista contacts_with_relations_view
  * 
@@ -87,11 +93,13 @@ export interface ContactWithRelations extends Contact {
   /** Objeto linked_user construido para retrocompatibilidad con UI existente */
   linked_user?: LinkedUser | null;
 }
+
 /** Tipo simplificado para tipos de contacto (del JSON de la vista) */
 export interface ContactTypeSimple {
   id: string;
   name: string;
 }
+
 /**
  * ContactByType - Tipo que refleja la vista contacts_by_type_view
  */
@@ -101,6 +109,7 @@ export interface ContactByType {
   contact_type_name: string;
   total_contacts: number;
 }
+
 /**
  * ContactsSummary - Tipo que refleja la vista contacts_summary_view
  */
@@ -110,6 +119,7 @@ export interface ContactsSummary {
   linked_contacts: number;
   member_contacts: number;
 }
+
 export interface ContactInput {
   first_name: string;
   last_name?: string;
@@ -122,11 +132,13 @@ export interface ContactInput {
   national_id?: string;
   display_name_override?: string;
 }
+
 export interface ContactTypeInput {
   name: string;
 }
+
 export interface ContactAttachmentInput {
   file: File;
-  category: 'dni_front'| 'dni_back'| 'document'| 'photo'| 'other';
+  category: 'dni_front' | 'dni_back' | 'document' | 'photo' | 'other';
   metadata?: any;
 }

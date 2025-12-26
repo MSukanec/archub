@@ -2,20 +2,23 @@ import { DollarSign, Eye, Edit } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { useGlobalModalStore } from '@/components/modal'
 import { FormPanel, ViewPanel, useGeneralCostPaymentForm } from '../forms/GeneralCostPaymentForm'
+
 interface GeneralCostPaymentModalProps {
   modalData?: {
     paymentId?: string
   }
   onClose: () => void
-  mode?: 'create'| 'edit'| 'view'
+  mode?: 'create' | 'edit' | 'view'
 }
+
 export default function GeneralCostPaymentModal({ 
   modalData, 
   onClose, 
-  mode = 'create'
+  mode = 'create' 
 }: GeneralCostPaymentModalProps) {
   const { openModal } = useGlobalModalStore()
   const paymentId = modalData?.paymentId
+
   const {
     form,
     onSubmit,
@@ -42,6 +45,7 @@ export default function GeneralCostPaymentModal({
     mode,
     onSuccess: onClose,
   })
+
   const getHeader = () => {
     switch (mode) {
       case 'view':
@@ -62,7 +66,9 @@ export default function GeneralCostPaymentModal({
         }
     }
   }
+
   const header = getHeader()
+
   if (paymentLoading) {
     return (
       <ModalLayout onClose={onClose} size="lg">
@@ -75,7 +81,8 @@ export default function GeneralCostPaymentModal({
       </ModalLayout>
     )
   }
-  if (mode === 'view'&& !editingPayment) {
+
+  if (mode === 'view' && !editingPayment) {
     return (
       <ModalLayout onClose={onClose} size="lg">
         <ModalHeader title="Pago no encontrado" />
@@ -86,15 +93,17 @@ export default function GeneralCostPaymentModal({
       </ModalLayout>
     )
   }
+
   return (
     <ModalLayout onClose={onClose} size="lg">
       <ModalHeader
         title={header.title}
         description={header.description}
-        icon={mode === 'view'? Eye : mode === 'edit'? Edit : DollarSign}
+        icon={mode === 'view' ? Eye : mode === 'edit' ? Edit : DollarSign}
       />
+
       <ModalBody>
-        {mode === 'view'&& editingPayment ? (
+        {mode === 'view' && editingPayment ? (
           <ViewPanel payment={editingPayment} mediaFiles={mediaFiles} />
         ) : (
           <FormPanel
@@ -116,21 +125,23 @@ export default function GeneralCostPaymentModal({
           />
         )}
       </ModalBody>
-      {mode !== 'view'&& (
+
+      {mode !== 'view' && (
         <ModalFooter
           leftLabel="Cancelar"
           onLeftClick={onClose}
-          submitText={mode === 'edit'? 'Actualizar Pago': 'Guardar Pago'}
+          submitText={mode === 'edit' ? 'Actualizar Pago' : 'Guardar Pago'}
           onSubmit={form.handleSubmit(onSubmit)}
           isSubmitting={isSubmitting}
         />
       )}
-      {mode === 'view'&& (
+
+      {mode === 'view' && (
         <ModalFooter
           leftLabel="Cerrar"
           onLeftClick={onClose}
           submitText="Editar"
-          onSubmit={() => openModal('generalCostPayment', { paymentId: editingPayment?.id, mode: 'edit'})}
+          onSubmit={() => openModal('generalCostPayment', { paymentId: editingPayment?.id, mode: 'edit' })}
         />
       )}
     </ModalLayout>

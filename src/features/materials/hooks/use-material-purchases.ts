@@ -1,19 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+
 export interface MaterialPurchase {
   id: string;
   project_id: string;
   organization_id: string;
   provider_id: string | null;
   invoice_number: string | null;
-  document_type: 'invoice'| 'receipt'| 'ticket'| 'other';
+  document_type: 'invoice' | 'receipt' | 'ticket' | 'other';
   purchase_date: string;
   subtotal: number;
   tax_amount: number;
   total_amount: number;
   currency_id: string;
   exchange_rate: number | null;
-  status: 'pending'| 'partially_paid'| 'paid'| 'cancelled';
+  status: 'pending' | 'partially_paid' | 'paid' | 'cancelled';
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -50,21 +51,25 @@ export interface MaterialPurchase {
     file_type: string;
   }>;
 }
+
 export const MATERIAL_PURCHASE_STATUS = {
-  pending: { label: 'Pendiente', variant: 'pending'as const },
-  partially_paid: { label: 'Pago Parcial', variant: 'warning'as const },
-  paid: { label: 'Pagado', variant: 'success'as const },
-  cancelled: { label: 'Cancelado', variant: 'error'as const },
+  pending: { label: 'Pendiente', variant: 'pending' as const },
+  partially_paid: { label: 'Pago Parcial', variant: 'warning' as const },
+  paid: { label: 'Pagado', variant: 'success' as const },
+  cancelled: { label: 'Cancelado', variant: 'error' as const },
 };
+
 export const DOCUMENT_TYPES = {
-  invoice: { label: 'Factura', value: 'invoice'},
-  receipt: { label: 'Recibo', value: 'receipt'},
-  ticket: { label: 'Ticket', value: 'ticket'},
-  other: { label: 'Otro', value: 'other'},
+  invoice: { label: 'Factura', value: 'invoice' },
+  receipt: { label: 'Recibo', value: 'receipt' },
+  ticket: { label: 'Ticket', value: 'ticket' },
+  other: { label: 'Otro', value: 'other' },
 };
+
 export function getMaterialPurchaseStatusBadgeConfig(status: MaterialPurchase['status']) {
   return MATERIAL_PURCHASE_STATUS[status] || MATERIAL_PURCHASE_STATUS.pending;
 }
+
 export function useMaterialPurchases(projectId: string | undefined, organizationId: string | undefined) {
   return useQuery<{ data: MaterialPurchase[] }, Error, MaterialPurchase[]>({
     queryKey: [`/api/projects/${projectId}/material-purchases?organization_id=${organizationId}`],
@@ -72,6 +77,7 @@ export function useMaterialPurchases(projectId: string | undefined, organization
     select: (response) => response?.data || [],
   });
 }
+
 export function useMaterialPurchase(
   projectId: string | undefined,
   purchaseId: string | undefined,
@@ -83,8 +89,10 @@ export function useMaterialPurchase(
     select: (response) => response?.data || null,
   });
 }
+
 export function useCreateMaterialPurchase() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async ({
       purchaseData,
@@ -123,8 +131,10 @@ export function useCreateMaterialPurchase() {
     },
   });
 }
+
 export function useUpdateMaterialPurchase() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async ({
       projectId,
@@ -165,8 +175,10 @@ export function useUpdateMaterialPurchase() {
     },
   });
 }
+
 export function useDeleteMaterialPurchase() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async ({
       purchaseId,

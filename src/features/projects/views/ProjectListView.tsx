@@ -23,6 +23,7 @@ import { es } from 'date-fns/locale'
 import { useActionBarMobile } from '@/layouts'
 import { useMobile } from '@/hooks/use-mobile'
 import { ProjectRow } from '@/features/projects/components/ProjectRow'
+
 export function ProjectListView() {
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
@@ -39,11 +40,13 @@ export function ProjectListView() {
   const { setSelectedProject } = useProjectContext()
   const { setSidebarLevel } = useNavigationStore()
   const [, navigate] = useLocation()
+
   // Filter states
   const [filterByProjectType, setFilterByProjectType] = useState('all')
   const [filterByModality, setFilterByModality] = useState('all')
   const [filterByStatus, setFilterByStatus] = useState('all')
   const [searchValue, setSearchValue] = useState('')
+
   // Mobile Action Bar
   const {
     setActions,
@@ -54,23 +57,28 @@ export function ProjectListView() {
     setSearchValue: setMobileSearchValue
   } = useActionBarMobile()
   const isMobile = useMobile()
+
   // Sync search values between mobile and desktop
   useEffect(() => {
     if (isMobile && mobileSearchValue !== searchValue) {
       setSearchValue(mobileSearchValue)
     }
   }, [mobileSearchValue, isMobile])
+
   // Get active project
   const userId = userData?.user?.id;
   const { data: userOrgPrefs } = useUserOrganizationPreferences(userId, organizationId);
   const activeProjectId = userOrgPrefs?.last_project_id
+
   // Extract unique values for filters
   const availableProjectTypes = useMemo(() => Array.from(
     new Set(projects.map(p => p.project_data?.project_type?.name).filter(Boolean))
   ), [projects]);
+
   const availableModalities = useMemo(() => Array.from(
     new Set(projects.map(p => p.project_data?.project_modality?.name).filter(Boolean))
   ), [projects]);
+
   const availableStatuses = useMemo(() => {
     const statusNames: Record<string, string> = {
       'active': 'En proceso',
@@ -86,6 +94,7 @@ export function ProjectListView() {
       label: statusNames[status as keyof typeof statusNames] || status
     }));
   }, [projects]);
+
   const projectsWithActive = projects.map(project => ({
     ...project,
     is_active: project.id === activeProjectId
@@ -97,16 +106,17 @@ export function ProjectListView() {
     const nameMatch = project.name?.toLowerCase().includes(searchLower);
     const searchMatch = !searchValue || nameMatch;
     
-    const matchesProjectType = filterByProjectType === 'all'|| 
+    const matchesProjectType = filterByProjectType === 'all' || 
       project.project_data?.project_type_id === filterByProjectType ||
       project.project_data?.project_type?.name?.toLowerCase().includes(filterByProjectType.toLowerCase());
     
-    const matchesModality = filterByModality === 'all'|| 
+    const matchesModality = filterByModality === 'all' || 
       project.project_data?.project_modality_id === filterByModality ||
       project.project_data?.project_modality?.name?.toLowerCase().includes(filterByModality.toLowerCase());
     
-    const matchesStatus = filterByStatus === 'all'|| 
+    const matchesStatus = filterByStatus === 'all' || 
       project.status?.toLowerCase() === filterByStatus.toLowerCase();
+
     return searchMatch && matchesProjectType && matchesModality && matchesStatus;
   })
   
@@ -115,15 +125,18 @@ export function ProjectListView() {
     ...filteredProjects.filter(project => project.id === activeProjectId),
     ...filteredProjects.filter(project => project.id !== activeProjectId)
   ] : filteredProjects
+
   const handleClearFilters = () => {
     setSearchValue('')
     setFilterByProjectType('all')
     setFilterByModality('all')
     setFilterByStatus('all')
   }
+
   // Configure Mobile Action Bar
   useEffect(() => {
     if (!isMobile) return;
+
     setActions({
       search: {
         id: 'search',
@@ -159,6 +172,7 @@ export function ProjectListView() {
       },
     });
     setShowActionBar(true);
+
     return () => {
       clearActions();
       setShowActionBar(false);
@@ -166,6 +180,7 @@ export function ProjectListView() {
       setSearchValue('');
     };
   }, [isMobile, projectsCount, openModal, setActions, setShowActionBar, clearActions, setMobileSearchValue]);
+
   // Configure filters for Mobile Action Bar
   useEffect(() => {
     if (isMobile && availableProjectTypes.length > 0) {
@@ -199,6 +214,7 @@ export function ProjectListView() {
       });
     }
   }, [filterByProjectType, filterByModality, filterByStatus, availableProjectTypes, availableModalities, availableStatuses, isMobile]);
+
   // Select project mutation
   const { mutate: selectProject, isPending: isSelectingProject } = useOptimisticMutation({
     mutationFn: async (projectId: string) => {
@@ -242,12 +258,15 @@ export function ProjectListView() {
     onErrorMessage: "No se pudo seleccionar el proyecto",
     additionalQueryKeys: [['current-user']],
   });
+
   const handleSelectProject = (projectId: string) => {
     selectProject(projectId)
   }
+
   const handleEdit = (project: any) => {
     openModal('project', { editingProject: project, isEditing: true })
   }
+
   const handleDeleteClick = (project: any) => {
     const getStatusText = (status: string) => {
       const statusConfig = {
@@ -278,6 +297,7 @@ export function ProjectListView() {
       isLoading: isDeleting
     });
   }
+
   // Format status
   const getStatusText = (status: string) => {
     const statusConfig = {
@@ -290,8 +310,9 @@ export function ProjectListView() {
     }
     return statusConfig[status as keyof typeof statusConfig] || status || 'Sin estado'
   }
-  const getStatusVariant = (status: string): 'status-active'| 'status-completed'| 'status-paused'| 'status-cancelled'| 'status-planning'| 'neutral'=> {
-    const variantMap: Record<string, 'status-active'| 'status-completed'| 'status-paused'| 'status-cancelled'| 'status-planning'| 'neutral'> = {
+
+  const getStatusVariant = (status: string): 'status-active' | 'status-completed' | 'status-paused' | 'status-cancelled' | 'status-planning' | 'neutral' => {
+    const variantMap: Record<string, 'status-active' | 'status-completed' | 'status-paused' | 'status-cancelled' | 'status-planning' | 'neutral'> = {
       'active': 'status-active',
       'completed': 'status-completed',
       'paused': 'status-paused',
@@ -300,17 +321,19 @@ export function ProjectListView() {
     }
     return variantMap[status] || 'neutral'
   }
+
   const getStatusBadge = (status: string) => (
     <Badge variant={getStatusVariant(status)}>
       {getStatusText(status)}
     </Badge>
   )
+
   // Table columns configuration
   const columns: Column<any>[] = useMemo(() => [
     {
-      key: 'name'as const,
+      key: 'name' as const,
       label: 'Proyecto',
-      type: 'long-text'as const,
+      type: 'long-text' as const,
       sortable: false,
       render: (project: any) => (
         <div className="flex items-center gap-2">
@@ -318,7 +341,7 @@ export function ProjectListView() {
           {project.is_active && (
             <div 
               className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: 'var(--accent)'}}
+              style={{ backgroundColor: 'var(--accent)' }}
               title="Proyecto activo"
             >
               <CheckCircle2 className="h-3.5 w-3.5 text-white" />
@@ -328,9 +351,9 @@ export function ProjectListView() {
       )
     },
     {
-      key: 'project_type'as const,
+      key: 'project_type' as const,
       label: 'Tipo',
-      type: 'short-text'as const,
+      type: 'short-text' as const,
       sortable: false,
       render: (project: any) => (
         <span className="text-sm">
@@ -339,9 +362,9 @@ export function ProjectListView() {
       )
     },
     {
-      key: 'modality'as const,
+      key: 'modality' as const,
       label: 'Modalidad',
-      type: 'short-text'as const,
+      type: 'short-text' as const,
       sortable: false,
       render: (project: any) => (
         <span className="text-sm">
@@ -350,9 +373,9 @@ export function ProjectListView() {
       )
     },
     {
-      key: 'currency'as const,
+      key: 'currency' as const,
       label: 'Moneda',
-      type: 'short-text'as const,
+      type: 'short-text' as const,
       sortable: false,
       render: (project: any) => {
         const currency = project.currency || defaultCurrency;
@@ -364,16 +387,16 @@ export function ProjectListView() {
       }
     },
     {
-      key: 'status'as const,
+      key: 'status' as const,
       label: 'Estado',
-      type: 'medium-text'as const,
+      type: 'medium-text' as const,
       sortable: false,
       render: (project: any) => getStatusBadge(project.status)
     },
     {
-      key: 'created_at'as const,
+      key: 'created_at' as const,
       label: 'Creación',
-      type: 'date'as const,
+      type: 'date' as const,
       sortable: false,
       render: (project: any) => (
         <span className="text-sm text-muted-foreground">
@@ -382,9 +405,9 @@ export function ProjectListView() {
       )
     },
     {
-      key: 'last_active_at'as const,
+      key: 'last_active_at' as const,
       label: 'Última Actividad',
-      type: 'datetime'as const,
+      type: 'datetime' as const,
       sortable: false,
       render: (project: any) => (
         <span className="text-sm text-muted-foreground">
@@ -395,6 +418,7 @@ export function ProjectListView() {
       )
     }
   ], [defaultCurrency])
+
   const getProjectRowActions = (project: any) => [
     {
       label: 'Editar',
@@ -405,9 +429,10 @@ export function ProjectListView() {
       label: 'Eliminar',
       icon: Trash2,
       onClick: () => handleDeleteClick(project),
-      variant: 'destructive'as const
+      variant: 'destructive' as const
     }
   ]
+
   // Delete project mutation
   const { mutate: deleteProject, isPending: isDeleting } = useOptimisticMutation({
     mutationFn: async (projectId: string) => {
@@ -436,7 +461,7 @@ export function ProjectListView() {
             organization_id: organizationId,
             last_project_id: newActiveId,
             updated_at: new Date().toISOString()
-          }, { onConflict: 'user_id,organization_id'}).then(() => {
+          }, { onConflict: 'user_id,organization_id' }).then(() => {
             // Success - no action needed
           });
         }
@@ -476,6 +501,7 @@ export function ProjectListView() {
         : [])
     ],
   })
+
   return (
     <div className="space-y-6" data-testid="container-project-list">
       {sortedProjects.length > 0 ? (

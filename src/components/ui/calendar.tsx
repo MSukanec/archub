@@ -1,17 +1,22 @@
 import * as React from "react"
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
 import { DayPicker, DropdownProps } from "react-day-picker"
+
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { Button } from "@/components/ui/button"
+
 export type CalendarProps = Omit<React.ComponentProps<typeof DayPicker>, 'onSelect'> & {
   autoClose?: boolean;
   onClose?: () => void;
   onSelect?: any;
 }
-type ViewMode = 'days'| 'months'| 'years'
+
+type ViewMode = 'days' | 'months' | 'years'
+
 const MONTHS_SHORT = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 const MONTHS_FULL = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+
 function Calendar({
   className,
   classNames,
@@ -29,42 +34,50 @@ function Calendar({
   const currentMonth = controlledMonth || internalMonth
   const currentYear = currentMonth.getFullYear()
   const currentMonthIndex = currentMonth.getMonth()
+
   const handleMonthChange = (newMonth: Date) => {
     setInternalMonth(newMonth)
     onMonthChange?.(newMonth)
   }
-  const navigateMonth = (direction: 'prev'| 'next') => {
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
     const newMonth = new Date(currentMonth)
-    newMonth.setMonth(currentMonth.getMonth() + (direction === 'prev'? -1 : 1))
+    newMonth.setMonth(currentMonth.getMonth() + (direction === 'prev' ? -1 : 1))
     handleMonthChange(newMonth)
   }
-  const navigateYear = (direction: 'prev'| 'next') => {
+
+  const navigateYear = (direction: 'prev' | 'next') => {
     const newMonth = new Date(currentMonth)
-    newMonth.setFullYear(currentMonth.getFullYear() + (direction === 'prev'? -1 : 1))
+    newMonth.setFullYear(currentMonth.getFullYear() + (direction === 'prev' ? -1 : 1))
     handleMonthChange(newMonth)
   }
+
   const selectMonth = (monthIndex: number) => {
     const newMonth = new Date(currentMonth)
     newMonth.setMonth(monthIndex)
     handleMonthChange(newMonth)
     setViewMode('days')
   }
+
   const selectYear = (year: number) => {
     const newMonth = new Date(currentMonth)
     newMonth.setFullYear(year)
     handleMonthChange(newMonth)
     setViewMode('days')
   }
+
   // Generar rango de años (12 años centrados en el año actual)
   const generateYearRange = () => {
     const startYear = Math.floor(currentYear / 12) * 12
     return Array.from({ length: 12 }, (_, i) => startYear + i)
   }
-  const navigateYearGrid = (direction: 'prev'| 'next') => {
+
+  const navigateYearGrid = (direction: 'prev' | 'next') => {
     const newMonth = new Date(currentMonth)
-    newMonth.setFullYear(currentMonth.getFullYear() + (direction === 'prev'? -12 : 12))
+    newMonth.setFullYear(currentMonth.getFullYear() + (direction === 'prev' ? -12 : 12))
     handleMonthChange(newMonth)
   }
+
   // Custom Navigation Header
   const CustomNavigationHeader = () => (
     <div className="flex items-center justify-center gap-1 px-2 pb-3 border-b border-border mb-3">
@@ -82,6 +95,7 @@ function Calendar({
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
+
       <button
         className="h-7 px-2 text-xs font-medium rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors min-w-[70px]"
         onClick={() => setViewMode('months')}
@@ -96,6 +110,7 @@ function Calendar({
       >
         {currentYear}
       </button>
+
       <button
         className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
         onClick={() => navigateMonth('next')}
@@ -112,6 +127,7 @@ function Calendar({
       </button>
     </div>
   )
+
   // Month Selection View
   const MonthSelectionView = () => (
     <div className="p-3 min-h-[280px]">
@@ -135,6 +151,7 @@ function Calendar({
       </div>
     </div>
   )
+
   // Year Selection View
   const YearSelectionView = () => {
     const years = generateYearRange()
@@ -149,9 +166,11 @@ function Calendar({
           >
             <ChevronsLeft className="h-4 w-4" />
           </button>
+
           <div className="text-sm font-medium">
             {years[0]} - {years[years.length - 1]}
           </div>
+
           <button
             className="h-7 w-7 inline-flex items-center justify-center rounded-md border border-border bg-transparent text-foreground hover:bg-accent/10 transition-colors"
             onClick={() => navigateYearGrid('next')}
@@ -160,6 +179,7 @@ function Calendar({
             <ChevronsRight className="h-4 w-4" />
           </button>
         </div>
+
         <div className="grid grid-cols-3 gap-2">
           {years.map((year) => (
             <button
@@ -180,6 +200,7 @@ function Calendar({
       </div>
     )
   }
+
   // Interceptar selección de día para autoClose
   const handleDaySelect = React.useCallback((day: any) => {
     if (onSelect && day) {
@@ -197,6 +218,7 @@ function Calendar({
       }, 150);
     }
   }, [onSelect, autoClose, onClose]);
+
   // Days View (normal calendar)
   const DaysView = () => {
     const dayPickerProps = {
@@ -243,15 +265,17 @@ function Calendar({
       </div>
     );
   };
+
   return (
     <div className={cn("p-3 flex justify-center", className)}>
       <div className="inline-block">
-        {viewMode === 'days'&& <DaysView />}
-        {viewMode === 'months'&& <MonthSelectionView />}
-        {viewMode === 'years'&& <YearSelectionView />}
+        {viewMode === 'days' && <DaysView />}
+        {viewMode === 'months' && <MonthSelectionView />}
+        {viewMode === 'years' && <YearSelectionView />}
       </div>
     </div>
   )
 }
 Calendar.displayName = "Calendar"
+
 export { Calendar }

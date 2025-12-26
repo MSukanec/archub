@@ -9,6 +9,7 @@ import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+
 interface Organization {
   id: string;
   name: string;
@@ -19,6 +20,7 @@ interface Organization {
     slug: string;
   } | null;
 }
+
 interface OrganizationMember {
   id: string;
   user_id: string;
@@ -28,6 +30,7 @@ interface OrganizationMember {
     email: string;
   } | null;
 }
+
 interface ResetResult {
   payments: number;
   payment_events: number;
@@ -38,25 +41,31 @@ interface ResetResult {
   projects_reset: number;
   members_reset: number;
 }
+
 interface ResetTestDataModalProps {
   modalData?: any;
   onClose: () => void;
 }
+
 export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps) {
   const { toast } = useToast();
   const [selectedOrgId, setSelectedOrgId] = useState<string>('');
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [resetResult, setResetResult] = useState<ResetResult | null>(null);
+
   const { data: organizations = [], isLoading: orgsLoading } = useQuery<Organization[]>({
     queryKey: ['admin-organizations-reset'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
+
       const { data, error } = await supabase
         .from('organizations')
         .select('id, name, plan_id')
         .eq('is_deleted', false)
         .order('name', { ascending: true });
+
       if (error) throw error;
+
       const planIds = Array.from(new Set((data || []).map(org => org.plan_id).filter(Boolean)));
       
       let plans: any[] = [];
@@ -67,16 +76,19 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
           .in('id', planIds);
         plans = plansData || [];
       }
+
       return (data || []).map(org => ({
         ...org,
         plan: plans.find(p => p.id === org.plan_id) || null
       }));
     },
   });
+
   const { data: members = [], isLoading: membersLoading } = useQuery<OrganizationMember[]>({
     queryKey: ['admin-org-members-reset', selectedOrgId],
     queryFn: async () => {
       if (!supabase || !selectedOrgId) return [];
+
       const { data, error } = await supabase
         .from('organization_members')
         .select(`
@@ -90,6 +102,7 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
         `)
         .eq('organization_id', selectedOrgId)
         .eq('is_active', true);
+
       if (error) {
         console.error('Error fetching members:', error);
         throw error;
@@ -103,17 +116,19 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
     },
     enabled: !!selectedOrgId,
   });
+
   useEffect(() => {
     setSelectedUserId('');
     setResetResult(null);
   }, [selectedOrgId]);
+
   const resetMutation = useMutation({
     mutationFn: async () => {
       console.log('[ResetModal] Starting reset mutation with orgId:', selectedOrgId);
       const payload: { organizationId: string; userId?: string } = {
         organizationId: selectedOrgId,
       };
-      if (selectedUserId && selectedUserId !== 'none'&& selectedUserId.trim() !== '') {
+      if (selectedUserId && selectedUserId !== 'none' && selectedUserId.trim() !== '') {
         payload.userId = selectedUserId;
       }
       console.log('[ResetModal] Sending request with payload:', payload);
@@ -147,8 +162,10 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
       });
     },
   });
+
   const selectedOrg = organizations.find(org => org.id === selectedOrgId);
   const isFreePlan = selectedOrg?.plan?.slug === 'free';
+
   const handleReset = () => {
     if (!selectedOrgId) {
       toast({
@@ -160,10 +177,12 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
     }
     resetMutation.mutate();
   };
+
   const orgOptions = organizations.map(org => ({
     value: org.id,
     label: `${org.name}${org.plan?.name ? ` (${org.plan.name})` : ''}`
   }));
+
   return (
     <ModalLayout onClose={onClose} size="md">
       <ModalHeader
@@ -171,6 +190,7 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
         description="Elimina datos de prueba de suscripciones, pagos y progreso de cursos"
         icon={RotateCcw}
       />
+
       <ModalBody>
         <div className="space-y-4">
           {resetResult ? (
@@ -209,7 +229,7 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
                   )}
                   <div className="flex justify-between items-center py-1 border-b border-border/50">
                     <span className="text-muted-foreground">Plan reseteado a Free</span>
-                    <span className="font-mono font-medium">{resetResult.organization_reset ? 'Sí': 'No'}</span>
+                    <span className="font-mono font-medium">{resetResult.organization_reset ? 'Sí' : 'No'}</span>
                   </div>
                   <div className="flex justify-between items-center py-1 border-b border-border/50">
                     <span className="text-muted-foreground">Proyectos desbloqueados</span>
@@ -236,6 +256,7 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
                   disabled={orgsLoading}
                 />
               </div>
+
               {selectedOrgId && (
                 <div className="space-y-2">
                   <Label>Usuario (opcional - para borrar progreso de cursos)</Label>
@@ -258,6 +279,7 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
                   </Select>
                 </div>
               )}
+
               {selectedOrgId && !isFreePlan && (
                 <Alert variant="destructive">
                   <AlertTriangle className="h-4 w-4" />
@@ -267,6 +289,7 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
                   </AlertDescription>
                 </Alert>
               )}
+
               {selectedOrgId && (
                 <Alert>
                   <AlertDescription>
@@ -276,7 +299,7 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
                       <li>Eventos de pago asociados</li>
                       <li>Preferencias de suscripción MercadoPago</li>
                       <li>Suscripciones activas</li>
-                      {selectedUserId && selectedUserId !== 'none'&& <li>Progreso de cursos del usuario</li>}
+                      {selectedUserId && selectedUserId !== 'none' && <li>Progreso de cursos del usuario</li>}
                       <li>Se reseteará el plan a Free</li>
                       <li>Se desbloquearán proyectos y miembros</li>
                     </ul>
@@ -287,6 +310,7 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
           )}
         </div>
       </ModalBody>
+
       <ModalFooter
         leftLabel={resetResult ? "Cerrar" : "Cancelar"}
         onLeftClick={onClose}

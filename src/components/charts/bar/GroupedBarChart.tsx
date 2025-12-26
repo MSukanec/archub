@@ -1,14 +1,17 @@
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend, ReferenceLine } from 'recharts'
 import { CHART_COLORS, CHART_AXIS, CHART_TOOLTIP, CHART_STATES, CHART_DIMENSIONS, CHART_SHAPES, formatCompact, getChartColor } from '../theme'
+
 export interface GroupedBarDataPoint {
   label: string
   [key: string]: string | number
 }
+
 export interface BarSeriesConfig {
   key: string
   name: string
   color?: string
 }
+
 export interface GroupedBarChartProps {
   data: GroupedBarDataPoint[]
   series: BarSeriesConfig[]
@@ -23,6 +26,7 @@ export interface GroupedBarChartProps {
   onClick?: (label: string, seriesKey: string) => void
   clickable?: boolean
 }
+
 export function GroupedBarChart({
   data,
   series,
@@ -44,6 +48,7 @@ export function GroupedBarChart({
       </div>
     )
   }
+
   if (!data || data.length === 0) {
     return (
       <div style={{ height }} className={CHART_STATES.empty.className}>
@@ -51,6 +56,7 @@ export function GroupedBarChart({
       </div>
     )
   }
+
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -93,7 +99,7 @@ export function GroupedBarChart({
             <Legend
               verticalAlign="bottom"
               height={25}
-              wrapperStyle={{ fontSize: '12px', paddingTop: '0px'}}
+              wrapperStyle={{ fontSize: '12px', paddingTop: '0px' }}
             />
           )}
           {series.map((s, index) => (
@@ -103,7 +109,7 @@ export function GroupedBarChart({
               name={s.name}
               fill={s.color || getChartColor(index)}
               radius={CHART_SHAPES.bar.radius}
-              style={clickable ? { cursor: 'pointer'} : undefined}
+              style={clickable ? { cursor: 'pointer' } : undefined}
               onClick={(d: any) => {
                 if (clickable && onClick && d?.payload) {
                   onClick(d.payload.label, s.key)

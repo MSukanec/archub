@@ -7,6 +7,7 @@ import type { ProjectType, ProjectModality } from '@/features/projects';
 import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
+
 export function ProjectSettingsView() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -20,14 +21,17 @@ export function ProjectSettingsView() {
   const replaceTypeMutation = useReplaceProjectType(organizationId);
   const deleteModalityMutation = useDeleteProjectModality(organizationId);
   const replaceModalityMutation = useReplaceProjectModality(organizationId);
+
   // Ordenar tipos alfabéticamente
   const sortedTypes = [...projectTypes].sort((a, b) => 
-    a.name.localeCompare(b.name, 'es', { sensitivity: 'base'})
+    a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
   );
+
   // Ordenar modalidades alfabéticamente
   const sortedModalities = [...projectModalities].sort((a, b) => 
-    a.name.localeCompare(b.name, 'es', { sensitivity: 'base'})
+    a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
   );
+
   const handleEditType = (type: ProjectType) => {
     if (!organizationId) {
       toast({
@@ -42,6 +46,7 @@ export function ProjectSettingsView() {
       isEditing: true 
     });
   };
+
   const handleEditModality = (modality: ProjectModality) => {
     if (!organizationId) {
       toast({
@@ -51,6 +56,7 @@ export function ProjectSettingsView() {
       });
       return;
     }
+
     if (modality.organization_id === null) {
       toast({
         title: 'Operación no permitida',
@@ -59,30 +65,35 @@ export function ProjectSettingsView() {
       });
       return;
     }
+
     openModal('projectModality', { 
       projectModality: modality,
       isEditing: true 
     });
   };
+
   const handleDeleteType = (type: ProjectType) => {
     if (!organizationId) return;
+
     const otherTypes = projectTypes.filter((t: ProjectType) => t.id !== type.id);
     const hasReplacements = otherTypes.length > 0;
     
-    const mode = hasReplacements ? 'replace': 'delete';
+    const mode = hasReplacements ? 'replace' : 'delete';
     
     const replacementOptions = otherTypes
-      .sort((a: ProjectType, b: ProjectType) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base'}))
+      .sort((a: ProjectType, b: ProjectType) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
       .map((t: ProjectType) => ({
         label: t.name,
         value: t.id
       }));
+
     const consequences = [
       `Todos los proyectos con este tipo quedarán sin tipo de proyecto`,
-      mode === 'replace'
+      mode === 'replace' 
         ? 'Puedes reemplazarlos con otro tipo o dejarlos sin referencia'
         : ''
     ].filter(Boolean);
+
     openModal('delete-confirmation', {
       mode,
       title: 'Eliminar tipo de proyecto',
@@ -90,7 +101,7 @@ export function ProjectSettingsView() {
       itemName: type.name,
       itemType: 'tipo de proyecto',
       consequences: consequences.length > 0 ? consequences : undefined,
-      replacementOptions: mode === 'replace'? replacementOptions : undefined,
+      replacementOptions: mode === 'replace' ? replacementOptions : undefined,
       currentId: type.id,
       onDelete: async () => {
         await deleteTypeMutation.mutateAsync({ typeId: type.id, organizationId });
@@ -100,8 +111,10 @@ export function ProjectSettingsView() {
       }
     });
   };
+
   const handleDeleteModality = (modality: ProjectModality) => {
     if (!organizationId) return;
+
     if (modality.organization_id === null) {
       toast({
         title: 'Operación no permitida',
@@ -110,23 +123,26 @@ export function ProjectSettingsView() {
       });
       return;
     }
+
     const otherModalities = projectModalities.filter((m: ProjectModality) => m.id !== modality.id);
     const hasReplacements = otherModalities.length > 0;
     
-    const mode = hasReplacements ? 'replace': 'delete';
+    const mode = hasReplacements ? 'replace' : 'delete';
     
     const replacementOptions = otherModalities
-      .sort((a: ProjectModality, b: ProjectModality) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base'}))
+      .sort((a: ProjectModality, b: ProjectModality) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
       .map((m: ProjectModality) => ({
         label: m.name,
         value: m.id
       }));
+
     const consequences = [
       `Todos los proyectos con esta modalidad quedarán sin modalidad de proyecto`,
-      mode === 'replace'
+      mode === 'replace' 
         ? 'Puedes reemplazarlos con otra modalidad o dejarlos sin referencia'
         : ''
     ].filter(Boolean);
+
     openModal('delete-confirmation', {
       mode,
       title: 'Eliminar modalidad de proyecto',
@@ -134,7 +150,7 @@ export function ProjectSettingsView() {
       itemName: modality.name,
       itemType: 'modalidad de proyecto',
       consequences: consequences.length > 0 ? consequences : undefined,
-      replacementOptions: mode === 'replace'? replacementOptions : undefined,
+      replacementOptions: mode === 'replace' ? replacementOptions : undefined,
       currentId: modality.id,
       onDelete: async () => {
         await deleteModalityMutation.mutateAsync({ modalityId: modality.id, organizationId });
@@ -144,6 +160,7 @@ export function ProjectSettingsView() {
       }
     });
   };
+
   if (typesLoading || modalitiesLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -151,6 +168,7 @@ export function ProjectSettingsView() {
       </div>
     );
   }
+
   return (
     <div className="p-6 space-y-8">
       {/* Sección: Tipos de Proyecto */}
@@ -178,6 +196,7 @@ export function ProjectSettingsView() {
             Puedes crear tipos personalizados para adaptar la clasificación a las necesidades de tu organización.
           </p>
         </div>
+
         {/* Right Column - Contenido */}
         <div className="space-y-3">
           {/* Tipos ordenados alfabéticamente */}
@@ -234,6 +253,7 @@ export function ProjectSettingsView() {
           )}
         </div>
       </div>
+
       {/* Sección: Modalidades de Proyecto */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column - Descripción */}
@@ -259,6 +279,7 @@ export function ProjectSettingsView() {
             Puedes crear modalidades personalizadas para categorizar tus proyectos según su fase o enfoque.
           </p>
         </div>
+
         {/* Right Column - Contenido */}
         <div className="space-y-3">
           {/* Modalidades ordenadas alfabéticamente */}

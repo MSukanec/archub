@@ -5,4 +5,5 @@
  * is already in the correct format. This file exists for consistency
  * with the Feature-Sliced Design structure.
  */
+
 export {};

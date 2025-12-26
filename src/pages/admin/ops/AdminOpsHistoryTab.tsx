@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 interface CheckRun {
   id: string;
   created_at: string;
@@ -17,13 +18,16 @@ interface CheckRun {
   stats: Record<string, any>;
   error_message: string | null;
 }
+
 export default function AdminOpsHistoryTab() {
   const { data: runs = [], isLoading } = useQuery<CheckRun[]>({
     queryKey: ['/api/admin/ops/check-runs'],
   });
+
   if (isLoading) {
     return <div className="text-center py-8 text-muted-foreground">Cargando historial...</div>;
   }
+
   return (
     <div className="space-y-2">
       {runs.length === 0 ? (
@@ -39,9 +43,9 @@ export default function AdminOpsHistoryTab() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {run.status === 'success'? (
+                  {run.status === 'success' ? (
                     <CheckCircle2 className="h-5 w-5 text-green-500" />
-                  ) : run.status === 'warning'? (
+                  ) : run.status === 'warning' ? (
                     <AlertTriangle className="h-5 w-5 text-yellow-500" />
                   ) : (
                     <XCircle className="h-5 w-5 text-red-500" />

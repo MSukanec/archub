@@ -3,7 +3,9 @@
  * Based on database tables: project_clients, client_commitments, client_payments,
  * client_payment_schedule, client_roles, contacts
  */
+
 // ========== Contact Types ==========
+
 export interface Contact {
   id: string;
   organization_id: string;
@@ -27,7 +29,9 @@ export interface Contact {
   created_at: string;
   updated_at: string;
 }
+
 // ========== Client Role Types ==========
+
 export interface ClientRole {
   id: string;
   organization_id: string;
@@ -39,7 +43,9 @@ export interface ClientRole {
   is_deleted: boolean;
   deleted_at: string | null;
 }
+
 // ========== Project Client Types ==========
+
 export interface ProjectClient {
   id: string;
   project_id: string;
@@ -47,7 +53,7 @@ export interface ProjectClient {
   organization_id: string;
   is_primary: boolean;
   notes: string | null;
-  status: 'active'| 'inactive'| 'deleted'| 'potential'| 'rejected'| 'completed';
+  status: 'active' | 'inactive' | 'deleted' | 'potential' | 'rejected' | 'completed';
   client_role_id: string | null;
   created_by: string | null;
   created_at: string;
@@ -55,12 +61,15 @@ export interface ProjectClient {
   is_deleted: boolean;
   deleted_at: string | null;
 }
+
 // Project Client with relations
 export interface ProjectClientWithRelations extends ProjectClient {
   contact: Contact | null;
   role: ClientRole | null;
 }
+
 // ========== Client Commitment Types ==========
+
 export interface ClientCommitment {
   id: string;
   project_id: string;
@@ -69,21 +78,22 @@ export interface ClientCommitment {
   amount: number;
   currency_id: string;
   exchange_rate: number;
-  commitment_method: 'fixed'| 'installments_fixed'| 'installments_indexed'| 'milestones'| 'custom';
+  commitment_method: 'fixed' | 'installments_fixed' | 'installments_indexed' | 'milestones' | 'custom';
   unit_name: string | null;
   unit_description: string | null;
   installments_count?: number | null;
-  installments_frequency?: 'monthly'| 'bimonthly'| 'quarterly'| 'yearly'| null;
+  installments_frequency?: 'monthly' | 'bimonthly' | 'quarterly' | 'yearly' | null;
   installments_start_date?: string | null;
-  installments_distribution?: 'equal'| 'custom'| null;
-  index_type?: 'cac'| 'uvi'| 'ipc'| 'custom_index'| null;
-  index_frequency?: 'monthly'| 'quarterly'| null;
+  installments_distribution?: 'equal' | 'custom' | null;
+  index_type?: 'cac' | 'uvi' | 'ipc' | 'custom_index' | null;
+  index_frequency?: 'monthly' | 'quarterly' | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
   is_deleted: boolean;
   deleted_at: string | null;
 }
+
 // Client Commitment with relations
 export interface ClientCommitmentWithRelations extends ClientCommitment {
   project_client: ProjectClientWithRelations | null;
@@ -94,7 +104,9 @@ export interface ClientCommitmentWithRelations extends ClientCommitment {
     name: string;
   } | null;
 }
+
 // ========== Client Payment Schedule Types ==========
+
 export interface ClientPaymentSchedule {
   id: string;
   commitment_id: string;
@@ -102,13 +114,14 @@ export interface ClientPaymentSchedule {
   due_date: string;
   amount: number;
   currency_id: string;
-  status: 'pending'| 'paid'| 'overdue'| 'cancelled';
+  status: 'pending' | 'paid' | 'overdue' | 'cancelled';
   paid_at: string | null;
   payment_method: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
 }
+
 // Client Payment Schedule with relations
 export interface ClientPaymentScheduleWithRelations extends ClientPaymentSchedule {
   commitment: ClientCommitmentWithRelations | null;
@@ -119,7 +132,9 @@ export interface ClientPaymentScheduleWithRelations extends ClientPaymentSchedul
     name: string;
   } | null;
 }
+
 // ========== Client Payment Types ==========
+
 export interface ClientPayment {
   id: string;
   project_id: string;
@@ -134,12 +149,13 @@ export interface ClientPayment {
   notes: string | null;
   reference: string | null;
   wallet_id: string | null;
-  status: 'confirmed'| 'pending'| 'rejected'| 'void';
+  status: 'confirmed' | 'pending' | 'rejected' | 'void';
   file_url?: string | null; // Optional: migrating to media_files + media_links system
   created_by: string | null;
   created_at: string;
   updated_at: string;
 }
+
 // Client Payment with relations
 export interface ClientPaymentWithRelations extends ClientPayment {
   client: ProjectClientWithRelations | null;
@@ -184,7 +200,9 @@ export interface ClientPaymentWithRelations extends ClientPayment {
     file_type: string;
   }>;
 }
+
 // ========== Dashboard & Analytics Types ==========
+
 export interface ClientFinancialSummary {
   client_id: string;
   currency_id: string;
@@ -201,6 +219,7 @@ export interface ClientFinancialSummary {
   last_payment_date: string | null;
   last_payment_amount: number | null;
 }
+
 export interface ClientDashboardData {
   clients: ProjectClientWithRelations[];
   commitments: ClientCommitmentWithRelations[];
@@ -208,7 +227,9 @@ export interface ClientDashboardData {
   schedule: ClientPaymentScheduleWithRelations[];
   financialSummaries: Array<{ clientId: string; summaries: ClientFinancialSummary[] }>;
 }
+
 // ========== List View Types ==========
+
 export interface ClientListItem {
   id: string;
   contact: Contact | null;

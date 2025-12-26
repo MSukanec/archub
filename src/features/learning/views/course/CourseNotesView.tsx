@@ -14,10 +14,12 @@ import { useGlobalModalStore } from '@/components/modal';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import NoteRow from '@/features/learning/components/NoteRow';
+
 interface CourseNotesTabProps {
   courseId: string;
   courseSlug?: string;
 }
+
 interface NoteWithLesson {
   id: string;
   user_id: string;
@@ -37,6 +39,7 @@ interface NoteWithLesson {
     sort_index: number;
   };
 }
+
 export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabProps) {
   const [, navigate] = useLocation();
   const { setCurrentLesson } = useCourseSidebarStore();
@@ -44,11 +47,13 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
   const [selectedModule, setSelectedModule] = useState<string>('all');
   const { openModal } = useGlobalModalStore();
   const { toast } = useToast();
+
   // Fetch all notes for the course with lesson and module information (OPTIMIZED)
   const { data: notes = [], isLoading } = useQuery<NoteWithLesson[]>({
     queryKey: [`/api/courses/${courseId}/notes`],
     enabled: !!courseId
   });
+
   // Get unique modules from notes
   const modules = useMemo(() => {
     const uniqueModules = new Map<string, { title: string; sort_index: number }>();
@@ -61,13 +66,16 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
         }
       }
     });
+
     return Array.from(uniqueModules.values()).sort((a, b) => a.sort_index - b.sort_index);
   }, [notes]);
+
   // Filter notes by selected module
   const filteredNotes = useMemo(() => {
     if (selectedModule === 'all') return notes;
     return notes.filter(note => note.module?.title === selectedModule);
   }, [notes, selectedModule]);
+
   // Add moduleTitle property to notes for grouping
   const notesWithModuleTitle = useMemo(() => {
     return filteredNotes.map(note => ({
@@ -76,6 +84,7 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
       moduleSortIndex: note.module?.sort_index || 999
     }));
   }, [filteredNotes]);
+
   // Delete note mutation (OPTIMIZED)
   const deleteNoteMutation = useMutation({
     mutationFn: async (noteId: string) => {
@@ -103,15 +112,17 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
       });
     }
   });
+
   const handleDeleteNote = (note: NoteWithLesson) => {
     openModal('delete-confirmation', {
       mode: 'simple',
       title: 'Eliminar Apunte',
       description: '¿Estás seguro de que querés eliminar este apunte?',
-      itemName: note.body?.substring(0, 50) + '...'|| 'Apunte sin contenido',
+      itemName: note.body?.substring(0, 50) + '...' || 'Apunte sin contenido',
       onConfirm: () => deleteNoteMutation.mutate(note.id)
     });
   };
+
   const handleGoToLesson = (lessonId: string) => {
     // Set the current lesson in the sidebar
     setCurrentLesson(lessonId);
@@ -127,6 +138,7 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
     // Use the store to navigate (this will switch to "Reproductor" tab)
     goToLesson(lessonId, null);
   };
+
   // Render module group header
   const renderModuleGroupHeader = (moduleName: string, groupNotes: any[]) => {
     const notesCount = groupNotes.length;
@@ -138,16 +150,17 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
           color: "white"
         }}
       >
-        {moduleName} ({notesCount} {notesCount === 1 ? 'apunte': 'apuntes'})
+        {moduleName} ({notesCount} {notesCount === 1 ? 'apunte' : 'apuntes'})
       </div>
     );
   };
+
   const columns = [
     {
       key: 'lesson',
       label: 'Lección',
       sortable: true,
-      sortType: 'string'as const,
+      sortType: 'string' as const,
       render: (note: NoteWithLesson) => (
         <div className="font-medium">
           {note.lesson?.title || 'Sin lección'}
@@ -158,7 +171,7 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
       key: 'created_at',
       label: 'Fecha',
       sortable: true,
-      sortType: 'string'as const,
+      sortType: 'string' as const,
       render: (note: NoteWithLesson) => (
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -179,20 +192,21 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
               Fijado
             </Badge>
           )}
-          <span className={note.body ? 'line-clamp-2': 'text-muted-foreground italic'}>
+          <span className={note.body ? 'line-clamp-2' : 'text-muted-foreground italic'}>
             {note.body || 'Sin contenido'}
           </span>
         </div>
       )
     }
   ];
+
   const renderFilterContent = () => {
     return (
       <>
         <div className="text-xs font-medium mb-2 block">Filtrar por módulo</div>
         <div className="space-y-1">
           <Button
-            variant={selectedModule === 'all'? "secondary" : "ghost"}
+            variant={selectedModule === 'all' ? "secondary" : "ghost"}
             size="sm"
             onClick={() => setSelectedModule('all')}
             className="w-full justify-start text-xs font-normal h-8"
@@ -214,6 +228,7 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
       </>
     );
   };
+
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -223,6 +238,7 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
       </div>
     );
   }
+
   if (filteredNotes.length === 0) {
     return (
       <EmptyState
@@ -240,6 +256,7 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
       />
     );
   }
+
   return (
     <div className="space-y-6" data-testid="course-notes-tab">
       {/* Desktop View */}
@@ -258,7 +275,7 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
               icon: Trash2,
               label: 'Eliminar',
               onClick: () => handleDeleteNote(note),
-              variant: 'destructive'as const
+              variant: 'destructive' as const
             }
           ]}
           renderGroupHeader={renderModuleGroupHeader}
@@ -285,13 +302,14 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
           }
         />
       </div>
+
       {/* Mobile View */}
       <div className="lg:hidden">
         {/* Mobile Filter */}
         {modules.length > 0 && (
           <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2">
             <Button
-              variant={selectedModule === 'all'? "default" : "outline"}
+              variant={selectedModule === 'all' ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedModule('all')}
             >
@@ -309,6 +327,7 @@ export default function CourseNotesTab({ courseId, courseSlug }: CourseNotesTabP
             ))}
           </div>
         )}
+
         {/* Mobile Cards - Grouped by Module */}
         <div className="space-y-4">
           {Object.entries(

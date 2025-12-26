@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Tag } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -14,11 +15,14 @@ import { useOrganizationMembers } from '@/features/organization/hooks/use-organi
 import { createSiteLogType } from '@/features/sitelog/services/createSiteLogType';
 import { updateSiteLogType } from '@/features/sitelog/services/updateSiteLogType';
 import type { SiteLogType } from '@/features/sitelog/services/getSiteLogTypes';
+
 const siteLogTypeSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido').max(100, 'Máximo 100 caracteres'),
   description: z.string().max(500, 'Máximo 500 caracteres').optional(),
 });
+
 type SiteLogTypeFormData = z.infer<typeof siteLogTypeSchema>;
+
 // Subcomponente: Formulario para create/edit
 function FormPanel({
   form,
@@ -49,6 +53,7 @@ function FormPanel({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="description"
@@ -71,6 +76,7 @@ function FormPanel({
     </Form>
   );
 }
+
 // Subcomponente: Vista de lectura
 function ViewPanel({ data }: { data: SiteLogType }) {
   return (
@@ -88,14 +94,16 @@ function ViewPanel({ data }: { data: SiteLogType }) {
     </div>
   );
 }
+
 interface SiteLogTypeFormProps {
   modalData?: {
     siteLogType?: SiteLogType;
     siteLogTypeId?: string;
   };
   onClose: () => void;
-  mode?: 'create'| 'edit'| 'view';
+  mode?: 'create' | 'edit' | 'view';
 }
+
 export function SiteLogTypeForm({
   modalData,
   onClose,
@@ -107,6 +115,7 @@ export function SiteLogTypeForm({
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   const { data: members = [] } = useOrganizationMembers(userData?.organization?.id);
+
   const form = useForm<SiteLogTypeFormData>({
     resolver: zodResolver(siteLogTypeSchema),
     defaultValues: {
@@ -114,6 +123,7 @@ export function SiteLogTypeForm({
       description: '',
     },
   });
+
   // Cargar datos si es edición o vista
   useEffect(() => {
     if (siteLogType) {
@@ -128,6 +138,7 @@ export function SiteLogTypeForm({
       });
     }
   }, [siteLogType]);
+
   const createMutation = useMutation({
     mutationFn: createSiteLogType,
     onSuccess: (_data, variables) => {
@@ -147,6 +158,7 @@ export function SiteLogTypeForm({
       });
     },
   });
+
   const updateMutation = useMutation({
     mutationFn: ({ typeId, organizationId, data }: {
       typeId: string;
@@ -170,6 +182,7 @@ export function SiteLogTypeForm({
       });
     },
   });
+
   const onSubmit = (data: SiteLogTypeFormData) => {
     if (!userData?.organization?.id) {
       toast({
@@ -179,8 +192,10 @@ export function SiteLogTypeForm({
       });
       return;
     }
+
     setIsSubmitting(true);
-    if (mode === 'edit'&& siteLogType) {
+
+    if (mode === 'edit' && siteLogType) {
       updateMutation.mutate({
         typeId: siteLogType.id,
         organizationId: userData.organization.id,
@@ -200,6 +215,7 @@ export function SiteLogTypeForm({
         setIsSubmitting(false);
         return;
       }
+
       createMutation.mutate({
         name: data.name,
         description: data.description || null,
@@ -208,6 +224,7 @@ export function SiteLogTypeForm({
       });
     }
   };
+
   const getHeader = () => {
     switch (mode) {
       case 'view':
@@ -228,8 +245,10 @@ export function SiteLogTypeForm({
         };
     }
   };
+
   const header = getHeader();
   const isLoading = createMutation.isPending || updateMutation.isPending;
+
   return (
     <ModalLayout onClose={onClose} size="md">
       <ModalHeader
@@ -237,18 +256,20 @@ export function SiteLogTypeForm({
         description={header.description}
         icon={Tag}
       />
+
       <ModalBody>
-        {mode === 'view'? (
+        {mode === 'view' ? (
           siteLogType && <ViewPanel data={siteLogType} />
         ) : (
           <FormPanel form={form} onSubmit={onSubmit} />
         )}
       </ModalBody>
-      {mode !== 'view'&& (
+
+      {mode !== 'view' && (
         <ModalFooter
           leftLabel="Cancelar"
           onLeftClick={onClose}
-          rightLabel={mode === 'create'? 'Crear Tipo': 'Guardar Cambios'}
+          rightLabel={mode === 'create' ? 'Crear Tipo' : 'Guardar Cambios'}
           onRightClick={form.handleSubmit(onSubmit)}
           isSubmitting={isLoading}
         />

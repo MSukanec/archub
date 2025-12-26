@@ -1,5 +1,6 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { supabase } from "./supabase";
+
 async function throwIfResNotOk(res: Response) {
   // Silently suppress 400/401 auth errors - they are expected when no session exists
   if (res.status === 400 || res.status === 401) {
@@ -11,6 +12,7 @@ async function throwIfResNotOk(res: Response) {
     throw new Error(`${res.status}: ${text}`);
   }
 }
+
 export async function apiRequest(
   method: string,
   url: string,
@@ -41,9 +43,11 @@ export async function apiRequest(
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
+
   await throwIfResNotOk(res);
   return res;
 }
+
 type UnauthorizedBehavior = "returnNull" | "throw";
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
@@ -69,13 +73,16 @@ export const getQueryFn: <T>(options: {
       credentials: "include",
       headers,
     });
+
     // Return null for 400/401 errors if returnNull behavior is set
     if ((res.status === 400 || res.status === 401) && unauthorizedBehavior === "returnNull") {
       return null;
     }
+
     await throwIfResNotOk(res);
     return await res.json();
   };
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

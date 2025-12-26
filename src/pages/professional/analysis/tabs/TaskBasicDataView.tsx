@@ -2,6 +2,7 @@ import { Calendar, User, Ruler, Building, FileText, Zap, Hash, Trash2, Calculato
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useState, useEffect } from "react";
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,10 +18,12 @@ import { useGlobalModalStore } from '@/components/modal';
 import { useLocation } from 'wouter';
 import { useTaskMaterials } from '@/hooks/use-generated-tasks';
 import { useTaskLabor } from '@/hooks/use-task-labor';
+
 interface TaskBasicDataViewProps {
   task: any;
   onTabChange?: (tab: string) => void;
 }
+
 // Componente inline para mostrar resumen de costos
 function CostSummaryCard({ task, onTabChange, canEdit, handleDeleteTask }: { 
   task: any; 
@@ -33,7 +36,9 @@ function CostSummaryCard({ task, onTabChange, canEdit, handleDeleteTask }: {
   
   const { data: materials = [], isLoading: materialsLoading } = useTaskMaterials(taskId);
   const { data: labor = [], isLoading: laborLoading } = useTaskLabor(taskId);
+
   const isLoading = materialsLoading || laborLoading;
+
   // Calcular total de materiales por unidad (misma lógica que TaskCostPopover)
   const materialsTotalPerUnit = materials.reduce((sum, material) => {
     const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
@@ -41,6 +46,7 @@ function CostSummaryCard({ task, onTabChange, canEdit, handleDeleteTask }: {
     const quantity = material.amount || 0;
     return sum + (quantity * unitPrice);
   }, 0);
+
   // Calcular total de mano de obra por unidad (misma lógica que TaskCostPopover)
   const laborTotalPerUnit = labor.reduce((sum, laborItem) => {
     const laborView = laborItem.labor_view;
@@ -48,7 +54,9 @@ function CostSummaryCard({ task, onTabChange, canEdit, handleDeleteTask }: {
     const quantity = laborItem.quantity || 0;
     return sum + (quantity * unitPrice);
   }, 0);
+
   const totalPerUnit = materialsTotalPerUnit + laborTotalPerUnit;
+
   // Formatear moneda estilo argentino
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -58,7 +66,9 @@ function CostSummaryCard({ task, onTabChange, canEdit, handleDeleteTask }: {
       maximumFractionDigits: 2
     }).format(amount);
   };
+
   const hasCosts = materials.length > 0 || labor.length > 0;
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader 
@@ -86,6 +96,7 @@ function CostSummaryCard({ task, onTabChange, canEdit, handleDeleteTask }: {
                 </div>
                 <p className="text-sm font-semibold">{formatCurrency(materialsTotalPerUnit)}</p>
               </div>
+
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                 <div>
                   <p className="text-sm font-medium">Mano de Obra</p>
@@ -93,6 +104,7 @@ function CostSummaryCard({ task, onTabChange, canEdit, handleDeleteTask }: {
                 </div>
                 <p className="text-sm font-semibold">{formatCurrency(laborTotalPerUnit)}</p>
               </div>
+
               <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10 border border-primary/20">
                 <div>
                   <p className="text-sm font-semibold">Total por unidad</p>
@@ -101,6 +113,7 @@ function CostSummaryCard({ task, onTabChange, canEdit, handleDeleteTask }: {
                 <p className="text-sm font-bold text-primary">{formatCurrency(totalPerUnit)}</p>
               </div>
             </div>
+
             {/* Botón Ver detalle */}
             <FormSubsectionButton
               icon={<FileText className="h-4 w-4" />}
@@ -113,6 +126,7 @@ function CostSummaryCard({ task, onTabChange, canEdit, handleDeleteTask }: {
             />
           </div>
         )}
+
         {/* Botón Eliminar tarea al final */}
         <div className="mt-6 pt-3 border-t">
           <FormSubsectionButton
@@ -130,6 +144,7 @@ function CostSummaryCard({ task, onTabChange, canEdit, handleDeleteTask }: {
     </Card>
   );
 }
+
 export function TaskBasicDataView({ 
   task,
   onTabChange 
@@ -154,18 +169,20 @@ export function TaskBasicDataView({
   // Determinar si el usuario puede editar esta tarea
   // ADMIN: puede editar todo (sistema y organización)
   // Usuario normal: solo puede editar tareas de su organización (no sistema)
-  const canEdit = userData?.role?.name === 'Administrador'|| !isSystemTask;
+  const canEdit = userData?.role?.name === 'Administrador' || !isSystemTask;
   
   // Auto-save mutation for task name
   const saveTaskMutation = useMutation({
     mutationFn: async (dataToSave: any) => {
       if (!task.id || !supabase || !canEdit) return;
+
       const { error } = await supabase
         .from('tasks')
         .update({
           custom_name: dataToSave.taskName
         })
         .eq('id', task.id);
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -197,16 +214,19 @@ export function TaskBasicDataView({
       });
     }
   });
+
   // Auto-save mutation for task division/rubro
   const saveTaskRubroMutation = useMutation({
     mutationFn: async (division: string) => {
       if (!task.id || !supabase || !canEdit) return;
+
       const { error } = await supabase
         .from('tasks')
         .update({
           division: division
         })
         .eq('id', task.id);
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -238,16 +258,19 @@ export function TaskBasicDataView({
       });
     }
   });
+
   // Auto-save mutation for task unit
   const saveTaskUnitMutation = useMutation({
     mutationFn: async (unit: string) => {
       if (!task.id || !supabase || !canEdit) return;
+
       const { error } = await supabase
         .from('tasks')
         .update({
           unit: unit
         })
         .eq('id', task.id);
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -291,6 +314,7 @@ export function TaskBasicDataView({
     delay: 1000,
     enabled: canEdit
   });
+
   // Auto-save hook para el rubro de la tarea
   const { isSaving: isSavingRubro } = useAutoSave({
     data: {
@@ -302,6 +326,7 @@ export function TaskBasicDataView({
     delay: 1000,
     enabled: canEdit
   });
+
   // Auto-save hook para la unidad de la tarea
   const { isSaving: isSavingUnit } = useAutoSave({
     data: {
@@ -313,8 +338,10 @@ export function TaskBasicDataView({
     delay: 1000,
     enabled: canEdit
   });
+
   // Estado general de guardado
   const isSaving = isSavingName || isSavingRubro || isSavingUnit;
+
   // Función para eliminar tarea
   const handleDeleteTask = () => {
     const taskName = task.custom_name || task.name_rendered || 'esta tarea';
@@ -356,11 +383,11 @@ export function TaskBasicDataView({
           queryClient.invalidateQueries({ queryKey: ['task-parameter-dependencies'] });
           
           // Determinar dónde navegar según el origen
-          const isFromAdmin = typeof window !== 'undefined'&& 
+          const isFromAdmin = typeof window !== 'undefined' && 
             (document.referrer.includes('/admin/tasks') || 
              localStorage.getItem('taskViewSource') === 'admin');
           localStorage.removeItem('taskViewSource');
-          navigate(isFromAdmin ? '/admin/tasks': '/analysis');
+          navigate(isFromAdmin ? '/admin/tasks' : '/analysis');
           
         } catch (error: any) {
           console.error('Error deleting task:', error);
@@ -412,8 +439,10 @@ export function TaskBasicDataView({
       return data?.map(u => ({ value: u.name, label: u.name })) || [];
     }
   });
+
   // Los valores ya se actualizan en el useEffect principal de arriba
   // Remover useEffects duplicados que pueden causar conflictos
+
   return (
     <div className="space-y-6">
       {/* Cards principales */}
@@ -434,7 +463,7 @@ export function TaskBasicDataView({
                   <div>
                     <p className="text-sm font-medium">Creador</p>
                     <p className="text-sm text-muted-foreground">
-                      {isSystemTask ? 'Sistema': (userData?.organization?.name || 'Organización')}
+                      {isSystemTask ? 'Sistema' : (userData?.organization?.name || 'Organización')}
                     </p>
                   </div>
                 </div>
@@ -451,6 +480,7 @@ export function TaskBasicDataView({
                   </div>
                 )}
               </div>
+
               {/* Nombre de la Tarea - Textarea */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Nombre de la Tarea</label>
@@ -462,6 +492,7 @@ export function TaskBasicDataView({
                   className="min-h-[80px] resize-none"
                 />
               </div>
+
               {/* Rubro - Editable con ComboBox */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Rubro</label>
@@ -474,6 +505,7 @@ export function TaskBasicDataView({
                   allowCreate={canEdit}
                 />
               </div>
+
               {/* Unidad de Cómputo - Editable con ComboBox */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Unidad de Cómputo</label>
@@ -486,6 +518,8 @@ export function TaskBasicDataView({
                   allowCreate={canEdit}
                 />
               </div>
+
+
               {/* Descripción - Si existe */}
               {task.description && (
                 <div className="p-3 rounded-lg bg-muted/30">
@@ -496,6 +530,7 @@ export function TaskBasicDataView({
             </div>
           </CardContent>
         </Card>
+
         {/* Card derecha - Costos */}
         <CostSummaryCard 
           task={task}

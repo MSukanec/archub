@@ -5,6 +5,7 @@ import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown, hasMultipleCu
 import { format as formatMoney, formatKPI, convertToBaseCurrency } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
+import { 
   StatCard, 
   StatCardTitle, 
   StatCardValue, 
@@ -27,7 +28,9 @@ import { cn } from '@/lib/utils';
 import { Wallet, Coins } from 'lucide-react';
 import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
 import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
-export type PeriodFilter = '30d'| '3m'| '6m'| '1y'| 'all';
+
+export type PeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all';
+
 interface ProjectFinancesDashboardViewProps {
   movements: any[];
   organizationId?: string;
@@ -38,11 +41,13 @@ interface ProjectFinancesDashboardViewProps {
   dismissedIssueIds?: Set<string>;
   onDismissIssue?: (issueId: string) => void;
 }
+
 const MOVEMENT_TYPE_LABELS: Record<string, string> = {
   client_payment: 'Cobros Clientes',
   material_payment: 'Pagos Materiales',
   personnel_payment: 'Pagos Personal',
 };
+
 function getPeriodLabel(period: PeriodFilter): string {
   switch (period) {
     case '30d': return 'Últimos 30 días';
@@ -52,6 +57,7 @@ function getPeriodLabel(period: PeriodFilter): string {
     case 'all': return 'Histórico';
   }
 }
+
 function getPreviousPeriodDateRange(period: PeriodFilter): { from: Date; to: Date } | null {
   const now = new Date();
   const to = new Date(now);
@@ -84,6 +90,7 @@ function getPreviousPeriodDateRange(period: PeriodFilter): { from: Date; to: Dat
   from.setHours(0, 0, 0, 0);
   return { from, to };
 }
+
 function getDateFromForPeriod(period: PeriodFilter): Date | null {
   if (period === 'all') return null;
   
@@ -108,6 +115,7 @@ function getDateFromForPeriod(period: PeriodFilter): Date | null {
   result.setHours(0, 0, 0, 0);
   return result;
 }
+
 export function calculateAvailablePeriods(allMovements: any[]): Record<PeriodFilter, boolean> {
   const confirmedMovements = allMovements.filter(m => m.status === 'confirmed');
   
@@ -135,6 +143,7 @@ export function calculateAvailablePeriods(allMovements: any[]): Record<PeriodFil
   
   return result;
 }
+
 export function ProjectFinancesDashboardView({ 
   movements: allMovements = [],
   organizationId,
@@ -149,6 +158,7 @@ export function ProjectFinancesDashboardView({
   const orgId = organizationId || userData?.organization?.id;
   
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(orgId);
+
   const handleInsightAction = useCallback((action: InsightAction) => {
     switch (action.type) {
       case 'navigate':
@@ -167,6 +177,7 @@ export function ProjectFinancesDashboardView({
         break;
     }
   }, [onNavigateToMovements, onNavigateToTab, onScrollToPanel]);
+
   const handleMonthDrillDown = useCallback((month: string) => {
     if (onNavigateToTab) {
       onNavigateToTab('movements', { filterMonth: month });
@@ -174,6 +185,7 @@ export function ProjectFinancesDashboardView({
       onNavigateToMovements?.();
     }
   }, [onNavigateToTab, onNavigateToMovements]);
+
   const handleCategoryDrillDown = useCallback((categoryName: string) => {
     if (onNavigateToTab) {
       onNavigateToTab('movements', { filterType: categoryName });
@@ -181,12 +193,16 @@ export function ProjectFinancesDashboardView({
       onNavigateToMovements?.();
     }
   }, [onNavigateToTab, onNavigateToMovements]);
+
   const dateFrom = useMemo(() => getDateFromForPeriod(selectedPeriod), [selectedPeriod]);
+
   const periodMeta = useMemo(() => {
     const now = new Date();
     return getPeriodMeta(dateFrom, now);
   }, [dateFrom]);
+
   const kpiLabels = useMemo(() => getKPILabels(periodMeta), [periodMeta]);
+
   const confirmedMovements = useMemo(() => {
     const confirmed = allMovements.filter(m => m.status === 'confirmed');
     
@@ -199,6 +215,7 @@ export function ProjectFinancesDashboardView({
       return movementDateAtMidnight >= dateFrom;
     });
   }, [allMovements, dateFrom]);
+
   const previousPeriodMovements = useMemo(() => {
     const previousRange = getPreviousPeriodDateRange(selectedPeriod);
     if (!previousRange) return [];
@@ -211,11 +228,14 @@ export function ProjectFinancesDashboardView({
       return movementDateAtMidnight >= previousRange.from && movementDateAtMidnight < previousRange.to;
     });
   }, [allMovements, selectedPeriod]);
+
   const ingresoTypes = ['client_payment'];
   const egresoTypes = ['material_payment', 'personnel_payment'];
+
   const kpis = useMemo(() => {
     const ingresosMovements = confirmedMovements.filter(m => ingresoTypes.includes(m.movement_type));
     const egresosMovements = confirmedMovements.filter(m => egresoTypes.includes(m.movement_type));
+
     const totalIngresos = calculateMonetaryKPI({
       items: ingresosMovements.map(m => ({
         amount: m.amount,
@@ -227,6 +247,7 @@ export function ProjectFinancesDashboardView({
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
+
     const totalEgresos = calculateMonetaryKPI({
       items: egresosMovements.map(m => ({
         amount: m.amount,
@@ -238,9 +259,12 @@ export function ProjectFinancesDashboardView({
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
+
     const balance = totalIngresos.value - totalEgresos.value;
+
     const previousIngresosMovements = previousPeriodMovements.filter(m => ingresoTypes.includes(m.movement_type));
     const previousEgresosMovements = previousPeriodMovements.filter(m => egresoTypes.includes(m.movement_type));
+
     const previousIngresos = calculateMonetaryKPI({
       items: previousIngresosMovements.map(m => ({
         amount: m.amount,
@@ -252,6 +276,7 @@ export function ProjectFinancesDashboardView({
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
+
     const previousEgresos = calculateMonetaryKPI({
       items: previousEgresosMovements.map(m => ({
         amount: m.amount,
@@ -263,32 +288,37 @@ export function ProjectFinancesDashboardView({
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
     });
+
     let ingresosTrend: TrendDirection = 'neutral';
     let ingresosTrendValue = '';
     if (previousIngresos.value > 0) {
       const change = ((totalIngresos.value - previousIngresos.value) / previousIngresos.value) * 100;
-      ingresosTrend = change > 0 ? 'up': change < 0 ? 'down': 'neutral';
-      const periodLabel = selectedPeriod === 'all'? 'vs año anterior': 'vs período anterior';
-      ingresosTrendValue = `${change > 0 ? '+': ''}${Math.round(change)}% ${periodLabel}`;
+      ingresosTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
+      const periodLabel = selectedPeriod === 'all' ? 'vs año anterior' : 'vs período anterior';
+      ingresosTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% ${periodLabel}`;
     }
+
     let egresosTrend: TrendDirection = 'neutral';
     let egresosTrendValue = '';
     if (previousEgresos.value > 0) {
       const change = ((totalEgresos.value - previousEgresos.value) / previousEgresos.value) * 100;
-      egresosTrend = change > 0 ? 'up': change < 0 ? 'down': 'neutral';
-      const periodLabel = selectedPeriod === 'all'? 'vs año anterior': 'vs período anterior';
-      egresosTrendValue = `${change > 0 ? '+': ''}${Math.round(change)}% ${periodLabel}`;
+      egresosTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
+      const periodLabel = selectedPeriod === 'all' ? 'vs año anterior' : 'vs período anterior';
+      egresosTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% ${periodLabel}`;
     }
+
     const totalMovements = calculateCountKPI({
       count: confirmedMovements.length,
       label: 'movimientos'
     });
+
     const months = new Set(confirmedMovements.map(m => {
       const date = parseLocalDate(m.payment_date);
       if (!date) return '';
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     }).filter(m => m !== ''));
     const monthCount = months.size || 1;
+
     return {
       totalIngresos,
       totalEgresos,
@@ -303,6 +333,7 @@ export function ProjectFinancesDashboardView({
       previousEgresos: previousEgresos.value
     };
   }, [confirmedMovements, defaultCurrency, previousPeriodMovements, selectedPeriod, ingresoTypes, egresoTypes]);
+
   const monthlyChartData = useMemo(() => {
     const monthlyTotals = new Map<string, number>();
     
@@ -321,16 +352,18 @@ export function ProjectFinancesDashboardView({
         defaultCurrency?.code,
         m.signed_amount ?? m.amount,
         m.exchange_rate ?? null,
-        { quoteCurrency: 'USD'}
+        { quoteCurrency: 'USD' }
       );
       
       const existing = monthlyTotals.get(monthKey) || 0;
       monthlyTotals.set(monthKey, existing + convertedAmount);
     });
+
     return Array.from(monthlyTotals.entries())
       .map(([month, value]) => ({ month, value }))
       .sort((a, b) => a.month.localeCompare(b.month));
   }, [allMovements, dateFrom, defaultCurrency]);
+
   const currentMonthComparison = useMemo(() => {
     if (monthlyChartData.length < 2) return null;
     
@@ -344,6 +377,7 @@ export function ProjectFinancesDashboardView({
       stableThresholdPercent: 5
     });
   }, [monthlyChartData]);
+
   const categoryChartData = useMemo(() => {
     const typeTotals = new Map<string, number>();
     
@@ -353,12 +387,13 @@ export function ProjectFinancesDashboardView({
         defaultCurrency?.code,
         Math.abs(m.amount),
         m.exchange_rate ?? null,
-        { quoteCurrency: 'USD'}
+        { quoteCurrency: 'USD' }
       );
       
       const existing = typeTotals.get(m.movement_type) || 0;
       typeTotals.set(m.movement_type, existing + convertedAmount);
     });
+
     return Array.from(typeTotals.entries())
       .map(([type, value]) => ({
         name: MOVEMENT_TYPE_LABELS[type] || type,
@@ -367,6 +402,7 @@ export function ProjectFinancesDashboardView({
       .sort((a, b) => b.value - a.value)
       .slice(0, 8);
   }, [confirmedMovements, defaultCurrency]);
+
   const incomeExpenseChartData = useMemo(() => {
     const monthlyData = new Map<string, { income: number; expense: number }>();
     
@@ -385,7 +421,7 @@ export function ProjectFinancesDashboardView({
         defaultCurrency?.code,
         Math.abs(m.amount),
         m.exchange_rate ?? null,
-        { quoteCurrency: 'USD'}
+        { quoteCurrency: 'USD' }
       );
       
       const existing = monthlyData.get(monthKey) || { income: 0, expense: 0 };
@@ -398,6 +434,7 @@ export function ProjectFinancesDashboardView({
       }
       monthlyData.set(monthKey, existing);
     });
+
     return Array.from(monthlyData.entries())
       .map(([period, data]) => ({
         period,
@@ -407,6 +444,7 @@ export function ProjectFinancesDashboardView({
       }))
       .sort((a, b) => a.period.localeCompare(b.period));
   }, [allMovements, dateFrom, defaultCurrency, ingresoTypes]);
+
   const monthlyFinancialData: MonthlyFinancialData[] = useMemo(() => {
     return incomeExpenseChartData.map(d => ({
       month: d.period,
@@ -415,6 +453,7 @@ export function ProjectFinancesDashboardView({
       balance: d.balance
     }));
   }, [incomeExpenseChartData]);
+
   const currencyBalances = useMemo(() => {
     const balances = new Map<string, { name: string; symbol: string; balance: number }>();
     
@@ -433,6 +472,7 @@ export function ProjectFinancesDashboardView({
       }
       balances.set(currencyCode, existing);
     });
+
     return Array.from(balances.values())
       .map(b => ({
         name: `${b.symbol} ${b.name}`,
@@ -440,6 +480,7 @@ export function ProjectFinancesDashboardView({
       }))
       .sort((a, b) => Math.abs(b.balance) - Math.abs(a.balance));
   }, [allMovements, ingresoTypes]);
+
   const walletBalances = useMemo(() => {
     const balances = new Map<string, { name: string; balance: number }>();
     
@@ -454,7 +495,7 @@ export function ProjectFinancesDashboardView({
         defaultCurrency?.code,
         amount,
         m.exchange_rate ?? null,
-        { quoteCurrency: 'USD'}
+        { quoteCurrency: 'USD' }
       );
       
       const existing = balances.get(walletName) || { name: walletName, balance: 0 };
@@ -465,6 +506,7 @@ export function ProjectFinancesDashboardView({
       }
       balances.set(walletName, existing);
     });
+
     return Array.from(balances.values())
       .map(b => ({
         name: b.name,
@@ -472,11 +514,13 @@ export function ProjectFinancesDashboardView({
       }))
       .sort((a, b) => Math.abs(b.balance) - Math.abs(a.balance));
   }, [allMovements, ingresoTypes, defaultCurrency]);
+
   const autoInsights = useMemo(() => {
     const categoryData = categoryChartData.map(c => ({
       name: c.name,
       value: c.value
     }));
+
     const context = buildInsightContext({
       totalGasto: kpis.totalEgresos.value,
       previousPeriodGasto: kpis.previousEgresos,
@@ -497,6 +541,7 @@ export function ProjectFinancesDashboardView({
     });
     return generateFinancialInsights(context, 3);
   }, [kpis, categoryChartData, monthlyChartData, confirmedMovements, periodMeta, monthlyFinancialData]);
+
   const recentActivityItems = useMemo((): ActivityItem[] => {
     return [...confirmedMovements]
       .sort((a, b) => {
@@ -518,7 +563,7 @@ export function ProjectFinancesDashboardView({
               "font-medium tabular-nums",
               isIngreso ? "text-positive" : "text-negative"
             )}>
-              {isIngreso ? '+': '-'}{formattedAmount}
+              {isIngreso ? '+' : '-'}{formattedAmount}
             </span>
           ),
           leftIcon: isIngreso ? (
@@ -530,6 +575,7 @@ export function ProjectFinancesDashboardView({
         };
       });
   }, [confirmedMovements, ingresoTypes]);
+
   if (confirmedMovements.length === 0) {
     return (
       <EmptyState
@@ -539,17 +585,19 @@ export function ProjectFinancesDashboardView({
       />
     );
   }
+
   const currencySymbol = defaultCurrency?.symbol || '$';
   const showMultiCurrencyBreakdown = hasMultipleCurrencies(kpis.totalIngresos) || hasMultipleCurrencies(kpis.totalEgresos);
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="kpi-total-ingresos">
           <StatCardTitle>
-            <ArrowUpRight className="h-4 w-4" style={{ color: 'var(--positive)'}} />
+            <ArrowUpRight className="h-4 w-4" style={{ color: 'var(--positive)' }} />
             Total Ingresos
           </StatCardTitle>
-          <StatCardValue style={{ color: 'var(--positive)'}}>
+          <StatCardValue style={{ color: 'var(--positive)' }}>
             {currencySymbol} {kpis.totalIngresos.formatted}
           </StatCardValue>
           {kpis.ingresosTrendValue && (
@@ -559,12 +607,13 @@ export function ProjectFinancesDashboardView({
             <StatCardMeta>{formatBreakdown(kpis.totalIngresos)}</StatCardMeta>
           )}
         </StatCard>
+
         <StatCard data-testid="kpi-total-egresos">
           <StatCardTitle>
-            <ArrowDownRight className="h-4 w-4" style={{ color: 'var(--negative)'}} />
+            <ArrowDownRight className="h-4 w-4" style={{ color: 'var(--negative)' }} />
             Total Egresos
           </StatCardTitle>
-          <StatCardValue style={{ color: 'var(--negative)'}}>
+          <StatCardValue style={{ color: 'var(--negative)' }}>
             {currencySymbol} {kpis.totalEgresos.formatted}
           </StatCardValue>
           {kpis.egresosTrendValue && (
@@ -574,21 +623,23 @@ export function ProjectFinancesDashboardView({
             <StatCardMeta>{formatBreakdown(kpis.totalEgresos)}</StatCardMeta>
           )}
         </StatCard>
+
         <StatCard data-testid="kpi-balance">
           <StatCardTitle>
             <Scale className="h-4 w-4" />
             Balance
           </StatCardTitle>
-          <StatCardValue style={{ color: kpis.balance >= 0 ? 'var(--positive)': 'var(--negative)'}}>
-            {kpis.balance >= 0 ? '+': '-'}{currencySymbol} {formatKPI(Math.abs(kpis.balance))}
+          <StatCardValue style={{ color: kpis.balance >= 0 ? 'var(--positive)' : 'var(--negative)' }}>
+            {kpis.balance >= 0 ? '+' : '-'}{currencySymbol} {formatKPI(Math.abs(kpis.balance))}
           </StatCardValue>
           {currentMonthComparison && (
             <StatCardHistoricalComparison comparison={currentMonthComparison} label="vs promedio mensual" />
           )}
           <StatCardMeta>
-            {kpis.balance >= 0 ? 'Superávit': 'Déficit'} del período
+            {kpis.balance >= 0 ? 'Superávit' : 'Déficit'} del período
           </StatCardMeta>
         </StatCard>
+
         <StatCard data-testid="kpi-total-movimientos">
           <StatCardTitle>
             <DollarSign className="h-4 w-4" />
@@ -598,10 +649,11 @@ export function ProjectFinancesDashboardView({
             {kpis.totalMovements.formatted}
           </StatCardValue>
           <StatCardMeta>
-            {kpis.monthCount} {kpis.monthCount === 1 ? 'mes': 'meses'} con actividad
+            {kpis.monthCount} {kpis.monthCount === 1 ? 'mes' : 'meses'} con actividad
           </StatCardMeta>
         </StatCard>
       </div>
+
       <DashboardCard 
         id="monthlyChart"
         title="Evolución Financiera" 
@@ -617,9 +669,9 @@ export function ProjectFinancesDashboardView({
             balance: d.balance
           }))}
           series={[
-            { key: 'income', label: 'Ingresos', color: 'var(--positive)', type: 'bar'},
-            { key: 'expense', label: 'Egresos', color: 'var(--negative)', type: 'bar'},
-            { key: 'balance', label: 'Balance', color: 'var(--neutral)', type: 'line'}
+            { key: 'income', label: 'Ingresos', color: 'var(--positive)', type: 'bar' },
+            { key: 'expense', label: 'Egresos', color: 'var(--negative)', type: 'bar' },
+            { key: 'balance', label: 'Balance', color: 'var(--neutral)', type: 'line' }
           ]}
           height={280}
           emptyText="No hay movimientos registrados"
@@ -629,6 +681,7 @@ export function ProjectFinancesDashboardView({
           onBarClick={(month) => handleMonthDrillDown(month)}
         />
       </DashboardCard>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DashboardCard 
           id="categoryBreakdown"
@@ -645,6 +698,7 @@ export function ProjectFinancesDashboardView({
             onClick={(label) => handleCategoryDrillDown(label)}
           />
         </DashboardCard>
+
         <div className="grid grid-cols-1 gap-6">
           <DashboardCard 
             id="currencyBalances"
@@ -659,6 +713,7 @@ export function ProjectFinancesDashboardView({
               emptyText="No hay movimientos registrados"
             />
           </DashboardCard>
+
           <DashboardCard 
             id="walletBalances"
             title="Balance por Billetera" 
@@ -674,6 +729,7 @@ export function ProjectFinancesDashboardView({
           </DashboardCard>
         </div>
       </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <InsightCard
           title="Insights"
@@ -683,6 +739,7 @@ export function ProjectFinancesDashboardView({
           onAction={handleInsightAction}
           data-testid="insights-section"
         />
+
         <ActivityCard
           title="Actividad Reciente"
           titleIcon={<Clock />}

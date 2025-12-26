@@ -14,6 +14,7 @@ import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';
 import { FileText, FolderOpen, Clock, Plus, BookOpen } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 export function MediaDocumentation() {
   const { openModal } = useGlobalModalStore();
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
@@ -22,22 +23,27 @@ export function MediaDocumentation() {
   const { data: allDocuments } = useDesignDocuments();
   const { data: allFolders } = useDesignDocumentFolders();
   const recentDocuments = allDocuments?.slice(0, 10) || [];
+
   useEffect(() => {
     if (recentDocuments.length > 0 && !selectedDocument) {
       setSelectedDocument(recentDocuments[0]);
     }
   }, [recentDocuments, selectedDocument]);
+
   const handleDocumentSelect = (document: any) => {
     setSelectedDocument(document);
     setIsPreviewOpen(false);
   };
+
   const handleClosePreview = () => {
     setIsPreviewOpen(false);
     setSelectedDocument(null);
   };
+
   const handleExpandPdf = () => {
     setIsPreviewOpen(true);
   };
+
   // Empty state: No folders exist yet
   if (!allFolders || allFolders.length === 0) {
     return (
@@ -54,6 +60,7 @@ export function MediaDocumentation() {
       />
     );
   }
+
   // Empty state: Folders exist but no documents
   if (!allDocuments || allDocuments.length === 0) {
     return (
@@ -70,6 +77,7 @@ export function MediaDocumentation() {
       />
     );
   }
+
   return (
     <>
       <div className="hidden lg:flex flex-col h-full gap-4">
@@ -77,7 +85,7 @@ export function MediaDocumentation() {
           <div className="w-2/3 min-w-0">
             <div 
               className="rounded-lg overflow-hidden border-2 border-dashed h-full"
-              style={{ borderColor: 'var(--accent)'}}
+              style={{ borderColor: 'var(--accent)' }}
             >
               {selectedDocument ? (
                 <UnifiedViewer 
@@ -102,6 +110,7 @@ export function MediaDocumentation() {
               )}
             </div>
           </div>
+
           <div className="w-1/3">
             <DocumentInfo 
               document={selectedDocument}
@@ -112,6 +121,7 @@ export function MediaDocumentation() {
             />
           </div>
         </div>
+
         <div className="flex gap-4 h-80">
           <div className="w-2/3">
             <Card className="h-full flex flex-col">
@@ -125,6 +135,7 @@ export function MediaDocumentation() {
               </CardContent>
             </Card>
           </div>
+
           <div className="w-1/3">
             <Card className="h-full flex flex-col">
               <CardHeader 
@@ -167,6 +178,7 @@ export function MediaDocumentation() {
           </div>
         </div>
       </div>
+
       <div className="lg:hidden">
         <DocumentExplorer onDocumentSelect={handleDocumentSelect} />
         
@@ -176,6 +188,7 @@ export function MediaDocumentation() {
           onClose={handleClosePreview}
         />
       </div>
+
       <div className="hidden lg:block">
         <DocumentPreviewModal 
           document={selectedDocument}

@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { getOrganizationInitials, getProjectInitials } from "@/utils/initials";
+
 interface Project {
   id: string;
   name: string;
@@ -12,11 +13,13 @@ interface Project {
     image_path?: string;
   };
 }
+
 interface Organization {
   id: string;
   name: string;
   logo_url?: string;
 }
+
 interface ProjectSelectorFieldProps {
   projects: Project[];
   organization?: Organization;
@@ -25,6 +28,9 @@ interface ProjectSelectorFieldProps {
   placeholder?: string;
   className?: string;
 }
+
+
+
 export function ProjectSelectorField({
   projects,
   organization,
@@ -41,12 +47,14 @@ export function ProjectSelectorField({
       return nameA.localeCompare(nameB);
     });
   }, [projects]);
+
   // Convertir null a string especial para el Select
-  const selectValue = value === null ? '__organization__': (value || '');
+  const selectValue = value === null ? '__organization__' : (value || '');
   const selectedProject = value ? sortedProjects.find(project => project.id === value) : null;
   const isOrganizationSelected = value === null;
+
   return (
-    <Select value={selectValue} onValueChange={(val) => onChange(val === '__organization__'? null : val)}>
+    <Select value={selectValue} onValueChange={(val) => onChange(val === '__organization__' ? null : val)}>
       <SelectTrigger className={className}>
         <div className="flex items-center gap-2">
           {isOrganizationSelected ? (
@@ -57,7 +65,7 @@ export function ProjectSelectorField({
                 ) : (
                   <AvatarFallback 
                     className="text-xs font-medium text-white border-0"
-                    style={{ backgroundColor: 'hsl(var(--accent))'}}
+                    style={{ backgroundColor: 'hsl(var(--accent))' }}
                   >
                     {organization ? getOrganizationInitials(organization.name) : 'O'}
                   </AvatarFallback>
@@ -70,7 +78,7 @@ export function ProjectSelectorField({
               <Avatar className="w-5 h-5 border-0">
                 <AvatarFallback 
                   className="text-xs font-medium text-white border-0"
-                  style={{ backgroundColor: selectedProject.color || 'hsl(var(--accent))'}}
+                  style={{ backgroundColor: selectedProject.color || 'hsl(var(--accent))' }}
                 >
                   {getProjectInitials(selectedProject.name)}
                 </AvatarFallback>
@@ -92,7 +100,7 @@ export function ProjectSelectorField({
               ) : (
                 <AvatarFallback 
                   className="text-xs font-medium text-white border-0"
-                  style={{ backgroundColor: 'hsl(var(--accent))'}}
+                  style={{ backgroundColor: 'hsl(var(--accent))' }}
                 >
                   {organization ? getOrganizationInitials(organization.name) : 'O'}
                 </AvatarFallback>
@@ -112,7 +120,7 @@ export function ProjectSelectorField({
               <Avatar className="w-5 h-5 border-0">
                 <AvatarFallback 
                   className="text-xs font-medium text-white border-0"
-                  style={{ backgroundColor: project.color || 'hsl(var(--accent))'}}
+                  style={{ backgroundColor: project.color || 'hsl(var(--accent))' }}
                 >
                   {getProjectInitials(project.name)}
                 </AvatarFallback>

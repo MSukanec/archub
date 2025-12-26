@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { PartnerWithdrawal, PartnerWithdrawalCreateInput } from '../types';
+
 export async function createPartnerWithdrawal(
   input: PartnerWithdrawalCreateInput
 ): Promise<PartnerWithdrawal> {
@@ -17,11 +18,13 @@ export async function createPartnerWithdrawal(
     notes: input.notes || null,
     created_by: input.created_by,
   };
+
   const { data, error } = await supabase
     .from('partner_withdrawals')
     .insert(insertData)
     .select()
     .single();
+
   if (error) throw error;
   return data as PartnerWithdrawal;
 }

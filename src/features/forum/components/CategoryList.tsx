@@ -27,6 +27,7 @@ import { useGlobalModalStore } from '@/components/modal';
 import { useDeleteCategory, type ForumCategoryWithCounts } from '../services';
 import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import { useToast } from '@/hooks/use-toast';
+
 export const ICON_MAP: Record<string, LucideIcon> = {
   'message-square': MessageSquare,
   'briefcase': Briefcase,
@@ -39,15 +40,18 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   'star': Star,
   'folder': Folder,
 };
+
 export function getIconComponent(iconName: string | null): LucideIcon {
   if (!iconName) return MessageSquare;
   return ICON_MAP[iconName] || MessageSquare;
 }
+
 interface CategoryListProps {
   categories: ForumCategoryWithCounts[];
   selectedCategory: string | null;
   onCategorySelect: (categorySlug: string | null) => void;
 }
+
 export function CategoryList({
   categories,
   selectedCategory,
@@ -57,10 +61,12 @@ export function CategoryList({
   const { openModal } = useGlobalModalStore();
   const deleteMutation = useDeleteCategory();
   const { toast } = useToast();
+
   const handleEditCategory = (category: ForumCategoryWithCounts, e: React.MouseEvent) => {
     e.stopPropagation();
-    openModal('forum-category', { category, mode: 'edit'});
+    openModal('forum-category', { category, mode: 'edit' });
   };
+
   const handleDeleteCategory = (category: ForumCategoryWithCounts, e: React.MouseEvent) => {
     e.stopPropagation();
     openModal('delete-confirmation', {
@@ -93,6 +99,7 @@ export function CategoryList({
       },
     });
   };
+
   return (
     <nav className="space-y-1" data-testid="category-list">
       <button
@@ -108,10 +115,12 @@ export function CategoryList({
         <MessageSquare className="h-3.5 w-3.5 flex-shrink-0" />
         <span className="flex-1 text-left">Todos</span>
       </button>
+
       {categories.map((category) => {
         const Icon = getIconComponent(category.icon);
         const isSelected = selectedCategory === category.slug;
         const threadCount = category.thread_count ?? 0;
+
         return (
           <div
             key={category.id}
@@ -134,13 +143,14 @@ export function CategoryList({
               <span className="flex-1 text-left truncate">{category.name}</span>
               {threadCount > 0 && (
                 <Badge
-                  variant={isSelected ? 'secondary': 'outline'}
+                  variant={isSelected ? 'secondary' : 'outline'}
                   className="text-xs px-1.5 py-0"
                 >
                   {threadCount}
                 </Badge>
               )}
             </button>
+
             {isAdmin && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -149,7 +159,7 @@ export function CategoryList({
                     size="icon"
                     className={cn(
                       'absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity',
-                      isSelected ? 'text-white hover:bg-white/20': 'text-muted-foreground hover:bg-muted'
+                      isSelected ? 'text-white hover:bg-white/20' : 'text-muted-foreground hover:bg-muted'
                     )}
                     onClick={(e) => e.stopPropagation()}
                     data-testid={`category-menu-${category.slug}`}

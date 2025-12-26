@@ -2,6 +2,7 @@ import { Play, CheckCircle2, Circle, Clock, FileText, Bookmark, ChevronRight, He
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+
 interface LessonItemProps {
   lesson: {
     id: string;
@@ -16,6 +17,7 @@ interface LessonItemProps {
   isNextRecommended?: boolean;
   onGoToLesson: (lessonId: string) => void;
 }
+
 export function LessonItem({ 
   lesson, 
   isActive = false,
@@ -28,7 +30,9 @@ export function LessonItem({
     const secs = seconds % 60;
     return `${totalMins}:${secs.toString().padStart(2, '0')}`;
   };
+
   const duration = formatDuration(lesson.duration_sec);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -59,6 +63,7 @@ export function LessonItem({
           </div>
         )}
       </div>
+
       {/* Lesson Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
@@ -102,6 +107,7 @@ export function LessonItem({
           )}
         </div>
       </div>
+
       {/* Action - Go to lesson */}
       <div className="flex items-center gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
         <Button

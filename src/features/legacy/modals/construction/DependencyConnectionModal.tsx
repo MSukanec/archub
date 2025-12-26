@@ -5,6 +5,7 @@ import { ModalData } from "@/components/modal";
 import { Link, Trash2 } from "lucide-react";
 import { useDeleteConstructionDependency } from "@/hooks/use-construction-dependencies";
 import { toast } from "@/hooks/use-toast";
+
 // Función para limpiar nombres de tareas eliminando códigos y variables
 function cleanTaskName(name: string): string {
   if (!name) return 'Tarea sin nombre'
@@ -19,14 +20,16 @@ function cleanTaskName(name: string): string {
   cleanedName = cleanedName.replace(/\.\s*$/, '')
   
   // Limpiar espacios múltiples y trim
-  cleanedName = cleanedName.replace(/\s+/g, '').trim()
+  cleanedName = cleanedName.replace(/\s+/g, ' ').trim()
   
   return cleanedName || 'Tarea sin nombre'
 }
+
 interface DependencyConnectionModalProps {
   modalData: ModalData;
   onClose: () => void;
 }
+
 export function DependencyConnectionModal({ modalData, onClose }: DependencyConnectionModalProps) {
   const deleteDependency = useDeleteConstructionDependency();
   
@@ -38,6 +41,7 @@ export function DependencyConnectionModal({ modalData, onClose }: DependencyConn
   if (!dependency || !predecessorTask || !successorTask) {
     return null;
   }
+
   const handleDeleteConnection = async () => {
     try {
       await deleteDependency.mutateAsync(dependency.id);
@@ -55,6 +59,7 @@ export function DependencyConnectionModal({ modalData, onClose }: DependencyConn
       });
     }
   };
+
   const viewPanel = (
     <div className="space-y-4">
       <div className="text-sm text-muted-foreground">
@@ -95,19 +100,22 @@ export function DependencyConnectionModal({ modalData, onClose }: DependencyConn
             Días de Retraso
           </div>
           <div className="text-sm text-blue-700 dark:text-blue-300">
-            {dependency.lag_days} día{dependency.lag_days !== 1 ? 's': ''} adicional{dependency.lag_days !== 1 ? 'es': ''} de espera
+            {dependency.lag_days} día{dependency.lag_days !== 1 ? 's' : ''} adicional{dependency.lag_days !== 1 ? 'es' : ''} de espera
           </div>
         </div>
       )}
     </div>
   );
+
   const editPanel = viewPanel; // Mismo contenido para ambos paneles
+
   const headerContent = (
     <FormModalHeader 
       title="Conexión de Dependencia"
       icon={Link}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       cancelText="Cancelar"
@@ -119,6 +127,7 @@ export function DependencyConnectionModal({ modalData, onClose }: DependencyConn
       showLoadingSpinner={deleteDependency.isPending}
     />
   );
+
   return (
     <FormModalLayout
       columns={1}

@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { uploadCourseImageToCourseDetails, deleteCourseCoverImage } from '@/lib/storage/uploadCourseImageToCourseDetails';
 import { compressImage, formatCompressionStats } from '@/lib/imageCompression';
+
 interface CourseHeroImageUploadProps {
   courseId: string;
   currentImageUrl?: string | null;
   onImageUpdate?: (imageUrl: string | null) => void;
 }
+
 export default function CourseHeroImageUpload({
   courseId,
   currentImageUrl,
@@ -20,6 +22,7 @@ export default function CourseHeroImageUpload({
   const [dragActive, setDragActive] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
       setIsUploading(true);
@@ -45,6 +48,7 @@ export default function CourseHeroImageUpload({
       setIsUploading(false);
     }
   });
+
   const removeMutation = useMutation({
     mutationFn: async () => {
       // Get current image metadata from DB
@@ -78,6 +82,7 @@ export default function CourseHeroImageUpload({
       });
     }
   });
+
   const handleFileSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     
@@ -141,6 +146,7 @@ export default function CourseHeroImageUpload({
       uploadMutation.mutate(file);
     }
   };
+
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -150,20 +156,23 @@ export default function CourseHeroImageUpload({
       setDragActive(false);
     }
   };
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
     handleFileSelect(e.dataTransfer.files);
   };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleFileSelect(e.target.files);
   };
+
   return (
     <div className="w-full">
       <div 
         className={`relative w-full h-64 md:h-80 rounded-lg overflow-hidden transition-colors ${
-          dragActive ? 'bg-primary/10': 'bg-muted/30'
+          dragActive ? 'bg-primary/10' : 'bg-muted/30'
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -224,7 +233,7 @@ export default function CourseHeroImageUpload({
               </div>
               <Button disabled={isUploading} variant="default" data-testid="button-upload-course-image">
                 <Upload className="h-4 w-4 mr-2" />
-                {isUploading ? 'Subiendo...': 'Seleccionar Imagen'}
+                {isUploading ? 'Subiendo...' : 'Seleccionar Imagen'}
               </Button>
             </div>
           </div>
@@ -235,12 +244,13 @@ export default function CourseHeroImageUpload({
             <div className="bg-white dark:bg-gray-900 rounded-lg p-4 flex items-center gap-3">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
               <span className="text-sm font-medium">
-                {isCompressing ? 'Comprimiendo imagen...': 'Subiendo imagen...'}
+                {isCompressing ? 'Comprimiendo imagen...' : 'Subiendo imagen...'}
               </span>
             </div>
           </div>
         )}
       </div>
+
       <input
         id="course-hero-image-input"
         type="file"

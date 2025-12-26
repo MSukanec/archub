@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useParams, useLocation } from "wouter";
 import { Plus, FileText, FileSignature } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { SubcontractDashboardView } from './tabs/SubcontractDashboardView';
 import { SubcontractScopeView } from './tabs/SubcontractScopeView';
@@ -12,6 +13,7 @@ import { SubcontractHistoryView } from './tabs/SubcontractHistoryView';
 import { useSubcontract } from "@/features/subcontracts";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal';
+
 export default function SubcontractView() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
@@ -20,6 +22,7 @@ export default function SubcontractView() {
   
   const { data: userData } = useCurrentUser();
   const { data: subcontract, isLoading } = useSubcontract(id || '');
+
   // Obtener ofertas del subcontrato
   const { data: subcontractBids = [] } = useQuery({
     queryKey: ['subcontract-bids', id],
@@ -30,14 +33,17 @@ export default function SubcontractView() {
     },
     enabled: !!id
   });
+
   // Calcular datos derivados
   const winnerBid = useMemo(() => {
     if (!subcontract?.winner_bid_id) return null;
     return subcontractBids.find((bid: any) => bid.id === subcontract.winner_bid_id) || null;
   }, [subcontractBids, subcontract?.winner_bid_id]);
+
   // TODO: Implementar query para obtener proyecto
   const project = null; // Conectar con subcontract.project_id
   const provider = winnerBid?.contacts || null;
+
   const headerTabs = [
     {
       id: 'Resumen',
@@ -70,6 +76,7 @@ export default function SubcontractView() {
       isActive: activeTab === 'Historial'
     }
   ];
+
   const headerProps = {
     icon: FileSignature,
     title: subcontract?.title || "Subcontrato",
@@ -78,7 +85,7 @@ export default function SubcontractView() {
     isViewMode: true,
     tabs: headerTabs,
     onTabChange: setActiveTab,
-    actionButton: activeTab === 'Alcance'? {
+    actionButton: activeTab === 'Alcance' ? {
       label: "Agregar Tareas",
       icon: Plus,
       onClick: () => {
@@ -90,7 +97,7 @@ export default function SubcontractView() {
           }
         });
       }
-    } : activeTab === 'Ofertas'? {
+    } : activeTab === 'Ofertas' ? {
       label: "Nueva Oferta",
       icon: Plus,
       onClick: () => {
@@ -99,7 +106,7 @@ export default function SubcontractView() {
           isEditing: false
         });
       }
-    } : activeTab === 'Contratado'? {
+    } : activeTab === 'Contratado' ? {
       label: "Subir Contrato",
       icon: FileText,
       onClick: () => {
@@ -109,6 +116,7 @@ export default function SubcontractView() {
       disabled: true
     } : undefined
   };
+
   if (isLoading) {
     return (
       <Layout headerProps={headerProps} wide>
@@ -120,6 +128,7 @@ export default function SubcontractView() {
       </Layout>
     );
   }
+
   if (!subcontract) {
     return (
       <Layout headerProps={headerProps} wide>
@@ -132,6 +141,7 @@ export default function SubcontractView() {
       </Layout>
     );
   }
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'Resumen':
@@ -181,6 +191,7 @@ export default function SubcontractView() {
         return null;
     }
   };
+
   return (
     <Layout headerProps={headerProps} wide>
       {renderTabContent()}

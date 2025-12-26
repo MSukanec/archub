@@ -8,6 +8,7 @@ import { TaskSelectionTable, SelectedTask } from '@/components/shared/legacy/Tas
 import { useSubcontractTasks } from '../hooks';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectContext } from '@/stores/projectContext';
+
 interface SubcontractTaskFormModalProps {
   modalData?: {
     subcontractId?: string;
@@ -16,6 +17,7 @@ interface SubcontractTaskFormModalProps {
   };
   onClose: () => void;
 }
+
 export function SubcontractTaskFormModal({ modalData, onClose }: SubcontractTaskFormModalProps) {
   const { subcontractId, projectId, onSuccess } = modalData || {};
   const { setPanel } = useModalPanelStore();
@@ -26,13 +28,16 @@ export function SubcontractTaskFormModal({ modalData, onClose }: SubcontractTask
   
   const { subcontractTasks: existingSubcontractTasks = [], createMultipleSubcontractTasks } = useSubcontractTasks(subcontractId || '');
   const excludeTaskIds = existingSubcontractTasks.map((st: any) => st.task_id);
+
   useEffect(() => {
     setPanel('edit');
   }, [setPanel]);
+
   const handleSubmit = async () => {
     if (selectedTasks.length === 0 || !subcontractId || !userData?.user?.id) {
       return;
     }
+
     console.log('Adding tasks to subcontract:', subcontractId, selectedTasks);
     
     const tasksToAdd = selectedTasks.map(task => ({
@@ -44,6 +49,7 @@ export function SubcontractTaskFormModal({ modalData, onClose }: SubcontractTask
       unit: task.unit || '',
       notes: task.notes || ''
     }));
+
     try {
       await createMultipleSubcontractTasks.mutateAsync(tasksToAdd);
       onSuccess?.();
@@ -52,6 +58,7 @@ export function SubcontractTaskFormModal({ modalData, onClose }: SubcontractTask
       console.error('Error adding tasks:', error);
     }
   };
+
   const viewPanel = (
     <div className="space-y-6">
       <div className="text-center text-muted-foreground">
@@ -60,6 +67,7 @@ export function SubcontractTaskFormModal({ modalData, onClose }: SubcontractTask
       </div>
     </div>
   );
+
   const editPanel = (
     <div className="space-y-6">
       <TaskSelectionTable
@@ -69,6 +77,7 @@ export function SubcontractTaskFormModal({ modalData, onClose }: SubcontractTask
       />
     </div>
   );
+
   const headerContent = (
     <FormModalHeader 
       title="Agregar Tareas al Subcontrato"
@@ -76,16 +85,18 @@ export function SubcontractTaskFormModal({ modalData, onClose }: SubcontractTask
       icon={Plus}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel={`Agregar ${selectedTasks.length > 0 ? selectedTasks.length : ''} Tarea${selectedTasks.length !== 1 ? 's': ''}`}
+      rightLabel={`Agregar ${selectedTasks.length > 0 ? selectedTasks.length : ''} Tarea${selectedTasks.length !== 1 ? 's' : ''}`}
       onRightClick={handleSubmit}
       submitDisabled={selectedTasks.length === 0 || createMultipleSubcontractTasks.isPending}
       showLoadingSpinner={createMultipleSubcontractTasks.isPending}
     />
   );
+
   return (
     <FormModalLayout
       columns={1}

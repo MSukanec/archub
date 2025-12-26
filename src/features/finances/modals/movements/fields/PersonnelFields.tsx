@@ -3,17 +3,20 @@ import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { Users } from 'lucide-react'
 import { useProjectPersonnel, type ProjectPersonnel } from '@/features/personnel'
 import { useCurrentUser } from '@/hooks/use-current-user'
+
 // Personnel item interface
 export interface PersonnelItem {
   personnel_id: string
   contact_name: string
 }
+
 // Props interface
 interface PersonnelFieldsProps {
   selectedPersonnel: PersonnelItem[]
   onPersonnelChange: (personnelList: PersonnelItem[]) => void
   projectId?: string
 }
+
 export const PersonnelFields: React.FC<PersonnelFieldsProps> = ({
   selectedPersonnel,
   onPersonnelChange,
@@ -26,8 +29,10 @@ export const PersonnelFields: React.FC<PersonnelFieldsProps> = ({
   
   // Get current user data to access project info
   const { data: userData } = useCurrentUser()
+
   // Get project personnel
   const { data: projectPersonnel = [], isLoading } = useProjectPersonnel(projectId)
+
   // Transform personnel data for ComboBox  
   const personnelOptions = projectPersonnel.map((person: any) => {
     // Handle both array and object contact structures
@@ -37,6 +42,7 @@ export const PersonnelFields: React.FC<PersonnelFieldsProps> = ({
       label: `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || 'Sin nombre'
     }
   })
+
   const handlePersonnelChange = (value: string) => {
     setPersonnelId(value)
     
@@ -48,6 +54,7 @@ export const PersonnelFields: React.FC<PersonnelFieldsProps> = ({
       const contact = Array.isArray(selectedPerson.contact) ? selectedPerson.contact[0] : selectedPerson.contact
       contactName = `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || 'Sin nombre'
     }
+
     if (value) {
       onPersonnelChange([{
         personnel_id: value,
@@ -57,6 +64,7 @@ export const PersonnelFields: React.FC<PersonnelFieldsProps> = ({
       onPersonnelChange([])
     }
   }
+
   // Sync external changes with internal state
   useEffect(() => {
     const expectedPersonnelId = selectedPersonnel.length > 0 ? selectedPersonnel[0].personnel_id : ''
@@ -65,6 +73,7 @@ export const PersonnelFields: React.FC<PersonnelFieldsProps> = ({
       setPersonnelId(expectedPersonnelId)
     }
   }, [selectedPersonnel, personnelId])
+
   return (
     <div className="space-y-4">
       {/* Header */}

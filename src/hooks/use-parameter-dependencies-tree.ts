@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+
 export interface ParameterDependencyNode {
   id: string
   parameterId: string
@@ -8,6 +9,7 @@ export interface ParameterDependencyNode {
   level: number
   children: ParameterDependencyChild[]
 }
+
 export interface ParameterDependencyChild {
   dependencyId: string
   parentOptionId: string
@@ -24,6 +26,7 @@ export interface ParameterDependencyChild {
     label: string
   }>
 }
+
 // Hook para obtener todas las dependencias de parámetros en estructura de árbol
 export function useParameterDependenciesTree() {
   return useQuery({
@@ -118,6 +121,7 @@ export function useParameterDependenciesTree() {
     }
   })
 }
+
 // Hook para obtener parámetros que no tienen dependencias padre (raíz)
 export function useRootParameters() {
   return useQuery({

@@ -17,6 +17,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createTestimonial, updateTestimonial } from '../../services';
 import { uploadFile } from '@/lib/storage';
 import type { Testimonial } from '@shared/schema';
+
 const testimonialSchema = z.object({
   author_name: z.string().min(1, 'El nombre es requerido'),
   author_title: z.string().optional(),
@@ -27,19 +28,23 @@ const testimonialSchema = z.object({
   is_active: z.boolean().default(true),
   sort_index: z.number().int().min(0).default(0),
 });
+
 type TestimonialFormData = z.infer<typeof testimonialSchema>;
+
 interface TestimonialFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   courseId: string;
   testimonial?: Testimonial | null;
 }
+
 export function TestimonialFormModal({ isOpen, onClose, courseId, testimonial }: TestimonialFormModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [hoveredRating, setHoveredRating] = useState(0);
+
   const form = useForm<TestimonialFormData>({
     resolver: zodResolver(testimonialSchema),
     defaultValues: {
@@ -53,6 +58,7 @@ export function TestimonialFormModal({ isOpen, onClose, courseId, testimonial }:
       sort_index: 0,
     }
   });
+
   useEffect(() => {
     if (testimonial) {
       form.reset({
@@ -78,13 +84,16 @@ export function TestimonialFormModal({ isOpen, onClose, courseId, testimonial }:
       });
     }
   }, [testimonial, form]);
+
   const handleClose = () => {
     form.reset();
     onClose();
   };
+
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     setIsUploadingAvatar(true);
     try {
       const result = await uploadFile(file, {
@@ -92,6 +101,7 @@ export function TestimonialFormModal({ isOpen, onClose, courseId, testimonial }:
         category: 'testimonial_avatar',
         description: `Avatar for testimonial`,
       });
+
       if (result.file_url) {
         form.setValue('author_avatar_url', result.file_url);
         toast({
@@ -110,6 +120,7 @@ export function TestimonialFormModal({ isOpen, onClose, courseId, testimonial }:
       setIsUploadingAvatar(false);
     }
   };
+
   const createMutation = useMutation({
     mutationFn: (data: TestimonialFormData) => createTestimonial({
       courseId,
@@ -140,6 +151,7 @@ export function TestimonialFormModal({ isOpen, onClose, courseId, testimonial }:
       });
     }
   });
+
   const updateMutation = useMutation({
     mutationFn: (data: TestimonialFormData) => updateTestimonial(testimonial!.id, {
       authorName: data.author_name,
@@ -169,6 +181,7 @@ export function TestimonialFormModal({ isOpen, onClose, courseId, testimonial }:
       });
     }
   });
+
   const onSubmit = async (data: TestimonialFormData) => {
     setIsLoading(true);
     try {
@@ -181,15 +194,18 @@ export function TestimonialFormModal({ isOpen, onClose, courseId, testimonial }:
       setIsLoading(false);
     }
   };
+
   const avatarUrl = form.watch('author_avatar_url');
   const authorName = form.watch('author_name');
   const currentRating = form.watch('rating') || 0;
+
   const initials = authorName
-    ?.split('')
+    ?.split(' ')
     .map(n => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2) || 'NN';
+
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 space-y-5">
@@ -255,6 +271,7 @@ export function TestimonialFormModal({ isOpen, onClose, courseId, testimonial }:
             />
           </div>
         </div>
+
         {avatarUrl && (
           <FormField
             control={form.control}
@@ -283,6 +300,7 @@ export function TestimonialFormModal({ isOpen, onClose, courseId, testimonial }:
             )}
           />
         )}
+
         <FormField
           control={form.control}
           name="content"
@@ -301,6 +319,7 @@ export function TestimonialFormModal({ isOpen, onClose, courseId, testimonial }:
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="rating"
@@ -343,6 +362,7 @@ export function TestimonialFormModal({ isOpen, onClose, courseId, testimonial }:
             </FormItem>
           )}
         />
+
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -364,6 +384,7 @@ export function TestimonialFormModal({ isOpen, onClose, courseId, testimonial }:
             )}
           />
         </div>
+
         <div className="flex gap-6 pt-2">
           <FormField
             control={form.control}
@@ -381,6 +402,7 @@ export function TestimonialFormModal({ isOpen, onClose, courseId, testimonial }:
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="is_featured"
@@ -401,25 +423,29 @@ export function TestimonialFormModal({ isOpen, onClose, courseId, testimonial }:
       </form>
     </Form>
   );
+
   const headerContent = (
     <FormModalHeader 
-      title={testimonial ? 'Editar testimonio': 'Nuevo testimonio'}
+      title={testimonial ? 'Editar testimonio' : 'Nuevo testimonio'}
       description={testimonial 
-        ? 'Actualiza el testimonio del estudiante'
+        ? 'Actualiza el testimonio del estudiante' 
         : 'Agrega un testimonio de un estudiante para mostrar en la landing page'}
       icon={MessageSquareQuote}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={testimonial ? 'Actualizar': 'Crear'}
+      rightLabel={testimonial ? 'Actualizar' : 'Crear'}
       onRightClick={form.handleSubmit(onSubmit)}
       isSubmitting={isLoading}
     />
   );
+
   if (!isOpen) return null;
+
   return (
     <FormModalLayout
       columns={1}

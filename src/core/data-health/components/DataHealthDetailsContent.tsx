@@ -2,22 +2,27 @@ import type { DataIssue } from '../types';
 import { getRuleIcon } from '../rules/micro';
 import { Badge } from '@/components/ui/badge';
 import type { BadgeVariant } from '@/components/ui/badge';
+
 interface DataHealthDetailsContentProps {
   issue: DataIssue;
 }
+
 const severityLabels: Record<string, string> = {
   critical: 'Crítico',
   warning: 'Advertencia',
   info: 'Información',
 };
+
 const severityVariants: Record<string, BadgeVariant> = {
   critical: 'error',
   warning: 'warning',
   info: 'info',
 };
+
 export function DataHealthDetailsContent({ issue }: DataHealthDetailsContentProps) {
   const Icon = getRuleIcon(issue.ruleId);
   const variant = severityVariants[issue.severity] || 'neutral';
+
   return (
     <div className="w-full space-y-6">
       <div className="flex items-start gap-3">
@@ -25,8 +30,8 @@ export function DataHealthDetailsContent({ issue }: DataHealthDetailsContentProp
           <div 
             className="p-2 rounded-lg flex-shrink-0"
             style={{
-              backgroundColor: `color-mix(in srgb, var(--${issue.severity === 'critical'? 'error': issue.severity}) 10%, transparent)`,
-              color: `var(--${issue.severity === 'critical'? 'error': issue.severity})`,
+              backgroundColor: `color-mix(in srgb, var(--${issue.severity === 'critical' ? 'error' : issue.severity}) 10%, transparent)`,
+              color: `var(--${issue.severity === 'critical' ? 'error' : issue.severity})`,
             }}
           >
             <Icon className="h-5 w-5" />
@@ -39,11 +44,12 @@ export function DataHealthDetailsContent({ issue }: DataHealthDetailsContentProp
               {severityLabels[issue.severity]}
             </Badge>
             <Badge variant="neutral">
-              {issue.affectedCount} afectado{issue.affectedCount !== 1 ? 's': ''}
+              {issue.affectedCount} afectado{issue.affectedCount !== 1 ? 's' : ''}
             </Badge>
           </div>
         </div>
       </div>
+
       <div className="space-y-4">
         <div 
           className="text-sm leading-relaxed text-foreground bg-muted/50 p-4 rounded-lg [&_strong]:font-semibold [&_strong]:text-foreground"
@@ -53,6 +59,7 @@ export function DataHealthDetailsContent({ issue }: DataHealthDetailsContentProp
               .replace(/\n/g, '<br/>')
           }}
         />
+
         {issue.recommendedAction && (
           <div className="border-t pt-4">
             <div className="bg-accent/10 border border-accent/20 p-4 rounded-lg">

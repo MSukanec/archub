@@ -4,11 +4,13 @@
  * Este archivo contiene utilidades para prevenir acciones peligrosas en la base de datos
  * que puedan causar pérdida de datos o modificaciones no deseadas.
  */
+
 export interface SafetyCheckResult {
   isValid: boolean;
   error?: string;
   details?: Record<string, any>;
 }
+
 /**
  * Verifica que los datos del usuario sean válidos antes de cualquier operación de base de datos
  */
@@ -21,12 +23,14 @@ export function validateUserDataForDatabaseOperation(userData: any): SafetyCheck
     console.error('🚨', error);
     return { isValid: false, error };
   }
+
   // Check 2: User has valid ID
   if (!userData.user?.id) {
     const error = 'SAFETY VIOLATION: No user ID available for database operation';
     console.error('🚨', error, { userData });
     return { isValid: false, error, details: { hasUser: !!userData.user } };
   }
+
   // Check 3: Preferences exist (for preference-related operations)
   if (!userData.preferences) {
     const error = 'SAFETY WARNING: User preferences are null - may need recovery';
@@ -41,6 +45,7 @@ export function validateUserDataForDatabaseOperation(userData: any): SafetyCheck
       }
     };
   }
+
   // Check 4: Preferences have valid ID
   if (!userData.preferences.id) {
     const error = 'SAFETY VIOLATION: User preferences exist but have no ID';
@@ -55,6 +60,7 @@ export function validateUserDataForDatabaseOperation(userData: any): SafetyCheck
       }
     };
   }
+
   console.log('✅ Database safety check passed for user:', userData.user.id);
   return { 
     isValid: true, 
@@ -65,6 +71,7 @@ export function validateUserDataForDatabaseOperation(userData: any): SafetyCheck
     }
   };
 }
+
 /**
  * Wrapper seguro para operaciones de actualización en user_preferences
  */
@@ -79,15 +86,17 @@ export function createSafePreferencesUpdate() {
       if (!safetyCheck.isValid) {
         throw new Error(`Database operation blocked: ${safetyCheck.error}`);
       }
+
       return {
         preferencesId: userData.preferences.id,
         userId: userData.user.id,
         // Retorna un objeto que debe usarse con .eq('id', preferencesId).eq('user_id', userId)
-        whereClause: `id = '${userData.preferences.id}'AND user_id = '${userData.user.id}'`
+        whereClause: `id = '${userData.preferences.id}' AND user_id = '${userData.user.id}'`
       };
     }
   };
 }
+
 /**
  * Log de operaciones peligrosas para auditoría
  */
@@ -114,6 +123,7 @@ export function logDatabaseOperation(operation: string, table: string, userId?: 
     localStorage.setItem('database_operations_log', JSON.stringify(existingLogs));
   }
 }
+
 /**
  * Constantes de seguridad
  */

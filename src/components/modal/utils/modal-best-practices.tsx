@@ -14,11 +14,13 @@
  * 
  * TODO: Migrar este contenido a /docs/modals/ como Markdown
  */
+
 import { useModalReadiness, buildScopedQueryKey, QUERY_KEY_PATTERNS } from './modal-readiness';
 import { ModalErrorBoundary } from './ModalErrorBoundary';
 import { ModalLayout as FormModalLayout } from '../foundation/ModalLayout';
 import { ModalHeader as FormModalHeader } from '../foundation/ModalHeader';
 import { ModalFooter as FormModalFooter } from '../foundation/ModalFooter';
+
 // =====================================================
 // 📋 TABLA DE CONTENIDOS
 // =====================================================
@@ -34,9 +36,11 @@ import { ModalFooter as FormModalFooter } from '../foundation/ModalFooter';
 9. 🧪  TESTING PATTERNS - Cómo testear modales
 10. 📊 EXAMPLES - Ejemplos completos y casos de uso
 */
+
 // =====================================================
 // 1. 🛡️ READINESS PATTERNS
 // =====================================================
+
 /**
  * PATRÓN ESTÁNDAR: Readiness Guards
  * 
@@ -46,11 +50,13 @@ import { ModalFooter as FormModalFooter } from '../foundation/ModalFooter';
  * - Los inputs estén deshabilitados durante carga
  * - Los errores se muestren elegantemente
  */
+
 // ✅ EJEMPLO CORRECTO: Modal con Readiness Pattern
 export const ExampleModalWithReadiness = () => {
   const { data: userData } = useCurrentUser();
   const { data: projectData } = useProject(projectId);
   const { data: contactTypes } = useContactTypes();
+
   // 🔥 IMPLEMENTAR READINESS GUARD
   const readiness = useModalReadiness({
     criticalQueries: [
@@ -71,6 +77,7 @@ export const ExampleModalWithReadiness = () => {
       console.error('Modal readiness error:', error);
     },
   });
+
   // 🔥 USAR LOADING GATE EN LUGAR DE RENDERIZADO CONDICIONAL
   return (
     <FormModalLayout
@@ -95,26 +102,32 @@ export const ExampleModalWithReadiness = () => {
     </FormModalLayout>
   );
 };
+
 // ❌ EJEMPLO INCORRECTO: Sin readiness pattern
 export const BadModalExample = () => {
   const { data: userData, isLoading: userLoading } = useCurrentUser();
   const { data: projectData, isLoading: projectLoading } = useProject(projectId);
+
   // ❌ MAL: Lógica de loading dispersa
   if (userLoading || projectLoading) {
     return <div>Loading...</div>;
   }
+
   // ❌ MAL: No verifica errores ni IDs requeridos
   return <div>Contenido</div>;
 };
+
 // =====================================================
 // 2. 🗝️ QUERY KEY PATTERNS
 // =====================================================
+
 /**
  * PATRONES DE QUERY KEYS - Guía definitiva
  * 
  * 🎯 REGLA: Todos los hooks que dependen de contexto deben incluir
  * el scope apropiado en su queryKey para cache invalidation correcto
  */
+
 // ✅ QUERIES QUE NECESITAN ORGANIZATION SCOPE
 export const ORGANIZATION_SCOPED_QUERIES = {
   // Contacts y recursos organizacionales
@@ -132,6 +145,7 @@ export const ORGANIZATION_SCOPED_QUERIES = {
   // Proyectos de la organización
   projects: (orgId: string) => buildScopedQueryKey('projects', 'organization', orgId),
 };
+
 // ✅ QUERIES QUE NECESITAN PROJECT SCOPE
 export const PROJECT_SCOPED_QUERIES = {
   // Construcción y tareas
@@ -148,6 +162,7 @@ export const PROJECT_SCOPED_QUERIES = {
   documents: (projectId: string) => buildScopedQueryKey('documents', 'project', projectId),
   gallery: (projectId: string) => buildScopedQueryKey('gallery', 'project', projectId),
 };
+
 // ✅ QUERIES GLOBALES (no necesitan scope)
 export const GLOBAL_QUERIES = {
   currentUser: () => buildScopedQueryKey('current-user', 'global'),
@@ -155,6 +170,7 @@ export const GLOBAL_QUERIES = {
   currencies: () => buildScopedQueryKey('currencies', 'global'),
   countries: () => buildScopedQueryKey('countries', 'global'),
 };
+
 // 🔥 EJEMPLO DE USO CORRECTO
 export const useContactsWithCorrectQueryKey = (organizationId?: string) => {
   return useQuery({
@@ -163,16 +179,20 @@ export const useContactsWithCorrectQueryKey = (organizationId?: string) => {
     enabled: !!organizationId,
   });
 };
+
 // =====================================================
 // 3. 🏗️ STANDARD LAYOUTS
 // =====================================================
+
 /**
  * PATRONES ESTÁNDAR para Header/Footer
  */
+
 // ✅ PATRÓN: Modal de Formulario Estándar
 export const StandardFormModalPattern = () => {
   const readiness = useModalReadiness(/* ... */);
   const form = useForm(/* ... */);
+
   return (
     <FormModalLayout
       readinessState={readiness}
@@ -236,10 +256,12 @@ export const StandardFormModalPattern = () => {
     </FormModalLayout>
   );
 };
+
 // ✅ PATRÓN: Modal de Vista/Edición
 export const ViewEditModalPattern = () => {
   const [isEditing, setIsEditing] = useState(false);
   const readiness = useModalReadiness(/* ... */);
+
   return (
     <FormModalLayout
       isEditing={isEditing}
@@ -250,7 +272,7 @@ export const ViewEditModalPattern = () => {
       
       headerContent={
         <FormModalHeader
-          title={isEditing ? 'Editar Contacto': 'Ver Contacto'}
+          title={isEditing ? 'Editar Contacto' : 'Ver Contacto'}
           icon={User}
           readinessState={readiness}
           isEditing={isEditing}
@@ -276,15 +298,19 @@ export const ViewEditModalPattern = () => {
     />
   );
 };
+
 // =====================================================
 // 4. ⌨️ KEYBOARD & ACCESSIBILITY
 // =====================================================
+
 /**
  * MEJORES PRÁCTICAS DE ACCESSIBILITY
  */
+
 // ✅ PATRÓN: Modal Completamente Accesible
 export const AccessibleModalPattern = () => {
   const readiness = useModalReadiness(/* ... */);
+
   return (
     <FormModalLayout
       readinessState={readiness}
@@ -333,6 +359,7 @@ export const AccessibleModalPattern = () => {
     />
   );
 };
+
 // 🔥 SHORTCUTS ESTÁNDAR RECOMENDADOS
 export const STANDARD_KEYBOARD_SHORTCUTS = {
   // Navegación
@@ -352,16 +379,20 @@ export const STANDARD_KEYBOARD_SHORTCUTS = {
   'Ctrl+ArrowLeft': 'Paso anterior',
   'Ctrl+ArrowRight': 'Paso siguiente',
 };
+
 // =====================================================
 // 5. 🔄 LOADING STATES
 // =====================================================
+
 /**
  * MANEJO CONSISTENTE DE LOADING STATES
  */
+
 // ✅ PATRÓN: Loading States Jerárquicos
 export const LoadingStatesPattern = () => {
   const readiness = useModalReadiness(/* ... */);
   const inputStates = useModalInputStates(readiness, mutation.isPending);
+
   return (
     <FormModalLayout readinessState={readiness}>
       <readiness.LoadingGate>
@@ -381,6 +412,7 @@ export const LoadingStatesPattern = () => {
     </FormModalLayout>
   );
 };
+
 // 🔥 TIPOS DE LOADING A MANEJAR
 export const LOADING_STATE_TYPES = {
   // 1. Modal readiness loading (datos iniciales)
@@ -398,12 +430,15 @@ export const LOADING_STATE_TYPES = {
   // 5. Validation loading (validaciones async)
   VALIDATION: 'Validando...',
 };
+
 // =====================================================
 // 6. ❌ ERROR HANDLING
 // =====================================================
+
 /**
  * ERROR BOUNDARIES Y RECOVERY
  */
+
 // ✅ PATRÓN: Error Handling Completo
 export const ErrorHandlingPattern = () => {
   const readiness = useModalReadiness({
@@ -416,6 +451,7 @@ export const ErrorHandlingPattern = () => {
       // Sentry.captureException(error);
     },
   });
+
   return (
     <ModalErrorBoundary
       onClose={onClose}
@@ -431,6 +467,7 @@ export const ErrorHandlingPattern = () => {
     </ModalErrorBoundary>
   );
 };
+
 // 🔥 TIPOS DE ERRORES A MANEJAR
 export const ERROR_TYPES = {
   // 1. Errores de carga inicial
@@ -448,18 +485,22 @@ export const ERROR_TYPES = {
   // 5. Errores de renderizado (capturados por boundary)
   RENDER_ERROR: 'Error interno del modal',
 };
+
 // =====================================================
 // 7. 📝 FORM PATTERNS
 // =====================================================
+
 /**
  * PATRONES PARA FORMULARIOS
  */
+
 // ✅ PATRÓN: Formulario con Validación Robusta
 export const RobustFormPattern = () => {
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {},
   });
+
   const readiness = useModalReadiness(/* ... */);
   
   const mutation = useMutation({
@@ -480,6 +521,7 @@ export const RobustFormPattern = () => {
       });
     },
   });
+
   return (
     <FormModalLayout
       readinessState={readiness}
@@ -512,17 +554,21 @@ export const RobustFormPattern = () => {
     </FormModalLayout>
   );
 };
+
 // =====================================================
 // 8. 🎛️ ADVANCED FEATURES
 // =====================================================
+
 /**
  * FUNCIONALIDADES AVANZADAS
  */
+
 // ✅ PATRÓN: Modal Multi-Step
 export const MultiStepModalPattern = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 3;
   const readiness = useModalReadiness(/* ... */);
+
   return (
     <FormModalLayout
       readinessState={readiness}
@@ -544,7 +590,7 @@ export const MultiStepModalPattern = () => {
       
       footerContent={
         <FormModalFooter
-          leftLabel={currentStep > 1 ? 'Anterior': 'Cancelar'}
+          leftLabel={currentStep > 1 ? 'Anterior' : 'Cancelar'}
           onLeftClick={() => {
             if (currentStep > 1) {
               setCurrentStep(currentStep - 1);
@@ -553,7 +599,7 @@ export const MultiStepModalPattern = () => {
             }
           }}
           
-          rightLabel={currentStep === totalSteps ? 'Finalizar': 'Siguiente'}
+          rightLabel={currentStep === totalSteps ? 'Finalizar' : 'Siguiente'}
           onRightClick={() => {
             if (currentStep === totalSteps) {
               handleSubmit();
@@ -572,12 +618,15 @@ export const MultiStepModalPattern = () => {
     </FormModalLayout>
   );
 };
+
 // =====================================================
 // 9. 🧪 TESTING PATTERNS
 // =====================================================
+
 /**
  * CÓMO TESTEAR MODALES
  */
+
 // ✅ PATRÓN: Testing Comprehensivo
 export const TESTING_GUIDELINES = {
   // 1. Test de readiness states
@@ -585,12 +634,14 @@ export const TESTING_GUIDELINES = {
     render(<ExampleModal />);
     expect(screen.getByText('Cargando...')).toBeInTheDocument();
   },
+
   // 2. Test de keyboard shortcuts
   'should submit form when pressing Ctrl+S': async () => {
     render(<ExampleModal />);
     await userEvent.keyboard('{Control>}s{/Control}');
     expect(mockSubmit).toHaveBeenCalled();
   },
+
   // 3. Test de error boundaries
   'should show error boundary when component crashes': async () => {
     const ThrowError = () => { throw new Error('Test error'); };
@@ -601,6 +652,7 @@ export const TESTING_GUIDELINES = {
     );
     expect(screen.getByText('Error en el Modal')).toBeInTheDocument();
   },
+
   // 4. Test de accessibility
   'should have proper ARIA attributes': async () => {
     render(<ExampleModal />);
@@ -609,9 +661,11 @@ export const TESTING_GUIDELINES = {
     expect(modal).toHaveAttribute('aria-labelledby');
   },
 };
+
 // =====================================================
 // 10. 📊 EXAMPLES
 // =====================================================
+
 /**
  * EJEMPLO COMPLETO: Modal de Contacto Perfecto
  */
@@ -633,20 +687,23 @@ export const PerfectContactModal = ({ contactId, onClose }) => {
       ...(contactId && { contactId }),
     },
   });
+
   const form = useForm({
     resolver: zodResolver(contactSchema),
     defaultValues: contact || {},
   });
+
   const mutation = useMutation({
     mutationFn: contactId ? updateContact : createContact,
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ORGANIZATION_SCOPED_QUERIES.contacts(userData.organization.id)
       });
-      toast({ title: 'Contacto guardado exitosamente'});
+      toast({ title: 'Contacto guardado exitosamente' });
       onClose();
     },
   });
+
   return (
     <ModalErrorBoundary onClose={onClose}>
       <FormModalLayout
@@ -654,7 +711,7 @@ export const PerfectContactModal = ({ contactId, onClose }) => {
         wide={true}
         
         modalId="contact-form-modal"
-        ariaLabel={contactId ? 'Editar contacto': 'Nuevo contacto'}
+        ariaLabel={contactId ? 'Editar contacto' : 'Nuevo contacto'}
         
         autoFocusFirstInput={true}
         hasUnsavedChanges={form.formState.isDirty}
@@ -664,7 +721,7 @@ export const PerfectContactModal = ({ contactId, onClose }) => {
         
         headerContent={
           <FormModalHeader
-            title={contactId ? 'Editar Contacto': 'Nuevo Contacto'}
+            title={contactId ? 'Editar Contacto' : 'Nuevo Contacto'}
             description="Gestiona la información de contacto"
             icon={UserPlus}
             readinessState={readiness}
@@ -683,7 +740,7 @@ export const PerfectContactModal = ({ contactId, onClose }) => {
         footerContent={
           <FormModalFooter
             cancelText="Cancelar"
-            submitText={contactId ? 'Actualizar': 'Crear'}
+            submitText={contactId ? 'Actualizar' : 'Crear'}
             
             readinessState={readiness}
             formState={form.formState}
@@ -693,7 +750,7 @@ export const PerfectContactModal = ({ contactId, onClose }) => {
             onLeftClick={onClose}
             
             showValidationErrors={true}
-            loadingText={contactId ? 'Actualizando...': 'Creando...'}
+            loadingText={contactId ? 'Actualizando...' : 'Creando...'}
           />
         }
       >
@@ -707,9 +764,11 @@ export const PerfectContactModal = ({ contactId, onClose }) => {
     </ModalErrorBoundary>
   );
 };
+
 // =====================================================
 // 🎉 CHECKLIST FINAL
 // =====================================================
+
 /**
  * ✅ CHECKLIST: Modal Perfecto
  * 
@@ -733,9 +792,11 @@ export const PerfectContactModal = ({ contactId, onClose }) => {
  * 
  * 🎯 Si tu modal cumple todos estos puntos, ¡está perfecto!
  */
+
 // =====================================================
 // 📚 EXPORTS PARA USO EN MODALES
 // =====================================================
+
 export {
   // Readiness patterns
   useModalReadiness,
@@ -760,6 +821,7 @@ export {
   LOADING_STATE_TYPES,
   ERROR_TYPES,
 };
+
 /**
  * 🎯 MISIÓN COMPLETADA
  * 

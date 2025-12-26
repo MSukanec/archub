@@ -9,6 +9,7 @@ import AdminOpsAlertsTab from './AdminOpsAlertsTab';
 import AdminOpsHistoryTab from './AdminOpsHistoryTab';
 import AdminOpsRunbooksTab from './AdminOpsRunbooksTab';
 import AdminOpsFlagsTab from './AdminOpsFlagsTab';
+
 interface OpsStats {
   open: number;
   ack: number;
@@ -23,14 +24,17 @@ interface OpsStats {
     stats: Record<string, any>;
   } | null;
 }
+
 export default function AdminOps() {
   const [activeTab, setActiveTab] = useState('alertas');
   const { toast } = useToast();
   const isAdmin = useIsAdmin();
+
   const { data: stats } = useQuery<OpsStats>({
     queryKey: ['/api/admin/ops/stats'],
     enabled: isAdmin,
   });
+
   const runChecksMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest('POST', '/api/admin/ops/run-checks');
@@ -43,10 +47,12 @@ export default function AdminOps() {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/ops/check-runs'] });
     },
     onError: (error: any) => {
-      toast({ title: 'Error', description: error.message, variant: 'destructive'});
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     },
   });
+
   const totalOpen = (stats?.open || 0) + (stats?.ack || 0);
+
   const tabs = [
     { 
       id: 'alertas', 
@@ -70,8 +76,9 @@ export default function AdminOps() {
       isActive: activeTab === 'flags'
     }
   ];
+
   const getActionButton = () => {
-    if (activeTab === 'alertas'&& isAdmin) {
+    if (activeTab === 'alertas' && isAdmin) {
       return {
         label: runChecksMutation.isPending ? "Ejecutando..." : "Ejecutar Checks",
         icon: runChecksMutation.isPending ? RefreshCw : Play,
@@ -81,6 +88,7 @@ export default function AdminOps() {
     }
     return undefined;
   };
+
   const headerProps = {
     title: "Ops Center",
     icon: Activity,
@@ -90,6 +98,7 @@ export default function AdminOps() {
     onTabChange: setActiveTab,
     actionButton: getActionButton()
   };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'alertas':
@@ -104,6 +113,7 @@ export default function AdminOps() {
         return <AdminOpsAlertsTab stats={stats} />;
     }
   };
+
   return (
     <Layout wide headerProps={headerProps}>
       {renderTabContent()}

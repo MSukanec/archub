@@ -1,6 +1,8 @@
 import { create } from 'zustand';
-type PanelType = 'view'| 'edit'| 'subform';
-type SubformType = 'personal'| 'events'| 'files'| 'attachments'| null;
+
+type PanelType = 'view' | 'edit' | 'subform';
+type SubformType = 'personal' | 'events' | 'files' | 'attachments' | null;
+
 interface ModalPanelState {
   currentPanel: PanelType;
   currentSubform: SubformType;
@@ -8,6 +10,7 @@ interface ModalPanelState {
   setCurrentSubform: (subform: SubformType) => void;
   resetToView: () => void;
 }
+
 /**
  * @deprecated This store is deprecated and will be removed in a future version.
  * Modals should manage their own panel state using useState internally.
@@ -19,7 +22,7 @@ interface ModalPanelState {
  * 
  * Example:
  * ```tsx
- * const [currentPanel, setPanel] = useState<'view'| 'edit'| 'subform'>('view');
+ * const [currentPanel, setPanel] = useState<'view' | 'edit' | 'subform'>('view');
  * ```
  */
 export const useModalPanelStore = create<ModalPanelState>((set) => ({

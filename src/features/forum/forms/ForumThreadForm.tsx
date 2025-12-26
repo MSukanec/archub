@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { MessagesSquare } from 'lucide-react';
+
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -14,12 +15,15 @@ import { useToast } from '@/hooks/use-toast';
 import { uploadFile } from '@/lib/storage';
 import { useAuthStore } from '@/stores/authStore';
 import { useProjectContext } from '@/stores/projectContext';
+
 const threadSchema = z.object({
   title: z.string().min(1, 'El título es requerido').max(200, 'Máximo 200 caracteres'),
   category_id: z.string().min(1, 'Selecciona una categoría'),
   content: z.string().optional(),
 });
+
 type ThreadFormData = z.infer<typeof threadSchema>;
+
 interface FileToUpload {
   file: File;
   title: string;
@@ -27,20 +31,23 @@ interface FileToUpload {
   category: string;
   uploadProgress: number;
 }
+
 interface ForumThreadFormProps {
   modalData?: {
     categoryId?: string;
     categorySlug?: string;
     thread?: ForumThreadWithAuthor;
-    mode?: 'create'| 'edit';
+    mode?: 'create' | 'edit';
   };
   onClose: () => void;
 }
+
 function parseContentText(content: { text?: string } | null | undefined): string {
   if (!content) return '';
   if (typeof content === 'string') return content;
   return content.text || '';
 }
+
 export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormProps) {
   const { toast } = useToast();
   const { user } = useAuthStore();
@@ -48,11 +55,14 @@ export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormP
   const { data: categories, isLoading: categoriesLoading } = useForumCategories();
   const createMutation = useCreateThread();
   const updateMutation = useUpdateThread();
+
   const [filesToUpload, setFilesToUpload] = useState<FileToUpload[]>([]);
   const [isUploadingFiles, setIsUploadingFiles] = useState(false);
+
   const thread = modalData?.thread;
-  const mode = modalData?.mode || (thread ? 'edit': 'create');
+  const mode = modalData?.mode || (thread ? 'edit' : 'create');
   const preselectedCategoryId = modalData?.categoryId || thread?.category_id;
+
   const form = useForm<ThreadFormData>({
     resolver: zodResolver(threadSchema),
     defaultValues: {
@@ -61,6 +71,7 @@ export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormP
       content: parseContentText(thread?.content),
     },
   });
+
   const uploadAttachments = async (threadId: string) => {
     if (filesToUpload.length === 0) return;
     
@@ -100,9 +111,10 @@ export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormP
       setIsUploadingFiles(false);
     }
   };
+
   const onSubmit = async (data: ThreadFormData) => {
     try {
-      if (mode === 'edit'&& thread) {
+      if (mode === 'edit' && thread) {
         await updateMutation.mutateAsync({
           threadId: thread.id,
           data: {
@@ -139,20 +151,23 @@ export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormP
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || `No se pudo ${mode === 'edit'? 'actualizar': 'crear'} el tema`,
+        description: error.message || `No se pudo ${mode === 'edit' ? 'actualizar' : 'crear'} el tema`,
         variant: 'destructive',
       });
     }
   };
+
   const isPending = createMutation.isPending || updateMutation.isPending || isUploadingFiles;
   const showCategorySelect = !preselectedCategoryId && mode === 'create';
+
   return (
     <ModalLayout onClose={onClose} size="md">
       <ModalHeader
-        title={mode === 'edit'? 'Editar Tema': 'Nuevo Tema'}
-        description={mode === 'edit'? 'Actualiza los detalles del tema': 'Crea un nuevo tema de discusión en el foro'}
+        title={mode === 'edit' ? 'Editar Tema' : 'Nuevo Tema'}
+        description={mode === 'edit' ? 'Actualiza los detalles del tema' : 'Crea un nuevo tema de discusión en el foro'}
         icon={MessagesSquare}
       />
+
       <ModalBody>
         <Form {...form}>
           <form className="space-y-4">
@@ -173,6 +188,7 @@ export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormP
                 </FormItem>
               )}
             />
+
             {showCategorySelect && (
               <FormField
                 control={form.control}
@@ -183,7 +199,7 @@ export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormP
                     <Select value={field.value} onValueChange={field.onChange} disabled={categoriesLoading}>
                       <FormControl>
                         <SelectTrigger data-testid="select-thread-category">
-                          <SelectValue placeholder={categoriesLoading ? 'Cargando...': 'Selecciona una categoría'} />
+                          <SelectValue placeholder={categoriesLoading ? 'Cargando...' : 'Selecciona una categoría'} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -199,6 +215,7 @@ export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormP
                 )}
               />
             )}
+
             <FormField
               control={form.control}
               name="content"
@@ -218,6 +235,7 @@ export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormP
                 </FormItem>
               )}
             />
+
             <div className="space-y-2">
               <FormLabel>Imágenes (opcional)</FormLabel>
               <FileUploader
@@ -236,14 +254,15 @@ export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormP
           </form>
         </Form>
       </ModalBody>
+
       <ModalFooter
         leftLabel="Cancelar"
         onLeftClick={onClose}
         submitText={
           isUploadingFiles 
-            ? 'Subiendo imágenes...'
-            : mode === 'edit'
-              ? 'Guardar Cambios'
+            ? 'Subiendo imágenes...' 
+            : mode === 'edit' 
+              ? 'Guardar Cambios' 
               : 'Crear Tema'
         }
         onSubmit={form.handleSubmit(onSubmit)}

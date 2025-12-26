@@ -5,12 +5,14 @@ export const SUBCONTRACT_STATUS = {
   COMPLETED: 'completed',
   CANCELLED: 'cancelled',
 } as const;
+
 // Subcontract bid status constants
 export const BID_STATUS = {
   PENDING: 'pending',
   AWARDED: 'awarded',
   REJECTED: 'rejected',
 } as const;
+
 // Query keys for React Query cache management
 export const SUBCONTRACT_QUERY_KEYS = {
   all: ['subcontracts'] as const,

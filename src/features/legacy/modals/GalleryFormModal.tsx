@@ -12,6 +12,7 @@ import { Images } from 'lucide-react';
 import { useProjectContext } from '@/stores/projectContext';
 import { FileUploader } from '@/components/shared/fields/FileUploader';
 import { supabase } from '@/lib/supabase';
+
 interface GalleryFormModalProps {
   modalData?: {
     editingFile?: any;
@@ -19,6 +20,7 @@ interface GalleryFormModalProps {
   };
   onClose: () => void;
 }
+
 export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) {
   const { editingFile, isEditing = false } = modalData || {};
   const { data: userData, isLoading: userLoading } = useCurrentUser();
@@ -28,9 +30,11 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
   const { setPanel } = useModalPanelStore();
   const [filesToUpload, setFilesToUpload] = useState<any[]>([]);
   const [existingFileDeleted, setExistingFileDeleted] = useState(false);
+
   useEffect(() => {
     setPanel('edit');
   }, [setPanel]);
+
   const existingFiles = editingFile && !existingFileDeleted 
     ? [{
         id: editingFile.id,
@@ -41,17 +45,21 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
         mime_type: editingFile.mime_type,
       }]
     : [];
+
   const handleExistingFileDelete = async (fileId: string) => {
     setExistingFileDeleted(true);
   };
+
   const uploadMutation = useMutation({
     mutationFn: async () => {
       if (!userData) {
         throw new Error('No se han cargado los datos del usuario');
       }
+
       if (!currentOrganizationId) {
         throw new Error('No hay organización seleccionada');
       }
+
       // If there are files to upload, upload them FIRST before deleting anything
       if (filesToUpload.length > 0) {
         const galleryFiles: GalleryFileInput[] = filesToUpload.map((fileInput) => ({
@@ -59,6 +67,7 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
           title: fileInput.title || fileInput.file.name.replace(/\.[^/.]+$/, ''),
           description: fileInput.description || '',
         }));
+
         const { data: memberData, error: memberError } = await supabase
           .from('organization_members')
           .select('id, user_id, organization_id, is_active')
@@ -72,6 +81,7 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
         }
         
         const createdByMemberId = memberData.id;
+
         // Upload new files first - if this fails, the existing file remains intact
         await uploadGalleryFiles(
           galleryFiles,
@@ -81,6 +91,7 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
           'organization'
         );
       }
+
       // Only delete the existing file AFTER new files have been uploaded successfully
       // This ensures no data loss if the upload fails
       if (existingFileDeleted && editingFile?.id) {
@@ -97,7 +108,7 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
       } else if (editingFile) {
         description = 'Archivos agregados correctamente';
       } else {
-        description = `${filesToUpload.length > 1 ? 'Archivos subidos': 'Archivo subido'} correctamente`;
+        description = `${filesToUpload.length > 1 ? 'Archivos subidos' : 'Archivo subido'} correctamente`;
       }
       
       toast({
@@ -118,10 +129,12 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
       });
     },
   });
+
   const handleClose = () => {
     setFilesToUpload([]);
     onClose();
   };
+
   const handleSubmit = () => {
     const hasExistingFile = editingFile && !existingFileDeleted;
     
@@ -133,9 +146,12 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
       });
       return;
     }
+
     uploadMutation.mutate();
   };
+
   if (userLoading) return null;
+
   const editPanel = (
     <div className="space-y-4">
       <FileUploader
@@ -151,12 +167,14 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
       />
     </div>
   );
+
   const headerContent = (
     <FormModalHeader
       title="Subir Archivo Multimedia"
       icon={Images}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -167,6 +185,7 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
       showLoadingSpinner={uploadMutation.isPending}
     />
   );
+
   return (
     <FormModalLayout
       columns={1}

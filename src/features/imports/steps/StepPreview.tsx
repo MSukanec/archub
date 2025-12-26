@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { format, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { ParsedData } from '../types';
+
 interface StepPreviewProps {
   parsedData: ParsedData | null;
   isLoading: boolean;
@@ -17,6 +18,7 @@ interface StepPreviewProps {
   onReset: () => void;
   maxPreviewRows?: number;
 }
+
 export function StepPreview({
   parsedData,
   isLoading,
@@ -30,6 +32,7 @@ export function StepPreview({
       onFileSelect(acceptedFiles[0]);
     }
   }, [onFileSelect]);
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
@@ -40,6 +43,7 @@ export function StepPreview({
     maxFiles: 1,
     maxSize: 50 * 1024 * 1024,
   });
+
   const formatCellValue = (cell: any): string => {
     if (cell === null || cell === undefined) return '-';
     
@@ -47,7 +51,7 @@ export function StepPreview({
       return isValid(cell) ? format(cell, 'dd/MM/yyyy', { locale: es }) : String(cell);
     }
     
-    if (typeof cell === 'number'&& cell > 1000000000 && cell < 2000000000000) {
+    if (typeof cell === 'number' && cell > 1000000000 && cell < 2000000000000) {
       const date = new Date(cell);
       return isValid(date) ? format(date, 'dd/MM/yyyy', { locale: es }) : String(cell);
     }
@@ -66,6 +70,7 @@ export function StepPreview({
     
     return String(cell);
   };
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
@@ -74,6 +79,7 @@ export function StepPreview({
       </div>
     );
   }
+
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
@@ -90,6 +96,7 @@ export function StepPreview({
       </div>
     );
   }
+
   if (!parsedData) {
     return (
       <div className="space-y-6">
@@ -127,6 +134,7 @@ export function StepPreview({
       </div>
     );
   }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -151,6 +159,7 @@ export function StepPreview({
           </Button>
         </div>
       </div>
+
       <div className="border rounded-lg">
         <ScrollArea className="h-[300px]">
           <Table>

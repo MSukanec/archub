@@ -50,7 +50,9 @@ import {
   usePartnerWithdrawals,
   usePartnerCapitalKPI
 } from '@/features/capital';
-export type PeriodFilter = '30d'| '3m'| '6m'| '1y'| 'all';
+
+export type PeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all';
+
 interface CapitalDashboardViewProps {
   onNavigateToList?: () => void;
   onNavigateToBalances?: () => void;
@@ -59,6 +61,7 @@ interface CapitalDashboardViewProps {
   onScrollToPanel?: (panelId: string) => void;
   selectedPeriod?: PeriodFilter;
 }
+
 function getPeriodLabel(period: PeriodFilter): string {
   switch (period) {
     case '30d': return 'Últimos 30 días';
@@ -68,6 +71,7 @@ function getPeriodLabel(period: PeriodFilter): string {
     case 'all': return 'Histórico';
   }
 }
+
 function getDateFromForPeriod(period: PeriodFilter): Date | null {
   if (period === 'all') return null;
   
@@ -92,6 +96,7 @@ function getDateFromForPeriod(period: PeriodFilter): Date | null {
   result.setHours(0, 0, 0, 0);
   return result;
 }
+
 function getPreviousPeriodDateRange(period: PeriodFilter): { from: Date; to: Date } | null {
   const now = new Date();
   const to = new Date(now);
@@ -122,6 +127,7 @@ function getPreviousPeriodDateRange(period: PeriodFilter): { from: Date; to: Dat
   from.setHours(0, 0, 0, 0);
   return { from, to };
 }
+
 export function calculateAvailablePeriods(
   contributions: Array<{ contribution_date: string; status: string }>,
   withdrawals: Array<{ withdrawal_date: string; status: string }>
@@ -158,13 +164,14 @@ export function calculateAvailablePeriods(
   
   return result;
 }
+
 export function CapitalDashboardView({ 
   onNavigateToList, 
   onNavigateToBalances,
   onNavigateToTransactions,
   onNavigateToTab,
   onScrollToPanel,
-  selectedPeriod = 'all'
+  selectedPeriod = 'all' 
 }: CapitalDashboardViewProps) {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
@@ -174,7 +181,9 @@ export function CapitalDashboardView({
   const { data: allContributions = [], isLoading: loadingContributions } = usePartnerContributions(organizationId);
   const { data: allWithdrawals = [], isLoading: loadingWithdrawals } = usePartnerWithdrawals(organizationId);
   const { data: capitalKpiData = [], isLoading: loadingKPI } = usePartnerCapitalKPI(organizationId, { enabled: !!organizationId });
+
   const isLoading = loadingPartners || loadingContributions || loadingWithdrawals || loadingKPI;
+
   // Capital health KPIs from SQL view data
   const capitalHealthKPIs = useMemo(() => {
     if (capitalKpiData.length === 0) {
@@ -186,17 +195,20 @@ export function CapitalDashboardView({
         deviationByPartner: [] as Array<{ name: string; value: number; status: string }>
       };
     }
+
     // Total absolute deviation
     const totalDeviation = capitalKpiData.reduce((sum, kpi) => {
       return sum + Math.abs(kpi.deviation_contribution ?? 0);
     }, 0);
+
     // Count of under-contributed partners
     const underContributedCount = capitalKpiData.filter(
       kpi => kpi.contribution_status === 'bajo_aportado'
     ).length;
+
     // Find top over-contributor
     const overContributors = capitalKpiData
-      .filter(kpi => kpi.contribution_status === 'sobre_aportado'&& (kpi.deviation_contribution ?? 0) > 0)
+      .filter(kpi => kpi.contribution_status === 'sobre_aportado' && (kpi.deviation_contribution ?? 0) > 0)
       .sort((a, b) => (b.deviation_contribution ?? 0) - (a.deviation_contribution ?? 0));
     
     const topOverContributor = overContributors[0];
@@ -207,6 +219,7 @@ export function CapitalDashboardView({
       || topPartner?.contacts?.company_name 
       || null;
     const topOverContributorAmount = topOverContributor?.deviation_contribution ?? 0;
+
     // Deviation by partner for chart
     const deviationByPartner = capitalKpiData
       .filter(kpi => kpi.deviation_contribution !== null && kpi.deviation_contribution !== 0)
@@ -222,6 +235,7 @@ export function CapitalDashboardView({
         };
       })
       .sort((a, b) => b.value - a.value);
+
     return {
       totalDeviation,
       underContributedCount,
@@ -230,6 +244,7 @@ export function CapitalDashboardView({
       deviationByPartner
     };
   }, [capitalKpiData, partners]);
+
   // Data for deviation bar chart (no truncation - chart handles width)
   const deviationChartData = useMemo(() => {
     return capitalHealthKPIs.deviationByPartner.map(item => ({
@@ -237,6 +252,7 @@ export function CapitalDashboardView({
       value: item.value
     }));
   }, [capitalHealthKPIs.deviationByPartner]);
+
   // Data for expected vs real contribution chart (no truncation - chart handles it)
   const expectedVsRealData = useMemo(() => {
     return capitalKpiData
@@ -255,6 +271,7 @@ export function CapitalDashboardView({
       .sort((a, b) => b.real - a.real)
       .slice(0, 6);
   }, [capitalKpiData, partners]);
+
   const handleInsightAction = useCallback((action: InsightAction) => {
     switch (action.type) {
       case 'navigate':
@@ -285,6 +302,7 @@ export function CapitalDashboardView({
         break;
     }
   }, [onNavigateToList, onNavigateToBalances, onNavigateToTransactions, onNavigateToTab, onScrollToPanel]);
+
   const handleMonthDrillDown = useCallback((month: string) => {
     if (onNavigateToTab) {
       onNavigateToTab('transactions', { filterMonth: month });
@@ -292,6 +310,7 @@ export function CapitalDashboardView({
       onNavigateToTransactions?.();
     }
   }, [onNavigateToTab, onNavigateToTransactions]);
+
   const handlePartnerDrillDown = useCallback((partnerName: string) => {
     if (onNavigateToTab) {
       onNavigateToTab('balances', { filterPartner: partnerName });
@@ -299,12 +318,16 @@ export function CapitalDashboardView({
       onNavigateToBalances?.();
     }
   }, [onNavigateToTab, onNavigateToBalances]);
+
   const dateFrom = useMemo(() => getDateFromForPeriod(selectedPeriod), [selectedPeriod]);
+
   const periodMeta = useMemo(() => {
     const now = new Date();
     return getPeriodMeta(dateFrom, now);
   }, [dateFrom]);
+
   const kpiLabels = useMemo(() => getKPILabels(periodMeta), [periodMeta]);
+
   const confirmedContributions = useMemo(() => {
     const confirmed = allContributions.filter(c => c.status === 'confirmed');
     
@@ -316,6 +339,7 @@ export function CapitalDashboardView({
       return contributionDate >= dateFrom;
     });
   }, [allContributions, dateFrom]);
+
   const confirmedWithdrawals = useMemo(() => {
     const confirmed = allWithdrawals.filter(w => w.status === 'confirmed');
     
@@ -327,6 +351,7 @@ export function CapitalDashboardView({
       return withdrawalDate >= dateFrom;
     });
   }, [allWithdrawals, dateFrom]);
+
   const previousPeriodData = useMemo(() => {
     const previousRange = getPreviousPeriodDateRange(selectedPeriod);
     if (!previousRange) return { contributions: [], withdrawals: [] };
@@ -347,6 +372,7 @@ export function CapitalDashboardView({
     
     return { contributions: prevContributions, withdrawals: prevWithdrawals };
   }, [allContributions, allWithdrawals, selectedPeriod]);
+
   const kpis = useMemo(() => {
     const contributionsKPI = calculateMonetaryKPI({
       items: confirmedContributions.map(c => ({
@@ -358,6 +384,7 @@ export function CapitalDashboardView({
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol
     });
+
     const withdrawalsKPI = calculateMonetaryKPI({
       items: confirmedWithdrawals.map(w => ({
         amount: w.amount,
@@ -368,12 +395,14 @@ export function CapitalDashboardView({
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol
     });
+
     const netCapital = contributionsKPI.value - withdrawalsKPI.value;
     const netCapitalKPI = {
       ...contributionsKPI,
       value: netCapital,
       formatted: formatKPI(netCapital)
     };
+
     const prevContributionsKPI = calculateMonetaryKPI({
       items: previousPeriodData.contributions.map(c => ({
         amount: c.amount,
@@ -384,6 +413,7 @@ export function CapitalDashboardView({
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol
     });
+
     const prevWithdrawalsKPI = calculateMonetaryKPI({
       items: previousPeriodData.withdrawals.map(w => ({
         amount: w.amount,
@@ -394,32 +424,38 @@ export function CapitalDashboardView({
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol
     });
+
     const prevNetCapital = prevContributionsKPI.value - prevWithdrawalsKPI.value;
+
     let capitalTrend: TrendDirection = 'neutral';
     let capitalTrendValue = '';
     if (prevNetCapital !== 0) {
       const change = ((netCapital - prevNetCapital) / Math.abs(prevNetCapital)) * 100;
-      capitalTrend = change > 0 ? 'up': change < 0 ? 'down': 'neutral';
-      capitalTrendValue = `${change > 0 ? '+': ''}${Math.round(change)}% vs período anterior`;
+      capitalTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
+      capitalTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% vs período anterior`;
     }
+
     let contributionsTrend: TrendDirection = 'neutral';
     let contributionsTrendValue = '';
     if (prevContributionsKPI.value > 0) {
       const change = ((contributionsKPI.value - prevContributionsKPI.value) / prevContributionsKPI.value) * 100;
-      contributionsTrend = change > 0 ? 'up': change < 0 ? 'down': 'neutral';
-      contributionsTrendValue = `${change > 0 ? '+': ''}${Math.round(change)}% vs período anterior`;
+      contributionsTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
+      contributionsTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% vs período anterior`;
     }
+
     let withdrawalsTrend: TrendDirection = 'neutral';
     let withdrawalsTrendValue = '';
     if (prevWithdrawalsKPI.value > 0) {
       const change = ((withdrawalsKPI.value - prevWithdrawalsKPI.value) / prevWithdrawalsKPI.value) * 100;
-      withdrawalsTrend = change > 0 ? 'up': change < 0 ? 'down': 'neutral';
-      withdrawalsTrendValue = `${change > 0 ? '+': ''}${Math.round(change)}% vs período anterior`;
+      withdrawalsTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
+      withdrawalsTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% vs período anterior`;
     }
+
     const partnersCount = calculateCountKPI({
       count: partners.length,
       label: 'socios'
     });
+
     return {
       netCapital: netCapitalKPI,
       capitalTrend,
@@ -434,6 +470,7 @@ export function CapitalDashboardView({
       previousNetCapital: prevNetCapital
     };
   }, [confirmedContributions, confirmedWithdrawals, defaultCurrency, partners, previousPeriodData]);
+
   const monthlyChartData = useMemo(() => {
     const monthlyTotals = new Map<string, { contributions: number; withdrawals: number }>();
     
@@ -462,9 +499,11 @@ export function CapitalDashboardView({
       }))
       .sort((a, b) => a.month.localeCompare(b.month));
   }, [confirmedContributions, confirmedWithdrawals]);
+
   const sparklineData = useMemo(() => {
     return monthlyChartData.map(m => m.value);
   }, [monthlyChartData]);
+
   const currentMonthComparison = useMemo(() => {
     if (monthlyChartData.length < 2) return null;
     
@@ -478,6 +517,7 @@ export function CapitalDashboardView({
       stableThresholdPercent: 5
     });
   }, [monthlyChartData]);
+
   const partnerDistributionData = useMemo(() => {
     const partnerTotals = new Map<string, { label: string; value: number }>();
     
@@ -510,27 +550,31 @@ export function CapitalDashboardView({
       .sort((a, b) => b.value - a.value)
       .slice(0, 8);
   }, [confirmedContributions, confirmedWithdrawals]);
+
   // Capital-specific insights (using InsightItem format directly for InsightCard)
   const capitalInsightItems = useMemo(() => {
     const items: Array<{
       title: string;
       description: string;
-      variant: 'warning'| 'info'| 'success';
+      variant: 'warning' | 'info' | 'success';
       actions?: Array<{ id: string; label: string; type: 'navigate'; payload: Record<string, unknown> }>;
     }> = [];
+
     const netCapital = kpis.netCapital.value;
     const underContributedCount = capitalHealthKPIs.underContributedCount;
     const totalDeviation = capitalHealthKPIs.totalDeviation;
     const partnerCount = capitalKpiData.length;
+
     // Insight: Partners under-contributed
     if (underContributedCount > 0) {
       items.push({
         variant: 'warning',
-        title: `${underContributedCount} socio${underContributedCount > 1 ? 's': ''} bajo aporte`,
+        title: `${underContributedCount} socio${underContributedCount > 1 ? 's' : ''} bajo aporte`,
         description: `Hay socios que no han aportado lo que corresponde según su participación.`,
-        actions: [{ id: 'view-balances', label: 'Ver balances', type: 'navigate', payload: { tab: 'balances'} }]
+        actions: [{ id: 'view-balances', label: 'Ver balances', type: 'navigate', payload: { tab: 'balances' } }]
       });
     }
+
     // Insight: Capital concentration
     if (partnerDistributionData.length > 0 && netCapital > 0) {
       const topPartnerValue = partnerDistributionData[0]?.value ?? 0;
@@ -541,10 +585,11 @@ export function CapitalDashboardView({
           variant: 'info',
           title: `${Math.round(concentrationPercent)}% del capital en un solo socio`,
           description: `"${partnerDistributionData[0]?.label}" concentra la mayoría del capital neto.`,
-          actions: [{ id: 'view-distribution', label: 'Ver distribución', type: 'navigate', payload: { tab: 'balances'} }]
+          actions: [{ id: 'view-distribution', label: 'Ver distribución', type: 'navigate', payload: { tab: 'balances' } }]
         });
       }
     }
+
     // Insight: Total deviation / imbalance
     if (totalDeviation > 0 && netCapital > 0) {
       const deviationPercent = (totalDeviation / netCapital) * 100;
@@ -553,35 +598,39 @@ export function CapitalDashboardView({
           variant: 'warning',
           title: `Desbalance del ${Math.round(deviationPercent)}%`,
           description: 'El capital presenta desviaciones significativas respecto a los porcentajes acordados.',
-          actions: [{ id: 'view-deviations', label: 'Ver desvíos', type: 'navigate', payload: { tab: 'balances'} }]
+          actions: [{ id: 'view-deviations', label: 'Ver desvíos', type: 'navigate', payload: { tab: 'balances' } }]
         });
       }
     }
+
     // Insight: All balanced (positive)
     if (underContributedCount === 0 && partnerCount > 0) {
       items.push({
         variant: 'success',
         title: 'Capital equilibrado',
         description: 'Todos los socios han aportado según su participación acordada.',
-        actions: [{ id: 'view-status', label: 'Ver detalle', type: 'navigate', payload: { tab: 'balances'} }]
+        actions: [{ id: 'view-status', label: 'Ver detalle', type: 'navigate', payload: { tab: 'balances' } }]
       });
     }
+
     // Insight: Top over-contributor
     if (capitalHealthKPIs.topOverContributorName && capitalHealthKPIs.topOverContributorAmount > 0) {
       items.push({
         variant: 'info',
         title: `Mayor sobreaporte: ${capitalHealthKPIs.topOverContributorName}`,
         description: `Ha aportado ${defaultCurrency?.symbol || '$'} ${formatKPI(capitalHealthKPIs.topOverContributorAmount)} más de lo esperado.`,
-        actions: [{ id: 'view-contributor', label: 'Ver socio', type: 'navigate', payload: { tab: 'balances'} }]
+        actions: [{ id: 'view-contributor', label: 'Ver socio', type: 'navigate', payload: { tab: 'balances' } }]
       });
     }
+
     return items.slice(0, 3);
   }, [kpis, capitalHealthKPIs, capitalKpiData, partnerDistributionData, defaultCurrency]);
+
   const recentActivityItems = useMemo((): ActivityItem[] => {
     const allTransactions = [
       ...confirmedContributions.map(c => ({
         id: c.id,
-        type: 'contribution'as const,
+        type: 'contribution' as const,
         date: c.contribution_date,
         amount: c.amount,
         currencySymbol: c.currency?.symbol || '$',
@@ -592,7 +641,7 @@ export function CapitalDashboardView({
       })),
       ...confirmedWithdrawals.map(w => ({
         id: w.id,
-        type: 'withdrawal'as const,
+        type: 'withdrawal' as const,
         date: w.withdrawal_date,
         amount: w.amount,
         currencySymbol: w.currency?.symbol || '$',
@@ -614,13 +663,14 @@ export function CapitalDashboardView({
         rightContent: (
           <span className={cn(
             "text-sm font-medium",
-            t.type === 'contribution'? 'text-[var(--positive)]': 'text-[var(--negative)]'
+            t.type === 'contribution' ? 'text-[var(--positive)]' : 'text-[var(--negative)]'
           )}>
-            {t.type === 'contribution'? '+': '-'}{t.currencySymbol} {t.amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+            {t.type === 'contribution' ? '+' : '-'}{t.currencySymbol} {t.amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </span>
         )
       }));
   }, [confirmedContributions, confirmedWithdrawals]);
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -641,7 +691,9 @@ export function CapitalDashboardView({
       </div>
     );
   }
+
   const hasData = confirmedContributions.length > 0 || confirmedWithdrawals.length > 0;
+
   if (!hasData && partners.length === 0) {
     return (
       <EmptyState
@@ -657,6 +709,7 @@ export function CapitalDashboardView({
       />
     );
   }
+
   if (!hasData && partners.length > 0) {
     return (
       <EmptyState
@@ -672,7 +725,9 @@ export function CapitalDashboardView({
       />
     );
   }
+
   const currencySymbol = defaultCurrency?.symbol || '$';
+
   return (
     <div className="space-y-6">
       {/* Row 1: Core Capital Metrics */}
@@ -685,8 +740,8 @@ export function CapitalDashboardView({
             <Wallet className="h-4 w-4" />
             Capital Neto Total
           </AppCardTitle>
-          <AppCardValue className={kpis.netCapital.value >= 0 ? 'text-[var(--positive)]': 'text-[var(--negative)]'}>
-            {kpis.netCapital.value >= 0 ? '': '-'}{currencySymbol} {formatKPI(Math.abs(kpis.netCapital.value))}
+          <AppCardValue className={kpis.netCapital.value >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}>
+            {kpis.netCapital.value >= 0 ? '' : '-'}{currencySymbol} {formatKPI(Math.abs(kpis.netCapital.value))}
           </AppCardValue>
           {kpis.capitalTrendValue && (
             <AppCardTrend 
@@ -706,6 +761,7 @@ export function CapitalDashboardView({
             </div>
           )}
         </AppCard>
+
         <AppCard 
           data-testid="kpi-total-contributions"
           onClick={onNavigateToTransactions}
@@ -724,9 +780,10 @@ export function CapitalDashboardView({
             />
           )}
           <AppCardMeta>
-            {confirmedContributions.length} aporte{confirmedContributions.length !== 1 ? 's': ''} confirmado{confirmedContributions.length !== 1 ? 's': ''}
+            {confirmedContributions.length} aporte{confirmedContributions.length !== 1 ? 's' : ''} confirmado{confirmedContributions.length !== 1 ? 's' : ''}
           </AppCardMeta>
         </AppCard>
+
         <AppCard 
           data-testid="kpi-total-withdrawals"
           onClick={onNavigateToTransactions}
@@ -745,9 +802,10 @@ export function CapitalDashboardView({
             />
           )}
           <AppCardMeta>
-            {confirmedWithdrawals.length} retiro{confirmedWithdrawals.length !== 1 ? 's': ''} confirmado{confirmedWithdrawals.length !== 1 ? 's': ''}
+            {confirmedWithdrawals.length} retiro{confirmedWithdrawals.length !== 1 ? 's' : ''} confirmado{confirmedWithdrawals.length !== 1 ? 's' : ''}
           </AppCardMeta>
         </AppCard>
+
         <AppCard 
           data-testid="kpi-total-deviation"
           onClick={onNavigateToBalances}
@@ -756,13 +814,14 @@ export function CapitalDashboardView({
             <Scale className="h-4 w-4" />
             Desbalance Total
           </AppCardTitle>
-          <AppCardValue className={capitalHealthKPIs.totalDeviation > 0 ? 'text-[var(--pending)]': 'text-[var(--neutral)]'}>
+          <AppCardValue className={capitalHealthKPIs.totalDeviation > 0 ? 'text-[var(--pending)]' : 'text-[var(--neutral)]'}>
             {currencySymbol} {formatKPI(capitalHealthKPIs.totalDeviation)}
           </AppCardValue>
           <AppCardMeta>
             Suma de desvíos absolutos
           </AppCardMeta>
         </AppCard>
+
         <AppCard 
           data-testid="kpi-under-contributed"
           onClick={onNavigateToBalances}
@@ -771,13 +830,14 @@ export function CapitalDashboardView({
             <AlertTriangle className="h-4 w-4" />
             Socios Bajo Aporte
           </AppCardTitle>
-          <AppCardValue className={capitalHealthKPIs.underContributedCount > 0 ? 'text-[var(--negative)]': 'text-[var(--positive)]'}>
+          <AppCardValue className={capitalHealthKPIs.underContributedCount > 0 ? 'text-[var(--negative)]' : 'text-[var(--positive)]'}>
             {capitalHealthKPIs.underContributedCount}
           </AppCardValue>
           <AppCardMeta>
-            {capitalHealthKPIs.underContributedCount === 0 ? 'Todos al día': 'Requieren atención'}
+            {capitalHealthKPIs.underContributedCount === 0 ? 'Todos al día' : 'Requieren atención'}
           </AppCardMeta>
         </AppCard>
+
         <AppCard 
           data-testid="kpi-top-over-contributor"
           onClick={onNavigateToBalances}
@@ -796,6 +856,7 @@ export function CapitalDashboardView({
           </AppCardMeta>
         </AppCard>
       </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AppCard
           title="Evolución del Capital"
@@ -821,6 +882,7 @@ export function CapitalDashboardView({
             </div>
           )}
         </AppCard>
+
         <AppCard
           title="Distribución por Socio"
           icon={<PieChart className="h-5 w-5" />}
@@ -842,6 +904,7 @@ export function CapitalDashboardView({
           )}
         </AppCard>
       </div>
+
       {/* Row 4: Deviation Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AppCard
@@ -867,6 +930,7 @@ export function CapitalDashboardView({
             </div>
           )}
         </AppCard>
+
         <AppCard
           title="Aporte Esperado vs Real"
           icon={<Scale className="h-5 w-5" />}
@@ -877,8 +941,8 @@ export function CapitalDashboardView({
               <GroupedBarChart 
                 data={expectedVsRealData}
                 series={[
-                  { key: 'expected', name: 'Esperado', color: '#808080'},
-                  { key: 'real', name: 'Real', color: '#b3cc00'}
+                  { key: 'expected', name: 'Esperado', color: '#808080' },
+                  { key: 'real', name: 'Real', color: '#b3cc00' }
                 ]}
                 height={220}
                 valueFormatter={(v) => `${currencySymbol} ${formatKPI(v)}`}
@@ -891,6 +955,7 @@ export function CapitalDashboardView({
           )}
         </AppCard>
       </div>
+
       {/* Row 5: Insights & Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <InsightCard
@@ -898,6 +963,7 @@ export function CapitalDashboardView({
           onAction={handleInsightAction}
           data-testid="card-insights"
         />
+
         <ActivityCard
           title="Actividad Reciente"
           items={recentActivityItems}
@@ -908,4 +974,5 @@ export function CapitalDashboardView({
     </div>
   );
 }
+
 export default CapitalDashboardView;

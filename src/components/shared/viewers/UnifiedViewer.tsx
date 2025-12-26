@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { 
   ChevronLeft, 
   ChevronRight, 
   ZoomIn, 
@@ -18,8 +19,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { storageHelpers } from '@/lib/supabase/storage';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+
 // Configure PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+
 type UnifiedViewerProps = {
   bucket: string;
   path: string;
@@ -30,10 +33,11 @@ type UnifiedViewerProps = {
   onExpand?: () => void;
   height?: number;
 };
+
 type ViewerState = {
   loading: boolean;
   error: string | null;
-  fileType: 'pdf'| 'image'| 'unknown';
+  fileType: 'pdf' | 'image' | 'unknown';
   
   // PDF specific
   page: number;
@@ -50,6 +54,7 @@ type ViewerState = {
   scale: number;
   blob: Blob | null;
 };
+
 export function UnifiedViewer({ 
   bucket, 
   path, 
@@ -76,12 +81,14 @@ export function UnifiedViewer({
     scale: 0.6, // Start at 60% for better initial view
     blob: null
   });
+
   // Detect file type
-  const detectFileType = useCallback((mimeType: string): 'pdf'| 'image'| 'unknown'=> {
+  const detectFileType = useCallback((mimeType: string): 'pdf' | 'image' | 'unknown' => {
     if (mimeType === 'application/pdf') return 'pdf';
     if (mimeType.startsWith('image/')) return 'image';
     return 'unknown';
   }, []);
+
   // Load file
   const loadFile = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
@@ -89,6 +96,7 @@ export function UnifiedViewer({
     try {
       let blob: Blob;
       let mimeType: string;
+
       if (useSignedUrl) {
         const signedUrl = await storageHelpers.createSignedUrl(bucket, path, 3600);
         const response = await fetch(signedUrl);
@@ -99,6 +107,7 @@ export function UnifiedViewer({
         blob = await storageHelpers.downloadAsBlob(bucket, path);
         mimeType = fileType || blob.type || 'application/octet-stream';
       }
+
       const detectedType = detectFileType(mimeType);
       
       setState(prev => ({ 
@@ -107,6 +116,7 @@ export function UnifiedViewer({
         fileType: detectedType,
         loading: false 
       }));
+
       // Load based on type
       if (detectedType === 'pdf') {
         await loadPdfFromBlob(blob);
@@ -123,6 +133,7 @@ export function UnifiedViewer({
       }));
     }
   }, [bucket, path, useSignedUrl, fileType, detectFileType]);
+
   // Load PDF from blob
   const loadPdfFromBlob = async (blob: Blob) => {
     try {
@@ -151,6 +162,7 @@ export function UnifiedViewer({
       }));
     }
   };
+
   // Load image from blob
   const loadImageFromBlob = async (blob: Blob) => {
     try {
@@ -163,6 +175,7 @@ export function UnifiedViewer({
         img.onerror = reject;
         img.src = imageUrl;
       });
+
       setState(prev => ({
         ...prev,
         imageUrl,
@@ -178,15 +191,18 @@ export function UnifiedViewer({
       }));
     }
   };
+
   // Render PDF page
   const renderPage = useCallback(async () => {
     if (!state.pdfDoc || !canvasRef.current || state.loading) return;
+
     try {
       const page = await state.pdfDoc.getPage(state.page);
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
       
       if (!context) return;
+
       // Use the user's scale directly (1.0 = 100% natural size)
       const scaledViewport = page.getViewport({ scale: state.scale });
       
@@ -198,29 +214,35 @@ export function UnifiedViewer({
         viewport: scaledViewport,
         canvas: canvas
       };
+
       await page.render(renderContext).promise;
     } catch (error) {
       console.error('Error rendering PDF page:', error);
     }
   }, [state.pdfDoc, state.page, state.scale]);
+
   // Navigation functions
   const nextPage = () => {
     if (state.page < state.numPages) {
       setState(prev => ({ ...prev, page: prev.page + 1 }));
     }
   };
+
   const prevPage = () => {
     if (state.page > 1) {
       setState(prev => ({ ...prev, page: prev.page - 1 }));
     }
   };
+
   // Zoom functions - increment by 10% each time
   const zoomIn = () => setState(prev => ({ ...prev, scale: Math.min(prev.scale + 0.1, 5.0) }));
   const zoomOut = () => setState(prev => ({ ...prev, scale: Math.max(prev.scale - 0.1, 0.2) }));
   const zoom100 = () => setState(prev => ({ ...prev, scale: 1.0 }));
+
   // Image rotation
   const rotateLeft = () => setState(prev => ({ ...prev, rotation: (prev.rotation - 90) % 360 }));
   const rotateRight = () => setState(prev => ({ ...prev, rotation: (prev.rotation + 90) % 360 }));
+
   // Download
   const downloadFile = () => {
     if (!state.blob) return;
@@ -231,21 +253,25 @@ export function UnifiedViewer({
     link.click();
     URL.revokeObjectURL(url);
   };
+
   // Open in new tab
   const openInNewTab = () => {
     if (!state.blob) return;
     const url = URL.createObjectURL(state.blob);
     window.open(url, '_blank');
   };
+
   // Effects
   useEffect(() => {
     loadFile();
   }, [loadFile]);
+
   useEffect(() => {
-    if (state.fileType === 'pdf'&& state.pdfDoc && !state.loading) {
+    if (state.fileType === 'pdf' && state.pdfDoc && !state.loading) {
       renderPage();
     }
   }, [renderPage, state.fileType, state.pdfDoc, state.loading]);
+
   // Loading state
   if (state.loading) {
     return (
@@ -262,6 +288,7 @@ export function UnifiedViewer({
       </div>
     );
   }
+
   // Error state
   if (state.error) {
     return (
@@ -286,6 +313,7 @@ export function UnifiedViewer({
       </div>
     );
   }
+
   // Unknown file type
   if (state.fileType === 'unknown') {
     return (
@@ -307,6 +335,7 @@ export function UnifiedViewer({
       </div>
     );
   }
+
   return (
     <div 
       className={`relative group bg-muted/50 ${className}`}
@@ -317,7 +346,7 @@ export function UnifiedViewer({
         <div className="flex items-center gap-2 p-2 bg-card border border-border rounded-lg shadow-lg">
           
           {/* PDF Navigation */}
-          {state.fileType === 'pdf'&& (
+          {state.fileType === 'pdf' && (
             <>
               <Button
                 variant="ghost"
@@ -344,9 +373,11 @@ export function UnifiedViewer({
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
+
               <div className="w-px h-4 bg-border mx-1" />
             </>
           )}
+
           {/* Zoom Controls */}
           <Button
             variant="ghost"
@@ -376,8 +407,9 @@ export function UnifiedViewer({
           >
             <ZoomIn className="w-4 h-4" />
           </Button>
+
           {/* Image Rotation */}
-          {state.fileType === 'image'&& (
+          {state.fileType === 'image' && (
             <>
               <div className="w-px h-4 bg-border mx-1" />
               
@@ -402,6 +434,7 @@ export function UnifiedViewer({
               </Button>
             </>
           )}
+
           <div className="w-px h-4 bg-border mx-1" />
           
           {/* Actions */}
@@ -414,6 +447,7 @@ export function UnifiedViewer({
           >
             <Maximize className="w-4 h-4" />
           </Button>
+
           <Button 
             variant="ghost" 
             size="sm" 
@@ -433,6 +467,7 @@ export function UnifiedViewer({
           >
             <ExternalLink className="w-4 h-4" />
           </Button>
+
           {onExpand && (
             <Button
               variant="ghost"
@@ -446,23 +481,25 @@ export function UnifiedViewer({
           )}
         </div>
       </div>
+
       {/* Content Area - Fixed height scrollable area */}
       <div 
         className="absolute inset-0 overflow-auto"
-        style={{ paddingTop: '60px'}} // Account for floating toolbar
+        style={{ paddingTop: '60px' }} // Account for floating toolbar
       >
-        {state.fileType === 'pdf'&& (
+        {state.fileType === 'pdf' && (
           <div className="p-4 min-h-full flex justify-center items-center">
             <div className="bg-white dark:bg-gray-800 shadow-lg rounded border">
               <canvas 
                 ref={canvasRef}
                 className="block"
-                style={{ display: 'block'}}
+                style={{ display: 'block' }}
               />
             </div>
           </div>
         )}
-        {state.fileType === 'image'&& state.imageUrl && (
+
+        {state.fileType === 'image' && state.imageUrl && (
           <div className="p-4 min-h-full flex justify-center items-start">
             <img
               ref={imageRef}

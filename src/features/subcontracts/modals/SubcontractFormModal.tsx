@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FormModalLayout } from "@/components/modal";
 import { FormModalHeader } from "@/components/modal";
 import { FormModalFooter } from "@/components/modal";
+
 import { Package } from "lucide-react";
 import { useCreateSubcontract, useUpdateSubcontract, useSubcontract } from "../hooks";
 import { toast } from "@/hooks/use-toast";
@@ -19,13 +20,16 @@ import { es } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+
 const subcontractSchema = z.object({
   date: z.string().min(1, "La fecha es obligatoria"),
   title: z.string().min(1, "El título es obligatorio"),
   code: z.string().optional(),
   notes: z.string().optional(),
 });
+
 type SubcontractFormData = z.infer<typeof subcontractSchema>;
+
 interface SubcontractFormModalProps {
   modalData: {
     projectId: string;
@@ -35,14 +39,17 @@ interface SubcontractFormModalProps {
     isEditing?: boolean;
   };
 }
+
 export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { closeModal } = useGlobalModalStore();
   const { data: currentUser } = useCurrentUser();
+
   const createSubcontract = useCreateSubcontract();
   const updateSubcontract = useUpdateSubcontract();
   
   const { data: existingSubcontract } = useSubcontract(modalData.subcontractId || null);
+
   const form = useForm<SubcontractFormData>({
     resolver: zodResolver(subcontractSchema),
     defaultValues: {
@@ -52,6 +59,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       notes: '',
     }
   });
+
   React.useEffect(() => {
     if (existingSubcontract && modalData.isEditing) {
       form.reset({
@@ -62,8 +70,10 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       });
     }
   }, [existingSubcontract, modalData.isEditing, form]);
+
   const onSubmit = async (data: SubcontractFormData) => {
     setIsSubmitting(true);
+
     try {
       if (modalData.isEditing && modalData.subcontractId) {
         await updateSubcontract.mutateAsync({
@@ -80,6 +90,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
             exchange_rate: existingSubcontract?.exchange_rate || null,
           }
         });
+
         await logActivity({
           organization_id: modalData.organizationId,
           user_id: currentUser?.user?.id || '',
@@ -101,6 +112,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
           amount_total: null,
           exchange_rate: null,
         });
+
         await logActivity({
           organization_id: modalData.organizationId,
           user_id: currentUser?.user?.id || '',
@@ -112,6 +124,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       }
       
       closeModal();
+
     } catch (error) {
       console.error('Error guardando subcontrato:', error);
       toast({
@@ -123,6 +136,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       setIsSubmitting(false);
     }
   };
+
   const editPanel = (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
@@ -160,6 +174,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
             <p className="text-xs text-destructive">{form.formState.errors.date.message}</p>
           )}
         </div>
+
         <div className="space-y-1">
           <Label htmlFor="code" className="text-xs font-medium">
             Código <span className="text-muted-foreground">(Opcional)</span>
@@ -174,6 +189,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
           )}
         </div>
       </div>
+
       <div className="space-y-1">
         <Label htmlFor="title" className="text-xs font-medium">
           Título *
@@ -187,6 +203,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
           <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
         )}
       </div>
+
       <div className="space-y-1">
         <Label htmlFor="notes" className="text-xs font-medium">
           Notas
@@ -200,6 +217,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       </div>
     </div>
   );
+
   const headerContent = (
     <FormModalHeader 
       title={modalData.isEditing ? "Editar Subcontrato" : "Crear Subcontrato"}
@@ -207,6 +225,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       icon={Package}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -217,6 +236,7 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
       submitDisabled={!form.formState.isValid || isSubmitting}
     />
   );
+
   return (
     <FormModalLayout
       columns={1}

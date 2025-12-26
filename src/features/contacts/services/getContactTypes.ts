@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { ContactType } from '../types';
+
 /**
  * Obtiene todos los tipos de contacto activos (no eliminados) ordenados alfabéticamente.
  * Incluye tipos del sistema (organization_id = null) y tipos personalizados de la organización.
@@ -15,14 +16,17 @@ export async function getContactTypes(
   if (!supabase || !organizationId) {
     return [];
   }
+
   const { data, error } = await supabase
     .from('contact_types')
     .select('*')
     .or(`organization_id.eq.${organizationId},organization_id.is.null`)
     .eq('is_deleted', false)
     .order('name', { ascending: true });
+
   if (error) {
     throw error;
   }
+
   return data || [];
 }

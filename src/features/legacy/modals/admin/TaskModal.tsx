@@ -8,6 +8,7 @@ import { useUnits } from '@/hooks/use-units'
 import { useTaskLabor } from '@/hooks/use-task-labor'
 import { supabase } from '@/lib/supabase'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
+
 import { FormModalLayout } from '@/components/modal'
 import { FormModalHeader } from '@/components/modal'
 import { FormModalFooter } from '@/components/modal'
@@ -18,7 +19,9 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+
 import { Zap, Plus, Trash2, FileText, Settings, Package, Edit2 } from 'lucide-react'
+
 interface TaskModalProps {
   modalData?: {
     isEditing?: boolean
@@ -29,6 +32,7 @@ interface TaskModalProps {
   } | null
   onClose: () => void
 }
+
 interface ParameterSelection {
   parameterId: string
   optionId: string
@@ -37,6 +41,7 @@ interface ParameterSelection {
   optionName: string
   optionLabel: string
 }
+
 interface MaterialEditRowProps {
   material: any
   index: number
@@ -44,9 +49,11 @@ interface MaterialEditRowProps {
   onRemove: () => void
   disabled: boolean
 }
+
 function MaterialEditRow({ material, index, onEdit, onRemove, disabled }: MaterialEditRowProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editAmount, setEditAmount] = useState(material.amount.toString())
+
   const handleSaveEdit = () => {
     const newAmount = parseFloat(editAmount)
     if (newAmount > 0) {
@@ -54,10 +61,12 @@ function MaterialEditRow({ material, index, onEdit, onRemove, disabled }: Materi
       setIsEditing(false)
     }
   }
+
   const handleCancelEdit = () => {
     setEditAmount(material.amount.toString())
     setIsEditing(false)
   }
+
   return (
     <div className="py-2">
       <div className="flex items-center justify-between">
@@ -131,6 +140,7 @@ function MaterialEditRow({ material, index, onEdit, onRemove, disabled }: Materi
     </div>
   )
 }
+
 export function TaskModal({ modalData, onClose }: TaskModalProps) {
   const { task, isEditing, taskData, taskId, isDuplicating } = modalData || {}
   
@@ -183,6 +193,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       return null;
     }
   }, [actualTask?.param_values]);
+
   const existingParamOrder = React.useMemo(() => {
     if (!actualTask?.param_order) return null;
     
@@ -196,9 +207,11 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
     }
     return actualTask.param_order;
   }, [actualTask?.param_order]);
+
   // Effect to load existing task data when editing
   useEffect(() => {
     if (isEditingMode && actualTask && existingParamValues) {
+
       const loadedSelections: ParameterSelection[] = []
       
       if (existingParamValues && typeof existingParamValues === 'object') {
@@ -223,6 +236,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       }
     }
   }, [isEditingMode, actualTask, existingParamValues, existingParamOrder])
+
   // Mutations
   const createTaskMutation = useCreateGeneratedTask()
   const updateTaskMutation = useUpdateGeneratedTask()
@@ -260,6 +274,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   
   // Units data with success tracking
   const { data: units = [], isSuccess: unitsLoaded } = useUnits()
+
   // Task divisions data with success tracking
   const { data: taskDivisions = [], isSuccess: divisionsLoaded } = useQuery({
     queryKey: ['task-divisions'],
@@ -298,6 +313,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
   
   // Loading state for duplication costs
   const isDuplicationLoading = isDuplicating && (originalMaterialsLoading || originalLaborLoading)
+
   // Initialize existing parameter values (only for editing parametric tasks)
   React.useEffect(() => {
     if (isEditingMode && actualTask && existingParamValues) {
@@ -325,6 +341,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       }
     }
   }, [isEditingMode, actualTask, existingParamValues, existingParamOrder])
+
   // CRITICAL FIX: Initialize form data immediately when actualTask is available
   // This ensures duplication fields are populated instantly, not waiting for reference data
   React.useEffect(() => {
@@ -358,6 +375,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       }
     }
   }, [isEditingMode, isDuplicating, actualTask]) // Removed units and taskDivisions dependencies
+
   // FALLBACK: Secondary effect to resolve IDs from names when reference data becomes available
   // This runs after the immediate effect above, providing fallbacks if direct IDs weren't available
   React.useEffect(() => {
@@ -383,12 +401,14 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       }
     }
   }, [isEditingMode, isDuplicating, actualTask, units, taskDivisions, unitId, taskDivisionId]) // Added current state dependencies
+
   // Initialize task materials when editing
   React.useEffect(() => {
     if (isEditingMode && actualTask?.id) {
       setSavedTaskId(actualTask.id)
     }
   }, [isEditingMode, actualTask?.id])
+
   React.useEffect(() => {
     if (existingTaskMaterials.length > 0) {
       setTaskMaterials(existingTaskMaterials.map(tm => ({
@@ -400,6 +420,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       })))
     }
   }, [existingTaskMaterials])
+
   // Add material to local state
   // Handle edit material function
   const handleEditMaterial = (index: number, updatedMaterial: any) => {
@@ -408,6 +429,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
     ));
     setEditingMaterialIndex(null);
   };
+
   const handleAddMaterial = () => {
     if (!selectedMaterialId || !materialAmount) {
       toast({
@@ -417,6 +439,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       })
       return
     }
+
     const selectedMaterial = materials.find(m => m.id === selectedMaterialId)
     const newMaterial = {
       material_id: selectedMaterialId,
@@ -426,10 +449,12 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
     }
     
     setTaskMaterials(prev => [...prev, newMaterial])
+
     // Clear form
     setSelectedMaterialId('')
     setMaterialAmount('')
   }
+
   // Complete and save task with materials
   const handleSubmit = async () => {
     if (!customName.trim()) {
@@ -440,6 +465,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       })
       return
     }
+
     if (!userData?.organization?.id) {
       toast({
         title: "Error", 
@@ -448,6 +474,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       })
       return
     }
+
     setIsLoading(true)
     try {
       let taskId = savedTaskId;
@@ -486,6 +513,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
         const generateTaskCode = () => {
           return `CU-${Date.now()}`
         }
+
         const newTask = {
           code: generateTaskCode(),
           custom_name: customName,
@@ -516,6 +544,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
         taskId = data.id
         console.log('✅ Task created successfully with ID:', taskId)
       }
+
       // Save materials if any
       if (taskMaterials.length > 0 && taskId && userData?.organization?.id) {
         for (const material of taskMaterials) {
@@ -604,7 +633,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       
       toast({
         title: successTitle,
-        description: `Tarea ${isDuplicating ? 'duplicada': (isEditingMode ? 'actualizada': 'creada')} exitosamente: "${customName}"${costsMsg}.`,
+        description: `Tarea ${isDuplicating ? 'duplicada' : (isEditingMode ? 'actualizada' : 'creada')} exitosamente: "${customName}"${costsMsg}.`,
       })
       
       onClose()
@@ -619,16 +648,20 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       setIsLoading(false)
     }
   }
+
   // Get material options for ComboBox
   const materialOptions = materials.map(material => ({
     value: material.id,
     label: material.name
   }))
+
   // Get selected material unit
   const selectedMaterial = materials.find(m => m.id === selectedMaterialId)
   const selectedMaterialUnit = selectedMaterial?.unit?.name || ''
+
   // ViewPanel - null for creation modal
   const viewPanel = null;
+
   // EditPanel - defer content until data is ready
   const stepContent = (
     <div className="space-y-6">
@@ -705,6 +738,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       </div>
     </div>
   );
+
   // Header content with duplication state
   const headerContent = (
     <FormModalHeader 
@@ -713,6 +747,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       icon={Zap}
     />
   );
+
   // Footer content
   const footerContent = (
     <FormModalFooter
@@ -724,6 +759,7 @@ export function TaskModal({ modalData, onClose }: TaskModalProps) {
       submitDisabled={!canSubmit || isDuplicationLoading}
     />
   );
+
   return (
     <FormModalLayout
       columns={1}

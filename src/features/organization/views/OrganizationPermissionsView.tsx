@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
+
 interface Permission {
   id: string;
   key: string;
@@ -18,6 +19,7 @@ interface Permission {
   category: string;
   is_system: boolean;
 }
+
 interface Role {
   id: string;
   name: string;
@@ -26,11 +28,13 @@ interface Role {
   is_system: boolean;
   permissionIds: string[];
 }
+
 interface RolesPermissionsData {
   roles: Role[];
   permissions: Permission[];
   permissionsByCategory: Record<string, Permission[]>;
 }
+
 const CATEGORY_LABELS: Record<string, string> = {
   'projects': 'Proyectos',
   'project': 'Proyectos',
@@ -74,63 +78,65 @@ const CATEGORY_LABELS: Record<string, string> = {
   'subscriptions': 'Suscripciones',
   'subscription': 'Suscripciones',
 };
+
 const PERMISSION_LABELS: Record<string, { label: string; description: string }> = {
-  'projects.view': { label: 'Ver proyectos', description: 'Permite ver la lista de proyectos y sus detalles'},
-  'projects.create': { label: 'Crear proyectos', description: 'Permite crear nuevos proyectos'},
-  'projects.edit': { label: 'Editar proyectos', description: 'Permite modificar proyectos existentes'},
-  'projects.delete': { label: 'Eliminar proyectos', description: 'Permite eliminar proyectos'},
-  'projects.archive': { label: 'Archivar proyectos', description: 'Permite archivar y desarchivar proyectos'},
-  'members.view': { label: 'Ver miembros', description: 'Permite ver la lista de miembros de la organización'},
-  'members.invite': { label: 'Invitar miembros', description: 'Permite invitar nuevos miembros a la organización'},
-  'members.edit': { label: 'Editar miembros', description: 'Permite modificar información de miembros'},
-  'members.remove': { label: 'Eliminar miembros', description: 'Permite eliminar miembros de la organización'},
-  'finances.view': { label: 'Ver finanzas', description: 'Permite ver información financiera'},
-  'finances.create': { label: 'Crear movimientos', description: 'Permite crear movimientos financieros'},
-  'finances.edit': { label: 'Editar movimientos', description: 'Permite editar movimientos financieros'},
-  'finances.delete': { label: 'Eliminar movimientos', description: 'Permite eliminar movimientos financieros'},
-  'finances.export': { label: 'Exportar finanzas', description: 'Permite exportar reportes financieros'},
-  'clients.view': { label: 'Ver clientes', description: 'Permite ver la lista de clientes'},
-  'clients.create': { label: 'Crear clientes', description: 'Permite crear nuevos clientes'},
-  'clients.edit': { label: 'Editar clientes', description: 'Permite modificar clientes existentes'},
-  'clients.delete': { label: 'Eliminar clientes', description: 'Permite eliminar clientes'},
-  'contacts.view': { label: 'Ver contactos', description: 'Permite ver la lista de contactos'},
-  'contacts.create': { label: 'Crear contactos', description: 'Permite crear nuevos contactos'},
-  'contacts.edit': { label: 'Editar contactos', description: 'Permite modificar contactos existentes'},
-  'contacts.delete': { label: 'Eliminar contactos', description: 'Permite eliminar contactos'},
-  'materials.view': { label: 'Ver materiales', description: 'Permite ver la lista de materiales'},
-  'materials.create': { label: 'Crear materiales', description: 'Permite crear nuevos materiales'},
-  'materials.edit': { label: 'Editar materiales', description: 'Permite modificar materiales existentes'},
-  'materials.delete': { label: 'Eliminar materiales', description: 'Permite eliminar materiales'},
-  'personnel.view': { label: 'Ver personal', description: 'Permite ver la lista de personal'},
-  'personnel.create': { label: 'Crear personal', description: 'Permite crear nuevos registros de personal'},
-  'personnel.edit': { label: 'Editar personal', description: 'Permite modificar registros de personal'},
-  'personnel.delete': { label: 'Eliminar personal', description: 'Permite eliminar registros de personal'},
-  'subcontracts.view': { label: 'Ver subcontratos', description: 'Permite ver la lista de subcontratos'},
-  'subcontracts.create': { label: 'Crear subcontratos', description: 'Permite crear nuevos subcontratos'},
-  'subcontracts.edit': { label: 'Editar subcontratos', description: 'Permite modificar subcontratos existentes'},
-  'subcontracts.delete': { label: 'Eliminar subcontratos', description: 'Permite eliminar subcontratos'},
-  'sitelog.view': { label: 'Ver bitácora', description: 'Permite ver entradas de la bitácora'},
-  'sitelog.create': { label: 'Crear entradas', description: 'Permite crear nuevas entradas en la bitácora'},
-  'sitelog.edit': { label: 'Editar entradas', description: 'Permite modificar entradas de la bitácora'},
-  'sitelog.delete': { label: 'Eliminar entradas', description: 'Permite eliminar entradas de la bitácora'},
-  'media.view': { label: 'Ver media', description: 'Permite ver archivos multimedia'},
-  'media.upload': { label: 'Subir archivos', description: 'Permite subir nuevos archivos'},
-  'media.edit': { label: 'Editar media', description: 'Permite modificar archivos multimedia'},
-  'media.delete': { label: 'Eliminar media', description: 'Permite eliminar archivos multimedia'},
-  'settings.view': { label: 'Ver configuración', description: 'Permite ver la configuración'},
-  'settings.edit': { label: 'Editar configuración', description: 'Permite modificar la configuración'},
-  'organization.view': { label: 'Ver organización', description: 'Permite ver detalles de la organización'},
-  'organization.edit': { label: 'Editar organización', description: 'Permite modificar la organización'},
-  'roles.view': { label: 'Ver roles', description: 'Permite ver la lista de roles'},
-  'roles.manage': { label: 'Gestionar roles', description: 'Permite crear, editar y eliminar roles'},
-  'capital.view': { label: 'Ver capital', description: 'Permite ver información de capital'},
-  'capital.manage': { label: 'Gestionar capital', description: 'Permite gestionar el capital'},
-  'budgets.view': { label: 'Ver presupuestos', description: 'Permite ver presupuestos'},
-  'budgets.create': { label: 'Crear presupuestos', description: 'Permite crear nuevos presupuestos'},
-  'budgets.edit': { label: 'Editar presupuestos', description: 'Permite modificar presupuestos'},
-  'budgets.delete': { label: 'Eliminar presupuestos', description: 'Permite eliminar presupuestos'},
-  'analysis.view': { label: 'Ver análisis', description: 'Permite ver análisis y reportes'},
+  'projects.view': { label: 'Ver proyectos', description: 'Permite ver la lista de proyectos y sus detalles' },
+  'projects.create': { label: 'Crear proyectos', description: 'Permite crear nuevos proyectos' },
+  'projects.edit': { label: 'Editar proyectos', description: 'Permite modificar proyectos existentes' },
+  'projects.delete': { label: 'Eliminar proyectos', description: 'Permite eliminar proyectos' },
+  'projects.archive': { label: 'Archivar proyectos', description: 'Permite archivar y desarchivar proyectos' },
+  'members.view': { label: 'Ver miembros', description: 'Permite ver la lista de miembros de la organización' },
+  'members.invite': { label: 'Invitar miembros', description: 'Permite invitar nuevos miembros a la organización' },
+  'members.edit': { label: 'Editar miembros', description: 'Permite modificar información de miembros' },
+  'members.remove': { label: 'Eliminar miembros', description: 'Permite eliminar miembros de la organización' },
+  'finances.view': { label: 'Ver finanzas', description: 'Permite ver información financiera' },
+  'finances.create': { label: 'Crear movimientos', description: 'Permite crear movimientos financieros' },
+  'finances.edit': { label: 'Editar movimientos', description: 'Permite editar movimientos financieros' },
+  'finances.delete': { label: 'Eliminar movimientos', description: 'Permite eliminar movimientos financieros' },
+  'finances.export': { label: 'Exportar finanzas', description: 'Permite exportar reportes financieros' },
+  'clients.view': { label: 'Ver clientes', description: 'Permite ver la lista de clientes' },
+  'clients.create': { label: 'Crear clientes', description: 'Permite crear nuevos clientes' },
+  'clients.edit': { label: 'Editar clientes', description: 'Permite modificar clientes existentes' },
+  'clients.delete': { label: 'Eliminar clientes', description: 'Permite eliminar clientes' },
+  'contacts.view': { label: 'Ver contactos', description: 'Permite ver la lista de contactos' },
+  'contacts.create': { label: 'Crear contactos', description: 'Permite crear nuevos contactos' },
+  'contacts.edit': { label: 'Editar contactos', description: 'Permite modificar contactos existentes' },
+  'contacts.delete': { label: 'Eliminar contactos', description: 'Permite eliminar contactos' },
+  'materials.view': { label: 'Ver materiales', description: 'Permite ver la lista de materiales' },
+  'materials.create': { label: 'Crear materiales', description: 'Permite crear nuevos materiales' },
+  'materials.edit': { label: 'Editar materiales', description: 'Permite modificar materiales existentes' },
+  'materials.delete': { label: 'Eliminar materiales', description: 'Permite eliminar materiales' },
+  'personnel.view': { label: 'Ver personal', description: 'Permite ver la lista de personal' },
+  'personnel.create': { label: 'Crear personal', description: 'Permite crear nuevos registros de personal' },
+  'personnel.edit': { label: 'Editar personal', description: 'Permite modificar registros de personal' },
+  'personnel.delete': { label: 'Eliminar personal', description: 'Permite eliminar registros de personal' },
+  'subcontracts.view': { label: 'Ver subcontratos', description: 'Permite ver la lista de subcontratos' },
+  'subcontracts.create': { label: 'Crear subcontratos', description: 'Permite crear nuevos subcontratos' },
+  'subcontracts.edit': { label: 'Editar subcontratos', description: 'Permite modificar subcontratos existentes' },
+  'subcontracts.delete': { label: 'Eliminar subcontratos', description: 'Permite eliminar subcontratos' },
+  'sitelog.view': { label: 'Ver bitácora', description: 'Permite ver entradas de la bitácora' },
+  'sitelog.create': { label: 'Crear entradas', description: 'Permite crear nuevas entradas en la bitácora' },
+  'sitelog.edit': { label: 'Editar entradas', description: 'Permite modificar entradas de la bitácora' },
+  'sitelog.delete': { label: 'Eliminar entradas', description: 'Permite eliminar entradas de la bitácora' },
+  'media.view': { label: 'Ver media', description: 'Permite ver archivos multimedia' },
+  'media.upload': { label: 'Subir archivos', description: 'Permite subir nuevos archivos' },
+  'media.edit': { label: 'Editar media', description: 'Permite modificar archivos multimedia' },
+  'media.delete': { label: 'Eliminar media', description: 'Permite eliminar archivos multimedia' },
+  'settings.view': { label: 'Ver configuración', description: 'Permite ver la configuración' },
+  'settings.edit': { label: 'Editar configuración', description: 'Permite modificar la configuración' },
+  'organization.view': { label: 'Ver organización', description: 'Permite ver detalles de la organización' },
+  'organization.edit': { label: 'Editar organización', description: 'Permite modificar la organización' },
+  'roles.view': { label: 'Ver roles', description: 'Permite ver la lista de roles' },
+  'roles.manage': { label: 'Gestionar roles', description: 'Permite crear, editar y eliminar roles' },
+  'capital.view': { label: 'Ver capital', description: 'Permite ver información de capital' },
+  'capital.manage': { label: 'Gestionar capital', description: 'Permite gestionar el capital' },
+  'budgets.view': { label: 'Ver presupuestos', description: 'Permite ver presupuestos' },
+  'budgets.create': { label: 'Crear presupuestos', description: 'Permite crear nuevos presupuestos' },
+  'budgets.edit': { label: 'Editar presupuestos', description: 'Permite modificar presupuestos' },
+  'budgets.delete': { label: 'Eliminar presupuestos', description: 'Permite eliminar presupuestos' },
+  'analysis.view': { label: 'Ver análisis', description: 'Permite ver análisis y reportes' },
 };
+
 function getCategoryLabel(category: string): string {
   const normalized = category.toLowerCase().replace(/[-_]/g, '');
   if (CATEGORY_LABELS[category.toLowerCase()]) {
@@ -139,11 +145,13 @@ function getCategoryLabel(category: string): string {
   if (CATEGORY_LABELS[normalized]) {
     return CATEGORY_LABELS[normalized];
   }
-  return category.charAt(0).toUpperCase() + category.slice(1).replace(/[-_]/g, '');
+  return category.charAt(0).toUpperCase() + category.slice(1).replace(/[-_]/g, ' ');
 }
+
 function isAdminRole(roleName: string): boolean {
   return roleName.toLowerCase().includes('admin');
 }
+
 function sortPermissions(permissions: Permission[]): Permission[] {
   return [...permissions].sort((a, b) => {
     const aIsView = a.key.endsWith('.view');
@@ -159,6 +167,7 @@ function sortPermissions(permissions: Permission[]): Permission[] {
     return 0;
   });
 }
+
 function getPermissionInfo(key: string): { label: string; description: string } {
   if (PERMISSION_LABELS[key]) {
     return PERMISSION_LABELS[key];
@@ -178,11 +187,12 @@ function getPermissionInfo(key: string): { label: string; description: string } 
     'export': 'Exportar',
     'archive': 'Archivar',
   };
-  const verb = actionLabels[action] || action.replace(/_/g, '').replace(/\b\w/g, l => l.toUpperCase());
+  const verb = actionLabels[action] || action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   const categoryLabel = getCategoryLabel(category);
   const label = `${verb} ${categoryLabel}`;
-  return { label, description: ''};
+  return { label, description: '' };
 }
+
 export function OrganizationPermissionsView() {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
@@ -193,6 +203,7 @@ export function OrganizationPermissionsView() {
   
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const pendingSavesRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
   const { data, isLoading, error } = useQuery<RolesPermissionsData>({
     queryKey: organizationKeys.rolesPermissions(organizationId),
     queryFn: async () => {
@@ -203,11 +214,13 @@ export function OrganizationPermissionsView() {
     enabled: !!organizationId,
     staleTime: 30000,
   });
+
   useEffect(() => {
     if (data?.permissionsByCategory) {
       setExpandedCategories(new Set(Object.keys(data.permissionsByCategory)));
     }
   }, [data?.permissionsByCategory]);
+
   const updatePermissionsMutation = useOptimisticMutation({
     mutationFn: async ({ roleId, permissionIds }: { roleId: string; permissionIds: string[] }) => {
       return apiRequest('PUT', `/api/roles/${roleId}/permissions`, { permissionIds, organizationId });
@@ -227,6 +240,7 @@ export function OrganizationPermissionsView() {
     onErrorMessage: 'No se pudieron guardar los cambios',
     invalidateOnSuccess: false,
   });
+
   const scheduleAutoSave = useCallback((roleId: string, permissionIds: string[]) => {
     const existingTimeout = pendingSavesRef.current.get(roleId);
     if (existingTimeout) {
@@ -240,9 +254,11 @@ export function OrganizationPermissionsView() {
     
     pendingSavesRef.current.set(roleId, timeout);
   }, [updatePermissionsMutation, organizationId]);
+
   const handlePermissionToggle = useCallback((roleId: string, permissionId: string) => {
     const role = data?.roles.find(r => r.id === roleId);
     if (!role || isAdminRole(role.name) || !canManageRoles) return;
+
     const currentPermissions = role.permissionIds || [];
     const updatedPermissions = currentPermissions.includes(permissionId)
       ? currentPermissions.filter(id => id !== permissionId)
@@ -250,20 +266,25 @@ export function OrganizationPermissionsView() {
     
     updatePermissionsMutation.mutate({ roleId, permissionIds: updatedPermissions });
   }, [data?.roles, canManageRoles, updatePermissionsMutation]);
+
   const handleCategoryToggle = useCallback((roleId: string, category: string, permissions: Permission[]) => {
     const role = data?.roles.find(r => r.id === roleId);
     if (!role || isAdminRole(role.name) || !canManageRoles) return;
+
     const permissionIdsInCategory = permissions.map(p => p.id);
     const currentPermissions = role.permissionIds || [];
     const allSelected = permissionIdsInCategory.every(id => currentPermissions.includes(id));
+
     let updatedPermissions: string[];
     if (allSelected) {
       updatedPermissions = currentPermissions.filter(id => !permissionIdsInCategory.includes(id));
     } else {
       updatedPermissions = Array.from(new Set([...currentPermissions, ...permissionIdsInCategory]));
     }
+
     scheduleAutoSave(roleId, updatedPermissions);
   }, [data?.roles, canManageRoles, scheduleAutoSave]);
+
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => {
       const next = new Set(prev);
@@ -275,6 +296,7 @@ export function OrganizationPermissionsView() {
       return next;
     });
   };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -282,6 +304,7 @@ export function OrganizationPermissionsView() {
       </div>
     );
   }
+
   if (error) {
     return (
       <Alert variant="destructive">
@@ -291,8 +314,10 @@ export function OrganizationPermissionsView() {
       </Alert>
     );
   }
+
   const roles = data?.roles || [];
   const categories = data?.permissionsByCategory || {};
+
   return (
     <Card data-testid="permissions-tab">
       <CardContent className="p-0">
@@ -307,6 +332,7 @@ export function OrganizationPermissionsView() {
               </Alert>
             </div>
           )}
+
           <div className="overflow-hidden">
         <ScrollArea className="w-full">
           <div className="min-w-[800px]">
@@ -378,6 +404,7 @@ export function OrganizationPermissionsView() {
                             const allSelected = selectedCount === permissions.length;
                             const someSelected = selectedCount > 0 && selectedCount < permissions.length;
                             const isAdmin = isAdminRole(role.name);
+
                             return (
                               <td 
                                 key={role.id} 
@@ -427,6 +454,7 @@ export function OrganizationPermissionsView() {
                                 const isAdmin = isAdminRole(role.name);
                                 const rolePerms = role.permissionIds || [];
                                 const isChecked = isAdmin || rolePerms.includes(permission.id);
+
                                 return (
                                   <td key={role.id} className="text-center p-3">
                                     <div className="flex justify-center">

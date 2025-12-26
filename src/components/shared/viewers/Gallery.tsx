@@ -5,12 +5,14 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { MediaLightbox, useMediaLightbox, type MediaItem } from '@/components/shared/viewers/ImageLightbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { 
   Search, 
   Filter, 
   X, 
@@ -33,6 +35,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+
 interface GalleryFile {
   id: string;
   link_id?: string; // ID del media_link (requerido para eliminación en nueva arquitectura)
@@ -53,45 +56,49 @@ interface GalleryFile {
   general_cost_payment_id?: string | null;
   client_payment_id?: string | null;
 }
+
 // Helper para obtener el icono según el tipo de archivo
 function getFileTypeIcon(fileType: string) {
-  if (fileType === 'image'|| fileType?.startsWith('image/')) {
+  if (fileType === 'image' || fileType?.startsWith('image/')) {
     return ImageIcon;
-  } else if (fileType === 'video'|| fileType?.startsWith('video/')) {
+  } else if (fileType === 'video' || fileType?.startsWith('video/')) {
     return Video;
   }
   return FileText;
 }
+
 // Helper para obtener el icono y label según el origen del archivo
 function getSourceInfo(file: GalleryFile): { icon: any; label: string; color: string } | null {
   if (file.site_log_id) {
-    return { icon: BookOpen, label: 'Bitácora', color: 'bg-blue-500'};
+    return { icon: BookOpen, label: 'Bitácora', color: 'bg-blue-500' };
   }
   if (file.client_payment_id) {
-    return { icon: Users, label: 'Clientes', color: 'bg-purple-500'};
+    return { icon: Users, label: 'Clientes', color: 'bg-purple-500' };
   }
   if (file.movement_id) {
-    return { icon: DollarSign, label: 'Movimientos', color: 'bg-green-500'};
+    return { icon: DollarSign, label: 'Movimientos', color: 'bg-green-500' };
   }
   if (file.contact_id) {
-    return { icon: Users, label: 'Contactos', color: 'bg-orange-500'};
+    return { icon: Users, label: 'Contactos', color: 'bg-orange-500' };
   }
   if (file.course_lesson_id) {
-    return { icon: GraduationCap, label: 'Cursos', color: 'bg-indigo-500'};
+    return { icon: GraduationCap, label: 'Cursos', color: 'bg-indigo-500' };
   }
   if (file.general_cost_payment_id) {
-    return { icon: DollarSign, label: 'Costos', color: 'bg-yellow-500'};
+    return { icon: DollarSign, label: 'Costos', color: 'bg-yellow-500' };
   }
   return null;
 }
+
 interface GalleryProps {
   files: GalleryFile[];
   onDelete?: (file: GalleryFile) => void;
   onDownload?: (file: GalleryFile) => void;
   showProjectName?: boolean;
-  galleryStyle?: 'uniform'| 'masonry';
+  galleryStyle?: 'uniform' | 'masonry';
   hideActionBar?: boolean;
 }
+
 export function Gallery({ 
   files, 
   onDelete, 
@@ -101,45 +108,51 @@ export function Gallery({
   hideActionBar = false
 }: GalleryProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [fileTypeFilter, setFileTypeFilter] = useState<'Todo'| 'Imágenes'| 'Videos'>('Todo');
-  const [sourceFilter, setSourceFilter] = useState<'all'| 'standalone'| 'sitelog'>('all');
+  const [fileTypeFilter, setFileTypeFilter] = useState<'Todo' | 'Imágenes' | 'Videos'>('Todo');
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'standalone' | 'sitelog'>('all');
   const [filtersOpen, setFiltersOpen] = useState(false);
+
   // Filter files
   const filteredFiles = useMemo(() => {
     let filtered = files;
+
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(file => 
         file.file_name?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
+
     // File type filter
     if (fileTypeFilter !== 'Todo') {
       filtered = filtered.filter(file => 
         fileTypeFilter === 'Imágenes'
-          ? file.file_type === 'image'|| file.file_type?.startsWith('image/')
-          : file.file_type === 'video'|| file.file_type?.startsWith('video/')
+          ? file.file_type === 'image' || file.file_type?.startsWith('image/')
+          : file.file_type === 'video' || file.file_type?.startsWith('video/')
       );
     }
+
     // Source filter (site_log_id)
     if (sourceFilter !== 'all') {
       filtered = filtered.filter(file => 
-        sourceFilter === 'standalone'
+        sourceFilter === 'standalone' 
           ? (!file.site_log_id || file.site_log_id === null)
           : (file.site_log_id && file.site_log_id !== null)
       );
     }
+
     return filtered;
   }, [files, searchTerm, fileTypeFilter, sourceFilter]);
+
   // Lightbox setup - usar TODOS los archivos multimedia (imágenes y videos)
   const mediaItems = useMemo<MediaItem[]>(() => 
     files
       .filter(file => 
-        file.file_type === 'image'|| file.file_type?.startsWith('image/') ||
-        file.file_type === 'video'|| file.file_type?.startsWith('video/')
+        file.file_type === 'image' || file.file_type?.startsWith('image/') ||
+        file.file_type === 'video' || file.file_type?.startsWith('video/')
       )
       .map(file => ({
-        type: (file.file_type === 'video'|| file.file_type?.startsWith('video/')) ? 'video'as const : 'image'as const,
+        type: (file.file_type === 'video' || file.file_type?.startsWith('video/')) ? 'video' as const : 'image' as const,
         src: file.file_url
       })), 
     [files]
@@ -151,16 +164,17 @@ export function Gallery({
     openLightbox, 
     closeLightbox
   } = useMediaLightbox(mediaItems);
+
   const handleMediaClick = (file: GalleryFile) => {
-    const isMediaFile = file.file_type === 'image'|| file.file_type?.startsWith('image/') ||
-                        file.file_type === 'video'|| file.file_type?.startsWith('video/');
+    const isMediaFile = file.file_type === 'image' || file.file_type?.startsWith('image/') ||
+                        file.file_type === 'video' || file.file_type?.startsWith('video/');
     
     if (isMediaFile) {
       // Para imágenes y videos, abrir en lightbox
       const mediaIndex = files
         .filter(f => 
-          f.file_type === 'image'|| f.file_type?.startsWith('image/') ||
-          f.file_type === 'video'|| f.file_type?.startsWith('video/')
+          f.file_type === 'image' || f.file_type?.startsWith('image/') ||
+          f.file_type === 'video' || f.file_type?.startsWith('video/')
         )
         .findIndex(f => f.id === file.id);
       if (mediaIndex !== -1) {
@@ -171,11 +185,13 @@ export function Gallery({
       window.open(file.file_url, '_blank');
     }
   };
+
   const clearFilters = () => {
     setSearchTerm('');
     setFileTypeFilter('Todo');
     setSourceFilter('all');
   };
+
   // Count active filters
   const activeFiltersCount = useMemo(() => {
     let count = 0;
@@ -184,6 +200,7 @@ export function Gallery({
     if (sourceFilter !== 'all') count++;
     return count;
   }, [searchTerm, fileTypeFilter, sourceFilter]);
+
   if (files.length === 0) {
     return (
       <EmptyState
@@ -192,6 +209,7 @@ export function Gallery({
       />
     );
   }
+
   return (
     <div className="space-y-6">
       {/* Filter Buttons - Always show when we have any files */}
@@ -201,39 +219,40 @@ export function Gallery({
           {/* Filter buttons on the left - Using same style as TableTopBar tabs */}
           <div className="flex items-center gap-1">
             <Button
-              variant={fileTypeFilter === 'Todo'? "secondary" : "ghost"}
+              variant={fileTypeFilter === 'Todo' ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setFileTypeFilter('Todo')}
               className={cn(
                 "h-8 px-3 text-xs font-normal",
-                fileTypeFilter === 'Todo'? "button-secondary-pressed" : ""
+                fileTypeFilter === 'Todo' ? "button-secondary-pressed" : ""
               )}
             >
               Todo
             </Button>
             <Button
-              variant={fileTypeFilter === 'Imágenes'? "secondary" : "ghost"}
+              variant={fileTypeFilter === 'Imágenes' ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setFileTypeFilter('Imágenes')}
               className={cn(
                 "h-8 px-3 text-xs font-normal",
-                fileTypeFilter === 'Imágenes'? "button-secondary-pressed" : ""
+                fileTypeFilter === 'Imágenes' ? "button-secondary-pressed" : ""
               )}
             >
               Imágenes
             </Button>
             <Button
-              variant={fileTypeFilter === 'Videos'? "secondary" : "ghost"}
+              variant={fileTypeFilter === 'Videos' ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setFileTypeFilter('Videos')}
               className={cn(
                 "h-8 px-3 text-xs font-normal",
-                fileTypeFilter === 'Videos'? "button-secondary-pressed" : ""
+                fileTypeFilter === 'Videos' ? "button-secondary-pressed" : ""
               )}
             >
               Videos
             </Button>
           </div>
+
           {/* Actions on the right */}
           <div className="flex items-center gap-2">
             <Button
@@ -273,7 +292,7 @@ export function Gallery({
                     <label className="text-xs font-medium text-muted-foreground">Tipo de Archivo</label>
                     <Select
                       value={fileTypeFilter}
-                      onValueChange={(value: 'Todo'| 'Imágenes'| 'Videos') => setFileTypeFilter(value)}
+                      onValueChange={(value: 'Todo' | 'Imágenes' | 'Videos') => setFileTypeFilter(value)}
                     >
                       <SelectTrigger className="h-8 text-xs">
                         <SelectValue />
@@ -285,12 +304,13 @@ export function Gallery({
                       </SelectContent>
                     </Select>
                   </div>
+
                   {/* Filtro por Fuente */}
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-muted-foreground">Fuente del Archivo</label>
                     <Select
                       value={sourceFilter}
-                      onValueChange={(value: 'all'| 'standalone'| 'sitelog') => setSourceFilter(value)}
+                      onValueChange={(value: 'all' | 'standalone' | 'sitelog') => setSourceFilter(value)}
                     >
                       <SelectTrigger className="h-8 text-xs">
                         <SelectValue />
@@ -320,9 +340,10 @@ export function Gallery({
         </div>
       </div>
       )}
+
       {/* Gallery Grid */}
       {filteredFiles.length > 0 ? (
-        galleryStyle === 'uniform'? (
+        galleryStyle === 'uniform' ? (
           // Uniform Grid Style
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-1">
             {filteredFiles.map((file) => (
@@ -332,14 +353,14 @@ export function Gallery({
                   className="w-full h-full cursor-pointer relative overflow-hidden bg-gray-100"
                   onClick={() => handleMediaClick(file)}
                 >
-                  {file.file_type === 'image'|| file.file_type?.startsWith('image/') ? (
+                  {file.file_type === 'image' || file.file_type?.startsWith('image/') ? (
                     <img
                       src={file.file_url}
                       alt={file.file_name}
                       className="w-full h-full object-cover transition-transform group-hover:scale-105"
                       loading="lazy"
                     />
-                  ) : file.file_type === 'video'|| file.file_type?.startsWith('video/') ? (
+                  ) : file.file_type === 'video' || file.file_type?.startsWith('video/') ? (
                     <div className="w-full h-full bg-gray-100 flex items-center justify-center relative">
                       <PlayCircle className="w-8 h-8 text-white absolute z-10" />
                       <video
@@ -362,7 +383,7 @@ export function Gallery({
                       return (
                         <div
                           className="h-6 w-6 rounded-full bg-white/90 backdrop-blur-sm shadow-md border border-gray-300 flex items-center justify-center"
-                          title={file.file_type === 'image'|| file.file_type?.startsWith('image/') ? 'Imagen': file.file_type === 'video'|| file.file_type?.startsWith('video/') ? 'Video': 'Documento'}
+                          title={file.file_type === 'image' || file.file_type?.startsWith('image/') ? 'Imagen' : file.file_type === 'video' || file.file_type?.startsWith('video/') ? 'Video' : 'Documento'}
                         >
                           <FileIcon className="h-3.5 w-3.5 text-gray-700" />
                         </div>
@@ -461,14 +482,14 @@ export function Gallery({
                     className="w-full h-full cursor-pointer relative overflow-hidden"
                     onClick={() => handleMediaClick(file)}
                   >
-                    {file.file_type === 'image'|| file.file_type?.startsWith('image/') ? (
+                    {file.file_type === 'image' || file.file_type?.startsWith('image/') ? (
                       <img
                         src={file.file_url}
                         alt={file.file_name}
                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
                         loading="lazy"
                       />
-                    ) : file.file_type === 'video'|| file.file_type?.startsWith('video/') ? (
+                    ) : file.file_type === 'video' || file.file_type?.startsWith('video/') ? (
                       <div className="w-full h-full bg-gray-100 flex items-center justify-center relative">
                         <PlayCircle className="w-8 h-8 text-white absolute z-10" />
                         <video
@@ -491,7 +512,7 @@ export function Gallery({
                         return (
                           <div
                             className="h-6 w-6 rounded-full bg-white/90 backdrop-blur-sm shadow-md border border-gray-300 flex items-center justify-center"
-                            title={file.file_type === 'image'|| file.file_type?.startsWith('image/') ? 'Imagen': file.file_type === 'video'|| file.file_type?.startsWith('video/') ? 'Video': 'Documento'}
+                            title={file.file_type === 'image' || file.file_type?.startsWith('image/') ? 'Imagen' : file.file_type === 'video' || file.file_type?.startsWith('video/') ? 'Video' : 'Documento'}
                           >
                             <FileIcon className="h-3.5 w-3.5 text-gray-700" />
                           </div>
@@ -577,6 +598,7 @@ export function Gallery({
           }
         />
       )}
+
       {/* Media Lightbox (imágenes y videos) */}
       <MediaLightbox
         media={mediaItems}

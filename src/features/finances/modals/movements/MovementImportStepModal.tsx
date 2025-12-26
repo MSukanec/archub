@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/use-toast'
 import { IdentityBadge } from '@/components/shared/IdentityBadge'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
+
 // Value normalization utilities
 const normalizeText = (text: string): string => {
   if (!text || typeof text !== 'string') return '';
@@ -34,11 +35,13 @@ const normalizeText = (text: string): string => {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '') // Remove accents
     .trim()
-    .replace(/\s+/g, ''); // Normalize spaces
+    .replace(/\s+/g, ' '); // Normalize spaces
 };
+
 // Value mapping configurations
 const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
   const valueMap: { [key: string]: { [key: string]: string } } = {};
+
   // Add type mappings with proper UUIDs (only from parent concepts)
   const types = concepts?.filter(c => !c.parent_id) || [];
   if (types?.length) {
@@ -72,6 +75,7 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
       mappingKeys: Object.keys(valueMap.type_id).slice(0, 10)
     });
   }
+
   // Add currency mappings
   if (currencies?.length) {
     valueMap.currency_id = {};
@@ -84,6 +88,7 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
       }
     });
   }
+
   // Add wallet mappings
   if (wallets?.length) {
     valueMap.wallet_id = {};
@@ -93,6 +98,7 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
       valueMap.wallet_id[normalized] = orgWallet.id; // Use organization_wallet.id instead of wallet.id
     });
   }
+
   // Extract categories (intermediate level: children of types, parents of subcategories)
   const allCategories = types?.flatMap(type => type.children || []) || [];
   console.log('🔧 Categories for mapping:', {
@@ -100,6 +106,7 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
     categoriesFound: allCategories.length,
     categoryNames: allCategories.map(c => c.name).slice(0, 5)
   });
+
   // Add category mappings (intermediate level)
   if (allCategories?.length) {
     valueMap.category_id = {};
@@ -124,6 +131,7 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
       });
     });
   }
+
   // Extract subcategories (children of categories)
   const allSubcategories = allCategories?.flatMap(category => category.children || []) || [];
   console.log('🔧 Subcategories for mapping:', {
@@ -131,6 +139,7 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
     subcategoriesFound: allSubcategories.length,
     subcategoryNames: allSubcategories.map(s => s.name).slice(0, 5)
   });
+
   // Add subcategory mappings (deepest level)
   if (allSubcategories?.length) {
     valueMap.subcategory_id = {};
@@ -155,27 +164,31 @@ const createValueMap = (concepts: any[], currencies: any[], wallets: any[]) => {
       });
     });
   }
+
   return valueMap;
 };
+
 // UUID validation helper
 const isValidUUID = (value: string): boolean => {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return uuidRegex.test(value);
 };
+
 const normalizeValue = (field: string, value: any, valueMap: any, manualMappings: any = {}): any => {
-  if (!value || value === ''|| value === 'Sin asignar'|| value === 'empty-placeholder') {
+  if (!value || value === '' || value === 'Sin asignar' || value === 'empty-placeholder') {
     return null;
   }
   
   const stringValue = String(value).trim();
   const normalized = normalizeText(stringValue);
   
+
   
   // Check manual mappings first
   const mappingKey = `${field}_${stringValue}`;
   if (manualMappings[mappingKey] !== undefined) {
     // Return null for empty string mappings (Sin asignar)
-    return manualMappings[mappingKey] === ''|| manualMappings[mappingKey] === 'empty-placeholder'? null : manualMappings[mappingKey];
+    return manualMappings[mappingKey] === '' || manualMappings[mappingKey] === 'empty-placeholder' ? null : manualMappings[mappingKey];
   }
   
   // Check direct mapping
@@ -225,6 +238,7 @@ const normalizeValue = (field: string, value: any, valueMap: any, manualMappings
   // Return null for unmappable values to avoid UUID errors
   return null;
 };
+
 // Simple similarity calculation for fuzzy matching
 const calculateSimilarity = (str1: string, str2: string): number => {
   const longer = str1.length > str2.length ? str1 : str2;
@@ -235,6 +249,7 @@ const calculateSimilarity = (str1: string, str2: string): number => {
   const editDistance = levenshteinDistance(longer, shorter);
   return (longer.length - editDistance) / longer.length;
 };
+
 const levenshteinDistance = (str1: string, str2: string): number => {
   const matrix = [];
   
@@ -262,34 +277,40 @@ const levenshteinDistance = (str1: string, str2: string): number => {
   
   return matrix[str2.length][str1.length];
 };
+
 interface MovementImportStepModalProps {
   modalData?: any
   onClose: () => void
 }
+
 interface ParsedData {
   headers: string[]
   rows: any[][]
   fileName: string
 }
+
 interface ColumnMapping {
   [columnIndex: string]: string
 }
+
 interface ValidationError {
   row: number
   column: string
   message: string
 }
+
 const AVAILABLE_FIELDS = [
-  { value: 'movement_date', label: 'Fecha'},
-  { value: 'description', label: 'Descripción'},
-  { value: 'amount', label: 'Cantidad'},
-  { value: 'currency_id', label: 'Moneda'},
-  { value: 'wallet_id', label: 'Billetera'},
-  { value: 'type_id', label: 'Tipo'},
-  { value: 'category_id', label: 'Categoría'},
-  { value: 'subcategory_id', label: 'Subcategoría'},
-  { value: 'exchange_rate', label: 'Cotización'}
+  { value: 'movement_date', label: 'Fecha' },
+  { value: 'description', label: 'Descripción' },
+  { value: 'amount', label: 'Cantidad' },
+  { value: 'currency_id', label: 'Moneda' },
+  { value: 'wallet_id', label: 'Billetera' },
+  { value: 'type_id', label: 'Tipo' },
+  { value: 'category_id', label: 'Categoría' },
+  { value: 'subcategory_id', label: 'Subcategoría' },
+  { value: 'exchange_rate', label: 'Cotización' }
 ]
+
 // Smart column mapping - maps Excel headers to field values
 const SMART_COLUMN_MAPPING: { [key: string]: string } = {
   'descripcion': 'description',
@@ -320,6 +341,7 @@ const SMART_COLUMN_MAPPING: { [key: string]: string } = {
   'tasa': 'exchange_rate',
   'rate': 'exchange_rate'
 }
+
 export function MovementImportStepModal({ modalData, onClose }: MovementImportStepModalProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [parsedData, setParsedData] = useState<ParsedData | null>(null)
@@ -329,9 +351,11 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set())
   const [dropzoneKey, setDropzoneKey] = useState(0)
   const [selectedCreator, setSelectedCreator] = useState<string>('')
+
   const [manualMappings, setManualMappings] = useState<{[key: string]: string}>({})
   const [incompatibleValues, setIncompatibleValues] = useState<{ [key: string]: string[] }>({})
   // Force re-render counter for the problematic selectors
+
   
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -359,6 +383,9 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
       setSelectedCreator(currentUser.user.id)
     }
   }, [currentUser?.user?.id, selectedCreator])
+
+
+
   // Auto-map columns based on header names when data is parsed
   React.useEffect(() => {
     if (parsedData && parsedData.headers && Object.keys(columnMapping).length === 0) {
@@ -380,6 +407,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
       }
     }
   }, [parsedData, columnMapping])
+
   // Scroll to top when entering step 3
   useEffect(() => {
     if (currentStep === 3) {
@@ -405,7 +433,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
           const containers = document.querySelectorAll(selector)
           containers.forEach(container => {
             if (container && container.scrollTo) {
-              container.scrollTo({ top: 0, behavior: 'instant'}) // Use instant for immediate effect
+              container.scrollTo({ top: 0, behavior: 'instant' }) // Use instant for immediate effect
               scrolledContainers++
             }
           })
@@ -414,7 +442,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
         // Force scroll document as well
         document.documentElement.scrollTop = 0
         document.body.scrollTop = 0
-        window.scrollTo({ top: 0, behavior: 'instant'})
+        window.scrollTo({ top: 0, behavior: 'instant' })
         
         console.log(`✅ Aggressively scrolled ${scrolledContainers} containers to top`)
         
@@ -437,10 +465,12 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
       }, 100) // Reduced initial delay
     }
   }, [currentStep])
+
   // Filtrar conceptos por tipo
   const types = movementConcepts?.filter(c => !c.parent_id) || []
   // Get ALL concepts with parent_id (subcategories) - flatten the structure
   const categories = movementConcepts?.flatMap(concept => concept.children || []) || []
+
   // Function to find parent category name for a subcategory
   const findParentCategoryName = (subcategoryId: string): string => {
     for (const concept of movementConcepts || []) {
@@ -453,6 +483,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
     }
     return 'Sin categoría padre';
   }
+
   // Function to get hierarchy info for field display
   const getFieldHierarchyInfo = (fieldName: string, value: string): string => {
     if (fieldName === 'category_id') {
@@ -505,6 +536,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
     return value
   }
   
+
   
   // Create value mapping for normalization
   const valueMap = createValueMap(movementConcepts || [], organizationCurrencies || [], organizationWallets || [])
@@ -518,6 +550,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
     subcategory_sample: Object.keys(valueMap.subcategory_id || {}).slice(0, 5),
     concepts_received: movementConcepts?.length || 0
   })
+
   // Create mutation for creating new categories
   const createCategoryMutation = useMutation({
     mutationFn: async ({ name, parentId, originalValue }: { name: string; parentId?: string; originalValue?: string }) => {
@@ -533,6 +566,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
         })
         .select()
         .single()
+
       if (error) throw error
       return { newConcept: data, originalValue }
     },
@@ -542,7 +576,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
       
       // Auto-assign the new category/subcategory to the original value
       if (originalValue) {
-        const fieldType = newConcept.parent_id ? 'subcategory_id': 'category_id'
+        const fieldType = newConcept.parent_id ? 'subcategory_id' : 'category_id'
         const mappingKey = `${fieldType}_${originalValue}`
         
         setManualMappings(prev => ({
@@ -570,6 +604,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
       })
     },
   })
+
   // Function to render subcategory options with hierarchy
   const renderSubcategoryOptionsWithHierarchy = () => {
     const result: JSX.Element[] = []
@@ -594,10 +629,12 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
     
     return result
   }
+
   // State for subcategory creation dialog
   const [showSubcategoryDialog, setShowSubcategoryDialog] = useState(false)
   const [pendingSubcategoryName, setPendingSubcategoryName] = useState('')
   const [selectedParentCategory, setSelectedParentCategory] = useState('')
+
   // Function to handle creating new categories/subcategories
   const handleCreateNewCategory = async (fieldName: string, value: string) => {
     if (fieldName === 'category_id') {
@@ -612,6 +649,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
       setShowSubcategoryDialog(true)
     }
   }
+
   // Function to create subcategory with selected parent
   const createSubcategoryWithParent = async () => {
     if (!selectedParentCategory || !pendingSubcategoryName) return
@@ -627,6 +665,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
     setPendingSubcategoryName('')
     setSelectedParentCategory('')
   }
+
   // Reset modal state
   const resetModal = () => {
     setCurrentStep(1)
@@ -638,6 +677,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
     setDropzoneKey(prev => prev + 1)
     setManualMappings({})
   }
+
   // File processing
   const processFile = useCallback(async (file: File) => {
     setIsProcessing(true)
@@ -646,7 +686,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
       
       if (isExcel) {
         const arrayBuffer = await file.arrayBuffer()
-        const workbook = XLSX.read(arrayBuffer, { type: 'array'})
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' })
         const worksheetName = workbook.SheetNames[0]
         const worksheet = workbook.Sheets[worksheetName]
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
@@ -716,6 +756,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
       setIsProcessing(false)
     }
   }, [toast])
+
   // Dropzone configuration
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {
@@ -730,6 +771,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
     },
     multiple: false
   })
+
   // Validation
   const validateMapping = () => {
     const errors: ValidationError[] = []
@@ -767,6 +809,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
     
     return errors.length === 0
   }
+
   // Función para analizar valores incompatibles
   const analyzeIncompatibleValues = () => {
     const incompatible: { [key: string]: string[] } = {}
@@ -795,6 +838,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
     
     return incompatible
   }
+
   // Import mutation
   const importMutation = useMutation({
     mutationFn: async (movements: any[]) => {
@@ -812,12 +856,14 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
           
           return cleaned
         })
+
         // Get user token for RLS authentication
         const { data: { session } } = await supabase.auth.getSession();
         const userToken = session?.access_token;
+
         const response = await fetch('/api/movements/bulk', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json'},
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             movements: cleanedMovements,
             user_token: userToken
@@ -856,6 +902,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
       })
     }
   })
+
   // Handle import
   const handleImport = async () => {
     if (!parsedData || !currentUser?.organization?.id) return
@@ -879,6 +926,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
     const rowsToProcess = selectedRowsArray.length > 0 
       ? selectedRowsArray.map(index => parsedData.rows[index])
       : parsedData.rows
+
     const processedMovements = rowsToProcess
       .map((row) => {
         const movement: any = {
@@ -890,7 +938,9 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
           created_by: selectedMember.id, // Use organization_member.id instead of user.id
           is_favorite: false
         }
+
         let hasValidData = false
+
         // Map columns to movement fields
         Object.entries(columnMapping).forEach(([columnIndex, fieldName]) => {
           if (fieldName && row[parseInt(columnIndex)] !== undefined) {
@@ -946,7 +996,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
                   const normalizedValue = normalizeValue(fieldName, value, valueMap, manualMappings)
                   
                   // ONLY set the field if we got a valid UUID
-                  if (normalizedValue && typeof normalizedValue === 'string'&& isValidUUID(normalizedValue)) {
+                  if (normalizedValue && typeof normalizedValue === 'string' && isValidUUID(normalizedValue)) {
                     movement[fieldName] = normalizedValue
                     hasValidData = true
                     console.log(`✅ ${fieldName} mapped successfully: ${value} → ${normalizedValue}`)
@@ -961,21 +1011,23 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
             }
           }
         })
+
         // Only return movement if it has valid mappable data
         return hasValidData ? movement : null
       })
       .filter(Boolean) // Remove null movements
+
     // Log detailed info about what's being sent
     console.log(`Enviando ${processedMovements.length} movimientos válidos al servidor`);
     console.log('Primer movimiento procesado:', processedMovements[0]);
     
     // Check for any remaining text values in UUID fields
     const badMovements = processedMovements.filter(m => 
-      (m.type_id && typeof m.type_id === 'string'&& !m.type_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) ||
-      (m.category_id && typeof m.category_id === 'string'&& !m.category_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) ||
-      (m.currency_id && typeof m.currency_id === 'string'&& !m.currency_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) ||
-      (m.wallet_id && typeof m.wallet_id === 'string'&& !m.wallet_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) ||
-      (m.subcategory_id && typeof m.subcategory_id === 'string'&& !m.subcategory_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i))
+      (m.type_id && typeof m.type_id === 'string' && !m.type_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) ||
+      (m.category_id && typeof m.category_id === 'string' && !m.category_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) ||
+      (m.currency_id && typeof m.currency_id === 'string' && !m.currency_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) ||
+      (m.wallet_id && typeof m.wallet_id === 'string' && !m.wallet_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) ||
+      (m.subcategory_id && typeof m.subcategory_id === 'string' && !m.subcategory_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i))
     );
     
     if (badMovements.length > 0) {
@@ -990,19 +1042,22 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
     
     importMutation.mutate(processedMovements)
   }
+
   // Step configurations
   const stepConfig: StepModalConfig = {
     currentStep,
     totalSteps: 3,
-    stepTitle: currentStep === 1 ? 'Seleccionar archivo y creador': 
-               currentStep === 2 ? 'Mapear columnas': 
+    stepTitle: currentStep === 1 ? 'Seleccionar archivo y creador' : 
+               currentStep === 2 ? 'Mapear columnas' : 
                'Resolver valores incompatibles e importar'
   }
+
   const getFooterConfig = (): StepModalFooterConfig => {
     const baseCancel = {
       label: 'Cancelar',
       onClick: onClose
     }
+
     switch (currentStep) {
       case 1:
         return {
@@ -1054,6 +1109,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
         return { cancelAction: baseCancel }
     }
   }
+
   // Step content renderers
   const renderStep1 = () => (
     <div className="space-y-6">
@@ -1072,6 +1128,9 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
           </SelectContent>
         </Select>
       </div>
+
+
+
       <div className="space-y-3">
         <Label>Archivo de movimientos</Label>
         {!parsedData && (
@@ -1090,6 +1149,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
             </p>
           </div>
         )}
+
         {parsedData && (
           <Alert>
             <CheckCircle className="h-4 w-4" />
@@ -1099,12 +1159,14 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
           </Alert>
         )}
       </div>
+
       <Alert className="border-amber-200 bg-amber-50 text-amber-800">
         <AlertCircle className="h-4 w-4 text-amber-600" />
         <AlertDescription>
           El archivo debe tener una fila de encabezados en la primera línea
         </AlertDescription>
       </Alert>
+
       {isProcessing && (
         <div className="flex items-center justify-center py-4">
           <RefreshCcw className="h-5 w-5 animate-spin mr-2" />
@@ -1113,9 +1175,13 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
       )}
     </div>
   )
+
+
+
   // Validation function for field values
   const validateFieldValue = (fieldName: string, value: any) => {
     if (!value) return { isValid: true, suggestion: null }
+
     const normalizedValue = normalizeText(String(value))
     
     switch (fieldName) {
@@ -1221,6 +1287,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
         return { isValid: true, suggestion: null }
     }
   }
+
   // Helper function to get available options for each field type
   const getAvailableOptionsForField = (fieldName: string) => {
     let options: any[] = []
@@ -1245,9 +1312,11 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
         options = []
     }
     
+
     
     return options
   }
+
   const renderStep2 = () => (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -1258,6 +1327,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
           Vincula las columnas de tu archivo Excel con los campos de Seencel. Solo mapeo de columnas, el mapeo de valores será en el siguiente paso.
         </p>
       </div>
+
       {parsedData && (
         <div className="space-y-4">
           {/* Encabezados explicativos */}
@@ -1274,6 +1344,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
             </div>
             <div className="col-span-2"></div>
           </div>
+
           {parsedData.headers.map((header, index) => {
             const mappedField = columnMapping[index]
             const sampleValue = parsedData.rows[0]?.[index]
@@ -1288,7 +1359,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
                     <div className="col-span-4">
                       <div className="font-medium text-sm text-foreground">{header}</div>
                       <div className="text-xs text-muted-foreground mt-1">
-                        Ejemplo: {sampleValue && <span className="font-mono bg-muted px-2 py-1 rounded text-xs">{String(sampleValue).substring(0, 20)}{String(sampleValue).length > 20 ? '...': ''}</span>}
+                        Ejemplo: {sampleValue && <span className="font-mono bg-muted px-2 py-1 rounded text-xs">{String(sampleValue).substring(0, 20)}{String(sampleValue).length > 20 ? '...' : ''}</span>}
                       </div>
                     </div>
                     <div className="col-span-1 text-center">
@@ -1332,6 +1403,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
       )}
     </div>
   )
+
   const renderStep3 = () => {
     if (Object.keys(incompatibleValues).length === 0) {
       return (
@@ -1346,6 +1418,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
         </div>
       )
     }
+
     return (
       <div className="space-y-6">
         <div>
@@ -1354,6 +1427,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
             Los siguientes valores de tu archivo no coinciden con los datos existentes en Archub. Mapéalos manualmente o déjalos sin asignar.
           </p>
         </div>
+
         <div className="space-y-6">
           {Object.entries(incompatibleValues)
             .sort(([fieldNameA], [fieldNameB]) => {
@@ -1387,6 +1461,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
                     </p>
                   </div>
                 </div>
+
                 <div className="space-y-4">
                   {values.map((value, index) => {
                     const mappingKey = `${fieldName}_${value}`
@@ -1400,7 +1475,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
                             <span className="font-mono text-sm">
                               {(() => {
                                 const hierarchyText = getFieldHierarchyInfo(fieldName, value)
-                                const parts = hierarchyText.split('> ')
+                                const parts = hierarchyText.split(' > ')
                                 
                                 if (parts.length === 2) {
                                   return (
@@ -1416,12 +1491,12 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
                             </span>
                           </div>
                           <div className="text-xs mt-1">
-                            {fieldName === 'category_id'? (
+                            {fieldName === 'category_id' ? (
                               <span>
                                 <span className="text-green-600 font-medium">Tipo de Archub &gt;</span>
                                 <span className="text-muted-foreground ml-1">Valor de tu archivo</span>
                               </span>
-                            ) : fieldName === 'subcategory_id'? (
+                            ) : fieldName === 'subcategory_id' ? (
                               <span>
                                 <span className="text-green-600 font-medium">Categoría de Archub &gt;</span>
                                 <span className="text-muted-foreground ml-1">Valor de tu archivo</span>
@@ -1468,8 +1543,8 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
                                 });
                               }}
                               options={[
-                                { value: '', label: 'Sin asignar (NULL)'},
-                                ...(fieldName === 'subcategory_id'
+                                { value: '', label: 'Sin asignar (NULL)' },
+                                ...(fieldName === 'subcategory_id' 
                                   ? categories?.flatMap(cat => 
                                       (cat.children || []).map(sub => ({
                                         value: sub.id,
@@ -1489,7 +1564,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
                             />
                             
                             {/* Botón crear nuevo para categorías y subcategorías */}
-                            {(fieldName === 'category_id'|| fieldName === 'subcategory_id') && (
+                            {(fieldName === 'category_id' || fieldName === 'subcategory_id') && (
                               <Button
                                 type="button"
                                 variant="outline"
@@ -1498,7 +1573,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
                                 onClick={() => handleCreateNewCategory(fieldName, value)}
                               >
                                 <Plus className="h-3 w-3 mr-1" />
-                                Crear {fieldName === 'category_id'? 'categoría': 'subcategoría'} "{value}"
+                                Crear {fieldName === 'category_id' ? 'categoría' : 'subcategoría'} "{value}"
                               </Button>
                             )}
                           </div>
@@ -1508,7 +1583,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
                           {manualMappings[mappingKey] !== undefined ? (
                             <div className="flex items-center gap-1 text-green-700 text-xs">
                               <CheckCircle className="h-3 w-3" />
-                              <span>{manualMappings[mappingKey] === ''? 'NULL': 'Mapeado'}</span>
+                              <span>{manualMappings[mappingKey] === '' ? 'NULL' : 'Mapeado'}</span>
                             </div>
                           ) : (
                             <span className="text-xs text-muted-foreground">Sin mapear</span>
@@ -1523,6 +1598,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
             )
           })}
         </div>
+
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
@@ -1530,6 +1606,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
             Esto significa que esos campos estarán vacíos y podrás completarlos manualmente después de la importación.
           </AlertDescription>
         </Alert>
+
         {/* Dialog for selecting parent category when creating subcategory */}
         {showSubcategoryDialog && (
           <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
@@ -1558,6 +1635,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div className="flex gap-2 justify-end">
                   <Button 
                     variant="outline" 
@@ -1583,6 +1661,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
       </div>
     )
   }
+
   const renderStep4 = () => {
     // Check for normalized values to show preview
     const normalizedValues = new Set<string>()
@@ -1602,6 +1681,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
         })
       })
     }
+
     return (
       <div className="space-y-6">
         <div>
@@ -1610,6 +1690,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
             Revisa los datos antes de importar. Puedes seleccionar filas específicas.
           </p>
         </div>
+
         {normalizedValues.size > 0 && (
           <Alert>
             <CheckCircle className="h-4 w-4" />
@@ -1626,6 +1707,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
             </AlertDescription>
           </Alert>
         )}
+
       {parsedData && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
@@ -1643,9 +1725,10 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
                 }
               }}
             >
-              {selectedRows.size === parsedData.rows.length ? 'Deseleccionar todos': 'Seleccionar todos'}
+              {selectedRows.size === parsedData.rows.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
             </Button>
           </div>
+
           <div className="border rounded-lg overflow-hidden">
             <Table>
               <TableHeader>
@@ -1701,11 +1784,13 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
               </TableBody>
             </Table>
           </div>
+
           {parsedData.rows.length > 10 && (
             <p className="text-xs text-muted-foreground text-center">
               Mostrando las primeras 10 filas de {parsedData.rows.length}
             </p>
           )}
+
           {selectedRows.size > 0 && (
             <Alert>
               <CheckCircle className="h-4 w-4" />
@@ -1719,6 +1804,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
     </div>
     )
   }
+
   const getCurrentStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -1731,6 +1817,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
         return renderStep1()
     }
   }
+
   const headerContent = (
     <FormModalStepHeader
       title="Importar Movimientos"
@@ -1738,11 +1825,13 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
       stepConfig={stepConfig}
     />
   )
+
   const footerContent = (
     <FormModalStepFooter
       config={getFooterConfig()}
     />
   )
+
   return (
     <>
       <FormModalLayout
@@ -1794,7 +1883,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
                   onClick={createSubcategoryWithParent}
                   disabled={!selectedParentCategory || createCategoryMutation.isPending}
                 >
-                  {createCategoryMutation.isPending ? 'Creando...': 'Crear subcategoría'}
+                  {createCategoryMutation.isPending ? 'Creando...' : 'Crear subcategoría'}
                 </Button>
               </div>
             </div>

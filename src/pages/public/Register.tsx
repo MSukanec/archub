@@ -5,10 +5,12 @@ import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/use-toast";
 import { useFlowBlocking } from "@/hooks/use-flow-blocking";
 import { FlowBlockedBanner } from "@/components/shared/FlowBlockedBanner";
+
 export default function Register() {
   const { signInWithGoogle, loading } = useAuthStore();
   const { toast } = useToast();
   const { isBlocked, message } = useFlowBlocking('user_signup');
+
   const handleGoogleSignUp = async () => {
     if (isBlocked) {
       toast({
@@ -18,6 +20,7 @@ export default function Register() {
       });
       return;
     }
+
     try {
       await signInWithGoogle();
     } catch (error: any) {
@@ -28,8 +31,9 @@ export default function Register() {
       });
     }
   };
+
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: 'var(--main-sidebar-bg)'}}>
+    <div className="min-h-screen flex" style={{ backgroundColor: 'var(--main-sidebar-bg)' }}>
       {/* Left Panel - Dark */}
       <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 relative">
         <div className="max-w-md space-y-8 text-center">
@@ -41,18 +45,20 @@ export default function Register() {
               className="w-32 h-32 object-contain"
             />
           </div>
+
           {/* Text */}
           <div className="space-y-4">
             <h1 className="text-4xl font-bold !text-white">
               Comienza a
               <br />
-              <span style={{ color: 'var(--accent)'}}>Construir el Futuro</span>
+              <span style={{ color: 'var(--accent)' }}>Construir el Futuro</span>
             </h1>
             <p className="text-base !text-gray-400">
               Únete a cientos de profesionales que ya optimizan sus proyectos con Seencel.
               La herramienta completa para gestión de construcción.
             </p>
           </div>
+
           {/* Dots indicator */}
           <div className="flex justify-center gap-2 pt-8">
             <div className="w-2 h-2 rounded-full bg-white/30"></div>
@@ -61,10 +67,11 @@ export default function Register() {
           </div>
         </div>
       </div>
+
       {/* Right Panel - Light */}
       <div className="w-full lg:w-1/2 flex flex-col">
         <div className="w-full flex-1 flex items-stretch p-4 lg:p-6">
-          <div className="w-full h-full flex flex-col rounded-3xl px-6 lg:px-16 py-6" style={{ backgroundColor: 'var(--layout-bg)'}}>
+          <div className="w-full h-full flex flex-col rounded-3xl px-6 lg:px-16 py-6" style={{ backgroundColor: 'var(--layout-bg)' }}>
             {/* Logo + Sign in link - Fixed at top */}
             <div className="flex items-center justify-between gap-4 mb-8">
               <div className="flex items-center gap-3">
@@ -77,12 +84,13 @@ export default function Register() {
               <div className="text-sm">
                 <span className="text-gray-600">¿Ya tienes cuenta? </span>
                 <Link href="/login">
-                  <span className="font-semibold cursor-pointer hover:underline" style={{ color: 'var(--accent)'}}>
+                  <span className="font-semibold cursor-pointer hover:underline" style={{ color: 'var(--accent)' }}>
                     Inicia sesión
                   </span>
                 </Link>
               </div>
             </div>
+
             {/* Card Content - Centered vertically */}
             <div className="flex-1 flex items-center justify-center">
               <div className="w-full max-w-md space-y-8">
@@ -92,8 +100,10 @@ export default function Register() {
                     Crea tu cuenta y empieza a gestionar proyectos hoy mismo
                   </p>
                 </div>
+
                 <div className="space-y-4">
                   <FlowBlockedBanner flowKey="user_signup" className="mb-4" />
+
                   {/* Google Sign Up */}
                   <Button
                     variant="outline"
@@ -126,6 +136,7 @@ export default function Register() {
                     )}
                     Registrarse con Google
                   </Button>
+
                   {/* Email Sign Up - Disabled */}
                   <Button
                     variant="outline"

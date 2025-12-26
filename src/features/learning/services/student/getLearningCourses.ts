@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 /**
  * Course data from backend
  */
@@ -12,6 +13,7 @@ export interface CourseData {
   visibility: string;
   status: string;
 }
+
 /**
  * Enrollment data from backend
  */
@@ -24,6 +26,7 @@ export interface EnrollmentData {
   updated_at: string;
   course_slug?: string;
 }
+
 /**
  * Course progress data from course_progress_view
  */
@@ -35,6 +38,7 @@ export interface CourseProgressViewData {
   progress_pct: number;
   last_activity_at?: string;
 }
+
 /**
  * Response from /api/learning/courses-full endpoint
  */
@@ -43,6 +47,7 @@ export interface LearningCoursesResponse {
   enrollments: EnrollmentData[];
   progress: CourseProgressViewData[];
 }
+
 /**
  * Obtiene todos los cursos con enrollments y progreso del usuario.
  * 
@@ -62,6 +67,7 @@ export async function getLearningCourses(): Promise<LearningCoursesResponse> {
   if (!session) {
     throw new Error('No active session');
   }
+
   const response = await fetch('/api/learning/courses-full', {
     method: 'GET',
     headers: {
@@ -70,9 +76,11 @@ export async function getLearningCourses(): Promise<LearningCoursesResponse> {
     },
     credentials: 'include',
   });
+
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Failed to fetch courses'}));
+    const error = await response.json().catch(() => ({ error: 'Failed to fetch courses' }));
     throw new Error(error.error || 'Failed to fetch courses');
   }
+
   return await response.json();
 }

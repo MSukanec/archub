@@ -9,6 +9,7 @@ import {
   type UpdatePersonnelPaymentData,
 } from '../services/personnelPayments';
 import { PERSONNEL_PAYMENT_QUERY_KEYS } from '../constants';
+
 export function usePersonnelPayments(
   projectId: string | undefined,
   organizationId: string | undefined
@@ -21,6 +22,7 @@ export function usePersonnelPayments(
     gcTime: 60000,
   });
 }
+
 export function usePersonnelPayment(
   projectId: string | undefined,
   paymentId: string | undefined,
@@ -32,8 +34,10 @@ export function usePersonnelPayment(
     enabled: !!projectId && !!paymentId && !!organizationId,
   });
 }
+
 export function useCreatePersonnelPayment() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: ({
       payment,
@@ -57,8 +61,10 @@ export function useCreatePersonnelPayment() {
     },
   });
 }
+
 export function useUpdatePersonnelPayment() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: ({
       projectId,
@@ -87,8 +93,10 @@ export function useUpdatePersonnelPayment() {
     },
   });
 }
+
 export function useDeletePersonnelPayment() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: ({
       projectId,

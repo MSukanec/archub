@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+
 interface OnboardingState {
   currentStep: number;
   totalSteps: number;
@@ -8,7 +9,7 @@ interface OnboardingState {
     country: string;
     birthdate: string;
     organization_name: string;
-    theme: 'light'| 'dark';
+    theme: 'light' | 'dark';
     default_currency_id: string;
     secondary_currency_ids: string[];
     default_wallet_id: string;
@@ -19,7 +20,7 @@ interface OnboardingState {
     user_role: string;
     user_role_other: string;
     team_size: string;
-    last_user_type: 'professional'| 'provider'| 'worker'| 'visitor'| null;
+    last_user_type: 'professional' | 'provider' | 'worker' | 'visitor' | null;
   };
   setCurrentStep: (step: number) => void;
   updateFormData: (data: Partial<OnboardingState['formData']>) => void;
@@ -27,13 +28,14 @@ interface OnboardingState {
   goNextStep: () => void;
   goPrevStep: () => void;
 }
+
 const initialFormData = {
   first_name: '',
   last_name: '',
   country: '',
   birthdate: '',
   organization_name: '',
-  theme: 'light'as const,
+  theme: 'light' as const,
   default_currency_id: '',
   secondary_currency_ids: [] as string[],
   default_wallet_id: '',
@@ -46,6 +48,7 @@ const initialFormData = {
   team_size: '',
   last_user_type: null as OnboardingState['formData']['last_user_type'],
 };
+
 export const useOnboardingStore = create<OnboardingState>((set, get) => ({
   currentStep: 1,
   totalSteps: 4,

@@ -14,10 +14,12 @@ import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import MarkerRow from '@/features/learning/components/MarkerRow';
 import { useCourseMarkers, getCourseMarkersUrl, type MarkerWithLesson, useCoursePlayerStore } from '@/features/learning';
+
 interface CourseMarkersTabProps {
   courseId: string;
   courseSlug?: string;
 }
+
 export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkersTabProps) {
   const [, navigate] = useLocation();
   const { setCurrentLesson } = useCourseSidebarStore();
@@ -25,8 +27,10 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
   const [selectedModule, setSelectedModule] = useState<string>('all');
   const { openModal } = useGlobalModalStore();
   const { toast } = useToast();
+
   // Fetch all markers for the course with lesson and module information (OPTIMIZED)
   const { data: markers = [], isLoading } = useCourseMarkers(courseId);
+
   // Get unique modules from markers
   const modules = useMemo(() => {
     const uniqueModules = new Map<string, { title: string; sort_index: number }>();
@@ -39,13 +43,16 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
         }
       }
     });
+
     return Array.from(uniqueModules.values()).sort((a, b) => a.sort_index - b.sort_index);
   }, [markers]);
+
   // Filter markers by selected module
   const filteredMarkers = useMemo(() => {
     if (selectedModule === 'all') return markers;
     return markers.filter(marker => marker.module?.title === selectedModule);
   }, [markers, selectedModule]);
+
   // Add moduleTitle property to markers for grouping
   const markersWithModuleTitle = useMemo(() => {
     return filteredMarkers.map(marker => ({
@@ -54,12 +61,14 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       moduleSortIndex: marker.module?.sort_index || 999
     }));
   }, [filteredMarkers]);
+
   const formatTime = (seconds: number | null): string => {
     if (seconds === null) return '0:00';
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
   // Delete marker mutation (OPTIMIZED)
   const deleteMarkerMutation = useMutation({
     mutationFn: async (markerId: string) => {
@@ -87,6 +96,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       });
     }
   });
+
   const handleDeleteMarker = (marker: MarkerWithLesson) => {
     openModal('delete-confirmation', {
       mode: 'simple',
@@ -96,6 +106,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       onConfirm: () => deleteMarkerMutation.mutate(marker.id)
     });
   };
+
   const handleGoToLesson = (lessonId: string, timeSec: number | null) => {
     // Set the current lesson in the sidebar
     setCurrentLesson(lessonId);
@@ -114,6 +125,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
     // Use the store to navigate (this will switch to "Reproductor" tab and set pending seek)
     goToLesson(lessonId, timeSec);
   };
+
   // Render module group header
   const renderModuleGroupHeader = (moduleName: string, groupMarkers: any[]) => {
     const markersCount = groupMarkers.length;
@@ -125,16 +137,17 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
           color: "white"
         }}
       >
-        {moduleName} ({markersCount} {markersCount === 1 ? 'marcador': 'marcadores'})
+        {moduleName} ({markersCount} {markersCount === 1 ? 'marcador' : 'marcadores'})
       </div>
     );
   };
+
   const columns = [
     {
       key: 'lesson',
       label: 'Lección',
       sortable: true,
-      sortType: 'string'as const,
+      sortType: 'string' as const,
       render: (marker: MarkerWithLesson) => (
         <div className="font-medium">
           {marker.lesson?.title || 'Sin lección'}
@@ -145,7 +158,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       key: 'time_sec',
       label: 'Tiempo',
       sortable: true,
-      sortType: 'number'as const,
+      sortType: 'number' as const,
       render: (marker: MarkerWithLesson) => (
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-muted-foreground" />
@@ -166,20 +179,21 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
               Fijado
             </Badge>
           )}
-          <span className={marker.body ? '': 'text-muted-foreground italic'}>
+          <span className={marker.body ? '' : 'text-muted-foreground italic'}>
             {marker.body || 'Sin descripción'}
           </span>
         </div>
       )
     }
   ];
+
   const renderFilterContent = () => {
     return (
       <>
         <div className="text-xs font-medium mb-2 block">Filtrar por módulo</div>
         <div className="space-y-1">
           <Button
-            variant={selectedModule === 'all'? "secondary" : "ghost"}
+            variant={selectedModule === 'all' ? "secondary" : "ghost"}
             size="sm"
             onClick={() => setSelectedModule('all')}
             className="w-full justify-start text-xs font-normal h-8"
@@ -201,6 +215,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       </>
     );
   };
+
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -210,6 +225,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       </div>
     );
   }
+
   if (filteredMarkers.length === 0) {
     return (
       <EmptyState
@@ -227,6 +243,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
       />
     );
   }
+
   return (
     <div className="space-y-6" data-testid="course-markers-tab">
       {/* Desktop View */}
@@ -245,7 +262,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
               icon: Trash2,
               label: 'Eliminar',
               onClick: () => handleDeleteMarker(marker),
-              variant: 'destructive'as const
+              variant: 'destructive' as const
             }
           ]}
           renderGroupHeader={renderModuleGroupHeader}
@@ -272,13 +289,14 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
           }
         />
       </div>
+
       {/* Mobile View */}
       <div className="lg:hidden">
         {/* Mobile Filter */}
         {modules.length > 0 && (
           <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2">
             <Button
-              variant={selectedModule === 'all'? "default" : "outline"}
+              variant={selectedModule === 'all' ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedModule('all')}
             >
@@ -296,6 +314,7 @@ export default function CourseMarkersTab({ courseId, courseSlug }: CourseMarkers
             ))}
           </div>
         )}
+
         {/* Mobile Cards - Grouped by Module */}
         <div className="space-y-4">
           {Object.entries(

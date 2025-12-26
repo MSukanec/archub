@@ -1,4 +1,5 @@
 import { getPublicUrl } from '@/lib/supabase/storage';
+
 /**
  * Feature images stored in Supabase Storage (public-assets/app-ui/features/)
  * These images are used in plan restriction modals

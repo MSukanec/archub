@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import Player from "@vimeo/player";
+
 type Props = { 
   vimeoId: string;
   initialPosition?: number;
@@ -7,6 +8,7 @@ type Props = {
   onPlayerReady?: (player: Player) => void;
   onSeekApplied?: () => void;
 };
+
 export default function VimeoPlayer({ vimeoId, initialPosition = 0, onProgress, onPlayerReady, onSeekApplied }: Props) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<Player | null>(null);
@@ -19,6 +21,7 @@ export default function VimeoPlayer({ vimeoId, initialPosition = 0, onProgress, 
     
     playerRef.current = new Player(iframeRef.current);
     const player = playerRef.current;
+
     // Configurar eventos básicos
     player.on("timeupdate", (e: any) => {
       const currentSec = Math.floor(e.seconds);
@@ -36,13 +39,16 @@ export default function VimeoPlayer({ vimeoId, initialPosition = 0, onProgress, 
     });
     
     player.on("ended", () => onProgress?.(0, 100));
+
     // Notificar al padre que el player está listo
     onPlayerReady?.(player);
+
     return () => {
       player.destroy();
       playerRef.current = null;
     };
   }, []); // Solo al montar/desmontar
+
   // 2) Cuando cambia vimeoId, cargar el nuevo video en la misma instancia
   useEffect(() => {
     if (!playerRef.current || !vimeoId) return;
@@ -79,6 +85,7 @@ export default function VimeoPlayer({ vimeoId, initialPosition = 0, onProgress, 
         });
     }
   }, [vimeoId, initialPosition]);
+
   return (
     <iframe
       ref={iframeRef}

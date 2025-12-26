@@ -1,5 +1,6 @@
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { queryClient, apiRequest } from '@/lib/queryClient'
+
 export interface HeroSection {
   id: string
   organization_id: string
@@ -8,17 +9,18 @@ export interface HeroSection {
   title: string
   description: string
   media_url?: string
-  media_type?: 'image'| 'video'
+  media_type?: 'image' | 'video'
   primary_button_text?: string
   primary_button_action?: string
-  primary_button_action_type?: 'url'| 'internal_route'| 'external'
+  primary_button_action_type?: 'url' | 'internal_route' | 'external'
   secondary_button_text?: string
   secondary_button_action?: string
-  secondary_button_action_type?: 'url'| 'internal_route'| 'external'
+  secondary_button_action_type?: 'url' | 'internal_route' | 'external'
   is_active: boolean
   created_at: string
   updated_at: string
 }
+
 export function useHeroSections(sectionType: string = 'learning_dashboard') {
   return useQuery({
     queryKey: ['/api/layout/hero-sections', sectionType],
@@ -31,6 +33,7 @@ export function useHeroSections(sectionType: string = 'learning_dashboard') {
     }
   })
 }
+
 export function useCreateHeroSection() {
   return useMutation({
     mutationFn: async (data: Partial<HeroSection>): Promise<HeroSection> => {
@@ -45,6 +48,7 @@ export function useCreateHeroSection() {
     }
   })
 }
+
 export function useUpdateHeroSection() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<HeroSection> }) => {
@@ -55,6 +59,7 @@ export function useUpdateHeroSection() {
     }
   })
 }
+
 export function useDeleteHeroSection() {
   return useMutation({
     mutationFn: async (id: string) => {
@@ -65,6 +70,7 @@ export function useDeleteHeroSection() {
     }
   })
 }
+
 export function useReorderHeroSections() {
   return useMutation({
     mutationFn: async (sections: Array<{ id: string; order_index: number }>) => {

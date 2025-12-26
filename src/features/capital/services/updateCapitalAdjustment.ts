@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { CapitalAdjustment, CapitalAdjustmentUpdateInput } from '../types';
+
 export async function updateCapitalAdjustment(
   id: string,
   updates: CapitalAdjustmentUpdateInput,
@@ -12,6 +13,7 @@ export async function updateCapitalAdjustment(
     .eq('organization_id', organizationId)
     .select()
     .single();
+
   if (error) throw error;
   return data as CapitalAdjustment;
 }

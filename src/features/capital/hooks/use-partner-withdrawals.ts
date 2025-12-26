@@ -8,6 +8,7 @@ import { updatePartnerWithdrawal } from '../services/updatePartnerWithdrawal';
 import { deletePartnerWithdrawal } from '../services/deletePartnerWithdrawal';
 import { capitalKeys } from '@/core/query-keys';
 import type { PartnerWithdrawal, PartnerWithdrawalCreateInput } from '../types';
+
 export function usePartnerWithdrawals(
   organizationId: string | undefined,
   projectId?: string
@@ -18,6 +19,7 @@ export function usePartnerWithdrawals(
     enabled: !!organizationId,
   });
 }
+
 export function usePartnerWithdrawal(
   withdrawalId: string | undefined,
   organizationId: string | undefined
@@ -28,8 +30,10 @@ export function usePartnerWithdrawal(
     enabled: !!withdrawalId && !!organizationId,
   });
 }
+
 export function useCreatePartnerWithdrawal() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (input: PartnerWithdrawalCreateInput) => createPartnerWithdrawal(input),
     onSuccess: (data) => {
@@ -41,8 +45,10 @@ export function useCreatePartnerWithdrawal() {
     },
   });
 }
+
 export function useUpdatePartnerWithdrawal() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: ({
       withdrawalId,
@@ -50,7 +56,7 @@ export function useUpdatePartnerWithdrawal() {
       organizationId,
     }: {
       withdrawalId: string;
-      updates: Partial<Omit<PartnerWithdrawal, 'id'| 'created_at'| 'organization_id'| 'created_by'>>;
+      updates: Partial<Omit<PartnerWithdrawal, 'id' | 'created_at' | 'organization_id' | 'created_by'>>;
       organizationId: string;
     }) => updatePartnerWithdrawal(withdrawalId, updates, organizationId),
     onSuccess: (data) => {
@@ -65,8 +71,10 @@ export function useUpdatePartnerWithdrawal() {
     },
   });
 }
+
 export function useDeletePartnerWithdrawal() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: ({
       withdrawalId,

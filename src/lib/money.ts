@@ -10,6 +10,7 @@
  * 
  * @module money
  */
+
 export interface MoneyItem {
   amount: number;
   currency_id?: string;
@@ -21,6 +22,7 @@ export interface MoneyItem {
   } | null;
   exchange_rate?: number | null;
 }
+
 export interface CurrencyBreakdown {
   currencyId: string;
   currencyCode: string;
@@ -29,15 +31,18 @@ export interface CurrencyBreakdown {
   total: number;
   count: number;
 }
+
 export interface BreakdownResult {
   baseTotal: number;
   breakdown: CurrencyBreakdown[];
   breakdownMap: Record<string, number>;
 }
+
 export interface ConvertOptions {
-  direction?: 'multiply'| 'divide';
+  direction?: 'multiply' | 'divide';
   defaultRate?: number;
 }
+
 /**
  * Convierte un monto usando el exchange rate.
  * 
@@ -64,10 +69,11 @@ export function convert(
   
   if (rate === 0) return amount;
   
-  return direction === 'multiply'
+  return direction === 'multiply' 
     ? amount * rate 
     : amount / rate;
 }
+
 /**
  * Formatea un monto como moneda SIN decimales (estándar Seencel).
  * 
@@ -92,10 +98,11 @@ export function format(
     maximumFractionDigits: 0,
   });
   
-  const sign = amount < 0 ? '-': (showSign && amount > 0 ? '+': '');
+  const sign = amount < 0 ? '-' : (showSign && amount > 0 ? '+' : '');
   
   return `${symbol} ${sign}${formattedNumber}`;
 }
+
 /**
  * Formatea un monto para KPIs (valor principal grande).
  * Sin símbolo, solo el número formateado.
@@ -113,6 +120,7 @@ export function formatKPI(value: number, locale: string = 'es-AR'): string {
     maximumFractionDigits: 0,
   });
 }
+
 /**
  * Formatea el desglose por moneda para mostrar debajo del KPI principal.
  * 
@@ -131,13 +139,14 @@ export function formatSubValue(
   breakdown: Array<{ currencySymbol: string; total: number }>,
   options: { separator?: string; locale?: string } = {}
 ): string {
-  const { separator = '+ ', locale = 'es-AR'} = options;
+  const { separator = ' + ', locale = 'es-AR' } = options;
   
   return breakdown
     .filter(b => b.total !== 0)
     .map(b => format(b.total, b.currencySymbol, { locale }))
     .join(separator);
 }
+
 /**
  * Agrupa y suma items por moneda sin convertir.
  * Retorna el desglose real por cada moneda.
@@ -147,9 +156,9 @@ export function formatSubValue(
  * 
  * @example
  * const items = [
- *   { amount: 100, currency: { id: 'usd', code: 'USD', symbol: '$'} },
- *   { amount: 200, currency: { id: 'usd', code: 'USD', symbol: '$'} },
- *   { amount: 50000, currency: { id: 'ars', code: 'ARS', symbol: '$'} }
+ *   { amount: 100, currency: { id: 'usd', code: 'USD', symbol: '$' } },
+ *   { amount: 200, currency: { id: 'usd', code: 'USD', symbol: '$' } },
+ *   { amount: 50000, currency: { id: 'ars', code: 'ARS', symbol: '$' } }
  * ];
  * sumByCurrency(items)
  * // => [
@@ -184,25 +193,27 @@ export function sumByCurrency(items: MoneyItem[]): CurrencyBreakdown[] {
   
   return Array.from(map.values()).sort((a, b) => Math.abs(b.total) - Math.abs(a.total));
 }
+
 export interface ConvertToBaseOptions {
   /**
    * Qué hacer cuando no hay moneda base definida:
    * - 'passthrough': Retorna el amount sin convertir (default, usado en financial-metrics)
    * - 'zero': Retorna 0 para evitar mezclar monedas (usado en partner-metrics)
    */
-  onMissingBase?: 'passthrough'| 'zero';
+  onMissingBase?: 'passthrough' | 'zero';
   
   /**
    * Código de la moneda que se usa como referencia en el exchange_rate.
    * Por defecto es 'USD'. El exchange_rate siempre significa "1 [quoteCurrency] = X [otra moneda]".
    * 
-   * Ejemplo con quoteCurrency='USD'y exchange_rate=1000:
+   * Ejemplo con quoteCurrency='USD' y exchange_rate=1000:
    * - Si item está en USD y base es ARS → multiplica (100 USD * 1000 = 100,000 ARS)
    * - Si item está en ARS y base es USD → divide (100,000 ARS / 1000 = 100 USD)
    */
   quoteCurrency?: string;
   defaultRate?: number;
 }
+
 /**
  * Convierte un monto entre dos monedas explícitamente.
  * 
@@ -218,7 +229,7 @@ export interface ConvertToBaseOptions {
  * DEFINICIÓN DE EXCHANGE_RATE:
  * El exchange_rate siempre significa "1 [quoteCurrency] = X [otra moneda]"
  * 
- * Ejemplo con quoteCurrency='USD'y exchange_rate=1000:
+ * Ejemplo con quoteCurrency='USD' y exchange_rate=1000:
  * - convertToBaseCurrency('USD', 'ARS', 100, 1000) → 100 * 1000 = 100,000 (100 USD = 100,000 ARS)
  * - convertToBaseCurrency('ARS', 'USD', 100000, 1000) → 100,000 / 1000 = 100 (100,000 ARS = 100 USD)
  * 
@@ -249,7 +260,7 @@ export function convertExplicit(
   }
   
   // Determinar dirección de conversión basada en quoteCurrency
-  let direction: 'multiply'| 'divide'= 'multiply';
+  let direction: 'multiply' | 'divide' = 'multiply';
   
   if (toCurrencyId === quoteCurrency && fromCurrencyId !== quoteCurrency) {
     // Convertir desde otra moneda al quote → dividir
@@ -260,8 +271,9 @@ export function convertExplicit(
   const rate = exchangeRate ?? defaultRate;
   if (rate === 0) return amount;
   
-  return direction === 'multiply'? amount * rate : amount / rate;
+  return direction === 'multiply' ? amount * rate : amount / rate;
 }
+
 /**
  * OVERLOAD 1: Signatura explícita
  * Convierte un monto de una moneda a otra, recibiendo todos los parámetros explícitamente.
@@ -273,6 +285,7 @@ export function convertToBaseCurrency(
   exchangeRate: number | null,
   options?: ConvertToBaseOptions
 ): number;
+
 /**
  * OVERLOAD 2: Signatura implícita (compatibilidad hacia atrás)
  * Convierte un item monetario a la moneda base, inferiendo los IDs del item.
@@ -282,6 +295,7 @@ export function convertToBaseCurrency(
   baseCurrencyCodeOrId?: string,
   options?: ConvertToBaseOptions
 ): number;
+
 /**
  * IMPLEMENTACIÓN
  */
@@ -306,13 +320,13 @@ export function convertToBaseCurrency(
   // OVERLOAD 2: Signatura implícita (item es MoneyItem)
   const item = itemOrFromId as MoneyItem;
   const baseCurrencyCodeOrId = toCurrencyIdOrBaseCurrency;
-  const opts = (typeof amountOrOptions === 'object'? amountOrOptions : exchangeRateOrOptions) as ConvertToBaseOptions | undefined;
+  const opts = (typeof amountOrOptions === 'object' ? amountOrOptions : exchangeRateOrOptions) as ConvertToBaseOptions | undefined;
   
   const { onMissingBase = 'passthrough', quoteCurrency = 'USD', defaultRate = 1 } = opts || {};
   
   // Si no hay moneda base definida, usar estrategia configurada
   if (!baseCurrencyCodeOrId) {
-    return onMissingBase === 'zero'? 0 : item.amount;
+    return onMissingBase === 'zero' ? 0 : item.amount;
   }
   
   // Obtener identificadores del item
@@ -338,6 +352,7 @@ export function convertToBaseCurrency(
     { quoteCurrency, defaultRate }
   );
 }
+
 /**
  * Suma todos los items convirtiéndolos a la moneda base.
  * Usa convertExplicit para asegurar que cada conversión es correcta.
@@ -348,8 +363,8 @@ export function convertToBaseCurrency(
  * 
  * @example
  * const items = [
- *   { amount: 100, currency: { id: 'usd', code: 'USD'}, exchange_rate: 1000 },
- *   { amount: 50000, currency: { id: 'ars', code: 'ARS'}, exchange_rate: 1 }
+ *   { amount: 100, currency: { id: 'usd', code: 'USD' }, exchange_rate: 1000 },
+ *   { amount: 50000, currency: { id: 'ars', code: 'ARS' }, exchange_rate: 1 }
  * ];
  * sumAllInBaseCurrency(items, 'ars') // => 100000 + 50000 = 150000
  */
@@ -370,6 +385,7 @@ export function sumAllInBaseCurrency(
     );
   }, 0);
 }
+
 /**
  * Devuelve un objeto completo con el total convertido y el desglose por moneda.
  * Esto es ideal para KPIs que muestran ambos valores.
@@ -407,6 +423,7 @@ export function explainBreakdown(
     breakdownMap,
   };
 }
+
 /**
  * Obtiene el exchange rate efectivo para una moneda.
  * Si es la moneda base, retorna 1.
@@ -434,6 +451,7 @@ export function getEffectiveExchangeRate(
   // Default
   return 1;
 }
+
 /**
  * Formatea un exchange rate para mostrar en UI.
  * 
@@ -452,6 +470,7 @@ export function formatExchangeRate(
     maximumFractionDigits: maxDecimals,
   });
 }
+
 /**
  * Valida que un item tenga los campos monetarios requeridos.
  */
@@ -460,6 +479,7 @@ export function isValidMoneyItem(item: unknown): item is MoneyItem {
   const obj = item as Record<string, unknown>;
   return typeof obj.amount === 'number';
 }
+
 /**
  * Objeto exportado con todas las funciones para uso con namespace.
  * 
@@ -482,4 +502,5 @@ export const money = {
   getEffectiveExchangeRate,
   isValidMoneyItem,
 };
+
 export default money;

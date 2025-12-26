@@ -1,7 +1,9 @@
 import ReactMarkdown from 'react-markdown';
+
 interface MessageContentProps {
   content: string;
 }
+
 export function MessageContent({ content }: MessageContentProps) {
   return (
     <ReactMarkdown

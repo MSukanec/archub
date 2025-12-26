@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 import { parseLocalDate } from '@/lib/date-utils';
 import { formatKPI, format as formatMoneyAmount } from '@/lib/money';
 import { calculateMonetaryKPI, formatBreakdown as kpiFormatBreakdown } from '@/lib/kpis';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/shared/AppCard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/use-currencies';
@@ -31,11 +31,14 @@ import {
   type LedgerEntry,
 } from '@/features/capital';
 import { PaymentStatusBadge, type PaymentStatus } from '@/components/shared/PaymentStatusBadge';
+
 interface CapitalTransactionsViewProps {
   activeFilterIssueId?: string | null;
   getAffectedIdsForIssue?: (issueId: string) => Set<string>;
 }
-type TransactionType = 'contribution'| 'withdrawal'| 'adjustment';
+
+type TransactionType = 'contribution' | 'withdrawal' | 'adjustment';
+
 interface UnifiedTransaction {
   id: string;
   type: TransactionType;
@@ -48,7 +51,7 @@ interface UnifiedTransaction {
   currency_symbol: string;
   currency_id: string;
   exchange_rate: number | null;
-  status: 'confirmed'| 'pending'| 'rejected'| 'void';
+  status: 'confirmed' | 'pending' | 'rejected' | 'void';
   notes: string | null;
   reference: string | null;
   reason?: string;
@@ -56,6 +59,7 @@ interface UnifiedTransaction {
   linkedUser?: { avatar_url?: string | null } | null;
   creator?: { users?: { full_name?: string | null; avatar_url?: string | null } | null } | null;
 }
+
 function formatPartnerName(partner?: { contacts: { full_name: string | null; first_name: string | null; last_name: string | null; company_name: string | null; email?: string | null } | null }): string {
   if (!partner?.contacts) return 'Sin socio';
   const { full_name, first_name, last_name, company_name, email } = partner.contacts;
@@ -63,6 +67,7 @@ function formatPartnerName(partner?: { contacts: { full_name: string | null; fir
   const constructedName = `${first_name || ''} ${last_name || ''}`.trim();
   return constructedName || company_name || email || 'Sin nombre';
 }
+
 export function CapitalTransactionsView({ 
   activeFilterIssueId, 
   getAffectedIdsForIssue = () => new Set() 
@@ -70,7 +75,9 @@ export function CapitalTransactionsView({
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
+
   const organizationId = userData?.organization?.id;
+
   const { data: contributions = [], isLoading: loadingContributions } = usePartnerContributions(organizationId);
   const { data: withdrawals = [], isLoading: loadingWithdrawals } = usePartnerWithdrawals(organizationId);
   const { data: adjustments = [], isLoading: loadingAdjustments } = useCapitalAdjustments(organizationId);
@@ -78,18 +85,23 @@ export function CapitalTransactionsView({
   const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
   const { data: partners = [], isLoading: loadingPartners } = usePartners(organizationId, { enabled: !!organizationId });
   const { data: members = [], isLoading: loadingMembers } = useOrganizationMembers(organizationId || '');
+
   const deleteContributionMutation = useDeletePartnerContribution();
   const deleteWithdrawalMutation = useDeletePartnerWithdrawal();
   const deleteAdjustmentMutation = useDeleteCapitalAdjustment();
+
   const isLoading = loadingContributions || loadingWithdrawals || loadingAdjustments || loadingPartners || loadingMembers;
+
   const transactions = useMemo<UnifiedTransaction[]>(() => {
     // Use mergeCapitalMovements to unify all 3 types
     const ledger = mergeCapitalMovements(contributions, withdrawals, adjustments);
+
     return ledger.map((entry: LedgerEntry) => {
       let date = '';
       let wallet_name = null;
       let reference = '';
       let reason = '';
+
       if (entry.type === 'contribution') {
         date = entry.contribution_date;
         wallet_name = (entry as any).organization_wallet?.wallets?.name || null;
@@ -103,6 +115,7 @@ export function CapitalTransactionsView({
         reference = entry.reference || '';
         reason = entry.reason || '';
       }
+
       return {
         id: entry.id,
         type: entry.type,
@@ -124,6 +137,7 @@ export function CapitalTransactionsView({
       };
     });
   }, [contributions, withdrawals, adjustments]);
+
   const transactionsWithLinkedUser = useMemo(() => {
     return transactions.map(transaction => {
       const partnerData = partners.find(p => p.id === transaction.partner_id);
@@ -136,11 +150,13 @@ export function CapitalTransactionsView({
       };
     });
   }, [transactions, partners]);
+
   const filteredTransactions = useMemo(() => {
     if (!activeFilterIssueId) return transactionsWithLinkedUser;
     const issueIds = getAffectedIdsForIssue(activeFilterIssueId);
     return transactionsWithLinkedUser.filter(t => issueIds.has(t.id));
   }, [transactionsWithLinkedUser, activeFilterIssueId, getAffectedIdsForIssue]);
+
   const metrics = useMemo(() => {
     const confirmedTransactions = transactions.filter(t => t.status === 'confirmed');
     
@@ -156,6 +172,7 @@ export function CapitalTransactionsView({
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol
     });
+
     const withdrawalsKPI = calculateMonetaryKPI({
       items: confirmedTransactions
         .filter(t => t.type === 'withdrawal')
@@ -168,6 +185,7 @@ export function CapitalTransactionsView({
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol
     });
+
     const adjustmentsKPI = calculateMonetaryKPI({
       items: confirmedTransactions
         .filter(t => t.type === 'adjustment')
@@ -180,12 +198,14 @@ export function CapitalTransactionsView({
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol
     });
+
     const netBalance = contributionsKPI.value - withdrawalsKPI.value + adjustmentsKPI.value;
     const netBalanceKPI = {
       ...contributionsKPI,
       value: netBalance,
       formatted: formatKPI(netBalance)
     };
+
     return {
       contributions_kpi: contributionsKPI,
       withdrawals_kpi: withdrawalsKPI,
@@ -193,10 +213,12 @@ export function CapitalTransactionsView({
       net_balance_kpi: netBalanceKPI,
     };
   }, [transactions, defaultCurrency]);
+
   const handleEdit = (transaction: UnifiedTransaction) => {
     if (!organizationId) {
       return;
     }
+
     if (transaction.type === 'contribution') {
       openModal('partner-contribution', {
         organizationId,
@@ -217,13 +239,16 @@ export function CapitalTransactionsView({
       });
     }
   };
+
   const handleDelete = (transaction: UnifiedTransaction) => {
     if (!organizationId) {
       return;
     }
-    const typeLabel = transaction.type === 'contribution'? 'aporte': transaction.type === 'withdrawal'? 'retiro': 'ajuste';
+
+    const typeLabel = transaction.type === 'contribution' ? 'aporte' : transaction.type === 'withdrawal' ? 'retiro' : 'ajuste';
     const formattedAmount = `${transaction.currency_symbol} ${transaction.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     const itemLabel = `${transaction.partner_name || transaction.reason || 'Ajuste'} - ${formattedAmount}`;
+
     showDeleteConfirmation({
       mode: 'simple',
       title: `Eliminar ${typeLabel}`,
@@ -251,6 +276,7 @@ export function CapitalTransactionsView({
       isLoading: deleteContributionMutation.isPending || deleteWithdrawalMutation.isPending || deleteAdjustmentMutation.isPending,
     });
   };
+
   const handleAddTransaction = () => {
     if (!organizationId) {
       return;
@@ -259,12 +285,13 @@ export function CapitalTransactionsView({
       organizationId,
     });
   };
+
   const columns: Column<UnifiedTransaction>[] = [
     {
       key: 'date',
       label: 'Fecha',
-      type: 'date'as const,
-      sortType: 'date'as const,
+      type: 'date' as const,
+      sortType: 'date' as const,
       render: (item: UnifiedTransaction) => (
         <span className="text-sm text-muted-foreground">
           {format(parseLocalDate(item.date) || new Date(), 'dd/MM/yyyy')}
@@ -274,7 +301,7 @@ export function CapitalTransactionsView({
     {
       key: 'type',
       label: 'Tipo',
-      type: 'medium-text'as const,
+      type: 'medium-text' as const,
       render: (item: UnifiedTransaction) => (
         <div className="flex items-center gap-2">
           <IdentityBadge 
@@ -283,12 +310,12 @@ export function CapitalTransactionsView({
             showName={false}
             size="sm"
           />
-          {item.type === 'contribution'? (
+          {item.type === 'contribution' ? (
             <>
               <ArrowDownCircle className="h-4 w-4 text-[var(--positive)]" />
               <span className="text-sm">Aporte</span>
             </>
-          ) : item.type === 'withdrawal'? (
+          ) : item.type === 'withdrawal' ? (
             <>
               <ArrowUpCircle className="h-4 w-4 text-[var(--negative)]" />
               <span className="text-sm">Retiro</span>
@@ -305,7 +332,7 @@ export function CapitalTransactionsView({
     {
       key: 'partner_name',
       label: 'Socio',
-      type: 'medium-text'as const,
+      type: 'medium-text' as const,
       render: (item: UnifiedTransaction) => (
         <IdentityBadge 
           name={item.partner_name}
@@ -317,7 +344,7 @@ export function CapitalTransactionsView({
     {
       key: 'notes',
       label: 'Notas',
-      type: 'long-text'as const,
+      type: 'long-text' as const,
       render: (item: UnifiedTransaction) => (
         <span className="text-sm text-muted-foreground truncate">
           {item.notes || '-'}
@@ -327,7 +354,7 @@ export function CapitalTransactionsView({
     {
       key: 'wallet_name',
       label: 'Billetera',
-      type: 'medium-text'as const,
+      type: 'medium-text' as const,
       render: (item: UnifiedTransaction) => (
         <span className="text-sm text-muted-foreground">
           {item.wallet_name || '-'}
@@ -337,21 +364,21 @@ export function CapitalTransactionsView({
     {
       key: 'amount',
       label: 'Monto',
-      type: 'amount'as const,
-      align: 'right'as const,
-      sortType: 'number'as const,
+      type: 'amount' as const,
+      align: 'right' as const,
+      sortType: 'number' as const,
       render: (item: UnifiedTransaction) => (
         <div className="flex flex-col items-end">
           <span className={`text-sm font-medium ${
-            item.type === 'contribution'
-              ? 'text-[var(--positive)]'
-              : item.type === 'withdrawal'
+            item.type === 'contribution' 
+              ? 'text-[var(--positive)]' 
+              : item.type === 'withdrawal' 
               ? 'text-[var(--negative)]'
               : item.signedAmount >= 0 
-              ? 'text-[var(--positive)]'
+              ? 'text-[var(--positive)]' 
               : 'text-[var(--negative)]'
           }`}>
-            {item.signedAmount >= 0 ? '+': '-'}{item.currency_symbol} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {item.signedAmount >= 0 ? '+' : '-'}{item.currency_symbol} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
           {isMultiCurrency && item.exchange_rate != null && (
             <span className="text-xs text-muted-foreground">
@@ -364,12 +391,13 @@ export function CapitalTransactionsView({
     {
       key: 'status',
       label: 'Estado',
-      type: 'status'as const,
+      type: 'status' as const,
       render: (item: UnifiedTransaction) => (
         <PaymentStatusBadge status={item.status as PaymentStatus} />
       ),
     },
   ];
+
   const rowActions = (item: UnifiedTransaction) => [
     {
       label: 'Editar',
@@ -380,9 +408,10 @@ export function CapitalTransactionsView({
       label: 'Eliminar',
       icon: Trash2,
       onClick: () => handleDelete(item),
-      variant: 'destructive'as const,
+      variant: 'destructive' as const,
     },
   ];
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -390,6 +419,7 @@ export function CapitalTransactionsView({
       </div>
     );
   }
+
   if (transactions.length === 0) {
     return (
       <EmptyState
@@ -405,6 +435,7 @@ export function CapitalTransactionsView({
       />
     );
   }
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
@@ -425,6 +456,7 @@ export function CapitalTransactionsView({
               : 'Sin aportes confirmados'}
           </StatCardMeta>
         </StatCard>
+
         <StatCard data-testid="card-total-withdrawals">
           <StatCardTitle showArrow={false}>
             <TrendingDown className="h-4 w-4" />
@@ -442,12 +474,13 @@ export function CapitalTransactionsView({
               : 'Sin retiros confirmados'}
           </StatCardMeta>
         </StatCard>
+
         <StatCard data-testid="card-total-adjustments">
           <StatCardTitle showArrow={false}>
             <Receipt className="h-4 w-4" />
             Ajustes
           </StatCardTitle>
-          <StatCardValue className={metrics.adjustments_kpi.value >= 0 ? 'text-[var(--positive)]': 'text-[var(--negative)]'}>
+          <StatCardValue className={metrics.adjustments_kpi.value >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}>
             {metrics.adjustments_kpi.breakdown && metrics.adjustments_kpi.breakdown.length > 0
               ? formatMoneyAmount(metrics.adjustments_kpi.value, metrics.adjustments_kpi.breakdown[0].currencySymbol)
               : formatKPI(metrics.adjustments_kpi.value)
@@ -459,12 +492,13 @@ export function CapitalTransactionsView({
               : 'Sin ajustes confirmados'}
           </StatCardMeta>
         </StatCard>
+
         <StatCard data-testid="card-net-balance">
           <StatCardTitle showArrow={false}>
             <Wallet className="h-4 w-4" />
             Saldo Neto
           </StatCardTitle>
-          <StatCardValue className={metrics.net_balance_kpi.value >= 0 ? 'text-[var(--positive)]': 'text-[var(--negative)]'}>
+          <StatCardValue className={metrics.net_balance_kpi.value >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}>
             {metrics.net_balance_kpi.breakdown && metrics.net_balance_kpi.breakdown.length > 0
               ? formatMoneyAmount(metrics.net_balance_kpi.value, metrics.net_balance_kpi.breakdown[0].currencySymbol)
               : formatKPI(metrics.net_balance_kpi.value)
@@ -476,6 +510,7 @@ export function CapitalTransactionsView({
               : 'Sin saldo'}
           </StatCardMeta>
         </StatCard>
+
         <StatCard data-testid="card-transactions-count">
           <StatCardTitle showArrow={false}>
             <Receipt className="h-4 w-4" />
@@ -489,11 +524,12 @@ export function CapitalTransactionsView({
           </StatCardMeta>
         </StatCard>
       </div>
+
       <Table
         columns={columns}
         data={filteredTransactions}
         rowActions={rowActions}
-        defaultSort={{ key: 'date', direction: 'desc'}}
+        defaultSort={{ key: 'date', direction: 'desc' }}
         topBar={{
           showSearch: true,
         }}
@@ -501,14 +537,14 @@ export function CapitalTransactionsView({
           <div className="p-4 border rounded-lg space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                {item.type === 'contribution'? (
+                {item.type === 'contribution' ? (
                   <ArrowDownCircle className="h-5 w-5 text-[var(--positive)]" />
-                ) : item.type === 'withdrawal'? (
+                ) : item.type === 'withdrawal' ? (
                   <ArrowUpCircle className="h-5 w-5 text-[var(--negative)]" />
                 ) : (
                   <Receipt className="h-5 w-5 text-[var(--neutral)]" />
                 )}
-                <span className="font-medium">{item.type === 'contribution'? 'Aporte': item.type === 'withdrawal'? 'Retiro': 'Ajuste'}</span>
+                <span className="font-medium">{item.type === 'contribution' ? 'Aporte' : item.type === 'withdrawal' ? 'Retiro' : 'Ajuste'}</span>
               </div>
               <PaymentStatusBadge status={item.status as PaymentStatus} />
             </div>
@@ -519,15 +555,15 @@ export function CapitalTransactionsView({
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <span className={`text-lg font-bold ${
-                  item.type === 'contribution'
-                    ? 'text-[var(--positive)]'
-                    : item.type === 'withdrawal'
+                  item.type === 'contribution' 
+                    ? 'text-[var(--positive)]' 
+                    : item.type === 'withdrawal' 
                     ? 'text-[var(--negative)]'
                     : item.signedAmount >= 0 
-                    ? 'text-[var(--positive)]'
+                    ? 'text-[var(--positive)]' 
                     : 'text-[var(--negative)]'
                 }`}>
-                  {item.signedAmount >= 0 ? '+': '-'}{item.currency_symbol} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {item.signedAmount >= 0 ? '+' : '-'}{item.currency_symbol} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
                 {isMultiCurrency && item.exchange_rate != null && (
                   <span className="text-xs text-muted-foreground">

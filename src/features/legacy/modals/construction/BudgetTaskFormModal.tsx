@@ -7,6 +7,7 @@ import { useModalPanelStore } from '@/components/modal';
 import { TaskSelectionTable, SelectedTask } from '@/components/shared/legacy/TaskSelectionTable';
 import { useBudgetTasks } from '@/hooks/use-budget-tasks';
 import { useCurrentUser } from '@/hooks/use-current-user';
+
 interface BudgetTaskFormModalProps {
   modalData?: {
     budgetId?: string;
@@ -14,6 +15,7 @@ interface BudgetTaskFormModalProps {
   };
   onClose: () => void;
 }
+
 export function BudgetTaskFormModal({ modalData, onClose }: BudgetTaskFormModalProps) {
   const { budgetId, onSuccess } = modalData || {};
   const { setPanel } = useModalPanelStore();
@@ -25,13 +27,16 @@ export function BudgetTaskFormModal({ modalData, onClose }: BudgetTaskFormModalP
   // Obtener tareas ya existentes en el presupuesto para excluirlas
   const { budgetTasks: existingBudgetTasks = [], createMultipleBudgetTasks } = useBudgetTasks(budgetId || '');
   const excludeTaskIds = existingBudgetTasks.map((bt: any) => bt.task_id);
+
   useEffect(() => {
     setPanel('edit');
   }, [setPanel]);
+
   const handleSubmit = async () => {
     if (selectedTasks.length === 0 || !budgetId || !userData?.user?.id) {
       return;
     }
+
     console.log('Adding tasks to budget:', budgetId, selectedTasks);
     
     // Convertir tareas seleccionadas al formato requerido por la base de datos
@@ -41,6 +46,7 @@ export function BudgetTaskFormModal({ modalData, onClose }: BudgetTaskFormModalP
       organization_id: userData.organization?.id || '',
       project_id: userData.preferences?.last_project_id || '',
     }));
+
     try {
       await createMultipleBudgetTasks.mutateAsync(tasksToAdd);
       onSuccess?.();
@@ -50,6 +56,7 @@ export function BudgetTaskFormModal({ modalData, onClose }: BudgetTaskFormModalP
       // El error se maneja en el hook con toast
     }
   };
+
   const viewPanel = (
     <div className="space-y-6">
       <div className="text-center text-muted-foreground">
@@ -58,6 +65,7 @@ export function BudgetTaskFormModal({ modalData, onClose }: BudgetTaskFormModalP
       </div>
     </div>
   );
+
   const editPanel = (
     <div className="space-y-6">
       <TaskSelectionTable
@@ -67,22 +75,25 @@ export function BudgetTaskFormModal({ modalData, onClose }: BudgetTaskFormModalP
       />
     </div>
   );
+
   const headerContent = (
     <FormModalHeader 
       title="Agregar Tareas al Presupuesto"
       icon={Plus}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel={`Agregar ${selectedTasks.length > 0 ? selectedTasks.length : ''} Tarea${selectedTasks.length !== 1 ? 's': ''}`}
+      rightLabel={`Agregar ${selectedTasks.length > 0 ? selectedTasks.length : ''} Tarea${selectedTasks.length !== 1 ? 's' : ''}`}
       onRightClick={handleSubmit}
       submitDisabled={selectedTasks.length === 0 || createMultipleBudgetTasks.isPending}
       showLoadingSpinner={createMultipleBudgetTasks.isPending}
     />
   );
+
   return (
     <FormModalLayout
       columns={1}

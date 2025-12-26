@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+
 export function Footer() {
   return (
     <footer className="border-t bg-background py-8 mt-16">
@@ -18,6 +19,7 @@ export function Footer() {
               Gestiona proyectos, equipos y finanzas con IA.
             </p>
           </div>
+
           <div>
             <h3 className="font-semibold mb-4">Producto</h3>
             <nav className="flex flex-col space-y-2">
@@ -44,6 +46,7 @@ export function Footer() {
               </Link>
             </nav>
           </div>
+
           <div>
             <h3 className="font-semibold mb-4">Legal</h3>
             <nav className="flex flex-col space-y-2">
@@ -64,6 +67,7 @@ export function Footer() {
             </nav>
           </div>
         </div>
+
         <div className="border-t pt-6">
           <p className="text-xs text-muted-foreground text-center">
             © {new Date().getFullYear()} Seencel. Todos los derechos reservados.

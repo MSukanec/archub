@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+
 export interface ConstructionTaskSearchResult {
   task_instance_id: string;
   project_id: string;
@@ -25,11 +26,13 @@ export interface ConstructionTaskSearchResult {
   task_group_id: string;
   task_group_name: string;
 }
+
 export interface ConstructionTaskSearchFilters {
   rubro?: string;
   category?: string;
   phase_id?: string;
 }
+
 export function useConstructionTaskSearch(
   organizationId: string,
   projectId: string,
@@ -45,24 +48,30 @@ export function useConstructionTaskSearch(
       if (!supabase) {
         throw new Error("Supabase client not initialized");
       }
+
       // Usar directamente la vista construction_gantt_view - ya tiene todos los datos necesarios
       let query = supabase
         .from("construction_tasks_view")
         .select("*")
         .eq("project_id", projectId);
+
       // Filtrar por rubro si se especifica
       if (filters.rubro) {
         query = query.eq('rubro_name', filters.rubro);
       }
+
       // Filtrar por categoría si se especifica
       if (filters.category) {
         query = query.eq('category_name', filters.category);
       }
+
       // Filtrar por fase si se especifica
       if (filters.phase_id) {
         query = query.eq('phase_instance_id', filters.phase_id);
       }
+
       const { data: allTasks, error } = await query;
+
       if (error) {
         console.error("Error searching construction tasks:", error);
         throw error;
@@ -80,6 +89,7 @@ export function useConstructionTaskSearch(
     enabled: enabled && !!supabase && !!projectId && searchTerm.length >= 3
   });
 }
+
 // Hook para obtener opciones de filtros de construction tasks
 export function useConstructionTaskSearchFilterOptions(organizationId: string, projectId: string) {
   return useQuery({
@@ -88,17 +98,21 @@ export function useConstructionTaskSearchFilterOptions(organizationId: string, p
       if (!supabase) {
         throw new Error("Supabase client not initialized");
       }
+
       const { data, error } = await supabase
         .from("construction_gantt_view")
         .select("rubro_name, category_name")
         .eq("project_id", projectId);
+
       if (error) {
         console.error("Error fetching filter options:", error);
         throw error;
       }
+
       // Extraer valores únicos
       const rubros = [...new Set(data?.map(item => item.rubro_name).filter(Boolean) || [])];
       const categories = [...new Set(data?.map(item => item.category_name).filter(Boolean) || [])];
+
       return {
         rubros,
         categories,

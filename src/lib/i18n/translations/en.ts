@@ -1,4 +1,5 @@
 import type { TranslationKeys } from "./es";
+
 export const en: TranslationKeys = {
   table: {
     search: {

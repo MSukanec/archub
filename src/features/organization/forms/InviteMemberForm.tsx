@@ -19,11 +19,14 @@ import { Button } from '@/components/ui/button';
 import { Calendar, DollarSign, CalendarClock } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 const memberSchema = z.object({
   email: z.string().email('Email inválido'),
   roleId: z.string().min(1, 'Debe seleccionar un rol'),
 });
+
 type MemberFormData = z.infer<typeof memberSchema>;
+
 interface SeatPricingData {
   canAddSeat: boolean;
   error?: string;
@@ -35,12 +38,12 @@ interface SeatPricingData {
   } | null;
   subscription: {
     id: string;
-    billingPeriod: 'monthly'| 'annual';
+    billingPeriod: 'monthly' | 'annual';
     startedAt: string;
     expiresAt: string;
     currentSeats: number;
     maxSeats: number;
-    paymentProvider: 'mercadopago'| 'paypal'| 'bank_transfer'| null;
+    paymentProvider: 'mercadopago' | 'paypal' | 'bank_transfer' | null;
     payerEmail: string | null;
   } | null;
   pricing: {
@@ -66,12 +69,14 @@ interface SeatPricingData {
     roleName?: string;
   };
 }
+
 const planColors: Record<string, string> = {
   free: 'var(--plan-free-bg)',
   pro: 'var(--plan-pro-bg)',
   teams: 'var(--plan-teams-bg)',
   enterprise: 'var(--plan-enterprise-bg)',
 };
+
 function getPlanColor(planSlug: string | undefined): string {
   if (!planSlug) return planColors.free;
   const normalized = planSlug.toLowerCase();
@@ -80,11 +85,12 @@ function getPlanColor(planSlug: string | undefined): string {
   if (normalized.includes('pro')) return planColors.pro;
   return planColors.free;
 }
+
 export interface InviteMemberFormProps {
   organizationId?: string;
   editingMember?: any;
   defaultEmail?: string;
-  mode: 'create'| 'edit';
+  mode: 'create' | 'edit';
   onSuccess: () => void;
   onCancel: () => void;
   hideActions?: boolean;
@@ -92,6 +98,7 @@ export interface InviteMemberFormProps {
   onPricingChange?: (pricing: SeatPricingData | null) => void;
   onLoadingChange?: (isLoading: boolean) => void;
 }
+
 export function InviteMemberForm({
   organizationId,
   editingMember,
@@ -113,11 +120,13 @@ export function InviteMemberForm({
   
   const isReinvite = !!defaultEmail;
   const effectiveOrgId = organizationId || userData?.preferences?.last_organization_id;
-  const isEditing = mode === 'edit'|| !!editingMember;
+  const isEditing = mode === 'edit' || !!editingMember;
+
   const { data: roles = [], isLoading: rolesLoading } = useQuery<{ id: string; name: string; type: string }[]>({
     queryKey: [`/api/roles?organizationId=${effectiveOrgId}`],
     enabled: !!effectiveOrgId,
   });
+
   const form = useForm<MemberFormData>({
     resolver: zodResolver(memberSchema),
     defaultValues: {
@@ -125,8 +134,10 @@ export function InviteMemberForm({
       roleId: '',
     },
   });
+
   const watchedEmail = form.watch('email');
   const watchedRoleId = form.watch('roleId');
+
   useEffect(() => {
     if (editingMember && roles.length > 0) {
       form.reset({
@@ -140,6 +151,7 @@ export function InviteMemberForm({
       });
     }
   }, [editingMember, defaultEmail, form, roles]);
+
   useEffect(() => {
     if (!isEditing && watchedEmail && watchedRoleId && !hasCalculated) {
       const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchedEmail);
@@ -148,12 +160,15 @@ export function InviteMemberForm({
       }
     }
   }, [watchedEmail, watchedRoleId, isEditing, hasCalculated]);
+
   useEffect(() => {
     onPricingChange?.(pricingData);
   }, [pricingData, onPricingChange]);
+
   useEffect(() => {
     onLoadingChange?.(isLoading || isCalculating);
   }, [isLoading, isCalculating, onLoadingChange]);
+
   const calculateSeatCost = useCallback(async (data: MemberFormData): Promise<SeatPricingData | null> => {
     if (!effectiveOrgId) return null;
     
@@ -163,6 +178,7 @@ export function InviteMemberForm({
       if (!sessionData?.session?.access_token) {
         throw new Error('No hay sesión activa');
       }
+
       const response = await fetch('/api/checkout/calculate-seat-proration', {
         method: 'POST',
         headers: {
@@ -175,11 +191,13 @@ export function InviteMemberForm({
           role_id: data.roleId,
         }),
       });
+
       const result = await response.json();
       
       if (!response.ok) {
         throw new Error(result.error || 'Error calculando costo');
       }
+
       const pricingResult = result.data as SeatPricingData;
       setPricingData(pricingResult);
       setHasCalculated(true);
@@ -191,14 +209,17 @@ export function InviteMemberForm({
       setIsCalculating(false);
     }
   }, [effectiveOrgId]);
+
   const createMemberMutation = useOptimisticMutation({
     mutationFn: async (memberData: MemberFormData) => {
       if (!effectiveOrgId) throw new Error('No organization selected');
+
       const response = await apiRequest('POST', '/api/invite-member', {
         email: memberData.email,
         roleId: memberData.roleId,
         organizationId: effectiveOrgId,
       });
+
       return response.json();
     },
     queryKey: organizationKeys.invitations(effectiveOrgId),
@@ -223,16 +244,18 @@ export function InviteMemberForm({
       
       return [optimisticInvitation, ...oldData];
     },
-    onSuccessMessage: isReinvite ? 'Miembro reinvitado exitosamente': 'Invitación enviada exitosamente',
+    onSuccessMessage: isReinvite ? 'Miembro reinvitado exitosamente' : 'Invitación enviada exitosamente',
     onErrorMessage: 'Error al invitar miembro',
     additionalQueryKeys: [
       organizationKeys.members(effectiveOrgId),
       organizationKeys.formerMembers(effectiveOrgId),
     ],
   });
+
   const updateMemberMutation = useOptimisticMutation({
     mutationFn: async (memberData: MemberFormData) => {
       if (!editingMember?.id) throw new Error('No member to update');
+
       const { data, error } = await supabase
         .from('organization_members')
         .update({
@@ -240,6 +263,7 @@ export function InviteMemberForm({
         })
         .eq('id', editingMember.id)
         .select();
+
       if (error) throw error;
       return data;
     },
@@ -267,18 +291,21 @@ export function InviteMemberForm({
     onSuccessMessage: 'El rol del miembro ha sido actualizado correctamente',
     onErrorMessage: 'Error al actualizar miembro',
   });
+
   const handleFormSubmit = async (data: MemberFormData) => {
     if (isEditing) {
       updateMemberMutation.mutate(data);
       onSuccess();
       return;
     }
+
     let pricing = pricingData;
     if (!pricing) {
       pricing = await calculateSeatCost(data);
     }
     
     if (!pricing) return;
+
     if (!pricing.canAddSeat) {
       toast({
         title: 'No se puede agregar miembro',
@@ -287,6 +314,7 @@ export function InviteMemberForm({
       });
       return;
     }
+
     const isPayPal = pricing.subscription?.paymentProvider === 'paypal';
     const needsPayment = pricing.pricing && (isPayPal 
       ? pricing.pricing.proratedAmountUSD > 0 
@@ -300,6 +328,7 @@ export function InviteMemberForm({
       onSuccess();
     }
   };
+
   const handleProceedToPayment = async (pricing: SeatPricingData) => {
     if (!pricing?.subscription || !pricing?.pricing) return;
     
@@ -310,6 +339,7 @@ export function InviteMemberForm({
       if (!sessionData?.session?.access_token) {
         throw new Error('No hay sesión activa');
       }
+
       const formData = form.getValues();
       const isPayPalProvider = pricing.subscription.paymentProvider === 'paypal';
       
@@ -329,11 +359,13 @@ export function InviteMemberForm({
             billing_period: pricing.subscription.billingPeriod,
           }),
         });
+
         const result = await response.json();
         
         if (!response.ok || !result.ok) {
           throw new Error(result.error || 'Error creando orden de pago');
         }
+
         window.location.href = result.approval_url;
       } else {
         const response = await fetch('/api/checkout/mp/create-seat', {
@@ -351,11 +383,13 @@ export function InviteMemberForm({
             billing_period: pricing.subscription.billingPeriod,
           }),
         });
+
         const result = await response.json();
         
         if (!response.ok || !result.ok) {
           throw new Error(result.error || 'Error creando preferencia de pago');
         }
+
         window.location.href = result.init_point;
       }
     } catch (error: any) {
@@ -367,6 +401,7 @@ export function InviteMemberForm({
       setIsLoading(false);
     }
   };
+
   const isPayPal = pricingData?.subscription?.paymentProvider === 'paypal';
   const needsPayment = pricingData?.pricing && (isPayPal 
     ? pricingData.pricing.proratedAmountUSD > 0 
@@ -374,8 +409,9 @@ export function InviteMemberForm({
   );
   const selectedRole = roles.find((r: any) => r.id === watchedRoleId);
   const isSubmitting = isLoading || createMemberMutation.isPending || updateMemberMutation.isPending;
+
   const formatPrice = (amountARS: number, amountUSD: number) => {
-    const formatAmount = (amount: number, currency: 'USD'| 'ARS') => {
+    const formatAmount = (amount: number, currency: 'USD' | 'ARS') => {
       return new Intl.NumberFormat('es-AR', {
         style: 'currency',
         currency: currency,
@@ -389,15 +425,17 @@ export function InviteMemberForm({
     }
     return formatAmount(amountARS, 'ARS');
   };
+
   const getSubmitLabel = () => {
     if (isSubmitting) {
-      return needsPayment ? 'Redirigiendo...': 'Procesando...';
+      return needsPayment ? 'Redirigiendo...' : 'Procesando...';
     }
     if (isCalculating) return 'Calculando...';
     if (isEditing) return 'Actualizar';
     if (needsPayment) return 'Proceder al Pago';
-    return isReinvite ? 'Reinvitar': 'Invitar';
+    return isReinvite ? 'Reinvitar' : 'Invitar';
   };
+
   return (
     <Form {...form}>
       <form 
@@ -424,6 +462,7 @@ export function InviteMemberForm({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="roleId"
@@ -452,6 +491,7 @@ export function InviteMemberForm({
             </FormItem>
           )}
         />
+
         {!isEditing && watchedEmail && watchedRoleId && (
           <>
             <Separator className="my-4" />
@@ -467,6 +507,7 @@ export function InviteMemberForm({
                   <DollarSign className="h-4 w-4 text-primary" />
                   <span className="font-medium text-sm">Costo del nuevo miembro</span>
                 </div>
+
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Miembro:</span>
@@ -477,7 +518,9 @@ export function InviteMemberForm({
                     <span className="text-muted-foreground">Rol:</span>
                     <Badge variant="neutral" className="text-xs">{selectedRole?.name || pricingData.invitation.roleName}</Badge>
                   </div>
+
                   <Separator className="my-2" />
+
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Plan:</span>
                     <Badge 
@@ -487,33 +530,41 @@ export function InviteMemberForm({
                       {pricingData.organization?.planName}
                     </Badge>
                   </div>
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <Calendar className="h-3 w-3" />
                       <span>Período:</span>
                     </div>
-                    <span>{pricingData.subscription.billingPeriod === 'monthly'? 'Mensual': 'Anual'}</span>
+                    <span>{pricingData.subscription.billingPeriod === 'monthly' ? 'Mensual' : 'Anual'}</span>
                   </div>
+
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Días restantes:</span>
                     <span>{pricingData.pricing.daysRemaining} de {pricingData.pricing.totalDays}</span>
                   </div>
+
                   <Separator className="my-2" />
+
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Precio asiento completo:</span>
                     <span>{formatPrice(pricingData.pricing.seatPriceARS, pricingData.pricing.seatPriceUSD)}</span>
                   </div>
+
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Porcentaje prorrateado:</span>
                     <span>{pricingData.pricing.percentageRemaining}%</span>
                   </div>
+
                   <Separator className="my-2" />
+
                   <div className="flex items-center justify-between pt-1">
                     <span className="font-semibold">Total a pagar ahora:</span>
                     <span className="text-lg font-bold text-primary">
                       {formatPrice(pricingData.pricing.proratedAmountARS, pricingData.pricing.proratedAmountUSD)}
                     </span>
                   </div>
+
                   {!isPayPal && pricingData.subscription.payerEmail && (
                     <div className="mt-3 p-2 rounded bg-blue-500/10 border border-blue-500/20 text-xs">
                       <span className="text-blue-600 dark:text-blue-400">
@@ -522,6 +573,7 @@ export function InviteMemberForm({
                     </div>
                   )}
                 </div>
+
                 {pricingData.nextBilling && (
                   <div className="mt-4 p-3 rounded-md bg-background border">
                     <div className="flex items-center gap-2 mb-2">
@@ -532,7 +584,7 @@ export function InviteMemberForm({
                       <div className="flex items-center justify-between">
                         <span className="text-muted-foreground">Fecha:</span>
                         <span className="font-medium">
-                          {format(new Date(pricingData.nextBilling.date), "d 'de'MMMM, yyyy", { locale: es })}
+                          {format(new Date(pricingData.nextBilling.date), "d 'de' MMMM, yyyy", { locale: es })}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
@@ -552,6 +604,7 @@ export function InviteMemberForm({
             ) : null}
           </>
         )}
+
         {!hideActions && (
           <div className="flex gap-2 pt-4 border-t">
             <Button type="button" variant="secondary" onClick={onCancel} className="flex-1">

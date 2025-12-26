@@ -5,15 +5,19 @@ import { toast } from '@/hooks/use-toast'
 import { useProducts, Product, useDeleteProduct } from '@/features/materials'
 import { useGlobalModalStore } from '@/components/modal'
 import AdminProductRow from '@/features/materials/components/admin/AdminProductRow'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
+
 import { Table } from '@/components/shared/trees/Table'
 import { ImageLightbox, useImageLightbox } from '@/components/shared/viewers/ImageLightbox'
 import { cn } from '@/lib/utils'
+
 import { Plus, Edit, Trash2, Package, Tag, Copy, ExternalLink, Image, Box, RefreshCw } from 'lucide-react'
+
 const AdminCostProducts = () => {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('name')
@@ -24,9 +28,11 @@ const AdminCostProducts = () => {
   const { openModal } = useGlobalModalStore()
   const [lightboxImages, setLightboxImages] = useState<string[]>([])
   const { isOpen, currentIndex, openLightbox, closeLightbox } = useImageLightbox(lightboxImages)
+
   // Fetch products using the hook
   const { data: products = [], isLoading } = useProducts()
   const deleteProductMutation = useDeleteProduct()
+
   // Get unique materials and brands for filters
   const uniqueMaterials = products
     .filter(p => p.material)
@@ -36,6 +42,7 @@ const AdminCostProducts = () => {
       }
       return acc
     }, [])
+
   const uniqueBrands = products
     .filter(p => p.brand)
     .reduce((acc: any[], product) => {
@@ -44,19 +51,21 @@ const AdminCostProducts = () => {
       }
       return acc
     }, [])
+
   // Filter products and add groupKey for grouping
   const filteredProducts = useMemo(() => {
     const filtered = products.filter(product => {
-      const matchesSearch = searchValue === ''|| 
+      const matchesSearch = searchValue === '' || 
         product.name.toLowerCase().includes(searchValue.toLowerCase()) ||
         product.material?.toLowerCase().includes(searchValue.toLowerCase()) ||
         product.brand?.toLowerCase().includes(searchValue.toLowerCase())
       
-      const matchesMaterial = filterByMaterial === ''|| product.material_id === filterByMaterial
-      const matchesBrand = filterByBrand === ''|| product.brand_id === filterByBrand
+      const matchesMaterial = filterByMaterial === '' || product.material_id === filterByMaterial
+      const matchesBrand = filterByBrand === '' || product.brand_id === filterByBrand
       
       return matchesSearch && matchesMaterial && matchesBrand
     })
+
     const productsWithGroupKey = filtered.map(product => {
       let groupKey = '';
       
@@ -67,7 +76,7 @@ const AdminCostProducts = () => {
         case 'category':
           const hierarchy = product.category_hierarchy || 'Sin categoría';
           // Extraer solo la primera categoría (antes del primer " > ")
-          groupKey = hierarchy.split('> ')[0];
+          groupKey = hierarchy.split(' > ')[0];
           break;
         default:
           groupKey = '';
@@ -78,6 +87,7 @@ const AdminCostProducts = () => {
         groupKey
       };
     });
+
     // Ordenar según el tipo de agrupación
     return productsWithGroupKey.sort((a, b) => {
       switch (groupingType) {
@@ -103,12 +113,15 @@ const AdminCostProducts = () => {
       }
     });
   }, [products, searchValue, filterByMaterial, filterByBrand, sortBy, groupingType])
+
   const handleEdit = (product: Product) => {
     openModal('product-form', { editingProduct: product })
   }
+
   const handleCreate = () => {
     openModal('product-form', { editingProduct: null })
   }
+
   const handleDuplicate = (product: Product) => {
     // Create a duplicate object with "Copia" added to the name
     const duplicateProduct = {
@@ -120,6 +133,7 @@ const AdminCostProducts = () => {
     }
     openModal('product-form', { editingProduct: duplicateProduct, isDuplicating: true })
   }
+
   const handleDelete = (product: Product) => {
     openModal('delete-confirmation', {
       mode: 'dangerous',
@@ -131,19 +145,22 @@ const AdminCostProducts = () => {
       isLoading: deleteProductMutation.isPending
     })
   }
+
   const clearFilters = () => {
     setSearchValue('')
     setSortBy('name')
     setFilterByMaterial('')
     setFilterByBrand('')
   }
+
   // Render grouping popover content
   const renderGroupingContent = () => {
     const groupingOptions = [
-      { value: 'none', label: 'Sin agrupar'},
-      { value: 'category', label: 'Por categorías'},
-      { value: 'material', label: 'Por material'}
+      { value: 'none', label: 'Sin agrupar' },
+      { value: 'category', label: 'Por categorías' },
+      { value: 'material', label: 'Por material' }
     ];
+
     return (
       <>
         <div className="text-xs font-medium mb-2 block">Agrupar por</div>
@@ -166,6 +183,7 @@ const AdminCostProducts = () => {
       </>
     );
   };
+
   const baseColumns = [
     {
       key: 'name',
@@ -212,7 +230,7 @@ const AdminCostProducts = () => {
           </span>
           {product.providers_count && product.providers_count > 0 && (
             <span className="text-xs text-muted-foreground">
-              {product.providers_count} proveedor{product.providers_count > 1 ? 'es': ''}
+              {product.providers_count} proveedor{product.providers_count > 1 ? 'es' : ''}
             </span>
           )}
         </div>
@@ -282,13 +300,14 @@ const AdminCostProducts = () => {
   
   // Dynamic columns based on grouping (using baseColumns which already handles the conditional inclusion)
   const columns = baseColumns;
+
   return (
     <div className="space-y-6">
       <Table
         data={filteredProducts}
         columns={columns}
         isLoading={isLoading}
-        groupBy={groupingType === 'none'? undefined : 'groupKey'}
+        groupBy={groupingType === 'none' ? undefined : 'groupKey'}
         rowActions={(product: Product) => [
           {
             icon: Edit,
@@ -304,7 +323,7 @@ const AdminCostProducts = () => {
             icon: Trash2,
             label: 'Eliminar',
             onClick: () => handleDelete(product),
-            variant: 'destructive'as const
+            variant: 'destructive' as const
           }
         ]}
         topBar={{
@@ -312,7 +331,7 @@ const AdminCostProducts = () => {
           searchValue: searchValue,
           onSearchChange: setSearchValue,
           showFilter: true,
-          isFilterActive: filterByMaterial !== ''|| filterByBrand !== '',
+          isFilterActive: filterByMaterial !== '' || filterByBrand !== '',
           renderFilterContent: () => (
             <>
               <div className="space-y-3">
@@ -362,9 +381,9 @@ const AdminCostProducts = () => {
             density="normal"
           />
         )}
-        renderGroupHeader={groupingType === 'none'? undefined : (groupKey: string, groupRows: any[]) => (
+        renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
           <div className="col-span-full text-sm font-medium">
-            {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Producto': 'Productos'})
+            {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Producto' : 'Productos'})
           </div>
         )}
         emptyState={
@@ -375,6 +394,7 @@ const AdminCostProducts = () => {
           </div>
         }
       />
+
       <ImageLightbox
         images={lightboxImages}
         isOpen={isOpen}
@@ -384,4 +404,5 @@ const AdminCostProducts = () => {
     </div>
   )
 }
+
 export default AdminCostProducts

@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { uploadMediaFileV2 } from '../services/uploadMediaFileV2';
 import { QUERY_KEYS } from '../constants';
+
 /**
  * Hook para subir un archivo de media usando nueva arquitectura (media_files + media_links).
  * 
@@ -11,6 +12,7 @@ import { QUERY_KEYS } from '../constants';
  */
 export function useUploadMediaFile() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: uploadMediaFileV2,
     onSuccess: () => {

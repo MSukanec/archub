@@ -1,5 +1,6 @@
 import { NodeObject } from 'react-force-graph-2d';
 import { GraphNode, SatelliteNode, CoreNode, StatusColors } from '../types';
+
 export interface NodeRendererContext {
   statusColors: Record<string, StatusColors>;
   coreColor: { main: string; glow: string };
@@ -7,6 +8,7 @@ export interface NodeRendererContext {
   globalScale: number;
   imageCache?: Map<string, HTMLImageElement>;
 }
+
 export interface NodeRenderer {
   renderCore: (
     node: CoreNode & NodeObject,
@@ -20,6 +22,7 @@ export interface NodeRenderer {
     context: NodeRendererContext
   ) => void;
 }
+
 export interface AvatarNodeData extends SatelliteNode {
   avatarUrl?: string;
   groupColor?: string;

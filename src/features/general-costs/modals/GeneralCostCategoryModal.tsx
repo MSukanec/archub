@@ -2,15 +2,18 @@ import { FolderOpen, Eye, Edit } from 'lucide-react';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { FormPanel, ViewPanel, useCategoryForm } from '../forms/GeneralCostCategoryForm';
 import type { GeneralCostCategory } from '../types';
+
 interface GeneralCostCategoryModalProps {
   modalData?: {
     category?: GeneralCostCategory;
   };
   onClose: () => void;
-  mode?: 'create'| 'edit'| 'view';
+  mode?: 'create' | 'edit' | 'view';
 }
-export default function GeneralCostCategoryModal({ modalData, onClose, mode = 'create'}: GeneralCostCategoryModalProps) {
+
+export default function GeneralCostCategoryModal({ modalData, onClose, mode = 'create' }: GeneralCostCategoryModalProps) {
   const { category } = modalData || {};
+
   const {
     form,
     onSubmit,
@@ -23,6 +26,7 @@ export default function GeneralCostCategoryModal({ modalData, onClose, mode = 'c
     mode,
     onSuccess: onClose,
   });
+
   const getHeader = () => {
     switch (currentMode) {
       case 'view':
@@ -43,16 +47,19 @@ export default function GeneralCostCategoryModal({ modalData, onClose, mode = 'c
         };
     }
   };
+
   const header = getHeader();
+
   return (
     <ModalLayout onClose={onClose} size="sm">
       <ModalHeader
         title={header.title}
         description={header.description}
-        icon={currentMode === 'view'? Eye : currentMode === 'edit'? Edit : FolderOpen}
+        icon={currentMode === 'view' ? Eye : currentMode === 'edit' ? Edit : FolderOpen}
       />
+
       <ModalBody>
-        {currentMode === 'view'? (
+        {currentMode === 'view' ? (
           category && (
             <ViewPanel
               category={category}
@@ -64,17 +71,18 @@ export default function GeneralCostCategoryModal({ modalData, onClose, mode = 'c
           <FormPanel form={form} />
         )}
       </ModalBody>
-      {currentMode !== 'view'&& (
+
+      {currentMode !== 'view' && (
         <ModalFooter
           leftLabel="Cancelar"
           onLeftClick={onClose}
-          submitText={currentMode === 'edit'? 'Guardar Cambios': 'Crear Categoría'}
+          submitText={currentMode === 'edit' ? 'Guardar Cambios' : 'Crear Categoría'}
           onSubmit={form.handleSubmit(onSubmit)}
           isSubmitting={isSubmitting}
         />
       )}
       
-      {currentMode === 'view'&& (
+      {currentMode === 'view' && (
         <ModalFooter
           leftLabel="Cerrar"
           onLeftClick={onClose}

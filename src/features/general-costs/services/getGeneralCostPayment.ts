@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { GeneralCostPayment } from '../types';
+
 /**
  * Retrieves a single general cost payment by ID.
  * 
@@ -18,6 +19,7 @@ export async function getGeneralCostPayment(
   if (!supabase) {
     throw new Error('Supabase client not initialized');
   }
+
   const { data, error } = await supabase
     .from('general_costs_payments')
     .select(`
@@ -62,13 +64,16 @@ export async function getGeneralCostPayment(
     .eq('id', id)
     .eq('organization_id', organizationId)
     .single();
+
   if (error) {
     if (error.code === 'PGRST116') {
       return null;
     }
     throw error;
   }
+
   if (!data) return null;
+
   const walletData = Array.isArray(data.wallet) ? data.wallet[0] : data.wallet;
   
   return {

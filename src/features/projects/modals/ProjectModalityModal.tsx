@@ -6,15 +6,18 @@ import {
   useProjectModalityForm,
   type ProjectModality 
 } from '../forms/ProjectModalityForm';
+
 interface ProjectModalityModalProps {
   modalData?: {
     projectModality?: ProjectModality;
   };
   onClose: () => void;
-  mode?: 'create'| 'edit'| 'view';
+  mode?: 'create' | 'edit' | 'view';
 }
-export function ProjectModalityModal({ modalData, onClose, mode = 'create'}: ProjectModalityModalProps) {
+
+export function ProjectModalityModal({ modalData, onClose, mode = 'create' }: ProjectModalityModalProps) {
   const { projectModality } = modalData || {};
+
   const {
     form,
     onSubmit,
@@ -28,10 +31,12 @@ export function ProjectModalityModal({ modalData, onClose, mode = 'create'}: Pro
       onClose();
     },
   });
+
   const handleClose = () => {
     reset();
     onClose();
   };
+
   const getHeader = () => {
     switch (mode) {
       case 'view':
@@ -52,7 +57,9 @@ export function ProjectModalityModal({ modalData, onClose, mode = 'create'}: Pro
         };
     }
   };
+
   const header = getHeader();
+
   return (
     <ModalLayout onClose={handleClose} size="md">
       <ModalHeader 
@@ -62,17 +69,18 @@ export function ProjectModalityModal({ modalData, onClose, mode = 'create'}: Pro
       />
       
       <ModalBody>
-        {mode === 'view'&& projectModality ? (
+        {mode === 'view' && projectModality ? (
           <ViewPanel data={projectModality} />
         ) : (
           <FormPanel form={form} onSubmit={onSubmit} />
         )}
       </ModalBody>
-      {mode !== 'view'&& (
+
+      {mode !== 'view' && (
         <ModalFooter
           leftLabel="Cancelar"
           onLeftClick={handleClose}
-          rightLabel={mode === 'create'? 'Crear': 'Actualizar'}
+          rightLabel={mode === 'create' ? 'Crear' : 'Actualizar'}
           onRightClick={form.handleSubmit(onSubmit)}
           isSubmitting={isSubmitting}
           submitDisabled={isSubmitting}

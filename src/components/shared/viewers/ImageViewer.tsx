@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { 
   ZoomIn, 
   ZoomOut, 
   Download, 
@@ -12,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
   RotateCcw
 } from 'lucide-react';
 import { storageHelpers } from '@/lib/supabase/storage';
+
 type ImageViewerProps = {
   bucket: string;
   path: string;
@@ -21,6 +23,7 @@ type ImageViewerProps = {
   onExpand?: () => void;
   height?: number;
 };
+
 type ImageState = {
   loading: boolean;
   error: string | null;
@@ -31,6 +34,7 @@ type ImageState = {
   naturalWidth: number;
   naturalHeight: number;
 };
+
 export function ImageViewer({ 
   bucket, 
   path, 
@@ -51,9 +55,11 @@ export function ImageViewer({
     naturalWidth: 0,
     naturalHeight: 0
   });
+
   // Container dimensions for fit calculations
   const CONTAINER_WIDTH = 800;
   const CONTAINER_HEIGHT = 450;
+
   // Load image
   useEffect(() => {
     let isMounted = true;
@@ -63,6 +69,7 @@ export function ImageViewer({
       try {
         if (!isMounted) return;
         setState(prev => ({ ...prev, loading: true, error: null }));
+
         // For images, try to use the direct URL first
         let imageUrl: string;
         
@@ -79,6 +86,7 @@ export function ImageViewer({
           // Use direct URL if path is already a URL
           imageUrl = path;
         }
+
         // Load image to get natural dimensions
         const img = new Image();
         img.onload = () => {
@@ -108,6 +116,7 @@ export function ImageViewer({
         };
         
         img.src = imageUrl;
+
       } catch (error) {
         if (!isMounted) return;
         
@@ -119,7 +128,9 @@ export function ImageViewer({
         }));
       }
     };
+
     loadImage();
+
     // Cleanup on unmount
     return () => {
       isMounted = false;
@@ -128,6 +139,7 @@ export function ImageViewer({
       }
     };
   }, [bucket, path, useSignedUrl]);
+
   // Zoom functions - 10% increments
   const zoomIn = () => {
     setState(prev => ({ 
@@ -135,32 +147,38 @@ export function ImageViewer({
       scale: Math.min(prev.scale + 0.1, 3.0) 
     }));
   };
+
   const zoomOut = () => {
     setState(prev => ({ 
       ...prev, 
       scale: Math.max(prev.scale - 0.1, 0.1) 
     }));
   };
+
   const zoom100 = () => {
     setState(prev => ({ ...prev, scale: 1.0 }));
   };
+
   const fitToWidth = () => {
     if (state.naturalWidth === 0) return;
     const fitToWidthScale = Math.min(1.0, CONTAINER_WIDTH / state.naturalWidth);
     setState(prev => ({ ...prev, scale: fitToWidthScale }));
   };
+
   const rotateLeft = () => {
     setState(prev => ({ 
       ...prev, 
       rotation: (prev.rotation - 90) % 360 
     }));
   };
+
   const rotateRight = () => {
     setState(prev => ({ 
       ...prev, 
       rotation: (prev.rotation + 90) % 360 
     }));
   };
+
   const downloadImage = () => {
     if (!state.imageUrl) return;
     
@@ -169,10 +187,12 @@ export function ImageViewer({
     link.download = fileName;
     link.click();
   };
+
   const openInNewTab = () => {
     if (!state.imageUrl) return;
     window.open(state.imageUrl, '_blank');
   };
+
   if (state.loading) {
     return (
       <div 
@@ -186,6 +206,7 @@ export function ImageViewer({
       </div>
     );
   }
+
   if (state.error) {
     return (
       <div 
@@ -200,6 +221,7 @@ export function ImageViewer({
       </div>
     );
   }
+
   return (
     <div 
       className={`relative group bg-muted/50 overflow-auto ${className}`}
@@ -220,6 +242,7 @@ export function ImageViewer({
           />
         )}
       </div>
+
       {/* Floating toolbar - appears on hover like PDF viewer */}
       <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <div className="flex items-center gap-2 p-2 bg-card border border-border rounded-lg shadow-lg">
@@ -254,7 +277,9 @@ export function ImageViewer({
           >
             <ZoomIn className="w-4 h-4" />
           </Button>
+
           <div className="w-px h-4 bg-border mx-1" />
+
           {/* Rotation controls */}
           <Button
             variant="ghost"
@@ -265,6 +290,7 @@ export function ImageViewer({
           >
             <RotateCcw className="w-4 h-4" />
           </Button>
+
           <Button
             variant="ghost"
             size="sm"
@@ -274,6 +300,7 @@ export function ImageViewer({
           >
             <RotateCw className="w-4 h-4" />
           </Button>
+
           <div className="w-px h-4 bg-border mx-1" />
           
           {/* Actions */}
@@ -286,6 +313,7 @@ export function ImageViewer({
           >
             <Maximize className="w-4 h-4" />
           </Button>
+
           <Button 
             variant="ghost" 
             size="sm" 
@@ -295,6 +323,7 @@ export function ImageViewer({
           >
             <Download className="w-4 h-4" />
           </Button>
+
           {onExpand && (
             <Button 
               variant="ghost" 

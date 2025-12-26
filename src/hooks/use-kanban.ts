@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { toast } from '@/hooks/use-toast'
+
 export interface KanbanBoard {
   id: string
   name: string
@@ -13,6 +14,7 @@ export interface KanbanBoard {
   created_at: string
   updated_at: string
 }
+
 export interface KanbanList {
   id: string
   board_id: string
@@ -29,6 +31,7 @@ export interface KanbanList {
     avatar_url?: string
   }
 }
+
 export interface KanbanCard {
   id: string
   list_id: string
@@ -56,6 +59,7 @@ export interface KanbanCard {
     avatar_url?: string
   }
 }
+
 export interface KanbanComment {
   id: string
   card_id: string
@@ -71,6 +75,7 @@ export interface KanbanComment {
     avatar_url?: string
   }
 }
+
 export interface KanbanAttachment {
   id: string
   card_id: string
@@ -87,6 +92,7 @@ export interface KanbanAttachment {
     avatar_url?: string
   }
 }
+
 // Hook to get boards for current organization (and optionally filter by project)
 export function useKanbanBoards(projectId?: string | null) {
   const { data: userData } = useCurrentUser()
@@ -95,36 +101,44 @@ export function useKanbanBoards(projectId?: string | null) {
   
   // Use provided projectId or fallback to selected project
   const filterProjectId = projectId !== undefined ? projectId : selectedProjectId
+
   return useQuery({
     queryKey: ['kanban-boards', organizationId, filterProjectId],
     queryFn: async () => {
       if (!organizationId) throw new Error('Organization ID required')
+
       let query = supabase
         .from('kanban_boards')
         .select('*')
         .eq('organization_id', organizationId)
+
       // Filter by project if one is specified
       if (filterProjectId) {
         query = query.eq('project_id', filterProjectId)
       }
+
       const { data, error } = await query.order('created_at', { ascending: false })
+
       if (error) throw error
       return data as KanbanBoard[]
     },
     enabled: !!organizationId
   })
 }
+
 // Hook to get lists for a specific board
 export function useKanbanLists(boardId: string) {
   return useQuery({
     queryKey: ['kanban-lists', boardId],
     queryFn: async () => {
       if (!boardId) throw new Error('Board ID required')
+
       const { data, error } = await supabase
         .from('kanban_lists')
         .select('*')
         .eq('board_id', boardId)
         .order('position', { ascending: true })
+
       if (error) throw error
       
       // If we have lists, fetch organization member data for creators
@@ -133,16 +147,19 @@ export function useKanbanLists(boardId: string) {
         data.forEach(list => {
           if (list.created_by) memberIds.add(list.created_by)
         })
+
         if (memberIds.size > 0) {
           const { data: members, error: membersError } = await supabase
             .from('organization_members')
             .select('id, full_name, email, avatar_url')
             .in('id', Array.from(memberIds))
+
           if (!membersError && members) {
             const memberMap = members.reduce((acc, member) => {
               acc[member.id] = member
               return acc
             }, {} as Record<string, any>)
+
             // Attach member data to lists
             return data.map(list => ({
               ...list,
@@ -151,11 +168,13 @@ export function useKanbanLists(boardId: string) {
           }
         }
       }
+
       return data as KanbanList[]
     },
     enabled: !!boardId
   })
 }
+
 // Hook to get cards for a specific board
 export function useKanbanCards(boardId: string) {
   return useQuery({
@@ -163,32 +182,40 @@ export function useKanbanCards(boardId: string) {
     queryFn: async () => {
       if (!boardId) throw new Error('Board ID required')
       if (!supabase) throw new Error('Supabase not initialized')
+
       console.log('Fetching cards for board:', boardId)
+
       // First get all list IDs for this board
       const { data: lists, error: listsError } = await supabase
         .from('kanban_lists')
         .select('id')
         .eq('board_id', boardId)
+
       if (listsError) {
         console.error('Error fetching lists:', listsError)
         throw listsError
       }
+
       const listIds = lists?.map(list => list.id) || []
       console.log('List IDs found:', listIds)
+
       if (listIds.length === 0) {
         console.log('No lists found for board, returning empty array')
         return []
       }
+
       // Then get all cards for those lists (without relations for now)
       const { data, error } = await supabase
         .from('kanban_cards')
         .select('*')
         .in('list_id', listIds)
         .order('position', { ascending: true })
+
       if (error) {
         console.error('Error fetching cards:', error)
         throw error
       }
+
       console.log('Cards fetched:', data?.length || 0, 'cards')
       
       // If we have cards, fetch organization member data for creators and assigned users
@@ -198,16 +225,19 @@ export function useKanbanCards(boardId: string) {
           if (card.created_by) memberIds.add(card.created_by)
           if (card.assigned_to) memberIds.add(card.assigned_to)
         })
+
         if (memberIds.size > 0) {
           const { data: members, error: membersError } = await supabase
             .from('organization_members')
             .select('id, full_name, email, avatar_url')
             .in('id', Array.from(memberIds))
+
           if (!membersError && members) {
             const memberMap = members.reduce((acc, member) => {
               acc[member.id] = member
               return acc
             }, {} as Record<string, any>)
+
             // Attach member data to cards
             return data.map(card => ({
               ...card,
@@ -217,17 +247,20 @@ export function useKanbanCards(boardId: string) {
           }
         }
       }
+
       return data as KanbanCard[]
     },
     enabled: !!boardId
   })
 }
+
 // Hook to get comments for a specific card
 export function useKanbanComments(cardId: string) {
   return useQuery({
     queryKey: ['kanban-comments', cardId],
     queryFn: async () => {
       if (!cardId) throw new Error('Card ID required')
+
       const { data, error } = await supabase
         .from('kanban_comments')
         .select(`
@@ -241,39 +274,46 @@ export function useKanbanComments(cardId: string) {
         `)
         .eq('card_id', cardId)
         .order('created_at', { ascending: true })
+
       if (error) throw error
       return data as KanbanComment[]
     },
     enabled: !!cardId
   })
 }
+
 // Hook to get attachments for a specific card
 export function useKanbanAttachments(cardId: string) {
   return useQuery({
     queryKey: ['kanban-attachments', cardId],
     queryFn: async () => {
       if (!cardId) throw new Error('Card ID required')
+
       const { data, error } = await supabase
         .from('kanban_attachments')
         .select('*')
         .eq('card_id', cardId)
         .order('created_at', { ascending: false })
+
       if (error) throw error
       return data as KanbanAttachment[]
     },
     enabled: !!cardId
   })
 }
+
 // Mutation to create a new board
 export function useCreateKanbanBoard() {
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
   const { selectedProjectId } = useProjectContext()
+
   return useMutation({
     mutationFn: async (boardData: { name: string; description?: string; project_id?: string }) => {
       if (!userData?.organization?.id || !userData?.user?.id) {
         throw new Error('Organization and user required')
       }
+
       // Get the current user's organization member ID
       const { data: memberData, error: memberError } = await supabase
         .from('organization_members')
@@ -281,8 +321,10 @@ export function useCreateKanbanBoard() {
         .eq('user_id', userData.user.id)
         .eq('organization_id', userData.organization.id)
         .single()
+
       if (memberError) throw memberError
       if (!memberData) throw new Error('User is not a member of this organization')
+
       const { data, error } = await supabase
         .from('kanban_boards')
         .insert({
@@ -294,6 +336,7 @@ export function useCreateKanbanBoard() {
         })
         .select()
         .single()
+
       if (error) throw error
       return data
     },
@@ -310,9 +353,11 @@ export function useCreateKanbanBoard() {
     }
   })
 }
+
 // Update kanban board
 export function useUpdateKanbanBoard() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async (boardData: { id: string; name: string; description?: string }) => {
       const { data, error } = await supabase
@@ -324,6 +369,7 @@ export function useUpdateKanbanBoard() {
         .eq('id', boardData.id)
         .select()
         .single()
+
       if (error) throw error
       return data
     },
@@ -340,15 +386,18 @@ export function useUpdateKanbanBoard() {
     }
   })
 }
+
 // Delete kanban board
 export function useDeleteKanbanBoard() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async (boardId: string) => {
       const { error } = await supabase
         .from('kanban_boards')
         .delete()
         .eq('id', boardId)
+
       if (error) throw error
     },
     onSuccess: () => {
@@ -364,9 +413,11 @@ export function useDeleteKanbanBoard() {
     }
   })
 }
+
 // Delete kanban card
 export function useDeleteKanbanCard() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async ({ cardId, boardId }: { cardId: string; boardId: string }) => {
       if (!supabase) throw new Error('Supabase not initialized')
@@ -375,6 +426,7 @@ export function useDeleteKanbanCard() {
         .from('kanban_cards')
         .delete()
         .eq('id', cardId)
+
       if (error) throw error
       return { cardId, boardId }
     },
@@ -395,10 +447,12 @@ export function useDeleteKanbanCard() {
     }
   })
 }
+
 // Mutation to create a new list
 export function useCreateKanbanList() {
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
+
   return useMutation({
     mutationFn: async (listData: { board_id: string; name: string; created_by?: string }) => {
       if (!supabase) throw new Error('Supabase not initialized')
@@ -415,6 +469,7 @@ export function useCreateKanbanList() {
           .eq('user_id', userData.user.id)
           .eq('organization_id', userData.organization.id)
           .single()
+
         if (memberError) throw memberError
         if (!memberData) throw new Error('User is not a member of this organization')
         createdBy = memberData.id
@@ -427,7 +482,9 @@ export function useCreateKanbanList() {
         .eq('board_id', listData.board_id)
         .order('position', { ascending: false })
         .limit(1)
+
       const nextPosition = (lists?.[0]?.position || 0) + 1
+
       const { data, error } = await supabase
         .from('kanban_lists')
         .insert({
@@ -438,6 +495,7 @@ export function useCreateKanbanList() {
         })
         .select()
         .single()
+
       if (error) throw error
       return data
     },
@@ -458,9 +516,11 @@ export function useCreateKanbanList() {
     }
   })
 }
+
 // Update kanban list
 export function useUpdateKanbanList() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async (listData: { id: string; name: string; board_id: string; created_by?: string }) => {
       if (!supabase) throw new Error('Supabase not initialized')
@@ -474,6 +534,7 @@ export function useUpdateKanbanList() {
         .eq('id', listData.id)
         .select()
         .single()
+
       if (error) throw error
       return data
     },
@@ -494,9 +555,11 @@ export function useUpdateKanbanList() {
     }
   })
 }
+
 // Delete kanban list
 export function useDeleteKanbanList() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async (listId: string) => {
       if (!supabase) throw new Error('Supabase not initialized')
@@ -507,19 +570,24 @@ export function useDeleteKanbanList() {
         .select('board_id')
         .eq('id', listId)
         .single()
+
       if (listError) throw listError
       const boardId = listData.board_id
+
       // First delete all cards in the list
       const { error: cardsError } = await supabase
         .from('kanban_cards')
         .delete()
         .eq('list_id', listId)
+
       if (cardsError) throw cardsError
+
       // Then delete the list
       const { error } = await supabase
         .from('kanban_lists')
         .delete()
         .eq('id', listId)
+
       if (error) throw error
       return { listId, boardId }
     },
@@ -543,10 +611,12 @@ export function useDeleteKanbanList() {
     }
   })
 }
+
 // Mutation to create a new card
 export function useCreateKanbanCard() {
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
+
   return useMutation({
     mutationFn: async (cardData: { 
       list_id: string; 
@@ -566,7 +636,9 @@ export function useCreateKanbanCard() {
         .eq('list_id', cardData.list_id)
         .order('position', { ascending: false })
         .limit(1)
+
       const nextPosition = (cards?.[0]?.position || 0) + 1
+
       const { data, error } = await supabase
         .from('kanban_cards')
         .insert({
@@ -580,6 +652,7 @@ export function useCreateKanbanCard() {
         })
         .select()
         .single()
+
       if (error) throw error
       return { ...data, board_id: cardData.board_id } // Include board_id in response
     },
@@ -604,9 +677,11 @@ export function useCreateKanbanCard() {
     }
   })
 }
+
 // Mutation to move a card between lists
 export function useMoveKanbanCard() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async ({ 
       cardId, 
@@ -628,6 +703,7 @@ export function useMoveKanbanCard() {
           position: newPosition
         })
         .eq('id', cardId)
+
       if (error) throw error
     },
     onSuccess: (_, variables) => {
@@ -646,9 +722,11 @@ export function useMoveKanbanCard() {
     }
   })
 }
+
 // Update kanban card
 export function useUpdateKanbanCard() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async (cardData: { 
       id: string;
@@ -671,6 +749,7 @@ export function useUpdateKanbanCard() {
         .eq('id', cardData.id)
         .select()
         .single()
+
       if (error) throw error
       return data
     },
@@ -706,13 +785,16 @@ export function useUpdateKanbanCard() {
     }
   })
 }
+
 // Mutation to add a comment
 export function useCreateKanbanComment() {
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
+
   return useMutation({
     mutationFn: async ({ cardId, content }: { cardId: string; content: string }) => {
       if (!userData?.user?.id) throw new Error('User required')
+
       const { data, error } = await supabase
         .from('kanban_comments')
         .insert({
@@ -722,6 +804,7 @@ export function useCreateKanbanComment() {
         })
         .select()
         .single()
+
       if (error) throw error
       return data
     },
@@ -741,10 +824,12 @@ export function useCreateKanbanComment() {
     }
   })
 }
+
 // Mutation to upload attachment
 export function useCreateKanbanAttachment() {
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
+
   return useMutation({
     mutationFn: async ({ 
       cardId, 
@@ -754,18 +839,23 @@ export function useCreateKanbanAttachment() {
       file: File;
     }) => {
       if (!userData?.user?.id) throw new Error('User required')
+
       // Upload file to Supabase Storage
       const fileExt = file.name.split('.').pop()
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
       const filePath = `kanban-attachments/${cardId}/${fileName}`
+
       const { error: uploadError } = await supabase.storage
         .from('attachments')
         .upload(filePath, file)
+
       if (uploadError) throw uploadError
+
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('attachments')
         .getPublicUrl(filePath)
+
       // Save attachment record
       const { data, error } = await supabase
         .from('kanban_attachments')
@@ -779,6 +869,7 @@ export function useCreateKanbanAttachment() {
         })
         .select()
         .single()
+
       if (error) throw error
       return data
     },
@@ -795,20 +886,24 @@ export function useCreateKanbanAttachment() {
     }
   })
 }
+
 // Hook to update last kanban board preference
 export function useUpdateLastKanbanBoard() {
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
+
   return useMutation({
     mutationFn: async (boardId: string) => {
       if (!userData?.preferences?.id) throw new Error('User preferences required')
       if (!supabase) throw new Error('Supabase not initialized')
+
       const { data, error } = await supabase
         .from('user_preferences')
         .update({ last_kanban_board_id: boardId })
         .eq('id', userData.preferences.id)
         .select()
         .single()
+
       if (error) throw error
       return data
     },
@@ -821,9 +916,11 @@ export function useUpdateLastKanbanBoard() {
     }
   })
 }
+
 // Toggle completed status for kanban card
 export function useToggleKanbanCardCompleted() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async ({ 
       cardId, 
@@ -845,12 +942,14 @@ export function useToggleKanbanCardCompleted() {
       } else {
         updateData.completed_at = undefined
       }
+
       const { data, error } = await supabase
         .from('kanban_cards')
         .update(updateData)
         .eq('id', cardId)
         .select()
         .single()
+
       if (error) throw error
       return data
     },

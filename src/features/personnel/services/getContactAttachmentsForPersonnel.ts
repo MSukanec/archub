@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 export interface ContactAttachmentForPersonnel {
   id: string;
   contact_id: string;
@@ -13,6 +14,7 @@ export interface ContactAttachmentForPersonnel {
   created_by: string;
   created_at: string;
 }
+
 export async function getContactAttachmentsForPersonnel(
   avatarAttachmentIds: string[]
 ): Promise<ContactAttachmentForPersonnel[]> {

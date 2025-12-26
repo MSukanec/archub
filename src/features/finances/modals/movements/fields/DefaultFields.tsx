@@ -14,6 +14,7 @@ import { GeneralCostsFields } from './GeneralCostsFields'
 import { PartnerWithdrawalsFields } from './PartnerWithdrawalsFields'
 import { PartnerContributionsFields } from './PartnerContributionsFields'
 import { CommitmentItem } from './ClientsFields'
+
 interface DefaultFieldsProps {
   form: UseFormReturn<any>
   currencies: any[]
@@ -50,6 +51,7 @@ interface DefaultFieldsProps {
   // Exchange rate visibility configuration
   showExchangeRate?: boolean
 }
+
 export function DefaultMovementFields({
   form,
   currencies,
@@ -111,6 +113,7 @@ export function DefaultMovementFields({
         )}
       />
       */}
+
       {/* Fila: Billetera | Moneda y Monto */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 col-span-2">
         <FormField
@@ -137,6 +140,7 @@ export function DefaultMovementFields({
             </FormItem>
           )}
         />
+
         <FormItem>
           <FormLabel>Moneda y Monto *</FormLabel>
           <FormControl>
@@ -160,6 +164,7 @@ export function DefaultMovementFields({
           <FormMessage />
         </FormItem>
       </div>
+
       {/* Fila: Cotización (ancho completo) - Solo mostrar si showExchangeRate es true */}
       {showExchangeRate && (
         <div className="col-span-2">
@@ -185,6 +190,7 @@ export function DefaultMovementFields({
           />
         </div>
       )}
+
       {/* Botón para Selección de Persona - Solo si showPersonButton es true */}
       {showPersonButton && onOpenPersonSubform && (
         <div className="col-span-2">
@@ -196,6 +202,7 @@ export function DefaultMovementFields({
           />
         </div>
       )}
+
       {/* Botón para Selección de Tareas - Solo si showTaskButton es true */}
       {showTaskButton && onOpenTasksSubform && (
         <div className="col-span-2">
@@ -207,6 +214,7 @@ export function DefaultMovementFields({
           />
         </div>
       )}
+
       {/* Botón para Selección de Subcontrato - Solo si showSubcontractButton es true */}
       {showSubcontractButton && onOpenSubcontractSubform && (
         <div className="col-span-2">
@@ -218,8 +226,9 @@ export function DefaultMovementFields({
           />
         </div>
       )}
+
       {/* CAMPOS ESPECÍFICOS SEGÚN CATEGORÍA */}
-      {selectedCategoryId === 'd376d404-734a-47a9-b851-d112d64147db'&& onPersonnelChange && (
+      {selectedCategoryId === 'd376d404-734a-47a9-b851-d112d64147db' && onPersonnelChange && (
         <div className="col-span-2">
           <PersonnelFields 
             selectedPersonnel={selectedPersonnel}
@@ -228,7 +237,8 @@ export function DefaultMovementFields({
           />
         </div>
       )}
-      {selectedCategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498'&& onSubcontractsChange && (
+
+      {selectedCategoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' && onSubcontractsChange && (
         <div className="col-span-2">
           <SubcontractsFields 
             selectedSubcontracts={selectedSubcontracts}
@@ -237,7 +247,8 @@ export function DefaultMovementFields({
           />
         </div>
       )}
-      {selectedCategoryId === 'f3b96eda-15d5-4c96-ade7-6f53685115d3'&& onClientsChange && (
+
+      {selectedCategoryId === 'f3b96eda-15d5-4c96-ade7-6f53685115d3' && onClientsChange && (
         <div className="col-span-2">
           <ClientsFields 
             selectedClients={selectedClients}
@@ -246,7 +257,8 @@ export function DefaultMovementFields({
           />
         </div>
       )}
-      {selectedCategoryId === 'e854de08-da8f-4769-a2c5-b24b622f20b0'&& onIndirectsChange && (
+
+      {selectedCategoryId === 'e854de08-da8f-4769-a2c5-b24b622f20b0' && onIndirectsChange && (
         <div className="col-span-2">
           <IndirectFields 
             selectedIndirects={selectedIndirects}
@@ -255,7 +267,8 @@ export function DefaultMovementFields({
           />
         </div>
       )}
-      {selectedCategoryId === '0ec4814c-40f6-49f3-8a34-0c350a122bad'&& onGeneralCostsChange && (
+
+      {selectedCategoryId === '0ec4814c-40f6-49f3-8a34-0c350a122bad' && onGeneralCostsChange && (
         <div className="col-span-2">
           <GeneralCostsFields 
             selectedGeneralCosts={selectedGeneralCosts}
@@ -265,7 +278,8 @@ export function DefaultMovementFields({
         </div>
       )}
       
-      {form.watch('category_id') === 'c04a82f8-6fd8-439d-81f7-325c63905a1b'&& onPartnerWithdrawalsChange && (
+
+      {form.watch('category_id') === 'c04a82f8-6fd8-439d-81f7-325c63905a1b' && onPartnerWithdrawalsChange && (
         <div className="col-span-2">
           <PartnerWithdrawalsFields 
             selectedPartnerWithdrawals={selectedPartnerWithdrawals}
@@ -273,7 +287,8 @@ export function DefaultMovementFields({
           />
         </div>
       )}
-      {form.watch('category_id') === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb'&& onPartnerContributionsChange && (
+
+      {form.watch('category_id') === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' && onPartnerContributionsChange && (
         <div className="col-span-2">
           <PartnerContributionsFields 
             selectedPartnerContributions={selectedPartnerContributions}
@@ -281,6 +296,7 @@ export function DefaultMovementFields({
           />
         </div>
       )}
+
     </>
   )
 }

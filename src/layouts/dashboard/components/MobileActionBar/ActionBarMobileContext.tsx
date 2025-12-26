@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react'
 import { LucideIcon } from 'lucide-react'
+
 interface ActionBarAction {
   id: string
   icon: LucideIcon
   label: string
   onClick: () => void
-  variant?: 'primary'| 'secondary'
+  variant?: 'primary' | 'secondary'
   planRestriction?: {
     feature: string
     current: number
@@ -14,6 +15,7 @@ interface ActionBarAction {
     modalDescription?: string
   }
 }
+
 interface ActionBarActions {
   home?: ActionBarAction
   search?: ActionBarAction
@@ -21,6 +23,7 @@ interface ActionBarActions {
   filter?: ActionBarAction
   notifications?: ActionBarAction
 }
+
 interface ActionBarMobileContextType {
   actions: ActionBarActions
   setActions: (actions: ActionBarActions) => void
@@ -38,7 +41,9 @@ interface ActionBarMobileContextType {
   showNotificationsPopover: boolean
   setShowNotificationsPopover: (show: boolean) => void
 }
+
 const ActionBarMobileContext = createContext<ActionBarMobileContextType | undefined>(undefined)
+
 export function ActionBarMobileProvider({ children }: { children: ReactNode }) {
   const [actions, setActions] = useState<ActionBarActions>({})
   const [showActionBar, setShowActionBar] = useState(false)
@@ -50,6 +55,7 @@ export function ActionBarMobileProvider({ children }: { children: ReactNode }) {
   const [filterConfig, setFilterConfig] = useState<any>(null)
   
   const [showNotificationsPopover, setShowNotificationsPopover] = useState(false)
+
   const clearActions = () => {
     setActions({})
     setShowActionBar(false)
@@ -58,6 +64,7 @@ export function ActionBarMobileProvider({ children }: { children: ReactNode }) {
     setShowNotificationsPopover(false)
     setSearchValue('')
   }
+
   return (
     <ActionBarMobileContext.Provider
       value={{
@@ -82,6 +89,7 @@ export function ActionBarMobileProvider({ children }: { children: ReactNode }) {
     </ActionBarMobileContext.Provider>
   )
 }
+
 export function useActionBarMobile() {
   const context = useContext(ActionBarMobileContext)
   if (context === undefined) {

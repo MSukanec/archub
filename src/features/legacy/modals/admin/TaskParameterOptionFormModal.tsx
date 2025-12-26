@@ -3,11 +3,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Plus } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
+
 import { FormModalLayout } from "@/components/modal";
 import { FormModalHeader } from "@/components/modal";
 import { FormModalFooter } from "@/components/modal";
@@ -15,6 +17,7 @@ import { useGlobalModalStore } from '@/components/modal';
 import { useCreateTaskParameterOption, useUpdateTaskParameterOption, TaskParameterOption } from '@/hooks/use-task-parameters-admin';
 import { useTopLevelCategories, useUnits } from '@/hooks/use-task-categories';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 // Form schema
 const taskParameterOptionSchema = z.object({
   value: z.string().min(1, 'El valor es requerido'),
@@ -23,10 +26,13 @@ const taskParameterOptionSchema = z.object({
   category_id: z.string().optional(),
   unit_id: z.string().optional(),
 });
+
 type TaskParameterOptionFormData = z.infer<typeof taskParameterOptionSchema>;
+
 interface TaskParameterOptionFormModalProps {
   modalType: 'task-parameter-option';
 }
+
 export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionFormModalProps) {
   const { open, data, closeModal } = useGlobalModalStore();
   const { parameterId, parameterLabel, option }: { parameterId?: string; parameterLabel?: string; option?: TaskParameterOption } = data || {};
@@ -55,6 +61,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
       .trim()
       .replace(/\s+/g, '_'); // Replace spaces with underscores
   };
+
   const form = useForm<TaskParameterOptionFormData>({
     resolver: zodResolver(taskParameterOptionSchema),
     defaultValues: {
@@ -65,6 +72,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
       unit_id: '',
     },
   });
+
   // Load option data when editing
   useEffect(() => {
     if (option) {
@@ -85,6 +93,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
       });
     }
   }, [option, form]);
+
   // Watch label changes to auto-generate value
   const watchedLabel = form.watch('label');
   useEffect(() => {
@@ -94,6 +103,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
       form.setValue('value', normalizedValue);
     }
   }, [watchedLabel, option, form]);
+
   const handleSubmit = async (data: TaskParameterOptionFormData) => {
     if (!parameterId) {
       toast({
@@ -103,6 +113,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
       });
       return;
     }
+
     setIsSubmitting(true);
     
     try {
@@ -163,6 +174,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
       setIsSubmitting(false);
     }
   };
+
   const viewPanel = (
     <div className="space-y-4">
       <div>
@@ -179,6 +191,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
         <h4 className="font-medium">Slug</h4>
         <p className="text-muted-foreground mt-1 font-mono text-sm">{option?.name || 'Sin slug'}</p>
       </div>
+
       {/* Show category and unit info for "Tipo de Tarea" parameter */}
       {isTipoTareaParameter && (
         <>
@@ -205,6 +218,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
       )}
     </div>
   );
+
   const editPanel = (
     <div className="space-y-4">
       <Form {...form}>
@@ -226,6 +240,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
               </FormItem>
             )}
           />
+
           {/* Description Field */}
           <FormField
             control={form.control}
@@ -244,6 +259,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
               </FormItem>
             )}
           />
+
           {/* Value Field */}
           <FormField
             control={form.control}
@@ -264,6 +280,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
               </FormItem>
             )}
           />
+
           {/* Conditional fields - only for "Tipo de Tarea" parameter */}
           {isTipoTareaParameter && (
             <>
@@ -293,6 +310,7 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
                   </FormItem>
                 )}
               />
+
               {/* Unit Field */}
               <FormField
                 control={form.control}
@@ -325,24 +343,28 @@ export function TaskParameterOptionFormModal({ modalType }: TaskParameterOptionF
       </Form>
     </div>
   );
+
   const headerContent = (
     <FormModalHeader 
-      title={option ? 'Editar Opción': 'Nueva Opción'}
+      title={option ? 'Editar Opción' : 'Nueva Opción'}
       icon={Plus}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={closeModal}
-      rightLabel={option ? 'Guardar Cambios': 'Crear Opción'}
+      rightLabel={option ? 'Guardar Cambios' : 'Crear Opción'}
       onRightClick={() => {
         form.handleSubmit(handleSubmit)();
       }}
       showLoadingSpinner={isSubmitting}
     />
   );
+
   if (!open || modalType !== 'task-parameter-option') return null;
+
   return (
     <FormModalLayout
       columns={1}

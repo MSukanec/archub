@@ -6,17 +6,21 @@ import { useGlobalModalStore } from '@/components/modal';
 import AdminLayoutContentView from '@/features/admin/views/AdminLayoutContentView';
 import AdminLayoutCardView from '@/features/admin/views/AdminLayoutCardView';
 import ChartGalleryView from '@/features/admin/views/ChartGalleryView';
+
 const AdminLayoutPage = () => {
   const [activeTab, setActiveTab] = useState('charts');
   const { openModal } = useGlobalModalStore();
+
   const tabs = [
-    { id: 'charts', label: 'Charts', isActive: activeTab === 'charts'},
-    { id: 'content', label: 'Contenido', isActive: activeTab === 'content'},
-    { id: 'components', label: 'Componentes', isActive: activeTab === 'components'}
+    { id: 'charts', label: 'Charts', isActive: activeTab === 'charts' },
+    { id: 'content', label: 'Contenido', isActive: activeTab === 'content' },
+    { id: 'components', label: 'Componentes', isActive: activeTab === 'components' }
   ];
+
   const handleCreateSection = () => {
-    openModal('hero-section-form', { mode: 'create'});
+    openModal('hero-section-form', { mode: 'create' });
   };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'charts':
@@ -29,6 +33,7 @@ const AdminLayoutPage = () => {
         return <ChartGalleryView />;
     }
   };
+
   const headerProps = {
     title: 'Layout',
     icon: LayoutIcon,
@@ -36,13 +41,14 @@ const AdminLayoutPage = () => {
     showFilters: false,
     tabs,
     onTabChange: setActiveTab,
-    actions: activeTab === 'content'? [
+    actions: activeTab === 'content' ? [
       <Button key="create" onClick={handleCreateSection} data-testid="button-create-hero-section">
         <Plus className="w-4 h-4 mr-2" />
         Nueva Sección
       </Button>
     ] : undefined
   };
+
   return (
     <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
@@ -51,4 +57,5 @@ const AdminLayoutPage = () => {
     </Layout>
   );
 };
+
 export default AdminLayoutPage;

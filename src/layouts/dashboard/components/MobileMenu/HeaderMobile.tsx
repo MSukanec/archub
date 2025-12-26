@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { MobileMenu } from "./MobileMenu";
 import { useMobileMenuStore } from "./useMobileMenuStore";
+
 interface Tab {
   id: string;
   label: string;
   isActive: boolean;
   disabled?: boolean;
 }
+
 interface HeaderMobileProps {
   icon?: React.ComponentType<any> | React.ReactNode;
   title?: string;
@@ -17,6 +19,7 @@ interface HeaderMobileProps {
   onTabChange?: (tabId: string) => void;
   children?: React.ReactNode;
 }
+
 export function HeaderMobile({
   icon,
   title,
@@ -25,7 +28,9 @@ export function HeaderMobile({
   children,
 }: HeaderMobileProps = {}) {
   const { isOpen: isMobileMenuOpen, openMenu, closeMenu } = useMobileMenuStore();
+
   const [location, navigate] = useLocation();
+
   const getCurrentSectionLabel = () => {
     if (location === "/") return "Gestión de Organizaciones";
     if (location.startsWith("/design")) return "Diseño";
@@ -40,6 +45,7 @@ export function HeaderMobile({
     if (location.startsWith("/organization")) return "Organización";
     return "Seencel";
   };
+
   const getBreadcrumbIcon = () => {
     if (location === "/" || location.startsWith("/organization")) return <Building className="w-5 h-5 text-[var(--accent)]" />;
     if (location.startsWith("/design")) return <Brush className="w-5 h-5 text-[var(--accent)]" />;
@@ -52,7 +58,9 @@ export function HeaderMobile({
     if (location.startsWith("/settings")) return <Settings className="w-5 h-5 text-[var(--accent)]" />;
     return <Building className="w-5 h-5 text-[var(--accent)]" />;
   };
+
   const isProjectBasedSection = location.startsWith("/design") || location.startsWith("/construction") || location.startsWith("/finances");
+
   return (
     <>
       <div className="md:hidden sticky top-0 z-50 bg-[var(--card-bg)] border-b border-[var(--card-border)]">
@@ -76,6 +84,7 @@ export function HeaderMobile({
               </h1>
             </div>
           </button>
+
           <div className="flex items-center gap-2">
             <Menu 
               className="w-6 h-6 text-[var(--layout-text)] cursor-pointer hover:text-[var(--accent)] transition-colors" 
@@ -83,6 +92,7 @@ export function HeaderMobile({
             />
           </div>
         </div>
+
         {tabs && tabs.length > 0 && (
           <div className="px-4 pb-3">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
@@ -96,7 +106,7 @@ export function HeaderMobile({
                     ${tab.disabled
                       ? 'bg-[var(--card-bg)] text-[var(--muted-foreground)] border border-[var(--main-sidebar-border)] cursor-not-allowed opacity-50'
                       : tab.isActive 
-                        ? 'bg-[var(--accent)] text-white'
+                        ? 'bg-[var(--accent)] text-white' 
                         : 'bg-[var(--card-bg)] text-[var(--main-sidebar-fg)] border border-[var(--main-sidebar-border)] hover:bg-[var(--card-hover-bg)]'
                     }
                   `}
@@ -108,7 +118,9 @@ export function HeaderMobile({
           </div>
         )}
       </div>
+
       <MobileMenu onClose={closeMenu} />
+
       {children && (
         <div className="md:hidden">
           {children}

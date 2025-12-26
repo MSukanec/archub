@@ -6,11 +6,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { Column, RowAction, PrimaryRowAction, LeadingRowAction } from "./types";
 import { getColumnAlignment, getJustifyClass } from "./utils";
+
 function RowActionsPopover({ rowActions }: { rowActions: RowAction[] }) {
   const [open, setOpen] = useState(false);
   
   const defaultActions = rowActions.filter((a) => a.variant !== "destructive");
   const destructiveActions = rowActions.filter((a) => a.variant === "destructive");
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -66,6 +68,7 @@ function RowActionsPopover({ rowActions }: { rowActions: RowAction[] }) {
     </Popover>
   );
 }
+
 interface TableRowProps<T> {
   item: T;
   index: number;
@@ -83,6 +86,7 @@ interface TableRowProps<T> {
   isLastItem: boolean;
   getRowClassName?: (item: T) => string;
 }
+
 export function TableRow<T>({
   item,
   index,
@@ -101,6 +105,7 @@ export function TableRow<T>({
   getRowClassName,
 }: TableRowProps<T>) {
   const hasActions = !!(rowActions || primaryRowAction || leadingRowAction);
+
   return (
     <div
       className={cn(
@@ -126,9 +131,11 @@ export function TableRow<T>({
           />
         </div>
       )}
+
       {columns.map((column) => {
         const alignment = getColumnAlignment(column);
         const justifyClass = getJustifyClass(alignment);
+
         return (
           <div
             key={String(column.key)}
@@ -144,6 +151,7 @@ export function TableRow<T>({
           </div>
         );
       })}
+
       {hasActions && (
         <div className="flex items-center justify-end gap-2">
           {leadingRowAction && (
@@ -160,6 +168,7 @@ export function TableRow<T>({
               <leadingRowAction.icon className="h-4 w-4" />
             </Button>
           )}
+
           {primaryRowAction && (
             <Button
               variant="ghost"
@@ -174,6 +183,7 @@ export function TableRow<T>({
               <ArrowRight className="h-4 w-4" />
             </Button>
           )}
+
           {rowActions && !hideActions && (
             <RowActionsPopover rowActions={rowActions} />
           )}
@@ -182,10 +192,12 @@ export function TableRow<T>({
     </div>
   );
 }
+
 interface InactiveSeparatorProps {
   label: string;
   gridTemplateColumns: string;
 }
+
 export function InactiveSeparator({
   label,
   gridTemplateColumns,

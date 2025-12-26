@@ -12,13 +12,16 @@ import { supabase } from '@/lib/supabase';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
+
 const organizationSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   is_active: z.boolean(),
   plan_id: z.string().min(1, 'El plan es requerido'),
   is_founder: z.boolean()
 });
+
 type OrganizationFormData = z.infer<typeof organizationSchema>;
+
 interface Organization {
   id: string;
   name: string;
@@ -29,15 +32,17 @@ interface Organization {
     [key: string]: any;
   } | null;
 }
+
 export interface OrganizationFormProps {
   organizationId?: string;
   organization?: Organization;
-  mode: 'create'| 'edit'| 'view';
+  mode: 'create' | 'edit' | 'view';
   onSuccess: () => void;
   onCancel: () => void;
   hideActions?: boolean;
   formRef?: React.RefObject<HTMLFormElement>;
 }
+
 export function AdminOrganizationForm({
   organizationId,
   organization,
@@ -50,6 +55,7 @@ export function AdminOrganizationForm({
   const { data: currentUser } = useCurrentUser();
   const internalFormRef = useRef<HTMLFormElement>(null);
   const actualFormRef = formRef || internalFormRef;
+
   const { data: plans = [], isLoading: isLoadingPlans } = useQuery({
     queryKey: ['admin-plans'],
     queryFn: async () => {
@@ -64,6 +70,7 @@ export function AdminOrganizationForm({
       return data;
     }
   });
+
   const form = useForm<OrganizationFormData>({
     resolver: zodResolver(organizationSchema),
     defaultValues: {
@@ -73,6 +80,7 @@ export function AdminOrganizationForm({
       is_founder: organization?.settings?.is_founder ?? false
     }
   });
+
   useEffect(() => {
     if (organization) {
       form.reset({
@@ -83,6 +91,7 @@ export function AdminOrganizationForm({
       });
     }
   }, [organization, form]);
+
   const { mutate: createOrganization, isPending: isCreating } = useOptimisticMutation({
     mutationFn: async (data: OrganizationFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -119,7 +128,7 @@ export function AdminOrganizationForm({
       if (!oldData) return oldData;
       if (!Array.isArray(oldData)) return oldData;
       const optimisticOrg = {
-        id: 'temp-'+ Date.now(),
+        id: 'temp-' + Date.now(),
         name: variables.name,
         is_active: variables.is_active,
         plan_id: variables.plan_id,
@@ -131,6 +140,7 @@ export function AdminOrganizationForm({
     onErrorMessage: "No se pudo crear la organización",
     additionalQueryKeys: [['current-user']],
   });
+
   const { mutate: updateOrganization, isPending: isUpdating } = useOptimisticMutation({
     mutationFn: async (data: OrganizationFormData) => {
       if (!supabase || !organization) throw new Error('Supabase not initialized or no organization');
@@ -174,14 +184,17 @@ export function AdminOrganizationForm({
     onErrorMessage: "No se pudo actualizar la organización",
     additionalQueryKeys: [['current-user']],
   });
+
   const isSubmitting = isCreating || isUpdating;
+
   const onSubmit = (data: OrganizationFormData) => {
-    if (mode === 'edit'&& organization) {
+    if (mode === 'edit' && organization) {
       updateOrganization(data);
     } else {
       createOrganization(data);
     }
   };
+
   if (isLoadingPlans) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -189,7 +202,8 @@ export function AdminOrganizationForm({
       </div>
     );
   }
-  if (mode === 'view'&& organization) {
+
+  if (mode === 'view' && organization) {
     return (
       <div className="w-full space-y-6">
         <div className="space-y-4">
@@ -200,7 +214,7 @@ export function AdminOrganizationForm({
           <div>
             <label className="text-sm font-medium">Estado</label>
             <p className="text-sm text-muted-foreground mt-1">
-              {organization.is_active ? 'Activa': 'Inactiva'}
+              {organization.is_active ? 'Activa' : 'Inactiva'}
             </p>
           </div>
         </div>
@@ -214,6 +228,7 @@ export function AdminOrganizationForm({
       </div>
     );
   }
+
   return (
     <Form {...form}>
       <form 
@@ -238,6 +253,7 @@ export function AdminOrganizationForm({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="plan_id"
@@ -262,6 +278,7 @@ export function AdminOrganizationForm({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="is_founder"
@@ -283,6 +300,7 @@ export function AdminOrganizationForm({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="is_active"
@@ -304,6 +322,7 @@ export function AdminOrganizationForm({
             </FormItem>
           )}
         />
+
         {!hideActions && (
           <div className="flex gap-2 pt-4 border-t">
             <Button 
@@ -321,7 +340,7 @@ export function AdminOrganizationForm({
               className="flex-[3]"
               data-testid="button-submit"
             >
-              {isSubmitting ? 'Guardando...': mode === 'edit'? 'Guardar Cambios': 'Crear'}
+              {isSubmitting ? 'Guardando...' : mode === 'edit' ? 'Guardar Cambios' : 'Crear'}
             </Button>
           </div>
         )}

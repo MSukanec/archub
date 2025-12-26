@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { TrendingUp, Plus } from 'lucide-react'
+
 import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { EmptyState } from '@/components/shared/EmptyState'
 import { Button } from '@/components/ui/button'
@@ -10,9 +11,11 @@ import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal'
 import { useToast } from '@/hooks/use-toast'
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner'
+
 import { CapitalMembersSummaryTab } from './CapitalMembersSummaryTab'
 import { CapitalHistoryTab } from './CapitalHistoryTab'
 import CapitalFinancialSummaryTab from './CapitalFinancialSummaryTab'
+
 interface CapitalMovement {
   id: string
   movement_date: string
@@ -43,6 +46,7 @@ interface CapitalMovement {
   type_name?: string
   partner?: string
 }
+
 export default function FinancesCapitalMovements() {
   const [searchValue, setSearchValue] = useState("")
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -51,9 +55,12 @@ export default function FinancesCapitalMovements() {
   const { openModal } = useGlobalModalStore()
   const queryClient = useQueryClient()
   const { toast } = useToast()
+
   const organizationId = userData?.organization?.id
+
   // Get all movements for the organization
   const { data: allMovements = [], isLoading } = useMovements(organizationId, undefined)
+
   // Get movement concepts to identify capital movements
   const { data: concepts = [] } = useQuery({
     queryKey: ['movement-concepts', organizationId],
@@ -70,6 +77,7 @@ export default function FinancesCapitalMovements() {
     },
     enabled: !!organizationId && !!supabase
   })
+
   // Find concepts for partner contributions and withdrawals
   const aportesPropriosConcept = concepts.find(c => 
     c.id === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb'
@@ -78,6 +86,7 @@ export default function FinancesCapitalMovements() {
   const retirosPropriosConcept = concepts.find(c => 
     c.id === 'c04a82f8-6fd8-439d-81f7-325c63905a1b'
   )
+
   // Also find old concepts by name for backward compatibility
   const aportesPropriosOld = concepts.find(c => 
     c.name === 'Aportes Propios'
@@ -86,6 +95,7 @@ export default function FinancesCapitalMovements() {
   const retirosPropriosOld = concepts.find(c => 
     c.name === 'Retiros Propios'
   )
+
   // Filter movements to only include capital movements
   const movements = useMemo(() => {
     return allMovements.filter(movement => {
@@ -98,6 +108,7 @@ export default function FinancesCapitalMovements() {
       return isAporte || isRetiro
     })
   }, [allMovements, aportesPropriosConcept, retirosPropriosConcept, aportesPropriosOld, retirosPropriosOld])
+
   // Get organization members
   const { data: members = [] } = useQuery({
     queryKey: ['organization-members', organizationId],
@@ -117,11 +128,13 @@ export default function FinancesCapitalMovements() {
         `)
         .eq('organization_id', organizationId)
         .eq('is_active', true)
+
       if (error) throw error
       return data || []
     },
     enabled: !!organizationId && !!supabase
   })
+
   // Calculate member summary using partner field from movements data
   const { memberSummary, availableCurrencies } = useMemo(() => {
     const currenciesSet = new Set<string>()
@@ -132,6 +145,7 @@ export default function FinancesCapitalMovements() {
         currenciesSet.add(movement.currency_code)
       }
     })
+
     const summaryMap = new Map()
     
     // Process movements and group by partner or member
@@ -139,6 +153,7 @@ export default function FinancesCapitalMovements() {
       let partnerId = null
       let partnerName = null
       let partnerEmail = ''
+
       // Use partner field from movement data if available
       if (movement.partner) {
         partnerName = movement.partner
@@ -155,8 +170,10 @@ export default function FinancesCapitalMovements() {
         partnerId = `unknown_${movement.id}`
         partnerEmail = ''
       }
+
       // Create a unique key for grouping (using partner name for now)
       const groupKey = partnerName
+
       let existing = summaryMap.get(groupKey) || {
         member_id: partnerId,
         member: {
@@ -174,8 +191,10 @@ export default function FinancesCapitalMovements() {
         totalRetiros: 0,
         saldo: 0
       }
+
       const amount = movement.amount || 0
       const currencyCode = movement.currency_code || 'N/A'
+
       // Check if it's aporte or retiro
       const isAporte = movement.subcategory_id === aportesPropriosConcept?.id || 
                        movement.category_id === aportesPropriosOld?.id
@@ -185,12 +204,14 @@ export default function FinancesCapitalMovements() {
       } else {
         existing.totalRetiros += amount
       }
+
       if (currencyCode === 'USD') {
         existing.dollarizedTotal += isAporte ? amount : -amount
-      } else if (currencyCode === 'ARS'&& movement.exchange_rate) {
+      } else if (currencyCode === 'ARS' && movement.exchange_rate) {
         const convertedAmount = amount / movement.exchange_rate
         existing.dollarizedTotal += isAporte ? convertedAmount : -convertedAmount
       }
+
       // Add to currencies
       if (!existing.currencies[currencyCode]) {
         existing.currencies[currencyCode] = {
@@ -203,31 +224,39 @@ export default function FinancesCapitalMovements() {
         }
       }
       existing.currencies[currencyCode].amount += isAporte ? amount : -amount
+
       existing.saldo = existing.totalAportes - existing.totalRetiros
+
       summaryMap.set(groupKey, existing)
     })
+
     // Convert to array and filter
     const summary = Array.from(summaryMap.values())
+
     return {
       memberSummary: summary.filter(s => Object.keys(s.currencies).length > 0),
       availableCurrencies: Array.from(currenciesSet).sort()
     }
   }, [movements, aportesPropriosConcept, retirosPropriosConcept, aportesPropriosOld, retirosPropriosOld])
+
   // For compatibility with existing components
   const allMovementPartners: any[] = []
+
   const handleNewMovement = () => {
     openModal('movement', {})
   }
+
   const handleEdit = (movement: CapitalMovement) => {
     // Check both new structure (subcategory_id) and old structure (category_id)
     const isAporte = movement.subcategory_id === aportesPropriosConcept?.id || 
                      movement.category_id === aportesPropriosOld?.id
-    const movementType = isAporte ? 'aportes_propios': 'retiros_propios'
+    const movementType = isAporte ? 'aportes_propios' : 'retiros_propios'
     openModal('movement', { 
       movementType,
       editingMovement: movement 
     })
   }
+
   const deleteMutation = useMutation({
     mutationFn: async (movementId: string) => {
       if (!supabase) throw new Error('Supabase not initialized')
@@ -256,6 +285,7 @@ export default function FinancesCapitalMovements() {
       })
     }
   })
+
   const handleDelete = (movement: CapitalMovement) => {
     openModal('delete-confirmation', {
       title: 'Eliminar Movimiento',
@@ -263,6 +293,7 @@ export default function FinancesCapitalMovements() {
       onConfirm: () => deleteMutation.mutate(movement.id)
     })
   }
+
   // Create tabs for the header
   const headerTabs = [
     {
@@ -281,6 +312,7 @@ export default function FinancesCapitalMovements() {
       isActive: activeTab === "details"
     }
   ]
+
   // Get header actions based on active tab
   const getHeaderActions = () => {
     if (movements.length > 0) {
@@ -301,6 +333,7 @@ export default function FinancesCapitalMovements() {
     
     return [];
   };
+
   const headerProps = {
     title: "Capital",
     description: "Gestiona aportes y retiros de capital de los socios de tu organización.",
@@ -311,6 +344,7 @@ export default function FinancesCapitalMovements() {
     onTabChange: setActiveTab,
     actions: getHeaderActions()
   }
+
   if (isLoading) {
     return (
       <Layout headerProps={headerProps} wide={true}>
@@ -320,6 +354,7 @@ export default function FinancesCapitalMovements() {
       </Layout>
     )
   }
+
   return (
     <Layout headerProps={headerProps} wide={true}>
       {/* Conditional Content - EmptyState or Tabs */}
@@ -345,9 +380,11 @@ export default function FinancesCapitalMovements() {
           {activeTab === "dashboard" && (
             <CapitalFinancialSummaryTab />
           )}
+
           {activeTab === "members" && memberSummary.length > 0 && (
             <CapitalMembersSummaryTab memberSummary={memberSummary} />
           )}
+
           {activeTab === "details" && (
             <CapitalHistoryTab
               movements={movements as any}

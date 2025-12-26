@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { LearningDashboardFast } from '../types';
+
 /**
  * Obtiene una versión optimizada del dashboard de aprendizaje.
  * 
@@ -19,6 +20,7 @@ export async function getLearningDashboardFast(): Promise<LearningDashboardFast>
   if (!session) {
     throw new Error('No active session');
   }
+
   const response = await fetch('/api/learning/dashboard-fast', {
     method: 'GET',
     headers: {
@@ -27,9 +29,11 @@ export async function getLearningDashboardFast(): Promise<LearningDashboardFast>
     },
     credentials: 'include',
   });
+
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Failed to fetch learning dashboard'}));
+    const error = await response.json().catch(() => ({ error: 'Failed to fetch learning dashboard' }));
     throw new Error(error.error || 'Failed to fetch learning dashboard');
   }
+
   return await response.json();
 }

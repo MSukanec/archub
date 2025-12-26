@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { InsertMovementTask } from '../../shared/schema';
+
 export function useMovementTasks(movementId?: string) {
   return useQuery({
     queryKey: ['movement-tasks', movementId],
@@ -22,6 +23,7 @@ export function useMovementTasks(movementId?: string) {
     enabled: !!movementId && !!supabase
   });
 }
+
 export function useCreateMovementTasks() {
   const queryClient = useQueryClient();
   

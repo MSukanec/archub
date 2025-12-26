@@ -1,15 +1,19 @@
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useFlowBlocking, FlowKey } from '@/hooks/use-flow-blocking';
+
 interface FlowBlockedBannerProps {
   flowKey: FlowKey;
   className?: string;
 }
+
 export function FlowBlockedBanner({ flowKey, className }: FlowBlockedBannerProps) {
   const { isBlocked, message, isLoading } = useFlowBlocking(flowKey);
+
   if (isLoading || !isBlocked) {
     return null;
   }
+
   return (
     <Alert variant="destructive" className={className} data-testid="flow-blocked-banner">
       <AlertCircle className="h-4 w-4" />
@@ -18,15 +22,19 @@ export function FlowBlockedBanner({ flowKey, className }: FlowBlockedBannerProps
     </Alert>
   );
 }
+
 interface FlowBlockedOverlayProps {
   flowKey: FlowKey;
   children: React.ReactNode;
 }
+
 export function FlowBlockedOverlay({ flowKey, children }: FlowBlockedOverlayProps) {
   const { isBlocked, message, isLoading } = useFlowBlocking(flowKey);
+
   if (isLoading) {
     return <>{children}</>;
   }
+
   if (isBlocked) {
     return (
       <div className="relative" data-testid="flow-blocked-overlay">
@@ -43,5 +51,6 @@ export function FlowBlockedOverlay({ flowKey, children }: FlowBlockedOverlayProp
       </div>
     );
   }
+
   return <>{children}</>;
 }

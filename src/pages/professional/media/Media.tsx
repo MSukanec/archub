@@ -5,18 +5,22 @@ import { MediaGallery } from './MediaGallery';
 import { FileText, Images, Upload, Plus } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from '@/components/modal';
+
 export default function Media() {
   const { setSidebarContext } = useNavigationStore();
   const { openModal } = useGlobalModalStore();
   const [activeTab, setActiveTab] = useState('documentation');
+
   // Set sidebar context on mount
   useEffect(() => {
     setSidebarContext('project');
   }, [setSidebarContext]);
+
   const tabs = [
-    { id: 'documentation', label: 'Documentación', isActive: activeTab === 'documentation'},
-    { id: 'gallery', label: 'Galería', isActive: activeTab === 'gallery'}
+    { id: 'documentation', label: 'Documentación', isActive: activeTab === 'documentation' },
+    { id: 'gallery', label: 'Galería', isActive: activeTab === 'gallery' }
   ];
+
   const getActionButton = () => {
     switch (activeTab) {
       case 'documentation':
@@ -35,6 +39,7 @@ export default function Media() {
         return undefined;
     }
   };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'documentation':
@@ -45,6 +50,7 @@ export default function Media() {
         return <MediaDocumentation />;
     }
   };
+
   const headerProps = {
     icon: <FileText className="w-5 h-5" />,
     title: "Media",
@@ -52,6 +58,7 @@ export default function Media() {
     onTabChange: setActiveTab,
     actionButton: getActionButton()
   };
+
   return (
     <Layout headerProps={headerProps} wide={true}>
       {renderTabContent()}

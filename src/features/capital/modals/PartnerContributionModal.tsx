@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { TrendingUp } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { PartnerContributionForm } from '../forms/PartnerContributionForm'
+
 interface PartnerContributionModalProps {
   modalData?: {
     projectId?: string;
@@ -9,10 +10,12 @@ interface PartnerContributionModalProps {
     contributionId?: string;
   };
   onClose: () => void;
-  mode?: 'create'| 'edit'| 'view';
+  mode?: 'create' | 'edit' | 'view';
 }
-export function PartnerContributionModal({ modalData, onClose, mode = 'create'}: PartnerContributionModalProps) {
+
+export function PartnerContributionModal({ modalData, onClose, mode = 'create' }: PartnerContributionModalProps) {
   const formRef = useRef<HTMLFormElement>(null)
+
   const getHeader = () => {
     switch (mode) {
       case 'view':
@@ -33,6 +36,7 @@ export function PartnerContributionModal({ modalData, onClose, mode = 'create'}:
         };
     }
   };
+
   const getSubmitText = () => {
     switch (mode) {
       case 'view':
@@ -44,6 +48,7 @@ export function PartnerContributionModal({ modalData, onClose, mode = 'create'}:
         return 'Registrar Aporte';
     }
   };
+
   const handleSubmit = () => {
     if (mode === 'view') {
       onClose();
@@ -51,7 +56,9 @@ export function PartnerContributionModal({ modalData, onClose, mode = 'create'}:
       formRef.current.requestSubmit();
     }
   };
+
   const header = getHeader();
+
   return (
     <ModalLayout 
       onClose={onClose} 
@@ -87,4 +94,5 @@ export function PartnerContributionModal({ modalData, onClose, mode = 'create'}:
     </ModalLayout>
   )
 }
+
 export default PartnerContributionModal

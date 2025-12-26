@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button'
 import { PlanRestricted } from '@/features/users'
 import { useActionBarMobile } from '@/layouts'
 import { useMobile } from '@/hooks/use-mobile'
+
 export function ProjectActivesView() {
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
@@ -29,11 +30,13 @@ export function ProjectActivesView() {
   const { setSelectedProject } = useProjectContext()
   const { setSidebarLevel } = useNavigationStore()
   const [, navigate] = useLocation()
+
   // Filter states
   const [filterByProjectType, setFilterByProjectType] = useState('all')
   const [filterByModality, setFilterByModality] = useState('all')
   const [filterByStatus, setFilterByStatus] = useState('all')
   const [searchValue, setSearchValue] = useState('')
+
   // Mobile Action Bar
   const {
     setActions,
@@ -44,23 +47,28 @@ export function ProjectActivesView() {
     setSearchValue: setMobileSearchValue
   } = useActionBarMobile()
   const isMobile = useMobile()
+
   // Sync search values between mobile and desktop
   useEffect(() => {
     if (isMobile && mobileSearchValue !== searchValue) {
       setSearchValue(mobileSearchValue)
     }
   }, [mobileSearchValue, isMobile])
+
   // Get active project
   const userId = userData?.user?.id;
   const { data: userOrgPrefs } = useUserOrganizationPreferences(userId, organizationId);
   const activeProjectId = userOrgPrefs?.last_project_id
+
   // Extract unique values for filters
   const availableProjectTypes = useMemo(() => Array.from(
     new Set(projects.map(p => p.project_data?.project_type?.name).filter(Boolean))
   ), [projects]);
+
   const availableModalities = useMemo(() => Array.from(
     new Set(projects.map(p => p.project_data?.project_modality?.name).filter(Boolean))
   ), [projects]);
+
   const availableStatuses = useMemo(() => {
     const statusNames: Record<string, string> = {
       'active': 'En proceso',
@@ -76,28 +84,32 @@ export function ProjectActivesView() {
       label: statusNames[status as keyof typeof statusNames] || status
     }));
   }, [projects]);
+
   const projectsWithActive = projects.map(project => ({
     ...project,
     is_active: project.id === activeProjectId
   }))
+
   // Apply filters
   const filteredProjects = projectsWithActive.filter(project => {
     const searchLower = searchValue.toLowerCase();
     const nameMatch = project.name?.toLowerCase().includes(searchLower);
     const searchMatch = !searchValue || nameMatch;
     
-    const matchesProjectType = filterByProjectType === 'all'|| 
+    const matchesProjectType = filterByProjectType === 'all' || 
       project.project_data?.project_type_id === filterByProjectType ||
       project.project_data?.project_type?.name?.toLowerCase().includes(filterByProjectType.toLowerCase());
     
-    const matchesModality = filterByModality === 'all'|| 
+    const matchesModality = filterByModality === 'all' || 
       project.project_data?.project_modality_id === filterByModality ||
       project.project_data?.project_modality?.name?.toLowerCase().includes(filterByModality.toLowerCase());
     
-    const matchesStatus = filterByStatus === 'all'|| 
+    const matchesStatus = filterByStatus === 'all' || 
       project.status?.toLowerCase() === filterByStatus.toLowerCase();
+
     return searchMatch && matchesProjectType && matchesModality && matchesStatus;
   })
+
   // Put active project first, then sort by last_active_at, fallback to created_at
   const sortedProjects = useMemo(() => {
     const activeProject = filteredProjects.find(p => p.id === activeProjectId);
@@ -115,10 +127,12 @@ export function ProjectActivesView() {
     
     return activeProject ? [activeProject, ...otherProjects] : otherProjects;
   }, [filteredProjects, activeProjectId])
+
   // Select project mutation using save-engine optimistic pattern
   const preferencesQueryKey = userId && organizationId 
     ? userOrgPreferencesKeys.detail(userId, organizationId)
     : ['user-preferences-placeholder'];
+
   const { mutate: selectProject, isPending: isSelectingProject } = useOptimisticMutation({
     mutationFn: async (projectId: string) => {
       if (!supabase || !userData?.user?.id || !organizationId) {
@@ -152,15 +166,20 @@ export function ProjectActivesView() {
     onErrorMessage: "No se pudo activar el proyecto",
     additionalQueryKeys: [projectsKeys.list(organizationId)],
   });
+
   const handleSelectProject = (projectId: string) => {
     if (projectId === activeProjectId) return;
+
     selectProject(projectId);
+
     setSelectedProject(projectId, organizationId);
     setSidebarLevel('project');
+
     updateProjectLastActive(projectId, organizationId!).catch(err => 
       console.error('Error updating project last_active_at:', err)
     );
   }
+
   const handleNavigateToProject = async (projectId: string) => {
     if (!supabase || !userData?.user?.id || !organizationId) {
       toast({
@@ -170,6 +189,7 @@ export function ProjectActivesView() {
       });
       return;
     }
+
     // ⚡ PASO 1: OPTIMISTIC UPDATE - Update cache immediately
     const queryKey = userOrgPreferencesKeys.detail(userData?.user?.id, organizationId);
     const oldData = queryClient.getQueryData(queryKey);
@@ -179,6 +199,7 @@ export function ProjectActivesView() {
       last_project_id: projectId,
       updated_at: new Date().toISOString()
     }));
+
     // ✅ PASO 2: IMMEDIATE CALLBACKS - Navigate and show toast WITHOUT waiting
     setSelectedProject(projectId, organizationId);
     setSidebarLevel('project');
@@ -189,6 +210,7 @@ export function ProjectActivesView() {
       title: "Proyecto abierto",
       description: "Accediendo al proyecto..."
     });
+
     // ⚡ PASO 3: FIRE AND FORGET - Update DB in background
     try {
       if (projectId !== activeProjectId) {
@@ -205,6 +227,7 @@ export function ProjectActivesView() {
         
         if (error) throw error;
       }
+
       // Update last_active_at in background
       updateProjectLastActive(projectId, organizationId!).catch(err => 
         console.error('Error updating project last_active_at:', err)
@@ -219,12 +242,15 @@ export function ProjectActivesView() {
       });
     }
   }
+
   const handleEdit = (project: any) => {
     openModal('project', { editingProject: project, isEditing: true })
   }
+
   // Configure Mobile Action Bar
   useEffect(() => {
     if (!isMobile) return;
+
     setActions({
       search: {
         id: 'search',
@@ -260,6 +286,7 @@ export function ProjectActivesView() {
       },
     });
     setShowActionBar(true);
+
     return () => {
       clearActions();
       setShowActionBar(false);
@@ -267,6 +294,7 @@ export function ProjectActivesView() {
       setSearchValue('');
     };
   }, [isMobile, projectsCount, openModal, setActions, setShowActionBar, clearActions, setMobileSearchValue]);
+
   // Configure filters for Mobile Action Bar
   useEffect(() => {
     if (isMobile && availableProjectTypes.length > 0) {
@@ -300,6 +328,7 @@ export function ProjectActivesView() {
       });
     }
   }, [filterByProjectType, filterByModality, filterByStatus, availableProjectTypes, availableModalities, availableStatuses, isMobile]);
+
   if (projectsLoading) {
     return (
       <div className="p-8 text-center text-muted-foreground">
@@ -307,6 +336,7 @@ export function ProjectActivesView() {
       </div>
     )
   }
+
   return (
     <div className="space-y-6" data-testid="container-project-actives">
       {sortedProjects.length > 0 ? (

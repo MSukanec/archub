@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { UserOrganizationPreferences } from '../types';
+
 /**
  * Obtiene las preferencias de un usuario para una organización específica.
  * 
@@ -19,6 +20,7 @@ export async function getUserOrganizationPreferences(
   organizationId: string
 ): Promise<UserOrganizationPreferences | null> {
   if (!userId || !organizationId) return null;
+
   let session = null;
   try {
     const { data } = await supabase.auth.getSession();
@@ -30,6 +32,7 @@ export async function getUserOrganizationPreferences(
   if (!session) {
     return null;
   }
+
   const response = await fetch(`/api/user/organization-preferences?user_id=${userId}&organization_id=${organizationId}`, {
     method: 'GET',
     headers: {
@@ -37,11 +40,13 @@ export async function getUserOrganizationPreferences(
       'Authorization': `Bearer ${session.access_token}`,
     },
   });
+
   if (!response.ok) {
     if (response.status === 404) {
       return null;
     }
     throw new Error(`HTTP error! status: ${response.status}`);
   }
+
   return response.json();
 }

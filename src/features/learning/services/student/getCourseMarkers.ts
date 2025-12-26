@@ -1,4 +1,5 @@
 import { apiRequest } from '@/lib/queryClient';
+
 export interface MarkerWithLesson {
   id: string;
   user_id: string;
@@ -18,6 +19,7 @@ export interface MarkerWithLesson {
     sort_index: number;
   };
 }
+
 /**
  * Construye la URL del endpoint de marcadores de curso.
  * 
@@ -35,6 +37,7 @@ export interface MarkerWithLesson {
 export function getCourseMarkersUrl(courseId: string): string {
   return `/api/courses/${courseId}/markers`;
 }
+
 /**
  * Obtiene todos los marcadores de un curso.
  * 
@@ -53,6 +56,7 @@ export async function getCourseMarkers(courseId: string): Promise<MarkerWithLess
   if (!courseId) {
     return [];
   }
+
   const response = await apiRequest('GET', getCourseMarkersUrl(courseId));
   return await response.json();
 }

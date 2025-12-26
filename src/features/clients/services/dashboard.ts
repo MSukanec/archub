@@ -4,6 +4,7 @@ import { getProjectClients } from './projectClients';
 import { getClientCommitments } from './clientCommitments';
 import { getClientPayments } from './clientPayments';
 import { getClientPaymentSchedule } from './clientPaymentSchedule';
+
 /**
  * Obtiene datos agregados del dashboard de clientes con resúmenes financieros.
  * 
@@ -41,6 +42,7 @@ export async function getClientDashboardData(
       financialSummaries: [],
     };
   }
+
   // Paralelizar todas las consultas usando las nuevas vistas
   const [
     clientsResult,
@@ -55,8 +57,10 @@ export async function getClientDashboardData(
     getClientPaymentSchedule(projectId, organizationId),
     supabase.from('client_financial_summary_view').select('*').eq('project_id', projectId).eq('organization_id', organizationId)
   ]);
+
   if (clientsResult.error) throw clientsResult.error;
   if (financialSummaryResult.error) throw financialSummaryResult.error;
+
   // Transform view data to match ProjectClientWithRelations
   const clients = (clientsResult.data || []).map(c => ({
     id: c.id,
@@ -107,6 +111,7 @@ export async function getClientDashboardData(
       deleted_at: null 
     } : null
   }));
+
   // Transform financial summary from view
   const financialSummaries = (financialSummaryResult.data || []).map(f => ({
     clientId: f.client_id,
@@ -127,6 +132,7 @@ export async function getClientDashboardData(
       last_payment_amount: null,
     }]
   }));
+
   return {
     clients,
     commitments: commitmentsResult,
@@ -135,6 +141,7 @@ export async function getClientDashboardData(
     financialSummaries,
   };
 }
+
 /**
  * Calcula resúmenes financieros por cliente y moneda.
  * 
@@ -154,11 +161,13 @@ function calculateFinancialSummaries(
   schedule: any[]
 ): Array<{ clientId: string; summaries: ClientFinancialSummary[] }> {
   const summariesByClient: Array<{ clientId: string; summaries: ClientFinancialSummary[] }> = [];
+
   clientIds.forEach(clientId => {
     const clientCommitments = commitments.filter(c => c.client_id === clientId);
     const clientPayments = payments.filter(p => p.client_id === clientId);
     
     const currencyGroups: Record<string, ClientFinancialSummary> = {};
+
     clientCommitments.forEach(commitment => {
       const currencyId = commitment.currency_id;
       
@@ -180,12 +189,15 @@ function calculateFinancialSummaries(
           last_payment_amount: null,
         };
       }
+
       const summary = currencyGroups[currencyId];
       summary.total_committed += commitment.amount;
+
       const commitmentSchedule = schedule.filter(s => s.commitment_id === commitment.id);
       commitmentSchedule.forEach(scheduleItem => {
         summary.total_scheduled += scheduleItem.amount;
         summary.total_schedule_items += 1;
+
         if (scheduleItem.status === 'paid') {
           summary.schedule_paid += 1;
         } else if (scheduleItem.status === 'pending') {
@@ -205,6 +217,7 @@ function calculateFinancialSummaries(
         }
       });
     });
+
     clientPayments.forEach(payment => {
       const currencyId = payment.currency_id;
       
@@ -226,20 +239,25 @@ function calculateFinancialSummaries(
           last_payment_amount: null,
         };
       }
+
       const summary = currencyGroups[currencyId];
       summary.total_paid += payment.amount;
+
       if (!summary.last_payment_date || payment.payment_date > summary.last_payment_date) {
         summary.last_payment_date = payment.payment_date;
         summary.last_payment_amount = payment.amount;
       }
     });
+
     Object.values(currencyGroups).forEach(summary => {
       summary.balance_due = summary.total_committed - summary.total_paid;
     });
+
     summariesByClient.push({
       clientId,
       summaries: Object.values(currencyGroups),
     });
   });
+
   return summariesByClient;
 }

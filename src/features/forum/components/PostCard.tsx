@@ -12,14 +12,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { ForumPostWithAuthor } from '../services';
+
 function getInitials(name: string): string {
   return name
-    .split('')
+    .split(' ')
     .slice(0, 2)
     .map((word) => word[0])
     .join('')
     .toUpperCase();
 }
+
 interface PostCardProps {
   post: ForumPostWithAuthor;
   depth?: number;
@@ -30,6 +32,7 @@ interface PostCardProps {
   onEdit?: (post: ForumPostWithAuthor) => void;
   onDelete?: (postId: string) => void;
 }
+
 export function PostCard({
   post,
   depth = 0,
@@ -44,10 +47,13 @@ export function PostCard({
   const organizationName = post.organization?.name;
   const maxDepth = 3;
   const actualDepth = Math.min(depth, maxDepth);
+
   const contentText = typeof post.content === 'string'
     ? post.content
     : post.content?.text || '';
+
   const isAuthor = currentUserId && post.author_id === currentUserId;
+
   return (
     <div
       className={cn(
@@ -63,6 +69,7 @@ export function PostCard({
             {getInitials(authorName)}
           </AvatarFallback>
         </Avatar>
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 text-sm mb-1">
             <span className="font-medium text-[var(--text-default)]">
@@ -74,13 +81,15 @@ export function PostCard({
               </span>
             )}
             <span className="text-[var(--text-muted)] text-xs">
-              {format(new Date(post.created_at), "d 'de'MMM, HH:mm", { locale: es })}
+              {format(new Date(post.created_at), "d 'de' MMM, HH:mm", { locale: es })}
             </span>
           </div>
+
           <div 
             className="prose prose-sm dark:prose-invert max-w-none text-[var(--text-default)]"
             dangerouslySetInnerHTML={{ __html: contentText }}
           />
+
           <div className="flex items-center gap-2 mt-2">
             <Button
               variant="ghost"
@@ -95,6 +104,7 @@ export function PostCard({
               <Heart className={cn('h-3.5 w-3.5', isLiked && 'fill-current')} />
               {likeCount > 0 && <span>{likeCount}</span>}
             </Button>
+
             {isAuthor && (onEdit || onDelete) && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -130,6 +140,7 @@ export function PostCard({
           </div>
         </div>
       </div>
+
       {post.replies && post.replies.length > 0 && (
         <div className="mt-2">
           {post.replies.map((reply) => (

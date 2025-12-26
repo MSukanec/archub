@@ -5,12 +5,15 @@
  * Uses the design system's semantic color tokens
  */
 import type { BadgeVariant } from '@/components/ui/badge';
-export type MaterialPaymentStatus = 'confirmed'| 'pending'| 'rejected'| 'void';
+
+export type MaterialPaymentStatus = 'confirmed' | 'pending' | 'rejected' | 'void';
+
 export interface StatusBadgeConfig {
   label: string;
   variant: BadgeVariant;
   className: string;
 }
+
 /**
  * Get badge configuration for a material payment status
  * 
@@ -22,22 +25,22 @@ export function getMaterialPaymentStatusBadgeConfig(status: MaterialPaymentStatu
     confirmed: { 
       label: 'Confirmado', 
       variant: 'success', 
-      className: ''
+      className: '' 
     },
     pending: { 
       label: 'Pendiente', 
       variant: 'pending', 
-      className: ''
+      className: '' 
     },
     rejected: { 
       label: 'Rechazado', 
       variant: 'error', 
-      className: ''
+      className: '' 
     },
     void: { 
       label: 'Anulado', 
       variant: 'neutral', 
-      className: ''
+      className: '' 
     },
   };
   

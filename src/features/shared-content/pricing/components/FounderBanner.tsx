@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Check, Crown, ExternalLink, ArrowRight } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import type { PricingMode } from "../types";
+
 interface FounderBannerProps {
   mode?: PricingMode;
 }
-export function FounderBanner({ mode = 'public'}: FounderBannerProps) {
+
+export function FounderBanner({ mode = 'public' }: FounderBannerProps) {
   const [, navigate] = useLocation();
   return (
     <div className="relative overflow-hidden">
@@ -34,6 +36,7 @@ export function FounderBanner({ mode = 'public'}: FounderBannerProps) {
               </div>
             </div>
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
             <div className="flex items-start gap-3">
               <Check className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
@@ -43,38 +46,45 @@ export function FounderBanner({ mode = 'public'}: FounderBannerProps) {
             <div className="flex items-start gap-3">
               <Check className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
               <Link 
-                href={mode === 'dashboard'? '/learning/courses/master-archicad/info': '/cursos/master-archicad'}
+                href={mode === 'dashboard' ? '/learning/courses/master-archicad/info' : '/cursos/master-archicad'}
                 className="text-[var(--text-muted)] hover:text-accent transition-colors inline-flex items-center gap-1"
               >
                 <span>Acceso vitalicio al curso Master ArchiCAD</span>
                 <ExternalLink className="h-3 w-3" />
               </Link>
             </div>
+
             <div className="flex items-start gap-3">
               <Check className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
               <span className="text-[var(--text-muted)]">Voz y voto directo en el roadmap</span>
             </div>
+
             <div className="flex items-start gap-3">
               <Check className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
               <span className="text-[var(--text-muted)]">Acceso anticipado a nuevas funcionalidades</span>
             </div>
+
             <div className="flex items-start gap-3">
               <Check className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
               <span className="text-[var(--text-muted)]">Comunidad privada en Discord</span>
             </div>
+
             <div className="flex items-start gap-3">
               <Check className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
               <span className="text-[var(--text-muted)]">Insignia de Fundador pública en tu perfil</span>
             </div>
+
             <div className="flex items-start gap-3">
               <Check className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
               <span className="text-[var(--text-muted)]">Incluido en directorio de organizaciones fundadoras</span>
             </div>
+
             <div className="flex items-start gap-3">
               <Check className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
               <span className="text-[var(--text-muted)]">Estatus permanente mientras mantengas tu suscripción</span>
             </div>
           </div>
+
           <div className="flex items-center justify-between gap-4 pt-2 border-t border-accent/10">
             <p className="text-xs text-[var(--text-muted)]">
               ¿Preguntas? <Link href="/contact" className="text-accent hover:underline">Contacta con nuestro equipo</Link>

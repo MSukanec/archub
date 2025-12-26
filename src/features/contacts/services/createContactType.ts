@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { ContactTypeInput, ContactType } from '../types';
+
 /**
  * Crea un nuevo tipo de contacto en la organización.
  * 
@@ -15,6 +16,7 @@ export async function createContactType(
   if (!supabase || !organizationId) {
     throw new Error('Missing required parameters');
   }
+
   const { data, error } = await supabase
     .from('contact_types')
     .insert({
@@ -25,8 +27,10 @@ export async function createContactType(
     })
     .select()
     .single();
+
   if (error) {
     throw error;
   }
+
   return data;
 }

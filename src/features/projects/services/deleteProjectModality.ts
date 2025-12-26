@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 /**
  * Elimina (soft delete) una modalidad de proyecto personalizada de una organización.
  * Solo se pueden eliminar modalidades que pertenecen a la organización (no del sistema).
@@ -12,9 +13,11 @@ export async function deleteProjectModality(modalityId: string, organizationId: 
   if (!supabase) {
     throw new Error('Supabase client not available');
   }
+
   if (!modalityId || !organizationId) {
     throw new Error('Missing required parameters: modalityId and organizationId are required');
   }
+
   const { error } = await supabase
     .from('project_modalities')
     .update({
@@ -24,6 +27,7 @@ export async function deleteProjectModality(modalityId: string, organizationId: 
     .eq('id', modalityId)
     .eq('organization_id', organizationId)
     .eq('is_deleted', false);
+
   if (error) {
     console.error('Error deleting project modality:', error);
     throw error;

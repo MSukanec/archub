@@ -1,6 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import DataRowCard from '@/components/shared/DataRowCard';
+
 interface NoteRowProps {
   note: {
     id: string;
@@ -11,6 +12,7 @@ interface NoteRowProps {
   onGoToNote: (noteId: string) => void;
   onDelete: (noteId: string) => void;
 }
+
 export default function NoteRow({ note, onGoToNote, onDelete }: NoteRowProps) {
   return (
     <DataRowCard
@@ -22,16 +24,19 @@ export default function NoteRow({ note, onGoToNote, onDelete }: NoteRowProps) {
         <p className="font-medium text-sm leading-tight">
           {note.lesson_title}
         </p>
+
         {/* 2. Nombre de Módulo */}
         <p className="text-xs text-muted-foreground">
           {note.module_title}
         </p>
+
         {/* 3. Texto del apunte */}
         {note.body && (
           <p className="text-xs text-muted-foreground line-clamp-3 whitespace-pre-wrap">
             {note.body}
           </p>
         )}
+
         {/* 4. Botones: IR + ELIMINAR */}
         <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border/50">
           {/* Botón IR (2/3) */}
@@ -48,6 +53,7 @@ export default function NoteRow({ note, onGoToNote, onDelete }: NoteRowProps) {
           >
             Ir
           </Button>
+
           {/* Botón ELIMINAR (1/3) */}
           <Button
             variant="destructive"

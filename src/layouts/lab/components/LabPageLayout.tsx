@@ -1,5 +1,6 @@
 import { LabProvider } from '../context/LabContext';
 import { LabToolbar } from './topbar/LabToolbar';
+
 interface LabPageLayoutProps {
   children: React.ReactNode;
   className?: string;
@@ -12,6 +13,7 @@ interface LabPageLayoutProps {
     showOrgProjectSelectors?: boolean;
   };
 }
+
 /**
  * LabPageLayout - Layout para páginas experimentales del Lab
  * 
@@ -49,4 +51,5 @@ export function LabPageLayout({
     </LabProvider>
   );
 }
+
 export default LabPageLayout;

@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import type { Project } from '../types';
 import { transformProjectData } from '../mappers/projectMapper';
+
 /**
  * Obtiene un proyecto específico por su ID con todas sus relaciones.
  * 
@@ -19,10 +20,12 @@ export async function getProjectById(projectId: string): Promise<Project | null>
   if (!supabase || !projectId) {
     return null;
   }
+
   // Reject temporary IDs - they're not valid UUIDs for Supabase
   if (projectId.startsWith('temp-')) {
     return null;
   }
+
   const { data, error } = await supabase
     .from('projects')
     .select(`

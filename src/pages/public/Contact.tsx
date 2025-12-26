@@ -6,6 +6,7 @@ import { MarketingLayout } from "@/layouts/marketing";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { 
   Select, 
   SelectContent, 
   SelectItem, 
@@ -24,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Mail, Phone, MapPin, Send, Building2, CheckCircle, Loader2 } from "lucide-react";
+
 const countries = [
   { code: "AR", name: "Argentina", phone: "+54" },
   { code: "MX", name: "México", phone: "+52" },
@@ -40,6 +42,7 @@ const countries = [
   { code: "US", name: "Estados Unidos", phone: "+1" },
   { code: "OTHER", name: "Otro país", phone: "" },
 ];
+
 const contactFormSchema = z.object({
   firstName: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
   lastName: z.string().min(2, "El apellido debe tener al menos 2 caracteres"),
@@ -50,22 +53,27 @@ const contactFormSchema = z.object({
   message: z.string().min(10, "El mensaje debe tener al menos 10 caracteres").max(2000, "El mensaje es demasiado largo"),
   honeypot: z.string().max(0, "Error de validación"),
 });
+
 type ContactFormData = z.infer<typeof contactFormSchema>;
+
 export default function Contact() {
   const { toast } = useToast();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const formStartTime = useRef(Date.now());
   const contactTokenRef = useRef<string | null>(null);
+
   const tokenQuery = useQuery<{ token: string; expiresIn: number }>({
     queryKey: ['/api/contact/token'],
     staleTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
+
   useEffect(() => {
     if (tokenQuery.data?.token) {
       contactTokenRef.current = tokenQuery.data.token;
     }
   }, [tokenQuery.data]);
+
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
@@ -79,19 +87,23 @@ export default function Contact() {
       honeypot: "",
     },
   });
+
   const submitMutation = useMutation({
     mutationFn: async (data: ContactFormData) => {
       if (data.honeypot) {
         throw new Error("Validación de seguridad fallida");
       }
+
       const timeTaken = Date.now() - formStartTime.current;
       if (timeTaken < 3000) {
         throw new Error("Por favor, espera unos segundos antes de enviar el formulario");
       }
+
       const currentToken = contactTokenRef.current;
       if (!currentToken) {
         throw new Error("Error de seguridad. Por favor, recarga la página e intenta de nuevo.");
       }
+
       const response = await apiRequest("POST", "/api/contact", {
         firstName: data.firstName,
         lastName: data.lastName,
@@ -125,9 +137,11 @@ export default function Contact() {
       });
     },
   });
+
   const onSubmit = (data: ContactFormData) => {
     submitMutation.mutate(data);
   };
+
   if (isSubmitted) {
     return (
       <MarketingLayout
@@ -160,6 +174,7 @@ export default function Contact() {
       </MarketingLayout>
     );
   }
+
   return (
     <MarketingLayout
       headerNavigation={[
@@ -186,6 +201,7 @@ export default function Contact() {
                   Estamos aquí para ayudarte.
                 </p>
               </div>
+
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-md bg-accent/10 flex items-center justify-center flex-shrink-0">
@@ -201,6 +217,7 @@ export default function Contact() {
                     </a>
                   </div>
                 </div>
+
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-md bg-accent/10 flex items-center justify-center flex-shrink-0">
                     <Building2 className="w-4 h-4 text-accent" />
@@ -212,6 +229,7 @@ export default function Contact() {
                     </p>
                   </div>
                 </div>
+
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-md bg-accent/10 flex items-center justify-center flex-shrink-0">
                     <MapPin className="w-4 h-4 text-accent" />
@@ -224,10 +242,12 @@ export default function Contact() {
                   </div>
                 </div>
               </div>
+
               <p className="text-xs text-muted-foreground pt-4 border-t">
                 Responderemos en un plazo de 24-48 horas hábiles.
               </p>
             </div>
+
             <div className="lg:col-span-3">
               <div className="bg-card border rounded-xl p-6 shadow-sm">
                 <Form {...form}>
@@ -268,6 +288,7 @@ export default function Contact() {
                         )}
                       />
                     </div>
+
                     <FormField
                       control={form.control}
                       name="email"
@@ -286,6 +307,7 @@ export default function Contact() {
                         </FormItem>
                       )}
                     />
+
                     <FormField
                       control={form.control}
                       name="company"
@@ -303,6 +325,7 @@ export default function Contact() {
                         </FormItem>
                       )}
                     />
+
                     <div className="grid sm:grid-cols-2 gap-3">
                       <FormField
                         control={form.control}
@@ -328,6 +351,7 @@ export default function Contact() {
                           </FormItem>
                         )}
                       />
+
                       <FormField
                         control={form.control}
                         name="phone"
@@ -347,6 +371,7 @@ export default function Contact() {
                         )}
                       />
                     </div>
+
                     <FormField
                       control={form.control}
                       name="message"
@@ -365,7 +390,8 @@ export default function Contact() {
                         </FormItem>
                       )}
                     />
-                    <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', top: '-9999px'}}>
+
+                    <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
                       <label htmlFor="website">No llenar este campo</label>
                       <input
                         type="text"
@@ -375,6 +401,7 @@ export default function Contact() {
                         autoComplete="off"
                       />
                     </div>
+
                     <Button 
                       type="submit" 
                       size="lg" 
@@ -394,6 +421,7 @@ export default function Contact() {
                         </>
                       )}
                     </Button>
+
                     <p className="text-xs text-muted-foreground text-center">
                       Al enviar este formulario, aceptas nuestra{" "}
                       <a href="/privacy" className="underline hover:text-accent">

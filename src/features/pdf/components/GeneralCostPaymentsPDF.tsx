@@ -1,6 +1,7 @@
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
@@ -115,12 +116,12 @@ const styles = StyleSheet.create({
     fontSize: 8,
     color: '#6b7280',
   },
-  colDate: { width: '12%'},
-  colConcept: { width: '25%'},
-  colNotes: { width: '20%'},
-  colWallet: { width: '13%'},
-  colAmount: { width: '18%', textAlign: 'right'},
-  colStatus: { width: '12%'},
+  colDate: { width: '12%' },
+  colConcept: { width: '25%' },
+  colNotes: { width: '20%' },
+  colWallet: { width: '13%' },
+  colAmount: { width: '18%', textAlign: 'right' },
+  colStatus: { width: '12%' },
   statusBadge: {
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -181,12 +182,13 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
 });
+
 export interface GeneralCostPaymentItem {
   id: string;
   payment_date: string;
   amount: number;
   exchange_rate?: number | null;
-  status: 'confirmed'| 'pending'| 'overdue'| 'cancelled';
+  status: 'confirmed' | 'pending' | 'overdue' | 'cancelled';
   reference?: string | null;
   notes?: string | null;
   currency_symbol?: string;
@@ -196,6 +198,7 @@ export interface GeneralCostPaymentItem {
   category_name?: string | null;
   creator_name?: string | null;
 }
+
 export interface GeneralCostPaymentsPDFData {
   organization_name?: string;
   organization_logo?: string | null;
@@ -209,9 +212,11 @@ export interface GeneralCostPaymentsPDFData {
   date_range?: string;
   generated_at?: string;
 }
+
 interface GeneralCostPaymentsPDFProps {
   data: GeneralCostPaymentsPDFData;
 }
+
 export function GeneralCostPaymentsPDF({ data }: GeneralCostPaymentsPDFProps) {
   const formatDate = (dateStr: string) => {
     try {
@@ -222,12 +227,14 @@ export function GeneralCostPaymentsPDF({ data }: GeneralCostPaymentsPDFProps) {
       return dateStr;
     }
   };
+
   const formatCurrency = (amount: number, symbol: string = '$') => {
     return `${symbol} ${new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount)}`;
   };
+
   const getStatusConfig = (status: string) => {
     const configs: Record<string, { label: string; style: any; textStyle: any }> = {
       confirmed: { label: 'Confirmado', style: styles.statusConfirmed, textStyle: styles.statusTextConfirmed },
@@ -237,7 +244,9 @@ export function GeneralCostPaymentsPDF({ data }: GeneralCostPaymentsPDFProps) {
     };
     return configs[status] || configs.pending;
   };
+
   const generatedDate = data.generated_at || new Date().toISOString();
+
   return (
     <Document>
       <Page size="A4" orientation="landscape" style={styles.page}>
@@ -260,14 +269,16 @@ export function GeneralCostPaymentsPDF({ data }: GeneralCostPaymentsPDFProps) {
           <View style={styles.documentInfo}>
             <Text style={styles.documentTitle}>REPORTE DE GASTOS GENERALES</Text>
             <Text style={styles.documentSubtitle}>
-              Generado: {format(new Date(generatedDate), "d 'de'MMMM 'de'yyyy", { locale: es })}
+              Generado: {format(new Date(generatedDate), "d 'de' MMMM 'de' yyyy", { locale: es })}
             </Text>
             {data.date_range && (
               <Text style={styles.documentSubtitle}>{data.date_range}</Text>
             )}
           </View>
         </View>
+
         <View style={styles.divider} />
+
         {/* Summary Cards */}
         <View style={styles.summarySection}>
           <View style={styles.summaryCard}>
@@ -283,6 +294,7 @@ export function GeneralCostPaymentsPDF({ data }: GeneralCostPaymentsPDFProps) {
             <Text style={styles.summaryValue}>{data.total_confirmed_formatted}</Text>
           </View>
         </View>
+
         {/* Table */}
         {data.payments.length === 0 ? (
           <Text style={styles.noData}>No hay pagos para mostrar</Text>
@@ -297,6 +309,7 @@ export function GeneralCostPaymentsPDF({ data }: GeneralCostPaymentsPDFProps) {
               <Text style={[styles.tableHeaderCell, styles.colAmount]}>Monto</Text>
               <Text style={[styles.tableHeaderCell, styles.colStatus]}>Estado</Text>
             </View>
+
             {/* Table Rows */}
             {data.payments.map((payment, index) => {
               const statusConfig = getStatusConfig(payment.status);
@@ -321,11 +334,11 @@ export function GeneralCostPaymentsPDF({ data }: GeneralCostPaymentsPDFProps) {
                     {payment.wallet_name || '-'}
                   </Text>
                   <View style={styles.colAmount}>
-                    <Text style={[styles.tableCell, { textAlign: 'right'}]}>
+                    <Text style={[styles.tableCell, { textAlign: 'right' }]}>
                       {formatCurrency(payment.amount, payment.currency_symbol)}
                     </Text>
                     {payment.exchange_rate && payment.exchange_rate !== 1 && (
-                      <Text style={[styles.tableCellMuted, { textAlign: 'right'}]}>
+                      <Text style={[styles.tableCellMuted, { textAlign: 'right' }]}>
                         Cot. {payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                       </Text>
                     )}
@@ -342,6 +355,7 @@ export function GeneralCostPaymentsPDF({ data }: GeneralCostPaymentsPDFProps) {
             })}
           </View>
         )}
+
         {/* Footer */}
         <View style={styles.footer} fixed>
           <Text style={styles.footerText}>

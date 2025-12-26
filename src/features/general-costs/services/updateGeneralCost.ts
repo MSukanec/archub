@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { InsertGeneralCost, GeneralCost } from '../types';
+
 /**
  * Updates an existing general cost in the database.
  * 
@@ -18,6 +19,7 @@ export async function updateGeneralCost(
   if (!supabase) {
     throw new Error('Supabase client not initialized');
   }
+
   const { data, error } = await supabase
     .from('general_costs')
     .update({
@@ -27,8 +29,10 @@ export async function updateGeneralCost(
     .eq('id', generalCostId)
     .select()
     .single();
+
   if (error) {
     throw error;
   }
+
   return data;
 }

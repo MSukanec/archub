@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+
 import { FormModalLayout } from '@/components/modal'
 import { FormModalHeader } from '@/components/modal'
 import { FormModalFooter } from '@/components/modal'
@@ -11,13 +12,16 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CurrencyAmountField } from '@/components/shared/fields/CurrencyAmountField'
+
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useUnits } from '@/hooks/use-units'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { toast } from '@/hooks/use-toast'
+
 import { Users } from 'lucide-react'
+
 const laborTypeSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
@@ -25,6 +29,7 @@ const laborTypeSchema = z.object({
   unit_price: z.number().optional(),
   currency_id: z.string().optional(),
 })
+
 interface LaborType {
   id: string
   name: string
@@ -34,6 +39,7 @@ interface LaborType {
   created_at: string
   updated_at: string | null
 }
+
 interface NewLaborTypeData {
   name: string
   description?: string
@@ -41,6 +47,7 @@ interface NewLaborTypeData {
   organization_id?: string | null
   is_system?: boolean
 }
+
 interface LaborPriceData {
   labor_id: string
   organization_id: string
@@ -49,6 +56,7 @@ interface LaborPriceData {
   valid_from: string
   valid_to: string | null
 }
+
 interface AdminLaborModalProps {
   modalData: {
     editingLaborType?: LaborType | null
@@ -56,6 +64,7 @@ interface AdminLaborModalProps {
   }
   onClose: () => void
 }
+
 export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   
@@ -69,7 +78,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
   const { data: organizationCurrencies = [], isSuccess: currenciesLoaded } = useOrganizationCurrencies(userData?.organization?.id)
   
   const isAdmin = React.useMemo(() => {
-    return userData?.role?.name === 'Administrador'|| userData?.role?.name === 'Admin'
+    return userData?.role?.name === 'Administrador' || userData?.role?.name === 'Admin'
   }, [userData?.role?.name])
   
   const isSystemLabor = React.useMemo(() => {
@@ -81,6 +90,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
     name: oc.currency.name,
     symbol: oc.currency.symbol
   }))
+
   const { data: existingLaborPrice, isSuccess: laborPriceLoaded } = useQuery({
     queryKey: ['labor-price', editingLaborType?.id, userData?.organization?.id],
     queryFn: async () => {
@@ -100,6 +110,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
     },
     enabled: !!editingLaborType?.id && !!userData?.organization?.id
   })
+
   const createLaborPriceMutation = useMutation({
     mutationFn: async (data: LaborPriceData) => {
       const { error } = await supabase
@@ -109,6 +120,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       if (error) throw error
     }
   })
+
   const updateLaborPriceMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<LaborPriceData> }) => {
       const { error } = await supabase
@@ -119,6 +131,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       if (error) throw error
     }
   })
+
   const createMutation = useMutation({
     mutationFn: async (data: NewLaborTypeData) => {
       const { data: insertedData, error } = await supabase
@@ -146,6 +159,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       })
     }
   })
+
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<NewLaborTypeData> }) => {
       const { error } = await supabase
@@ -171,11 +185,13 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       })
     }
   })
+
   const isDataReady = userLoaded && unitsLoaded && (!userData?.organization?.id || currenciesLoaded)
   
   useEffect(() => {
     setPanel('edit')
   }, [setPanel])
+
   const form = useForm<z.infer<typeof laborTypeSchema>>({
     resolver: zodResolver(laborTypeSchema),
     defaultValues: {
@@ -186,12 +202,14 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       currency_id: currencyOptions.length > 0 ? currencyOptions[0].id : '',
     },
   })
+
   React.useEffect(() => {
     if (currencyOptions.length > 0 && !form.getValues('currency_id')) {
       console.log('💱 Setting default currency:', currencyOptions[0])
       form.setValue('currency_id', currencyOptions[0].id)
     }
   }, [currencyOptions, form])
+
   useEffect(() => {
     if (editingLaborType) {
       form.reset({
@@ -211,6 +229,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       })
     }
   }, [editingLaborType, isDuplicating, form, existingLaborPrice])
+
   const onSubmit = async (data: z.infer<typeof laborTypeSchema>) => {
     setIsLoading(true)
     
@@ -241,7 +260,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       }
       
       console.log('💰 Price data:', { unit_price: data.unit_price, currency_id: data.currency_id, org: userData?.organization?.id })
-      if (data.unit_price && data.currency_id && data.currency_id !== ''&& userData?.organization?.id) {
+      if (data.unit_price && data.currency_id && data.currency_id !== '' && userData?.organization?.id) {
         const priceData: LaborPriceData = {
           labor_id: laborTypeId,
           organization_id: userData.organization.id,
@@ -272,14 +291,16 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       setIsLoading(false)
     }
   }
+
   const viewPanel = null
+
   const editPanel = (
     <Form {...form}>
       <form 
         onSubmit={form.handleSubmit(onSubmit)} 
         className="space-y-4"
         onKeyDown={(e) => {
-          if (e.key === 'Enter'&& !e.shiftKey) {
+          if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault()
             form.handleSubmit(onSubmit)()
           }
@@ -302,6 +323,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="description"
@@ -320,6 +342,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
             </FormItem>
           )}
         />
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -373,22 +396,26 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       </form>
     </Form>
   )
+
   const getTitle = () => {
     if (isDuplicating) return "Duplicar Tipo de Mano de Obra"
     if (isEditing) return "Editar Tipo de Mano de Obra"
     return "Nuevo Tipo de Mano de Obra"
   }
+
   const getButtonLabel = () => {
     if (isDuplicating) return "Duplicar"
     if (isEditing) return "Actualizar"
     return "Crear"
   }
+
   const headerContent = (
     <FormModalHeader 
       title={getTitle()}
       icon={Users}
     />
   )
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -397,6 +424,7 @@ export function AdminLaborModal({ modalData, onClose }: AdminLaborModalProps) {
       onRightClick={form.handleSubmit(onSubmit)}
     />
   )
+
   return (
     <FormModalLayout
       columns={1}

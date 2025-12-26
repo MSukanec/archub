@@ -1,5 +1,6 @@
 import { apiRequest } from '@/lib/queryClient';
 import type { Subcontract } from '../types';
+
 export interface UpdateSubcontractData {
   organization_id: string;
   title?: string;
@@ -13,6 +14,7 @@ export interface UpdateSubcontractData {
   exchange_rate?: number | null;
   notes?: string | null;
 }
+
 export async function updateSubcontract(
   subcontractId: string,
   data: UpdateSubcontractData
@@ -30,10 +32,12 @@ export async function updateSubcontract(
     exchange_rate: data.exchange_rate,
     notes: data.notes,
   });
+
   if (response.ok) {
     const subcontract = await response.json();
     return subcontract;
   }
+
   const errorData = await response.json();
   throw new Error(errorData.error || 'Failed to update subcontract');
 }

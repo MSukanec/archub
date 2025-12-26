@@ -15,6 +15,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createTestimonial, updateTestimonial } from '../services';
 import { uploadFile } from '@/lib/storage';
 import type { Testimonial } from '@shared/schema';
+
 const testimonialSchema = z.object({
   author_name: z.string().min(1, 'El nombre es requerido'),
   author_title: z.string().optional(),
@@ -24,23 +25,28 @@ const testimonialSchema = z.object({
   is_active: z.boolean().default(true),
   sort_index: z.number().int().min(0).default(0),
 });
+
 type TestimonialFormData = z.infer<typeof testimonialSchema>;
+
 interface TestimonialFormProps {
   modalData?: {
     courseId: string;
     testimonial?: Testimonial | null;
   };
   onClose: () => void;
-  mode?: 'create'| 'edit';
+  mode?: 'create' | 'edit';
 }
+
 export function TestimonialForm({ modalData, onClose, mode: propMode }: TestimonialFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
   const courseId = modalData?.courseId || '';
   const testimonial = modalData?.testimonial;
-  const mode = propMode || (testimonial ? 'edit': 'create');
+  const mode = propMode || (testimonial ? 'edit' : 'create');
+
   const form = useForm<TestimonialFormData>({
     resolver: zodResolver(testimonialSchema),
     defaultValues: {
@@ -53,6 +59,7 @@ export function TestimonialForm({ modalData, onClose, mode: propMode }: Testimon
       sort_index: 0,
     }
   });
+
   useEffect(() => {
     if (testimonial) {
       form.reset({
@@ -76,13 +83,16 @@ export function TestimonialForm({ modalData, onClose, mode: propMode }: Testimon
       });
     }
   }, [testimonial, form]);
+
   const handleClose = () => {
     form.reset();
     onClose();
   };
+
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     setIsUploadingAvatar(true);
     try {
       const result = await uploadFile(file, {
@@ -90,6 +100,7 @@ export function TestimonialForm({ modalData, onClose, mode: propMode }: Testimon
         category: 'testimonial_avatar',
         description: `Avatar for testimonial`,
       });
+
       if (result.file_url) {
         form.setValue('author_avatar_url', result.file_url);
         toast({
@@ -108,6 +119,7 @@ export function TestimonialForm({ modalData, onClose, mode: propMode }: Testimon
       setIsUploadingAvatar(false);
     }
   };
+
   const createMutation = useMutation({
     mutationFn: (data: TestimonialFormData) => createTestimonial({
       courseId,
@@ -137,6 +149,7 @@ export function TestimonialForm({ modalData, onClose, mode: propMode }: Testimon
       });
     }
   });
+
   const updateMutation = useMutation({
     mutationFn: (data: TestimonialFormData) => updateTestimonial(testimonial!.id, {
       authorName: data.author_name,
@@ -165,10 +178,11 @@ export function TestimonialForm({ modalData, onClose, mode: propMode }: Testimon
       });
     }
   });
+
   const onSubmit = async (data: TestimonialFormData) => {
     setIsLoading(true);
     try {
-      if (mode === 'edit'&& testimonial) {
+      if (mode === 'edit' && testimonial) {
         await updateMutation.mutateAsync(data);
       } else {
         await createMutation.mutateAsync(data);
@@ -177,21 +191,24 @@ export function TestimonialForm({ modalData, onClose, mode: propMode }: Testimon
       setIsLoading(false);
     }
   };
+
   const avatarUrl = form.watch('author_avatar_url');
   const authorName = form.watch('author_name');
+
   const initials = authorName
-    ?.split('')
+    ?.split(' ')
     .map(n => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2) || 'NN';
+
   return (
     <ModalLayout onClose={handleClose} size="md">
       <ModalHeader
         icon={MessageSquareQuote}
-        title={mode === 'edit'? 'Editar testimonio': 'Nuevo testimonio'}
-        description={mode === 'edit'
-          ? 'Actualiza el testimonio del estudiante'
+        title={mode === 'edit' ? 'Editar testimonio' : 'Nuevo testimonio'}
+        description={mode === 'edit' 
+          ? 'Actualiza el testimonio del estudiante' 
           : 'Agrega un testimonio de un estudiante para mostrar en la landing page'}
       />
       
@@ -260,6 +277,7 @@ export function TestimonialForm({ modalData, onClose, mode: propMode }: Testimon
                 />
               </div>
             </div>
+
             {avatarUrl && (
               <FormField
                 control={form.control}
@@ -288,6 +306,7 @@ export function TestimonialForm({ modalData, onClose, mode: propMode }: Testimon
                 )}
               />
             )}
+
             <FormField
               control={form.control}
               name="content"
@@ -306,6 +325,7 @@ export function TestimonialForm({ modalData, onClose, mode: propMode }: Testimon
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="sort_index"
@@ -325,6 +345,7 @@ export function TestimonialForm({ modalData, onClose, mode: propMode }: Testimon
                 </FormItem>
               )}
             />
+
             <div className="flex gap-6 pt-2">
               <FormField
                 control={form.control}
@@ -342,6 +363,7 @@ export function TestimonialForm({ modalData, onClose, mode: propMode }: Testimon
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="is_featured"
@@ -362,10 +384,11 @@ export function TestimonialForm({ modalData, onClose, mode: propMode }: Testimon
           </form>
         </Form>
       </ModalBody>
+
       <ModalFooter
         leftLabel="Cancelar"
         onLeftClick={handleClose}
-        rightLabel={mode === 'edit'? 'Actualizar': 'Crear'}
+        rightLabel={mode === 'edit' ? 'Actualizar' : 'Crear'}
         onRightClick={form.handleSubmit(onSubmit)}
         showLoadingSpinner={isLoading}
       />

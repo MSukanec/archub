@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { Settings, Edit, Trash2, Plus } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+
 import { Table } from '@/components/shared/trees/Table';
 import { EmptyState } from '@/components/shared/EmptyState';
+
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameterOption, TaskParameterWithOptions } from '@/hooks/use-task-parameters-admin';
 import { useGlobalModalStore } from '@/components/modal';
 import { useTopLevelCategories, useUnits } from '@/hooks/use-task-categories';
+
 const AdminTaskParameters = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name_asc');
@@ -27,9 +31,12 @@ const AdminTaskParameters = () => {
     const totalParameters = parameters.length;
     const selectParameters = parameters.filter(p => p.type === 'select').length;
     const totalOptions = parameters.reduce((sum, param) => sum + (param.options?.length || 0), 0);
+
     return { totalParameters, selectParameters, totalOptions, requiredParameters: 0 };
   };
+
   const stats = calculateStats(parameters);
+
   // Filter and sort parameters
   const filteredAndSortedParameters = parameters
     .filter(parameter =>
@@ -50,6 +57,7 @@ const AdminTaskParameters = () => {
           return 0;
       }
     });
+
   if (isLoading) {
     return (
       <div className="p-8 text-center text-muted-foreground">
@@ -57,16 +65,19 @@ const AdminTaskParameters = () => {
       </div>
     );
   }
+
   // Parameter Values Table Component
   function ParameterValuesTable({ parameterId }: { parameterId: string }) {
     const parameter = filteredAndSortedParameters.find(p => p.id === parameterId);
     const parameterValues = parameter?.options || [];
+
     // Fetch categories and units for display
     const { data: categories = [] } = useTopLevelCategories();
     const { data: units = [] } = useUnits();
     
     // Check if this is the "Tipo de Tarea" parameter
     const isTipoTareaParameter = parameterId === '42d5048d-e839-496d-ad6c-9d185002eee8';
+
     if (!parameter) {
       return (
         <div className="text-center py-8 text-muted-foreground">
@@ -74,6 +85,7 @@ const AdminTaskParameters = () => {
         </div>
       );
     }
+
     if (parameterValues.length === 0) {
       return (
         <div className="space-y-4">
@@ -98,6 +110,7 @@ const AdminTaskParameters = () => {
         </div>
       );
     }
+
     // CustomTable columns for parameter values
     const columns = [
       {
@@ -162,6 +175,7 @@ const AdminTaskParameters = () => {
         )
       }
     ];
+
     return (
       <div className="space-y-4">
         <div className="flex justify-end">
@@ -205,23 +219,26 @@ const AdminTaskParameters = () => {
                   }
                 });
               },
-              variant: 'destructive'as const
+              variant: 'destructive' as const
             }
           ]}
         />
       </div>
     );
   }
+
   // Preparar opciones para el ComboBox
   const parameterOptions = filteredAndSortedParameters.map(parameter => ({
     value: parameter.id,
     label: `${parameter.label} (${parameter.type})`
   }));
+
   const handleEditParameter = () => {
     if (selectedParameter) {
       openModal('task-parameter', { parameter: selectedParameter });
     }
   };
+
   const handleDeleteParameter = () => {
     if (selectedParameter) {
       openModal('delete-confirmation', {
@@ -235,6 +252,7 @@ const AdminTaskParameters = () => {
       });
     }
   };
+
   return (
     <div className="space-y-0">
       {filteredAndSortedParameters.length === 0 ? (
@@ -243,7 +261,7 @@ const AdminTaskParameters = () => {
             icon={<Settings className="w-12 h-12 text-muted-foreground" />}
             title={searchTerm ? "No se encontraron parámetros" : "No hay parámetros creados"}
             description={searchTerm 
-              ? 'Prueba ajustando los filtros de búsqueda'
+              ? 'Prueba ajustando los filtros de búsqueda' 
               : 'Comienza creando tu primer parámetro para gestionar las opciones de tareas'
             }
           />
@@ -270,4 +288,5 @@ const AdminTaskParameters = () => {
     </div>
   );
 };
+
 export default AdminTaskParameters;

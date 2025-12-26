@@ -2,6 +2,7 @@ import { Fragment, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { TableRow } from "./TableRow";
 import { Column, RowAction, PrimaryRowAction, LeadingRowAction, TableMode } from "./types";
+
 interface TableGroupProps<T> {
   groupKey: string;
   groupRows: T[];
@@ -20,6 +21,7 @@ interface TableGroupProps<T> {
   getItemId: (item: T) => string | number;
   getRowClassName?: (item: T) => string;
 }
+
 export function TableGroup<T>({
   groupKey,
   groupRows,
@@ -58,6 +60,7 @@ export function TableGroup<T>({
           {renderGroupHeader(groupKey, groupRows)}
         </div>
       )}
+
       {groupRows.map((item, index) => (
         <TableRow
           key={getItemId(item)}

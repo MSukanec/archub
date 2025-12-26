@@ -5,10 +5,13 @@ import { supabase } from '@/lib/supabase';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import type { CourseLessonNote } from '@shared/schema';
+
 interface LessonNotesProps {
   lessonId: string;
 }
-type SaveStatus = 'idle'| 'saving'| 'saved'| 'error';
+
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+
 export function LessonNotes({ lessonId }: LessonNotesProps) {
   const [noteText, setNoteText] = useState('');
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
@@ -17,12 +20,14 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
   const savedTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialLoadRef = useRef(true);
   const initialNoteTextRef = useRef('');
+
   // Save note mutation
   const saveNoteMutation = useMutation({
     mutationFn: async (body: string) => {
       const { data } = await supabase.auth.getSession();
       const session = data?.session;
       if (!session) throw new Error('No session');
+
       const response = await fetch(`/api/lessons/${lessonId}/notes`, {
         method: 'POST',
         headers: {
@@ -35,9 +40,11 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
         }),
         credentials: 'include'
       });
+
       if (!response.ok) {
         throw new Error('Failed to save note');
       }
+
       return response.json();
     },
     onMutate: () => {
@@ -73,6 +80,7 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
       setSaveStatus('error');
     }
   });
+
   useEffect(() => {
     const loadNote = async () => {
       try {
@@ -88,15 +96,18 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
           return;
         }
         if (!session) return;
+
         const response = await fetch(`/api/lessons/${lessonId}/notes`, {
           headers: {
             'Authorization': `Bearer ${session.access_token}`
           },
           credentials: 'include'
         });
+
         if (!response.ok) {
           return;
         }
+
         const notes: CourseLessonNote[] = await response.json();
         const mainNote = notes.find(note => note.time_sec === null);
         
@@ -116,26 +127,32 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
         }, 100);
       }
     };
+
     loadNote();
   }, [lessonId]);
+
   useEffect(() => {
     // No guardar durante la carga inicial
     if (isInitialLoadRef.current) {
       return;
     }
+
     // No guardar si el texto está vacío y no había nada antes (evita crear notas vacías)
-    if (noteText.trim() === ''&& initialNoteTextRef.current === '') {
+    if (noteText.trim() === '' && initialNoteTextRef.current === '') {
       return;
     }
+
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
+
     debounceTimerRef.current = setTimeout(() => {
       // Actualizar el texto inicial para futuras comparaciones
       initialNoteTextRef.current = noteText;
       // Usar la mutation para guardar
       saveNoteMutation.mutate(noteText);
     }, 700);
+
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
@@ -145,6 +162,7 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
       }
     };
   }, [noteText, lessonId]);
+
   const getSaveStatusIndicator = () => {
     switch (saveStatus) {
       case 'saving':
@@ -172,6 +190,7 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
         return null;
     }
   };
+
   if (isLoading) {
     return (
       <div className="bg-card border border-border rounded-lg p-6 animate-pulse">
@@ -181,6 +200,7 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
       </div>
     );
   }
+
   return (
     <div className="bg-card border border-border rounded-lg p-6" data-testid="lesson-notes-container">
       <div className="flex items-center gap-3 mb-3">
@@ -191,6 +211,7 @@ export function LessonNotes({ lessonId }: LessonNotesProps) {
       <p className="text-sm text-muted-foreground mb-4">
         Los apuntes se guardan automáticamente mientras escribes
       </p>
+
       <div className="space-y-3">
         <Textarea
           data-testid="notes-textarea"

@@ -3,8 +3,10 @@ import { useLearningCourses } from './use-learning-courses';
 import { useCourseLessonsSummary } from './use-course-lessons-summary';
 import type { CourseData, EnrollmentData, CourseProgressViewData } from '../services/student/getLearningCourses';
 import { useLocation } from 'wouter';
-export type CourseTabFilter = 'enrolled'| 'completed'| 'all';
-export type EnrollmentStatus = 'enrolled'| 'completed'| 'not_enrolled';
+
+export type CourseTabFilter = 'enrolled' | 'completed' | 'all';
+export type EnrollmentStatus = 'enrolled' | 'completed' | 'not_enrolled';
+
 /**
  * View-model completo para renderizar un curso.
  * Todos los campos están listos para mostrar, sin necesidad de cálculos adicionales.
@@ -29,6 +31,7 @@ export interface CourseViewModel {
   hasDuration: boolean;
   onClick: () => void;
 }
+
 /**
  * View-model para el empty state.
  * Encapsula toda la lógica de presentación del estado vacío,
@@ -43,6 +46,7 @@ export interface EmptyStateViewModel {
   ctaText?: string;
   onCtaClick?: () => void;
 }
+
 export interface UseCourseListDataResult {
   courseViewModels: CourseViewModel[];
   enrolledCount: number;
@@ -50,6 +54,7 @@ export interface UseCourseListDataResult {
   isLoading: boolean;
   emptyState: EmptyStateViewModel;
 }
+
 /**
  * Formatea la duración en segundos a texto legible (ej: "2h 30m" o "45m").
  */
@@ -58,18 +63,21 @@ function formatDuration(totalDurationSec: number): string {
   const minutes = Math.floor((totalDurationSec % 3600) / 60);
   return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 }
+
 /**
  * Formatea el conteo de lecciones (ej: "1 lección" o "10 lecciones").
  */
 function formatLessonsCount(count: number): string {
-  return `${count} ${count === 1 ? 'lección': 'lecciones'}`;
+  return `${count} ${count === 1 ? 'lección' : 'lecciones'}`;
 }
+
 /**
  * Formatea el texto de progreso (ej: "5 de 10 lecciones").
  */
 function formatProgressText(completed: number, total: number): string {
-  return `${completed} de ${total} ${total === 1 ? 'lección': 'lecciones'}`;
+  return `${completed} de ${total} ${total === 1 ? 'lección' : 'lecciones'}`;
 }
+
 /**
  * Hook para gestionar la lógica de negocio de la lista de cursos.
  * 
@@ -84,7 +92,7 @@ function formatProgressText(completed: number, total: number): string {
  * - Determinación de estados de UI (mostrar botones, progreso, etc.)
  * - Lógica de navegación (onClick callbacks ya listos)
  * 
- * @param activeTab - Filtro activo ('enrolled'| 'completed'| 'all')
+ * @param activeTab - Filtro activo ('enrolled' | 'completed' | 'all')
  * @param onShowAllCourses - Callback para mostrar todos los cursos (cambiar a tab 'all')
  * @returns View-model completo con datos listos para renderizar
  */
@@ -94,14 +102,18 @@ export function useCourseListData(
 ): UseCourseListDataResult {
   const { data: fullData, isLoading: fullDataLoading } = useLearningCourses();
   const [, navigate] = useLocation();
+
   const courses = fullData?.courses || [];
   const courseProgressData = fullData?.progress || [];
   const enrollments = fullData?.enrollments || [];
+
   // DEBUG: Log course data to see if cover_url is present
   console.log('[useCourseListData] Courses:', courses.map(c => ({ id: c.id, title: c.title, cover_url: c.cover_url })));
   console.log('[useCourseListData] First course full data:', courses[0]);
+
   const courseIds = useMemo(() => courses.map((c: CourseData) => c.id), [courses]);
   const { data: courseLessonsSummary } = useCourseLessonsSummary(courseIds);
+
   // Build progress map
   const courseProgress = useMemo(() => {
     const progressMap = new Map<string, { completed: number; total: number; percentage: number; totalDurationSec: number }>();
@@ -133,6 +145,7 @@ export function useCourseListData(
     
     return progressMap;
   }, [courses, courseProgressData, courseLessonsSummary]);
+
   // Build enrollment map for quick lookup
   const enrollmentMap = useMemo(() => {
     const map = new Map<string, boolean>();
@@ -143,6 +156,7 @@ export function useCourseListData(
     });
     return map;
   }, [enrollments]);
+
   // Build complete view-models with all presentation logic and navigation callbacks
   const allViewModels = useMemo(() => {
     const activeCourses = courses.filter((c: CourseData) => c.is_active && c.visibility !== 'draft');
@@ -154,8 +168,9 @@ export function useCourseListData(
       // Determine enrollment status
       let enrollmentStatus: EnrollmentStatus = 'not_enrolled';
       if (hasEnrollment) {
-        enrollmentStatus = progress.percentage === 100 ? 'completed': 'enrolled';
+        enrollmentStatus = progress.percentage === 100 ? 'completed' : 'enrolled';
       }
+
       // Format all presentation data
       const durationText = formatDuration(progress.totalDurationSec);
       const lessonsCountText = formatLessonsCount(progress.total);
@@ -163,8 +178,9 @@ export function useCourseListData(
       const hasDuration = progress.totalDurationSec > 0;
       const showProgress = hasEnrollment;
       const showCartIcon = enrollmentStatus === 'not_enrolled';
-      const ctaText = hasEnrollment ? 'Ver curso': 'Suscribirme';
+      const ctaText = hasEnrollment ? 'Ver curso' : 'Suscribirme';
       const ctaDisabled = false;
+
       // Create onClick callback with complete navigation logic
       // NO branching needed in the component - all logic is here
       const onClick = () => {
@@ -176,6 +192,7 @@ export function useCourseListData(
           navigate(`/checkout?course=${course.slug}`);
         }
       };
+
       return {
         id: course.id,
         slug: course.slug,
@@ -195,6 +212,7 @@ export function useCourseListData(
       };
     });
   }, [courses, courseProgress, enrollmentMap, navigate]);
+
   // Filter view-models by active tab
   const courseViewModels = useMemo(() => {
     if (activeTab === 'enrolled') {
@@ -205,13 +223,16 @@ export function useCourseListData(
     
     return allViewModels;
   }, [allViewModels, activeTab]);
+
   // Calculate counts from ALL courses (not filtered)
   const enrolledCount = useMemo(() => {
     return allViewModels.filter(vm => vm.enrollmentStatus === 'enrolled').length;
   }, [allViewModels]);
+
   const completedCount = useMemo(() => {
     return allViewModels.filter(vm => vm.enrollmentStatus === 'completed').length;
   }, [allViewModels]);
+
   // Calculate empty state view-model with all presentation logic
   // NO branching needed in the component - all logic is here
   const emptyState = useMemo((): EmptyStateViewModel => {
@@ -224,13 +245,14 @@ export function useCourseListData(
         description: ''
       };
     }
+
     // Empty state logic based on active tab
     if (activeTab === 'enrolled') {
       return {
         show: true,
         title: 'No tienes cursos inscritos',
         description: 'Explora nuestro catálogo y comienza a aprender hoy',
-        ctaText: onShowAllCourses ? 'Ver todos los cursos': undefined,
+        ctaText: onShowAllCourses ? 'Ver todos los cursos' : undefined,
         onCtaClick: onShowAllCourses
       };
     }
@@ -240,7 +262,7 @@ export function useCourseListData(
         show: true,
         title: 'Aún no has completado ningún curso',
         description: 'Continúa con tus cursos en progreso para completarlos',
-        ctaText: onShowAllCourses ? 'Ver todos los cursos': undefined,
+        ctaText: onShowAllCourses ? 'Ver todos los cursos' : undefined,
         onCtaClick: onShowAllCourses
       };
     }
@@ -252,6 +274,7 @@ export function useCourseListData(
       description: 'Actualmente no hay cursos activos para mostrar'
     };
   }, [courseViewModels.length, activeTab, onShowAllCourses]);
+
   return {
     courseViewModels,
     enrolledCount,

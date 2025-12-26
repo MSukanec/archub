@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getBoards } from '../services/getBoards';
 import { createBoard, type CreateBoardInput } from '../services/createBoard';
 import { QUERY_KEYS } from '../constants';
+
 export function useBoards(projectId?: string) {
   return useQuery({
     queryKey: [QUERY_KEYS.BOARDS, projectId],
@@ -11,6 +12,7 @@ export function useBoards(projectId?: string) {
     gcTime: 5 * 60 * 1000, // Keep in memory for 5 minutes
   });
 }
+
 export function useCreateBoard() {
   const queryClient = useQueryClient();
   

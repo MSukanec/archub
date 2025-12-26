@@ -1,11 +1,13 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { supabase } from '@/lib/supabase'
+
 interface ThemeState {
   isDark: boolean
   toggleTheme: (userId?: string, preferencesId?: string) => Promise<void>
   setTheme: (isDark: boolean) => void
 }
+
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
@@ -29,7 +31,7 @@ export const useThemeStore = create<ThemeState>()(
         // Sincronizar con base de datos si hay usuario
         if (supabase && userId && preferencesId) {
           try {
-            const themeValue = newIsDark ? 'dark': 'light'
+            const themeValue = newIsDark ? 'dark' : 'light'
             const { error } = await supabase
               .from('user_preferences')
               .update({ theme: themeValue })

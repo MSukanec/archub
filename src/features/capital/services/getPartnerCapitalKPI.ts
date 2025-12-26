@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 export interface PartnerCapitalKPI {
   partner_id: string;
   organization_id: string;
@@ -17,27 +18,32 @@ export interface PartnerCapitalKPI {
   deviation_contribution: number | null;
   deviation_net: number | null;
   real_ownership_ratio: number | null;
-  contribution_status: 'sobre_aportado'| 'equilibrado'| 'bajo_aportado'| 'sin_porcentaje';
-  net_status: 'arriba'| 'equilibrado'| 'abajo'| 'sin_porcentaje';
+  contribution_status: 'sobre_aportado' | 'equilibrado' | 'bajo_aportado' | 'sin_porcentaje';
+  net_status: 'arriba' | 'equilibrado' | 'abajo' | 'sin_porcentaje';
   contributions_count: number;
   withdrawals_count: number;
   adjustments_count: number;
   last_movement_date: string | null;
 }
+
 export async function getPartnerCapitalKPI(organizationId: string): Promise<PartnerCapitalKPI[]> {
   if (!organizationId) {
     return [];
   }
+
   const { data, error } = await supabase
     .from('capital_partner_kpi_view')
     .select('*')
     .eq('organization_id', organizationId);
+
   if (error) {
     throw new Error(`Failed to fetch partner capital KPIs: ${error.message}`);
   }
+
   if (!data || data.length === 0) {
     return [];
   }
+
   return data.map(row => ({
     partner_id: row.partner_id,
     organization_id: row.organization_id,

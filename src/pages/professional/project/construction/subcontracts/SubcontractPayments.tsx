@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal'
 import { Receipt, Plus, Wallet } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+
 interface SubcontractPaymentsProps {
   projectId: string
   organizationId: string
 }
+
 export function SubcontractPayments({ projectId, organizationId }: SubcontractPaymentsProps) {
   const { openModal } = useGlobalModalStore()
   
@@ -55,16 +57,19 @@ export function SubcontractPayments({ projectId, organizationId }: SubcontractPa
         .eq('movement.organization_id', organizationId)
         .eq('movement.project_id', projectId)
         .order('movement(movement_date)', { ascending: false })
+
       if (error) {
         console.error('Error fetching subcontract payments:', error)
         throw error
       }
+
       // Transform payments data to match expected format
       const movements = (paymentsData || []).map((payment: any) => {
         const contact = payment.subcontracts?.subcontract_bids?.[0]?.contacts
         const contractorName = contact 
           ? (contact.full_name || contact.company_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim())
           : 'Sin adjudicar'
+
         return {
           id: payment.movement?.id,
           movement_date: payment.movement?.movement_date,
@@ -102,10 +107,12 @@ export function SubcontractPayments({ projectId, organizationId }: SubcontractPa
           }
         }
       })
+
       return movements
     },
     enabled: !!organizationId && !!projectId && !!supabase
   })
+
   const detailColumns: Column[] = [
     {
       key: "movement_date",
@@ -197,6 +204,7 @@ export function SubcontractPayments({ projectId, organizationId }: SubcontractPa
       )
     }
   ]
+
   // Summary calculations
   const totalByCurrency = payments.reduce((acc, payment) => {
     const currencyCode = payment.currency?.code || 'ARS'
@@ -215,6 +223,7 @@ export function SubcontractPayments({ projectId, organizationId }: SubcontractPa
     
     return acc
   }, {} as Record<string, { total: number; count: number; symbol: string }>)
+
   if (!isLoading && payments.length === 0) {
     return (
       <div className="space-y-6">
@@ -235,6 +244,7 @@ export function SubcontractPayments({ projectId, organizationId }: SubcontractPa
       </div>
     )
   }
+
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
@@ -249,7 +259,7 @@ export function SubcontractPayments({ projectId, organizationId }: SubcontractPa
                     {data.symbol} {data.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {data.count} pago{data.count !== 1 ? 's': ''} registrado{data.count !== 1 ? 's': ''}
+                    {data.count} pago{data.count !== 1 ? 's' : ''} registrado{data.count !== 1 ? 's' : ''}
                   </p>
                 </div>
                 <Receipt className="w-8 h-8 text-muted-foreground" />
@@ -258,6 +268,7 @@ export function SubcontractPayments({ projectId, organizationId }: SubcontractPa
           ))}
         </div>
       )}
+
       {/* Payments Table */}
       <div className="bg-card rounded-lg border">
         <div className="p-6 border-b">

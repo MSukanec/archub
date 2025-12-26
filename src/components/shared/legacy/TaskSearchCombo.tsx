@@ -22,21 +22,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+
 interface Option {
   value: string;
   label: string;
 }
+
 export interface TaskSearchFilters {
-  origin: 'all'| 'system'| 'organization';
+  origin: 'all' | 'system' | 'organization';
   rubro?: string;
   category?: string;
   subcategory?: string;
 }
+
 interface FilterOptions {
   rubros: string[];
   categories: string[];
   subcategories: string[];
 }
+
 interface TaskSearchComboProps {
   options: Option[];
   value?: string;
@@ -56,6 +60,7 @@ interface TaskSearchComboProps {
   filterOptions?: FilterOptions;
   isLoading?: boolean;
 }
+
 export function TaskSearchCombo({
   options,
   value,
@@ -69,16 +74,19 @@ export function TaskSearchCombo({
   showCreateButton = false,
   onCreateTask,
   searchQuery = "",
-  filters = { origin: 'all'},
+  filters = { origin: 'all' },
   onFiltersChange,
   filterOptions,
   isLoading = false
 }: TaskSearchComboProps) {
   const [open, setOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+
   const selectedOption = options.find((option) => option.value === value);
+
   // Contar filtros activos
   const activeFiltersCount = Object.values(filters).filter(f => f && f !== 'all').length;
+
   return (
     <div className="flex items-center gap-2">
       {/* Filtros a la izquierda */}
@@ -111,7 +119,7 @@ export function TaskSearchCombo({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => onFiltersChange({ origin: 'all'})}
+                    onClick={() => onFiltersChange({ origin: 'all' })}
                     className="h-6 px-2 text-xs"
                   >
                     <X className="w-3 h-3 mr-1" />
@@ -125,7 +133,7 @@ export function TaskSearchCombo({
                 <label className="text-xs font-medium text-muted-foreground">Origen</label>
                 <Select
                   value={filters.origin || "all"}
-                  onValueChange={(value: 'all'| 'system'| 'organization') => 
+                  onValueChange={(value: 'all' | 'system' | 'organization') => 
                     onFiltersChange({ ...filters, origin: value })
                   }
                 >
@@ -139,6 +147,7 @@ export function TaskSearchCombo({
                   </SelectContent>
                 </Select>
               </div>
+
               {/* Filtro por Rubro */}
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">Rubro</label>
@@ -165,6 +174,7 @@ export function TaskSearchCombo({
                   </SelectContent>
                 </Select>
               </div>
+
               {/* Filtro por Categoría */}
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">Categoría</label>
@@ -191,6 +201,7 @@ export function TaskSearchCombo({
                   </SelectContent>
                 </Select>
               </div>
+
               {/* Filtro por Subcategoría */}
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">Subcategoría</label>
@@ -216,6 +227,7 @@ export function TaskSearchCombo({
           </PopoverContent>
         </Popover>
       )}
+
       {/* Campo de búsqueda principal */}
       <div className="flex-1">
         <Popover open={open} onOpenChange={setOpen}>
@@ -241,7 +253,7 @@ export function TaskSearchCombo({
           <PopoverContent 
             className="p-0 z-[9999] bg-background border border-[var(--input-border)]" 
             align="start"
-            style={{ width: 'var(--radix-popover-trigger-width)'}}
+            style={{ width: 'var(--radix-popover-trigger-width)' }}
           >
             <Command className="bg-background rounded-md border-[var(--input-border)]" shouldFilter={false}>
               <div className="relative">
@@ -290,6 +302,7 @@ export function TaskSearchCombo({
               )}
             </CommandEmpty>
           )}
+
           {/* Solo mostrar CommandGroup si hay opciones */}
           {options.length > 0 && (
             <CommandGroup className="max-h-48 overflow-auto">
@@ -314,6 +327,7 @@ export function TaskSearchCombo({
               ))}
             </CommandGroup>
           )}
+
           {/* Estado vacío cuando no hay búsqueda activa */}
           {options.length === 0 && searchQuery.length < 3 && (
             <div className="py-2 px-3 text-xs text-[var(--input-placeholder)] text-center">

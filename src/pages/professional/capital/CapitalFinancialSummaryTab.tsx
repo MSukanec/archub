@@ -16,11 +16,15 @@ import { useMovements } from '@/hooks/use-movements'
 import { useMovementKPIs } from '@/hooks/use-movement-kpis'
 import { format, subDays, subMonths, subYears, isAfter, startOfDay, endOfDay } from 'date-fns'
 import { es } from 'date-fns/locale'
-type Period = 'Semana'| 'Mes'| 'Trimestre'| 'Año';
+
+type Period = 'Semana' | 'Mes' | 'Trimestre' | 'Año';
+
+
 export default function FinancesDashboard() {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.preferences?.last_organization_id
   const projectId = userData?.preferences?.last_project_id
+
   // Estado para el gráfico de capital
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('Trimestre');
   const { data: movements = [] } = useMovements(organizationId, null);
@@ -43,6 +47,7 @@ export default function FinancesDashboard() {
   
   const { data: financialSummary, isLoading: summaryLoading } = useFinancialSummary(organizationId, effectiveProjectId, 'desde-siempre')
   const { data: monthlyFlow, isLoading: flowLoading } = useMonthlyFlowData(organizationId, effectiveProjectId, 'desde-siempre')
+
   const walletCurrencyData = useWalletCurrencyBalances(organizationId, effectiveProjectId)
   const walletCurrencyLoading = walletCurrencyData.isLoading
   
@@ -65,6 +70,7 @@ export default function FinancesDashboard() {
     const normalized = currencyName.toLowerCase().trim()
     return currencyMap[normalized] || currencyName.toUpperCase().substring(0, 3)
   }
+
   // Transform wallet balances to generic CategoryBalanceRow format
   const walletBalanceRows: CategoryBalanceRow[] = walletCurrencyData.organizationBalances?.flatMap(currency => 
     currency.wallets?.map(wallet => ({
@@ -77,7 +83,7 @@ export default function FinancesDashboard() {
         currency: 'ARS',
         minimumFractionDigits: 0
       }).format(Math.abs(wallet.balance)),
-      valueVariant: wallet.balance > 0 ? 'positive'as const : wallet.balance < 0 ? 'negative'as const : 'neutral'as const
+      valueVariant: wallet.balance > 0 ? 'positive' as const : wallet.balance < 0 ? 'negative' as const : 'neutral' as const
     })) || []
   ) || []
   const { data: recentMovements } = useRecentMovements(organizationId, effectiveProjectId, 5, 'desde-siempre')
@@ -148,13 +154,14 @@ export default function FinancesDashboard() {
   const formatCurrency = (amount: number) => {
     // Use the default currency for formatting
     const defaultCurrencyCode = defaultCurrency?.code || 'ARS'
-    const locale = defaultCurrencyCode === 'ARS'? 'es-AR': 'es-ES'
+    const locale = defaultCurrencyCode === 'ARS' ? 'es-AR' : 'es-ES'
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: defaultCurrencyCode,
       minimumFractionDigits: 0
     }).format(amount)
   }
+
   // Format movement amount with original currency symbol
   const formatMovementAmount = (movement: any) => {
     // Get currency symbol from movement data
@@ -173,20 +180,24 @@ export default function FinancesDashboard() {
       }).format(Math.abs(amount))}`
     }
   }
+
   // Get currency badge component
   const getCurrencyBadge = () => (
     <Badge variant="neutral" className="text-xs">
       {defaultCurrency?.code || 'ARS'}
     </Badge>
   )
+
   const getBalanceColor = (balance: number) => {
-    if (balance > 0) return { color: 'var(--positive)'}
-    if (balance < 0) return { color: 'var(--negative)'}
-    return { color: 'var(--neutral)'}
+    if (balance > 0) return { color: 'var(--positive)' }
+    if (balance < 0) return { color: 'var(--negative)' }
+    return { color: 'var(--neutral)' }
   }
+
   return (
     <>
       <div>
+
         {/* Show empty state if no movements exist */}
         {!summaryLoading && (!financialSummary || financialSummary.totalMovements === 0) ? (
           <EmptyState 
@@ -262,6 +273,7 @@ export default function FinancesDashboard() {
             emptyText="No hay movimientos en este período"
           />
         </div>
+
         {/* 2 columnas - Balances por Billetera y Moneda / Movimientos Recientes */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
           {/* Balances por Billetera y Moneda */}
@@ -281,6 +293,7 @@ export default function FinancesDashboard() {
               />
             </CardContent>
           </Card>
+
           {/* Movimientos Recientes */}
           <Card>
             <CardHeader className="pb-2">
@@ -327,6 +340,7 @@ export default function FinancesDashboard() {
             </CardContent>
           </Card>
         </div>
+
         {/* Flujo Financiero Mensual - 100% ancho */}
         <div className="relative group mt-6">
           {/* Header - igual que el de Capital */}
@@ -349,6 +363,7 @@ export default function FinancesDashboard() {
             netLabel="Neto"
           />
         </div>
+
         </>
         )}
       </div>

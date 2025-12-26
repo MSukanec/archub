@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { Tabs } from "@/components/shared/Tabs";
 import { TopBarConfig, GroupingOption } from "./types";
 import { TABLE_LABELS, TABLE_ANIMATION, TABLE_BULK_ANIMATION } from "./constants";
+
 interface TableTopBarProps {
   topBar?: TopBarConfig;
   selectable: boolean;
@@ -36,6 +37,7 @@ interface TableTopBarProps {
   isFilterActive: boolean;
   onClearFilters: () => void;
 }
+
 export function TableTopBar({
   topBar,
   selectable,
@@ -52,6 +54,7 @@ export function TableTopBar({
   const showSort = topBar?.showSort ?? false;
   const showClearFilters = topBar?.showClearFilters ?? true;
   const hasBulkSelection = selectable && selectedCount > 0;
+
   const createPopoverButton = (
     option: { value: string; label: string },
     currentValue: string,
@@ -73,6 +76,7 @@ export function TableTopBar({
       </Button>
     );
   };
+
   const createStandardPopover = (
     title: string,
     options: GroupingOption[],
@@ -90,12 +94,14 @@ export function TableTopBar({
       </>
     );
   };
+
   const defaultGroupingContent = () => {
     const groupingOptions = topBar?.groupingOptions || [
       { value: "none", label: TABLE_LABELS.grouping.none },
     ];
     const currentValue = topBar?.currentGrouping || "none";
     const onChange = topBar?.onGroupingChange || (() => {});
+
     return createStandardPopover(
       TABLE_LABELS.grouping.title,
       groupingOptions,
@@ -103,6 +109,7 @@ export function TableTopBar({
       onChange
     );
   };
+
   const defaultExportContent = () => {
     const exportOptions = [
       {
@@ -118,6 +125,7 @@ export function TableTopBar({
         onClick: topBar?.onExportPDF,
       },
     ];
+
     return (
       <>
         <div className="text-xs font-medium mb-2 block">
@@ -144,6 +152,7 @@ export function TableTopBar({
       </>
     );
   };
+
   return (
     <div className="hidden lg:block border-b border-[var(--card-border)] bg-[var(--card-bg)] relative overflow-hidden">
       <AnimatePresence mode="wait">
@@ -176,8 +185,10 @@ export function TableTopBar({
                 {TABLE_LABELS.selection.deselect}
               </Button>
             </div>
+
             <div className="flex items-center gap-1">
               {topBar?.bulkActions?.customActions}
+
               {topBar?.bulkActions?.onExport && (
                 <Button
                   variant="ghost"
@@ -189,6 +200,7 @@ export function TableTopBar({
                   <span className="text-xs">{TABLE_LABELS.export.button}</span>
                 </Button>
               )}
+
               {topBar?.bulkActions?.onDelete && (
                 <Button
                   variant="ghost"
@@ -219,6 +231,7 @@ export function TableTopBar({
                   onValueChange={topBar.tabsConfig.onValueChange}
                 />
               )}
+
               {!topBar?.tabsConfig && topBar?.leftModeButtons && (
                 <div className="flex items-center gap-1">
                   {topBar.leftModeButtons.options.map((option) => (
@@ -241,6 +254,7 @@ export function TableTopBar({
                   ))}
                 </div>
               )}
+
               {!topBar?.tabsConfig && tabs.length > 0 && (
                 <div className="flex items-center gap-1">
                   {tabs.map((tab) => (
@@ -262,6 +276,7 @@ export function TableTopBar({
                 </div>
               )}
             </div>
+
             <div className="flex items-center gap-1">
               {showSearch && (
                 <div
@@ -291,6 +306,7 @@ export function TableTopBar({
                   <Search className="h-4 w-4 text-[var(--muted-foreground)] shrink-0" />
                 </div>
               )}
+
               {showSort && topBar?.renderSortContent && (
                 <Popover>
                   <PopoverTrigger asChild>
@@ -311,6 +327,7 @@ export function TableTopBar({
                   </PopoverContent>
                 </Popover>
               )}
+
               {showFilter && topBar?.renderFilterContent && (
                 <Popover>
                   <PopoverTrigger asChild>
@@ -346,6 +363,7 @@ export function TableTopBar({
                   </PopoverContent>
                 </Popover>
               )}
+
               {topBar?.groupingOptions && topBar.groupingOptions.length > 0 && (
                 <Popover>
                   <PopoverTrigger asChild>
@@ -368,6 +386,7 @@ export function TableTopBar({
                   </PopoverContent>
                 </Popover>
               )}
+
               {topBar?.showImport && (
                 <Button
                   variant="ghost"
@@ -380,6 +399,7 @@ export function TableTopBar({
                   <span className="text-xs">{TABLE_LABELS.import.button}</span>
                 </Button>
               )}
+
               {topBar?.showExport && (
                 <Popover>
                   <PopoverTrigger asChild>
@@ -393,6 +413,7 @@ export function TableTopBar({
                   </PopoverContent>
                 </Popover>
               )}
+
               {topBar?.customActions}
             </div>
           </motion.div>

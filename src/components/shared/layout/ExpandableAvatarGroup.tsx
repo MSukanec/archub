@@ -6,11 +6,13 @@ import { Users } from "lucide-react";
 import { useOrganizationMembers } from "@/features/organization";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { cn } from "@/lib/utils";
+
 interface ExpandableAvatarGroupProps {
   organizationId?: string;
   maxCollapsed?: number;
   className?: string;
 }
+
 export function ExpandableAvatarGroup({ 
   organizationId,
   maxCollapsed = 4,
@@ -20,11 +22,14 @@ export function ExpandableAvatarGroup({
   const [, setLocation] = useLocation();
   const { setSidebarLevel } = useNavigationStore();
   const { data: members = [], isLoading } = useOrganizationMembers(organizationId);
+
   if (isLoading || !members.length) {
     return null;
   }
+
   const visibleMembers = members.slice(0, maxCollapsed);
   const remainingCount = Math.max(0, members.length - maxCollapsed);
+
   const getInitials = (name: string | null | undefined) => {
     if (!name) return "?";
     return name
@@ -34,12 +39,15 @@ export function ExpandableAvatarGroup({
       .toUpperCase()
       .slice(0, 2);
   };
+
   const getMemberName = (member: typeof members[0]) => {
     return member.users?.full_name || "Usuario";
   };
+
   const getMemberAvatar = (member: typeof members[0]) => {
     return member.users?.avatar_url || undefined;
   };
+
   return (
     <div 
       className={cn("relative", className)}
@@ -76,6 +84,7 @@ export function ExpandableAvatarGroup({
           )}
         </div>
       </div>
+
       {/* Expanded State */}
       <div
         className={cn(

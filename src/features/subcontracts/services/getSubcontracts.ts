@@ -1,9 +1,11 @@
 import { supabase } from '@/lib/supabase';
 import type { SubcontractWithContact } from '../types';
+
 export async function getSubcontracts(projectId: string): Promise<SubcontractWithContact[]> {
   if (!projectId || !supabase) {
     return [];
   }
+
   const { data, error } = await supabase
     .from('subcontracts')
     .select(`
@@ -16,9 +18,11 @@ export async function getSubcontracts(projectId: string): Promise<SubcontractWit
     `)
     .eq('project_id', projectId)
     .order('created_at', { ascending: false });
+
   if (error) {
     console.error('Error fetching subcontracts:', error);
     throw error;
   }
+
   return data || [];
 }

@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { DollarSign } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { ClientPaymentForm } from '../forms/ClientPaymentForm'
+
 interface ClientPaymentModalProps {
   modalData?: {
     projectId?: string;
@@ -9,10 +10,12 @@ interface ClientPaymentModalProps {
     paymentId?: string;
   };
   onClose: () => void;
-  mode?: 'create'| 'edit'| 'view';
+  mode?: 'create' | 'edit' | 'view';
 }
-export function ClientPaymentModal({ modalData, onClose, mode = 'create'}: ClientPaymentModalProps) {
+
+export function ClientPaymentModal({ modalData, onClose, mode = 'create' }: ClientPaymentModalProps) {
   const formRef = useRef<HTMLFormElement>(null)
+
   const getHeader = () => {
     switch (mode) {
       case 'view':
@@ -33,6 +36,7 @@ export function ClientPaymentModal({ modalData, onClose, mode = 'create'}: Clien
         };
     }
   };
+
   const getSubmitText = () => {
     switch (mode) {
       case 'view':
@@ -44,6 +48,7 @@ export function ClientPaymentModal({ modalData, onClose, mode = 'create'}: Clien
         return 'Registrar Pago';
     }
   };
+
   const handleSubmit = () => {
     if (mode === 'view') {
       onClose();
@@ -51,7 +56,9 @@ export function ClientPaymentModal({ modalData, onClose, mode = 'create'}: Clien
       formRef.current.requestSubmit();
     }
   };
+
   const header = getHeader();
+
   return (
     <ModalLayout 
       onClose={onClose} 
@@ -87,4 +94,5 @@ export function ClientPaymentModal({ modalData, onClose, mode = 'create'}: Clien
     </ModalLayout>
   )
 }
+
 export default ClientPaymentModal

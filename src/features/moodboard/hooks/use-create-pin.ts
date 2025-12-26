@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createPin, type CreatePinInput } from '../services/createPin';
 import { QUERY_KEYS } from '../constants';
+
 export function useCreatePin() {
   const queryClient = useQueryClient();
   

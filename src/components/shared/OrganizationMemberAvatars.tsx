@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 interface Member {
   id: string;
   avatar_url?: string;
@@ -8,14 +9,17 @@ interface Member {
     last_name?: string;
   };
 }
+
 interface OrganizationMemberAvatarsProps {
   members: Member[];
 }
+
 export function OrganizationMemberAvatars({ members }: OrganizationMemberAvatarsProps) {
   if (!members || members.length === 0) return null;
   
   const displayMembers = members.slice(0, 4);
   const remainingCount = members.length > 4 ? members.length - 4 : 0;
+
   return (
     <div className="flex items-center gap-2">
       <div className="flex items-center -space-x-1">
@@ -30,7 +34,7 @@ export function OrganizationMemberAvatars({ members }: OrganizationMemberAvatars
               <AvatarFallback className="text-base font-semibold">
                 {member.user?.full_name
                   ? member.user.full_name
-                      .split('')
+                      .split(' ')
                       .map(n => n[0])
                       .join('')
                       .toUpperCase()

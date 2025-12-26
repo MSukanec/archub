@@ -7,19 +7,23 @@ import { Badge } from "@/components/ui/badge";
 import { useProjectsLite } from "@/features/projects";
 import { useProjectContext } from "@/stores/projectContext";
 import { useLocation } from "wouter";
+
 export function ContextSelector() {
   const { data: projectsLite = [] } = useProjectsLite();
   const { selectedProjectId, setSelectedProject, currentOrganizationId } = useProjectContext();
   const [open, setOpen] = useState(false);
   const [, navigate] = useLocation();
+
   const currentProject = projectsLite.find(p => p.id === selectedProjectId);
   const currentProjectName = currentProject?.name || "Seleccionar Proyecto";
+
   // Ordenar proyectos por última actividad (updated_at descendente)
   const sortedProjects = [...projectsLite].sort((a, b) => {
     const dateA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
     const dateB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
     return dateB - dateA; // Más reciente primero
   });
+
   // Función para obtener las iniciales del proyecto
   const getProjectInitials = (name: string) => {
     const words = name.trim().split(/\s+/);
@@ -28,14 +32,17 @@ export function ContextSelector() {
     }
     return name.slice(0, 2).toUpperCase();
   };
+
   const handleProjectChange = (projectId: string) => {
     setSelectedProject(projectId, currentOrganizationId);
     setOpen(false);
   };
+
   const handleNewProject = () => {
     setOpen(false);
     navigate('/organization/projects');
   };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -56,8 +63,8 @@ export function ContextSelector() {
               {currentProject ? getProjectInitials(currentProject.name) : '??'}
             </AvatarFallback>
           </Avatar>
-          <span className="font-medium" style={{ color: 'var(--main-sidebar-fg)'}}>{currentProjectName}</span>
-          <ChevronDown className="h-3 w-3 opacity-60" style={{ color: 'var(--main-sidebar-fg)'}} />
+          <span className="font-medium" style={{ color: 'var(--main-sidebar-fg)' }}>{currentProjectName}</span>
+          <ChevronDown className="h-3 w-3 opacity-60" style={{ color: 'var(--main-sidebar-fg)' }} />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-64 p-2">
@@ -65,6 +72,7 @@ export function ContextSelector() {
           <div className="px-2 py-1.5">
             <p className="text-xs font-semibold text-muted-foreground">Proyectos</p>
           </div>
+
           {projectsLite.length === 0 ? (
             <div className="px-2 py-4 text-center">
               <p className="text-sm text-muted-foreground">No hay proyectos disponibles</p>

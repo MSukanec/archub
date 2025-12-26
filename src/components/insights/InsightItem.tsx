@@ -1,7 +1,9 @@
 import { type Insight } from './types';
 import { type InsightItem as ContainerInsightItem } from '../InsightCard';
 import * as LucideIcons from 'lucide-react';
-type InsightVariant = 'info'| 'warning'| 'success'| 'danger';
+
+type InsightVariant = 'info' | 'warning' | 'success' | 'danger';
+
 function mapTypeToVariant(type: Insight['type']): InsightVariant {
   switch (type) {
     case 'info': return 'info';
@@ -10,6 +12,7 @@ function mapTypeToVariant(type: Insight['type']): InsightVariant {
     default: return 'info';
   }
 }
+
 function getIconElement(iconName: string, className?: string) {
   const icons = LucideIcons as unknown as Record<string, React.ComponentType<{ className?: string }>>;
   const IconComponent = icons[iconName];
@@ -20,6 +23,7 @@ function getIconElement(iconName: string, className?: string) {
   
   return <IconComponent className={className} />;
 }
+
 export function toInsightItems(insights: Insight[]): ContainerInsightItem[] {
   return insights.map(insight => {
     let fullDescription = insight.description;

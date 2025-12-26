@@ -1,10 +1,12 @@
 import { useGlobalModalStore } from '@/components/modal'
+
 interface ReplacementOption {
   label: string
   value: string
 }
+
 interface UseDeleteConfirmationOptions {
-  mode?: 'simple'| 'dangerous'| 'replace'
+  mode?: 'simple' | 'dangerous' | 'replace'
   title: string
   description: string
   itemName?: string
@@ -16,8 +18,10 @@ interface UseDeleteConfirmationOptions {
   currentCategoryId?: string
   isLoading?: boolean
 }
+
 export function useDeleteConfirmation() {
   const { openModal, popModal } = useGlobalModalStore()
+
   const showDeleteConfirmation = (options: UseDeleteConfirmationOptions) => {
     openModal('delete-confirmation', {
       mode: options.mode || 'simple',
@@ -33,6 +37,7 @@ export function useDeleteConfirmation() {
       isLoading: options.isLoading || false
     })
   }
+
   return {
     showDeleteConfirmation,
     closeDeleteConfirmation: popModal

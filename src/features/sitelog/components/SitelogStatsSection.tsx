@@ -1,10 +1,14 @@
 import { Paperclip } from 'lucide-react';
+
 import { Card } from '@/components/ui/card';
 import { SparklineChart } from '@/components/charts/sparkline/SparklineChart';
+
 import { useSitelogMetrics } from '../hooks/use-sitelog-metrics';
+
 interface SitelogStatsSectionProps {
   siteLogs: any[];
 }
+
 export function SitelogStatsSection({ siteLogs }: SitelogStatsSectionProps) {
   const {
     totalLogs,
@@ -12,6 +16,7 @@ export function SitelogStatsSection({ siteLogs }: SitelogStatsSectionProps) {
     totalFiles,
     timeline
   } = useSitelogMetrics(siteLogs);
+
   return (
     <Card className="w-full p-6" data-testid="card-sitelog-stats">
       {/* Header: Title/Value on left, KPIs on right */}
@@ -40,6 +45,7 @@ export function SitelogStatsSection({ siteLogs }: SitelogStatsSectionProps) {
           </div>
         </div>
       </div>
+
       {/* Sparkline Chart */}
       <div>
         <SparklineChart 

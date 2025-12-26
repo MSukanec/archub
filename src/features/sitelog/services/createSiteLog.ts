@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 export interface CreateSiteLogData {
   log_date: string;
   created_by: string;
@@ -12,6 +13,7 @@ export interface CreateSiteLogData {
   project_id: string;
   organization_id: string;
 }
+
 /**
  * Crea una nueva bitácora en un proyecto.
  * 
@@ -23,11 +25,13 @@ export async function createSiteLog(data: CreateSiteLogData) {
   if (!supabase) {
     throw new Error('Error de conexión con la base de datos');
   }
+
   const { data: result, error } = await supabase
     .from('site_logs')
     .insert([data])
     .select()
     .single();
+
   if (error) throw new Error(error.message);
   
   return result;

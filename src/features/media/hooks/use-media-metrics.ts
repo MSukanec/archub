@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
 import type { GalleryFile } from '../types';
+
 interface MediaMetrics {
   totalFiles: number;
   totalImages: number;
   totalVideos: number;
   timeline: { value: number; date: Date }[];
 }
+
 /**
  * Hook para calcular métricas de archivos de media.
  * 
@@ -21,12 +23,15 @@ interface MediaMetrics {
 export function useMediaMetrics(galleryFiles: GalleryFile[]): MediaMetrics {
   return useMemo(() => {
     const totalFiles = galleryFiles.length;
+
     const totalImages = galleryFiles.filter(file => 
       file.file_type && file.file_type.toLowerCase().includes('image')
     ).length;
+
     const totalVideos = galleryFiles.filter(file => 
       file.file_type && file.file_type.toLowerCase().includes('video')
     ).length;
+
     // Generate historical timeline with running total
     // First, collect all file creation dates
     const fileDates: Date[] = [];
@@ -42,8 +47,10 @@ export function useMediaMetrics(galleryFiles: GalleryFile[]): MediaMetrics {
         // Skip invalid dates
       }
     });
+
     // Sort dates chronologically
     fileDates.sort((a, b) => a.getTime() - b.getTime());
+
     // Determine the date range for the timeline
     let startDate: Date;
     const today = new Date();
@@ -61,6 +68,7 @@ export function useMediaMetrics(galleryFiles: GalleryFile[]): MediaMetrics {
       // Start from the earlier of: 14 days ago or first file date
       startDate = earliestFileDate < daysAgo14 ? earliestFileDate : daysAgo14;
     }
+
     // Build timeline with running total
     const timeline: { date: Date; value: number }[] = [];
     let cumulativeCount = 0;
@@ -82,6 +90,7 @@ export function useMediaMetrics(galleryFiles: GalleryFile[]): MediaMetrics {
       // Move to next day
       currentDate.setDate(currentDate.getDate() + 1);
     }
+
     return {
       totalFiles,
       totalImages,

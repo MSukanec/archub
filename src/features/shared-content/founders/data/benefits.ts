@@ -9,6 +9,7 @@ import {
   Crown,
 } from "lucide-react";
 import type { Benefit } from "../types";
+
 export const benefits: Benefit[] = [
   {
     icon: Building2,

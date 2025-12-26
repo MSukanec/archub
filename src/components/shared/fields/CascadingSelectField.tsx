@@ -1,14 +1,17 @@
 "use client"
+
 import * as React from "react"
 import { useState, useRef, useEffect, useLayoutEffect } from "react"
 import { ChevronDown, ArrowLeft } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+
 interface CascadingOption {
   value: string
   label: string
   children?: CascadingOption[]
 }
+
 interface CascadingSelectProps {
   options: CascadingOption[]
   value?: string[]
@@ -17,6 +20,7 @@ interface CascadingSelectProps {
   className?: string
   disabled?: boolean
 }
+
 export function CascadingSelect({
   options,
   value = [],
@@ -36,8 +40,10 @@ export function CascadingSelect({
     left: '0px',
     width: 'auto'
   })
+
   // Estado para prevenir loops de sincronización
   const [isInternalUpdate, setIsInternalUpdate] = React.useState(false)
+
   // Calcular posición del dropdown cuando se abre
   useLayoutEffect(() => {
     if (isOpen && triggerRef.current) {
@@ -49,26 +55,31 @@ export function CascadingSelect({
       })
     }
   }, [isOpen])
+
   // Sincronizar con el valor externo solo cuando NO es una actualización interna
   React.useEffect(() => {
     if (isInternalUpdate) {
       return // Saltar sincronización si es una actualización interna
     }
+
     if (value.length === 0) {
       setSelectedPath([])
       setCurrentLevel(0)
       setCurrentOptions(options)
       return
     }
+
     // Verificar si ya tenemos el path correcto
     const currentValues = selectedPath.map(item => item.value)
     if (value.length === currentValues.length && 
         value.every((val, index) => val === currentValues[index])) {
       return // Ya tenemos el path correcto
     }
+
     // Reconstruir el path basado en el valor externo
     const buildPath = (opts: CascadingOption[], vals: string[], path: CascadingOption[] = []): CascadingOption[] | null => {
       if (vals.length === 0) return path
+
       for (const option of opts) {
         if (option.value === vals[0]) {
           const newPath = [...path, option]
@@ -81,11 +92,13 @@ export function CascadingSelect({
       }
       return null
     }
+
     const path = buildPath(options, value)
     if (path && path.length > 0) {
       setSelectedPath(path)
     }
   }, [value, options, isInternalUpdate])
+
   // Reset del flag de actualización interna
   React.useEffect(() => {
     if (isInternalUpdate) {
@@ -93,10 +106,12 @@ export function CascadingSelect({
       return () => clearTimeout(timer)
     }
   }, [isInternalUpdate])
+
   const getDisplayText = () => {
     if (selectedPath.length === 0) return placeholder
     return selectedPath.map(item => item.label).join(" / ")
   }
+
   const handleTriggerClick = () => {
     if (disabled) return
     if (!isOpen) {
@@ -127,9 +142,11 @@ export function CascadingSelect({
     }
     setIsOpen(!isOpen)
   }
+
   const handleOptionClick = (option: CascadingOption) => {
     const newPath = [...selectedPath.slice(0, currentLevel), option]
     setSelectedPath(newPath)
+
     if (option.children && option.children.length > 0) {
       // Hay hijos, navegar al siguiente nivel
       setCurrentOptions(option.children)
@@ -142,6 +159,7 @@ export function CascadingSelect({
       setIsOpen(false)
     }
   }
+
   const handleBack = () => {
     if (currentLevel > 0) {
       const newLevel = currentLevel - 1
@@ -159,6 +177,7 @@ export function CascadingSelect({
       }
     }
   }
+
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -171,11 +190,13 @@ export function CascadingSelect({
         setIsOpen(false)
       }
     }
+
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside)
       return () => document.removeEventListener("mousedown", handleClickOutside)
     }
   }, [isOpen])
+
   return (
     <div className="relative">
       {/* Trigger - Estéticamente idéntico al Select */}
@@ -217,6 +238,7 @@ export function CascadingSelect({
           isOpen && "transform rotate-180"
         )} />
       </button>
+
       {/* Dropdown Content - Estéticamente idéntico al Select, usando fixed para escapar del modal */}
       {isOpen && (
         <div

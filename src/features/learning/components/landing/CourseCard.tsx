@@ -5,9 +5,11 @@ import { BookOpen, Award } from 'lucide-react';
 import { ComingSoonCard } from '@/components/shared/restrictions';
 import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import type { Course, ItemStatus } from '@shared/schema';
+
 interface CourseCardProps {
   course: Course;
 }
+
 function CourseCardContent({ course }: { course: Course }) {
   return (
     <Card 
@@ -35,11 +37,13 @@ function CourseCardContent({ course }: { course: Course }) {
           </div>
         )}
       </div>
+
       <CardHeader className="pb-3">
         <h3 className="text-xl font-bold line-clamp-2 group-hover:text-primary transition-colors">
           {course.title}
         </h3>
       </CardHeader>
+
       <CardContent className="pb-3">
         {course.short_description && (
           <p className="text-sm text-muted-foreground line-clamp-2">
@@ -54,6 +58,7 @@ function CourseCardContent({ course }: { course: Course }) {
           </p>
         )}
       </CardContent>
+
       <CardFooter className="pt-3 border-t flex justify-between items-center">
         {course.price ? (
           <div className="flex flex-col">
@@ -70,10 +75,12 @@ function CourseCardContent({ course }: { course: Course }) {
     </Card>
   );
 }
+
 export function CourseCard({ course }: CourseCardProps) {
   const status = (course.status || 'available') as ItemStatus;
   const isAdmin = useIsAdmin();
-  const isBlocking = status !== 'available'&& !isAdmin;
+  const isBlocking = status !== 'available' && !isAdmin;
+
   if (isBlocking) {
     return (
       <ComingSoonCard status={status}>
@@ -81,6 +88,7 @@ export function CourseCard({ course }: CourseCardProps) {
       </ComingSoonCard>
     );
   }
+
   return (
     <ComingSoonCard status={status}>
       <Link href={`/cursos/${course.slug}`}>

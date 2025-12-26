@@ -6,12 +6,15 @@
  * 
  * @returns Mutation para enviar mensajes
  */
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { sendAIChatMessage } from '../services/sendAIChatMessage';
 import { AI_QUERY_KEYS } from '../constants';
 import { toast } from '@/hooks/use-toast';
+
 export function useAIChat() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (message: string) => sendAIChatMessage(message),
     onSuccess: () => {

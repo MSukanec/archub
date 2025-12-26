@@ -1,12 +1,14 @@
 import type { LucideIcon } from 'lucide-react';
 import { DollarSign, Calendar, Users, FolderOpen, Wallet, Tag, AlertTriangle } from 'lucide-react';
 import type { DataSeverity } from '../../types';
+
 export interface RuleMetadata {
   id: string;
   icon: LucideIcon;
   severity: DataSeverity;
   category: string;
 }
+
 export const microRuleRegistry: Record<string, RuleMetadata> = {
   'missing-exchange-rate': {
     id: 'missing-exchange-rate',
@@ -129,14 +131,17 @@ export const microRuleRegistry: Record<string, RuleMetadata> = {
     category: 'classification',
   },
 };
+
 export function getRuleIcon(ruleId: string): LucideIcon {
   const metadata = microRuleRegistry[ruleId];
   return metadata?.icon || AlertTriangle;
 }
+
 export function getRuleSeverity(ruleId: string): DataSeverity {
   const metadata = microRuleRegistry[ruleId];
   return metadata?.severity || 'warning';
 }
+
 export function getRuleMetadata(ruleId: string): RuleMetadata | undefined {
   return microRuleRegistry[ruleId];
 }

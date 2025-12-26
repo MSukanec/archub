@@ -20,10 +20,12 @@ import { AppCard, AppCardTitle, AppCardValue, AppCardMeta, AppCardContent } from
 import { ProjectItemCard } from '@/features/projects';
 import { getOrganizationInitials } from '@/utils/initials';
 import { cn } from '@/lib/utils';
+
 interface OrganizationDashboardViewProps {
   onProjectSelected?: (projectId: string) => void;
   onNavigateToProjects?: () => void;
 }
+
 // Internal component: WelcomePanel
 function WelcomePanel({ 
   userName, 
@@ -39,6 +41,7 @@ function WelcomePanel({
   onLogoUpload: (file: File) => void;
 }) {
   const logoInputRef = useRef<HTMLInputElement>(null);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -46,6 +49,7 @@ function WelcomePanel({
       onLogoUpload(file);
     }
   };
+
   return (
     <div className="space-y-2 pb-6 border-b border-border">
       <div className="flex items-center gap-4">
@@ -59,7 +63,7 @@ function WelcomePanel({
             data-testid="button-upload-org-logo"
           >
             <Avatar className="h-16 w-16 border-2 border-accent">
-              {logoUrl && logoUrl.trim() !== ''&& (
+              {logoUrl && logoUrl.trim() !== '' && (
                 <AvatarImage 
                   src={logoUrl} 
                   alt={organizationName || 'Organización'}
@@ -70,6 +74,7 @@ function WelcomePanel({
                 {getOrganizationInitials(organizationName || '')}
               </AvatarFallback>
             </Avatar>
+
             <div className={cn(
               "absolute inset-0 rounded-full flex items-center justify-center transition-all",
               "bg-black/50 opacity-0 group-hover:opacity-100",
@@ -82,6 +87,7 @@ function WelcomePanel({
               )}
             </div>
           </button>
+
           <input
             ref={logoInputRef}
             type="file"
@@ -104,6 +110,7 @@ function WelcomePanel({
     </div>
   );
 }
+
 // Internal component: StatsPanel
 function StatsPanel({
   projectsCount,
@@ -127,52 +134,55 @@ function StatsPanel({
           <div className="flex-1">
             <AppCardTitle>Proyectos Activos</AppCardTitle>
             <AppCardValue className="mt-2">
-              {isLoading ? '-': activeProjectsCount}
+              {isLoading ? '-' : activeProjectsCount}
             </AppCardValue>
             <AppCardMeta>
-              {isLoading ? 'Cargando...': `de ${projectsCount} totales`}
+              {isLoading ? 'Cargando...' : `de ${projectsCount} totales`}
             </AppCardMeta>
           </div>
           <Folder className="w-5 h-5 text-muted-foreground opacity-40 mt-1" />
         </div>
       </AppCard>
+
       <AppCard href="/contacts" data-testid="stat-card-contactos">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <AppCardTitle>Contactos</AppCardTitle>
             <AppCardValue className="mt-2">
-              {isLoading ? '-': contactsCount}
+              {isLoading ? '-' : contactsCount}
             </AppCardValue>
             <AppCardMeta>
-              {isLoading ? 'Cargando...': 'Personal y clientes'}
+              {isLoading ? 'Cargando...' : 'Personal y clientes'}
             </AppCardMeta>
           </div>
           <Users className="w-5 h-5 text-muted-foreground opacity-40 mt-1" />
         </div>
       </AppCard>
+
       <AppCard data-testid="stat-card-bitacoras-org">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <AppCardTitle>Bitácoras</AppCardTitle>
             <AppCardValue className="mt-2">
-              {isLoading ? '-': siteLogsCount}
+              {isLoading ? '-' : siteLogsCount}
             </AppCardValue>
             <AppCardMeta>
-              {isLoading ? 'Cargando...': 'Registros totales'}
+              {isLoading ? 'Cargando...' : 'Registros totales'}
             </AppCardMeta>
           </div>
           <FileText className="w-5 h-5 text-muted-foreground opacity-40 mt-1" />
         </div>
       </AppCard>
+
       <AppCard data-testid="stat-card-equipo" className="opacity-75 cursor-default hover:shadow-none">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <AppCardTitle>Equipo</AppCardTitle>
             <AppCardValue className="mt-2">
-              {isLoading ? '-': teamCount}
+              {isLoading ? '-' : teamCount}
             </AppCardValue>
             <AppCardMeta>
-              {isLoading ? 'Cargando...': 'Miembros activos'}
+              {isLoading ? 'Cargando...' : 'Miembros activos'}
             </AppCardMeta>
           </div>
           <Users2 className="w-5 h-5 text-muted-foreground opacity-40 mt-1" />
@@ -181,6 +191,7 @@ function StatsPanel({
     </div>
   );
 }
+
 // Internal component: ProjectsPanel
 function ProjectsPanel({
   projects,
@@ -206,7 +217,9 @@ function ProjectsPanel({
     ...projectsWithActive.filter(project => project.id === activeProjectId),
     ...projectsWithActive.filter(project => project.id !== activeProjectId)
   ] : projectsWithActive;
+
   const activeProjects = sortedProjects.filter(p => p.status === 'active');
+
   return (
     <AppCard href="/organization/projects">
       <AppCardTitle>Proyectos Activos</AppCardTitle>
@@ -252,6 +265,7 @@ function ProjectsPanel({
     </AppCard>
   );
 }
+
 // Main View Component
 export function OrganizationDashboardView({ 
   onProjectSelected,
@@ -272,7 +286,9 @@ export function OrganizationDashboardView({
   
   const organization = userData?.organizations?.find(org => org.id === currentOrganizationId) || 
                       ((userData as UserData | undefined)?.organization ?? null);
+
   const preferencesQueryKey = userOrgPreferencesKeys.detail(userId!, organizationId!);
+
   useEffect(() => {
     if (organization) {
       if ((organization as any).image_bucket && (organization as any).image_path) {
@@ -287,6 +303,7 @@ export function OrganizationDashboardView({
       }
     }
   }, [organization]);
+
   const { mutate: uploadLogo, isPending: isLogoUploading } = useOptimisticMutation({
     mutationFn: async (file: File) => {
       if (!organizationId) throw new Error('Organization ID required');
@@ -318,6 +335,7 @@ export function OrganizationDashboardView({
     onErrorMessage: "No se pudo subir el logo",
     additionalQueryKeys: [['organizations', organizationId]],
   });
+
   const { mutate: selectProject } = useOptimisticMutation({
     mutationFn: async (projectId: string) => {
       if (!supabase || !userData?.user?.id || !organizationId) {
@@ -359,15 +377,19 @@ export function OrganizationDashboardView({
     onErrorMessage: "No se pudo seleccionar el proyecto",
     additionalQueryKeys: [['current-user'], ['active-projects'], ['projects']],
   });
+
   const handleLogoUpload = useCallback((file: File) => {
     uploadLogo(file);
   }, [uploadLogo]);
+
   const handleSelectProject = useCallback((projectId: string) => {
     selectProject(projectId);
   }, [selectProject]);
+
   const handleEditProject = (project: any) => {
     openModal('project', { editingProject: project, isEditing: true });
   };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -375,6 +397,7 @@ export function OrganizationDashboardView({
       </div>
     );
   }
+
   if (!organization) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -382,9 +405,11 @@ export function OrganizationDashboardView({
       </div>
     );
   }
+
   const userName = userData?.user_data?.first_name || userData?.user?.full_name || 'Usuario';
-  const teamCount = contacts.filter((c: any) => c.contact_type === 'staff'|| c.contact_type === 'personnel').length;
+  const teamCount = contacts.filter((c: any) => c.contact_type === 'staff' || c.contact_type === 'personnel').length;
   const dataLoading = projectsLoading || contactsLoading || siteLogsLoading;
+
   return (
     <div className="space-y-6">
       <WelcomePanel
@@ -394,6 +419,7 @@ export function OrganizationDashboardView({
         isLogoUploading={isLogoUploading}
         onLogoUpload={handleLogoUpload}
       />
+
       <StatsPanel
         projectsCount={projects.length}
         activeProjectsCount={projects.filter(p => p.status === 'active').length}
@@ -402,6 +428,7 @@ export function OrganizationDashboardView({
         teamCount={teamCount}
         isLoading={dataLoading}
       />
+
       <ProjectsPanel
         projects={projects as any}
         activeProjectId={activeProjectId}

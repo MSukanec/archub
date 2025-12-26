@@ -12,37 +12,47 @@ import { Info, GraduationCap, FileText, Palette, Search, HelpCircle, Plus, Penci
 import { CourseFaqFormModal } from '@/features/learning/modals/admin/CourseFaqFormModal';
 import { uploadFile } from '@/lib/storage';
 import type { LandingSections, LandingSection, CourseFaq } from '@shared/schema';
+
 interface ClientGalleryImage {
   id: string;
   file_url: string;
   file_name: string;
   media_file_id: string;
 }
+
 interface AdminCourseMarketingTabProps {
   courseId: string;
 }
+
 export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketingTabProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
   const [isHydrated, setIsHydrated] = useState(false);
+
   const [instructorName, setInstructorName] = useState('');
   const [instructorTitle, setInstructorTitle] = useState('');
   const [instructorBio, setInstructorBio] = useState('');
   const [instructorPhotoUrl, setInstructorPhotoUrl] = useState('');
+
   const [badgeText, setBadgeText] = useState('');
   const [previewVideoId, setPreviewVideoId] = useState('');
+
   const [seoKeywords, setSeoKeywords] = useState('');
   const [ogImageUrl, setOgImageUrl] = useState('');
+
   const [landingSections, setLandingSections] = useState<LandingSections>({
-    instructor: { title: 'SOBRE EL DOCENTE', subtitle: 'NUESTRO CURSO', description: ''},
-    modules: { title: 'MÓDULOS Y LECCIONES', subtitle: 'CONTENIDO DEL CURSO', description: 'Contenido estructurado paso a paso para tu aprendizaje profesional'},
-    faq: { title: 'PREGUNTAS FRECUENTES', subtitle: 'DUDAS COMUNES', description: 'Resolvemos tus dudas sobre el curso'},
+    instructor: { title: 'SOBRE EL DOCENTE', subtitle: 'NUESTRO CURSO', description: '' },
+    modules: { title: 'MÓDULOS Y LECCIONES', subtitle: 'CONTENIDO DEL CURSO', description: 'Contenido estructurado paso a paso para tu aprendizaje profesional' },
+    faq: { title: 'PREGUNTAS FRECUENTES', subtitle: 'DUDAS COMUNES', description: 'Resolvemos tus dudas sobre el curso' },
   });
+
   const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
   const [selectedFaq, setSelectedFaq] = useState<CourseFaq | null>(null);
   
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+
   const { data: courseData } = useQuery({
     queryKey: ['/api/admin/courses', courseId],
     queryFn: async () => {
@@ -50,38 +60,46 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return null;
+
       const res = await fetch(`/api/admin/courses/${courseId}`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         },
         credentials: 'include'
       });
+
       if (!res.ok) throw new Error('Failed to fetch course');
       return res.json();
     },
     enabled: !!courseId && !!supabase
   });
+
   const { data: faqs = [] } = useQuery<CourseFaq[]>({
     queryKey: ['course-faqs', courseId],
     queryFn: async () => {
       if (!courseId || !supabase) return [];
+
       const { data, error } = await supabase
         .from('course_faqs')
         .select('*')
         .eq('course_id', courseId)
         .order('sort_index', { ascending: true });
+
       if (error) {
         console.error('Error fetching FAQs:', error);
         return [];
       }
+
       return data || [];
     },
     enabled: !!courseId && !!supabase
   });
+
   const { data: clientGalleryImages = [] } = useQuery<ClientGalleryImage[]>({
     queryKey: ['course-client-gallery', courseId],
     queryFn: async () => {
       if (!courseId || !supabase) return [];
+
       const { data, error } = await supabase
         .from('media_links')
         .select(`
@@ -98,10 +116,12 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
         .eq('category', 'client_gallery')
         .eq('media_files.is_deleted', false)
         .order('created_at', { ascending: true });
+
       if (error) {
         console.error('Error fetching client gallery:', error);
         return [];
       }
+
       return (data || []).map((item: any) => ({
         id: item.id,
         media_file_id: item.media_file_id,
@@ -111,6 +131,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
     },
     enabled: !!courseId && !!supabase
   });
+
   useEffect(() => {
     if (courseData) {
       setInstructorName(courseData.instructor_name || '');
@@ -125,20 +146,23 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       if (courseData.landing_sections) {
         const sections = courseData.landing_sections as LandingSections | undefined;
         setLandingSections({
-          instructor: sections?.instructor || { title: 'SOBRE EL DOCENTE', subtitle: 'NUESTRO CURSO', description: ''},
-          modules: sections?.modules || { title: 'MÓDULOS Y LECCIONES', subtitle: 'CONTENIDO DEL CURSO', description: 'Contenido estructurado paso a paso para tu aprendizaje profesional'},
-          faq: sections?.faq || { title: 'PREGUNTAS FRECUENTES', subtitle: 'DUDAS COMUNES', description: 'Resolvemos tus dudas sobre el curso'}
+          instructor: sections?.instructor || { title: 'SOBRE EL DOCENTE', subtitle: 'NUESTRO CURSO', description: '' },
+          modules: sections?.modules || { title: 'MÓDULOS Y LECCIONES', subtitle: 'CONTENIDO DEL CURSO', description: 'Contenido estructurado paso a paso para tu aprendizaje profesional' },
+          faq: sections?.faq || { title: 'PREGUNTAS FRECUENTES', subtitle: 'DUDAS COMUNES', description: 'Resolvemos tus dudas sobre el curso' }
         });
       }
       
       setIsHydrated(true);
     }
   }, [courseData]);
+
   const saveMarketingDataMutation = useMutation({
     mutationFn: async (dataToSave: any) => {
       if (!courseId || !supabase) return;
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session');
+
       const res = await fetch(`/api/admin/courses/${courseId}`, {
         method: 'PATCH',
         headers: {
@@ -151,6 +175,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
           updated_at: new Date().toISOString()
         })
       });
+
       if (!res.ok) throw new Error('Failed to update course');
       return res.json();
     },
@@ -172,6 +197,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       });
     }
   });
+
   const deleteFaqMutation = useMutation({
     mutationFn: async (faqId: string) => {
       const { deleteCourseFaq } = await import('@/features/learning');
@@ -194,40 +220,48 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       });
     }
   });
+
   const updateInstructorSection = (field: keyof LandingSection, value: string) => {
     setLandingSections(prev => ({
       ...prev,
       instructor: { ...prev?.instructor, [field]: value }
     }));
   };
+
   const updateModulesSection = (field: keyof LandingSection, value: string) => {
     setLandingSections(prev => ({
       ...prev,
       modules: { ...prev?.modules, [field]: value }
     }));
   };
+
   const updateFaqSection = (field: keyof LandingSection, value: string) => {
     setLandingSections(prev => ({
       ...prev,
       faq: { ...prev?.faq, [field]: value }
     }));
   };
+
   const handleOpenFaqModal = (faq?: CourseFaq) => {
     setSelectedFaq(faq || null);
     setIsFaqModalOpen(true);
   };
+
   const handleCloseFaqModal = () => {
     setSelectedFaq(null);
     setIsFaqModalOpen(false);
   };
+
   const handleDeleteFaq = async (faqId: string) => {
     if (confirm('¿Estás seguro de que deseas eliminar esta FAQ?')) {
       await deleteFaqMutation.mutateAsync(faqId);
     }
   };
+
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+
     setIsUploadingGallery(true);
     try {
       const uploadPromises = Array.from(files).map(async (file) => {
@@ -245,6 +279,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
           description: file.name
         });
       });
+
       await Promise.all(uploadPromises);
       
       queryClient.invalidateQueries({ queryKey: ['course-client-gallery', courseId] });
@@ -266,6 +301,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       }
     }
   };
+
   const handleDeleteGalleryImage = async (mediaFileId: string) => {
     if (!supabase) return;
     
@@ -274,7 +310,9 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
         .from('media_files')
         .update({ is_deleted: true })
         .eq('id', mediaFileId);
+
       if (error) throw error;
+
       queryClient.invalidateQueries({ queryKey: ['course-client-gallery', courseId] });
       toast({
         title: "Imagen eliminada",
@@ -289,6 +327,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       });
     }
   };
+
   const { isSaving } = useAutoSave({
     data: {
       instructor_name: instructorName || null,
@@ -314,6 +353,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
     delay: 1000,
     enabled: !!courseData && isHydrated
   });
+
   return (
     <div className="w-full space-y-6" data-testid="admin-course-marketing-tab">
       {isSaving && (
@@ -322,12 +362,14 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
           <span>Guardando cambios...</span>
         </div>
       )}
+
       {/* INSTRUCTOR */}
       <div className="bg-card border rounded-lg p-6 space-y-4">
         <div className="flex items-center gap-2">
           <GraduationCap className="w-5 h-5 text-accent flex-shrink-0" />
           <h3 className="text-lg font-semibold">Información del Instructor</h3>
         </div>
+
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="instructor-name">Nombre del Instructor</Label>
@@ -339,6 +381,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
               data-testid="input-instructor-name"
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="instructor-title">Título/Cargo</Label>
             <Input
@@ -349,6 +392,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
               data-testid="input-instructor-title"
             />
           </div>
+
           <div className="space-y-2 md:col-span-2">
             <Label htmlFor="instructor-bio">Biografía del Instructor</Label>
             <Textarea
@@ -360,6 +404,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
               data-testid="textarea-instructor-bio"
             />
           </div>
+
           <div className="space-y-2 md:col-span-2">
             <Label htmlFor="instructor-photo">URL de Foto del Instructor</Label>
             <Input
@@ -372,6 +417,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
           </div>
         </div>
       </div>
+
       {/* DESCRIPCIONES DE SECCIONES */}
       <div className="bg-card border rounded-lg p-6 space-y-4">
         <div className="flex items-center gap-2">
@@ -381,6 +427,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
         <p className="text-sm text-muted-foreground">
           Personaliza las descripciones de cada sección de la landing
         </p>
+
         <div className="grid gap-4">
           <div className="space-y-2">
             <Label htmlFor="instructor-section-description">Descripción - Sección Instructor</Label>
@@ -393,6 +440,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
               data-testid="textarea-instructor-section-description"
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="modules-section-description">Descripción - Sección Módulos</Label>
             <Textarea
@@ -404,6 +452,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
               data-testid="textarea-modules-section-description"
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="faq-section-description">Descripción - Sección FAQs</Label>
             <Textarea
@@ -417,12 +466,14 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
           </div>
         </div>
       </div>
+
       {/* MARKETING */}
       <div className="bg-card border rounded-lg p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Palette className="w-5 h-5 text-accent flex-shrink-0" />
           <h3 className="text-lg font-semibold">Marketing y Presentación</h3>
         </div>
+
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="badge-text">Texto del Badge</Label>
@@ -437,6 +488,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
               Badge en la esquina superior de la portada
             </p>
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="preview-video">ID de Video Preview (Vimeo)</Label>
             <Input
@@ -452,12 +504,14 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
           </div>
         </div>
       </div>
+
       {/* SEO */}
       <div className="bg-card border rounded-lg p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Search className="w-5 h-5 text-accent flex-shrink-0" />
           <h3 className="text-lg font-semibold">SEO y Redes Sociales</h3>
         </div>
+
         <div className="grid gap-4">
           <div className="space-y-2">
             <Label htmlFor="seo-keywords">Palabras Clave SEO</Label>
@@ -473,6 +527,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
               Separa cada palabra clave con una coma
             </p>
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="og-image">Imagen Open Graph</Label>
             <Input
@@ -488,6 +543,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
           </div>
         </div>
       </div>
+
       {/* GALERÍA DE CLIENTES */}
       <div className="bg-card border rounded-lg p-6 space-y-4">
         <div className="flex items-center justify-between gap-2">
@@ -517,13 +573,14 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
               ) : (
                 <Upload className="w-4 h-4 mr-1" />
               )}
-              {isUploadingGallery ? 'Subiendo...': 'Subir Imágenes'}
+              {isUploadingGallery ? 'Subiendo...' : 'Subir Imágenes'}
             </Button>
           </div>
         </div>
         <p className="text-sm text-muted-foreground">
           Imágenes de clientes que se mostrarán en un carrusel en la landing del curso
         </p>
+
         {clientGalleryImages.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">
             No hay imágenes en la galería. Haz clic en "Subir Imágenes" para agregar.
@@ -555,6 +612,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
           </div>
         )}
       </div>
+
       {/* FAQs */}
       <div className="bg-card border rounded-lg p-6 space-y-4 overflow-hidden">
         <div className="flex items-center justify-between gap-2">
@@ -571,6 +629,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
             Agregar FAQ
           </Button>
         </div>
+
         <div className="space-y-2 overflow-hidden">
           {faqs.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
@@ -614,6 +673,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
           )}
         </div>
       </div>
+
       {/* Help */}
       <Alert>
         <Info className="h-4 w-4" />
@@ -621,6 +681,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
           Los cambios se guardan automáticamente. Estos datos se utilizan para generar la página de landing pública del curso.
         </AlertDescription>
       </Alert>
+
       {/* FAQ Modal */}
       <CourseFaqFormModal
         isOpen={isFaqModalOpen}

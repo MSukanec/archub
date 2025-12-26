@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { Package } from 'lucide-react';
+
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { MaterialCostsTab } from './MaterialCostsTab';
 import { MaterialBasicDataTab } from './MaterialBasicDataTab';
 import { useMaterial } from "@/features/materials";
 import { useCurrentUser } from '@/hooks/use-current-user';
+
 export default function MaterialsView() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
@@ -14,6 +16,7 @@ export default function MaterialsView() {
   const organizationId = userData?.organization?.id;
   
   const { data: material, isLoading } = useMaterial(id || '', organizationId);
+
   const headerTabs = [
     {
       id: 'Datos Básicos',
@@ -26,6 +29,7 @@ export default function MaterialsView() {
       isActive: activeTab === 'Costos'
     }
   ];
+
   const headerProps = {
     icon: Package,
     title: material?.name || "Material",
@@ -37,6 +41,7 @@ export default function MaterialsView() {
     tabs: headerTabs,
     onTabChange: setActiveTab
   };
+
   if (isLoading) {
     return (
       <Layout headerProps={headerProps} wide>
@@ -48,6 +53,7 @@ export default function MaterialsView() {
       </Layout>
     );
   }
+
   if (!material) {
     return (
       <Layout headerProps={headerProps} wide>
@@ -60,6 +66,7 @@ export default function MaterialsView() {
       </Layout>
     );
   }
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'Datos Básicos':
@@ -79,6 +86,7 @@ export default function MaterialsView() {
         return null;
     }
   };
+
   return (
     <Layout headerProps={headerProps} wide>
       {renderTabContent()}

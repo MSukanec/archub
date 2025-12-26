@@ -1,10 +1,13 @@
 import { z } from 'zod';
+
 export const generalCostSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   category_id: z.string().optional(),
 });
+
 export type GeneralCostFormData = z.infer<typeof generalCostSchema>;
+
 export const generalCostPaymentSchema = z.object({
   payment_date: z.date({
     required_error: "Fecha es requerida",
@@ -18,4 +21,5 @@ export const generalCostPaymentSchema = z.object({
   reference: z.string().optional(),
   status: z.enum(['pending', 'confirmed', 'rejected', 'void']).default('confirmed'),
 });
+
 export type GeneralCostPaymentFormData = z.infer<typeof generalCostPaymentSchema>;

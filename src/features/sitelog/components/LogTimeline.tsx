@@ -3,6 +3,7 @@ import { format, parseISO } from "date-fns";
 import { useMediaLightbox, MediaLightbox, type MediaItem } from "@/components/shared/viewers/ImageLightbox";
 import { DateSeparator } from "./DateSeparator";
 import { LogEntryCard } from "./LogEntryCard";
+
 interface LogTimelineProps {
   siteLogs: any[];
   toggleFavorite: (siteLogId: string) => void;
@@ -10,6 +11,7 @@ interface LogTimelineProps {
   handleEditSiteLog: (siteLog: any) => void;
   handleDeleteSiteLog: (siteLog: any) => void;
 }
+
 export function LogTimeline({ 
   siteLogs, 
   toggleFavorite,
@@ -17,6 +19,7 @@ export function LogTimeline({
   handleEditSiteLog,
   handleDeleteSiteLog 
 }: LogTimelineProps) {
+
   // Group logs by date
   const groupedLogs = useMemo(() => {
     const groups: { [key: string]: any[] } = {};
@@ -37,18 +40,20 @@ export function LogTimeline({
       logs: groups[key]
     }));
   }, [siteLogs]);
+
   // Initialize lightbox with all images and videos from all logs
   const mediaItems = useMemo(() => {
     return siteLogs.flatMap((log: any) => 
-      log.files?.filter((file: any) => file.file_type === 'image'|| file.file_type === 'video')
+      log.files?.filter((file: any) => file.file_type === 'image' || file.file_type === 'video')
         .map((file: any) => ({
-          type: file.file_type as 'image'| 'video',
+          type: file.file_type as 'image' | 'video',
           src: file.file_url
         })) || []
     );
   }, [siteLogs]);
   
   const lightbox = useMediaLightbox(mediaItems);
+
   return (
     <>
       <div className="space-y-2">

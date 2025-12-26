@@ -1,4 +1,5 @@
-export type ClientPortalTab = 'dashboard'| 'installments'| 'payments'| 'logs';
+export type ClientPortalTab = 'dashboard' | 'installments' | 'payments' | 'logs';
+
 export interface ClientPortalProject {
   id: string;
   name: string;
@@ -11,6 +12,7 @@ export interface ClientPortalProject {
   city: string | null;
   image_url: string | null;
 }
+
 export interface ClientPortalClient {
   id: string;
   project_client_id: string;
@@ -24,6 +26,7 @@ export interface ClientPortalClient {
   is_primary: boolean;
   role_name: string | null;
 }
+
 export interface ClientPortalCommitment {
   id: string;
   amount: number;
@@ -32,6 +35,7 @@ export interface ClientPortalCommitment {
   commitment_method: string;
   unit_name: string | null;
 }
+
 export interface ClientPortalScheduleItem {
   id: string;
   due_date: string;
@@ -41,6 +45,7 @@ export interface ClientPortalScheduleItem {
   status: string;
   paid_at: string | null;
 }
+
 export interface ClientPortalPayment {
   id: string;
   amount: number;
@@ -60,16 +65,19 @@ export interface ClientPortalPayment {
   receipt_url: string | null;
   receipt_name: string | null;
 }
+
 export interface ClientPortalSiteLogFile {
   id: string;
   file_url: string;
   file_name: string | null;
   file_type: string;
 }
+
 export interface ClientPortalSiteLogCreator {
   full_name: string | null;
   avatar_url: string | null;
 }
+
 export interface ClientPortalSiteLog {
   id: string;
   log_date: string;
@@ -80,6 +88,7 @@ export interface ClientPortalSiteLog {
   files: ClientPortalSiteLogFile[];
   creator: ClientPortalSiteLogCreator | null;
 }
+
 export interface ClientPortalStats {
   total_commitment: number;
   total_paid: number;
@@ -90,6 +99,7 @@ export interface ClientPortalStats {
   next_installment_amount: number | null;
   project_progress: number;
 }
+
 export interface ClientPortalSettings {
   show_dashboard: boolean;
   show_installments: boolean;
@@ -99,6 +109,7 @@ export interface ClientPortalSettings {
   show_progress: boolean;
   allow_comments: boolean;
 }
+
 export interface ClientPortalData {
   project: ClientPortalProject;
   client: ClientPortalClient | null;

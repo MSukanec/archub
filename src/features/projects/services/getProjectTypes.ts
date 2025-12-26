@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { ProjectType } from '../types';
+
 /**
  * Obtiene los tipos de proyecto disponibles para una organización.
  * 
@@ -15,12 +16,14 @@ export async function getProjectTypes(organizationId: string): Promise<ProjectTy
   if (!supabase || !organizationId) {
     return [];
   }
+
   const { data, error } = await supabase
     .from('project_types')
     .select('*')
     .eq('is_deleted', false)
     .or(`organization_id.eq.${organizationId},organization_id.is.null`)
     .order('name');
+
   if (error) throw error;
   
   return data || [];

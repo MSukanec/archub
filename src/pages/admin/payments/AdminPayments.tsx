@@ -7,22 +7,27 @@ import { useGlobalModalStore } from '@/components/modal';
 import AdminPaymentsTab from './AdminPaymentsTab';
 import AdminPaymentsTransfersTab from './AdminPaymentsTransfersTab';
 import AdminPaymentCoupons from './AdminPaymentCoupons';
+
 const AdminPayments = () => {
   const [activeTab, setActiveTab] = useState('payments');
   const { setSidebarLevel, sidebarLevel } = useNavigationStore();
   const { openModal } = useGlobalModalStore();
+
   useEffect(() => {
-    // Only set to 'admin'if not in 'general'mode (respects user's hub selection)
+    // Only set to 'admin' if not in 'general' mode (respects user's hub selection)
     if (sidebarLevel !== 'general') {
       setSidebarLevel('admin');
     }
   }, [setSidebarLevel, sidebarLevel]);
+
   const handleCreateCoupon = () => {
     openModal('coupon', {});
   };
+
   const handleCreatePayment = () => {
     openModal('payment', {});
   };
+
   const headerProps = {
     title: "Pagos",
     icon: Wallet,
@@ -45,7 +50,7 @@ const AdminPayments = () => {
     ],
     onTabChange: (tabId: string) => setActiveTab(tabId),
     actions: [
-      activeTab === 'payments'&& (
+      activeTab === 'payments' && (
         <Button
           key="create-payment"
           onClick={handleCreatePayment}
@@ -56,7 +61,7 @@ const AdminPayments = () => {
           Crear Pago Manual
         </Button>
       ),
-      activeTab === 'coupons'&& (
+      activeTab === 'coupons' && (
         <Button
           key="create-coupon"
           onClick={handleCreateCoupon}
@@ -69,14 +74,16 @@ const AdminPayments = () => {
       ),
     ].filter(Boolean)
   };
+
   return (
     <Layout wide headerProps={headerProps}>
       <div className="space-y-6">
-        {activeTab === 'payments'&& <AdminPaymentsTab />}
-        {activeTab === 'transfers'&& <AdminPaymentsTransfersTab />}
-        {activeTab === 'coupons'&& <AdminPaymentCoupons />}
+        {activeTab === 'payments' && <AdminPaymentsTab />}
+        {activeTab === 'transfers' && <AdminPaymentsTransfersTab />}
+        {activeTab === 'coupons' && <AdminPaymentCoupons />}
       </div>
     </Layout>
   );
 };
+
 export default AdminPayments;

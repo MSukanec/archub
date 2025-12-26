@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 interface MappingPattern {
   id: string;
   organization_id: string;
@@ -8,10 +9,12 @@ interface MappingPattern {
   usage_count: number;
   last_used_at: string;
 }
+
 interface PatternResult {
   targetField: string;
   usageCount: number;
 }
+
 /**
  * Gets stored mapping patterns from ia_import_mapping_patterns table.
  * Used to provide instant mapping suggestions based on organization history.
@@ -36,11 +39,14 @@ export async function getMappingPatterns(
   headers: string[]
 ): Promise<Map<string, PatternResult>> {
   const result = new Map<string, PatternResult>();
+
   if (!supabase || !organizationId || !entity || !headers.length) {
     return result;
   }
+
   try {
     const normalizedHeaders = headers.map(h => h.toLowerCase().trim());
+
     const { data, error } = await supabase
       .from('ia_import_mapping_patterns')
       .select('source_header, target_field, usage_count')
@@ -48,12 +54,15 @@ export async function getMappingPatterns(
       .eq('entity', entity)
       .in('source_header', normalizedHeaders)
       .order('usage_count', { ascending: false });
+
     if (error) {
       throw error;
     }
+
     if (!data || data.length === 0) {
       return result;
     }
+
     for (const pattern of data) {
       const normalizedHeader = pattern.source_header.toLowerCase().trim();
       
@@ -64,12 +73,14 @@ export async function getMappingPatterns(
         });
       }
     }
+
     return result;
   } catch (error) {
     console.error('Error fetching mapping patterns:', error);
     throw error;
   }
 }
+
 /**
  * Gets all mapping patterns for an organization and entity.
  * Useful for displaying pattern history or analytics.
@@ -86,19 +97,24 @@ export async function getAllMappingPatterns(
   if (!supabase || !organizationId) {
     return [];
   }
+
   try {
     let query = supabase
       .from('ia_import_mapping_patterns')
       .select('*')
       .eq('organization_id', organizationId)
       .order('usage_count', { ascending: false });
+
     if (entity) {
       query = query.eq('entity', entity);
     }
+
     const { data, error } = await query;
+
     if (error) {
       throw error;
     }
+
     return data || [];
   } catch (error) {
     console.error('Error fetching all mapping patterns:', error);

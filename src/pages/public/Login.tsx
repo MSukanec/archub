@@ -6,12 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/use-toast";
+
 export default function Login() {
   const { signInWithGoogle, signIn, loading } = useAuthStore();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showEmailForm, setShowEmailForm] = useState(false);
+
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
@@ -23,6 +25,7 @@ export default function Login() {
       });
     }
   };
+
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -34,6 +37,7 @@ export default function Login() {
       });
       return;
     }
+
     try {
       await signIn(email, password);
       // Success handled by AuthGuard redirect
@@ -45,8 +49,9 @@ export default function Login() {
       });
     }
   };
+
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: 'var(--main-sidebar-bg)'}}>
+    <div className="min-h-screen flex" style={{ backgroundColor: 'var(--main-sidebar-bg)' }}>
       {/* Left Panel - Dark */}
       <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 relative">
         <div className="max-w-md space-y-8 text-center">
@@ -58,18 +63,20 @@ export default function Login() {
               className="w-32 h-32 object-contain"
             />
           </div>
+
           {/* Text */}
           <div className="space-y-4">
             <h1 className="text-4xl font-bold !text-white">
               Una Plataforma para
               <br />
-              <span style={{ color: 'var(--accent)'}}>Optimizar tu Construcción</span>
+              <span style={{ color: 'var(--accent)' }}>Optimizar tu Construcción</span>
             </h1>
             <p className="text-base !text-gray-400">
               Gestiona proyectos, equipos y presupuestos en un solo lugar.
               Simplifica tu trabajo y aumenta la productividad.
             </p>
           </div>
+
           {/* Dots indicator */}
           <div className="flex justify-center gap-2 pt-8">
             <div className="w-2 h-2 rounded-full bg-white"></div>
@@ -78,10 +85,11 @@ export default function Login() {
           </div>
         </div>
       </div>
+
       {/* Right Panel - Light */}
       <div className="w-full lg:w-1/2 flex flex-col">
         <div className="w-full flex-1 flex items-stretch p-4 lg:p-6">
-          <div className="w-full h-full flex flex-col rounded-3xl px-6 lg:px-16 py-6" style={{ backgroundColor: 'var(--layout-bg)'}}>
+          <div className="w-full h-full flex flex-col rounded-3xl px-6 lg:px-16 py-6" style={{ backgroundColor: 'var(--layout-bg)' }}>
             {/* Logo + Sign up link - Fixed at top */}
             <div className="flex items-center justify-between gap-4 mb-8">
               <div className="flex items-center gap-3">
@@ -94,12 +102,13 @@ export default function Login() {
               <div className="text-sm">
                 <span className="text-gray-600">¿No tienes cuenta? </span>
                 <Link href="/register">
-                  <span className="font-semibold cursor-pointer hover:underline" style={{ color: 'var(--accent)'}}>
+                  <span className="font-semibold cursor-pointer hover:underline" style={{ color: 'var(--accent)' }}>
                     Regístrate
                   </span>
                 </Link>
               </div>
             </div>
+
             {/* Card Content - Centered vertically */}
             <div className="flex-1 flex items-center justify-center">
               <div className="w-full max-w-md space-y-8">
@@ -109,6 +118,7 @@ export default function Login() {
                     Ingresa tus credenciales para acceder a tu cuenta
                   </p>
                 </div>
+
                 {!showEmailForm ? (
                   <div className="space-y-4">
                     {/* Google Sign In */}
@@ -143,6 +153,7 @@ export default function Login() {
                       )}
                       Continuar con Google
                     </Button>
+
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
                         <div className="w-full border-t border-gray-300" />
@@ -153,6 +164,7 @@ export default function Login() {
                         </span>
                       </div>
                     </div>
+
                     {/* Email Sign In - Enabled */}
                     <Button
                       variant="outline"
@@ -199,7 +211,7 @@ export default function Login() {
                     <Button
                       type="submit"
                       className="w-full h-11"
-                      style={{ backgroundColor: 'var(--accent)', color: 'white'}}
+                      style={{ backgroundColor: 'var(--accent)', color: 'white' }}
                       disabled={loading}
                       data-testid="button-submit-login"
                     >

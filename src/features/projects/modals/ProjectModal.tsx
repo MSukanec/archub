@@ -7,16 +7,19 @@ import {
   useProjectForm,
   type Project 
 } from '../forms/ProjectForm';
+
 interface ProjectModalProps {
   modalData?: any;
   project?: Project;
-  mode?: 'create'| 'edit'| 'view';
+  mode?: 'create' | 'edit' | 'view';
   onClose: () => void;
 }
+
 export function ProjectModal({ modalData, project: projectProp, mode: modeProp, onClose }: ProjectModalProps) {
   const project = projectProp || modalData?.project || modalData?.editingProject;
-  const mode = modeProp || modalData?.mode || (project ? 'edit': 'create');
+  const mode = modeProp || modalData?.mode || (project ? 'edit' : 'create');
   const { toast } = useToast();
+
   const {
     form,
     onSubmit,
@@ -62,6 +65,7 @@ export function ProjectModal({ modalData, project: projectProp, mode: modeProp, 
       },
     },
   });
+
   const handleClose = () => {
     if (isUploadingImage || isDeletingImage) {
       toast({
@@ -74,16 +78,19 @@ export function ProjectModal({ modalData, project: projectProp, mode: modeProp, 
     reset();
     onClose();
   };
+
   const getTitle = () => {
     if (mode === 'view') return project?.name || 'Proyecto';
     if (mode === 'edit') return 'Editar Proyecto';
     return 'Nuevo Proyecto';
   };
+
   const getDescription = () => {
     if (mode === 'view') return 'Detalles del proyecto';
     if (mode === 'edit') return 'Modifica los datos y configuración básica del proyecto';
     return 'Crea un nuevo proyecto para tu organización';
   };
+
   if (mode === 'view') {
     return (
       <ModalLayout onClose={handleClose} size="lg">
@@ -106,6 +113,7 @@ export function ProjectModal({ modalData, project: projectProp, mode: modeProp, 
       </ModalLayout>
     );
   }
+
   return (
     <ModalLayout onClose={handleClose} size="lg">
       <ModalHeader
@@ -121,7 +129,7 @@ export function ProjectModal({ modalData, project: projectProp, mode: modeProp, 
           projectModalities={projectModalities}
           organizationCurrencies={organizationCurrencies}
           organizationId={organizationId}
-          currentImageUrl={mode === 'edit'? currentImageUrl : null}
+          currentImageUrl={mode === 'edit' ? currentImageUrl : null}
           imagePreviewUrl={imagePreviewUrl}
           onFileSelect={handleFileSelect}
           mode={mode}
@@ -133,7 +141,7 @@ export function ProjectModal({ modalData, project: projectProp, mode: modeProp, 
       <ModalFooter
         leftLabel="Cancelar"
         onLeftClick={handleClose}
-        submitText={mode === 'edit'? 'Actualizar Proyecto': 'Crear Proyecto'}
+        submitText={mode === 'edit' ? 'Actualizar Proyecto' : 'Crear Proyecto'}
         onSubmit={() => form.handleSubmit(onSubmit)()}
         isSubmitting={isSubmitting}
       />

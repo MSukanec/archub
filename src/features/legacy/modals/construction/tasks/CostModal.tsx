@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+
 import { FormModalLayout } from '@/components/modal'
 import { FormModalHeader } from '@/components/modal'
 import { FormModalFooter } from '@/components/modal'
@@ -10,18 +11,22 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
+
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useMaterials } from '@/features/materials'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { toast } from '@/hooks/use-toast'
+
 import { DollarSign } from 'lucide-react'
+
 const costSchema = z.object({
-  type: z.enum(['material', 'consumable', 'labor'], { required_error: 'Selecciona un tipo de costo'}),
+  type: z.enum(['material', 'consumable', 'labor'], { required_error: 'Selecciona un tipo de costo' }),
   item_id: z.string().min(1, 'Selecciona un material o mano de obra'),
   quantity: z.coerce.number().min(0.001, 'La cantidad debe ser mayor a 0'),
 })
+
 interface LaborType {
   labor_id: string
   labor_name: string
@@ -33,6 +38,7 @@ interface LaborType {
   created_at: string
   updated_at: string | null
 }
+
 interface CostModalProps {
   modalData: {
     task?: any
@@ -41,9 +47,10 @@ interface CostModalProps {
   }
   onClose: () => void
 }
+
 export function CostModal({ modalData, onClose }: CostModalProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const [costType, setCostType] = useState<'material'| 'consumable'| 'labor'| ''>('')
+  const [costType, setCostType] = useState<'material' | 'consumable' | 'labor' | ''>('')
   const [selectedItemUnit, setSelectedItemUnit] = useState<string>('')
   
   const { task, isEditing = false, costData } = modalData
@@ -54,6 +61,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
   const organizationId = userData?.organization?.id
   const { currentOrganizationId } = useProjectContext()
   const { data: materials = [] } = useMaterials(organizationId)
+
   const { data: laborTypes = [] } = useQuery({
     queryKey: ['labor-types'],
     queryFn: async () => {
@@ -78,6 +86,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       return data || []
     }
   })
+
   const createTaskMaterialMutation = useMutation({
     mutationFn: async (data: { task_id: string; material_id: string; amount: number }) => {
       if (!supabase) throw new Error('Supabase not initialized')
@@ -110,6 +119,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       })
     }
   })
+
   const createTaskLaborMutation = useMutation({
     mutationFn: async (data: { task_id: string; labor_type_id: string; quantity: number }) => {
       if (!supabase) throw new Error('Supabase not initialized')
@@ -141,6 +151,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       })
     }
   })
+
   const updateTaskMaterialMutation = useMutation({
     mutationFn: async (data: { id: string; material_id: string; amount: number }) => {
       if (!supabase) throw new Error('Supabase not initialized')
@@ -172,6 +183,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       })
     }
   })
+
   const updateTaskLaborMutation = useMutation({
     mutationFn: async (data: { id: string; labor_type_id: string; quantity: number }) => {
       if (!supabase) throw new Error('Supabase not initialized')
@@ -203,9 +215,11 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       })
     }
   })
+
   useEffect(() => {
     setPanel('edit')
   }, [setPanel])
+
   const form = useForm<z.infer<typeof costSchema>>({
     resolver: zodResolver(costSchema),
     defaultValues: {
@@ -214,12 +228,13 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       quantity: undefined,
     },
   })
+
   useEffect(() => {
     if (isEditing && costData) {
-      let type: 'material'| 'consumable'| 'labor';
+      let type: 'material' | 'consumable' | 'labor';
       if (costData.material_id) {
         const material = materials.find(m => m.id === costData.material_id);
-        type = material?.material_type === 'consumable'? 'consumable': 'material';
+        type = material?.material_type === 'consumable' ? 'consumable' : 'material';
       } else {
         type = 'labor';
       }
@@ -235,8 +250,9 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       }, 100);
     }
   }, [isEditing, costData, form, materials]);
+
   const getSelectedItemUnit = useCallback((itemId: string, type: string): string => {
-    if (type === 'material'|| type === 'consumable') {
+    if (type === 'material' || type === 'consumable') {
       const material = materials.find(m => m.id === itemId)
       return material?.unit_of_computation || ''
     } else if (type === 'labor') {
@@ -245,6 +261,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     }
     return ''
   }, [materials, laborTypes])
+
   const watchedType = form.watch('type')
   useEffect(() => {
     if (watchedType !== costType) {
@@ -255,6 +272,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       }
     }
   }, [watchedType, costType, form, isEditing])
+
   const watchedItemId = form.watch('item_id')
   useEffect(() => {
     if (watchedItemId && costType) {
@@ -264,6 +282,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       setSelectedItemUnit('')
     }
   }, [watchedItemId, costType, getSelectedItemUnit])
+
   const onSubmit = async (data: z.infer<typeof costSchema>) => {
     if (!task?.id) {
       toast({
@@ -273,6 +292,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       })
       return
     }
+
     if (isEditing && !costData?.id) {
       toast({
         title: "Error",
@@ -281,11 +301,12 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       })
       return
     }
+
     setIsLoading(true)
     
     try {
       if (isEditing && costData?.id) {
-        if (data.type === 'material'|| data.type === 'consumable') {
+        if (data.type === 'material' || data.type === 'consumable') {
           await updateTaskMaterialMutation.mutateAsync({
             id: costData.id,
             material_id: data.item_id,
@@ -299,7 +320,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
           })
         }
       } else {
-        if (data.type === 'material'|| data.type === 'consumable') {
+        if (data.type === 'material' || data.type === 'consumable') {
           await createTaskMaterialMutation.mutateAsync({
             task_id: task.id,
             material_id: data.item_id,
@@ -322,6 +343,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       setIsLoading(false)
     }
   }
+
   const getItemOptions = () => {
     if (costType === 'material') {
       return materials.filter(m => m.material_type !== 'consumable').map(material => ({
@@ -341,13 +363,16 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
     }
     return []
   }
+
   const getItemPlaceholder = () => {
     if (costType === 'material') return 'Buscar material...'
     if (costType === 'consumable') return 'Buscar insumo...'
     if (costType === 'labor') return 'Buscar tipo de mano de obra...'
     return 'Selecciona un tipo primero'
   }
+
   const viewPanel = null
+
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -373,13 +398,14 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="item_id"
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                {costType === 'material'? 'Material *': costType === 'consumable'? 'Insumo *': costType === 'labor'? 'Tipo de Mano de Obra *': 'Item *'}
+                {costType === 'material' ? 'Material *' : costType === 'consumable' ? 'Insumo *' : costType === 'labor' ? 'Tipo de Mano de Obra *' : 'Item *'}
               </FormLabel>
               <FormControl>
                 <ComboBox
@@ -388,7 +414,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
                   options={getItemOptions()}
                   placeholder={getItemPlaceholder()}
                   searchPlaceholder={getItemPlaceholder()}
-                  emptyMessage={`No se encontraron ${costType === 'material'? 'materiales': costType === 'consumable'? 'insumos': 'tipos de mano de obra'}.`}
+                  emptyMessage={`No se encontraron ${costType === 'material' ? 'materiales' : costType === 'consumable' ? 'insumos' : 'tipos de mano de obra'}.`}
                   disabled={!costType}
                 />
               </FormControl>
@@ -396,6 +422,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="quantity"
@@ -429,6 +456,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       </form>
     </Form>
   )
+
   const headerContent = (
     <FormModalHeader 
       title={isEditing ? "Editar Costo de Tarea" : "Agregar Costo a Tarea"}
@@ -438,6 +466,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       icon={DollarSign}
     />
   )
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -446,6 +475,7 @@ export function CostModal({ modalData, onClose }: CostModalProps) {
       onRightClick={form.handleSubmit(onSubmit)}
     />
   )
+
   return (
     <FormModalLayout
       columns={1}

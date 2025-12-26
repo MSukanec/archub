@@ -2,9 +2,11 @@ import { useLocation } from "wouter"
 import { Button } from "@/components/ui/button"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import { Home, ArrowLeft } from "lucide-react"
+
 export default function NotFound() {
   const [, setLocation] = useLocation()
   const { data: currentUser } = useCurrentUser()
+
   const handleGoHome = () => {
     if (currentUser?.user?.id) {
       setLocation("/dashboard")
@@ -12,9 +14,11 @@ export default function NotFound() {
       setLocation("/")
     }
   }
+
   const handleGoBack = () => {
     window.history.back()
   }
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="flex items-center justify-center min-h-screen">
@@ -33,6 +37,7 @@ export default function NotFound() {
               La página que buscas no existe o ha sido movida.
             </p>
           </div>
+
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button onClick={handleGoBack} variant="outline" className="flex items-center gap-2">
@@ -44,6 +49,7 @@ export default function NotFound() {
               {currentUser?.user?.id ? "Ir al Dashboard" : "Ir al Inicio"}
             </Button>
           </div>
+
           {/* Additional Help */}
           <div className="text-sm text-muted-foreground">
             Si crees que esto es un error, contacta al soporte técnico.

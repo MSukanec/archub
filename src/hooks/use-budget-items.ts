@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCurrentUser } from './use-current-user'
 import { toast } from '@/hooks/use-toast'
 import { useProjectContext } from '@/stores/projectContext'
+
 interface BudgetItem {
   // Campos básicos de budget_items
   id: string
@@ -20,7 +21,7 @@ interface BudgetItem {
   currency_id: string
   markup_pct: number
   tax_pct: number
-  cost_scope: 'materials_and_labor'| 'materials_only'| 'labor_only'
+  cost_scope: 'materials_and_labor' | 'materials_only' | 'labor_only'
   sort_key: number
   
   // Campos enriquecidos de la vista (desde joins)
@@ -31,20 +32,24 @@ interface BudgetItem {
   cost_scope_label?: string
   position?: number // alias para sort_key para compatibilidad
 }
+
 export function useBudgetItems(budgetId?: string) {
   const { currentOrganizationId } = useProjectContext()
+
   return useQuery({
     queryKey: ['budget-items', budgetId, currentOrganizationId],
     queryFn: async () => {
       if (!budgetId || !currentOrganizationId) {
         return []
       }
+
       // Get the authentication token
       const { supabase } = await import('@/lib/supabase');
       const { data: session } = await supabase.auth.getSession();
       if (!session.session?.access_token) {
         throw new Error('No authentication token available');
       }
+
       // Use server endpoint instead of direct Supabase access
       const response = await fetch(`/api/budget-items?budget_id=${budgetId}&organization_id=${currentOrganizationId}`, {
         method: 'GET',
@@ -53,26 +58,31 @@ export function useBudgetItems(budgetId?: string) {
           'Authorization': `Bearer ${session.session.access_token}`
         },
       })
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
+
       const data = await response.json()
       return data as BudgetItem[]
     },
     enabled: !!budgetId && !!currentOrganizationId
   })
 }
+
 export function useCreateBudgetItem() {
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
+
   return useMutation({
-    mutationFn: async (budgetItemData: Omit<BudgetItem, 'id'| 'created_at'| 'updated_at'>) => {
+    mutationFn: async (budgetItemData: Omit<BudgetItem, 'id' | 'created_at' | 'updated_at'>) => {
       // Get the authentication token
       const { supabase } = await import('@/lib/supabase');
       const { data: session } = await supabase.auth.getSession();
       if (!session.session?.access_token) {
         throw new Error('No authentication token available');
       }
+
       // Use server endpoint instead of direct Supabase access
       const response = await fetch('/api/budget-items', {
         method: 'POST',
@@ -82,9 +92,11 @@ export function useCreateBudgetItem() {
         },
         body: JSON.stringify(budgetItemData),
       })
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
+
       const data = await response.json()
       return data
     },
@@ -105,8 +117,10 @@ export function useCreateBudgetItem() {
     }
   })
 }
+
 export function useUpdateBudgetItem() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async ({ id, ...budgetItemData }: Partial<BudgetItem> & { id: string }) => {
       // Get the authentication token
@@ -115,6 +129,7 @@ export function useUpdateBudgetItem() {
       if (!session.session?.access_token) {
         throw new Error('No authentication token available');
       }
+
       // Use server endpoint instead of direct Supabase access
       const response = await fetch(`/api/budget-items/${id}`, {
         method: 'PATCH',
@@ -124,9 +139,11 @@ export function useUpdateBudgetItem() {
         },
         body: JSON.stringify(budgetItemData),
       })
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
+
       const data = await response.json()
       return data
     },
@@ -146,8 +163,10 @@ export function useUpdateBudgetItem() {
     }
   })
 }
+
 export function useDeleteBudgetItem() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async (budgetItemId: string) => {
       // Get the authentication token
@@ -156,6 +175,7 @@ export function useDeleteBudgetItem() {
       if (!session.session?.access_token) {
         throw new Error('No authentication token available');
       }
+
       // Use server endpoint instead of direct Supabase access
       const response = await fetch(`/api/budget-items/${budgetItemId}`, {
         method: 'DELETE',
@@ -164,9 +184,11 @@ export function useDeleteBudgetItem() {
           'Authorization': `Bearer ${session.session.access_token}`
         },
       })
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
+
       const data = await response.json()
       return data
     },
@@ -186,8 +208,10 @@ export function useDeleteBudgetItem() {
     }
   })
 }
+
 export function useMoveBudgetItem() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async ({ budget_id, item_id, prev_item_id, next_item_id }: {
       budget_id: string;
@@ -201,6 +225,7 @@ export function useMoveBudgetItem() {
       if (!session.session?.access_token) {
         throw new Error('No authentication token available');
       }
+
       // Use server endpoint for budget item move
       const response = await fetch('/api/budget-items/move', {
         method: 'POST',
@@ -215,11 +240,13 @@ export function useMoveBudgetItem() {
           next_item_id
         }),
       })
+
       if (!response.ok) {
         const errorText = await response.text()
         console.error('Move budget item failed:', response.status, errorText)
         throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
       }
+
       const data = await response.json()
       return data
     },

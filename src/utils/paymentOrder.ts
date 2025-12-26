@@ -1,10 +1,12 @@
 type PaymentMethod = "mercadopago" | "paypal" | "transfer";
+
 /**
  * Verifica si el país es Argentina
  */
 export function isArgentineCountry(countryAlpha3?: string): boolean {
-  return countryAlpha3?.toUpperCase() === 'ARG'|| countryAlpha3?.toUpperCase() === 'AR';
+  return countryAlpha3?.toUpperCase() === 'ARG' || countryAlpha3?.toUpperCase() === 'AR';
 }
+
 /**
  * Ordena los métodos de pago según el país del usuario.
  * 
@@ -27,6 +29,7 @@ export function orderedMethods(countryAlpha3?: string, hasCoupon?: boolean): Pay
     return ['paypal', 'transfer', 'mercadopago'];
   }
 }
+
 /**
  * Retorna el texto del botón según el método de pago seleccionado
  */

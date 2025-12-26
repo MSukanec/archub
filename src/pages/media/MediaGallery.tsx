@@ -7,36 +7,44 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Images, Plus } from 'lucide-react';
+import { 
   useCurrentProject, 
   useGalleryFiles, 
   useDeleteMediaFile,
   MediaStatsSection,
   type GalleryFile 
 } from '@/features/media';
+
 export function MediaGallery() {
   const { openModal } = useGlobalModalStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
-  const [galleryStyle, setGalleryStyle] = useState<'uniform'| 'masonry'>('uniform');
+  const [galleryStyle, setGalleryStyle] = useState<'uniform' | 'masonry'>('uniform');
   
   const storedProjectId = userData?.preferences?.last_project_id;
   const organizationId = userData?.organization?.id;
+
   // Get current project
   const { data: currentProject } = useCurrentProject(storedProjectId, organizationId);
+
   // Get gallery files using the new hook
   const { 
     data: allFiles = [], 
     isLoading: galleryLoading, 
     error: galleryError 
   } = useGalleryFiles(organizationId, currentProject?.id);
+
   // Show all files in gallery
   const galleryFiles = allFiles;
+
   // Delete mutation
   const deleteFileMutation = useDeleteMediaFile();
+
   // Handlers
   const handleDownload = async (file: GalleryFile) => {
     if (!file.file_url) return;
+
     try {
       // Try to download via fetch first (works better with CORS)
       const response = await fetch(file.file_url);
@@ -55,6 +63,7 @@ export function MediaGallery() {
       window.open(file.file_url, '_blank');
     }
   };
+
   const handleDelete = (file: GalleryFile) => {
     // Ensure link_id exists - use id as fallback if link_id is missing
     const linkId = file.link_id || file.id;
@@ -67,6 +76,7 @@ export function MediaGallery() {
       });
       return;
     }
+
     openModal('delete-confirmation', {
       mode: 'delete',
       title: 'Eliminar archivo',
@@ -93,6 +103,7 @@ export function MediaGallery() {
       }
     });
   };
+
   if (galleryLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -103,6 +114,7 @@ export function MediaGallery() {
       </div>
     );
   }
+
   if (galleryError) {
     return (
       <EmptyState
@@ -117,6 +129,7 @@ export function MediaGallery() {
       />
     );
   }
+
   if (galleryFiles.length === 0) {
     return (
       <EmptyState
@@ -132,6 +145,7 @@ export function MediaGallery() {
       />
     );
   }
+
   return (
     <div className="space-y-6">
       {galleryFiles.length > 0 && (
@@ -141,7 +155,7 @@ export function MediaGallery() {
             file_size: file.file_size ?? undefined
           })) as any}
           galleryStyle={galleryStyle}
-          onGalleryStyleChange={() => setGalleryStyle(galleryStyle === 'uniform'? 'masonry': 'uniform')}
+          onGalleryStyleChange={() => setGalleryStyle(galleryStyle === 'uniform' ? 'masonry' : 'uniform')}
         />
       )}
       

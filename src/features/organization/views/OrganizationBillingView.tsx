@@ -23,6 +23,7 @@ import { useGlobalModalStore } from '@/components/modal';
 import { useLocation } from 'wouter';
 import { getPlanConfig } from '@/features/shared-content/pricing/data/plans-config';
 import { organizationKeys } from '@/core/query-keys';
+
 interface OrganizationSubscription {
   id: string;
   plan_id: string;
@@ -42,6 +43,7 @@ interface OrganizationSubscription {
     slug: string;
   } | null;
 }
+
 interface Payment {
   id: string;
   amount: number;
@@ -58,6 +60,7 @@ interface Payment {
     slug: string;
   } | null;
 }
+
 interface NextInvoice {
   seats: number;
   pricePerSeat: number;
@@ -67,15 +70,18 @@ interface NextInvoice {
   currency: string;
   nextBillingDate: string | null;
 }
+
 export function OrganizationBillingView() {
   const { currentOrganizationId } = useProjectContext();
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const [location, setLocation] = useLocation();
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const paymentStatus = params.get('payment');
+
     if (paymentStatus && currentOrganizationId) {
       const url = new URL(window.location.href);
       url.searchParams.delete('payment');
@@ -91,6 +97,7 @@ export function OrganizationBillingView() {
       url.searchParams.delete('processing_mode');
       url.searchParams.delete('merchant_account_id');
       window.history.replaceState({}, '', url.pathname);
+
       if (paymentStatus === 'success') {
         refreshCurrentUserCache(queryClient).then(() => {
           queryClient.invalidateQueries({ queryKey: organizationKeys.subscription(currentOrganizationId) });
@@ -110,10 +117,12 @@ export function OrganizationBillingView() {
       }
     }
   }, [currentOrganizationId, openModal, userData]);
+
   const { data: subscription, isLoading: subscriptionLoading, error: subscriptionError, refetch: refetchSubscription } = useQuery<OrganizationSubscription | null>({
     queryKey: organizationKeys.subscription(currentOrganizationId),
     queryFn: async () => {
       if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
+
       const { data, error} = await supabase
         .from('organization_subscriptions')
         .select(`
@@ -133,6 +142,7 @@ export function OrganizationBillingView() {
         .order('started_at', { ascending: false })
         .limit(1)
         .maybeSingle();
+
       if (error) throw error;
       
       if (data) {
@@ -165,10 +175,12 @@ export function OrganizationBillingView() {
     },
     enabled: !!currentOrganizationId && !!supabase,
   });
+
   const { data: payments = [], isLoading: paymentsLoading, error: paymentsError, refetch: refetchPayments } = useQuery<Payment[]>({
     queryKey: organizationKeys.payments(currentOrganizationId),
     queryFn: async () => {
       if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
+
       // Get payments for subscriptions (including upgrades)
       const { data: paymentsData, error } = await supabase
         .from('payments')
@@ -176,6 +188,7 @@ export function OrganizationBillingView() {
         .eq('organization_id', currentOrganizationId)
         .in('product_type', ['subscription', 'subscription_upgrade'])
         .order('created_at', { ascending: false });
+
       if (error) throw error;
       
       // Fetch plan info for each payment that has a product_id
@@ -198,16 +211,19 @@ export function OrganizationBillingView() {
     },
     enabled: !!currentOrganizationId && !!supabase,
   });
+
   const { data: organization } = useQuery<{ name: string; logo_url: string | null; plan_id: string | null; plans: { name: string; slug: string } | null }>({
     queryKey: organizationKeys.info(currentOrganizationId),
     queryFn: async () => {
       if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
+
       const { data, error } = await supabase
         .from('organizations')
         .select('name, image_bucket, image_path, plan_id, plans(name, slug)')
         .eq('is_deleted', false)
         .eq('id', currentOrganizationId)
         .single();
+
       if (error) throw error;
       
       let logo_url: string | null = null;
@@ -222,8 +238,10 @@ export function OrganizationBillingView() {
     },
     enabled: !!currentOrganizationId && !!supabase,
   });
+
   const planSlug = organization?.plans?.slug || subscription?.plans?.slug || 'free';
   const isTeamsPlan = planSlug === 'teams';
+
   const { data: nextInvoice } = useQuery<NextInvoice>({
     queryKey: organizationKeys.nextInvoice(currentOrganizationId),
     queryFn: async () => {
@@ -233,6 +251,7 @@ export function OrganizationBillingView() {
     },
     enabled: !!currentOrganizationId && isTeamsPlan,
   });
+
   const { data: billingCycles = [] } = useQuery<any[]>({
     queryKey: organizationKeys.billingCycles(currentOrganizationId),
     queryFn: async () => {
@@ -242,6 +261,7 @@ export function OrganizationBillingView() {
     },
     enabled: !!currentOrganizationId && isTeamsPlan,
   });
+
   const cancelSubscriptionMutation = useOptimisticMutation({
     mutationFn: async (subscriptionId: string) => {
       return await apiRequest('POST', `/api/subscriptions/${subscriptionId}/cancel`);
@@ -249,11 +269,12 @@ export function OrganizationBillingView() {
     queryKey: organizationKeys.subscription(currentOrganizationId),
     optimisticUpdate: (oldData, _subscriptionId) => {
       if (!oldData) return oldData;
-      return { ...oldData, status: 'cancelled'};
+      return { ...oldData, status: 'cancelled' };
     },
     onSuccessMessage: 'Suscripción cancelada. Mantendrás acceso hasta la fecha de expiración.',
     onErrorMessage: 'No se pudo cancelar la suscripción',
   });
+
   const cancelScheduledDowngradeMutation = useOptimisticMutation<unknown, void>({
     mutationFn: async () => {
       return await apiRequest('DELETE', '/api/subscriptions/cancel-scheduled-downgrade');
@@ -266,15 +287,18 @@ export function OrganizationBillingView() {
     onSuccessMessage: 'El cambio de plan programado ha sido cancelado.',
     onErrorMessage: 'No se pudo cancelar el cambio programado',
   });
+
   const planName = organization?.plans?.name || subscription?.plans?.name || 'Free';
-  const billingPeriod = subscription?.billing_period === 'monthly'? 'mes': 'año';
+  const billingPeriod = subscription?.billing_period === 'monthly' ? 'mes' : 'año';
   const amount = subscription?.amount || 0;
   const currency = subscription?.currency || 'USD';
   const expiresAt = subscription?.expires_at;
   const subscriptionStatus = subscription?.status || 'free';
+
   const isFreePlan = planSlug === 'free';
   const isCancelled = subscriptionStatus === 'cancelled';
   const isActive = subscriptionStatus === 'active';
+
   const getDaysRemaining = () => {
     if (!expiresAt) return 0;
     const now = new Date();
@@ -283,7 +307,9 @@ export function OrganizationBillingView() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return Math.max(0, diffDays);
   };
+
   const daysRemaining = getDaysRemaining();
+
   const getPlanBadgeClass = (slug: string) => {
     const classes: Record<string, string> = {
       'free': 'plan-card-free',
@@ -293,15 +319,17 @@ export function OrganizationBillingView() {
     };
     return classes[slug.toLowerCase()] || classes['free'];
   };
+
   const getNextPlan = () => {
     const planHierarchy: Record<string, { slug: string; name: string } | null> = {
-      'free': { slug: 'pro', name: 'PRO'},
-      'pro': { slug: 'teams', name: 'TEAMS'},
-      'teams': { slug: 'enterprise', name: 'ENTERPRISE'},
+      'free': { slug: 'pro', name: 'PRO' },
+      'pro': { slug: 'teams', name: 'TEAMS' },
+      'teams': { slug: 'enterprise', name: 'ENTERPRISE' },
       'enterprise': null,
     };
     return planHierarchy[planSlug.toLowerCase()] || null;
   };
+
   const handleDownloadInvoice = async (payment: Payment) => {
     if (!organization || !subscription) return;
     try {
@@ -328,6 +356,7 @@ export function OrganizationBillingView() {
       });
     }
   };
+
   const columns = [
     {
       key: 'date',
@@ -364,12 +393,12 @@ export function OrganizationBillingView() {
       render: (payment: Payment) => (
         <div className="flex items-center gap-2">
           <img 
-            src={payment.provider === 'paypal'? '/Paypal_2014_logo.png': '/MercadoPago_logo.png'}
-            alt={payment.provider === 'paypal'? 'PayPal': 'MercadoPago'}
+            src={payment.provider === 'paypal' ? '/Paypal_2014_logo.png' : '/MercadoPago_logo.png'}
+            alt={payment.provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
             className="h-4 w-auto object-contain"
           />
           <span className="text-sm">
-            {payment.provider === 'paypal'? 'PayPal': 'MercadoPago'}
+            {payment.provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
           </span>
         </div>
       ),
@@ -385,6 +414,7 @@ export function OrganizationBillingView() {
       ),
     },
   ];
+
   return (
     <div className="space-y-6">
       {subscriptionError && (
@@ -406,6 +436,7 @@ export function OrganizationBillingView() {
           </AlertDescription>
         </Alert>
       )}
+
       {paymentsError && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -425,6 +456,7 @@ export function OrganizationBillingView() {
           </AlertDescription>
         </Alert>
       )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <AppCard>
           <div className="flex items-center justify-between mb-4">
@@ -475,13 +507,14 @@ export function OrganizationBillingView() {
                 {expiresAt && !isFreePlan && (
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">
-                      {isCancelled ? 'Expira el:': 'Próxima renovación:'}
+                      {isCancelled ? 'Expira el:' : 'Próxima renovación:'}
                     </span>
                     <span className="font-medium">
                       {format(new Date(expiresAt), 'dd MMM yyyy', { locale: es })}
                     </span>
                   </div>
                 )}
+
                 {isCancelled && (
                   <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 p-4 rounded-lg">
                     <div className="flex items-start gap-3">
@@ -492,7 +525,7 @@ export function OrganizationBillingView() {
                         </h4>
                         <p className="text-sm text-amber-700 dark:text-amber-300 mb-2">
                           {daysRemaining > 0 
-                            ? `Te quedan ${daysRemaining} día${daysRemaining !== 1 ? 's': ''} de acceso a ${planName}.`
+                            ? `Te quedan ${daysRemaining} día${daysRemaining !== 1 ? 's' : ''} de acceso a ${planName}.`
                             : 'Tu acceso expira hoy.'
                           }
                         </p>
@@ -504,6 +537,7 @@ export function OrganizationBillingView() {
                     </div>
                   </div>
                 )}
+
                 {subscription?.scheduled_downgrade_plan_id && subscription?.scheduled_downgrade_plan && !isCancelled && (
                   <div className="bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 p-4 rounded-lg">
                     <div className="flex items-start gap-3">
@@ -547,6 +581,7 @@ export function OrganizationBillingView() {
                   </div>
                 )}
               </div>
+
               <div className="space-y-2">
                 {isActive && !isFreePlan && (
                   <Button 
@@ -573,6 +608,7 @@ export function OrganizationBillingView() {
                     Cancelar Suscripción
                   </Button>
                 )}
+
                 {isCancelled && (
                   <Button 
                     onClick={() => setLocation('/settings/pricing-plan')}
@@ -600,7 +636,7 @@ export function OrganizationBillingView() {
                   >
                     <ArrowUpCircle className="w-4 h-4 mr-2" />
                     {isFreePlan 
-                      ? 'Mejorar Plan'
+                      ? 'Mejorar Plan' 
                       : getNextPlan()?.slug === 'enterprise'
                         ? 'Contactar para ENTERPRISE'
                         : `Mejorar a ${getNextPlan()?.name}`
@@ -611,6 +647,7 @@ export function OrganizationBillingView() {
             </>
           )}
         </AppCard>
+
         <AppCard>
           <CardTitle className="text-lg mb-4">Método de Pago</CardTitle>
           <CardDescription className="mb-4">
@@ -631,14 +668,14 @@ export function OrganizationBillingView() {
               <div className="flex items-center gap-3">
                 <div className="h-10 w-16 rounded-md bg-white dark:bg-gray-800 border border-border flex items-center justify-center p-1">
                   <img 
-                    src={payments[0].provider === 'paypal'? '/Paypal_2014_logo.png': '/MercadoPago_logo.png'}
-                    alt={payments[0].provider === 'paypal'? 'PayPal': 'MercadoPago'}
+                    src={payments[0].provider === 'paypal' ? '/Paypal_2014_logo.png' : '/MercadoPago_logo.png'}
+                    alt={payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
                     className="w-full h-full object-contain"
                   />
                 </div>
                 <div className="flex-1">
                   <div className="font-medium text-sm">
-                    {payments[0].provider === 'paypal'? 'PayPal': 'MercadoPago'}
+                    {payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {payments[0].payer_email}
@@ -649,18 +686,19 @@ export function OrganizationBillingView() {
               {expiresAt && !isFreePlan && (
                 <div className="flex items-center justify-between text-sm py-2 border-t border-border">
                   <span className="text-muted-foreground">
-                    {isCancelled ? 'Expira el:': 'Próxima renovación:'}
+                    {isCancelled ? 'Expira el:' : 'Próxima renovación:'}
                   </span>
                   <span className="font-medium">
                     {format(new Date(expiresAt), 'dd MMM yyyy', { locale: es })}
                   </span>
                 </div>
               )}
+
               <Button
                 variant="secondary"
                 className="w-full"
                 onClick={() => {
-                  const url = payments[0].provider === 'paypal'
+                  const url = payments[0].provider === 'paypal' 
                     ? 'https://www.paypal.com/myaccount/autopay'
                     : 'https://www.mercadopago.com.ar/subscriptions';
                   window.open(url, '_blank', 'noopener,noreferrer');
@@ -668,7 +706,7 @@ export function OrganizationBillingView() {
                 data-testid="button-manage-payment-method"
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
-                Gestionar en {payments[0].provider === 'paypal'? 'PayPal': 'MercadoPago'}
+                Gestionar en {payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
               </Button>
             </div>
           ) : (
@@ -678,6 +716,7 @@ export function OrganizationBillingView() {
           )}
         </AppCard>
       </div>
+
       {isTeamsPlan && (
         <div className="space-y-6">
           {nextInvoice && (
@@ -709,7 +748,7 @@ export function OrganizationBillingView() {
                         "font-medium",
                         nextInvoice.prorationAdjustment > 0 ? "text-orange-600" : "text-green-600"
                       )}>
-                        {nextInvoice.prorationAdjustment > 0 ? '+': ''}
+                        {nextInvoice.prorationAdjustment > 0 ? '+' : ''}
                         {nextInvoice.currency} ${nextInvoice.prorationAdjustment.toFixed(2)}
                       </span>
                     </div>
@@ -727,6 +766,7 @@ export function OrganizationBillingView() {
               </CardContent>
             </Card>
           )}
+
           {billingCycles.length > 0 && (
             <Card>
               <CardHeader>
@@ -759,8 +799,8 @@ export function OrganizationBillingView() {
                             {cycle.currency_code} ${parseFloat(cycle.total_amount).toFixed(2)}
                           </td>
                           <td className="py-3 px-4">
-                            <Badge variant={cycle.status === 'paid'? 'success': cycle.status === 'pending'? 'pending': 'warning'} className="text-xs">
-                              {cycle.status === 'paid'? 'Pagado': cycle.status === 'pending'? 'Pendiente': 'Cancelado'}
+                            <Badge variant={cycle.status === 'paid' ? 'success' : cycle.status === 'pending' ? 'pending' : 'warning'} className="text-xs">
+                              {cycle.status === 'paid' ? 'Pagado' : cycle.status === 'pending' ? 'Pendiente' : 'Cancelado'}
                             </Badge>
                           </td>
                         </tr>
@@ -773,6 +813,7 @@ export function OrganizationBillingView() {
           )}
         </div>
       )}
+
       {paymentsLoading ? (
         <Card className="p-6">
           <div className="space-y-3">

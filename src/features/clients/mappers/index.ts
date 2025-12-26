@@ -1,6 +1,7 @@
 /**
  * Mappers for transforming client data between different formats and calculating KPIs
  */
+
 import type {
   ProjectClientWithRelations,
   ClientListItem,
@@ -8,7 +9,9 @@ import type {
   ClientDashboardData,
   ClientPaymentWithRelations,
 } from '../types';
+
 // ========== Types for transformed data ==========
+
 export interface CurrencyFinancial {
   currency: {
     id: string;
@@ -25,6 +28,7 @@ export interface CurrencyFinancial {
   schedule_paid: number;
   schedule_overdue: number;
 }
+
 export interface ProjectClientSummary {
   id: string;
   contact_id: string;
@@ -57,12 +61,14 @@ export interface ProjectClientSummary {
   balance_due: number;
   next_due: number | null;
 }
+
 export interface DashboardKPIs {
   totalClients: number;
   totalPayments: number;
   totalCommittedAmount: number;
   totalBalanceDue: number;
 }
+
 export interface ObligationsKPIs {
   totalCommittedAmount: number;
   totalPaidAmount: number;
@@ -73,7 +79,9 @@ export interface ObligationsKPIs {
   balancePercentage: number;
   schedulePercentage: number;
 }
+
 // ========== Helper Functions ==========
+
 /**
  * Gets financial summaries for a specific client
  */
@@ -84,6 +92,7 @@ export function getFinancialSummariesForClient(
   const clientSummary = financialSummaries.find(fs => fs.clientId === clientId);
   return clientSummary?.summaries || [];
 }
+
 /**
  * Maps project clients with financial data to client list items for display
  */
@@ -93,6 +102,7 @@ export function mapToClientListItems(
 ): ClientListItem[] {
   return clients.map((client) => {
     const summaries = getFinancialSummariesForClient(client.id, financialSummaries);
+
     return {
       id: client.id,
       contact: client.contact,
@@ -115,6 +125,7 @@ export function mapToClientListItems(
     };
   });
 }
+
 /**
  * Calculates total amounts across all currencies for a client
  */
@@ -128,6 +139,7 @@ export function calculateClientTotals(summaries: ClientFinancialSummary[]) {
     { total_committed: 0, total_paid: 0, balance_due: 0 }
   );
 }
+
 /**
  * Formats contact display name with fallbacks
  */
@@ -138,13 +150,14 @@ export function formatClientDisplayName(
   
   if (contact.full_name) return contact.full_name;
   
-  const name = [contact.first_name, contact.last_name].filter(Boolean).join('');
+  const name = [contact.first_name, contact.last_name].filter(Boolean).join(' ');
   if (name) return name;
   
   if (contact.company_name) return contact.company_name;
   
   return 'Sin nombre';
 }
+
 /**
  * Calculates payment completion percentage for a client
  */
@@ -152,12 +165,14 @@ export function calculatePaymentProgress(summary: ClientFinancialSummary): numbe
   if (summary.total_committed === 0) return 0;
   return Math.round((summary.total_paid / summary.total_committed) * 100);
 }
+
 /**
  * Determines if a client has overdue payments
  */
 export function hasOverduePayments(summary: ClientFinancialSummary): boolean {
   return summary.schedule_overdue > 0;
 }
+
 /**
  * Gets the status color for a payment schedule item
  */
@@ -170,6 +185,7 @@ export function getScheduleStatusColor(status: string): string {
   };
   return colors[status] || 'gray';
 }
+
 /**
  * Gets the status color for a payment
  */
@@ -182,6 +198,7 @@ export function getPaymentStatusColor(status: string): string {
   };
   return colors[status] || 'gray';
 }
+
 /**
  * Gets the status color for a client
  */
@@ -196,7 +213,9 @@ export function getClientStatusColor(status: string): string {
   };
   return colors[status] || 'gray';
 }
+
 // ========== Dashboard Data Transformations ==========
+
 /**
  * Maps a client with financial summaries to a ProjectClientSummary
  * This centralizes the transformation logic that was scattered across pages
@@ -223,6 +242,7 @@ export function mapToClientSummary(
     schedule_paid: summary.schedule_paid,
     schedule_overdue: summary.schedule_overdue,
   }));
+
   const total_committed_amount = summaries.reduce((sum, s) => sum + s.total_committed, 0);
   const total_paid_amount = summaries.reduce((sum, s) => sum + s.total_paid, 0);
   const balance_due = summaries.reduce((sum, s) => sum + s.balance_due, 0);
@@ -230,6 +250,7 @@ export function mapToClientSummary(
     if (!s.next_due_amount) return min;
     return min === null ? s.next_due_amount : Math.min(min, s.next_due_amount);
   }, null as number | null);
+
   return {
     id: client.id,
     contact_id: client.contact_id,
@@ -259,6 +280,7 @@ export function mapToClientSummary(
     next_due,
   };
 }
+
 /**
  * Maps all clients to ProjectClientSummary array
  */
@@ -268,7 +290,9 @@ export function mapToClientSummaries(
 ): ProjectClientSummary[] {
   return clients.map(client => mapToClientSummary(client, financialSummaries));
 }
+
 // ========== KPI Calculations ==========
+
 /**
  * Calculates KPIs for the Dashboard tab
  */
@@ -284,6 +308,7 @@ export function calculateDashboardKPIs(
   const totalBalanceDue = clientSummaries.reduce((sum, client) => 
     sum + (client.balance_due || 0), 0
   );
+
   return {
     totalClients,
     totalPayments,
@@ -291,6 +316,7 @@ export function calculateDashboardKPIs(
     totalBalanceDue,
   };
 }
+
 /**
  * Calculates KPIs for the Obligations tab
  */
@@ -327,6 +353,7 @@ export function calculateObligationsKPIs(
     );
     return sum + paidSum;
   }, 0);
+
   const paidPercentage = totalCommittedAmount > 0 
     ? (totalPaidAmount / totalCommittedAmount) * 100 
     : 0;
@@ -338,6 +365,7 @@ export function calculateObligationsKPIs(
   const schedulePercentage = totalScheduleItems > 0 
     ? (totalSchedulePaid / totalScheduleItems) * 100 
     : 0;
+
   return {
     totalCommittedAmount,
     totalPaidAmount,
@@ -349,6 +377,7 @@ export function calculateObligationsKPIs(
     schedulePercentage,
   };
 }
+
 /**
  * Formats currency amount for display
  */

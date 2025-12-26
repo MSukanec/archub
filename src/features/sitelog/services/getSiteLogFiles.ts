@@ -1,10 +1,11 @@
 import { supabase } from '@/lib/supabase';
+
 export interface SiteLogFile {
   id: string;
   file_url: string | null;
   signed_url?: string;
   file_name: string;
-  file_type: 'image'| 'video'| 'pdf'| 'doc'| 'other';
+  file_type: 'image' | 'video' | 'pdf' | 'doc' | 'other';
   file_size: number;
   file_path: string;
   bucket: string;
@@ -14,6 +15,7 @@ export interface SiteLogFile {
   metadata: Record<string, any> | null;
   created_at: string;
 }
+
 async function getSignedUrl(bucket: string, path: string): Promise<string | null> {
   if (!supabase) return null;
   
@@ -33,6 +35,7 @@ async function getSignedUrl(bucket: string, path: string): Promise<string | null
     return null;
   }
 }
+
 /**
  * Obtiene los archivos multimedia de una bitácora específica.
  * 
@@ -49,6 +52,7 @@ export async function getSiteLogFiles(siteLogId: string, organizationId: string)
   if (!supabase || !siteLogId || !organizationId) {
     return [];
   }
+
   try {
     const { data, error } = await supabase
       .from('media_links')
@@ -73,20 +77,23 @@ export async function getSiteLogFiles(siteLogId: string, organizationId: string)
       .eq('organization_id', organizationId)
       .eq('media_files.is_deleted', false)
       .order('created_at', { ascending: false });
+
     if (error) throw error;
     
     if (!data) return [];
+
     const filteredData = data.filter((item: any) => {
       const mediaFile = Array.isArray(item.media_files) ? item.media_files[0] : item.media_files;
       return mediaFile && !mediaFile.is_deleted;
     });
+
     const files: SiteLogFile[] = await Promise.all(
       filteredData.map(async (item: any) => {
         const mediaFile = Array.isArray(item.media_files) ? item.media_files[0] : item.media_files;
         
         let displayUrl = mediaFile.file_url;
         
-        if (mediaFile.bucket === 'private-assets'&& mediaFile.file_path) {
+        if (mediaFile.bucket === 'private-assets' && mediaFile.file_path) {
           const signedUrl = await getSignedUrl(mediaFile.bucket, mediaFile.file_path);
           displayUrl = signedUrl || mediaFile.file_url;
         }
@@ -107,6 +114,7 @@ export async function getSiteLogFiles(siteLogId: string, organizationId: string)
         };
       })
     );
+
     return files;
   } catch (error) {
     console.error('Error fetching sitelog files:', error);

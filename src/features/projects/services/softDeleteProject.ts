@@ -1,4 +1,5 @@
 import { apiRequest } from '@/lib/queryClient';
+
 /**
  * Realiza un soft delete de un proyecto mediante el endpoint Express API.
  * 
@@ -19,9 +20,11 @@ export async function softDeleteProject(projectId: string, organizationId: strin
   if (!projectId || !organizationId) {
     throw new Error('Missing required parameters: projectId and organizationId are required');
   }
+
   const response = await apiRequest('DELETE', `/api/projects/${projectId}`, {
     organizationId,
   });
+
   // Si HTTP 200, parseamos { success, message }
   if (response.ok) {
     const result = await response.json();

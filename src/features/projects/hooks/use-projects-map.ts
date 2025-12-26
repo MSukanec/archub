@@ -2,7 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import { getProjects } from '../services/getProjects';
 import { projectsKeys } from '@/core/query-keys';
 import type { Project } from '../types';
+
 type ProjectsMap = Record<string, { id: string; name: string; color: string | null }>;
+
 /**
  * Hook para obtener un mapa de proyectos con colores.
  * Usado en la tabla de movimientos en modo GENERAL.

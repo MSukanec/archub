@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+
 export const pricingFAQs = [
   {
     q: "¿Qué es la insignia de Fundador y qué incluye?",

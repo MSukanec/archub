@@ -7,10 +7,12 @@
  * IMPORTANT: This modal is 100% presentational and receives all data via props.
  * It does NOT use global hooks like useUnits, useCurrentUser, or useProjectContext.
  */
+
 import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Package } from 'lucide-react';
+
 import { FormModalLayout } from '@/components/modal';
 import { FormModalHeader } from '@/components/modal';
 import { FormModalFooter } from '@/components/modal';
@@ -20,16 +22,20 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { CascadingSelect } from '@/components/shared/fields/CascadingSelectField';
+
 import { useCreateMaterial } from '../hooks/use-create-material';
 import { useUpdateMaterial } from '../hooks/use-update-material';
 import { useMaterialCategories } from '../material-categories';
+
 import { materialSchema, type MaterialFormData } from '../schemas';
 import type { Material, NewMaterialData } from '../types';
 import { convertToCascadingOptions, findCategoryPath, findCategoryIdByName } from '../mappers/materialMapper';
+
 interface Unit {
   id: string;
   name: string;
 }
+
 interface MaterialModalProps {
   modalData: {
     editingMaterial?: Material | null;
@@ -39,24 +45,30 @@ interface MaterialModalProps {
   organizationId: string;
   units: Unit[];
 }
+
 export function MaterialModal({ modalData, onClose, organizationId, units }: MaterialModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategoryPath, setSelectedCategoryPath] = useState<string[]>([]);
+
   const { editingMaterial, isDuplicating = false } = modalData;
   const isEditing = !!editingMaterial && !isDuplicating;
+
   // Feature hooks only (100% presentational)
   const createMutation = useCreateMaterial();
   const updateMutation = useUpdateMaterial();
   const { data: categories = [] } = useMaterialCategories(organizationId);
   const { setPanel } = useModalPanelStore();
+
   // Convert categories to cascading format - memoize to prevent recreation
   const cascadingOptions = useMemo(() => {
     return convertToCascadingOptions(categories);
   }, [categories]);
+
   // Force edit mode when modal opens
   useEffect(() => {
     setPanel('edit');
   }, [setPanel]);
+
   // Form setup
   const form = useForm<MaterialFormData>({
     resolver: zodResolver(materialSchema),
@@ -68,6 +80,7 @@ export function MaterialModal({ modalData, onClose, organizationId, units }: Mat
       is_completed: false,
     },
   });
+
   // Load editing data
   useEffect(() => {
     if ((isEditing || isDuplicating) && editingMaterial && categories.length > 0) {
@@ -76,13 +89,15 @@ export function MaterialModal({ modalData, onClose, organizationId, units }: Mat
         (editingMaterial as any).category_id ||
         findCategoryIdByName(categories, (editingMaterial as any).category_name) ||
         '';
+
       form.reset({
         name: isDuplicating ? `${editingMaterial.name} - Copia` : editingMaterial.name,
-        material_type: (editingMaterial.material_type as 'material'| 'consumable') || 'material',
+        material_type: (editingMaterial.material_type as 'material' | 'consumable') || 'material',
         category_id: categoryId,
         unit_id: editingMaterial.unit_id,
         is_completed: editingMaterial.is_completed || false,
       });
+
       // Set the category path for CascadingSelect
       const path = findCategoryPath(categories, categoryId);
       setSelectedCategoryPath(path);
@@ -97,9 +112,11 @@ export function MaterialModal({ modalData, onClose, organizationId, units }: Mat
       setSelectedCategoryPath([]);
     }
   }, [editingMaterial?.id, isEditing, isDuplicating, categories.length, form]);
+
   // Submit handler
   const onSubmit = async (values: MaterialFormData) => {
     setIsLoading(true);
+
     try {
       if (isEditing && editingMaterial) {
         // Update material
@@ -125,6 +142,7 @@ export function MaterialModal({ modalData, onClose, organizationId, units }: Mat
           organization_id: organizationId,
           is_system: false,
         };
+
         await createMutation.mutateAsync(materialData);
       }
       onClose();
@@ -134,6 +152,7 @@ export function MaterialModal({ modalData, onClose, organizationId, units }: Mat
       setIsLoading(false);
     }
   };
+
   // Edit panel
   const editPanel = (
     <Form {...form}>
@@ -152,6 +171,7 @@ export function MaterialModal({ modalData, onClose, organizationId, units }: Mat
             </FormItem>
           )}
         />
+
         {/* Material Type */}
         <FormField
           control={form.control}
@@ -174,6 +194,7 @@ export function MaterialModal({ modalData, onClose, organizationId, units }: Mat
             </FormItem>
           )}
         />
+
         {/* Category */}
         <FormField
           control={form.control}
@@ -198,6 +219,7 @@ export function MaterialModal({ modalData, onClose, organizationId, units }: Mat
             </FormItem>
           )}
         />
+
         {/* Unit */}
         <FormField
           control={form.control}
@@ -223,6 +245,7 @@ export function MaterialModal({ modalData, onClose, organizationId, units }: Mat
             </FormItem>
           )}
         />
+
         {/* Is Completed */}
         <FormField
           control={form.control}
@@ -244,22 +267,25 @@ export function MaterialModal({ modalData, onClose, organizationId, units }: Mat
       </form>
     </Form>
   );
+
   const headerContent = (
     <FormModalHeader
-      title={isEditing ? 'Editar Material': isDuplicating ? 'Duplicar Material': 'Nuevo Material'}
+      title={isEditing ? 'Editar Material' : isDuplicating ? 'Duplicar Material' : 'Nuevo Material'}
       icon={Package}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel={isEditing ? 'Actualizar': 'Crear'}
+      rightLabel={isEditing ? 'Actualizar' : 'Crear'}
       onRightClick={form.handleSubmit(onSubmit)}
       submitDisabled={isLoading}
       showLoadingSpinner={isLoading}
     />
   );
+
   return (
     <FormModalLayout
       columns={1}

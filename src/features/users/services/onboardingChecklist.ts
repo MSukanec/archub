@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 /**
  * Actualiza el checklist de inicio del usuario.
  * 
@@ -13,10 +14,12 @@ export async function updateHomeChecklist(key: string, value: boolean): Promise<
   if (!supabase) {
     throw new Error('Supabase client not available');
   }
+
   const { error } = await supabase.rpc('tick_home_checklist', {
     p_key: key,
     p_value: value
   });
+
   if (error) {
     console.error('Error updating home checklist:', error);
     throw error;

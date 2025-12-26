@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { AppCard } from '@/components/shared/AppCard';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
+
 export interface ActivityItem {
   id: string | number;
   title: string;
@@ -9,6 +10,7 @@ export interface ActivityItem {
   rightContent?: ReactNode;
   badge?: ReactNode;
 }
+
 export interface ActivityCardProps {
   title?: string;
   titleIcon?: ReactNode;
@@ -20,6 +22,7 @@ export interface ActivityCardProps {
   className?: string;
   'data-testid'?: string;
 }
+
 export function ActivityCard({
   title,
   titleIcon,
@@ -32,6 +35,7 @@ export function ActivityCard({
   'data-testid': testId,
 }: ActivityCardProps) {
   const resolvedEmptyText = emptyText || emptyMessage || 'No hay actividad reciente';
+
   const viewAllAction = onViewAll ? (
     <Button variant="ghost" size="sm" onClick={onViewAll} className="h-7 px-2 text-xs">
       Ver todos

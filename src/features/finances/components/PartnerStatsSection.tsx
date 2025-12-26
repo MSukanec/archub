@@ -3,12 +3,14 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePartnerMetrics } from '../hooks/use-partner-metrics';
 import type { FinancialMovementWithRelations } from '../types';
+
 interface PartnerStatsSectionProps {
   movements: FinancialMovementWithRelations[];
   primaryCurrencyCode?: string;
   primaryCurrencySymbol?: string;
   isLoadingCurrency?: boolean;
 }
+
 export function PartnerStatsSection({ 
   movements, 
   primaryCurrencyCode,
@@ -24,6 +26,7 @@ export function PartnerStatsSection({
     balanceByCurrency,
     balanceByPartner,
   } = usePartnerMetrics(movements, primaryCurrencyCode);
+
   // Format currency
   const formatCurrency = (amount: number, symbol: string = '$') => {
     const absAmount = Math.abs(amount);
@@ -32,6 +35,7 @@ export function PartnerStatsSection({
       maximumFractionDigits: 2
     }).format(absAmount)}`;
   };
+
   // Format breakdown for KPIs (ej: "$ 40.690.342,00 + US$ 113.270,00")
   const formatBreakdown = (items: Array<{ currencySymbol: string; amount: number }>) => {
     if (!items || items.length === 0) return '';
@@ -41,9 +45,11 @@ export function PartnerStatsSection({
         maximumFractionDigits: 2
       }).format(amount);
       return `${currencySymbol} ${formattedAmount}`;
-    }).join('+ ');
+    }).join(' + ');
   };
+
   const isPositive = totalInPrimaryCurrency >= 0;
+
   // Show skeletons while currency is loading
   if (isLoadingCurrency) {
     return (
@@ -56,6 +62,7 @@ export function PartnerStatsSection({
       </div>
     );
   }
+
   return (
     <div className="space-y-4 mb-6">
       {/* Fila 1: KPIs Principales con Breakdown */}
@@ -80,6 +87,7 @@ export function PartnerStatsSection({
             </p>
           </div>
         </Card>
+
         {/* Columna 2: Total Retiros */}
         <Card className="p-6" data-testid="card-total-withdrawals">
           <div className="space-y-2">
@@ -100,6 +108,7 @@ export function PartnerStatsSection({
             </p>
           </div>
         </Card>
+
         {/* Columna 3: Saldo Neto */}
         <Card className="p-6" data-testid="card-partner-balance-consolidated">
           <div className="space-y-2">
@@ -107,10 +116,10 @@ export function PartnerStatsSection({
               Saldo Neto
             </p>
             <p 
-              className={`text-3xl font-bold ${isPositive ? 'text-green-600': 'text-red-600'}`}
+              className={`text-3xl font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}
               data-testid="text-partner-balance"
             >
-              {isPositive ? '': '-'}{formatCurrency(totalInPrimaryCurrency, primaryCurrencySymbol)}
+              {isPositive ? '' : '-'}{formatCurrency(totalInPrimaryCurrency, primaryCurrencySymbol)}
             </p>
             <p className="text-xs text-muted-foreground">
               {balanceByCurrency.length > 0 
@@ -121,6 +130,7 @@ export function PartnerStatsSection({
           </div>
         </Card>
       </div>
+
       {/* Fila 2: Balance por Socio y Balance por Moneda */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Balance por Socio */}
@@ -145,10 +155,10 @@ export function PartnerStatsSection({
                       {partner.partnerName}
                     </span>
                     <span 
-                      className={`text-sm font-bold ${partner.balance >= 0 ? 'text-green-600': 'text-red-600'}`}
+                      className={`text-sm font-bold ${partner.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}
                       data-testid={`partner-balance-${partner.partnerId}`}
                     >
-                      {partner.balance >= 0 ? '': '-'}{formatCurrency(partner.balance, primaryCurrencySymbol)}
+                      {partner.balance >= 0 ? '' : '-'}{formatCurrency(partner.balance, primaryCurrencySymbol)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -160,6 +170,7 @@ export function PartnerStatsSection({
             )}
           </div>
         </Card>
+
         {/* Balance por Moneda */}
         <Card className="p-6" data-testid="card-partner-currency-balance">
           <div className="space-y-1 mb-4">
@@ -179,7 +190,7 @@ export function PartnerStatsSection({
                       {curr.currencyCode}
                     </span>
                     <span 
-                      className={`text-sm font-bold ${curr.balance >= 0 ? 'text-green-600': 'text-red-600'}`}
+                      className={`text-sm font-bold ${curr.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}
                       data-testid={`partner-balance-${curr.currencyCode}`}
                     >
                       {formatCurrency(curr.balance, curr.currencySymbol)}

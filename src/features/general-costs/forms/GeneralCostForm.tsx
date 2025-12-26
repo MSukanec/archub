@@ -1,10 +1,12 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
 import { useOrganizationMembers } from '@/features/organization'
@@ -15,10 +17,12 @@ import { useGeneralCost } from '../hooks/use-general-cost'
 import { useGeneralCosts } from '../hooks/use-general-costs'
 import { generalCostSchema, type GeneralCostFormData } from '../schemas'
 import type { GeneralCost } from '../types'
+
 interface FormPanelProps {
   form: ReturnType<typeof useForm<GeneralCostFormData>>
   categories: any[]
 }
+
 export function FormPanel({ form, categories }: FormPanelProps) {
   return (
     <Form {...form}>
@@ -40,6 +44,7 @@ export function FormPanel({ form, categories }: FormPanelProps) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="category_id"
@@ -65,6 +70,7 @@ export function FormPanel({ form, categories }: FormPanelProps) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="description"
@@ -87,9 +93,11 @@ export function FormPanel({ form, categories }: FormPanelProps) {
     </Form>
   )
 }
+
 interface ViewPanelProps {
   generalCost: GeneralCost
 }
+
 export function ViewPanel({ generalCost }: ViewPanelProps) {
   return (
     <div className="space-y-4">
@@ -118,25 +126,30 @@ export function ViewPanel({ generalCost }: ViewPanelProps) {
     </div>
   )
 }
+
 interface UseGeneralCostFormOptions {
   generalCostId?: string
-  mode: 'create'| 'edit'| 'view'
+  mode: 'create' | 'edit' | 'view'
   onSuccess: () => void
 }
+
 export function useGeneralCostForm({ generalCostId, mode, onSuccess }: UseGeneralCostFormOptions) {
   const { toast } = useToast()
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
+
   const { data: members = [] } = useOrganizationMembers(organizationId || undefined)
   const { data: existingGeneralCost, isLoading: generalCostLoading } = useGeneralCost(
-    mode === 'edit'|| mode === 'view'? generalCostId || null : null
+    mode === 'edit' || mode === 'view' ? generalCostId || null : null
   )
   const { data: allGeneralCosts = [] } = useGeneralCosts(organizationId || null)
   const { data: categories = [] } = useGeneralCostCategories(organizationId)
+
   const form = useForm<GeneralCostFormData>({
     resolver: zodResolver(generalCostSchema),
-    defaultValues: { name: '', description: '', category_id: ''}
+    defaultValues: { name: '', description: '', category_id: '' }
   })
+
   useEffect(() => {
     if (existingGeneralCost) {
       form.reset({
@@ -146,8 +159,10 @@ export function useGeneralCostForm({ generalCostId, mode, onSuccess }: UseGenera
       })
     }
   }, [existingGeneralCost, form])
+
   const createMutation = useCreateGeneralCost(organizationId || null)
   const updateMutation = useUpdateGeneralCost(organizationId || null)
+
   const onSubmit = async (data: GeneralCostFormData) => {
     if (!organizationId) {
       toast({
@@ -157,12 +172,14 @@ export function useGeneralCostForm({ generalCostId, mode, onSuccess }: UseGenera
       })
       return
     }
+
     const normalizedName = data.name.trim().toLowerCase()
     const duplicate = allGeneralCosts.find((gc: any) => {
       const isSameName = gc.name.trim().toLowerCase() === normalizedName
-      const isDifferentId = mode === 'edit'? gc.id !== generalCostId : true
+      const isDifferentId = mode === 'edit' ? gc.id !== generalCostId : true
       return isSameName && isDifferentId
     })
+
     if (duplicate) {
       toast({
         title: 'Nombre duplicado',
@@ -171,8 +188,9 @@ export function useGeneralCostForm({ generalCostId, mode, onSuccess }: UseGenera
       })
       return
     }
+
     try {
-      if (mode === 'edit'&& generalCostId) {
+      if (mode === 'edit' && generalCostId) {
         await updateMutation.mutateAsync({
           generalCostId,
           organizationId,
@@ -192,6 +210,7 @@ export function useGeneralCostForm({ generalCostId, mode, onSuccess }: UseGenera
           })
           return
         }
+
         await createMutation.mutateAsync({
           organization_id: organizationId,
           name: data.name,
@@ -200,6 +219,7 @@ export function useGeneralCostForm({ generalCostId, mode, onSuccess }: UseGenera
           category_id: data.category_id || undefined
         })
       }
+
       onSuccess()
     } catch (error: any) {
       toast({
@@ -209,6 +229,7 @@ export function useGeneralCostForm({ generalCostId, mode, onSuccess }: UseGenera
       })
     }
   }
+
   return {
     form,
     onSubmit,

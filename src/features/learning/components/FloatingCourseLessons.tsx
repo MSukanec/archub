@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useLocation, useRoute } from 'wouter';
 import { useCourseSidebarStore } from '@/stores/sidebarStore';
+
 export function FloatingCourseLessons() {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
@@ -20,6 +21,7 @@ export function FloatingCourseLessons() {
   const { currentLessonId: sidebarLessonId, setCurrentLesson } = useCourseSidebarStore();
   const storeLessonId = useCoursePlayerStore(s => s.currentLessonId);
   const currentLessonId = storeLessonId || sidebarLessonId || null;
+
   // Fetch course by slug
   const { data: course } = useQuery({
     queryKey: ['course', courseSlug],
@@ -36,6 +38,7 @@ export function FloatingCourseLessons() {
     },
     enabled: !!courseSlug && !!supabase && isOnCoursePlayerTab
   });
+
   // Fetch modules
   const { data: modules = [] } = useQuery({
     queryKey: ['course-modules', course?.id],
@@ -51,6 +54,7 @@ export function FloatingCourseLessons() {
     },
     enabled: !!course?.id && !!supabase && isOnCoursePlayerTab
   });
+
   // Fetch lessons
   const { data: lessons = [] } = useQuery({
     queryKey: ['course-lessons-full', course?.id],
@@ -67,6 +71,7 @@ export function FloatingCourseLessons() {
     },
     enabled: !!course?.id && !!supabase && modules.length > 0 && isOnCoursePlayerTab
   });
+
   // Fetch progress for all lessons in the course
   const { data: progressData } = useQuery<any[]>({
     queryKey: ['/api/courses', course?.id, 'progress'],
@@ -89,6 +94,7 @@ export function FloatingCourseLessons() {
     },
     enabled: !!course?.id && !!supabase && isOnCoursePlayerTab
   });
+
   // Auto-expandir el módulo que contiene la lección actual o el primer módulo
   useEffect(() => {
     if (currentLessonId && lessons.length > 0) {
@@ -125,14 +131,17 @@ export function FloatingCourseLessons() {
       });
     }
   }, [currentLessonId, lessons, modules]);
+
   // Only show if we have data (AFTER all hooks)
   if (!isOnCoursePlayerTab || modules.length === 0) {
     return null;
   }
+
   // Create a map of lesson progress for quick lookup
   const progressMap = new Map(
     (progressData || []).map((p: any) => [p.lesson_id, p])
   );
+
   const toggleModule = (moduleId: string) => {
     if (expandedModules.has(moduleId)) {
       setExpandedModules(new Set());
@@ -140,10 +149,12 @@ export function FloatingCourseLessons() {
       setExpandedModules(new Set([moduleId]));
     }
   };
+
   const handleLessonClick = (lessonId: string) => {
     goToLesson(lessonId);
     setIsOpen(false);
   };
+
   return (
     <>
       {/* Botón flotante - LADO DERECHO, 80px arriba del FloatingAIChat (bottom-24 = 96px) */}
@@ -166,14 +177,15 @@ export function FloatingCourseLessons() {
         {/* Pulso de resplandor animado */}
         <span className="absolute inset-0 rounded-full bg-accent opacity-40 animate-ping-slow" />
       </button>
+
       {/* Drawer Mobile - Fullscreen */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             className="fixed inset-0 z-50 bg-[var(--main-sidebar-bg)] overflow-hidden"
-            initial={{ x: '-100%'}}
+            initial={{ x: '-100%' }}
             animate={{ x: 0 }}
-            exit={{ x: '-100%'}}
+            exit={{ x: '-100%' }}
             transition={{ 
               type: "spring",
               stiffness: 300,
@@ -196,6 +208,7 @@ export function FloatingCourseLessons() {
                 <X className="w-5 h-5 text-[var(--main-sidebar-fg)]" />
               </button>
             </div>
+
             {/* Contenido - Módulos y Lecciones */}
             <div className="overflow-y-auto h-[calc(100vh-65px)] p-4">
               <div className="space-y-2">
@@ -203,6 +216,7 @@ export function FloatingCourseLessons() {
                   const moduleLessons = lessons.filter(l => l.module_id === module.id);
                   const isModuleExpanded = expandedModules.has(module.id);
                   const hasActiveLesson = moduleLessons.some(l => l.id === currentLessonId);
+
                   return (
                     <div key={module.id}>
                       {/* Módulo Header */}
@@ -241,6 +255,7 @@ export function FloatingCourseLessons() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </button>
+
                       {/* Lecciones del módulo */}
                       {isModuleExpanded && (
                         <div className="mt-1 ml-4 border-l-2 border-[var(--main-sidebar-border)] pl-2 space-y-1">
@@ -248,6 +263,7 @@ export function FloatingCourseLessons() {
                             const isActive = currentLessonId === lesson.id;
                             const progress = progressMap.get(lesson.id);
                             const isCompleted = progress?.is_completed;
+
                             return (
                               <button
                                 key={lesson.id}
@@ -278,7 +294,7 @@ export function FloatingCourseLessons() {
                                 {isCompleted ? (
                                   <CheckCircle2 
                                     className="w-4 h-4 flex-shrink-0 ml-2"
-                                    style={{ color: 'var(--accent)'}}
+                                    style={{ color: 'var(--accent)' }}
                                   />
                                 ) : (
                                   <Circle 
@@ -301,6 +317,7 @@ export function FloatingCourseLessons() {
           </motion.div>
         )}
       </AnimatePresence>
+
       <style>{`
         @keyframes breathe {
           0%, 100% {
@@ -314,33 +331,41 @@ export function FloatingCourseLessons() {
                         0 0 35px rgba(var(--accent-rgb), 0.15);
           }
         }
+
         @keyframes ping-slow {
           75%, 100% {
             transform: scale(1.8);
             opacity: 0;
           }
         }
+
         .animate-breathe {
           animation: breathe 4.5s ease-in-out infinite;
         }
+
         .animate-ping-slow {
           animation: ping-slow 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
+
         .shadow-glow {
           box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.2), 
                       0 0 25px rgba(var(--accent-rgb), 0.1);
         }
+
         /* Scrollbar styling - sutil y similar al fondo */
         .overflow-y-auto::-webkit-scrollbar {
           width: 8px;
         }
+
         .overflow-y-auto::-webkit-scrollbar-track {
           background: var(--main-sidebar-bg);
         }
+
         .overflow-y-auto::-webkit-scrollbar-thumb {
           background: rgba(255, 255, 255, 0.1);
           border-radius: 4px;
         }
+
         .overflow-y-auto::-webkit-scrollbar-thumb:hover {
           background: rgba(255, 255, 255, 0.15);
         }

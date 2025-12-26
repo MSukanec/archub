@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCoursePricing } from '../services';
 import { LEARNING_QUERY_KEYS } from '../constants';
+
 /**
  * Hook para obtener la información de pricing de un curso.
  * 

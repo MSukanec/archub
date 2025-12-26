@@ -13,18 +13,21 @@ import { markAsRead, markAllAsRead, resolveNotificationHref, type UserNotificati
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { usersKeys } from '@/core/query-keys';
+
 export function UserNotificationsView() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const userId = userData?.user?.id;
+
   const { data: notifications = [], isLoading: notificationsLoading } = useQuery({
     queryKey: usersKeys.notifications(userId || ''),
     queryFn: async () => {
       if (!supabase || !userId) {
         throw new Error('No user available');
       }
+
       const { data, error } = await supabase
         .from('user_notifications')
         .select(`
@@ -45,11 +48,13 @@ export function UserNotificationsView() {
         `)
         .eq('user_id', userId)
         .order('delivered_at', { ascending: false });
+
       if (error) throw error;
       return (data as any[]) || [];
     },
     enabled: !!userId
   });
+
   const markAsReadMutation = useMutation({
     mutationFn: async (notificationId: string) => {
       if (!userId) throw new Error('No user available');
@@ -68,6 +73,7 @@ export function UserNotificationsView() {
       });
     }
   });
+
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
       if (!userId) throw new Error('No user available');
@@ -90,26 +96,30 @@ export function UserNotificationsView() {
       });
     }
   });
+
   const handleNotificationClick = async (notification: UserNotificationRow) => {
     try {
       if (!notification.read_at) {
         await markAsReadMutation.mutateAsync(notification.id);
       }
+
       const href = resolveNotificationHref(notification);
       navigate(href);
     } catch (error) {
       console.error('Error handling notification click:', error);
     }
   };
+
   const getTypeBadge = (type: string) => {
-    const typeMap: Record<string, { label: string; variant: 'info'| 'success'| 'neutral'| 'pending'| 'warning'}> = {
-      'task_assigned': { label: 'Tarea', variant: 'info'},
-      'task_completed': { label: 'Tarea', variant: 'success'},
-      'comment_added': { label: 'Comentario', variant: 'neutral'},
-      'mention': { label: 'Mención', variant: 'info'},
-      'system': { label: 'Sistema', variant: 'neutral'},
+    const typeMap: Record<string, { label: string; variant: 'info' | 'success' | 'neutral' | 'pending' | 'warning' }> = {
+      'task_assigned': { label: 'Tarea', variant: 'info' },
+      'task_completed': { label: 'Tarea', variant: 'success' },
+      'comment_added': { label: 'Comentario', variant: 'neutral' },
+      'mention': { label: 'Mención', variant: 'info' },
+      'system': { label: 'Sistema', variant: 'neutral' },
     };
-    const config = typeMap[type] || { label: type, variant: 'neutral'};
+
+    const config = typeMap[type] || { label: type, variant: 'neutral' };
     
     return (
       <Badge variant={config.variant} className="text-xs">
@@ -117,6 +127,7 @@ export function UserNotificationsView() {
       </Badge>
     );
   };
+
   const columns = [
     {
       key: "type" as const,
@@ -188,6 +199,7 @@ export function UserNotificationsView() {
       )
     }
   ];
+
   if (notificationsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -195,7 +207,9 @@ export function UserNotificationsView() {
       </div>
     );
   }
+
   const unreadNotifications = notifications.filter(n => !n.read_at);
+
   if (notifications.length === 0) {
     return (
       <EmptyState
@@ -206,6 +220,7 @@ export function UserNotificationsView() {
       />
     );
   }
+
   return (
     <div className="space-y-4">
       {unreadNotifications.length > 0 && (

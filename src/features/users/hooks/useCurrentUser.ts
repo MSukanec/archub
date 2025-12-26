@@ -2,6 +2,7 @@ import { useQuery, QueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
 import { supabase } from '@/lib/supabase'
 import { usersKeys } from '@/core/query-keys'
+
 async function fetchCurrentUser(forceRefresh: boolean = false): Promise<UserData | null> {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
   
@@ -10,7 +11,8 @@ async function fetchCurrentUser(forceRefresh: boolean = false): Promise<UserData
   }
   
   const token = sessionData.session.access_token
-  const url = forceRefresh ? '/api/current-user?refresh=true': '/api/current-user'
+  const url = forceRefresh ? '/api/current-user?refresh=true' : '/api/current-user'
+
   const response = await fetch(url, {
     method: 'GET',
     headers: {
@@ -18,12 +20,15 @@ async function fetchCurrentUser(forceRefresh: boolean = false): Promise<UserData
       'Authorization': `Bearer ${token}`,
     },
   })
+
   if (!response.ok) {
     return null
   }
+
   const userData = await response.json()
   return userData as UserData || null
 }
+
 export async function refreshCurrentUserCache(queryClient: QueryClient): Promise<void> {
   try {
     const freshUserData = await fetchCurrentUser(true)
@@ -36,6 +41,7 @@ export async function refreshCurrentUserCache(queryClient: QueryClient): Promise
     queryClient.invalidateQueries({ queryKey: usersKeys.current() })
   }
 }
+
 export interface UserData {
   user: {
     id: string
@@ -144,8 +150,10 @@ export interface UserData {
     [key: string]: any
   }[] | null
 }
+
 export function useCurrentUser(forceRefresh?: boolean) {
   const { user: authUser, loading: authLoading, logout } = useAuthStore()
+
   return useQuery<UserData>({
     queryKey: usersKeys.current(),
     queryFn: async () => {
@@ -177,7 +185,9 @@ export function useCurrentUser(forceRefresh?: boolean) {
       } catch (error) {
         return null as any;
       }
-      const url = forceRefresh ? '/api/current-user?refresh=true': '/api/current-user'
+
+      const url = forceRefresh ? '/api/current-user?refresh=true' : '/api/current-user'
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -185,21 +195,26 @@ export function useCurrentUser(forceRefresh?: boolean) {
           'Authorization': `Bearer ${token}`,
         },
       })
+
       if (response.status === 404) {
         await logout()
         return null as any;
       }
+
       if (response.status === 400 || response.status === 401) {
         return null as any;
       }
+
       if (!response.ok) {
         return null as any;
       }
+
       const userData = await response.json()
       
       if (!userData) {
         return null as any;
       }
+
       return userData as UserData
     },
     enabled: !!authUser && !authLoading,

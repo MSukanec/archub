@@ -9,24 +9,29 @@ import { supabase } from '@/lib/supabase';
 import { useSaveEngine } from '@/core/save-engine';
 import { usersKeys } from '@/core/query-keys';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
+
 interface PreferencesData {
   sidebarDocked: boolean;
-  theme: 'light'| 'dark';
+  theme: 'light' | 'dark';
 }
+
 export function UserPreferencesView() {
   const { data: userData, isLoading } = useCurrentUser();
   const { isDocked: sidebarDockedFromStore, setDocked: setMainSidebarDocked } = useSidebarStore();
   const { isDark, setTheme } = useThemeStore();
   
   const [sidebarDocked, setSidebarDocked] = useState(false);
-  const [themeValue, setThemeValue] = useState<'light'| 'dark'>('light');
+  const [themeValue, setThemeValue] = useState<'light' | 'dark'>('light');
   const [isHydrated, setIsHydrated] = useState(false);
+
   const hasHydratedRef = useRef(false);
   const lastHydratedIdRef = useRef<string | null>(null);
+
   const formData = useMemo<PreferencesData>(() => ({
     sidebarDocked,
     theme: themeValue,
   }), [sidebarDocked, themeValue]);
+
   useSaveEngine<PreferencesData>({
     data: formData,
     queryKey: usersKeys.current(),
@@ -69,9 +74,11 @@ export function UserPreferencesView() {
       };
     },
   });
+
   useEffect(() => {
     setSidebarDocked(sidebarDockedFromStore);
   }, [sidebarDockedFromStore]);
+
   useEffect(() => {
     if (!userData?.preferences) return;
     
@@ -84,7 +91,7 @@ export function UserPreferencesView() {
     lastHydratedIdRef.current = userId ?? null;
     
     const initialSidebarDocked = userData.preferences.sidebar_docked || false;
-    const initialTheme = userData.preferences.theme === 'dark'? 'dark': 'light';
+    const initialTheme = userData.preferences.theme === 'dark' ? 'dark' : 'light';
     
     setSidebarDocked(initialSidebarDocked);
     setThemeValue(initialTheme);
@@ -94,15 +101,18 @@ export function UserPreferencesView() {
       setIsHydrated(true);
     }, 100);
   }, [userData?.preferences, setTheme]);
+
   const handleSidebarDockedChange = (value: boolean) => {
     setSidebarDocked(value);
     setMainSidebarDocked(value);
   };
+
   const handleThemeChange = (value: boolean) => {
-    const newTheme = value ? 'dark': 'light';
+    const newTheme = value ? 'dark' : 'light';
     setThemeValue(newTheme);
     setTheme(value);
   };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -110,6 +120,7 @@ export function UserPreferencesView() {
       </div>
     );
   }
+
   if (!userData?.user) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -117,6 +128,7 @@ export function UserPreferencesView() {
       </div>
     );
   }
+
   return (
     <div className="space-y-8">
       <div>
@@ -130,6 +142,7 @@ export function UserPreferencesView() {
               Configura las preferencias de tu aplicación.
             </p>
           </div>
+
           <div className="space-y-6">
             <div className="flex items-center justify-between py-2">
               <div className="space-y-0.5">

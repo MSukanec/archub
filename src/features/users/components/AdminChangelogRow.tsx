@@ -3,6 +3,7 @@ import DataRowCard from '@/components/shared/DataRowCard';
 import { Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 // Interface para entrada del changelog
 interface ChangelogEntry {
   id: string;
@@ -20,13 +21,15 @@ interface ChangelogEntry {
     avatar_url?: string;
   } | null;
 }
+
 interface AdminChangelogRowProps {
   entry: ChangelogEntry;
   onClick?: () => void;
   selected?: boolean;
-  density?: 'compact'| 'normal'| 'comfortable';
+  density?: 'compact' | 'normal' | 'comfortable';
   className?: string;
 }
+
 // Componente para mostrar la fecha de la entrada
 const EntryDate = ({ date }: { date: string }) => {
   return (
@@ -38,6 +41,7 @@ const EntryDate = ({ date }: { date: string }) => {
     </div>
   );
 };
+
 export default function AdminChangelogRow({ 
   entry, 
   onClick, 
@@ -55,11 +59,13 @@ export default function AdminChangelogRow({
         <div className="font-semibold text-sm truncate">
           {entry.title}
         </div>
+
         {/* Segunda fila - Tipo */}
         <div className="text-xs text-muted-foreground truncate">
           {entry.type}
         </div>
       </div>
+
       {/* Trailing Section - Fecha */}
       <div className="flex items-center">
         <EntryDate date={entry.date} />
@@ -68,6 +74,7 @@ export default function AdminChangelogRow({
       </div>
     </>
   );
+
   // Usar el nuevo DataRowCard
   return (
     <DataRowCard
@@ -81,5 +88,6 @@ export default function AdminChangelogRow({
     </DataRowCard>
   );
 }
+
 // Export del tipo para uso externo
 export type { ChangelogEntry };

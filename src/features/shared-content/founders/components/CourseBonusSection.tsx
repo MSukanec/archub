@@ -2,11 +2,13 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useCourseLanding } from "@/features/learning";
 import { Users, BadgeCheck, ArrowRight, Gift, Play } from "lucide-react";
+
 export function CourseBonusSection() {
   const { data } = useCourseLanding('master-archicad');
   
   const coverUrl = data?.course?.cover_url;
   const courseSlug = data?.course?.slug || 'master-archicad';
+
   return (
     <section
       className="relative py-24 -mx-6 overflow-hidden"
@@ -38,24 +40,26 @@ export function CourseBonusSection() {
               <span className="text-xs font-medium text-white">Bonus de Capacitación Actual</span>
             </div>
           </div>
+
           <div className="text-center">
             <h2 
               className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6"
-              style={{ color: '#ffffff'}}
+              style={{ color: '#ffffff' }}
             >
               Curso Completo de Archicad
             </h2>
             
             <p 
               className="text-lg sm:text-xl mb-8 max-w-3xl mx-auto"
-              style={{ color: '#d0d0d0'}}
+              style={{ color: '#d0d0d0' }}
             >
               Como miembro fundador, tienes acceso <strong className="text-white">gratuito e incluido</strong> al 
               bonus de capacitación vigente. Actualmente es el curso más completo de Archicad en español, 
-              un programa valorado en{''}
+              un programa valorado en{' '}
               <span className="text-primary font-bold">USD $169/año</span> que podrás disfrutar 
               sin costo adicional mientras mantengas tu suscripción activa.
             </p>
+
             <div className="flex flex-wrap items-center justify-center gap-6 mb-10">
               <div className="flex items-center gap-2 text-white/90">
                 <Users className="h-5 w-5 text-primary" />
@@ -66,6 +70,7 @@ export function CourseBonusSection() {
                 <span className="font-medium">Avalado por Graphisoft Argentina</span>
               </div>
             </div>
+
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-6 sm:p-8 mb-10 max-w-2xl mx-auto">
               <div className="flex items-center justify-center gap-4 mb-4">
                 <div className="text-center">
@@ -82,6 +87,7 @@ export function CourseBonusSection() {
                 Acceso permanente mientras seas miembro fundador. Para todos los miembros de la organización. Sin pagos adicionales, sin renovaciones.
               </p>
             </div>
+
             <Link href={`/cursos/${courseSlug}`}>
               <Button
                 size="lg"

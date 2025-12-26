@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { removeFromBucket } from '@/lib/supabase/storage';
+
 /**
  * DEPRECATED: contact_attachments table no longer exists
  * Use media_files + media_links instead

@@ -1,5 +1,6 @@
 import { useCurrentUser } from './use-current-user';
 import type { UserMode } from '@/config/modes';
+
 /**
  * Hook para obtener el modo de uso actual del usuario
  * El modo se almacena en user_preferences.last_user_type

@@ -1,8 +1,10 @@
 import { LineChart, Line, ResponsiveContainer } from 'recharts'
 import { CHART_COLORS, CHART_STATES, CHART_SHAPES } from '../theme'
+
 export interface SparklineDataPoint {
   value: number
 }
+
 export interface SparklineChartProps {
   data: SparklineDataPoint[] | number[]
   color?: string
@@ -11,6 +13,7 @@ export interface SparklineChartProps {
   isLoading?: boolean
   emptyText?: string
 }
+
 export function SparklineChart({
   data,
   color = CHART_COLORS.accent,
@@ -24,9 +27,11 @@ export function SparklineChart({
       <div style={{ height }} className="w-full bg-muted/20 rounded animate-pulse" />
     )
   }
+
   const normalizedData: SparklineDataPoint[] = Array.isArray(data)
-    ? data.map(item => typeof item === 'number'? { value: item } : item)
+    ? data.map(item => typeof item === 'number' ? { value: item } : item)
     : []
+
   if (!normalizedData.length || !normalizedData.some(d => d.value !== 0)) {
     return (
       <div style={{ height }} className={CHART_STATES.empty.className}>
@@ -34,6 +39,7 @@ export function SparklineChart({
       </div>
     )
   }
+
   return (
     <div style={{ width: '100%', height }}>
       <ResponsiveContainer width="100%" height="100%">

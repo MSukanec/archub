@@ -3,8 +3,11 @@ import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { DollarSign, Plus, Edit, Trash2, Heart, Search, Filter, X, Pencil, Upload, Wallet, Home, Bell } from "lucide-react";
 import { formatDate } from "@/lib/date-utils";
+
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -30,13 +33,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+
 import { Table, ProjectBadge } from "@/components/shared/trees/Table";
 import { EmptyState } from "@/components/shared/EmptyState";
+
 import TransferRow, { type TransferGroup } from "@/features/finances/components/TransferRow";
 import MovementRow from "@/features/finances/components/MovementRow";
 import ConversionRow, { type ConversionGroup } from "@/features/finances/components/ConversionRow";
 import { SwipeableCard } from '@/layouts';
 import { Star } from "lucide-react";
+
 import { useGlobalModalStore } from "@/components/modal";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMovements, useToggleMovementFavorite } from "@/hooks/use-movements";
@@ -44,6 +50,7 @@ import { useOrganizationDefaultCurrency, useOrganizationCurrencies } from "@/hoo
 import { useOrganizationWallets } from "@/features/organization";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useProjectsMap } from "@/features/projects";
+
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -52,6 +59,7 @@ import { useMobile } from "@/hooks/use-mobile";
 import { useProjectContext } from "@/stores/projectContext";
 import { MovementKPICardsWithWallets } from "@/features/finances/components/MovementKPICardsWithWallets";
 import { exportToExcel } from "@/lib/export-utils";
+
 interface Movement {
   id: string;
   description: string;
@@ -122,6 +130,7 @@ interface Movement {
     avatar_url?: string;
   };
 }
+
 export default function MovementsList() {
   const [, navigate] = useLocation();
   
@@ -134,10 +143,15 @@ export default function MovementsList() {
       maximumFractionDigits: 0
     }).format(amount);
   };
+
   const [searchValue, setSearchValue] = useState("");
+
   const { openModal } = useGlobalModalStore();
+
   const [selectedMovements, setSelectedMovements] = useState<Movement[]>([]);
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
+
+
   const { 
     setActions, 
     setShowActionBar, 
@@ -147,12 +161,17 @@ export default function MovementsList() {
     setSearchValue: setMobileSearchValue
   } = useActionBarMobile();
   const isMobile = useMobile();
+
+
   // Sync search values between mobile and desktop
   useEffect(() => {
     if (isMobile && mobileSearchValue !== searchValue) {
       setSearchValue(mobileSearchValue);
     }
   }, [mobileSearchValue, isMobile]);
+
+
+
   // Filter states
   const [filterByType, setFilterByType] = useState("all");
   const [filterByCategory, setFilterByCategory] = useState("all");
@@ -161,16 +180,19 @@ export default function MovementsList() {
   const [filterByFavorites, setFilterByFavorites] = useState("all");
   const [filterByCurrency, setFilterByCurrency] = useState("all");
   const [filterByWallet, setFilterByWallet] = useState("all");
+
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId, isGlobalView, currentOrganizationId } = useProjectContext();
   // Usar ProjectContext como fuente única de verdad para org/project IDs
   const organizationId = currentOrganizationId || undefined;
   const projectId = selectedProjectId;
+
   const { data: rawMovements = [], isLoading } = useMovements(
     organizationId,
     undefined, // No filtrar por proyecto - mostrar todos los movimientos de la organización
   );
+
   // Safe movements with defensive checks
   const movements = useMemo(() => {
     return rawMovements.filter(movement => 
@@ -180,6 +202,7 @@ export default function MovementsList() {
       typeof movement.movement_data === 'object'
     );
   }, [rawMovements]);
+
   // Get organization's default currency
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
   
@@ -192,13 +215,15 @@ export default function MovementsList() {
   
   // En página organizacional siempre mostrar columna proyecto
   const isGeneralMode = true;
+
   // Toggle favorite mutation
   const toggleFavoriteMutation = useToggleMovementFavorite();
+
   // Delete movement mutation
   const deleteMovementMutation = useMutation({
     mutationFn: async (movementOrId: string | Movement) => {
       // Check if it's a conversion deletion
-      if (typeof movementOrId === 'object'&& (movementOrId as any)._isConversionDeletion) {
+      if (typeof movementOrId === 'object' && (movementOrId as any)._isConversionDeletion) {
         const conversionData = (movementOrId as any)._conversionData;
         const movementIds = conversionData.movements.map((m: Movement) => m.id);
         
@@ -208,9 +233,10 @@ export default function MovementsList() {
           .delete()
           .in("id", movementIds)
           .eq("organization_id", organizationId);
+
         if (error) throw error;
         return { isConversion: true, isTransfer: false, count: movementIds.length };
-      } else if (typeof movementOrId === 'object'&& (movementOrId as any)._isTransferDeletion) {
+      } else if (typeof movementOrId === 'object' && (movementOrId as any)._isTransferDeletion) {
         const transferData = (movementOrId as any)._transferData;
         const movementIds = transferData.movements.map((m: Movement) => m.id);
         
@@ -220,16 +246,18 @@ export default function MovementsList() {
           .delete()
           .in("id", movementIds)
           .eq("organization_id", organizationId);
+
         if (error) throw error;
         return { isConversion: false, isTransfer: true, count: movementIds.length };
       } else {
         // Regular single movement deletion
-        const movementId = typeof movementOrId === 'string'? movementOrId : movementOrId.id;
+        const movementId = typeof movementOrId === 'string' ? movementOrId : movementOrId.id;
         const { error } = await supabase
           .from("movements")
           .delete()
           .eq("id", movementId)
           .eq("organization_id", organizationId);
+
         if (error) throw error;
         return { isConversion: false, isTransfer: false, count: 1 };
       }
@@ -266,6 +294,7 @@ export default function MovementsList() {
       });
     },
   });
+
   // Delete multiple movements mutation
   const deleteMultipleMovementsMutation = useMutation({
     mutationFn: async (movementIds: string[]) => {
@@ -274,6 +303,7 @@ export default function MovementsList() {
         .delete()
         .in("id", movementIds)
         .eq("organization_id", organizationId);
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -301,12 +331,15 @@ export default function MovementsList() {
       });
     },
   });
+
   const handleEdit = (movement: Movement) => {
     openModal('movement', { editingMovement: movement });
   };
+
   const handleView = (movement: Movement) => {
     openModal('movements-view', { viewingMovement: movement });
   };
+
   const handleEditConversion = (conversionGroup: ConversionGroup) => {
     // For conversions, we need to set special data so the modal can handle it
     const egresoMovement = conversionGroup.movements.find(m => 
@@ -322,6 +355,7 @@ export default function MovementsList() {
     
     openModal('movement', { editingMovement: conversionMovement as any });
   };
+
   const handleViewConversion = (conversionGroup: ConversionGroup) => {
     // Find the first egreso movement as main data
     const egresoMovement = conversionGroup.movements.find(m => m.amount < 0);
@@ -336,6 +370,7 @@ export default function MovementsList() {
     
     openModal('movements-view', { viewingMovement: conversionMovement as any });
   };
+
   const handleEditTransfer = (transferGroup: TransferGroup) => {
     // For transfers, we need to set special data so the modal can handle it
     const egresoMovement = transferGroup.movements.find(m => 
@@ -351,6 +386,7 @@ export default function MovementsList() {
     
     openModal('movement', { editingMovement: transferMovement as any });
   };
+
   const handleViewTransfer = (transferGroup: TransferGroup) => {
     // Find the first egreso movement as main data
     const egresoMovement = transferGroup.movements.find(m => m.amount < 0);
@@ -365,6 +401,7 @@ export default function MovementsList() {
     
     openModal('movements-view', { viewingMovement: transferMovement as any });
   };
+
   const handleDelete = (movement: Movement) => {
     openModal('delete-confirmation', {
       mode: 'simple',
@@ -376,6 +413,7 @@ export default function MovementsList() {
       isLoading: deleteMovementMutation.isPending
     });
   };
+
   const handleDeleteConversion = (conversionGroup: ConversionGroup) => {
     const firstMovement = conversionGroup.movements[0];
     const movementWithConversionData = {
@@ -394,6 +432,7 @@ export default function MovementsList() {
       isLoading: deleteMovementMutation.isPending
     });
   };
+
   const handleDeleteTransfer = (transferGroup: TransferGroup) => {
     const firstMovement = transferGroup.movements[0];
     const movementWithTransferData = {
@@ -412,6 +451,7 @@ export default function MovementsList() {
       isLoading: deleteMovementMutation.isPending
     });
   };
+
   const handleToggleFavorite = async (movement: Movement) => {
     try {
       await toggleFavoriteMutation.mutateAsync({
@@ -425,6 +465,7 @@ export default function MovementsList() {
         description: "El movimiento se ha actualizado correctamente.",
       });
     } catch (error) {
+
       toast({
         title: "Error",
         description: "No se pudo actualizar el estado de favorito.",
@@ -432,11 +473,16 @@ export default function MovementsList() {
       });
     }
   };
+
+
+
+
   const handleDeleteSelected = () => {
     if (selectedMovements.length > 0) {
       setShowBulkDeleteDialog(true);
     }
   };
+
   const confirmBulkDelete = () => {
     if (selectedMovements.length > 0) {
       deleteMultipleMovementsMutation.mutate(
@@ -445,22 +491,29 @@ export default function MovementsList() {
       setShowBulkDeleteDialog(false);
     }
   };
+
   // Type predicate to filter out null/undefined values
   const notEmpty = <T,>(value: T | null | undefined): value is T => value !== null && value !== undefined;
+
   // Get unique types, categories, and subcategories from actual data
   const availableTypes = useMemo(() => Array.from(
     new Set(movements.map((m) => m.movement_data?.type?.name).filter(notEmpty)),
   ), [movements]);
+
   const availableCategories = useMemo(() => Array.from(
     new Set(
       movements.map((m) => m.movement_data?.category?.name).filter(notEmpty),
     ),
   ), [movements]);
+
+
+
   const availableSubcategories = useMemo(() => Array.from(
     new Set(
       movements.map((m) => m.movement_data?.subcategory?.name).filter(notEmpty),
     ),
   ), [movements]);
+
   // Get subcategories filtered by selected category
   const getSubcategoriesForCategory = (categoryName: string) => {
     if (categoryName === 'all') return [];
@@ -474,17 +527,21 @@ export default function MovementsList() {
       )
     );
   };
+
   const filteredSubcategories = getSubcategoriesForCategory(filterByCategory);
+
   const availableCurrencies = useMemo(() => Array.from(
     new Set(
       movements.map((m) => m.movement_data?.currency?.name).filter(notEmpty),
     ),
   ), [movements]);
+
   const availableWallets = useMemo(() => Array.from(
     new Set(
       movements.map((m) => m.movement_data?.wallet?.name).filter(notEmpty),
     ),
   ), [movements]);
+
   // Configure mobile action bar - separate into setup and config updates
   useEffect(() => {
     if (isMobile) {
@@ -523,6 +580,7 @@ export default function MovementsList() {
       });
       setShowActionBar(true);
     }
+
     // Cleanup when component unmounts
     return () => {
       if (isMobile) {
@@ -530,6 +588,7 @@ export default function MovementsList() {
       }
     };
   }, [isMobile, navigate, setActions, setShowActionBar, clearActions, openModal]); // Include all dependencies
+
   // Separate effect for filter configuration to avoid loops
   useEffect(() => {
     if (isMobile && availableTypes.length > 0) {
@@ -600,11 +659,15 @@ export default function MovementsList() {
       });
     }
   }, [filterByType, filterByCategory, filterBySubcategory, filterByCurrency, filterByWallet, availableTypes, availableCategories, availableSubcategories, availableCurrencies, availableWallets, isMobile]);
+
+
+
   // Group movements by conversion_group_id
   const groupConversions = (movements: Movement[]): (Movement | ConversionGroup | TransferGroup)[] => {
     const conversionGroups = new Map<string, Movement[]>();
     const transferGroups = new Map<string, Movement[]>();
     const regularMovements: Movement[] = [];
+
     // First pass - group by conversion_group_id and transfer_group_id
     movements.forEach(movement => {
       if (movement.conversion_group_id) {
@@ -621,8 +684,10 @@ export default function MovementsList() {
         regularMovements.push(movement);
       }
     });
+
     // Build result array with grouped conversions and transfers
     const result: (Movement | ConversionGroup | TransferGroup)[] = [...regularMovements];
+
     // Add conversion groups
     conversionGroups.forEach((groupMovements, groupId) => {
       if (groupMovements.length === 2) {
@@ -642,7 +707,7 @@ export default function MovementsList() {
             description: egresoMovement.description,
             movement_date: egresoMovement.movement_date,
             created_at: egresoMovement.created_at,
-            creator: egresoMovement.creator && 'email'in egresoMovement.creator 
+            creator: egresoMovement.creator && 'email' in egresoMovement.creator 
               ? egresoMovement.creator 
               : undefined,
             is_conversion_group: true
@@ -651,6 +716,7 @@ export default function MovementsList() {
         }
       }
     });
+
     // Add transfer groups
     transferGroups.forEach((groupMovements, groupId) => {
       if (groupMovements.length === 2) {
@@ -669,7 +735,7 @@ export default function MovementsList() {
             description: egresoMovement.description,
             movement_date: egresoMovement.movement_date,
             created_at: egresoMovement.created_at,
-            creator: egresoMovement.creator && 'email'in egresoMovement.creator 
+            creator: egresoMovement.creator && 'email' in egresoMovement.creator 
               ? egresoMovement.creator 
               : undefined,
             is_transfer_group: true
@@ -678,6 +744,7 @@ export default function MovementsList() {
         }
       }
     });
+
     // Sort by movement_date descending
     return result.sort((a, b) => {
       const dateA = new Date(a.movement_date);
@@ -685,9 +752,11 @@ export default function MovementsList() {
       return dateB.getTime() - dateA.getTime();
     });
   };
+
   // Apply filters to grouped items
   const processedMovements = useMemo(() => {
     let filtered = movements;
+
     // Apply search filter
     if (searchValue) {
       filtered = filtered.filter(m => 
@@ -696,16 +765,20 @@ export default function MovementsList() {
         m.movement_data?.subcategory?.name?.toLowerCase()?.includes(searchValue.toLowerCase())
       );
     }
+
     // Apply filters
     if (filterByType !== "all") {
       filtered = filtered.filter(m => m.movement_data?.type?.name === filterByType);
     }
+
     if (filterByCategory !== "all") {
       filtered = filtered.filter(m => m.movement_data?.category?.name === filterByCategory);
     }
+
     if (filterBySubcategory !== "all") {
       filtered = filtered.filter(m => m.movement_data?.subcategory?.name === filterBySubcategory);
     }
+
     if (filterByFavorites !== "all") {
       if (filterByFavorites === "favorites") {
         filtered = filtered.filter(m => m.is_favorite);
@@ -713,12 +786,15 @@ export default function MovementsList() {
         filtered = filtered.filter(m => !m.is_favorite);
       }
     }
+
     if (filterByCurrency !== "all") {
       filtered = filtered.filter(m => m.movement_data?.currency?.name === filterByCurrency);
     }
+
     if (filterByWallet !== "all") {
       filtered = filtered.filter(m => m.movement_data?.wallet?.name === filterByWallet);
     }
+
     return groupConversions(filtered);
   }, [
     movements,
@@ -730,10 +806,11 @@ export default function MovementsList() {
     filterByCurrency,
     filterByWallet,
   ]);
+
   const handleExportToExcel = useCallback(() => {
     const exportColumns = [
       { key: 'project', label: 'Proyecto', render: (item: Movement | ConversionGroup | TransferGroup) => {
-        if ('is_conversion_group'in item || 'is_transfer_group'in item) {
+        if ('is_conversion_group' in item || 'is_transfer_group' in item) {
           const projectId = (item as any).movements?.[0]?.project_id;
           return projectsMap[projectId]?.name || '-';
         }
@@ -743,48 +820,49 @@ export default function MovementsList() {
         return item.movement_date ? formatDate(item.movement_date) : '-';
       }},
       { key: 'type', label: 'Tipo', render: (item: Movement | ConversionGroup | TransferGroup) => {
-        if ('is_conversion_group'in item) return 'Conversión';
-        if ('is_transfer_group'in item) return 'Transferencia';
+        if ('is_conversion_group' in item) return 'Conversión';
+        if ('is_transfer_group' in item) return 'Transferencia';
         return (item as Movement).movement_data?.type?.name || '-';
       }},
       { key: 'category', label: 'Categoría', render: (item: Movement | ConversionGroup | TransferGroup) => {
-        if ('is_conversion_group'in item) return `${item.from_currency} → ${item.to_currency}`;
-        if ('is_transfer_group'in item) return `${item.from_wallet} → ${item.to_wallet}`;
+        if ('is_conversion_group' in item) return `${item.from_currency} → ${item.to_currency}`;
+        if ('is_transfer_group' in item) return `${item.from_wallet} → ${item.to_wallet}`;
         return (item as Movement).movement_data?.category?.name || '-';
       }},
       { key: 'subcategory', label: 'Subcategoría', render: (item: Movement | ConversionGroup | TransferGroup) => {
-        if ('is_conversion_group'in item || 'is_transfer_group'in item) return '-';
+        if ('is_conversion_group' in item || 'is_transfer_group' in item) return '-';
         return (item as Movement).movement_data?.subcategory?.name || '-';
       }},
       { key: 'description', label: 'Descripción', render: (item: Movement | ConversionGroup | TransferGroup) => {
         return item.description || '-';
       }},
       { key: 'currency', label: 'Moneda', render: (item: Movement | ConversionGroup | TransferGroup) => {
-        if ('is_conversion_group'in item) return `${item.from_currency}/${item.to_currency}`;
-        if ('is_transfer_group'in item) {
+        if ('is_conversion_group' in item) return `${item.from_currency}/${item.to_currency}`;
+        if ('is_transfer_group' in item) {
           const firstMovement = item.movements[0];
           return firstMovement?.movement_data?.currency?.code || 'USD';
         }
         return (item as Movement).movement_data?.currency?.code || 'USD';
       }},
       { key: 'wallet', label: 'Billetera', render: (item: Movement | ConversionGroup | TransferGroup) => {
-        if ('is_conversion_group'in item) {
+        if ('is_conversion_group' in item) {
           const egresoMovement = item.movements.find(m => m.movement_data?.type?.name?.toLowerCase()?.includes('egreso'));
           return egresoMovement?.movement_data?.wallet?.name || '-';
         }
-        if ('is_transfer_group'in item) return `${item.from_wallet} → ${item.to_wallet}`;
+        if ('is_transfer_group' in item) return `${item.from_wallet} → ${item.to_wallet}`;
         return (item as Movement).movement_data?.wallet?.name || '-';
       }},
       { key: 'amount', label: 'Monto', render: (item: Movement | ConversionGroup | TransferGroup) => {
-        if ('is_conversion_group'in item) return `-${item.from_amount} / +${item.to_amount}`;
-        if ('is_transfer_group'in item) return item.amount;
+        if ('is_conversion_group' in item) return `-${item.from_amount} / +${item.to_amount}`;
+        if ('is_transfer_group' in item) return item.amount;
         return (item as Movement).amount;
       }},
       { key: 'exchange_rate', label: 'Cotización', render: (item: Movement | ConversionGroup | TransferGroup) => {
-        if ('is_conversion_group'in item || 'is_transfer_group'in item) return '-';
+        if ('is_conversion_group' in item || 'is_transfer_group' in item) return '-';
         return (item as Movement).exchange_rate || '-';
       }},
     ];
+
     const today = new Date().toISOString().split('T')[0];
     exportToExcel({
       filename: `movimientos_${today}.xlsx`,
@@ -792,16 +870,22 @@ export default function MovementsList() {
       columns: exportColumns,
       data: processedMovements
     });
+
     toast({
       title: "Exportación exitosa",
       description: `Se exportaron ${processedMovements.length} movimientos a Excel.`,
     });
   }, [processedMovements, projectsMap, toast]);
+
   // Set sidebar context to project when component mounts
   const { setSidebarContext } = useNavigationStore();
+
   useEffect(() => {
     setSidebarContext('organization');
   }, [setSidebarContext]);
+
+
+
   const tableColumns = useMemo(() => {
     // Lógica condicional para mostrar columnas
     const hasMultipleCurrencies = organizationCurrencies.length > 1
@@ -820,7 +904,7 @@ export default function MovementsList() {
         // Para grupos de conversión y transferencia, usar el project_id del primer movimiento
         let itemProjectId: string | null = null;
         
-        if ('is_conversion_group'in item || 'is_transfer_group'in item) {
+        if ('is_conversion_group' in item || 'is_transfer_group' in item) {
           const group = item as any;
           itemProjectId = group.movements?.[0]?.project_id || null;
         } else {
@@ -843,6 +927,7 @@ export default function MovementsList() {
       sortType: "date" as const,
       render: (item: Movement | ConversionGroup | TransferGroup) => {
         const displayDate = item.movement_date;
+
         // Formatear fecha
         let dateElement;
         if (!displayDate) {
@@ -854,6 +939,7 @@ export default function MovementsList() {
             dateElement = <div className="text-xs text-muted-foreground">Fecha inválida</div>;
           }
         }
+
         // Solo mostrar creador en planes TEAMS
         const creatorElement = isTeamsPlan ? (
           <div className="flex items-center gap-2 mt-1">
@@ -861,17 +947,18 @@ export default function MovementsList() {
               <AvatarImage src={item.creator?.avatar_url} />
               <AvatarFallback className="text-xs">
                 {item.creator?.full_name?.charAt(0) ||
-                  (item.creator && 'email'in item.creator ? item.creator.email?.charAt(0) : undefined) ||
+                  (item.creator && 'email' in item.creator ? item.creator.email?.charAt(0) : undefined) ||
                   "U"}
               </AvatarFallback>
             </Avatar>
             <span className="text-xs text-muted-foreground truncate">
               {item.creator?.full_name || 
-               (item.creator && 'email'in item.creator ? item.creator.email : undefined) || 
+               (item.creator && 'email' in item.creator ? item.creator.email : undefined) || 
                "Usuario"}
             </span>
           </div>
         ) : null;
+
         return (
           <div className="py-1">
             {dateElement}
@@ -887,7 +974,7 @@ export default function MovementsList() {
       sortable: true,
       sortType: "string" as const,
       render: (item: Movement | ConversionGroup | TransferGroup) => {
-        if ('is_conversion_group'in item) {
+        if ('is_conversion_group' in item) {
           return (
             <div className="space-y-0.5">
               <div className="text-xs font-bold text-gray-900">
@@ -900,7 +987,7 @@ export default function MovementsList() {
           );
         }
         
-        if ('is_transfer_group'in item) {
+        if ('is_transfer_group' in item) {
           return (
             <div className="space-y-0.5">
               <div className="text-xs font-bold text-gray-900">
@@ -920,22 +1007,22 @@ export default function MovementsList() {
         const categoryId = movement.category_id || movement.subcategory_id; // Usar subcategory_id si category_id es null (migración)
         
         // Solo mostrar datos específicos según UUIDs exactos
-        if (categoryId === 'f3b96eda-15d5-4c96-ade7-6f53685115d3'&& movement.client && movement.client.trim() !== "") {
+        if (categoryId === 'f3b96eda-15d5-4c96-ade7-6f53685115d3' && movement.client && movement.client.trim() !== "") {
           // Aportes de Clientes
           selectedValue = movement.client;
-        } else if (categoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498'&& movement.subcontract && movement.subcontract.trim() !== "") {
+        } else if (categoryId === 'f40a8fda-69e6-4e81-bc8a-464359cd8498' && movement.subcontract && movement.subcontract.trim() !== "") {
           // Subcontratos
           selectedValue = movement.subcontract;
-        } else if (categoryId === 'd376d404-734a-47a9-b851-d112d64147db'&& movement.personnel && movement.personnel.trim() !== "") {
+        } else if (categoryId === 'd376d404-734a-47a9-b851-d112d64147db' && movement.personnel && movement.personnel.trim() !== "") {
           // Mano de Obra (Personal) - usar PERSONNEL en lugar de member (creador)
           selectedValue = movement.personnel;
-        } else if ((categoryId === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb'|| categoryId === 'c04a82f8-6fd8-439d-81f7-325c63905a1b') && movement.partner && movement.partner.trim() !== "") {
+        } else if ((categoryId === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb' || categoryId === 'c04a82f8-6fd8-439d-81f7-325c63905a1b') && movement.partner && movement.partner.trim() !== "") {
           // Aportes Propios o Retiros Propios
           selectedValue = movement.partner;
-        } else if (categoryId === 'e854de08-da8f-4769-a2c5-b24b622f20b0'&& movement.indirect && movement.indirect.trim() !== "") {
+        } else if (categoryId === 'e854de08-da8f-4769-a2c5-b24b622f20b0' && movement.indirect && movement.indirect.trim() !== "") {
           // Indirectos
           selectedValue = movement.indirect;
-        } else if (categoryId === '0ec4814c-40f6-49f3-8a34-0c350a122bad'&& movement.general_cost && movement.general_cost.trim() !== "") {
+        } else if (categoryId === '0ec4814c-40f6-49f3-8a34-0c350a122bad' && movement.general_cost && movement.general_cost.trim() !== "") {
           // Gastos Generales
           selectedValue = movement.general_cost;
         }
@@ -965,7 +1052,7 @@ export default function MovementsList() {
       sortable: true,
       sortType: "string" as const,
       render: (item: Movement | ConversionGroup | TransferGroup) => {
-        if ('is_conversion_group'in item) {
+        if ('is_conversion_group' in item) {
           return (
             <div>
               <div className="text-xs font-medium">
@@ -978,7 +1065,7 @@ export default function MovementsList() {
           );
         }
         
-        if ('is_transfer_group'in item) {
+        if ('is_transfer_group' in item) {
           return (
             <div>
               <div className="text-xs font-medium">
@@ -1005,7 +1092,7 @@ export default function MovementsList() {
       width: "5%",
       sortable: false,
       render: (item: Movement | ConversionGroup | TransferGroup) => {
-        if ('is_conversion_group'in item) {
+        if ('is_conversion_group' in item) {
           return (
             <div className="text-xs space-y-1">
               <div>{item.from_currency}</div>
@@ -1014,7 +1101,7 @@ export default function MovementsList() {
           );
         }
         
-        if ('is_transfer_group'in item) {
+        if ('is_transfer_group' in item) {
           const firstMovement = item.movements[0];
           return (
             <div className="text-xs">
@@ -1037,7 +1124,7 @@ export default function MovementsList() {
       width: "5%",
       sortable: false,
       render: (item: Movement | ConversionGroup | TransferGroup) => {
-        if ('is_conversion_group'in item) {
+        if ('is_conversion_group' in item) {
           const egresoMovement = item.movements.find(m => 
             m.movement_data?.type?.name?.toLowerCase()?.includes('egreso')
           );
@@ -1052,7 +1139,7 @@ export default function MovementsList() {
           );
         }
         
-        if ('is_transfer_group'in item) {
+        if ('is_transfer_group' in item) {
           return (
             <div className="text-xs space-y-1">
               <div>{item.from_wallet}</div>
@@ -1075,7 +1162,7 @@ export default function MovementsList() {
       sortable: true,
       sortType: "number" as const,
       render: (item: Movement | ConversionGroup | TransferGroup) => {
-        if ('is_conversion_group'in item) {
+        if ('is_conversion_group' in item) {
           return (
             <div className="text-xs space-y-1 text-right">
               <div className="font-medium text-red-600">
@@ -1088,7 +1175,7 @@ export default function MovementsList() {
           );
         }
         
-        if ('is_transfer_group'in item) {
+        if ('is_transfer_group' in item) {
           return (
             <div className="text-xs space-y-1 text-right">
               <div className="font-medium text-red-600">
@@ -1117,8 +1204,9 @@ export default function MovementsList() {
     },
   ];
 }, [isGeneralMode, projectsMap, handleToggleFavorite, handleEditConversion, handleDeleteConversion, handleEditTransfer, handleDeleteTransfer, handleEdit, handleDelete, organizationCurrencies, organizationWallets, userData?.plan?.name]);
+
   const getRowActions = useCallback((item: Movement | ConversionGroup | TransferGroup) => {
-    if ('is_conversion_group'in item) {
+    if ('is_conversion_group' in item) {
       return [
         {
           label: 'Favorito',
@@ -1138,12 +1226,12 @@ export default function MovementsList() {
           label: 'Eliminar',
           icon: Trash2,
           onClick: () => handleDeleteConversion(item),
-          variant: 'destructive'as const
+          variant: 'destructive' as const
         }
       ];
     }
     
-    if ('is_transfer_group'in item) {
+    if ('is_transfer_group' in item) {
       return [
         {
           label: 'Favorito',
@@ -1163,7 +1251,7 @@ export default function MovementsList() {
           label: 'Eliminar',
           icon: Trash2,
           onClick: () => handleDeleteTransfer(item),
-          variant: 'destructive'as const
+          variant: 'destructive' as const
         }
       ];
     }
@@ -1183,10 +1271,13 @@ export default function MovementsList() {
         label: 'Eliminar',
         icon: Trash2,
         onClick: () => handleDelete(item),
-        variant: 'destructive'as const
+        variant: 'destructive' as const
       }
     ];
   }, [handleToggleFavorite, handleEditConversion, handleDeleteConversion, handleEditTransfer, handleDeleteTransfer, handleEdit, handleDelete]);
+
+
+
   // Detectar si hay filtros activos
   const hasActiveFilters = searchValue.trim() !== "" || 
                           filterByType !== "all" || 
@@ -1196,6 +1287,7 @@ export default function MovementsList() {
                           filterByFavorites !== "all" || 
                           filterByCurrency !== "all" ||
                           filterByWallet !== "all";
+
   return (
     <>
       {/* Solo mostrar contenido si no está cargando */}
@@ -1244,7 +1336,7 @@ export default function MovementsList() {
             searchValue: searchValue,
             onSearchChange: setSearchValue,
             showFilter: true,
-            isFilterActive: filterByType !== 'all'|| filterByCategory !== 'all'|| filterBySubcategory !== 'all'|| filterByFavorites !== 'all'|| filterByCurrency !== 'all'|| filterByWallet !== 'all',
+            isFilterActive: filterByType !== 'all' || filterByCategory !== 'all' || filterBySubcategory !== 'all' || filterByFavorites !== 'all' || filterByCurrency !== 'all' || filterByWallet !== 'all',
             renderFilterContent: () => (
             <div className="space-y-3 p-2 min-w-[200px]">
               <div>
@@ -1296,7 +1388,7 @@ export default function MovementsList() {
                         {subcategory}
                       </SelectItem>
                     ))}
-                    {filteredSubcategories.length === 0 && filterByCategory !== 'all'&& (
+                    {filteredSubcategories.length === 0 && filterByCategory !== 'all' && (
                       <SelectItem value="no-subcategories" disabled>
                         Sin subcategorías disponibles
                       </SelectItem>
@@ -1379,18 +1471,19 @@ export default function MovementsList() {
             </Button>
           )
         }}
+
         getRowClassName={() => ""}
         selectedItems={selectedMovements}
         onSelectionChange={(items) => {
           // Only allow selection of regular movements, not group objects
           const regularMovements = items.filter(item => 
-            !('is_conversion_group'in item) && !('is_transfer_group'in item)
+            !('is_conversion_group' in item) && !('is_transfer_group' in item)
           ) as Movement[];
           setSelectedMovements(regularMovements);
         }}
         getItemId={(item) => item.id}
         renderCard={(item: any) => {
-          if ('is_conversion_group'in item) {
+          if ('is_conversion_group' in item) {
             // Render ConversionRow with SwipeableCard for conversion groups
             return (
               <SwipeableCard
@@ -1424,7 +1517,7 @@ export default function MovementsList() {
                 />
               </SwipeableCard>
             );
-          } else if ('is_transfer_group'in item) {
+          } else if ('is_transfer_group' in item) {
             // Render TransferRow with SwipeableCard for transfer groups
             return (
               <SwipeableCard
@@ -1493,7 +1586,12 @@ export default function MovementsList() {
           />
         </>
       )}
+
       {/* Modal Factory will handle the movement modal */}
+
+
+
+
       {/* Bulk Delete Confirmation Dialog */}
       <AlertDialog
         open={showBulkDeleteDialog}

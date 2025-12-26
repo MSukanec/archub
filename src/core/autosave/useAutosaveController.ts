@@ -9,10 +9,12 @@
  * 
  * This is the "brain" that coordinates saves. Individual fields use useAutosaveField.
  */
+
 import { useCallback, useRef, useState } from 'react';
 import { useQueryClient, QueryKey } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { normalizeFormData, hasMeaningfulDiff } from './normalizeValue';
+
 export interface AutosaveControllerOptions<TData extends Record<string, any>> {
   queryKey: QueryKey;
   saveFn: (data: TData) => Promise<void>;
@@ -22,6 +24,7 @@ export interface AutosaveControllerOptions<TData extends Record<string, any>> {
   errorMessage?: string;
   debounceMs?: number;
 }
+
 export interface AutosaveControllerReturn<TData extends Record<string, any>> {
   isSaving: boolean;
   lastSavedAt: Date | null;
@@ -32,6 +35,7 @@ export interface AutosaveControllerReturn<TData extends Record<string, any>> {
   lastPersistedData: TData | null;
   setLastPersistedData: (data: TData) => void;
 }
+
 export function useAutosaveController<TData extends Record<string, any>>({
   queryKey,
   saveFn,
@@ -51,12 +55,14 @@ export function useAutosaveController<TData extends Record<string, any>>({
   
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const savingRef = useRef(false);
+
   const cancelPendingSave = useCallback(() => {
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
       debounceTimeoutRef.current = null;
     }
   }, []);
+
   const save = useCallback(async (data: TData) => {
     cancelPendingSave();
     
@@ -98,6 +104,7 @@ export function useAutosaveController<TData extends Record<string, any>>({
       savingRef.current = false;
     }
   }, [saveFn, queryClient, queryKey, additionalQueryKeys, lastPersistedData, cancelPendingSave, onSaveSuccess, onSaveError, errorMessage, toast]);
+
   const saveDebounced = useCallback((data: TData) => {
     setHasUnsavedChanges(true);
     cancelPendingSave();
@@ -106,6 +113,7 @@ export function useAutosaveController<TData extends Record<string, any>>({
       save(data);
     }, debounceMs);
   }, [save, debounceMs, cancelPendingSave]);
+
   return {
     isSaving,
     lastSavedAt,

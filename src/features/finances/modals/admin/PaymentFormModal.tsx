@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useCurrentUser } from '@/hooks/use-current-user';
+
 // Schema de validación
 const paymentSchema = z.object({
   user_id: z.string().min(1, 'El usuario es requerido'),
@@ -29,7 +30,9 @@ const paymentSchema = z.object({
   }),
   provider_payment_id: z.string().optional(),
 });
+
 type PaymentFormData = z.infer<typeof paymentSchema>;
+
 interface PaymentFormModalProps {
   modalData?: {
     payment?: any;
@@ -37,40 +40,48 @@ interface PaymentFormModalProps {
   };
   onClose: () => void;
 }
+
 export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) {
   const { payment, isEditing = false } = modalData || {};
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = React.useState(false);
   const { data: userData } = useCurrentUser();
+
   // Fetch users for dropdown
   const { data: users = [] } = useQuery({
     queryKey: ['admin-users-list'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available');
+
       const { data, error } = await supabase
         .from('users')
         .select('id, full_name, email')
         .order('full_name');
+
       if (error) throw error;
       return data;
     },
   });
+
   // Fetch courses for dropdown
   const { data: courses = [] } = useQuery({
     queryKey: ['admin-courses-list'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available');
+
       const { data, error } = await supabase
         .from('courses')
         .select('id, title')
         .eq('is_deleted', false)
         .eq('is_active', true)
         .order('title');
+
       if (error) throw error;
       return data;
     },
   });
+
   const form = useForm<PaymentFormData>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
@@ -82,6 +93,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
       provider_payment_id: payment?.provider_payment_id || '',
     }
   });
+
   React.useEffect(() => {
     if (payment) {
       form.reset({
@@ -103,10 +115,12 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
       });
     }
   }, [payment, form]);
+
   const handleClose = () => {
     form.reset();
     onClose();
   };
+
   const createMutation = useMutation({
     mutationFn: async (data: PaymentFormData) => {
       if (!supabase || !userData?.user?.id) {
@@ -147,6 +161,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
       });
     }
   });
+
   const updateMutation = useMutation({
     mutationFn: async (data: PaymentFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -182,6 +197,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
       });
     }
   });
+
   const onSubmit = async (data: PaymentFormData) => {
     setIsLoading(true);
     try {
@@ -194,6 +210,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
       setIsLoading(false);
     }
   };
+
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -221,6 +238,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="course_id"
@@ -245,6 +263,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
             </FormItem>
           )}
         />
+
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -264,6 +283,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="currency"
@@ -286,6 +306,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
             )}
           />
         </div>
+
         <FormField
           control={form.control}
           name="provider"
@@ -312,6 +333,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="provider_payment_id"
@@ -334,21 +356,24 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
       </form>
     </Form>
   );
+
   const headerContent = (
     <FormModalHeader 
-      title={payment ? 'Editar Pago': 'Nuevo Pago Manual'}
-      description={payment ? 'Actualiza la información del pago registrado': 'Registra un pago manual que no pasó por el sistema automático'}
+      title={payment ? 'Editar Pago' : 'Nuevo Pago Manual'}
+      description={payment ? 'Actualiza la información del pago registrado' : 'Registra un pago manual que no pasó por el sistema automático'}
       icon={DollarSign}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={payment ? 'Actualizar': 'Crear Pago'}
+      rightLabel={payment ? 'Actualizar' : 'Crear Pago'}
       onRightClick={form.handleSubmit(onSubmit)}
     />
   );
+
   return (
     <FormModalLayout
       columns={1}

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { 
   Search, 
   CheckCircle2, 
   XCircle, 
@@ -26,12 +27,14 @@ import { useToast } from '@/hooks/use-toast';
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 interface OrganizationListItem {
   id: string;
   name: string;
   plan_name: string;
   created_at: string;
 }
+
 interface AuditReport {
   organization: {
     id: string;
@@ -105,6 +108,7 @@ interface AuditReport {
     all_passed: boolean;
   };
 }
+
 function HealthCheckRow({ 
   label, 
   passed, 
@@ -162,6 +166,7 @@ function HealthCheckRow({
     </div>
   );
 }
+
 function formatDate(dateStr: string | null | undefined) {
   if (!dateStr) return '-';
   try {
@@ -170,13 +175,16 @@ function formatDate(dateStr: string | null | undefined) {
     return dateStr;
   }
 }
+
 interface AdminAuditTabProps {
   onRefreshAction?: (refetchFn: () => void) => void;
 }
+
 export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
   const { toast } = useToast();
+
   const { data: organizations = [], isLoading: orgsLoading, error: orgsError } = useQuery<OrganizationListItem[]>({
     queryKey: ['/api/admin/audit/organizations', 'search', searchTerm],
     queryFn: async () => {
@@ -187,6 +195,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
     },
     enabled: searchTerm.length >= 2,
   });
+
   const { data: auditReport, isLoading: auditLoading, refetch: refetchAudit, error: auditError } = useQuery<AuditReport>({
     queryKey: ['/api/admin/audit/organizations', selectedOrgId, 'audit'],
     queryFn: async () => {
@@ -197,6 +206,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
     },
     enabled: !!selectedOrgId,
   });
+
   const repairFounderMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest('POST', `/api/admin/audit/organizations/${selectedOrgId}/repair-founder`);
@@ -205,17 +215,18 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
       return data;
     },
     onSuccess: () => {
-      toast({ title: 'Status de fundador reparado'});
+      toast({ title: 'Status de fundador reparado' });
       refetchAudit();
     },
     onError: (error: any) => {
       toast({ 
         title: 'Error', 
         description: error.message,
-        variant: 'destructive'
+        variant: 'destructive' 
       });
     },
   });
+
   const enrollFounderCourseMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest('POST', `/api/admin/audit/organizations/${selectedOrgId}/enroll-founder-course`);
@@ -225,7 +236,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
     },
     onSuccess: (data: any) => {
       toast({ 
-        title: data.already_enrolled ? 'Ya estaba inscrito': 'Owner inscrito al curso',
+        title: data.already_enrolled ? 'Ya estaba inscrito' : 'Owner inscrito al curso',
         description: data.course || '',
       });
       refetchAudit();
@@ -234,10 +245,11 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
       toast({ 
         title: 'Error', 
         description: error.message,
-        variant: 'destructive'
+        variant: 'destructive' 
       });
     },
   });
+
   const syncPlanMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest('POST', `/api/admin/audit/organizations/${selectedOrgId}/sync-plan`);
@@ -256,16 +268,19 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
       toast({ 
         title: 'Error', 
         description: error.message,
-        variant: 'destructive'
+        variant: 'destructive' 
       });
     },
   });
+
   const handleOrgSelect = (orgId: string) => {
     setSelectedOrgId(orgId);
     setSearchTerm('');
   };
+
   const report = auditReport;
   const health = report?.health_checks;
+
   return (
     <div className="space-y-6">
       <Card>
@@ -326,6 +341,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
           )}
         </CardContent>
       </Card>
+
       {selectedOrgId && auditLoading && (
         <div className="flex items-center justify-center py-12">
           <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -348,6 +364,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
           </CardContent>
         </Card>
       )}
+
       {report && (
         <>
           <div className="flex items-center justify-between">
@@ -370,13 +387,14 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
                 <RefreshCw className="h-4 w-4" />
               </Button>
               <Badge 
-                variant={health?.all_passed ? 'default': 'destructive'}
-                className={health?.all_passed ? 'bg-positive': ''}
+                variant={health?.all_passed ? 'default' : 'destructive'}
+                className={health?.all_passed ? 'bg-positive' : ''}
               >
-                {health?.all_passed ? 'OK': 'Requiere Atención'}
+                {health?.all_passed ? 'OK' : 'Requiere Atención'}
               </Badge>
             </div>
           </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <Card>
               <CardHeader className="pb-2">
@@ -396,6 +414,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
                 )}
               </CardContent>
             </Card>
+
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -407,13 +426,13 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
                 {report.subscription ? (
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
-                      <Badge variant={report.subscription.status === 'active'? 'default': 'secondary'} className="text-xs">
+                      <Badge variant={report.subscription.status === 'active' ? 'default' : 'secondary'} className="text-xs">
                         {report.subscription.status}
                       </Badge>
                       <span className="text-sm">{report.subscription.plan_name}</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {report.subscription.billing_period === 'annual'? 'Anual': 'Mensual'} • Desde {formatDate(report.subscription.started_at)}
+                      {report.subscription.billing_period === 'annual' ? 'Anual' : 'Mensual'} • Desde {formatDate(report.subscription.started_at)}
                     </p>
                   </div>
                 ) : (
@@ -421,6 +440,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
                 )}
               </CardContent>
             </Card>
+
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -442,6 +462,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
               </CardContent>
             </Card>
           </div>
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Health Checks</CardTitle>
@@ -465,7 +486,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
                 label="Ciclo de facturación" 
                 passed={health?.has_billing_cycle || false}
                 warning={!health?.has_active_subscription}
-                detail={report.billing_cycle ? 'Activo': 'Sin ciclo'}
+                detail={report.billing_cycle ? 'Activo' : 'Sin ciclo'}
               />
               <HealthCheckRow 
                 label="Pagos registrados" 
@@ -481,7 +502,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
               <HealthCheckRow 
                 label="Status Fundador" 
                 passed={health?.is_founder || false}
-                detail={health?.is_founder ? 'Activo': 'No es fundador'}
+                detail={health?.is_founder ? 'Activo' : 'No es fundador'}
                 action={!health?.is_founder}
                 actionLabel="Activar"
                 actionLoading={repairFounderMutation.isPending}
@@ -491,7 +512,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
                 label="Curso Fundador" 
                 passed={health?.founder_has_course || false}
                 warning={!health?.is_founder}
-                detail={report.founder_course_enrollment.enrolled ? 'Inscrito': 'No inscrito'}
+                detail={report.founder_course_enrollment.enrolled ? 'Inscrito' : 'No inscrito'}
                 action={!health?.founder_has_course && health?.is_founder}
                 actionLabel="Inscribir"
                 actionLoading={enrollFounderCourseMutation.isPending}
@@ -499,6 +520,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
               />
             </CardContent>
           </Card>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card>
               <CardHeader className="pb-2">
@@ -513,7 +535,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
                     {report.payments.map((payment) => (
                       <div key={payment.id} className="flex items-center justify-between text-sm py-1 border-b border-border/50 last:border-0">
                         <div className="flex items-center gap-2">
-                          <Badge variant={payment.status === 'completed'? 'default': 'secondary'} className="text-xs">
+                          <Badge variant={payment.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
                             {payment.status}
                           </Badge>
                           <span className="text-xs text-muted-foreground">{payment.provider}</span>
@@ -530,6 +552,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
                 )}
               </CardContent>
             </Card>
+
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -543,7 +566,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
                     {report.payment_events.map((event) => (
                       <div key={event.id} className="flex items-center justify-between text-sm py-1 border-b border-border/50 last:border-0">
                         <div className="flex items-center gap-2">
-                          <Badge variant={event.status === 'processed'? 'default': 'secondary'} className="text-xs">
+                          <Badge variant={event.status === 'processed' ? 'default' : 'secondary'} className="text-xs">
                             {event.status}
                           </Badge>
                           <span className="text-xs font-mono truncate max-w-32">{event.provider_event_type}</span>
@@ -558,6 +581,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
               </CardContent>
             </Card>
           </div>
+
           {report.mp_preferences.length > 0 && (
             <Card>
               <CardHeader className="pb-2">
@@ -572,7 +596,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
                     <div key={pref.id} className="flex items-center justify-between text-sm py-1 border-b border-border/50 last:border-0">
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">{pref.plan_slug}</Badge>
-                        <span className="text-xs">{pref.billing_period === 'annual'? 'Anual': 'Mensual'}</span>
+                        <span className="text-xs">{pref.billing_period === 'annual' ? 'Anual' : 'Mensual'}</span>
                       </div>
                       <div className="text-right">
                         {pref.preapproval_id && (
@@ -586,6 +610,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
               </CardContent>
             </Card>
           )}
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -615,7 +640,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
                       disabled={enrollFounderCourseMutation.isPending}
                       className="h-7 text-xs"
                     >
-                      {enrollFounderCourseMutation.isPending ? 'Inscribiendo...': 'Inscribir'}
+                      {enrollFounderCourseMutation.isPending ? 'Inscribiendo...' : 'Inscribir'}
                     </Button>
                   )}
                 </div>

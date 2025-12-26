@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 export const siteLogAttendeeSchema = z.object({
   id: z.string(),
   contact_id: z.string(),
@@ -7,6 +8,7 @@ export const siteLogAttendeeSchema = z.object({
   departure_time: z.string().optional(),
   notes: z.string().optional()
 });
+
 export const siteLogSchema = z.object({
   log_date: z.string().min(1, "La fecha es requerida"),
   is_public: z.boolean().default(false),
@@ -17,5 +19,6 @@ export const siteLogSchema = z.object({
   comments: z.string().optional(),
   attendees: z.array(siteLogAttendeeSchema).optional().default([])
 });
+
 export type SiteLogFormData = z.infer<typeof siteLogSchema>;
 export type SiteLogAttendeeFormData = z.infer<typeof siteLogAttendeeSchema>;

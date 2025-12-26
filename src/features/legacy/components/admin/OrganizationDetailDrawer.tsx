@@ -2,6 +2,7 @@ import { Building } from 'lucide-react';
 import { DrawerLayout, DrawerHeader, DrawerBody } from '@/components/drawer';
 import { OrganizationDetailContent } from './OrganizationDetailContent';
 import { Badge } from '@/components/ui/badge';
+
 interface Organization {
   id: string;
   name: string;
@@ -28,11 +29,13 @@ interface Organization {
   projects_count: number;
   last_seen_at: string | null;
 }
+
 export interface OrganizationDetailDrawerProps {
   organization: Organization | null;
   isOpen: boolean;
   onClose: () => void;
 }
+
 export function OrganizationDetailDrawer({
   organization,
   isOpen,
@@ -77,4 +80,5 @@ export function OrganizationDetailDrawer({
     </DrawerLayout>
   );
 }
+
 export default OrganizationDetailDrawer;

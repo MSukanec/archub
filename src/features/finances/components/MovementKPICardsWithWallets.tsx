@@ -5,10 +5,12 @@ import { motion } from "framer-motion";
 import { Building2, FolderOpen, DollarSign, Wallet } from "lucide-react";
 import { useWalletCurrencyBalances, CurrencyGroupedData } from "@/hooks/use-wallet-currency-balances";
 import { useMobile } from "@/hooks/use-mobile";
+
 interface MovementKPICardsWithWalletsProps {
   organizationId?: string;
   projectId?: string;
 }
+
 // Component to render wallet balances within a currency
 const WalletBalanceItem: React.FC<{ 
   wallet: string; 
@@ -22,32 +24,36 @@ const WalletBalanceItem: React.FC<{
       maximumFractionDigits: 0
     }).format(Math.abs(amount));
   };
+
   const getBalanceColor = (amount: number) => {
     if (amount > 0) return "text-green-600";
     if (amount < 0) return "text-red-600";
     return "text-muted-foreground";
   };
+
   const getBalanceSign = (amount: number) => {
     if (amount > 0) return "+";
     if (amount < 0) return "-";
     return "";
   };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.05, duration: 0.2 }}
-      className={`flex items-center justify-between ${isMobile ? 'py-0.5': 'py-1'}`}
+      className={`flex items-center justify-between ${isMobile ? 'py-0.5' : 'py-1'}`}
     >
-      <span className={`text-muted-foreground ${isMobile ? 'text-xs': 'text-xs'} truncate flex-1 pr-2`}>
+      <span className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-xs'} truncate flex-1 pr-2`}>
         {wallet}
       </span>
-      <span className={`font-medium ${getBalanceColor(balance)} ${isMobile ? 'text-xs': 'text-xs'} flex-shrink-0`}>
+      <span className={`font-medium ${getBalanceColor(balance)} ${isMobile ? 'text-xs' : 'text-xs'} flex-shrink-0`}>
         {getBalanceSign(balance)}{formatAmount(balance)}
       </span>
     </motion.div>
   );
 };
+
 // Component for mobile - simplified display (only totals)
 const CurrencyMobileSimple: React.FC<{ 
   currency: CurrencyGroupedData; 
@@ -59,16 +65,19 @@ const CurrencyMobileSimple: React.FC<{
       maximumFractionDigits: 0
     }).format(Math.abs(amount));
   };
+
   const getBalanceColor = (amount: number) => {
     if (amount > 0) return "text-green-600";
     if (amount < 0) return "text-red-600";
     return "text-muted-foreground";
   };
+
   const getBalanceSign = (amount: number) => {
     if (amount > 0) return "+";
     if (amount < 0) return "-";
     return "";
   };
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -89,6 +98,7 @@ const CurrencyMobileSimple: React.FC<{
     </motion.div>
   );
 };
+
 // Component to render currency column with wallets (desktop)
 const CurrencyColumn: React.FC<{ 
   currency: CurrencyGroupedData; 
@@ -101,16 +111,19 @@ const CurrencyColumn: React.FC<{
       maximumFractionDigits: 0
     }).format(Math.abs(amount));
   };
+
   const getBalanceColor = (amount: number) => {
     if (amount > 0) return "text-green-600";
     if (amount < 0) return "text-red-600";
     return "text-muted-foreground";
   };
+
   const getBalanceSign = (amount: number) => {
     if (amount > 0) return "+";
     if (amount < 0) return "-";
     return "";
   };
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -119,17 +132,18 @@ const CurrencyColumn: React.FC<{
       className="flex-1 min-w-0"
     >
       {/* Currency header */}
-      <div className={`flex items-center gap-2 ${isMobile ? 'mb-2': 'mb-3'}`}>
+      <div className={`flex items-center gap-2 ${isMobile ? 'mb-2' : 'mb-3'}`}>
         <div 
-          className={`rounded-md flex items-center justify-center ${isMobile ? 'w-6 h-6': 'w-8 h-8'}`}
-          style={{ backgroundColor: `${index === 0 ? '#84cc16': '#3b82f6'}20`, color: index === 0 ? '#84cc16': '#3b82f6'}}
+          className={`rounded-md flex items-center justify-center ${isMobile ? 'w-6 h-6' : 'w-8 h-8'}`}
+          style={{ backgroundColor: `${index === 0 ? '#84cc16' : '#3b82f6'}20`, color: index === 0 ? '#84cc16' : '#3b82f6' }}
         >
           <DollarSign className={isMobile ? "w-3 h-3" : "w-4 h-4"} />
         </div>
-        <h4 className={`font-bold text-foreground ${isMobile ? 'text-sm': 'text-base'}`}>
+        <h4 className={`font-bold text-foreground ${isMobile ? 'text-sm' : 'text-base'}`}>
           {currency.currencyCode}
         </h4>
       </div>
+
       {/* Wallet balances */}
       <div className={isMobile ? "space-y-0.5 mb-2" : "space-y-1 mb-3"}>
         {currency.wallets.map((wallet, walletIndex) => (
@@ -142,13 +156,14 @@ const CurrencyColumn: React.FC<{
           />
         ))}
       </div>
+
       {/* Divider and total */}
-      <div className={`border-t border-border ${isMobile ? 'pt-1': 'pt-2'}`}>
+      <div className={`border-t border-border ${isMobile ? 'pt-1' : 'pt-2'}`}>
         <div className="flex items-center justify-between">
-          <span className={`font-medium text-muted-foreground ${isMobile ? 'text-xs': 'text-sm'}`}>
+          <span className={`font-medium text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>
             Total:
           </span>
-          <span className={`font-bold ${getBalanceColor(currency.totalBalance)} ${isMobile ? 'text-sm': 'text-base'}`}>
+          <span className={`font-bold ${getBalanceColor(currency.totalBalance)} ${isMobile ? 'text-sm' : 'text-base'}`}>
             {getBalanceSign(currency.totalBalance)}{formatAmount(currency.totalBalance)}
           </span>
         </div>
@@ -156,29 +171,31 @@ const CurrencyColumn: React.FC<{
     </motion.div>
   );
 };
+
 export function MovementKPICardsWithWallets({ organizationId, projectId }: MovementKPICardsWithWalletsProps) {
   const { projectBalances, organizationBalances, isLoading } = useWalletCurrencyBalances(organizationId, projectId);
   const isMobile = useMobile();
+
   if (isLoading) {
     return (
-      <div className={`grid gap-3 mb-4 ${isMobile ? 'grid-cols-2': 'grid-cols-1 md:grid-cols-2'}`}>
+      <div className={`grid gap-3 mb-4 ${isMobile ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2'}`}>
         <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
           <CardContent className={isMobile ? "p-3" : "p-6"}>
-            <div className={`animate-pulse ${isMobile ? 'space-y-2': 'space-y-3'}`}>
-              <div className={`bg-muted rounded ${isMobile ? 'h-3 w-1/2': 'h-4 w-1/3'}`}></div>
+            <div className={`animate-pulse ${isMobile ? 'space-y-2' : 'space-y-3'}`}>
+              <div className={`bg-muted rounded ${isMobile ? 'h-3 w-1/2' : 'h-4 w-1/3'}`}></div>
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <div className={`bg-muted rounded ${isMobile ? 'h-3 w-8 mb-2': 'h-4 w-12 mb-3'}`}></div>
-                  <div className={isMobile ? 'space-y-1': 'space-y-2'}>
-                    <div className={`bg-muted rounded ${isMobile ? 'h-2': 'h-3'}`}></div>
-                    <div className={`bg-muted rounded ${isMobile ? 'h-2': 'h-3'}`}></div>
+                  <div className={`bg-muted rounded ${isMobile ? 'h-3 w-8 mb-2' : 'h-4 w-12 mb-3'}`}></div>
+                  <div className={isMobile ? 'space-y-1' : 'space-y-2'}>
+                    <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
+                    <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
                   </div>
                 </div>
                 <div className="flex-1">
-                  <div className={`bg-muted rounded ${isMobile ? 'h-3 w-8 mb-2': 'h-4 w-12 mb-3'}`}></div>
-                  <div className={isMobile ? 'space-y-1': 'space-y-2'}>
-                    <div className={`bg-muted rounded ${isMobile ? 'h-2': 'h-3'}`}></div>
-                    <div className={`bg-muted rounded ${isMobile ? 'h-2': 'h-3'}`}></div>
+                  <div className={`bg-muted rounded ${isMobile ? 'h-3 w-8 mb-2' : 'h-4 w-12 mb-3'}`}></div>
+                  <div className={isMobile ? 'space-y-1' : 'space-y-2'}>
+                    <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
+                    <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
                   </div>
                 </div>
               </div>
@@ -187,21 +204,21 @@ export function MovementKPICardsWithWallets({ organizationId, projectId }: Movem
         </Card>
         <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
           <CardContent className={isMobile ? "p-3" : "p-6"}>
-            <div className={`animate-pulse ${isMobile ? 'space-y-2': 'space-y-3'}`}>
-              <div className={`bg-muted rounded ${isMobile ? 'h-3 w-1/2': 'h-4 w-1/3'}`}></div>
+            <div className={`animate-pulse ${isMobile ? 'space-y-2' : 'space-y-3'}`}>
+              <div className={`bg-muted rounded ${isMobile ? 'h-3 w-1/2' : 'h-4 w-1/3'}`}></div>
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <div className={`bg-muted rounded ${isMobile ? 'h-3 w-8 mb-2': 'h-4 w-12 mb-3'}`}></div>
-                  <div className={isMobile ? 'space-y-1': 'space-y-2'}>
-                    <div className={`bg-muted rounded ${isMobile ? 'h-2': 'h-3'}`}></div>
-                    <div className={`bg-muted rounded ${isMobile ? 'h-2': 'h-3'}`}></div>
+                  <div className={`bg-muted rounded ${isMobile ? 'h-3 w-8 mb-2' : 'h-4 w-12 mb-3'}`}></div>
+                  <div className={isMobile ? 'space-y-1' : 'space-y-2'}>
+                    <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
+                    <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
                   </div>
                 </div>
                 <div className="flex-1">
-                  <div className={`bg-muted rounded ${isMobile ? 'h-3 w-8 mb-2': 'h-4 w-12 mb-3'}`}></div>
-                  <div className={isMobile ? 'space-y-1': 'space-y-2'}>
-                    <div className={`bg-muted rounded ${isMobile ? 'h-2': 'h-3'}`}></div>
-                    <div className={`bg-muted rounded ${isMobile ? 'h-2': 'h-3'}`}></div>
+                  <div className={`bg-muted rounded ${isMobile ? 'h-3 w-8 mb-2' : 'h-4 w-12 mb-3'}`}></div>
+                  <div className={isMobile ? 'space-y-1' : 'space-y-2'}>
+                    <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
+                    <div className={`bg-muted rounded ${isMobile ? 'h-2' : 'h-3'}`}></div>
                   </div>
                 </div>
               </div>
@@ -211,6 +228,7 @@ export function MovementKPICardsWithWallets({ organizationId, projectId }: Movem
       </div>
     );
   }
+
   const kpiCards = [
     {
       title: "Balance del Proyecto",
@@ -227,22 +245,27 @@ export function MovementKPICardsWithWallets({ organizationId, projectId }: Movem
       color: "#3b82f6",
     }
   ];
+
   // If viewing a specific project and it has no movements, hide all KPIs
   if (projectId && projectBalances.length === 0) {
     return null;
   }
+
   // Otherwise, filter out cards that have no movements
   const cardsWithMovements = kpiCards.filter(card => card.balances.length > 0);
+
   // If no cards have movements, don't render anything
   if (cardsWithMovements.length === 0) {
     return null;
   }
+
   const getGridClasses = () => {
     if (isMobile) {
       return 'grid-cols-2';
     }
-    return cardsWithMovements.length === 1 ? 'grid-cols-1 max-w-md': 'grid-cols-1 md:grid-cols-2';
+    return cardsWithMovements.length === 1 ? 'grid-cols-1 max-w-md' : 'grid-cols-1 md:grid-cols-2';
   };
+
   return (
     <div className={`grid gap-3 mb-4 ${getGridClasses()}`}>
       {cardsWithMovements.map((card, cardIndex) => (
@@ -255,15 +278,15 @@ export function MovementKPICardsWithWallets({ organizationId, projectId }: Movem
           <Card className="bg-[var(--card-bg)] border-[var(--card-border)]">
             <CardContent className={isMobile ? "p-3" : "p-6"}>
               {/* Header */}
-              <div className={`flex items-center gap-2 ${isMobile ? 'mb-3': 'mb-4'}`}>
+              <div className={`flex items-center gap-2 ${isMobile ? 'mb-3' : 'mb-4'}`}>
                 <div 
-                  className={`rounded-lg flex items-center justify-center ${isMobile ? 'w-7 h-7': 'w-10 h-10'}`}
+                  className={`rounded-lg flex items-center justify-center ${isMobile ? 'w-7 h-7' : 'w-10 h-10'}`}
                   style={{ backgroundColor: `${card.color}20`, color: card.color }}
                 >
                   <card.icon className={isMobile ? "w-4 h-4" : "w-5 h-5"} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className={`font-medium text-foreground ${isMobile ? 'text-xs leading-tight': 'text-sm'}`}>
+                  <h3 className={`font-medium text-foreground ${isMobile ? 'text-xs leading-tight' : 'text-sm'}`}>
                     {isMobile ? card.title.replace('Balance del ', '').replace('Balance de la ', '') : card.title}
                   </h3>
                   {!isMobile && (
@@ -273,12 +296,13 @@ export function MovementKPICardsWithWallets({ organizationId, projectId }: Movem
                   )}
                 </div>
               </div>
+
               {/* Currency columns or empty state */}
               {card.balances.length === 0 ? (
-                <div className={`text-center ${isMobile ? 'py-2': 'py-4'}`}>
-                  <Wallet className={`mx-auto text-muted-foreground mb-1 ${isMobile ? 'w-5 h-5': 'w-8 h-8 mb-2'}`} />
-                  <p className={`text-muted-foreground ${isMobile ? 'text-xs': 'text-xs'}`}>
-                    {isMobile ? 'Sin movimientos': card.emptyMessage}
+                <div className={`text-center ${isMobile ? 'py-2' : 'py-4'}`}>
+                  <Wallet className={`mx-auto text-muted-foreground mb-1 ${isMobile ? 'w-5 h-5' : 'w-8 h-8 mb-2'}`} />
+                  <p className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-xs'}`}>
+                    {isMobile ? 'Sin movimientos' : card.emptyMessage}
                   </p>
                 </div>
               ) : (

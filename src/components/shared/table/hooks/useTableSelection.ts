@@ -1,10 +1,12 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
+
 interface UseTableSelectionOptions<T> {
   externalSelectedItems?: T[];
   onSelectionChange?: (items: T[]) => void;
   getItemId: (item: T) => string | number;
   pageData: T[];
 }
+
 interface UseTableSelectionReturn<T> {
   selectedItems: T[];
   isItemSelected: (item: T) => boolean;
@@ -16,6 +18,7 @@ interface UseTableSelectionReturn<T> {
   isPartiallySelected: boolean;
   selectedCount: number;
 }
+
 export function useTableSelection<T>({
   externalSelectedItems,
   onSelectionChange,
@@ -25,15 +28,18 @@ export function useTableSelection<T>({
   const [internalSelectedItems, setInternalSelectedItems] = useState<T[]>(
     () => externalSelectedItems ?? []
   );
+
   const isControlled = onSelectionChange !== undefined;
   const selectedItems = isControlled
     ? (externalSelectedItems ?? [])
     : internalSelectedItems;
+
   useEffect(() => {
     if (!isControlled && externalSelectedItems) {
       setInternalSelectedItems(externalSelectedItems);
     }
   }, [isControlled, externalSelectedItems]);
+
   const updateSelection = useCallback(
     (newItems: T[]) => {
       if (isControlled) {
@@ -44,6 +50,7 @@ export function useTableSelection<T>({
     },
     [isControlled, onSelectionChange]
   );
+
   const isItemSelected = useCallback(
     (item: T): boolean => {
       return selectedItems.some(
@@ -52,6 +59,7 @@ export function useTableSelection<T>({
     },
     [selectedItems, getItemId]
   );
+
   const handleSelectItem = useCallback(
     (item: T, checked: boolean) => {
       if (checked) {
@@ -66,6 +74,7 @@ export function useTableSelection<T>({
     },
     [selectedItems, updateSelection, getItemId]
   );
+
   const handleSelectAll = useCallback(
     (checked: boolean) => {
       if (checked) {
@@ -86,23 +95,29 @@ export function useTableSelection<T>({
     },
     [selectedItems, updateSelection, pageData, getItemId, isItemSelected]
   );
+
   const clearSelection = useCallback(() => {
     updateSelection([]);
   }, [updateSelection]);
+
   const selectAll = useCallback(
     (allData: T[]) => {
       updateSelection(allData);
     },
     [updateSelection]
   );
+
   const isAllPageSelected = useMemo(() => {
     return pageData.length > 0 && pageData.every((item) => isItemSelected(item));
   }, [pageData, isItemSelected]);
+
   const isPartiallySelected = useMemo(() => {
     const selectedCount = pageData.filter((item) => isItemSelected(item)).length;
     return selectedCount > 0 && selectedCount < pageData.length;
   }, [pageData, isItemSelected]);
+
   const selectedCount = selectedItems.length;
+
   return {
     selectedItems,
     isItemSelected,

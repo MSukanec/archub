@@ -7,7 +7,9 @@ import { BookOpen, Award, Eye, CheckCircle, Clock, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import type { ItemStatus } from '@shared/schema';
-type CourseMode = 'public'| 'dashboard';
+
+type CourseMode = 'public' | 'dashboard';
+
 const statusConfig = {
   available: {
     icon: CheckCircle,
@@ -28,6 +30,7 @@ const statusConfig = {
     isBlocking: true,
   },
 } as const;
+
 interface UnifiedCourseCardProps {
   course: {
     id: string;
@@ -50,6 +53,7 @@ interface UnifiedCourseCardProps {
   };
   onViewCourse?: () => void;
 }
+
 export function UnifiedCourseCard({
   course,
   mode = 'dashboard',
@@ -66,7 +70,7 @@ export function UnifiedCourseCard({
   const StatusIcon = config?.icon;
   const isBlocking = config?.isBlocking && !isAdmin;
   
-  const courseInfoUrl = mode === 'public'
+  const courseInfoUrl = mode === 'public' 
     ? `/cursos/${course.slug}` 
     : `/learning/courses/${course.slug}/info`;
   
@@ -102,7 +106,7 @@ export function UnifiedCourseCard({
             </Badge>
           </div>
         )}
-        {config && StatusIcon && status !== 'available'&& (
+        {config && StatusIcon && status !== 'available' && (
           <div className="absolute top-3 right-3">
             <Badge 
               className={cn("px-2 py-1 shadow-lg", config.badgeClass)}
@@ -114,11 +118,13 @@ export function UnifiedCourseCard({
           </div>
         )}
       </div>
+
       <CardHeader className="pb-3">
         <h3 className="text-xl font-bold line-clamp-2 group-hover:text-primary transition-colors">
           {course.title}
         </h3>
       </CardHeader>
+
       <CardContent className="pb-3">
         {course.short_description && (
           <p className="text-sm text-muted-foreground line-clamp-2">
@@ -133,6 +139,7 @@ export function UnifiedCourseCard({
           </p>
         )}
       </CardContent>
+
       <CardFooter className="pt-3 border-t flex-col gap-3">
         {isEnrolled ? (
           <>
@@ -175,7 +182,7 @@ export function UnifiedCourseCard({
               data-testid={`button-view-course-${course.id}`}
             >
               <Eye className="w-4 h-4" />
-              {hasProgress ? 'Continuar Curso': 'Ver Curso'}
+              {hasProgress ? 'Continuar Curso' : 'Ver Curso'}
             </Button>
           </>
         ) : (
@@ -194,25 +201,29 @@ export function UnifiedCourseCard({
               <span className="text-lg font-semibold text-primary">Gratis</span>
             )}
             <span className="text-sm text-primary font-medium group-hover:underline">
-              {isBlocking ? '': 'Ver más →'}
+              {isBlocking ? '' : 'Ver más →'}
             </span>
           </div>
         )}
       </CardFooter>
     </Card>
   );
+
   // Si el curso está bloqueado, no permitir navegación
   if (isBlocking) {
     return <div className="select-none pointer-events-none">{cardContent}</div>;
   }
+
   // Si NO está inscrito → llevar a la landing page del curso (para ver info y comprar)
   // Si SÍ está inscrito → llevar al CourseView (para ver el contenido)
-  const notEnrolledUrl = mode === 'public'
+  const notEnrolledUrl = mode === 'public' 
     ? `/cursos/${course.slug}` 
     : `/learning/courses/${course.slug}/info`;
+
   if (!isEnrolled) {
     return <Link href={notEnrolledUrl}>{cardContent}</Link>;
   }
+
   return (
     <div onClick={() => {
       if (onViewCourse) {

@@ -1,13 +1,15 @@
 import { User } from 'lucide-react';
 import type { Course } from '@shared/schema';
 import { SectionHeader } from './SectionHeader';
+
 interface InstructorSectionProps {
   course: Course;
   title?: string;
   subtitle?: string;
   description?: string;
-  variant?: 'default'| 'no-container';
+  variant?: 'default' | 'no-container';
 }
+
 export function InstructorSection({ 
   course, 
   title = "SOBRE EL DOCENTE",
@@ -16,6 +18,7 @@ export function InstructorSection({
   variant = 'default'
 }: InstructorSectionProps) {
   if (!course.instructor_name) return null;
+
   const content = (
     <div className="space-y-12">
       <SectionHeader
@@ -38,6 +41,7 @@ export function InstructorSection({
             </div>
           )}
         </div>
+
         <div className="lg:col-span-2 space-y-4">
           <div>
             <h3 className="text-3xl font-bold tracking-tight">
@@ -49,6 +53,7 @@ export function InstructorSection({
               </p>
             )}
           </div>
+
           {course.instructor_bio && (
             <div
               className="prose prose-lg dark:prose-invert max-w-none text-muted-foreground leading-relaxed"
@@ -59,9 +64,11 @@ export function InstructorSection({
       </div>
     </div>
   );
+
   if (variant === 'no-container') {
     return <section className="py-16 sm:py-20">{content}</section>;
   }
+
   return (
     <section className="py-16 sm:py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

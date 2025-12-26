@@ -1,6 +1,7 @@
 import { User } from 'lucide-react'
 import { FormModalHeader, FormModalFooter, FormModalLayout } from '@/components/modal'
 import { FormPanel, ViewPanel, useUserForm } from '../forms/AdminUserForm'
+
 interface UserModalProps {
   modalData?: {
     user?: any
@@ -8,8 +9,10 @@ interface UserModalProps {
   }
   onClose: () => void
 }
+
 export function AdminUserModal({ modalData, onClose }: UserModalProps) {
   const { user } = modalData || {}
+
   const {
     form,
     onSubmit,
@@ -18,12 +21,14 @@ export function AdminUserModal({ modalData, onClose }: UserModalProps) {
     user,
     onSuccess: onClose,
   })
+
   const headerContent = (
     <FormModalHeader 
       title="Editar Usuario"
       icon={User}
     />
   )
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -33,6 +38,7 @@ export function AdminUserModal({ modalData, onClose }: UserModalProps) {
       isSubmitting={isSubmitting}
     />
   )
+
   return (
     <FormModalLayout
       columns={1}

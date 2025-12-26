@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+
 import { useOptimisticMutation } from '@/core/save-engine';
 import { projectsKeys } from '@/core/query-keys';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -11,16 +13,19 @@ import { createProjectModality } from '../services/createProjectModality';
 import { updateProjectModality } from '../services/updateProjectModality';
 import { projectModalitySchema, type ProjectModalityFormData } from '../schemas';
 import type { ProjectModality } from '../types';
+
 interface ProjectModalityFormCallbacks {
-  onSuccess?: (mode: 'create'| 'edit') => void;
+  onSuccess?: (mode: 'create' | 'edit') => void;
   onError?: (error: Error) => void;
 }
+
 interface UseProjectModalityFormOptions {
   projectModality?: ProjectModality;
-  mode: 'create'| 'edit'| 'view';
+  mode: 'create' | 'edit' | 'view';
   onSuccess?: () => void;
   callbacks?: ProjectModalityFormCallbacks;
 }
+
 export function ViewPanel({ data }: { data: ProjectModality }) {
   return (
     <div className="space-y-4">
@@ -36,6 +41,7 @@ export function ViewPanel({ data }: { data: ProjectModality }) {
     </div>
   );
 }
+
 export function FormPanel({
   form,
   onSubmit,
@@ -67,6 +73,7 @@ export function FormPanel({
     </Form>
   );
 }
+
 export function useProjectModalityForm({
   projectModality,
   mode,
@@ -76,12 +83,14 @@ export function useProjectModalityForm({
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   const { data: members = [] } = useOrganizationMembers(organizationId);
+
   const form = useForm<ProjectModalityFormData>({
     resolver: zodResolver(projectModalitySchema),
     defaultValues: {
       name: '',
     }
   });
+
   useEffect(() => {
     if (projectModality) {
       form.reset({
@@ -93,9 +102,11 @@ export function useProjectModalityForm({
       });
     }
   }, [projectModality, form]);
+
   const reset = () => {
     form.reset();
   };
+
   const { mutate: createModality, isPending: isCreating } = useOptimisticMutation({
     mutationFn: async (data: { name: string; organizationId: string; createdBy: string }) => {
       return createProjectModality(data);
@@ -103,7 +114,7 @@ export function useProjectModalityForm({
     queryKey: projectsKeys.modalityList(organizationId),
     optimisticUpdate: (oldData: ProjectModality[] | undefined, variables) => {
       const optimisticModality = {
-        id: 'temp-'+ Date.now(),
+        id: 'temp-' + Date.now(),
         name: variables.name,
         organization_id: variables.organizationId,
         created_by: variables.createdBy,
@@ -116,6 +127,7 @@ export function useProjectModalityForm({
     onErrorMessage: "Error al crear modalidad",
     additionalQueryKeys: [projectsKeys.modalities()],
   });
+
   const { mutate: updateModality, isPending: isUpdating } = useOptimisticMutation({
     mutationFn: async (data: { modalityId: string; organizationId: string; name: string }) => {
       return updateProjectModality(data.modalityId, data.organizationId, { name: data.name });
@@ -131,12 +143,14 @@ export function useProjectModalityForm({
     onErrorMessage: "Error al actualizar modalidad",
     additionalQueryKeys: [projectsKeys.modalities()],
   });
+
   const onSubmit = async (data: ProjectModalityFormData) => {
     if (!organizationId) {
       callbacks.onError?.(new Error('Faltan datos de organización'));
       return;
     }
-    if (mode === 'edit'&& projectModality) {
+
+    if (mode === 'edit' && projectModality) {
       updateModality({
         modalityId: projectModality.id,
         organizationId,
@@ -150,6 +164,7 @@ export function useProjectModalityForm({
         callbacks.onError?.(new Error('No se encontró el miembro de la organización'));
         return;
       }
+
       createModality({
         name: data.name,
         organizationId,
@@ -159,6 +174,7 @@ export function useProjectModalityForm({
       onSuccess?.();
     }
   };
+
   return {
     form,
     onSubmit,
@@ -167,4 +183,5 @@ export function useProjectModalityForm({
     organizationId,
   };
 }
+
 export type { ProjectModality, ProjectModalityFormData };

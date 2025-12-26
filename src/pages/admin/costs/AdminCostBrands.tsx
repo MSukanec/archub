@@ -5,25 +5,32 @@ import { toast } from '@/hooks/use-toast'
 import { useBrands, Brand, useDeleteBrand } from '@/hooks/use-brands'
 import { useGlobalModalStore } from '@/components/modal'
 import AdminBrandRow from '@/features/materials/components/admin/AdminBrandRow'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
 import { Table } from '@/components/shared/trees/Table'
+
 import { Plus, Edit, Trash2, Tag } from 'lucide-react'
+
 const AdminCostBrands = () => {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('name')
   
   const { openModal } = useGlobalModalStore()
+
   // Fetch brands using the hook
   const { data: brands = [], isLoading } = useBrands()
   const deleteBrandMutation = useDeleteBrand()
+
   // Apply client-side filtering
   const filteredBrands = brands.filter(brand => {
-    const matchesSearch = searchValue === ''|| brand.name.toLowerCase().includes(searchValue.toLowerCase())
+    const matchesSearch = searchValue === '' || brand.name.toLowerCase().includes(searchValue.toLowerCase())
     return matchesSearch
   })
+
   // Apply client-side sorting
   const sortedBrands = [...filteredBrands].sort((a, b) => {
     if (sortBy === 'name') {
@@ -32,12 +39,15 @@ const AdminCostBrands = () => {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     }
   })
+
   const handleEdit = (brand: Brand) => {
     openModal('brand-form', { editingBrand: brand })
   }
+
   const handleCreate = () => {
     openModal('brand-form', { editingBrand: null })
   }
+
   const handleDelete = (brand: Brand) => {
     // Crear lista de marcas disponibles para reemplazo (excluyendo la actual)
     const replacementOptions = brands
@@ -46,6 +56,7 @@ const AdminCostBrands = () => {
         value: b.id,
         label: b.name
       }))
+
     openModal('delete-confirmation', {
       mode: 'replace',
       title: 'Eliminar Marca',
@@ -64,10 +75,12 @@ const AdminCostBrands = () => {
       isLoading: deleteBrandMutation.isPending
     })
   }
+
   const clearFilters = () => {
     setSearchValue('')
     setSortBy('name')
   }
+
   const columns = [
     {
       key: 'created_at',
@@ -90,6 +103,7 @@ const AdminCostBrands = () => {
       )
     }
   ]
+
   return (
     <div className="space-y-6">
       <Table
@@ -106,7 +120,7 @@ const AdminCostBrands = () => {
             icon: Trash2,
             label: 'Eliminar',
             onClick: () => handleDelete(brand),
-            variant: 'destructive'as const
+            variant: 'destructive' as const
           }
         ]}
         renderCard={(brand) => (
@@ -127,4 +141,5 @@ const AdminCostBrands = () => {
     </div>
   )
 }
+
 export default AdminCostBrands

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image } from '@react-pdf/renderer';
 import { PdfBlockProps } from '../types';
+
 const styles = StyleSheet.create({
   header: {
     marginBottom: 20,
@@ -52,6 +53,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 });
+
 interface HeaderData {
   title?: string;
   subtitle?: string;
@@ -67,8 +69,9 @@ interface HeaderData {
   logoUrl?: string;
   logoSize?: number;
   showDivider?: boolean;
-  layout?: 'row'| 'column';
+  layout?: 'row' | 'column';
 }
+
 export const PdfHeader: React.FC<PdfBlockProps<HeaderData>> = ({ data, config }) => {
   const headerConfig = {
     title: data?.title || config?.title || 'Presupuesto de Construcción',
@@ -87,11 +90,13 @@ export const PdfHeader: React.FC<PdfBlockProps<HeaderData>> = ({ data, config })
     showDivider: data?.showDivider !== false && config?.showDivider !== false,
     layout: data?.layout || config?.layout || 'row',
   };
+
   const logoStyle = {
     ...styles.logo,
     width: headerConfig.logoSize,
     height: headerConfig.logoSize,
   };
+
   if (headerConfig.layout === 'column') {
     return (
       <View style={styles.header}>
@@ -114,7 +119,7 @@ export const PdfHeader: React.FC<PdfBlockProps<HeaderData>> = ({ data, config })
         )}
         
         {/* Información en dos columnas */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           <View style={{ flex: 1, marginRight: 20 }}>
             {headerConfig.projectName && (
               <View style={styles.infoRow}>
@@ -156,6 +161,7 @@ export const PdfHeader: React.FC<PdfBlockProps<HeaderData>> = ({ data, config })
       </View>
     );
   }
+
   // Layout horizontal (por defecto)
   return (
     <View style={styles.header}>
@@ -176,7 +182,7 @@ export const PdfHeader: React.FC<PdfBlockProps<HeaderData>> = ({ data, config })
           )}
           
           {/* Información del proyecto */}
-          <View style={{ flexDirection: 'row'}}>
+          <View style={{ flexDirection: 'row' }}>
             <View style={{ flex: 1, marginRight: 15 }}>
               {headerConfig.projectName && (
                 <View style={styles.infoRow}>

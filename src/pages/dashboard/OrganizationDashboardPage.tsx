@@ -9,6 +9,7 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { OrganizationDashboardView } from '@/features/organization/views/OrganizationDashboardView';
+
 export function OrganizationDashboardPage() {
   const [, setLocation] = useLocation();
   const { data: userData } = useCurrentUser();
@@ -20,25 +21,30 @@ export function OrganizationDashboardPage() {
   
   const layoutPreference = userData?.preferences?.layout || 'experimental';
   const isLabLayout = layoutPreference === 'lab';
+
   useEffect(() => {
     if (isMobile) {
       setShowActionBar(false);
     }
   }, [isMobile, setShowActionBar]);
+
   useEffect(() => {
     if (sidebarLevel !== 'general') {
       setSidebarLevel('organization');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setSidebarLevel]);
+
   const handleProjectSelected = (projectId: string) => {
     setSidebarLevel('project');
     setLocation('/project/dashboard');
   };
+
   const handleNavigateToProjects = () => {
     setSidebarLevel('organization');
     setLocation('/organization/projects');
   };
+
   const headerProps = {
     icon: Home,
     title: "Visión General",
@@ -46,6 +52,7 @@ export function OrganizationDashboardPage() {
     organizationId: organizationId,
     showMembers: true
   };
+
   if (isLabLayout) {
     return (
       <LabLayout 
@@ -61,6 +68,7 @@ export function OrganizationDashboardPage() {
       </LabLayout>
     );
   }
+
   return (
     <Layout headerProps={headerProps} wide={true}>
       <OrganizationDashboardView 

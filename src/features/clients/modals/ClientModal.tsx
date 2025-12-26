@@ -1,13 +1,15 @@
 import { ClientForm } from '../forms/ClientForm'
+
 interface ClientModalProps {
   modalData?: {
     projectId?: string;
     clientId?: string;
   };
   onClose: () => void;
-  mode?: 'create'| 'edit'| 'view';
+  mode?: 'create' | 'edit' | 'view';
 }
-export function ClientModal({ modalData, onClose, mode = 'create'}: ClientModalProps) {
+
+export function ClientModal({ modalData, onClose, mode = 'create' }: ClientModalProps) {
   return (
     <ClientForm
       modalData={modalData}
@@ -16,4 +18,5 @@ export function ClientModal({ modalData, onClose, mode = 'create'}: ClientModalP
     />
   )
 }
+
 export default ClientModal

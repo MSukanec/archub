@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+
 /**
  * Hook para contar alertas críticas/altas abiertas en el Ops Center
  * Solo disponible para admins - memoizes access token to avoid timing issues during refresh

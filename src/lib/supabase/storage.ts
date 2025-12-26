@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 export const storageHelpers = {
   /**
    * Get public URL for a file in a public bucket
@@ -7,6 +8,7 @@ export const storageHelpers = {
     const { data } = supabase.storage.from(bucket).getPublicUrl(path);
     return data.publicUrl;
   },
+
   /**
    * Create a signed URL for accessing private files
    */
@@ -20,6 +22,7 @@ export const storageHelpers = {
     
     return data.signedUrl;
   },
+
   /**
    * Download file as Blob from private bucket
    */
@@ -33,6 +36,7 @@ export const storageHelpers = {
     
     return data;
   },
+
   /**
    * Fetch file as blob from public URL
    */
@@ -44,6 +48,7 @@ export const storageHelpers = {
     return await response.blob();
   }
 };
+
 // Legacy exports for backward compatibility
 export const uploadToBucket = async (bucket: string, path: string, file: File): Promise<string> => {
   const { error } = await supabase.storage
@@ -57,6 +62,7 @@ export const uploadToBucket = async (bucket: string, path: string, file: File): 
   
   return storageHelpers.getPublicUrl(bucket, path);
 };
+
 export const removeFromBucket = async (bucket: string, paths: string[]): Promise<void> => {
   const { error } = await supabase.storage
     .from(bucket)
@@ -64,6 +70,7 @@ export const removeFromBucket = async (bucket: string, paths: string[]): Promise
   
   if (error) throw error;
 };
+
 export const getPublicUrl = (bucket: string, path: string): string => {
   return storageHelpers.getPublicUrl(bucket, path);
 };

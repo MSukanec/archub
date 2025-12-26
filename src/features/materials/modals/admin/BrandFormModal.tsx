@@ -2,36 +2,45 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+
 import { FormModalLayout } from '@/components/modal'
 import { FormModalHeader } from '@/components/modal'
 import { FormModalFooter } from '@/components/modal'
 import { useModalPanelStore } from '@/components/modal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+
 import { useCreateBrand, useUpdateBrand, Brand, NewBrandData } from '@/hooks/use-brands'
+
 import { Tag } from 'lucide-react'
+
 const brandSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
 })
+
 interface BrandFormModalProps {
   modalData: {
     editingBrand?: Brand | null
   }
   onClose: () => void
 }
+
 export function BrandFormModal({ modalData, onClose }: BrandFormModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   
   const { editingBrand } = modalData
   const isEditing = !!editingBrand
+
   // Hooks
   const createMutation = useCreateBrand()
   const updateMutation = useUpdateBrand()
   const { setPanel } = useModalPanelStore()
+
   // Force edit mode when modal opens
   useEffect(() => {
     setPanel('edit')
   }, [])
+
   // Form setup
   const form = useForm<z.infer<typeof brandSchema>>({
     resolver: zodResolver(brandSchema),
@@ -39,6 +48,7 @@ export function BrandFormModal({ modalData, onClose }: BrandFormModalProps) {
       name: '',
     },
   })
+
   // Load editing data
   useEffect(() => {
     if (isEditing && editingBrand) {
@@ -51,6 +61,7 @@ export function BrandFormModal({ modalData, onClose }: BrandFormModalProps) {
       })
     }
   }, [isEditing, editingBrand, form])
+
   const onSubmit = async (data: z.infer<typeof brandSchema>) => {
     setIsLoading(true)
     
@@ -72,8 +83,10 @@ export function BrandFormModal({ modalData, onClose }: BrandFormModalProps) {
       setIsLoading(false)
     }
   }
+
   // View panel (not needed for this modal as it's always in edit mode)
   const viewPanel = null
+
   // Edit panel with form
   const editPanel = (
     <Form {...form}>
@@ -98,12 +111,14 @@ export function BrandFormModal({ modalData, onClose }: BrandFormModalProps) {
       </form>
     </Form>
   )
+
   const headerContent = (
     <FormModalHeader 
       title={isEditing ? "Editar Marca" : "Nueva Marca"}
       icon={Tag}
     />
   )
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -112,6 +127,7 @@ export function BrandFormModal({ modalData, onClose }: BrandFormModalProps) {
       onRightClick={form.handleSubmit(onSubmit)}
     />
   )
+
   return (
     <FormModalLayout
       columns={1}

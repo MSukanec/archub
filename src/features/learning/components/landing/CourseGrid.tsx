@@ -2,10 +2,12 @@ import { CourseCard } from './CourseCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { BookOpen } from 'lucide-react';
 import type { Course } from '@shared/schema';
+
 interface CourseGridProps {
   courses: Course[];
   isLoading?: boolean;
 }
+
 function CourseCardSkeleton() {
   return (
     <Card className="h-full overflow-hidden">
@@ -21,6 +23,7 @@ function CourseCardSkeleton() {
     </Card>
   );
 }
+
 export function CourseGrid({ courses, isLoading }: CourseGridProps) {
   // Loading State - Show 3 skeleton cards
   if (isLoading) {
@@ -32,6 +35,7 @@ export function CourseGrid({ courses, isLoading }: CourseGridProps) {
       </div>
     );
   }
+
   // Empty State
   if (!courses || courses.length === 0) {
     return (
@@ -48,6 +52,7 @@ export function CourseGrid({ courses, isLoading }: CourseGridProps) {
       </Card>
     );
   }
+
   // Courses Grid - 3 columns on desktop, 2 on tablet, 1 on mobile
   return (
     <div 

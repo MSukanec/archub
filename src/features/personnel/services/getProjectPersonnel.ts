@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { ProjectPersonnel } from '../types';
+
 export async function getProjectPersonnel(
   projectId: string,
   organizationId: string
@@ -7,6 +8,7 @@ export async function getProjectPersonnel(
   if (!supabase || !projectId) {
     return [];
   }
+
   const { data, error } = await supabase
     .from('project_personnel_view')
     .select(`
@@ -32,10 +34,12 @@ export async function getProjectPersonnel(
     .eq('project_id', projectId)
     .eq('is_deleted', false)
     .order('created_at', { ascending: true });
+
   if (error) {
     console.error('Error fetching project personnel:', error);
     throw error;
   }
+
   return (data || []).map((row: any) => ({
     id: row.id,
     project_id: row.project_id,

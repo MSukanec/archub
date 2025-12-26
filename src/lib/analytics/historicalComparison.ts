@@ -5,6 +5,7 @@ import {
   type ComparisonType,
   DEFAULT_COMPARISON_OPTIONS,
 } from './types';
+
 export function calculateHistoricalComparison(
   currentValue: number,
   historicalValues: number[],
@@ -14,18 +15,23 @@ export function calculateHistoricalComparison(
     ...DEFAULT_COMPARISON_OPTIONS,
     ...options,
   };
+
   const relevantValues = historicalValues.slice(-windowSize);
   
   if (relevantValues.length < minDataPoints) {
     return null;
   }
+
   const sum = relevantValues.reduce((acc, val) => acc + val, 0);
   const historicalAverage = sum / relevantValues.length;
+
   if (historicalAverage === 0) {
     return null;
   }
+
   const deltaPercent = ((currentValue - historicalAverage) / historicalAverage) * 100;
   const absoluteDelta = Math.abs(deltaPercent);
+
   let direction: ComparisonDirection;
   if (absoluteDelta <= stableThresholdPercent) {
     direction = 'stable';
@@ -34,6 +40,7 @@ export function calculateHistoricalComparison(
   } else {
     direction = 'down';
   }
+
   let comparisonType: ComparisonType;
   if (absoluteDelta <= stableThresholdPercent) {
     comparisonType = 'at_average';
@@ -42,6 +49,7 @@ export function calculateHistoricalComparison(
   } else {
     comparisonType = 'below_average';
   }
+
   return {
     deltaPercent: Math.round(deltaPercent * 10) / 10,
     direction,
@@ -51,13 +59,15 @@ export function calculateHistoricalComparison(
     dataPoints: relevantValues.length,
   };
 }
+
 export function formatHistoricalComparison(
   result: HistoricalComparisonResult | null,
   options?: { prefix?: string; suffix?: string }
 ): string | null {
   if (!result) return null;
-  const { prefix = '', suffix = 'vs promedio'} = options ?? {};
-  const sign = result.deltaPercent > 0 ? '+': '';
+
+  const { prefix = '', suffix = 'vs promedio' } = options ?? {};
+  const sign = result.deltaPercent > 0 ? '+' : '';
   
   return `${prefix}${sign}${result.deltaPercent}% ${suffix}`;
 }

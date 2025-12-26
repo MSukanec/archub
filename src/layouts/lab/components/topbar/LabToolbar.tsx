@@ -1,6 +1,7 @@
 import { Search } from 'lucide-react';
 import { ContextMegaMenu, PagesMegaMenu, TabsMegaMenu, UserAvatarMenu, type PageTab } from './MegaMenu';
 import { ExpandableAvatarGroup } from '@/components/shared/layout/ExpandableAvatarGroup';
+
 interface LabToolbarProps {
   showSecondaryToolbar?: boolean;
   showSearch?: boolean;
@@ -16,6 +17,7 @@ interface LabToolbarProps {
   activeTab?: string;
   onTabChange?: (tabId: string) => void;
 }
+
 export function LabToolbar({
   showSecondaryToolbar = true,
   showSearch = true,

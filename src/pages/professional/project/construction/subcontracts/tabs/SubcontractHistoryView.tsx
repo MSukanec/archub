@@ -1,6 +1,7 @@
 import React from 'react';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { 
   Calendar, 
   FileText, 
   DollarSign, 
@@ -19,11 +20,14 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { useQuery } from "@tanstack/react-query";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
+
 interface SubcontractHistoryViewProps {
   subcontract: any;
 }
+
 export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewProps) {
   const { data: userData } = useCurrentUser();
+
   // Query para obtener pagos del subcontrato
   const { data: subcontractPayments = [] } = useQuery({
     queryKey: ['subcontract-payments', subcontract?.id],
@@ -36,18 +40,20 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
       const data = await response.json();
       return data.map((payment: any) => ({
         ...payment,
-        currency_symbol: payment.currency_name === 'Peso Argentino'? '$': 
-                        payment.currency_name === 'Dólar Estadounidense'? 'US$': '$'
+        currency_symbol: payment.currency_name === 'Peso Argentino' ? '$' : 
+                        payment.currency_name === 'Dólar Estadounidense' ? 'US$' : '$'
       }));
     },
     enabled: !!subcontract?.id && !!userData?.organization?.id
   });
+
   // Query para obtener el historial del subcontrato
   const { data: historyData = [], isLoading } = useQuery({
     queryKey: ['subcontract-history', subcontract?.id, subcontractPayments],
     queryFn: async () => {
       // Por ahora crear datos de prueba basados en la información del subcontrato
       const events = [];
+
       // 1. Creación del subcontrato
       if (subcontract?.created_at) {
         events.push({
@@ -62,6 +68,7 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
           status: 'completed'
         });
       }
+
       // 2. Envío de RFQ (Request for Quotation)
       events.push({
         id: 'rfq_sent',
@@ -74,6 +81,7 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
         icon: Send,
         status: 'completed'
       });
+
       // 3. Recepción de ofertas (basado en bids existentes)
       // Simular recepción de ofertas
       events.push({
@@ -87,6 +95,7 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
         icon: FileCheck,
         status: 'completed'
       });
+
       // 4. Adjudicación (si existe winner_bid_id)
       if (subcontract?.winner_bid_id) {
         events.push({
@@ -101,6 +110,7 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
           status: 'completed'
         });
       }
+
       // 5. Pagos (basado en datos reales)
       console.log('Subcontract payments:', subcontractPayments);
       if (subcontractPayments && subcontractPayments.length > 0) {
@@ -119,6 +129,7 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
           });
         });
       }
+
       // 6. Firma de contrato (pendiente)
       events.push({
         id: 'contract_signing',
@@ -131,6 +142,7 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
         icon: PenTool,
         status: 'pending'
       });
+
       console.log('All events before sorting:', events);
       const sortedEvents = events.sort((a, b) => {
         // Eventos pendientes (sin fecha) van al final
@@ -148,6 +160,7 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
     },
     enabled: !!subcontract?.id
   });
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
@@ -160,21 +173,24 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
         return <Badge variant="outline">Sin estado</Badge>;
     }
   };
+
   const getIcon = (IconComponent: any, status: string) => {
-    const iconClass = status === 'completed'? 'text-green-600': 
-                     status === 'pending'? 'text-yellow-600': 
+    const iconClass = status === 'completed' ? 'text-green-600' : 
+                     status === 'pending' ? 'text-yellow-600' : 
                      'text-blue-600';
     return <IconComponent className={`w-5 h-5 ${iconClass}`} />;
   };
+
   const getInitials = (name: string) => {
     if (!name) return 'S';
     return name
-      .split('')
+      .split(' ')
       .map(word => word.charAt(0))
       .join('')
       .toUpperCase()
       .slice(0, 2);
   };
+
   const columns = [
     {
       key: 'icon',
@@ -225,6 +241,7 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
       render: (event: any) => getStatusBadge(event.status)
     }
   ];
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -232,6 +249,7 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
       </div>
     );
   }
+
   if (historyData.length === 0) {
     return (
       <EmptyState
@@ -241,8 +259,11 @@ export function SubcontractHistoryView({ subcontract }: SubcontractHistoryViewPr
       />
     );
   }
+
   return (
     <div className="space-y-6">
+
+
       <Table 
         columns={columns}
         data={historyData}

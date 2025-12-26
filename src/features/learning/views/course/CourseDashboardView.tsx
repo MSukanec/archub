@@ -1,9 +1,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { apiRequest } from '@/lib/queryClient'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/shared/AppCard';
-import { ActivityCard } from '@/components';
-import { InsightCard
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ActivityCard'
 import { BookOpen, CheckCircle, Clock, FileText, Bookmark, Megaphone, Info, PlayCircle, Play, MessageCircle } from 'lucide-react'
 import type { ThreadsResponse, ForumThreadWithAuthor } from '@/features/forum/services'
 import { 
@@ -27,9 +25,11 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/shared/EmptyState'
+
 interface CourseDashboardTabProps {
   courseId?: string;
 }
+
 export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps) {
   const [, navigate] = useLocation();
   const { id: courseSlug } = useParams<{ id: string }>();
@@ -37,6 +37,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
   const setActiveTab = useCoursePlayerStore(s => s.setActiveTab);
   const { data: userData } = useCurrentUser();
   const { data: course } = useCourseOverview(courseSlug);
+
   // Handler to navigate to a specific tab
   const navigateToTab = (tab: string) => {
     if (courseSlug) {
@@ -46,8 +47,10 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       navigate(`/learning/courses/${courseSlug}?tab=${encodeURIComponent(tab)}`);
     }
   };
+
   // 🚀 Use learning feature hooks
   const { data: lessonProgressArray = [] } = useCourseProgress(courseId);
+
   // Calculate aggregated course progress from lesson progress array
   const courseProgress = useMemo(() => {
     if (!lessonProgressArray || lessonProgressArray.length === 0) {
@@ -64,19 +67,26 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       total_lessons: totalLessons
     };
   }, [lessonProgressArray]);
+
   // 🚀 Get total study time usando el hook del feature
   const { data: studyTime } = useStudyTime(userData?.user?.id, courseId);
+
   // 🚀 Get recent notes and markers usando los hooks del feature
   const { data: recentNotes = [] } = useCourseRecentNotes(courseId);
   const { data: recentMarkers = [] } = useCourseRecentMarkers(courseId);
+
   // 🚀 Get total course duration usando el hook del feature
   const { data: courseDuration } = useCourseDuration(courseId);
+
   // 🚀 Get user's enrollment usando el hook del feature
   const { data: enrollment } = useCourseEnrollment(courseId, userData?.user?.id);
+
   // 🚀 Get last lesson in progress usando el hook del feature
   const { data: lastLessonProgress } = useLastLessonInProgress(courseId, userData?.user?.id);
+
   // 🚀 Fetch lesson details for the last lesson in progress usando el hook del feature
   const { data: lastLessonDetails } = useLessonDetails(lastLessonProgress?.lesson_id);
+
   // Combine lastLessonProgress with lastLessonDetails
   const lastLesson = useMemo(() => {
     if (!lastLessonProgress) return null;
@@ -89,8 +99,10 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       is_completed: false
     };
   }, [lastLessonProgress, lastLessonDetails]);
+
   // 🚀 Get user's monthly study time usando el hook del feature
   const { data: monthlyStudyTime } = useMonthlyStudyTime();
+
   // 🚀 Get recent forum threads for this course
   const { data: forumThreadsData } = useQuery<ThreadsResponse>({
     queryKey: ['/api/forum/courses', courseId, 'threads', { recent: true }],
@@ -103,6 +115,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     staleTime: 60 * 1000,
   });
   const recentForumThreads = forumThreadsData?.threads || [];
+
   // Calculate stats
   const stats = useMemo(() => {
     const progressPct = courseProgress?.progress_pct || 0;
@@ -124,6 +137,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     } else {
       studyTimeFormatted = `0 MIN`;
     }
+
     // Format course total duration
     const courseHours = Math.floor(courseTotalSeconds / 3600);
     const courseMinutes = Math.floor((courseTotalSeconds % 3600) / 60);
@@ -136,6 +150,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     } else {
       courseDurationFormatted = `sin contenido`;
     }
+
     // Format this month study time
     const monthHours = Math.floor(monthSeconds / 3600);
     const monthMinutes = Math.floor((monthSeconds % 3600) / 60);
@@ -148,6 +163,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     } else {
       monthTimeFormatted = `0 HS`;
     }
+
     // Calculate subscription days remaining
     let daysRemaining = 0;
     let totalDays = 0;
@@ -169,14 +185,16 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       // No expiration date = unlimited access
       isUnlimited = true;
     }
+
     let subscriptionFormatted = '';
     if (daysRemaining > 0) {
-      subscriptionFormatted = `${daysRemaining} ${daysRemaining === 1 ? 'DÍA': 'DÍAS'}`;
+      subscriptionFormatted = `${daysRemaining} ${daysRemaining === 1 ? 'DÍA' : 'DÍAS'}`;
     } else if (isUnlimited) {
       subscriptionFormatted = '-';
     } else {
       subscriptionFormatted = 'EXPIRADO';
     }
+
     let subscriptionMetaFormatted = '';
     if (isUnlimited) {
       subscriptionMetaFormatted = 'acceso sin límite de tiempo';
@@ -185,6 +203,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     } else {
       subscriptionMetaFormatted = 'suscripción vencida';
     }
+
     return {
       progressPct: Number(progressPct).toFixed(1),
       doneLessons,
@@ -196,6 +215,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       subscriptionMetaFormatted
     };
   }, [courseProgress, studyTime, courseDuration, enrollment, monthlyStudyTime]);
+
   if (!courseId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -203,6 +223,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
       </div>
     )
   }
+
   return (
     <div className="space-y-6">
       {/* Hero Section with Course Cover Background and KPIs */}
@@ -297,6 +318,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           </div>
         </div>
       </div>
+
       {/* Forum, Notes and Markers Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Forum Card - Navega a Foro */}
@@ -360,6 +382,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
             )}
           </StatCardContent>
         </StatCard>
+
         {/* Notes Card - Navega a Apuntes */}
         <StatCard onCardClick={() => navigateToTab('Apuntes')}>
           <StatCardTitle>Apuntes Creados</StatCardTitle>
@@ -437,6 +460,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
             )}
           </StatCardContent>
         </StatCard>
+
         {/* Markers Card - Navega a Marcadores */}
         <StatCard onCardClick={() => navigateToTab('Marcadores')}>
           <StatCardTitle>Marcadores Creados</StatCardTitle>

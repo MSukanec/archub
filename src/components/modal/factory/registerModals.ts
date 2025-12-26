@@ -1,4 +1,5 @@
 import { registerModal, ModalConfig } from './registry';
+
 import { InviteMemberModal, AdminOrganizationModal, MemberActionConfirmationModal, UpgradeModal } from '@/features/organization';
 import { CapitalParticipantModal, PartnerContributionModal, PartnerWithdrawalModal, CapitalTransactionModal, CapitalAdjustmentModal } from '@/features/capital';
 import { ProjectModal } from '@/features/projects';
@@ -35,18 +36,22 @@ import CourseForumCategoryForm from '@/features/forum/forms/CourseForumCategoryF
 import { NewMovementModal } from '@/features/finances/modals/NewMovementModal';
 import { DataHealthDetailsModal } from '@/core/data-health/components/DataHealthDetailsModal';
 import { NewMoodboardItemModal } from '@/features/moodboard';
-const organizationConfig: ModalConfig = { category: 'organization', size: 'md'};
-const foundersConfig: ModalConfig = { category: 'founders', size: 'md'};
-const forumConfig: ModalConfig = { category: 'forum', size: 'md'};
-const projectConfig: ModalConfig = { category: 'project', size: 'lg'};
-const financeConfig: ModalConfig = { category: 'finance', size: 'lg'};
-const learningConfig: ModalConfig = { category: 'learning', size: 'lg'};
-const adminConfig: ModalConfig = { category: 'admin', size: 'md'};
-const generalConfig: ModalConfig = { category: 'general', size: 'md'};
+
+const organizationConfig: ModalConfig = { category: 'organization', size: 'md' };
+const foundersConfig: ModalConfig = { category: 'founders', size: 'md' };
+const forumConfig: ModalConfig = { category: 'forum', size: 'md' };
+const projectConfig: ModalConfig = { category: 'project', size: 'lg' };
+const financeConfig: ModalConfig = { category: 'finance', size: 'lg' };
+const learningConfig: ModalConfig = { category: 'learning', size: 'lg' };
+const adminConfig: ModalConfig = { category: 'admin', size: 'md' };
+const generalConfig: ModalConfig = { category: 'general', size: 'md' };
+
 let initialized = false;
+
 export function initializeModalRegistry(): void {
   if (initialized) return;
   initialized = true;
+
   registerModal('member', InviteMemberModal as any, {
     ...organizationConfig,
     mapDataToProps: (data) => ({
@@ -54,7 +59,7 @@ export function initializeModalRegistry(): void {
         organizationId: data?.organizationId,
         editingMember: data?.editingMember,
         defaultEmail: data?.defaultEmail,
-        mode: data?.editingMember ? 'edit': 'create',
+        mode: data?.editingMember ? 'edit' : 'create',
       },
     }),
   });
@@ -69,7 +74,7 @@ export function initializeModalRegistry(): void {
         modalData: {
           organizationId: data?.organizationId,
           participantId: data?.participantId || data?.partnerId,
-          mode: (data?.participantId || data?.partnerId) ? 'edit': 'create',
+          mode: (data?.participantId || data?.partnerId) ? 'edit' : 'create',
         },
       };
     },
@@ -109,7 +114,7 @@ export function initializeModalRegistry(): void {
       modalData: {
         organizationId: data?.organizationId,
         participantId: data?.partnerId,
-        mode: data?.partnerId ? 'edit': 'create',
+        mode: data?.partnerId ? 'edit' : 'create',
       },
     }),
   });
@@ -167,7 +172,7 @@ export function initializeModalRegistry(): void {
   registerModal('board', BoardFormModal as any, organizationConfig);
   registerModal('card', CardFormModal as any, organizationConfig);
   registerModal('list', ListFormModal as any, organizationConfig);
-  registerModal('organization', AdminOrganizationModal as any, { ...organizationConfig, size: 'lg'});
+  registerModal('organization', AdminOrganizationModal as any, { ...organizationConfig, size: 'lg' });
   registerModal('profile-organization', ProfileOrganizationFormModal as any, organizationConfig);
   registerModal('organization-movement-concept', OrganizationMovementConceptFormModal as any, organizationConfig);
   
@@ -176,24 +181,24 @@ export function initializeModalRegistry(): void {
     size: 'lg',
     mapDataToProps: (data) => ({
       project: data?.editingProject || data?.project,
-      mode: data?.mode || (data?.isEditing ? 'edit': (data?.editingProject || data?.project ? 'edit': 'create')),
+      mode: data?.mode || (data?.isEditing ? 'edit' : (data?.editingProject || data?.project ? 'edit' : 'create')),
     }),
   });
   registerModal('gallery', GalleryFormModal as any, projectConfig);
-  registerModal('document-folder', DocumentFolderFormModal as any, { ...projectConfig, size: 'md'});
+  registerModal('document-folder', DocumentFolderFormModal as any, { ...projectConfig, size: 'md' });
   registerModal('document-upload', DocumentUploadFormModal as any, projectConfig);
   registerModal('budget', BudgetFormModal as any, projectConfig);
   registerModal('budget-task-bulk-add', BudgetTaskFormModal as any, projectConfig);
-  registerModal('construction-phase', ConstructionPhaseFormModal as any, { ...projectConfig, size: 'md'});
-  registerModal('construction-task', TaskMultiModal as any, { ...projectConfig, size: 'xl'});
+  registerModal('construction-phase', ConstructionPhaseFormModal as any, { ...projectConfig, size: 'md' });
+  registerModal('construction-task', TaskMultiModal as any, { ...projectConfig, size: 'xl' });
   registerModal('construction-task-schedule', ConstructionTaskScheduleModal as any, projectConfig);
-  registerModal('dependency-connection', DependencyConnectionModal as any, { ...projectConfig, size: 'md'});
+  registerModal('dependency-connection', DependencyConnectionModal as any, { ...projectConfig, size: 'md' });
   registerModal('budget-item', BudgetItemModal as any, projectConfig);
   registerModal('task', TaskModal as any, projectConfig);
   registerModal('analysis-task', TaskModal as any, projectConfig);
-  registerModal('task-category', TaskCategoryFormModal as any, { ...projectConfig, size: 'md'});
-  registerModal('task-division', TaskDivisionFormModal as any, { ...projectConfig, size: 'md'});
-  registerModal('task-parameter', TaskParameterFormModal as any, { ...projectConfig, size: 'md'});
+  registerModal('task-category', TaskCategoryFormModal as any, { ...projectConfig, size: 'md' });
+  registerModal('task-division', TaskDivisionFormModal as any, { ...projectConfig, size: 'md' });
+  registerModal('task-parameter', TaskParameterFormModal as any, { ...projectConfig, size: 'md' });
   registerModal('task-parameter-option', TaskParameterOptionFormModal as any, { 
     ...projectConfig, 
     size: 'sm',
@@ -218,7 +223,7 @@ export function initializeModalRegistry(): void {
     size: 'md',
     mapDataToProps: (data) => ({
       projectType: data?.projectType,
-      mode: data?.isEditing || data?.projectType ? 'edit': 'create',
+      mode: data?.isEditing || data?.projectType ? 'edit' : 'create',
     }),
   });
   registerModal('projectModality', ProjectModalityModal as any, { 
@@ -226,7 +231,7 @@ export function initializeModalRegistry(): void {
     size: 'md',
     mapDataToProps: (data) => ({
       projectModality: data?.projectModality,
-      mode: data?.isEditing || data?.projectModality ? 'edit': 'create',
+      mode: data?.isEditing || data?.projectModality ? 'edit' : 'create',
     }),
   });
   
@@ -252,7 +257,7 @@ export function initializeModalRegistry(): void {
         contactType: data?.contactType,
         isEditing: data?.isEditing,
       },
-      mode: data?.isEditing || data?.contactType ? 'edit': 'create',
+      mode: data?.isEditing || data?.contactType ? 'edit' : 'create',
     }),
   });
   
@@ -314,8 +319,8 @@ export function initializeModalRegistry(): void {
   
   registerModal('movement', MovementModal as any, financeConfig);
   registerModal('movements-view', MovementModalView as any, financeConfig);
-  registerModal('movement-concept', MovementConceptFormModal as any, { ...financeConfig, size: 'md'});
-  registerModal('movement-import', MovementImportStepModal as any, { ...financeConfig, size: 'xl'});
+  registerModal('movement-concept', MovementConceptFormModal as any, { ...financeConfig, size: 'md' });
+  registerModal('movement-import', MovementImportStepModal as any, { ...financeConfig, size: 'xl' });
   registerModal('payment', PaymentFormModal as any, financeConfig);
   registerModal('bank-transfer-receipt', BankTransferReceiptModal as any, { 
     ...financeConfig, 
@@ -342,7 +347,7 @@ export function initializeModalRegistry(): void {
       modalData: {
         generalCostId: data?.generalCostId,
       },
-      mode: data?.mode || (data?.generalCostId ? 'edit': 'create')
+      mode: data?.mode || (data?.generalCostId ? 'edit' : 'create')
     })
   });
   registerModal('general-costs', GeneralCostModal as any, { 
@@ -352,7 +357,7 @@ export function initializeModalRegistry(): void {
       modalData: {
         generalCostId: data?.generalCostId,
       },
-      mode: data?.mode || (data?.generalCostId ? 'edit': 'create')
+      mode: data?.mode || (data?.generalCostId ? 'edit' : 'create')
     })
   });
   
@@ -362,7 +367,7 @@ export function initializeModalRegistry(): void {
       modalData: {
         paymentId: data?.paymentId,
       },
-      mode: data?.mode || (data?.paymentId ? 'edit': 'create')
+      mode: data?.mode || (data?.paymentId ? 'edit' : 'create')
     })
   });
   registerModal('general-costs-payment', GeneralCostPaymentModal as any, {
@@ -371,7 +376,7 @@ export function initializeModalRegistry(): void {
       modalData: {
         paymentId: data?.paymentId,
       },
-      mode: data?.mode || (data?.paymentId ? 'edit': 'create')
+      mode: data?.mode || (data?.paymentId ? 'edit' : 'create')
     })
   });
   registerModal('general-costs-payment-view', GeneralCostPaymentModal as any, {
@@ -393,10 +398,10 @@ export function initializeModalRegistry(): void {
   });
   
   registerModal('material-form', MaterialFormModal as any, projectConfig);
-  registerModal('material-category-form', MaterialCategoryFormModal as any, { ...projectConfig, size: 'md'});
-  registerModal('brand-form', BrandFormModal as any, { ...projectConfig, size: 'md'});
+  registerModal('material-category-form', MaterialCategoryFormModal as any, { ...projectConfig, size: 'md' });
+  registerModal('brand-form', BrandFormModal as any, { ...projectConfig, size: 'md' });
   registerModal('product-form', AdminProductModal as any, projectConfig);
-  registerModal('unit-presentation-form', UnitPresentationFormModal as any, { ...projectConfig, size: 'md'});
+  registerModal('unit-presentation-form', UnitPresentationFormModal as any, { ...projectConfig, size: 'md' });
   registerModal('provider-product', ProviderProductModal as any, projectConfig);
   registerModal('custom-product', ProductModal as any, projectConfig);
   registerModal('material-payment', MaterialPaymentModal as any, {
@@ -444,7 +449,7 @@ export function initializeModalRegistry(): void {
   });
   registerModal('labor-type-form', AdminLaborModal as any, adminConfig);
   
-  registerModal('subcontract', SubcontractFormModal as any, { ...projectConfig, size: 'xl'});
+  registerModal('subcontract', SubcontractFormModal as any, { ...projectConfig, size: 'xl' });
   registerModal('subcontract-bid', SubcontractBidFormModal as any, projectConfig);
   registerModal('subcontract-award', SubcontractAwardModal as any, projectConfig);
   registerModal('subcontract-task', SubcontractTaskFormModal as any, projectConfig);
@@ -454,7 +459,7 @@ export function initializeModalRegistry(): void {
     size: 'xl',
     mapDataToProps: (data) => ({
       siteLogId: data?.id || data?.data?.id,
-      mode: data?.mode || (data?.id || data?.data?.id ? (data?.isEditing ? 'edit': 'view') : 'create'),
+      mode: data?.mode || (data?.id || data?.data?.id ? (data?.isEditing ? 'edit' : 'view') : 'create'),
     })
   });
   registerModal('siteLogType', SiteLogTypeForm as any, {
@@ -462,16 +467,16 @@ export function initializeModalRegistry(): void {
     mapDataToProps: (data) => ({
       siteLogType: data?.siteLogType,
       siteLogTypeId: data?.siteLogTypeId,
-      mode: data?.mode || (data?.siteLogType ? 'edit': 'create'),
+      mode: data?.mode || (data?.siteLogType ? 'edit' : 'create'),
     })
   });
   
-  registerModal('course', CourseModal as any, { ...learningConfig, size: 'xl'});
+  registerModal('course', CourseModal as any, { ...learningConfig, size: 'xl' });
   registerModal('course-module', CourseModuleFormModal as any, learningConfig);
   registerModal('lesson', LessonFormModal as any, learningConfig);
   registerModal('course-enrollment', CourseEnrollmentModal as any, learningConfig);
   registerModal('coupon', CouponFormModal as any, learningConfig);
-  registerModal('payment-method', PaymentMethodModal as any, { ...learningConfig, size: 'md'});
+  registerModal('payment-method', PaymentMethodModal as any, { ...learningConfig, size: 'md' });
   registerModal('testimonial', TestimonialForm as any, {
     ...learningConfig,
     size: 'md',
@@ -480,12 +485,12 @@ export function initializeModalRegistry(): void {
         courseId: data?.courseId,
         testimonial: data?.testimonial,
       },
-      mode: data?.testimonial ? 'edit': 'create',
+      mode: data?.testimonial ? 'edit' : 'create',
     }),
   });
   
   registerModal('admin-user', AdminUserModal as any, adminConfig);
-  registerModal('admin-organization', AdminOrganizationModal as any, { ...adminConfig, size: 'lg'});
+  registerModal('admin-organization', AdminOrganizationModal as any, { ...adminConfig, size: 'lg' });
   registerModal('changelog-entry', AdminChangelogModal as any, adminConfig);
   registerModal('notification', AdminNotificationModal as any, adminConfig);
   registerModal('announcement', AdminAnnouncementModal as any, adminConfig);
@@ -493,9 +498,9 @@ export function initializeModalRegistry(): void {
   registerModal('plan', PlanModal as any, adminConfig);
   registerModal('downgrade', DowngradeModal as any, adminConfig);
   registerModal('upgrade', UpgradeModal as any, adminConfig);
-  registerModal('reset-test-data', AdminResetTestDataModal as any, { ...adminConfig, size: 'md'});
+  registerModal('reset-test-data', AdminResetTestDataModal as any, { ...adminConfig, size: 'md' });
   
-  registerModal('pdf-exporter', PDFExporterModal as any, { ...generalConfig, size: 'full'});
+  registerModal('pdf-exporter', PDFExporterModal as any, { ...generalConfig, size: 'full' });
   
   registerModal('delete-confirmation', DeleteConfirmationForm as any, { 
     ...generalConfig, 
@@ -533,6 +538,7 @@ export function initializeModalRegistry(): void {
       }
     }),
   });
+
   registerModal('forum-thread', ForumThreadForm as any, {
     ...forumConfig,
     mapDataToProps: (data) => ({
@@ -544,6 +550,7 @@ export function initializeModalRegistry(): void {
       mode: data?.thread ? (data?.mode || 'edit') : (data?.mode || 'create'),
     }),
   });
+
   registerModal('forum-post', ForumPostForm as any, {
     ...forumConfig,
     mapDataToProps: (data) => ({
@@ -555,6 +562,7 @@ export function initializeModalRegistry(): void {
       mode: data?.post ? (data?.mode || 'edit') : (data?.mode || 'create'),
     }),
   });
+
   registerModal('forum-category', ForumCategoryForm as any, {
     ...forumConfig,
     mapDataToProps: (data) => ({
@@ -564,6 +572,7 @@ export function initializeModalRegistry(): void {
       },
     }),
   });
+
   registerModal('course-forum-category', CourseForumCategoryForm as any, {
     ...forumConfig,
     mapDataToProps: (data) => ({
@@ -574,6 +583,7 @@ export function initializeModalRegistry(): void {
       },
     }),
   });
+
   registerModal('unified-payment', NewMovementModal as any, {
     ...financeConfig,
     size: 'lg',
@@ -585,6 +595,7 @@ export function initializeModalRegistry(): void {
       },
     }),
   });
+
   registerModal('data-health-details', DataHealthDetailsModal as any, {
     ...generalConfig,
     size: 'lg',
@@ -594,6 +605,7 @@ export function initializeModalRegistry(): void {
       },
     }),
   });
+
   registerModal('new-moodboard-item', NewMoodboardItemModal as any, {
     ...projectConfig,
     size: 'lg',

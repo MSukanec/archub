@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Images } from 'lucide-react';
 import type { SitelogGalleryFile } from '@/features/sitelog/types';
+
 export default function SitelogMedia() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -17,14 +18,17 @@ export default function SitelogMedia() {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   const projectId = userData?.preferences?.last_project_id;
+
   // Hook para obtener archivos multimedia de bitácoras
   const { 
     data: sitelogFiles = [], 
     isLoading, 
     error 
   } = useSitelogGallery(organizationId, projectId);
+
   // Hook para eliminar archivos
   const deleteFileMutation = useDeleteMediaFile();
+
   // Handlers
   const handleDownload = (file: SitelogGalleryFile) => {
     if (file.file_url) {
@@ -36,6 +40,7 @@ export default function SitelogMedia() {
       document.body.removeChild(link);
     }
   };
+
   const handleDelete = (file: SitelogGalleryFile) => {
     if (!file.link_id) {
       toast({
@@ -67,6 +72,7 @@ export default function SitelogMedia() {
       }
     });
   };
+
   // Loading state
   if (isLoading) {
     return (
@@ -78,6 +84,7 @@ export default function SitelogMedia() {
       </div>
     );
   }
+
   // Error state
   if (error) {
     return (
@@ -93,6 +100,7 @@ export default function SitelogMedia() {
       />
     );
   }
+
   // Empty state
   if (sitelogFiles.length === 0) {
     return (
@@ -103,11 +111,13 @@ export default function SitelogMedia() {
       />
     );
   }
+
   // Main render con datos
   return (
     <div className="space-y-6">
       {/* Card de estadísticas arriba */}
       <SitelogGalleryCard files={sitelogFiles} />
+
       {/* Galería agrupada por semana abajo */}
       <SitelogGallery
         files={sitelogFiles}

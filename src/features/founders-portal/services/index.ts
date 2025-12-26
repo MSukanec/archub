@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+
 export const FOUNDERS_QUERY_KEYS = {
   directory: ['/api/founders/directory'] as const,
   events: ['/api/founders/events'] as const,
@@ -8,6 +9,7 @@ export const FOUNDERS_QUERY_KEYS = {
   vote: (id: string) => [`/api/founders/votes/${id}`] as const,
   voteResults: (id: string) => [`/api/founders/votes/${id}/results`] as const,
 };
+
 export interface FounderOrganization {
   id: string;
   name: string;
@@ -22,6 +24,7 @@ export interface FounderOrganization {
   } | null;
   member_count?: number;
 }
+
 export interface FounderEvent {
   id: string;
   title: string;
@@ -37,17 +40,19 @@ export interface FounderEvent {
   registrations_count?: number;
   is_registered?: boolean;
 }
+
 export interface VoteOption {
   id: string;
   topic_id: string;
   option_text: string;
   option_order: number;
 }
+
 export interface VoteTopic {
   id: string;
   title: string;
   description: string | null;
-  status: 'draft'| 'active'| 'closed';
+  status: 'draft' | 'active' | 'closed';
   voting_deadline: string | null;
   created_at: string;
   options: VoteOption[];
@@ -55,27 +60,32 @@ export interface VoteTopic {
   total_votes?: number;
   user_voted_option_id?: string | null;
 }
+
 export function useFounderDirectory() {
   return useQuery<FounderOrganization[]>({
     queryKey: FOUNDERS_QUERY_KEYS.directory,
   });
 }
+
 export function useFounderEvents() {
   return useQuery<FounderEvent[]>({
     queryKey: FOUNDERS_QUERY_KEYS.events,
   });
 }
+
 export function useFounderVotes() {
   return useQuery<VoteTopic[]>({
     queryKey: FOUNDERS_QUERY_KEYS.votes,
   });
 }
+
 export function useFounderVote(id: string) {
   return useQuery<VoteTopic>({
     queryKey: FOUNDERS_QUERY_KEYS.vote(id),
     enabled: !!id,
   });
 }
+
 export function useRegisterEvent() {
   const queryClient = useQueryClient();
   
@@ -89,6 +99,7 @@ export function useRegisterEvent() {
     },
   });
 }
+
 export function useUnregisterEvent() {
   const queryClient = useQueryClient();
   
@@ -102,6 +113,7 @@ export function useUnregisterEvent() {
     },
   });
 }
+
 export function useCastVote() {
   const queryClient = useQueryClient();
   

@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { ContactInput, Contact } from '../types';
+
 /**
  * Crea un nuevo contacto en la organización.
  * 
@@ -15,11 +16,13 @@ export async function createContact(
   if (!supabase || !organizationId) {
     throw new Error('Missing required parameters');
   }
+
   // Generate full_name by concatenating first_name and last_name
   const full_name = [input.first_name, input.last_name]
     .filter(Boolean)
-    .join('')
+    .join(' ')
     .trim() || null;
+
   const { data, error } = await supabase
     .from('contacts')
     .insert({
@@ -40,8 +43,10 @@ export async function createContact(
     })
     .select()
     .single();
+
   if (error) {
     throw error;
   }
+
   return data;
 }

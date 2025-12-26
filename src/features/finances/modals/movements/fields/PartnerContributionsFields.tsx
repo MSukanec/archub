@@ -5,25 +5,30 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { FormLabel } from '@/components/ui/form'
 import { IdentityBadge } from '@/components/shared/IdentityBadge'
+
 // Re-export for compatibility
 export interface PartnerContributionItem {
   partner_id: string
   partner_name: string
 }
+
 interface PartnerContributionsFieldsProps {
   selectedPartnerContributions: PartnerContributionItem[]
   onPartnerContributionsChange: (partnerContributions: PartnerContributionItem[]) => void
 }
+
 export const PartnerContributionsFields: React.FC<PartnerContributionsFieldsProps> = ({
   selectedPartnerContributions,
   onPartnerContributionsChange
 }) => {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
+
   const { data: partners = [], isLoading } = usePartners(
     organizationId,
     { enabled: !!organizationId }
   )
+
   // Function to get partner display name
   const getPartnerDisplayName = (partner: Partner): string => {
     if (!partner?.contacts) return 'Socio sin nombre'
@@ -42,6 +47,7 @@ export const PartnerContributionsFields: React.FC<PartnerContributionsFieldsProp
       }
     }
   }
+
   // Create options for ComboBox with linkedUser for avatar rendering
   const partnerOptions = partners.map(partner => {
     const linkedUser = Array.isArray(partner.contacts?.linked_user) 
@@ -54,6 +60,7 @@ export const PartnerContributionsFields: React.FC<PartnerContributionsFieldsProp
       partnerName: getPartnerDisplayName(partner)
     };
   })
+
   // Handle partner change
   const handlePartnerChange = (partnerId: string) => {
     const selectedPartner = partners.find(p => p.id === partnerId)
@@ -63,8 +70,10 @@ export const PartnerContributionsFields: React.FC<PartnerContributionsFieldsProp
     }
     onPartnerContributionsChange([partnerContribution])
   }
+
   // Get current selected partner
   const currentSelectedPartner = selectedPartnerContributions.length > 0 ? selectedPartnerContributions[0] : null
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -77,6 +86,7 @@ export const PartnerContributionsFields: React.FC<PartnerContributionsFieldsProp
           </p>
         </div>
       </div>
+
       {/* Partner Selection Field */}
       <div>
         <FormLabel>Socio *</FormLabel>

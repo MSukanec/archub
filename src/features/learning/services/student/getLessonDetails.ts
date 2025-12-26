@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 /**
  * Obtiene los detalles básicos de una lección.
  * 
@@ -19,16 +20,19 @@ export async function getLessonDetails(
   if (!lessonId || !supabase) {
     return null;
   }
+
   try {
     const { data, error } = await supabase
       .from('course_lessons')
       .select('id, title, duration_sec')
       .eq('id', lessonId)
       .maybeSingle();
+
     if (error) {
       console.error('Error fetching lesson details:', error);
       return null;
     }
+
     return data;
   } catch (error) {
     console.error('Error in getLessonDetails:', error);

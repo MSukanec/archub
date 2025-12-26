@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getUserOrganizationPreferences } from '../services';
 import { userOrgPreferencesKeys } from '@/core/query-keys';
+
 export function useUserOrganizationPreferences(
   userId: string | undefined,
   organizationId: string | undefined

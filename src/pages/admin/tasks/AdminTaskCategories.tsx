@@ -1,24 +1,31 @@
 import React, { useState } from 'react';
 import { Plus, Tag, Filter, X, TreePine } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+
 import { HierarchicalTree } from '@/components/shared/trees/HierarchicalTree';
+
 import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
 import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
+
 const AdminTaskCategories = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   
   // New modal system
   const { openModal } = useGlobalModalStore();
+
   const { data: categories = [], isLoading, error, isError, refetch } = useTaskCategoriesAdmin();
   const { data: allCategories = [] } = useAllTaskCategories();
+
   // Debug query state (only log errors)
   if (isError) {
     console.error('❌ AdminCategories error:', error);
   }
+
   // Auto-expand categories that have children (only on initial load)
   React.useEffect(() => {
     if (categories.length > 0 && expandedCategories.size === 0) {
@@ -41,10 +48,13 @@ const AdminTaskCategories = () => {
       }
     }
   }, [categories, expandedCategories.size]);
+
   const deleteTaskCategoryMutation = useDeleteTaskCategory();
+
   const handleSearch = (term: string) => {
     setSearchTerm(term);
   };
+
   const toggleCategoryExpansion = (categoryId: string) => {
     setExpandedCategories(prev => {
       const newSet = new Set(prev);
@@ -56,6 +66,7 @@ const AdminTaskCategories = () => {
       return newSet;
     });
   };
+
   const handleDeleteCategory = (categoryId: string, categoryName: string) => {
     openModal('delete-confirmation', {
       title: "Eliminar categoría",
@@ -71,15 +82,19 @@ const AdminTaskCategories = () => {
       }
     });
   };
+
   const handleEditCategory = (categoryId: string) => {
     openModal('task-category', { isEditing: true, categoryId });
   };
+
   const handleCreateCategory = () => {
     openModal('task-category', { isEditing: true });
   };
+
   // Filter categories based on search term
   const filteredCategories = React.useMemo(() => {
     if (!searchTerm) return categories;
+
     const filterCategories = (cats: TaskCategoryAdmin[]): TaskCategoryAdmin[] => {
       return cats.filter(cat => {
         const matchesSearch = cat.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -98,8 +113,10 @@ const AdminTaskCategories = () => {
         children: cat.children ? filterCategories(cat.children) : []
       }));
     };
+
     return filterCategories(categories);
   }, [categories, searchTerm]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -107,6 +124,7 @@ const AdminTaskCategories = () => {
       </div>
     );
   }
+
   return (
     <div>
       <Card>
@@ -115,7 +133,7 @@ const AdminTaskCategories = () => {
             <div className="text-center py-12">
               <TreePine className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium text-muted-foreground mb-2">
-                {searchTerm ? 'No se encontraron categorías': 'No hay categorías creadas'}
+                {searchTerm ? 'No se encontraron categorías' : 'No hay categorías creadas'}
               </h3>
               <p className="text-sm text-muted-foreground mb-4">
                 {searchTerm 
@@ -151,4 +169,5 @@ const AdminTaskCategories = () => {
     </div>
   );
 }
+
 export default AdminTaskCategories;

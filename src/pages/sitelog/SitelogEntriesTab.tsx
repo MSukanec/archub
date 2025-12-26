@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Home, Search, Plus, Filter, Bell, FileText } from "lucide-react";
 import { useLocation } from "wouter";
+
 import { useGlobalModalStore } from "@/components/modal";
 import { useMobile } from "@/hooks/use-mobile";
 import SitelogRow from "@/features/sitelog/components/SitelogRow";
@@ -10,6 +11,7 @@ import { LogTimeline } from "@/features/sitelog/components/LogTimeline";
 import { ENTRY_TYPE_OPTIONS } from '@/features/sitelog/constants';
 import { Button } from "@/components/ui/button";
 import { useSitelogFiltersStore } from "@/features/sitelog/stores/useSitelogFiltersStore";
+
 interface SitelogEntriesProps {
   siteLogs: any[];
   toggleFavorite: (siteLogId: string) => void;
@@ -17,6 +19,7 @@ interface SitelogEntriesProps {
   handleEditSiteLog: (siteLog: any) => void;
   handleDeleteSiteLog: (siteLog: any) => void;
 }
+
 export default function SitelogEntriesTab({ 
   siteLogs, 
   toggleFavorite,
@@ -34,6 +37,7 @@ export default function SitelogEntriesTab({
   const isMobile = useMobile();
   const { setActions, setShowActionBar, clearActions, setFilterConfig, searchValue: mobileSearchValue } = useActionBarMobile();
   const [, navigate] = useLocation();
+
   // Configure mobile action bar
   useEffect(() => {
     if (isMobile) {
@@ -91,9 +95,9 @@ export default function SitelogEntriesTab({
             onChange: setSortBy,
             placeholder: 'Seleccionar orden',
             options: [
-              { value: 'date_recent', label: 'Fecha (más recientes)'},
-              { value: 'date_old', label: 'Fecha (más antiguos)'},
-              { value: 'type', label: 'Tipo de entrada'}
+              { value: 'date_recent', label: 'Fecha (más recientes)' },
+              { value: 'date_old', label: 'Fecha (más antiguos)' },
+              { value: 'type', label: 'Tipo de entrada' }
             ]
           }
         ],
@@ -123,14 +127,18 @@ export default function SitelogEntriesTab({
       }
     };
   }, [isMobile, filterByType, sortBy, favoritesOnly, publicOnly]);
+
   // Sync mobile search with local search
   useEffect(() => {
     setSearchValue(mobileSearchValue);
   }, [mobileSearchValue]);
+
   // Get Zustand store filters
   const { getFilteredLogs } = useSitelogFiltersStore();
+
   // First apply Zustand store filters (from SitelogFiltersBar)
   const storeFilteredLogs = getFilteredLogs(siteLogs || []);
+
   // Then apply additional local filters (mobile action bar and sorting)
   const filteredSiteLogs = storeFilteredLogs.filter((log: any) => {
     // Solo filtrar por búsqueda si hay un valor de búsqueda
@@ -144,6 +152,7 @@ export default function SitelogEntriesTab({
     
     return true;
   });
+
   // Ordenar bitácoras
   if (sortBy === "date_recent") {
     filteredSiteLogs.sort((a: any, b: any) => new Date(b.log_date).getTime() - new Date(a.log_date).getTime());
@@ -152,18 +161,19 @@ export default function SitelogEntriesTab({
   } else if (sortBy === "type") {
     filteredSiteLogs.sort((a: any, b: any) => a.entry_type.localeCompare(b.entry_type));
   }
+
   return (
     <>
       {filteredSiteLogs.length === 0 ? (
         <EmptyState
           icon={<FileText className="w-12 h-12 text-muted-foreground" />}
-          title={searchValue || filterByType !== 'all'|| favoritesOnly || publicOnly ? "No se encontraron entradas" : "No hay entradas de bitácora"}
-          description={searchValue || filterByType !== 'all'|| favoritesOnly || publicOnly 
-            ? 'Prueba ajustando los filtros de búsqueda'
+          title={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly ? "No se encontraron entradas" : "No hay entradas de bitácora"}
+          description={searchValue || filterByType !== 'all' || favoritesOnly || publicOnly 
+            ? 'Prueba ajustando los filtros de búsqueda' 
             : 'Comienza creando tu primera entrada de bitácora para documentar el progreso'
           }
           action={
-            !searchValue && filterByType === 'all'&& !favoritesOnly && !publicOnly ? (
+            !searchValue && filterByType === 'all' && !favoritesOnly && !publicOnly ? (
               <Button
                 onClick={() => openModal('site-log')}
                 variant="default"

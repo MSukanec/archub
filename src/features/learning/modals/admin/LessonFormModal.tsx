@@ -15,6 +15,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
 import { useAdminCourses } from '../../hooks/use-admin-courses';
+
 const lessonSchema = z.object({
   module_id: z.string().min(1, 'El módulo es requerido'),
   title: z.string().min(1, 'El título es requerido'),
@@ -25,7 +26,9 @@ const lessonSchema = z.object({
   sort_index: z.number().min(0, 'El orden debe ser mayor o igual a 0').default(0),
   is_active: z.boolean().default(true),
 });
+
 type LessonFormData = z.infer<typeof lessonSchema>;
+
 interface Lesson {
   id: string;
   module_id: string;
@@ -37,6 +40,7 @@ interface Lesson {
   is_active: boolean;
   created_at: string;
 }
+
 interface LessonFormModalProps {
   modalData?: {
     lesson?: Lesson;
@@ -45,6 +49,7 @@ interface LessonFormModalProps {
   };
   onClose: () => void;
 }
+
 export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
   const { lesson, courseId, isEditing = false } = modalData || {};
   const { setPanel } = useModalPanelStore();
@@ -53,6 +58,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
   const { data: courses = [] } = useAdminCourses();
+
   const { data: modules = [] } = useQuery({
     queryKey: ['/api/course-modules', selectedCourseId],
     queryFn: async () => {
@@ -68,6 +74,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
     },
     enabled: !!selectedCourseId,
   });
+
   const form = useForm<LessonFormData>({
     resolver: zodResolver(lessonSchema),
     defaultValues: {
@@ -81,6 +88,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
       is_active: lesson?.is_active ?? true,
     }
   });
+
   useEffect(() => {
     if (lesson && lesson.module_id) {
       supabase
@@ -93,6 +101,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
             setSelectedCourseId(data.course_id);
           }
         });
+
       form.reset({
         module_id: lesson.module_id || '',
         title: lesson.title || '',
@@ -117,15 +126,18 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
     }
     setPanel('edit');
   }, [lesson, form, setPanel]);
+
   useEffect(() => {
     if (courseId && !lesson) {
       setSelectedCourseId(courseId);
     }
   }, [courseId, lesson]);
+
   const handleClose = () => {
     form.reset();
     onClose();
   };
+
   const createLessonMutation = useMutation({
     mutationFn: async (data: LessonFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -172,6 +184,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
       });
     }
   });
+
   const updateLessonMutation = useMutation({
     mutationFn: async (data: LessonFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
@@ -220,6 +233,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
       });
     }
   });
+
   const onSubmit = async (data: LessonFormData) => {
     setIsLoading(true);
     try {
@@ -232,21 +246,24 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
       setIsLoading(false);
     }
   };
+
   const headerContent = (
     <FormModalHeader 
-      title={lesson ? 'Editar Lección': 'Nueva Lección'}
+      title={lesson ? 'Editar Lección' : 'Nueva Lección'}
       icon={Video}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={lesson ? 'Actualizar': 'Crear Lección'}
+      rightLabel={lesson ? 'Actualizar' : 'Crear Lección'}
       onRightClick={form.handleSubmit(onSubmit)}
       showLoadingSpinner={isLoading}
     />
   );
+
   const editContent = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -266,6 +283,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
               </SelectContent>
             </Select>
           </div>
+
           <FormField
             control={form.control}
             name="module_id"
@@ -291,6 +309,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
             )}
           />
         </div>
+
         <FormField
           control={form.control}
           name="title"
@@ -304,6 +323,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="vimeo_video_id"
@@ -317,6 +337,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
             </FormItem>
           )}
         />
+
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -329,7 +350,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
                     type="number" 
                     {...field} 
                     value={field.value ?? ''}
-                    onChange={(e) => field.onChange(e.target.value === ''? undefined : parseInt(e.target.value))}
+                    onChange={(e) => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value))}
                     placeholder="Ej: 5" 
                     data-testid="input-lesson-minutes" 
                   />
@@ -338,6 +359,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="duration_seconds"
@@ -349,7 +371,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
                     type="number" 
                     {...field} 
                     value={field.value ?? ''}
-                    onChange={(e) => field.onChange(e.target.value === ''? undefined : parseInt(e.target.value))}
+                    onChange={(e) => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value))}
                     placeholder="Ej: 30" 
                     data-testid="input-lesson-seconds" 
                   />
@@ -359,6 +381,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
             )}
           />
         </div>
+
         <FormField
           control={form.control}
           name="sort_index"
@@ -370,7 +393,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
                   type="number" 
                   {...field} 
                   value={field.value ?? ''}
-                  onChange={(e) => field.onChange(e.target.value === ''? undefined : parseInt(e.target.value))}
+                  onChange={(e) => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value))}
                   placeholder="Ej: 0, 1, 2..." 
                   data-testid="input-lesson-sort" 
                 />
@@ -379,6 +402,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
             </FormItem>
           )}
         />
+
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -401,6 +425,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="is_active"
@@ -426,6 +451,7 @@ export function LessonFormModal({ modalData, onClose }: LessonFormModalProps) {
       </form>
     </Form>
   );
+
   return (
     <FormModalLayout
       columns={1}

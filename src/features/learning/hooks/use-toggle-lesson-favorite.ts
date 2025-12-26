@@ -3,11 +3,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toggleLessonFavorite } from '../services';
 import { LEARNING_QUERY_KEYS } from '../constants';
 import { useToast } from '@/hooks/use-toast';
+
 interface UseToggleLessonFavoriteProps {
   lessonId: string;
   courseId: string;
   currentlyFavorite: boolean;
 }
+
 /**
  * Hook para marcar/desmarcar una lección como favorita.
  * 
@@ -24,6 +26,7 @@ export function useToggleLessonFavorite({
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [optimisticFavorite, setOptimisticFavorite] = useState<boolean | null>(null);
+
   const toggleFavoriteMutation = useMutation({
     mutationFn: (isFavorite: boolean) => toggleLessonFavorite(lessonId, isFavorite),
     onMutate: async (isFavorite: boolean) => {
@@ -31,20 +34,24 @@ export function useToggleLessonFavorite({
       await queryClient.cancelQueries({
         queryKey: LEARNING_QUERY_KEYS.courseProgress(courseId),
       });
+
       // Guardar snapshot anterior para rollback
       const previousProgress = queryClient.getQueryData(
         LEARNING_QUERY_KEYS.courseProgress(courseId)
       );
+
       // Actualizar cache optimistamente
       queryClient.setQueryData(
         LEARNING_QUERY_KEYS.courseProgress(courseId),
         (old: any) => {
           if (!old || !Array.isArray(old)) return old;
+
           return old.map((item: any) =>
             item.lesson_id === lessonId ? { ...item, is_favorite: isFavorite } : item
           );
         }
       );
+
       return { previousProgress };
     },
     onSuccess: (data, isFavorite) => {
@@ -55,6 +62,7 @@ export function useToggleLessonFavorite({
           ? "La lección fue agregada a tus favoritos"
           : "La lección fue quitada de tus favoritos",
       });
+
       // Limpiar estado optimista
       setOptimisticFavorite(null);
     },
@@ -66,23 +74,29 @@ export function useToggleLessonFavorite({
           context.previousProgress
         );
       }
+
       console.error('Error toggling favorite:', error);
       toast({
         title: "Error",
         description: error.message || "No se pudo marcar como favorito",
         variant: "destructive",
       });
+
       // Revertir estado optimista
       setOptimisticFavorite(null);
     },
   });
+
   const toggleFavorite = () => {
     const newValue = !currentlyFavorite;
+
     // ⚡ UPDATE UI INSTANTÁNEO
     setOptimisticFavorite(newValue);
+
     // Ejecutar mutación con optimistic update
     toggleFavoriteMutation.mutate(newValue);
   };
+
   return {
     toggleFavorite,
     isLoading: toggleFavoriteMutation.isPending,

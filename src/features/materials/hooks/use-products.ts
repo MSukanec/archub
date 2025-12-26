@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectContext } from '@/stores/projectContext';
+
 // Helper function to build category hierarchy path
 async function buildCategoryHierarchy(categoryId: string): Promise<string> {
   if (!categoryId || !supabase) return 'Sin categoría';
@@ -24,8 +25,9 @@ async function buildCategoryHierarchy(categoryId: string): Promise<string> {
     currentCategoryId = category.parent_id;
   }
   
-  return hierarchy.length > 0 ? hierarchy.join('> ') : 'Sin categoría';
+  return hierarchy.length > 0 ? hierarchy.join(' > ') : 'Sin categoría';
 }
+
 export interface Product {
   // Campos directos de la vista products_view
   id: string;
@@ -50,6 +52,7 @@ export interface Product {
   avg_price?: number;     // Precio promedio del día
   providers_count?: number; // Cantidad de proveedores (mapeado desde provider_count)
 }
+
 export interface NewProductData {
   material_id: string;
   brand_id?: string;
@@ -63,6 +66,7 @@ export interface NewProductData {
   organization_id?: string;
   is_system?: boolean;
 }
+
 export function useProducts() {
   const { currentOrganizationId } = useProjectContext()
   
@@ -72,23 +76,28 @@ export function useProducts() {
       if (!supabase) {
         return []
       }
+
       const { data: products, error } = await supabase
         .from('products_view')
         .select('*')
         .order('name')
+
       if (error) {
         console.error('Error fetching products:', error)
         throw error
       }
+
       // Obtener los precios promedio de la vista materializada
       const { data: avgPrices, error: avgError } = await supabase
         .from('product_avg_prices')
         .select('product_id, avg_price, provider_count')
+
       if (avgError) {
         console.error('Error fetching average prices:', avgError)
         // Si hay error con precios promedio, continuar solo con productos
         return products || []
       }
+
       // Combinar datos de productos con precios promedio
       const productsWithAvgPrices = products?.map(product => {
         const avgPriceData = avgPrices?.find(ap => ap.product_id === product.id)
@@ -98,17 +107,21 @@ export function useProducts() {
           providers_count: avgPriceData?.provider_count || 0
         }
       }) || []
+
       return productsWithAvgPrices
     },
     enabled: !!supabase
   })
 }
+
 export function useCreateProduct() {
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
+
   return useMutation({
     mutationFn: async (data: NewProductData) => {
       if (!supabase) throw new Error('Supabase client not available')
+
       const { data: result, error } = await supabase
         .from('products')
         .insert([data])
@@ -125,10 +138,12 @@ export function useCreateProduct() {
           )
         `)
         .single()
+
       if (error) {
         console.error('Error creating product:', error)
         throw error
       }
+
       return result
     },
     onSuccess: () => {
@@ -149,11 +164,14 @@ export function useCreateProduct() {
     },
   })
 }
+
 export function useUpdateProduct() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<NewProductData> }) => {
       if (!supabase) throw new Error('Supabase client not available')
+
       const { data: result, error } = await supabase
         .from('products')
         .update(data)
@@ -171,10 +189,12 @@ export function useUpdateProduct() {
           )
         `)
         .single()
+
       if (error) {
         console.error('Error updating product:', error)
         throw error
       }
+
       return result
     },
     onSuccess: () => {
@@ -195,15 +215,19 @@ export function useUpdateProduct() {
     },
   })
 }
+
 export function useDeleteProduct() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async (id: string) => {
       if (!supabase) throw new Error('Supabase client not available')
+
       const { error } = await supabase
         .from('products')
         .delete()
         .eq('id', id)
+
       if (error) {
         console.error('Error deleting product:', error)
         throw error

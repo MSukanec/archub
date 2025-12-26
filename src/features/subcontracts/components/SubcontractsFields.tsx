@@ -3,15 +3,18 @@ import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { FileText } from 'lucide-react'
 import { useSubcontracts } from '../hooks'
 import { useCurrentUser } from '@/hooks/use-current-user'
+
 export interface SubcontractItem {
   subcontract_id: string
   contact_name: string
 }
+
 interface SubcontractsFieldsProps {
   selectedSubcontracts: SubcontractItem[]
   onSubcontractsChange: (subcontractsList: SubcontractItem[]) => void
   projectId?: string
 }
+
 export const SubcontractsFields: React.FC<SubcontractsFieldsProps> = ({
   selectedSubcontracts,
   onSubcontractsChange,
@@ -22,7 +25,9 @@ export const SubcontractsFields: React.FC<SubcontractsFieldsProps> = ({
   )
   
   const { data: userData } = useCurrentUser()
+
   const { data: projectSubcontracts = [], isLoading } = useSubcontracts(projectId || null)
+
   const subcontractsOptions = projectSubcontracts.map((subcontract: any) => {
     const contact = Array.isArray(subcontract.contact) ? subcontract.contact[0] : subcontract.contact
     const contactName = contact?.full_name || `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || contact?.company_name || 'Sin nombre'
@@ -31,6 +36,7 @@ export const SubcontractsFields: React.FC<SubcontractsFieldsProps> = ({
       label: subcontract.title || contactName
     }
   })
+
   const handleSubcontractChange = (value: string) => {
     setSubcontractId(value)
     
@@ -42,6 +48,7 @@ export const SubcontractsFields: React.FC<SubcontractsFieldsProps> = ({
       const fullContactName = contact?.full_name || `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || contact?.company_name || 'Sin nombre'
       contactName = selectedSubcontract.title || fullContactName
     }
+
     if (value) {
       onSubcontractsChange([{
         subcontract_id: value,
@@ -51,6 +58,7 @@ export const SubcontractsFields: React.FC<SubcontractsFieldsProps> = ({
       onSubcontractsChange([])
     }
   }
+
   useEffect(() => {
     const expectedSubcontractId = selectedSubcontracts.length > 0 ? selectedSubcontracts[0].subcontract_id : ''
     
@@ -58,6 +66,7 @@ export const SubcontractsFields: React.FC<SubcontractsFieldsProps> = ({
       setSubcontractId(expectedSubcontractId)
     }
   }, [selectedSubcontracts, subcontractId])
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 pb-2 border-b border-[var(--card-border)]">

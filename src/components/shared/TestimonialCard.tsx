@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Star, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
 interface TestimonialCardProps {
   authorName: string;
   authorTitle?: string;
@@ -10,6 +11,7 @@ interface TestimonialCardProps {
   showStars?: boolean;
   className?: string;
 }
+
 export function TestimonialCard({
   authorName,
   authorTitle,
@@ -20,11 +22,12 @@ export function TestimonialCard({
   className
 }: TestimonialCardProps) {
   const initials = authorName
-    ?.split('')
+    ?.split(' ')
     .map(n => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2) || 'NN';
+
   return (
     <div className={cn("py-4", className)} data-testid="testimonial-card">
       {showStars && rating && (
@@ -42,6 +45,7 @@ export function TestimonialCard({
           ))}
         </div>
       )}
+
       <div className="flex items-center gap-3">
         <Avatar className="w-10 h-10 flex-shrink-0">
           <AvatarImage src={authorAvatarUrl || undefined} alt={authorName} />

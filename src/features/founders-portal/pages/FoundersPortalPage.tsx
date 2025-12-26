@@ -12,6 +12,7 @@ import { FoundersDashboardTab } from '@/pages/founders-portal/tabs/FoundersDashb
 import { Award, FolderPlus } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal';
 import { Button } from '@/components/ui/button';
+
 export function FoundersPortalPage() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { data: userData, isLoading } = useCurrentUser();
@@ -20,13 +21,15 @@ export function FoundersPortalPage() {
   const { openModal } = useGlobalModalStore();
   
   const isFounder = userData?.organization?.settings?.is_founder === true;
+
   const tabs = [
-    { id: 'dashboard', label: 'Visión General', isActive: activeTab === 'dashboard'},
-    { id: 'directorio', label: 'Directorio', isActive: activeTab === 'directorio'},
-    { id: 'eventos', label: 'Eventos', isActive: activeTab === 'eventos'},
-    { id: 'votaciones', label: 'Votaciones', isActive: activeTab === 'votaciones'},
-    { id: 'foro', label: 'Foro', isActive: activeTab === 'foro'},
+    { id: 'dashboard', label: 'Visión General', isActive: activeTab === 'dashboard' },
+    { id: 'directorio', label: 'Directorio', isActive: activeTab === 'directorio' },
+    { id: 'eventos', label: 'Eventos', isActive: activeTab === 'eventos' },
+    { id: 'votaciones', label: 'Votaciones', isActive: activeTab === 'votaciones' },
+    { id: 'foro', label: 'Foro', isActive: activeTab === 'foro' },
   ];
+
   const getHeaderProps = () => {
     const base = {
       icon: Award,
@@ -37,7 +40,8 @@ export function FoundersPortalPage() {
       tabs,
       onTabChange: setActiveTab,
     };
-    if (activeTab === 'foro'&& isAdmin) {
+
+    if (activeTab === 'foro' && isAdmin) {
       const actions: React.ReactNode[] = [];
       actions.push(
         <Button
@@ -53,13 +57,16 @@ export function FoundersPortalPage() {
       );
       return { ...base, actions };
     }
+
     return base;
   };
+
   useEffect(() => {
     if (!isLoading && !isFounder && !isAdmin && location === '/organization/founders-portal') {
       navigate('/organization/dashboard');
     }
   }, [isLoading, isFounder, isAdmin, location, navigate]);
+
   if (isLoading) {
     return (
       <Layout wide headerProps={getHeaderProps()}>
@@ -69,9 +76,11 @@ export function FoundersPortalPage() {
       </Layout>
     );
   }
+
   if (!isFounder && !isAdmin) {
     return null;
   }
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -88,6 +97,7 @@ export function FoundersPortalPage() {
         return <FoundersDashboardTab onTabChange={setActiveTab} />;
     }
   };
+
   return (
     <Layout wide headerProps={getHeaderProps()}>
       {renderTabContent()}

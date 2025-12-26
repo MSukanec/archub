@@ -37,12 +37,14 @@ import { formatContactName } from '@/utils/contacts'
 import { PaymentReceiptPDF, type PaymentReceiptData } from '@/features/pdf'
 import { pdf } from '@react-pdf/renderer'
 import { useIsAdmin } from '@/hooks/use-admin-permissions'
+
 interface ClientPaymentsViewProps {
   projectId?: string;
   initialFilterMonth?: string;
   initialFilterClient?: string;
   onClearDrillDown?: () => void;
 }
+
 interface PaymentMetrics {
   total_count: number;
   commitment_currency_id: string | null;
@@ -59,6 +61,7 @@ interface PaymentMetrics {
   confirmed_by_currency: Array<{ currency_symbol: string; amount: number }>;
   pending_by_currency: Array<{ currency_symbol: string; amount: number }>;
 }
+
 export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilterClient, onClearDrillDown }: ClientPaymentsViewProps) {
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
@@ -79,6 +82,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
   const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId);
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
   const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
+
   const [filterWallet, setFilterWallet] = useState<string>('all');
   const [filterCurrency, setFilterCurrency] = useState<string>('all');
   const [filterHasSchedule, setFilterHasSchedule] = useState<string>('all');
@@ -87,24 +91,30 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
   const [filterUnit, setFilterUnit] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterMonth, setFilterMonth] = useState<string>(initialFilterMonth || 'all');
+
   useEffect(() => {
     if (initialFilterMonth !== undefined) {
       setFilterMonth(initialFilterMonth || 'all');
     }
   }, [initialFilterMonth]);
+
   useEffect(() => {
     if (initialFilterClient !== undefined) {
       setFilterClient(initialFilterClient || 'all');
     }
   }, [initialFilterClient]);
+
   const [selectedPayments, setSelectedPayments] = useState<ClientPaymentWithRelations[]>([]);
+
   const { data: paymentsData, isLoading } = useClientPayments(activeProjectId || undefined, organizationId);
   const { data: commitmentsData } = useClientCommitments(activeProjectId || undefined, organizationId);
   const { data: projectClientsData } = useProjectClients(activeProjectId || undefined, organizationId);
+
   const allPayments = useMemo(() => {
     if (!paymentsData) return [];
     return paymentsData;
   }, [paymentsData]);
+
   const commitmentCurrency = useMemo(() => {
     if (!commitmentsData || commitmentsData.length === 0) return null;
     
@@ -135,6 +145,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
     
     return mostCommon.currency;
   }, [commitmentsData]);
+
   const metricsKPIs = useMemo(() => {
     const confirmedPayments = allPayments.filter(p => p.status === 'confirmed');
     const latestDate = allPayments.length > 0 
@@ -151,14 +162,17 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       baseCurrencyId: commitmentCurrency?.code || commitmentCurrency?.id,
       symbol: commitmentCurrency?.symbol
     });
+
     const totalPaymentsKPI = calculateCountKPI({
       count: allPayments.length,
       label: 'Pagos'
     });
+
     const lastPaymentKPI = calculateTextKPI({
       text: latestDate ? format(parseLocalDate(latestDate)!, 'd/M/yyyy') : '-',
       icon: 'calendar'
     });
+
     return {
       total_confirmado_kpi: totalConfirmedKPI,
       total_count_kpi: totalPaymentsKPI,
@@ -167,6 +181,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       latest_payment_date: latestDate
     };
   }, [allPayments, commitmentCurrency]);
+
   const metricsData = useMemo<PaymentMetrics>(() => {
     return {
       total_count: metricsKPIs.total_count,
@@ -185,12 +200,14 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       pending_by_currency: [],
     };
   }, [metricsKPIs]);
+
   const filterOptions = useMemo(() => {
     const wallets = new Set<string>();
     const currencies = new Set<string>();
     const clients = new Set<string>();
     const units = new Set<string>();
     const months = new Set<string>();
+
     allPayments.forEach(payment => {
       if (payment.wallet?.wallets?.name) wallets.add(payment.wallet.wallets.name);
       if (payment.currency?.code) currencies.add(payment.currency.code);
@@ -207,6 +224,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
         }
       }
     });
+
     return {
       wallets: Array.from(wallets).sort(),
       currencies: Array.from(currencies).sort(),
@@ -215,21 +233,22 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       months: Array.from(months).sort().reverse(),
     };
   }, [allPayments]);
+
   const clientPayments = useMemo(() => {
     return allPayments.filter(payment => {
-      if (filterWallet !== 'all'&& payment.wallet?.wallets?.name !== filterWallet) return false;
-      if (filterCurrency !== 'all'&& payment.currency?.code !== filterCurrency) return false;
-      if (filterHasSchedule === 'yes'&& !payment.schedule_id) return false;
-      if (filterHasSchedule === 'no'&& payment.schedule_id) return false;
-      if (filterHasCommitment === 'yes'&& !payment.commitment_id) return false;
-      if (filterHasCommitment === 'no'&& payment.commitment_id) return false;
+      if (filterWallet !== 'all' && payment.wallet?.wallets?.name !== filterWallet) return false;
+      if (filterCurrency !== 'all' && payment.currency?.code !== filterCurrency) return false;
+      if (filterHasSchedule === 'yes' && !payment.schedule_id) return false;
+      if (filterHasSchedule === 'no' && payment.schedule_id) return false;
+      if (filterHasCommitment === 'yes' && !payment.commitment_id) return false;
+      if (filterHasCommitment === 'no' && payment.commitment_id) return false;
       if (filterClient !== 'all') {
         const clientName = formatContactName(payment.client?.contact);
         if (clientName !== filterClient) return false;
       }
-      if (filterUnit !== 'all'&& payment.commitment?.unit_name !== filterUnit) return false;
-      if (filterStatus !== 'all'&& payment.status !== filterStatus) return false;
-      if (filterMonth !== 'all'&& payment.payment_date) {
+      if (filterUnit !== 'all' && payment.commitment?.unit_name !== filterUnit) return false;
+      if (filterStatus !== 'all' && payment.status !== filterStatus) return false;
+      if (filterMonth !== 'all' && payment.payment_date) {
         const date = parseLocalDate(payment.payment_date);
         if (date) {
           const paymentMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -239,7 +258,9 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       return true;
     });
   }, [allPayments, filterWallet, filterCurrency, filterHasSchedule, filterHasCommitment, filterClient, filterUnit, filterStatus, filterMonth]);
+
   const deletePaymentMutation = useDeleteClientPayment();
+
   const handleEdit = (payment: ClientPaymentWithRelations) => {
     openModal('client-payment', {
       projectId: activeProjectId,
@@ -248,8 +269,10 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       mode: 'edit',
     });
   };
+
   const handleDeletePayment = (payment: ClientPaymentWithRelations) => {
     if (!organizationId || !activeProjectId) return;
+
     const clientName = formatContactName(payment.client?.contact);
     const symbol = payment.currency?.symbol || '$';
     const formattedAmount = `${symbol} ${payment.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -269,12 +292,14 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       isLoading: deletePaymentMutation.isPending
     });
   };
+
   const handleAddPayment = () => {
     openModal('client-payment', {
       projectId: activeProjectId,
       organizationId: organizationId,
     });
   };
+
   const handleDownloadReceipt = async (payment: ClientPaymentWithRelations) => {
     try {
       const clientContact = payment.client?.contact;
@@ -304,6 +329,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
         organization_phone: userData?.organization?.phone,
         commitment_total: payment.commitment?.amount,
       };
+
       const blob = await pdf(<PaymentReceiptPDF data={receiptData} />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -313,6 +339,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+
       toast({
         title: "Recibo descargado",
         description: "El recibo de pago se ha descargado correctamente.",
@@ -326,16 +353,18 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       });
     }
   };
+
   const handleBulkDelete = () => {
     if (!organizationId || !activeProjectId || selectedPayments.length === 0) return;
+
     const count = selectedPayments.length;
     
     showDeleteConfirmation({
       mode: 'simple',
-      title: `Eliminar ${count} ${count === 1 ? 'pago': 'pagos'}`,
-      description: `¿Estás seguro de que querés eliminar ${count === 1 ? 'este pago': `estos ${count} pagos`}? Esta acción no se puede deshacer.`,
-      itemName: `${count} ${count === 1 ? 'pago seleccionado': 'pagos seleccionados'}`,
-      destructiveActionText: `Eliminar ${count === 1 ? 'pago': 'pagos'}`,
+      title: `Eliminar ${count} ${count === 1 ? 'pago' : 'pagos'}`,
+      description: `¿Estás seguro de que querés eliminar ${count === 1 ? 'este pago' : `estos ${count} pagos`}? Esta acción no se puede deshacer.`,
+      itemName: `${count} ${count === 1 ? 'pago seleccionado' : 'pagos seleccionados'}`,
+      destructiveActionText: `Eliminar ${count === 1 ? 'pago' : 'pagos'}`,
       onDelete: async () => {
         let successCount = 0;
         let failCount = 0;
@@ -372,7 +401,9 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       isLoading: deletePaymentMutation.isPending
     });
   };
+
   const createPaymentMutation = useCreateClientPayment();
+
   const handleImport = () => {
     if (!organizationId || !userData?.user?.id) {
       toast({
@@ -382,6 +413,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       });
       return;
     }
+
     const targetSchema: TargetField[] = [
       {
         field: 'payment_date',
@@ -460,10 +492,10 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
           labelKey: 'label',
           valueKey: 'value',
           options: [
-            { label: 'Confirmado', value: 'confirmed'},
-            { label: 'Pendiente', value: 'pending'},
-            { label: 'Rechazado', value: 'rejected'},
-            { label: 'Anulado', value: 'void'},
+            { label: 'Confirmado', value: 'confirmed' },
+            { label: 'Pendiente', value: 'pending' },
+            { label: 'Rechazado', value: 'rejected' },
+            { label: 'Anulado', value: 'void' },
           ],
         },
       },
@@ -482,6 +514,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
         description: 'Observaciones adicionales',
       },
     ];
+
     const walletValueMap: Record<string, string> = {};
     (organizationWallets || []).forEach(ow => {
       if (ow.wallets?.name && ow.id) {
@@ -489,6 +522,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
         walletValueMap[normalizedName] = ow.id;
       }
     });
+
     const currencyValueMap: Record<string, string> = {};
     (organizationCurrencies || []).forEach(oc => {
       if (oc.currency?.code && oc.currency_id) {
@@ -500,6 +534,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
         }
       }
     });
+
     const valueMapConfig: Record<string, Record<string, string>> = {
       currency_code: currencyValueMap,
       status: {
@@ -510,16 +545,18 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       },
       wallet_name: walletValueMap,
     };
+
     const projectContext: ProjectContext = activeProjectId 
       ? { type: 'project', projectId: activeProjectId, projectName: projectName || undefined }
       : { type: 'organization', organizationId: organizationId!, organizationName: organizationName || undefined };
+
     const availableClientsMap = new Map<string, { id: string; name: string }>();
     
     if (projectClientsData && projectClientsData.length > 0) {
       projectClientsData.forEach(client => {
         if (client.contact && client.id) {
           const clientName = formatContactName(client.contact);
-          if (clientName !== 'Cliente'&& !availableClientsMap.has(client.id)) {
+          if (clientName !== 'Cliente' && !availableClientsMap.has(client.id)) {
             availableClientsMap.set(client.id, { id: client.id, name: clientName });
           }
         }
@@ -530,7 +567,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       commitmentsData.forEach(commitment => {
         if (commitment.project_client?.contact && commitment.client_id) {
           const clientName = formatContactName(commitment.project_client.contact);
-          if (clientName !== 'Cliente'&& !availableClientsMap.has(commitment.client_id)) {
+          if (clientName !== 'Cliente' && !availableClientsMap.has(commitment.client_id)) {
             availableClientsMap.set(commitment.client_id, { id: commitment.client_id, name: clientName });
           }
         }
@@ -540,12 +577,14 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
     allPayments.forEach(payment => {
       if (payment.client?.contact && payment.client_id) {
         const clientName = formatContactName(payment.client.contact);
-        if (clientName !== 'Cliente'&& !availableClientsMap.has(payment.client_id)) {
+        if (clientName !== 'Cliente' && !availableClientsMap.has(payment.client_id)) {
           availableClientsMap.set(payment.client_id, { id: payment.client_id, name: clientName });
         }
       }
     });
+
     const availableClients = Array.from(availableClientsMap.values());
+
     openModal('universal-import', {
       config: {
         entityName: 'Pago de Cliente',
@@ -600,6 +639,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
               }
             }
           });
+
           const currenciesMap = new Map<string, string>();
           allPayments.forEach(payment => {
             if (payment.currency) {
@@ -612,6 +652,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
               currenciesMap.set(code, id);
             }
           }
+
           const walletsMap = new Map<string, string>();
           let defaultWalletId: string | null = null;
           
@@ -638,8 +679,10 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
               defaultWalletId = organizationWallets[0].id;
             }
           }
+
           const invalidRows: Array<{ index: number; reason: string }> = [];
           const validRowsToImport: typeof rows = [];
+
           rows.forEach((row, idx) => {
             const errors: string[] = [];
             
@@ -659,7 +702,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
               } else {
                 clientId = clientsData[clientName] || null;
                 if (!clientId) {
-                  errors.push(`Cliente "${clientNameInput}" no encontrado. Clientes disponibles: ${Object.keys(clientsData).slice(0, 3).join(', ')}${Object.keys(clientsData).length > 3 ? '...': ''}`);
+                  errors.push(`Cliente "${clientNameInput}" no encontrado. Clientes disponibles: ${Object.keys(clientsData).slice(0, 3).join(', ')}${Object.keys(clientsData).length > 3 ? '...' : ''}`);
                 }
               }
             }
@@ -694,12 +737,15 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
             if (!paymentDate) {
               errors.push('Fecha de pago vacía');
             }
+
             if (errors.length > 0) {
-              invalidRows.push({ index: idx + 1, reason: errors.join('| ') });
+              invalidRows.push({ index: idx + 1, reason: errors.join(' | ') });
               return;
             }
+
             validRowsToImport.push({ ...row, _clientId: clientId, _currencyId: currencyId });
           });
+
           if (invalidRows.length > 0) {
             const errorMsg = invalidRows.map(e => `Fila ${e.index}: ${e.reason}`).join('\n');
             toast({
@@ -709,6 +755,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
             });
             throw new Error(`Validación fallida: ${invalidRows.length} filas inválidas`);
           }
+
           if (!defaultWalletId) {
             toast({
               title: 'Error de validación',
@@ -717,6 +764,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
             });
             throw new Error('No hay billeteras disponibles');
           }
+
           const validStatuses = ['confirmed', 'pending', 'overdue', 'cancelled'];
           let successCount = 0;
           for (const row of validRowsToImport) {
@@ -731,7 +779,9 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
                   resolvedWalletId = walletsMap.get(walletInput.toLowerCase()) || defaultWalletId;
                 }
               }
+
               const resolvedStatus = validStatuses.includes(row.status) ? row.status : 'confirmed';
+
               const paymentData = {
                 client_id: row._clientId,
                 amount: parseFloat(row.amount) || 0,
@@ -745,6 +795,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
                 commitment_id: null,
                 schedule_id: null,
               };
+
               const targetProjectId = row._projectId || activeProjectId;
               
               if (!targetProjectId) {
@@ -773,6 +824,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
               });
             }
           }
+
           toast({
             title: 'Importación completada',
             description: `Se importaron ${successCount} de ${rows.length} pagos correctamente`,
@@ -781,6 +833,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       },
     });
   };
+
   if (!organizationId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -788,6 +841,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       </div>
     )
   }
+
   const formatDate = (dateString: string, formatString: string) => {
     try {
       const date = parseLocalDate(dateString);
@@ -796,22 +850,24 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       return '-';
     }
   };
+
   const formatAmount = (amount: number, currencySymbol: string | undefined) => {
     const symbol = currencySymbol || '$';
     return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
+
   const columns = [
     {
       key: 'payment_date',
       label: 'Fecha de Pago',
-      type: 'date'as const,
+      type: 'date' as const,
       sortable: true,
       render: (payment: ClientPaymentWithRelations) => formatDate(payment.payment_date, 'dd/MM/yyyy'),
     },
     ...(activeProjectId ? [] : [{
       key: 'project',
       label: 'Proyecto',
-      type: 'badge'as const,
+      type: 'badge' as const,
       sortable: true,
       render: (payment: ClientPaymentWithRelations) => {
         if (!payment.project) return '-';
@@ -831,7 +887,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
     {
       key: 'contact',
       label: 'Cliente',
-      type: 'long-text'as const,
+      type: 'long-text' as const,
       sortable: true,
       render: (payment: ClientPaymentWithRelations) => {
         const contact = payment.client?.contact;
@@ -856,7 +912,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
     {
       key: 'commitment_id',
       label: 'Compromiso',
-      type: 'amount'as const,
+      type: 'amount' as const,
       sortable: true,
       render: (payment: ClientPaymentWithRelations) => {
         if (!payment.commitment) return '-';
@@ -870,7 +926,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
     {
       key: 'schedule_id',
       label: 'Cuota',
-      type: 'date'as const,
+      type: 'date' as const,
       sortable: true,
       render: (payment: ClientPaymentWithRelations) => {
         if (!payment.schedule) return '-';
@@ -884,9 +940,9 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
     {
       key: 'amount',
       label: 'Monto',
-      type: 'amount'as const,
+      type: 'amount' as const,
       sortable: true,
-      sortType: 'number'as const,
+      sortType: 'number' as const,
       render: (payment: ClientPaymentWithRelations) => (
         <div className="flex flex-col items-end">
           <span className="font-bold">{formatAmount(payment.amount, payment.currency?.symbol)}</span>
@@ -906,22 +962,24 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
     {
       key: 'status',
       label: 'Estado',
-      type: 'status'as const,
+      type: 'status' as const,
       sortable: true,
       render: (payment: ClientPaymentWithRelations) => (
         <PaymentStatusBadge status={payment.status as PaymentStatus} />
       ),
     },
   ];
+
   const isFilterActive = 
-    filterWallet !== 'all'|| 
-    filterCurrency !== 'all'|| 
-    filterHasSchedule !== 'all'|| 
-    filterHasCommitment !== 'all'|| 
-    filterClient !== 'all'|| 
-    filterUnit !== 'all'||
-    filterStatus !== 'all'||
+    filterWallet !== 'all' || 
+    filterCurrency !== 'all' || 
+    filterHasSchedule !== 'all' || 
+    filterHasCommitment !== 'all' || 
+    filterClient !== 'all' || 
+    filterUnit !== 'all' ||
+    filterStatus !== 'all' ||
     filterMonth !== 'all';
+
   const hasDrillDownFilter = !!(initialFilterMonth || initialFilterClient);
   const drillDownLabel = useMemo(() => {
     const parts: string[] = [];
@@ -933,8 +991,9 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
     if (initialFilterClient) {
       parts.push(initialFilterClient);
     }
-    return parts.join('- ');
+    return parts.join(' - ');
   }, [initialFilterMonth, initialFilterClient]);
+
   const handleClearFilters = () => {
     setFilterWallet('all');
     setFilterCurrency('all');
@@ -946,6 +1005,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
     setFilterMonth('all');
     onClearDrillDown?.();
   };
+
   const handleViewPayment = (payment: ClientPaymentWithRelations) => {
     openModal('client-payment', {
       projectId: activeProjectId,
@@ -954,6 +1014,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       mode: 'view',
     });
   };
+
   if (!isLoading && allPayments.length === 0) {
     return (
       <EmptyState
@@ -973,6 +1034,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       />
     );
   }
+
   return (
     <div className="space-y-6">
       {hasDrillDownFilter && drillDownLabel && (
@@ -995,6 +1057,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
           </Button>
         </div>
       )}
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <AppCard className="col-span-2" data-testid="stat-card-total-confirmado">
           <AppCardTitle showArrow={false}>
@@ -1014,6 +1077,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
             }
           </AppCardMeta>
         </AppCard>
+
         <AppCard data-testid="stat-card-total-pagos">
           <AppCardTitle showArrow={false}>
             <DollarSign className="w-4 h-4 inline mr-1" />
@@ -1024,6 +1088,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
           </AppCardValue>
           <AppCardMeta>Cantidad de pagos registrados</AppCardMeta>
         </AppCard>
+
         <AppCard data-testid="stat-card-ultimo-pago">
           <AppCardTitle showArrow={false}>
             <Calendar className="w-4 h-4 inline mr-1" />
@@ -1038,6 +1103,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
           <AppCardMeta>Fecha del último pago registrado</AppCardMeta>
         </AppCard>
       </div>
+
       <Table
         columns={columns}
         data={clientPayments}
@@ -1204,7 +1270,7 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
             label: 'Eliminar Pago',
             icon: Trash2,
             onClick: () => handleDeletePayment(payment),
-            variant: 'destructive'as const,
+            variant: 'destructive' as const,
           },
         ]}
         renderCard={(payment: ClientPaymentWithRelations) => (
@@ -1217,4 +1283,5 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
     </div>
   )
 }
+
 export default ClientPaymentsView;

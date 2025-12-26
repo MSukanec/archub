@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -9,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+
 const userSchema = z.object({
   full_name: z.string().min(1, 'El nombre completo es requerido'),
   email: z.string().email('Email inválido'),
@@ -16,10 +18,13 @@ const userSchema = z.object({
   last_name: z.string().min(1, 'El apellido es requerido'),
   is_active: z.boolean().default(true),
 })
+
 export type UserFormData = z.infer<typeof userSchema>
+
 interface FormPanelProps {
   form: ReturnType<typeof useForm<UserFormData>>
 }
+
 export function FormPanel({ form }: FormPanelProps) {
   return (
     <Form {...form}>
@@ -53,6 +58,7 @@ export function FormPanel({ form }: FormPanelProps) {
             )}
           />
         </div>
+
         <FormField
           control={form.control}
           name="full_name"
@@ -66,6 +72,7 @@ export function FormPanel({ form }: FormPanelProps) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="email"
@@ -79,6 +86,7 @@ export function FormPanel({ form }: FormPanelProps) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="is_active"
@@ -104,9 +112,11 @@ export function FormPanel({ form }: FormPanelProps) {
     </Form>
   )
 }
+
 interface ViewPanelProps {
   user: any
 }
+
 export function ViewPanel({ user }: ViewPanelProps) {
   return (
     <div className="space-y-6">
@@ -114,7 +124,7 @@ export function ViewPanel({ user }: ViewPanelProps) {
         <Avatar className="h-16 w-16">
           <AvatarImage src={user?.avatar_url} />
           <AvatarFallback>
-            {user?.full_name?.split('').map((n: string) => n[0]).join('') || 'U'}
+            {user?.full_name?.split(' ').map((n: string) => n[0]).join('') || 'U'}
           </AvatarFallback>
         </Avatar>
         <div>
@@ -139,7 +149,7 @@ export function ViewPanel({ user }: ViewPanelProps) {
         <div>
           <p className="text-sm font-medium">Estado</p>
           <p className="text-sm text-muted-foreground" data-testid="text-user-status">
-            {user?.is_active ? 'Activo': 'Inactivo'}
+            {user?.is_active ? 'Activo' : 'Inactivo'}
           </p>
         </div>
         <div>
@@ -152,13 +162,16 @@ export function ViewPanel({ user }: ViewPanelProps) {
     </div>
   )
 }
+
 interface UseUserFormOptions {
   user?: any
   onSuccess: () => void
 }
+
 export function useUserForm({ user, onSuccess }: UseUserFormOptions) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
   const form = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
     defaultValues: {
@@ -169,6 +182,7 @@ export function useUserForm({ user, onSuccess }: UseUserFormOptions) {
       is_active: user?.is_active ?? true,
     }
   })
+
   useEffect(() => {
     if (user) {
       form.reset({
@@ -188,9 +202,11 @@ export function useUserForm({ user, onSuccess }: UseUserFormOptions) {
       })
     }
   }, [user, form])
+
   const updateUserMutation = useMutation({
     mutationFn: async (data: UserFormData) => {
       if (!user?.id) throw new Error('User ID is required')
+
       const { error: userError } = await supabase!
         .from('users')
         .update({
@@ -199,7 +215,9 @@ export function useUserForm({ user, onSuccess }: UseUserFormOptions) {
           is_active: data.is_active
         })
         .eq('id', user.id)
+
       if (userError) throw userError
+
       const { error: userDataError } = await supabase!
         .from('user_data')
         .update({
@@ -207,6 +225,7 @@ export function useUserForm({ user, onSuccess }: UseUserFormOptions) {
           last_name: data.last_name
         })
         .eq('user_id', user.id)
+
       if (userDataError) throw userDataError
     },
     onSuccess: () => {
@@ -225,9 +244,11 @@ export function useUserForm({ user, onSuccess }: UseUserFormOptions) {
       })
     }
   })
+
   const onSubmit = async (data: UserFormData) => {
     await updateUserMutation.mutateAsync(data)
   }
+
   return {
     form,
     onSubmit,

@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { ActivityLog } from '../types';
+
 /**
  * Obtiene los logs de actividad recientes de una organización.
  * 
@@ -18,6 +19,7 @@ export async function getOrganizationActivityLogs(
   organizationId: string
 ): Promise<ActivityLog[]> {
   if (!organizationId) return [];
+
   const { data, error } = await supabase
     .from('organization_activity_logs')
     .select(`
@@ -39,6 +41,7 @@ export async function getOrganizationActivityLogs(
     .eq('organization_id', organizationId)
     .order('created_at', { ascending: false })
     .limit(50);
+
   if (error) {
     return [];
   }

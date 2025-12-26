@@ -14,17 +14,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
-  { value: '30d', label: 'Últimos 30 días'},
-  { value: '3m', label: 'Últimos 3 meses'},
-  { value: '6m', label: 'Últimos 6 meses'},
-  { value: '1y', label: 'Último año'},
-  { value: 'all', label: 'Histórico'},
+  { value: '30d', label: 'Últimos 30 días' },
+  { value: '3m', label: 'Últimos 3 meses' },
+  { value: '6m', label: 'Últimos 6 meses' },
+  { value: '1y', label: 'Último año' },
+  { value: 'all', label: 'Histórico' },
 ];
+
 interface OrganizationFinancesViewProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
+
 export function OrganizationFinancesView({ activeTab, onTabChange }: OrganizationFinancesViewProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all');
   const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
@@ -32,10 +35,13 @@ export function OrganizationFinancesView({ activeTab, onTabChange }: Organizatio
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const { setSidebarLevel } = useNavigationStore();
+
   const organizationId = userData?.organization?.id;
+
   useEffect(() => {
     setSidebarLevel('organization');
   }, [setSidebarLevel]);
+
   const { data: allMovements = [] } = useUnifiedMovements(organizationId, null);
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
   const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
@@ -46,15 +52,18 @@ export function OrganizationFinancesView({ activeTab, onTabChange }: Organizatio
     isMultiCurrency,
     enabled: !!organizationId && allMovements.length > 0,
   });
+
   useEffect(() => {
     if (activeFilterIssueId && !dataHealth.hasIssues) {
       setActiveFilterIssueId(null);
     }
   }, [activeFilterIssueId, dataHealth.hasIssues]);
+
   const filteredMovementIds = useMemo(() => {
     if (!activeFilterIssueId) return null;
     return dataHealth.getAffectedIdsForIssue(activeFilterIssueId);
   }, [activeFilterIssueId, dataHealth]);
+
   const handleDataHealthClick = useCallback((issueId: string) => {
     if (activeTab !== 'movements') {
       onTabChange('movements');
@@ -67,16 +76,20 @@ export function OrganizationFinancesView({ activeTab, onTabChange }: Organizatio
       }
     }
   }, [activeTab, activeFilterIssueId, onTabChange]);
+
   const availablePeriods = useMemo(() => calculateAvailablePeriods(allMovements), [allMovements]);
+
   const validSelectedPeriod = useMemo(() => {
     if (availablePeriods[selectedPeriod]) return selectedPeriod;
     return 'all';
   }, [selectedPeriod, availablePeriods]);
+
   useEffect(() => {
     if (validSelectedPeriod !== selectedPeriod) {
       setSelectedPeriod(validSelectedPeriod);
     }
   }, [validSelectedPeriod, selectedPeriod]);
+
   const handleAddMovement = () => {
     openModal('unified-payment', {
       organizationId,
@@ -84,8 +97,10 @@ export function OrganizationFinancesView({ activeTab, onTabChange }: Organizatio
       isProjectContext: false,
     });
   };
+
   return (
     <div className="space-y-6 p-6">
+
       {dataHealth.result?.issues && dataHealth.result.issues.length > 0 && (
         <DataHealthAlertMulti
           issues={dataHealth.result.issues}
@@ -117,7 +132,7 @@ export function OrganizationFinancesView({ activeTab, onTabChange }: Organizatio
             };
             const testId = panelIdToTestId[panelId] || `chart-${panelId}`;
             const element = document.querySelector(`[data-testid="${testId}"]`);
-            element?.scrollIntoView({ behavior: 'smooth', block: 'center'});
+            element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }}
           selectedPeriod={validSelectedPeriod}
           dismissedIssueIds={dismissedIssueIds}

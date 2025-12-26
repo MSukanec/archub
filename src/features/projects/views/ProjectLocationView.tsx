@@ -12,9 +12,11 @@ import { MapPin, Building2, Navigation, CheckCircle2, AlertCircle } from 'lucide
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { GooglePlacesAutocomplete, GoogleMap } from '@/components/shared/integrations/google-maps'
+
 interface ProjectLocationViewProps {
   projectId?: string;
 }
+
 export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -23,11 +25,14 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
   
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
+
   // API Key from environment variable
   const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+
   // Hydration state - CRITICAL for preventing auto-save on page load
   const [isHydrated, setIsHydrated] = useState(false);
   const hasHydratedRef = useRef(false);
+
   // Form states - Location
   const [addressFull, setAddressFull] = useState('');
   const [address, setAddress] = useState('');
@@ -43,29 +48,35 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
   const [timezone, setTimezone] = useState('');
   const [locationType, setLocationType] = useState<string>(''); // Will be empty or valid enum value
   const [accessibilityNotes, setAccessibilityNotes] = useState('');
+
   // Get project data for location fields
   const { data: projectData, isSuccess: projectDataSuccess } = useQuery({
     queryKey: projectsKeys.data(activeProjectId),
     queryFn: async () => {
       if (!activeProjectId || !supabase) return null;
+
       const { data, error } = await supabase
         .from('project_data')
         .select('*')
         .eq('project_id', activeProjectId)
         .single();
+
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching project data:', error);
         throw error;
       }
+
       return data;
     },
     enabled: !!activeProjectId && !!supabase
   });
+
   // ENTERPRISE AUTOSAVE: Controller for coordinated saves
   const saveController = useAutosaveController({
     queryKey: projectsKeys.data(activeProjectId),
     saveFn: async (dataToSave: any) => {
       if (!activeProjectId || !supabase) throw new Error('Project or Supabase not available');
+
       // Normalize empty strings to null
       const normalizedData = {
         address_full: normalizeStringValue(dataToSave.address_full),
@@ -81,6 +92,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
         ...(dataToSave.location_type ? { location_type: dataToSave.location_type } : {}),
         accessibility_notes: normalizeStringValue(dataToSave.accessibility_notes)
       };
+
       const { error } = await supabase
         .from('project_data')
         .upsert({
@@ -90,6 +102,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
         }, {
           onConflict: 'project_id'
         });
+
       if (error) {
         console.error('Error saving project location:', error);
         throw error;
@@ -97,16 +110,18 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     },
     additionalQueryKeys: [projectsKeys.info(activeProjectId), projectsKeys.list(organizationId)],
   });
+
   // Validate coordinates (if both present, must be valid)
   const validateCoordinates = (lat: number | null, lng: number | null) => {
     if (lat !== null || lng !== null) {
       if (lat === null || lng === null) return false; // Both or neither
-      if (typeof lat !== 'number'|| typeof lng !== 'number') return false;
+      if (typeof lat !== 'number' || typeof lng !== 'number') return false;
       if (lat < -90 || lat > 90) return false;
       if (lng < -180 || lng > 180) return false;
     }
     return true;
   };
+
   // Handler for text fields: save on blur
   const handleTextFieldBlur = useCallback(() => {
     if (!isHydrated) return;
@@ -129,9 +144,10 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
       accessibility_notes: accessibilityNotes
     });
   }, [isHydrated, saveController, addressFull, address, city, state, country, zipCode, placeId, lat, lng, timezone, locationType, accessibilityNotes]);
+
   // Handler for text fields: save on Enter key
   const handleTextFieldKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter'&& !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (!isHydrated) return;
       
@@ -154,6 +170,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
       });
     }
   }, [isHydrated, saveController, addressFull, address, city, state, country, zipCode, placeId, lat, lng, timezone, locationType, accessibilityNotes]);
+
   // Handler for select fields: save immediately on change
   const handleSelectChange = useCallback((value: string) => {
     if (!isHydrated) return;
@@ -180,11 +197,13 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
       });
     }, 0);
   }, [isHydrated, saveController, addressFull, address, city, state, country, zipCode, placeId, lat, lng, timezone, accessibilityNotes]);
+
   // Reset hydration when project changes
   useEffect(() => {
     setIsHydrated(false);
     hasHydratedRef.current = false;
   }, [activeProjectId]);
+
   // UNIFIED hydration effect - loads ALL data at once, then marks as hydrated
   // Uses ref to prevent re-hydration on each render
   useEffect(() => {
@@ -192,8 +211,10 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     if (!projectDataSuccess || hasHydratedRef.current) {
       return;
     }
+
     // Mark as hydrating to prevent multiple hydrations
     hasHydratedRef.current = true;
+
     // Load project data (may be null for new projects)
     if (projectData) {
       setAddressFull(projectData.address_full || '');
@@ -209,6 +230,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
       setLocationType(projectData.location_type || '');
       setAccessibilityNotes(projectData.accessibility_notes || '');
     }
+
     // Mark as hydrated AFTER all state updates are queued
     setTimeout(() => {
       setIsHydrated(true);
@@ -230,6 +252,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
       });
     }, 100);
   }, [projectData, projectDataSuccess, saveController]);
+
   // Handle Google Places selection
   const handlePlaceSelected = (place: any) => {
     setAddressFull(place.address_full);
@@ -264,25 +287,30 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
       }, 10);
     }
   };
+
   // Handle manual latitude/longitude input with reverse geocoding
   const handleLatChange = async (value: string) => {
     const parsed = parseFloat(value);
     const newLat = isNaN(parsed) ? null : parsed;
     setLat(newLat);
+
     // If both lat and lng are valid, do reverse geocoding
     if (newLat !== null && lng !== null && googleMapsApiKey && (window as any).google) {
       await performReverseGeocoding(newLat, lng);
     }
   };
+
   const handleLngChange = async (value: string) => {
     const parsed = parseFloat(value);
     const newLng = isNaN(parsed) ? null : parsed;
     setLng(newLng);
+
     // If both lat and lng are valid, do reverse geocoding
     if (lat !== null && newLng !== null && googleMapsApiKey && (window as any).google) {
       await performReverseGeocoding(lat, newLng);
     }
   };
+
   // Reverse geocoding helper function
   const performReverseGeocoding = async (latitude: number, longitude: number) => {
     try {
@@ -290,18 +318,21 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
       const response = await geocoder.geocode({
         location: { lat: latitude, lng: longitude }
       });
+
       if (response.results && response.results.length > 0) {
         const result = response.results[0];
         const newAddress = result.formatted_address;
         
         setAddressFull(newAddress);
         setAddress(newAddress);
+
         // Extract address components
         const components = result.address_components;
         let newCity = '';
         let newState = '';
         let newCountry = '';
         let newZipCode = '';
+
         components.forEach((component: any) => {
           const types = component.types;
           if (types.includes('locality')) {
@@ -314,6 +345,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
             newZipCode = component.long_name;
           }
         });
+
         setCity(newCity);
         setState(newState);
         setCountry(newCountry);
@@ -324,10 +356,12 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
       console.error('Error in reverse geocoding:', error);
     }
   };
+
   // Handle marker drag on map
   const handleMarkerDragEnd = async (newLat: number, newLng: number) => {
     setLat(newLat);
     setLng(newLng);
+
     // Use the helper function for reverse geocoding
     if (googleMapsApiKey && (window as any).google) {
       await performReverseGeocoding(newLat, newLng);
@@ -337,6 +371,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
       });
     }
   };
+
   if (!activeProjectId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -344,7 +379,9 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
       </div>
     )
   }
+
   const hasCoordinates = lat !== null && lng !== null;
+
   return (
     <div className="space-y-8">
       {/* Google Places Search + Map Section */}
@@ -358,6 +395,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
           Busca una dirección o ingresa las coordenadas manualmente. Todos los campos se sincronizan automáticamente. 
           También puedes arrastrar el pin en el mapa para ajustar la ubicación.
         </p>
+
         {!googleMapsApiKey && (
           <div className="p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md">
             <div className="flex items-start gap-2">
@@ -371,6 +409,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
             </div>
           </div>
         )}
+
         {/* Desktop: 4 columns (search=2, lat=1, lng=1), Mobile: 1 column */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Search field - takes 2 columns on desktop */}
@@ -397,6 +436,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
               </>
             )}
           </div>
+
           {/* Latitude - takes 1 column */}
           <div className="space-y-2">
             <Label htmlFor="latitude">Latitud (-90 a 90)</Label>
@@ -410,6 +450,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
               data-testid="input-latitude"
             />
           </div>
+
           {/* Longitude - takes 1 column */}
           <div className="space-y-2">
             <Label htmlFor="longitude">Longitud (-180 a 180)</Label>
@@ -424,6 +465,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
             />
           </div>
         </div>
+
         {/* Map - shown right below search */}
         {hasCoordinates && googleMapsApiKey && (
           <div className="mt-4">
@@ -448,6 +490,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
           </div>
         )}
       </div>
+
       {/* Address Details Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
@@ -460,6 +503,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
           Estos campos se completan automáticamente al buscar una dirección, 
           pero puedes editarlos manualmente si es necesario.
         </p>
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="city">Ciudad</Label>
@@ -473,6 +517,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
               data-testid="input-city"
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="zip-code">Código Postal</Label>
             <Input 
@@ -486,6 +531,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
             />
           </div>
         </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="state">Provincia/Estado</Label>
@@ -499,6 +545,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
               data-testid="input-state"
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="country">País</Label>
             <Input 
@@ -512,6 +559,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
             />
           </div>
         </div>
+
         <div className="space-y-2">
           <Label htmlFor="location-type">Tipo de Ubicación</Label>
           <Select value={locationType} onValueChange={handleSelectChange}>
@@ -526,6 +574,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
             </SelectContent>
           </Select>
         </div>
+
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-4">
             <Label htmlFor="accessibility-notes">Notas de Accesibilidad</Label>

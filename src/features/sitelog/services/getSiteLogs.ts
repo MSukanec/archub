@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 async function getSignedUrl(bucket: string, path: string): Promise<string | null> {
   if (!supabase) return null;
   
@@ -18,6 +19,7 @@ async function getSignedUrl(bucket: string, path: string): Promise<string | null
     return null;
   }
 }
+
 /**
  * Obtiene todas las bitácoras con sus relaciones completas.
  * 
@@ -35,6 +37,7 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
   if (!supabase || !organizationId) {
     return [];
   }
+
   let query = supabase
     .from('site_logs')
     .select(`
@@ -54,21 +57,28 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
       )
     `)
     .eq('organization_id', organizationId);
+
   // Solo filtrar por proyecto si projectId está definido
   if (projectId) {
     query = query.eq('project_id', projectId);
   }
+
   const { data: logsData, error } = await query.order('created_at', { ascending: false });
+
   if (error) {
     throw error;
   }
+
   if (!logsData || logsData.length === 0) {
     return [];
   }
+
   const logIds = logsData?.map(log => log.id) || [];
+
   if (logIds.length === 0) {
     return [];
   }
+
   const { data: attendeesData, error: attendeesError } = await supabase
     .from('personnel_attendees')
     .select(`
@@ -84,9 +94,11 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
       )
     `)
     .in('site_log_id', logIds);
+
   if (attendeesError) {
     // Non-fatal, just log silently
   }
+
   // Cargar archivos usando nueva arquitectura (media_files + media_links)
   const { data: filesData, error: filesError } = await supabase
     .from('media_links')
@@ -111,9 +123,11 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
     `)
     .in('site_log_id', logIds)
     .eq('media_files.is_deleted', false);
+
   if (filesError) {
     console.error('Error loading sitelog files:', filesError);
   }
+
   // Generar signed URLs para archivos en private-assets
   const data = await Promise.all(logsData.map(async (log) => {
     const logFiles = filesData
@@ -140,12 +154,13 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
         };
       })
       .filter(file => file !== null) || [];
+
     // Generar signed URLs para archivos privados
     const filesWithUrls = await Promise.all(
       logFiles.map(async (file: any) => {
         let displayUrl = file.file_url;
         
-        if (file.bucket === 'private-assets'&& file.file_path) {
+        if (file.bucket === 'private-assets' && file.file_path) {
           const signedUrl = await getSignedUrl(file.bucket, file.file_path);
           displayUrl = signedUrl || file.file_url;
         }
@@ -156,6 +171,7 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
         };
       })
     );
+
     return {
       ...log,
       creator: log.creator?.user ? {
@@ -167,5 +183,6 @@ export async function getSiteLogs(projectId: string | undefined, organizationId:
       files: filesWithUrls
     };
   }));
+
   return data || [];
 }

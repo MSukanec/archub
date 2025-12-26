@@ -1,6 +1,6 @@
 export type EntityType = 
   | 'user_avatar'
-  | 'org_logo'
+  | 'org_logo' 
   | 'course_cover_public'
   | 'course_module_image'
   | 'course_client_gallery'
@@ -28,7 +28,9 @@ export type EntityType =
   | 'hero_section_media'
   | 'forum_thread_attachment'
   | 'inspiration_pin';
-export type BucketName = 'public-assets'| 'private-assets'| 'social-assets';
+
+export type BucketName = 'public-assets' | 'private-assets' | 'social-assets';
+
 export interface UploadContext {
   entity: EntityType;
   organization_id?: string;
@@ -62,6 +64,7 @@ export interface UploadContext {
   position?: number;
   metadata?: Record<string, any>;
 }
+
 export interface UploadResult {
   media_file_id: string;
   media_link_id?: string;
@@ -74,6 +77,7 @@ export interface UploadResult {
     wasCompressed: boolean;
   };
 }
+
 export interface StoragePath {
   bucket: BucketName;
   path: string;

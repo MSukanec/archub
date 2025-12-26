@@ -1,12 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { useProjectContext } from '@/stores/projectContext';
+import { 
   getUnifiedMovements, 
   getUnifiedMovementsStats,
   type UnifiedMovementWithRelations 
 } from '../services/getUnifiedMovements';
+
 interface UseUnifiedMovementsOptions {
   enabled?: boolean;
 }
+
 /**
  * Scope object para distinguir contextos estrictamente.
  * - org: consulta todos los movimientos de la organización
@@ -14,9 +17,10 @@ interface UseUnifiedMovementsOptions {
  * - pending: estado de espera (hydration pendiente), no ejecutar query
  */
 type MovementScope = 
-  | { type: 'org'}
+  | { type: 'org' }
   | { type: 'project'; projectId: string }
-  | { type: 'pending'};
+  | { type: 'pending' };
+
 /**
  * Normaliza el projectId a un objeto de scope explícito.
  * - null explícito = scope org
@@ -25,13 +29,14 @@ type MovementScope =
  */
 function normalizeScope(projectId: string | null | undefined): MovementScope {
   if (projectId === null) {
-    return { type: 'org'};
+    return { type: 'org' };
   }
-  if (typeof projectId === 'string'&& projectId.length > 0) {
+  if (typeof projectId === 'string' && projectId.length > 0) {
     return { type: 'project', projectId };
   }
-  return { type: 'pending'};
+  return { type: 'pending' };
 }
+
 /**
  * Genera un query key basado en el scope normalizado.
  * Garantiza aislamiento de cache completo entre contextos.
@@ -46,6 +51,7 @@ function getQueryKey(base: string, orgId: string | null | undefined, scope: Move
       return [base, orgId, 'scope:pending'];
   }
 }
+
 /**
  * Hook para obtener todos los movimientos financieros unificados.
  * Usa la vista unified_financial_movements_view de la base de datos.
@@ -79,15 +85,17 @@ export function useUnifiedMovements(
   
   // No ejecutar query si scope es pending (esperando hydration)
   const isPending = scope.type === 'pending';
+
   return useQuery<UnifiedMovementWithRelations[]>({
     queryKey: getQueryKey('unified-movements', effectiveOrgId, scope),
     queryFn: () => getUnifiedMovements(
       effectiveOrgId!, 
-      scope.type === 'project'? scope.projectId : null
+      scope.type === 'project' ? scope.projectId : null
     ),
     enabled: !!effectiveOrgId && !isPending && (options?.enabled !== false),
   });
 }
+
 /**
  * Hook para obtener estadísticas de los movimientos unificados.
  * 
@@ -113,11 +121,12 @@ export function useUnifiedMovementsStats(
   
   // No ejecutar query si scope es pending
   const isPending = scope.type === 'pending';
+
   return useQuery({
     queryKey: getQueryKey('unified-movements-stats', effectiveOrgId, scope),
     queryFn: () => getUnifiedMovementsStats(
       effectiveOrgId!, 
-      scope.type === 'project'? scope.projectId : null
+      scope.type === 'project' ? scope.projectId : null
     ),
     enabled: !!effectiveOrgId && !isPending && (options?.enabled !== false),
   });

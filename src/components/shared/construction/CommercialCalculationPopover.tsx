@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Eye, Calculator } from 'lucide-react'
+
 interface CommercialCalculationPopoverProps {
   material: {
     name: string
@@ -12,20 +13,25 @@ interface CommercialCalculationPopoverProps {
     commercial_quantity?: number
   }
 }
+
 export function CommercialCalculationPopover({ material }: CommercialCalculationPopoverProps) {
   const [isOpen, setIsOpen] = useState(false)
+
   // No mostrar el botón si no hay unidad comercial definida
   if (!material.commercial_unit_name || !material.commercial_equivalence || material.commercial_equivalence <= 0) {
     return null
   }
+
   const technicalQuantity = material.computed_quantity
   const equivalence = material.commercial_equivalence
   const commercialQuantity = material.commercial_quantity
   const unitName = material.unit_name || 'unidad'
   const commercialUnitName = material.commercial_unit_name
+
   // Calcular la división exacta para mostrar
   const exactDivision = technicalQuantity / equivalence
   const formattedDivision = exactDivision.toFixed(3)
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -62,6 +68,7 @@ export function CommercialCalculationPopover({ material }: CommercialCalculation
               </Button>
             </div>
           </div>
+
           {/* Content */}
           <div className="p-4">
             {/* Material name */}
@@ -70,6 +77,7 @@ export function CommercialCalculationPopover({ material }: CommercialCalculation
                 {material.name}
               </h3>
             </div>
+
             {/* Calculation steps */}
             <div className="space-y-3 text-sm">
               {/* Step 1: Division */}
@@ -81,6 +89,7 @@ export function CommercialCalculationPopover({ material }: CommercialCalculation
                   {technicalQuantity} {unitName} ÷ {equivalence} {unitName}/{commercialUnitName} = {formattedDivision}
                 </div>
               </div>
+
               {/* Step 2: Rounding */}
               <div className="bg-[var(--muted-bg)] rounded-lg p-3">
                 <div className="font-medium text-[var(--card-fg)] mb-1">
@@ -90,6 +99,7 @@ export function CommercialCalculationPopover({ material }: CommercialCalculation
                   {formattedDivision} → redondeado a <span className="font-semibold text-[var(--card-fg)]">{commercialQuantity} {commercialUnitName}</span>
                 </div>
               </div>
+
               {/* Step 3: Explanation */}
               <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
                 <div className="text-xs text-blue-800 dark:text-blue-200">

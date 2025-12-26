@@ -3,6 +3,7 @@ import type {
   Subcontract,
   SubcontractBid,
 } from '../../../../shared/schema';
+
 // Re-export types from shared schema
 export type {
   Subcontract,
@@ -14,6 +15,7 @@ export type {
   MovementSubcontract,
   InsertMovementSubcontract,
 } from '../../../../shared/schema';
+
 // Additional feature-specific types
 export interface SubcontractWithContact extends Subcontract {
   contact?: {
@@ -25,6 +27,7 @@ export interface SubcontractWithContact extends Subcontract {
     email?: string;
   };
 }
+
 export interface SubcontractBidWithContact extends SubcontractBid {
   contacts?: {
     id: string;

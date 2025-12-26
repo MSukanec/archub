@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { CourseLessonProgress } from '@shared/schema';
+
 /**
  * Obtiene el progreso de todas las lecciones de un curso.
  * 
@@ -14,12 +15,14 @@ export async function getCourseProgress(courseId: string): Promise<CourseLessonP
   if (!courseId) {
     return [];
   }
+
   const { data } = await supabase.auth.getSession();
   const session = data?.session;
   
   if (!session) {
     throw new Error('No active session');
   }
+
   const response = await fetch(`/api/courses/${courseId}/progress`, {
     method: 'GET',
     headers: {
@@ -28,9 +31,11 @@ export async function getCourseProgress(courseId: string): Promise<CourseLessonP
     },
     credentials: 'include',
   });
+
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Failed to fetch course progress'}));
+    const error = await response.json().catch(() => ({ error: 'Failed to fetch course progress' }));
     throw new Error(error.error || 'Failed to fetch course progress');
   }
+
   return await response.json();
 }

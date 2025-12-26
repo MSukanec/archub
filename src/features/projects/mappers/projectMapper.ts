@@ -3,7 +3,9 @@
  * 
  * Functions to transform project data from Supabase to the expected format.
  */
+
 import type { Project, ProjectData } from '../types';
+
 /**
  * Transforma project_data de array a objeto.
  * 
@@ -86,6 +88,7 @@ export function transformProjectData(rawProject: any): Project {
     project_data: projectData
   };
 }
+
 /**
  * Transforma un array de proyectos normalizando project_data.
  * 

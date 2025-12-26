@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { format, isValid, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { ValidationError, TargetField, ParsedData, ColumnMapping } from '../types';
+
 /**
  * Masked Date Input - Format: DD/MM/AAAA
  * Only allows numbers, slashes are fixed
@@ -23,6 +24,7 @@ interface MaskedDateInputProps {
   autoFocus?: boolean;
   className?: string;
 }
+
 function MaskedDateInput({ value, onChange, onSave, onCancel, autoFocus, className }: MaskedDateInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   
@@ -120,6 +122,7 @@ function MaskedDateInput({ value, onChange, onSave, onCancel, autoFocus, classNa
     </div>
   );
 }
+
 interface ValidationSummary {
   totalRows: number;
   validRows: number;
@@ -129,6 +132,7 @@ interface ValidationSummary {
   missingRequiredFields: string[];
   unmappedColumns: number[];
 }
+
 interface StepValidationProps {
   errors: ValidationError[];
   summary: ValidationSummary;
@@ -139,6 +143,7 @@ interface StepValidationProps {
   cellCorrections?: Record<string, string>;
   onCellCorrectionChange?: (rowIndex: number, field: string, value: string) => void;
 }
+
 export function StepValidation({
   errors,
   summary,
@@ -151,10 +156,12 @@ export function StepValidation({
 }: StepValidationProps) {
   const [editingCell, setEditingCell] = useState<{ row: number; field: string } | null>(null);
   const [editValue, setEditValue] = useState('');
+
   const getFieldLabel = (fieldName: string): string => {
     const field = targetSchema.find(f => f.field === fieldName);
     return field?.label || fieldName;
   };
+
   const errorsByField = useMemo(() => {
     const grouped: Record<string, ValidationError[]> = {};
     
@@ -166,6 +173,7 @@ export function StepValidation({
     
     return grouped;
   }, [errors]);
+
   // Detectar errores de celdas vacías ORIGINALES en campos editables
   // Esto se basa en parsedData y columnMapping, NO en errors (que cambia con correcciones)
   const originalEmptyCellErrors = useMemo(() => {
@@ -204,6 +212,7 @@ export function StepValidation({
     
     return emptyErrors;
   }, [parsedData, columnMapping, targetSchema]);
+
   // Detectar errores de celdas vacías en campos editables (para contador de errores)
   const emptyCellErrors = useMemo(() => {
     return errors.filter(e => {
@@ -213,6 +222,7 @@ export function StepValidation({
       return isEmpty && isEditableType && e.severity === 'error';
     });
   }, [errors, targetSchema]);
+
   // Agrupar errores ORIGINALES de celdas vacías por fila (para mostrar en tabla)
   const rowsWithEmptyCells = useMemo(() => {
     const rows: Record<number, ValidationError[]> = {};
@@ -222,7 +232,9 @@ export function StepValidation({
     }
     return rows;
   }, [originalEmptyCellErrors]);
+
   const hasEditableErrors = Object.keys(rowsWithEmptyCells).length > 0;
+
   const handleStartEdit = (rowIndex: number, field: string) => {
     // Use || as separator since field names contain underscores
     const key = `${rowIndex}||${field}`;
@@ -230,6 +242,7 @@ export function StepValidation({
     setEditValue(currentValue);
     setEditingCell({ row: rowIndex, field });
   };
+
   const handleSaveEdit = () => {
     if (editingCell && onCellCorrectionChange) {
       onCellCorrectionChange(editingCell.row, editingCell.field, editValue);
@@ -237,15 +250,18 @@ export function StepValidation({
     setEditingCell(null);
     setEditValue('');
   };
+
   const handleCancelEdit = () => {
     setEditingCell(null);
     setEditValue('');
   };
+
   const getCorrectedValue = (rowIndex: number, field: string): string | null => {
     // Use || as separator since field names contain underscores
     const key = `${rowIndex}||${field}`;
     return cellCorrections[key] || null;
   };
+
   const formatDisplayValue = (value: unknown, field: string): string => {
     if (value === null || value === undefined) return '';
     const strValue = String(value);
@@ -275,7 +291,7 @@ export function StepValidation({
       }
     }
     
-    if (fieldConfig?.type === 'currency'|| fieldConfig?.type === 'number') {
+    if (fieldConfig?.type === 'currency' || fieldConfig?.type === 'number') {
       const num = parseFloat(strValue);
       if (!isNaN(num)) {
         return num.toLocaleString('es-AR');
@@ -284,17 +300,20 @@ export function StepValidation({
     
     return strValue;
   };
+
   const getOriginalValue = (rowIndex: number, colIndex: number): string => {
     if (!parsedData || rowIndex >= parsedData.rows.length) return '';
     const value = parsedData.rows[rowIndex][colIndex];
     if (value === null || value === undefined) return '';
     return String(value);
   };
+
   const getFormattedOriginalValue = (rowIndex: number, colIndex: number, field: string): string => {
     if (!parsedData || rowIndex >= parsedData.rows.length) return '';
     const value = parsedData.rows[rowIndex][colIndex];
     return formatDisplayValue(value, field);
   };
+
   const getColumnIndexForField = (field: string): number => {
     if (!columnMapping) return -1;
     for (const [colIndex, mappedField] of Object.entries(columnMapping)) {
@@ -302,6 +321,7 @@ export function StepValidation({
     }
     return -1;
   };
+
   const originalRowsWithErrors = useMemo(() => {
     const rows = new Set<number>();
     for (const error of originalEmptyCellErrors) {
@@ -309,9 +329,11 @@ export function StepValidation({
     }
     return Array.from(rows).sort((a, b) => a - b);
   }, [originalEmptyCellErrors]);
+
   const getOriginalErrorsForRow = (rowIndex: number): ValidationError[] => {
     return originalEmptyCellErrors.filter(e => e.row === rowIndex);
   };
+
   if (errors.length === 0 && summary.missingRequiredFields.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
@@ -327,6 +349,7 @@ export function StepValidation({
       </div>
     );
   }
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -358,6 +381,7 @@ export function StepValidation({
           </CardContent>
         </Card>
       </div>
+
       {summary.missingRequiredFields.length > 0 && (
         <Card className="border-destructive/50">
           <CardHeader className="pb-3">
@@ -380,6 +404,7 @@ export function StepValidation({
           </CardContent>
         </Card>
       )}
+
       {/* Editor de celdas vacías - muestra todas las columnas para contexto */}
       {/* Mostrar mientras haya filas que originalmente tenían errores, aunque ya estén corregidas */}
       {originalRowsWithErrors.length > 0 && parsedData && columnMapping && onCellCorrectionChange && (() => {
@@ -570,6 +595,7 @@ export function StepValidation({
           </Card>
         );
       })()}
+
       <ScrollArea className="h-[300px]">
         <div className="space-y-3 pr-4">
           {Object.entries(errorsByField).map(([field, fieldErrors]) => {
@@ -583,10 +609,12 @@ export function StepValidation({
               const key = `${e.row}||${e.field}`;
               return !cellCorrections[key];
             });
+
             // Si todos los errores de este campo fueron corregidos, no mostrar
             if (uncorrectedErrors.length === 0) return null;
             
             const uniqueValues = Array.from(new Set(uncorrectedErrors.map(e => String(e.value)))).slice(0, 5);
+
             return (
               <Collapsible key={field}>
                 <Card className={cn(
@@ -605,7 +633,7 @@ export function StepValidation({
                           <div className="text-left">
                             <p className="font-medium">{fieldLabel}</p>
                             <p className="text-sm text-muted-foreground">
-                              {uncorrectedErrors.length} {uncorrectedErrors.length === 1 ? 'fila afectada': 'filas afectadas'}
+                              {uncorrectedErrors.length} {uncorrectedErrors.length === 1 ? 'fila afectada' : 'filas afectadas'}
                             </p>
                           </div>
                         </div>
@@ -635,7 +663,7 @@ export function StepValidation({
                         <div className="flex flex-wrap gap-2">
                           {uniqueValues.map((value, idx) => (
                             <Badge key={idx} variant="outline" className="font-mono text-xs">
-                              {value === 'null'|| value === 'undefined'|| value === ''? '(vacío)': value}
+                              {value === 'null' || value === 'undefined' || value === '' ? '(vacío)' : value}
                             </Badge>
                           ))}
                           {Array.from(new Set(uncorrectedErrors.map(e => String(e.value)))).length > 5 && (

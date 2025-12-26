@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { toast } from '@/hooks/use-toast'
+
 export interface ConstructionPhase {
   id: string
   name: string
@@ -9,6 +10,7 @@ export interface ConstructionPhase {
   phase_id?: string
   taskCount?: number
 }
+
 export function useConstructionProjectPhases(projectId: string) {
   return useQuery({
     queryKey: ['construction-project-phases', projectId],
@@ -28,10 +30,12 @@ export function useConstructionProjectPhases(projectId: string) {
         `)
         .eq('project_id', projectId)
         .order('position', { ascending: true })
+
       if (error) {
         console.error('Error fetching construction project phases:', error)
         throw error
       }
+
       // Para cada fase, obtener el conteo de tareas de forma separada
       const phasesWithCount = await Promise.all(
         (data || []).map(async (item: any) => {
@@ -40,6 +44,7 @@ export function useConstructionProjectPhases(projectId: string) {
             .select('*', { count: 'exact', head: true })
             .eq('project_id', projectId)
             .eq('phase_instance_id', item.id)
+
           return {
             id: item.construction_phases?.id || '',
             name: item.construction_phases?.name || 'Sin nombre',
@@ -50,11 +55,13 @@ export function useConstructionProjectPhases(projectId: string) {
           }
         })
       )
+
       return phasesWithCount
     },
     enabled: !!projectId,
   })
 }
+
 export function useConstructionPhases(organizationId: string) {
   return useQuery({
     queryKey: ['construction-phases', organizationId],
@@ -66,17 +73,21 @@ export function useConstructionPhases(organizationId: string) {
         .select('*')
         .eq('organization_id', organizationId)
         .order('name', { ascending: true })
+
       if (error) {
         console.error('Error fetching construction phases:', error)
         throw error
       }
+
       return data || []
     },
     enabled: !!organizationId,
   })
 }
+
 export function useCreateConstructionPhase() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async (phaseData: {
       projectId: string
@@ -88,7 +99,9 @@ export function useCreateConstructionPhase() {
       existingPhaseId?: string
     }) => {
       if (!supabase) throw new Error('Supabase not initialized')
+
       let phaseId = phaseData.existingPhaseId
+
       // Si no está usando una fase existente, crear nueva fase
       if (!phaseData.useExisting) {
         const { data: newPhase, error: phaseError } = await supabase
@@ -100,18 +113,23 @@ export function useCreateConstructionPhase() {
           })
           .select()
           .single()
+
         if (phaseError) {
           console.error('Error creating phase:', phaseError)
           throw phaseError
         }
+
         phaseId = newPhase.id
       }
+
       // Obtener la próxima posición
       const { count } = await supabase
         .from('construction_project_phases')
         .select('*', { count: 'exact', head: true })
         .eq('project_id', phaseData.projectId)
+
       const nextPosition = (count || 0) + 1
+
       // Crear relación proyecto-fase
       const { data: projectPhase, error: projectPhaseError } = await supabase
         .from('construction_project_phases')
@@ -123,10 +141,12 @@ export function useCreateConstructionPhase() {
         })
         .select()
         .single()
+
       if (projectPhaseError) {
         console.error('Error creating project phase:', projectPhaseError)
         throw projectPhaseError
       }
+
       return { success: true, projectPhase }
     },
     onSuccess: (_, variables) => {
@@ -152,8 +172,10 @@ export function useCreateConstructionPhase() {
     }
   })
 }
+
 export function useUpdatePhasePositions() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async ({ 
       projectId, 
@@ -163,6 +185,7 @@ export function useUpdatePhasePositions() {
       phases: ConstructionPhase[] 
     }) => {
       if (!supabase) throw new Error('Supabase not initialized')
+
       // Actualizar posiciones en lote incluyendo project_id y phase_id
       const updates = phases.map(phase => ({
         id: phase.project_phase_id,
@@ -170,14 +193,18 @@ export function useUpdatePhasePositions() {
         phase_id: phase.phase_id, // Incluir phase_id requerido
         position: phase.position
       }))
+
       // Debug logs removed
+
       const { error, data } = await supabase
         .from('construction_project_phases')
-        .upsert(updates, { onConflict: 'id'})
+        .upsert(updates, { onConflict: 'id' })
+
       if (error) {
         console.error('Error updating phase positions:', error)
         throw error
       }
+
       return { success: true }
     },
     onSuccess: (_, variables) => {

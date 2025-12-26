@@ -12,12 +12,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { ClientCommitmentWithRelations, ClientPaymentWithRelations } from '../types';
+
 interface CommitmentAccordionProps {
   commitments: ClientCommitmentWithRelations[];
   payments: ClientPaymentWithRelations[];
   onEdit?: (commitment: ClientCommitmentWithRelations) => void;
   onDelete?: (commitment: ClientCommitmentWithRelations) => void;
 }
+
 interface CommitmentItemProps {
   commitment: ClientCommitmentWithRelations;
   payments: ClientPaymentWithRelations[];
@@ -26,6 +28,7 @@ interface CommitmentItemProps {
   onEdit?: (commitment: ClientCommitmentWithRelations) => void;
   onDelete?: (commitment: ClientCommitmentWithRelations) => void;
 }
+
 const formatCurrency = (amount: number, symbol?: string): string => {
   const formattedAmount = new Intl.NumberFormat('es-AR', {
     minimumFractionDigits: 0,
@@ -34,6 +37,7 @@ const formatCurrency = (amount: number, symbol?: string): string => {
   
   return `${symbol || '$'} ${formattedAmount}`;
 };
+
 const getClientDisplayName = (commitment: ClientCommitmentWithRelations): string => {
   const contact = commitment.project_client?.contact;
   
@@ -58,6 +62,7 @@ const getClientDisplayName = (commitment: ClientCommitmentWithRelations): string
   
   return 'Sin nombre';
 };
+
 const getClientInitials = (commitment: ClientCommitmentWithRelations): string => {
   const contact = commitment.project_client?.contact;
   
@@ -66,7 +71,7 @@ const getClientInitials = (commitment: ClientCommitmentWithRelations): string =>
   }
   
   if (contact.company_name) {
-    const words = contact.company_name.split('');
+    const words = contact.company_name.split(' ');
     if (words.length > 1) {
       return words.slice(0, 2).map(w => w[0]?.toUpperCase()).join('');
     }
@@ -81,11 +86,13 @@ const getClientInitials = (commitment: ClientCommitmentWithRelations): string =>
   
   return firstInitial + lastInitial || 'CL';
 };
+
 const getContactAvatarUrl = (commitment: ClientCommitmentWithRelations): string | null => {
   const contact = commitment.project_client?.contact;
   if (!contact?.image_bucket || !contact?.image_path) return null;
   return null;
 };
+
 function CommitmentItem({ 
   commitment, 
   payments,
@@ -129,6 +136,7 @@ function CommitmentItem({
   const headerDisplay = commitment.unit_name 
     ? `${clientName} - ${commitment.unit_name}` 
     : clientName;
+
   return (
     <div 
       className={cn(
@@ -293,6 +301,7 @@ function CommitmentItem({
     </div>
   );
 }
+
 export default function CommitmentAccordion({ 
   commitments, 
   payments,
@@ -320,9 +329,11 @@ export default function CommitmentAccordion({
       return nameA.localeCompare(nameB, 'es');
     });
   }, [commitments]);
+
   const handleToggle = (id: string) => {
     setOpenId(prev => prev === id ? null : id);
   };
+
   if (sortedCommitments.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -332,6 +343,7 @@ export default function CommitmentAccordion({
       </div>
     );
   }
+
   return (
     <div className="space-y-3" data-testid="commitment-accordion-list">
       {sortedCommitments.map(commitment => (
@@ -348,4 +360,5 @@ export default function CommitmentAccordion({
     </div>
   );
 }
+
 export type { CommitmentAccordionProps };

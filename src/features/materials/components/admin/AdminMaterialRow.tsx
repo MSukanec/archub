@@ -1,6 +1,7 @@
 import React from 'react';
 import DataRowCard from '@/components/shared/DataRowCard';
 import { Badge } from '@/components/ui/badge';
+
 // Interface para el material usando la estructura actual de materials_view
 interface Material {
   id: string;
@@ -27,21 +28,24 @@ interface Material {
   unit?: { name: string };
   category?: { name: string };
 }
+
 interface AdminMaterialRowProps {
   material: Material;
   onClick?: () => void;
   selected?: boolean;
-  density?: 'compact'| 'normal'| 'comfortable';
+  density?: 'compact' | 'normal' | 'comfortable';
   className?: string;
 }
+
 // Helper para obtener las iniciales del material
 const getMaterialInitials = (material: Material): string => {
-  const words = material.name.split('');
+  const words = material.name.split(' ');
   if (words.length >= 2) {
     return `${words[0].slice(0, 1)}${words[1].slice(0, 1)}`.toUpperCase();
   }
   return material.name.slice(0, 2).toUpperCase();
 };
+
 // Helper para obtener el precio promedio
 const getMaterialPrice = (material: Material): string => {
   if (material.avg_price !== null && material.avg_price !== undefined) {
@@ -49,10 +53,12 @@ const getMaterialPrice = (material: Material): string => {
   }
   return 'Sin precio';
 };
+
 // Componente para mostrar precio y estado
 const PriceAndStatus = ({ material }: { material: Material }) => {
   const price = getMaterialPrice(material);
   const isCompleted = material.is_completed;
+
   return (
     <div className="text-right space-y-1">
       {/* Precio */}
@@ -66,16 +72,17 @@ const PriceAndStatus = ({ material }: { material: Material }) => {
           variant={isCompleted ? "default" : "secondary"} 
           className={`text-xs ${
             isCompleted 
-              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
               : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
           }`}
         >
-          {isCompleted ? 'Completo': 'Incompleto'}
+          {isCompleted ? 'Completo' : 'Incompleto'}
         </Badge>
       </div>
     </div>
   );
 };
+
 export default function AdminMaterialRow({ 
   material, 
   onClick, 
@@ -93,15 +100,18 @@ export default function AdminMaterialRow({
         <div className="font-semibold text-sm truncate">
           {material.name}
         </div>
+
         {/* Segunda fila - Unidad de Cómputo */}
         <div className="text-xs text-muted-foreground truncate">
           {material.unit_of_computation || material.unit?.name || 'Sin unidad'}
         </div>
+
         {/* Tercera fila - Categoría */}
         <div className="text-xs text-muted-foreground truncate">
           {material.category_name || material.category?.name || 'Sin categoría'}
         </div>
       </div>
+
       {/* Trailing Section - Precio y Estado */}
       <div className="flex items-center">
         <PriceAndStatus material={material} />
@@ -110,6 +120,7 @@ export default function AdminMaterialRow({
       </div>
     </>
   );
+
   // Usar el nuevo DataRowCard con avatar de iniciales
   return (
     <DataRowCard
@@ -124,5 +135,6 @@ export default function AdminMaterialRow({
     </DataRowCard>
   );
 }
+
 // Export del tipo para uso externo
 export type { Material };

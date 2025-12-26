@@ -33,6 +33,7 @@ import {
   useClientCommitments,
 } from '@/features/clients/hooks'
 import { getClientPaymentStatusBadgeConfig } from '@/features/clients/utils/statusBadge'
+
 const clientPaymentSchema = z.object({
   payment_date: z.date({
     required_error: "Fecha de pago es requerida",
@@ -49,7 +50,9 @@ const clientPaymentSchema = z.object({
   reference: z.string().optional(),
   notes: z.string().optional(),
 })
+
 type ClientPaymentFormData = z.infer<typeof clientPaymentSchema>
+
 function FormPanel({
   form,
   onSubmit,
@@ -92,18 +95,22 @@ function FormPanel({
   // Extract unique values for filters
   const selectedClientId = form.watch('client_id');
   const project_id = form.watch('project_id');
+
   const clientOptions = useMemo(() => {
     if (!projectClients) return []
+
     return projectClients
       .map(client => {
         const name = client.contact_full_name ||
                     client.contact_company_name ||
                     `${client.contact_first_name || ''} ${client.contact_last_name || ''}`.trim() ||
                     '-';
+
         const avatarUrl = client.linked_user_avatar_url
           || (client.contact_image_bucket && client.contact_image_path
             ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${client.contact_image_bucket}/${client.contact_image_path}`
             : null);
+
         return {
           value: client.id,
           label: name,
@@ -111,8 +118,9 @@ function FormPanel({
           roleName: client.role_name,
         }
       })
-      .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base'}))
+      .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
   }, [projectClients])
+
   const renderClientOption = (option: typeof clientOptions[number]) => (
     <IdentityBadge
       name={option.label}
@@ -121,10 +129,12 @@ function FormPanel({
       subLabel={option.roleName}
     />
   )
+
   const clientCommitments = useMemo(() => {
     if (!commitments || !selectedClientId) return [];
     return commitments.filter(c => c.client_id === selectedClientId);
   }, [commitments, selectedClientId]);
+
   const commitmentOptions = useMemo(() => {
     return clientCommitments.map(c => ({
       value: c.id,
@@ -133,6 +143,7 @@ function FormPanel({
         : `Compromiso ${c.currency?.symbol ? `- ${c.currency.symbol} ${c.amount?.toLocaleString('es-AR') || '0'}` : ''}`,
     }));
   }, [clientCommitments]);
+
   React.useEffect(() => {
     if (clientCommitments.length === 1) {
       form.setValue('commitment_id', clientCommitments[0].id);
@@ -140,17 +151,20 @@ function FormPanel({
       form.setValue('commitment_id', undefined);
     }
   }, [clientCommitments, form])
+
   const activeProjects = useMemo(() => {
     if (!projects) return [];
     // Only show projects that are 'in_process'
     return projects.filter(p => p.status === 'in_process');
   }, [projects]);
+
   const projectOptions = useMemo(() => {
     return activeProjects.map(p => ({
       value: p.id,
       label: p.name,
     }));
   }, [activeProjects]);
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -161,6 +175,7 @@ function FormPanel({
       </div>
     )
   }
+
   return (
     <div className="space-y-4 pt-4">
       {/* Top Section with Project Selector if not provided */}
@@ -192,6 +207,7 @@ function FormPanel({
           )}
         />
       )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
@@ -231,6 +247,7 @@ function FormPanel({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="client_id"
@@ -256,6 +273,7 @@ function FormPanel({
           )}
         />
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
@@ -286,6 +304,7 @@ function FormPanel({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="amount"
@@ -311,6 +330,7 @@ function FormPanel({
           )}
         />
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
@@ -341,6 +361,7 @@ function FormPanel({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="exchange_rate"
@@ -363,6 +384,7 @@ function FormPanel({
           )}
         />
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
@@ -398,6 +420,7 @@ function FormPanel({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="status"
@@ -424,6 +447,7 @@ function FormPanel({
           )}
         />
       </div>
+
       <FormField
         control={form.control}
         name="notes"
@@ -442,6 +466,7 @@ function FormPanel({
           </FormItem>
         )}
       />
+
       <FormField
         control={form.control}
         name="reference"
@@ -459,6 +484,7 @@ function FormPanel({
           </FormItem>
         )}
       />
+
       <div>
         <FileUploader
           mode="multiple"
@@ -484,6 +510,7 @@ function FormPanel({
     </div>
   )
 }
+
 function ViewPanel({
   existingPayment,
   attachments,
@@ -521,6 +548,7 @@ function ViewPanel({
           </div>
         </div>
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Fecha de Pago</h4>
@@ -546,6 +574,7 @@ function ViewPanel({
           })()}
         </div>
       </div>
+
       {(existingPayment.reference || existingPayment.commitment || existingPayment.schedule) && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {existingPayment.reference && (
@@ -572,12 +601,14 @@ function ViewPanel({
           )}
         </div>
       )}
+
       {existingPayment.notes && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Notas</h4>
           <p className="text-sm bg-muted/30 p-3 rounded-md" data-testid="text-payment-notes">{existingPayment.notes}</p>
         </div>
       )}
+
       {attachments.length > 0 && (
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Archivos Adjuntos</h4>
@@ -601,14 +632,15 @@ function ViewPanel({
           </div>
         </div>
       )}
+
       <div className="pt-4 border-t border-border">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground">
           <div data-testid="text-payment-created-at">
-            <span className="font-medium">Creado:</span> {format(new Date(existingPayment.created_at), "dd/MM/yyyy 'a las'HH:mm", { locale: es })}
+            <span className="font-medium">Creado:</span> {format(new Date(existingPayment.created_at), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
           </div>
           {existingPayment.updated_at && existingPayment.updated_at !== existingPayment.created_at && (
             <div data-testid="text-payment-updated-at">
-              <span className="font-medium">Actualizado:</span> {format(new Date(existingPayment.updated_at), "dd/MM/yyyy 'a las'HH:mm", { locale: es })}
+              <span className="font-medium">Actualizado:</span> {format(new Date(existingPayment.updated_at), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
             </div>
           )}
         </div>
@@ -616,16 +648,18 @@ function ViewPanel({
     </div>
   )
 }
+
 export interface ClientPaymentFormProps {
   projectId?: string;
   organizationId?: string;
   paymentId?: string;
-  mode: 'create'| 'edit'| 'view';
+  mode: 'create' | 'edit' | 'view';
   onSuccess: () => void;
   onCancel: () => void;
   hideActions?: boolean;
   formRef?: React.RefObject<HTMLFormElement>;
 }
+
 export function ClientPaymentForm({ 
   projectId, 
   organizationId, 
@@ -640,10 +674,12 @@ export function ClientPaymentForm({
   const { toast } = useToast()
   const [filesToUpload, setFilesToUpload] = useState<any[]>([])
   const [attachments, setAttachments] = useState<any[]>([])
+
   const { data: existingPayment, isLoading: loadingPayment } = useClientPayment(
     paymentId,
     organizationId
   )
+
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId)
   
@@ -653,9 +689,11 @@ export function ClientPaymentForm({
   const { data: commitments, isLoading: commitmentsLoading } = useClientCommitments(effectiveProjectId, organizationId)
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId || '')
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
+
   const currentMember = useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
   }, [members, userData?.user?.id])
+
   const form = useForm<ClientPaymentFormData>({
     resolver: zodResolver(clientPaymentSchema),
     defaultValues: {
@@ -673,17 +711,21 @@ export function ClientPaymentForm({
       notes: '',
     }
   })
-  const isLoading = currenciesLoading || clientsLoading || walletsLoading || membersLoading || projectsLoading || ((mode === 'edit'|| mode === 'view') && loadingPayment)
+
+  const isLoading = currenciesLoading || clientsLoading || walletsLoading || membersLoading || projectsLoading || ((mode === 'edit' || mode === 'view') && loadingPayment)
+
   const createPaymentMutation = useCreateClientPayment()
   const updatePaymentMutation = useUpdateClientPayment()
+
   const watchedProjectId = form.watch('project_id')
   React.useEffect(() => {
     if (watchedProjectId && watchedProjectId !== effectiveProjectId) {
       setEffectiveProjectId(watchedProjectId)
     }
   }, [watchedProjectId, effectiveProjectId])
+
   React.useEffect(() => {
-    if (existingPayment && (mode === 'edit'|| mode === 'view')) {
+    if (existingPayment && (mode === 'edit' || mode === 'view')) {
       const paymentDate = parseLocalDate(existingPayment.payment_date) || new Date()
       
       form.reset({
@@ -702,6 +744,7 @@ export function ClientPaymentForm({
       })
     }
   }, [existingPayment, mode, form, currentMember?.id, projectId])
+
   // Auto-populate created_by, default wallet, and default currency for CREATE mode
   React.useEffect(() => {
     if (mode === 'create') {
@@ -720,6 +763,7 @@ export function ClientPaymentForm({
       }
     }
   }, [mode, currentMember?.id, wallets, currencies, form])
+
   React.useEffect(() => {
     const fetchAttachments = async () => {
       if (!paymentId || !organizationId || !projectId) return
@@ -754,7 +798,7 @@ export function ClientPaymentForm({
       }
     }
     
-    if (mode === 'edit'|| mode === 'view') {
+    if (mode === 'edit' || mode === 'view') {
       fetchAttachments()
     }
   }, [paymentId, organizationId, projectId, mode])
@@ -771,7 +815,9 @@ export function ClientPaymentForm({
       isExisting: true,
     }))
   }, [attachments])
+
   const queryClient = useQueryClient()
+
   const handleExistingFileDelete = async (fileId: string) => {
     try {
       await deleteFile(fileId, false)
@@ -788,12 +834,14 @@ export function ClientPaymentForm({
       })
     }
   }
+
   const isSubmitting = createPaymentMutation.isPending || updatePaymentMutation.isPending
+
   const onSubmit = async (data: ClientPaymentFormData) => {
     try {
       let paymentResult;
       
-      if (mode === 'edit'&& paymentId) {
+      if (mode === 'edit' && paymentId) {
         paymentResult = await updatePaymentMutation.mutateAsync({
           paymentId,
           updates: {
@@ -830,6 +878,7 @@ export function ClientPaymentForm({
           createdBy: data.created_by,
         })
       }
+
       const createdPaymentId = paymentResult?.id || paymentId
       
       if (filesToUpload.length > 0 && createdPaymentId) {
@@ -842,6 +891,7 @@ export function ClientPaymentForm({
           })
           return;
         }
+
         for (const fileInput of filesToUpload) {
           try {
             console.log('[ClientPaymentFormFields] Uploading file:', {
@@ -889,11 +939,12 @@ export function ClientPaymentForm({
           }
         }
       }
+
       queryClient.invalidateQueries({ queryKey: ['client-payment-media', createdPaymentId] })
       setFilesToUpload([])
       
       toast({
-        title: mode === 'edit'? 'Pago actualizado': 'Pago registrado',
+        title: mode === 'edit' ? 'Pago actualizado' : 'Pago registrado',
         description: mode === 'edit'
           ? 'El pago ha sido actualizado correctamente'
           : 'El pago ha sido registrado correctamente',
@@ -905,10 +956,11 @@ export function ClientPaymentForm({
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: `Error al ${mode === 'edit'? 'actualizar': 'registrar'} el pago: ${error.message || 'Error desconocido'}`,
+        description: `Error al ${mode === 'edit' ? 'actualizar' : 'registrar'} el pago: ${error.message || 'Error desconocido'}`,
       })
     }
   }
+
   if (mode === 'view') {
     return (
       <div className="space-y-6 w-full">
@@ -932,6 +984,7 @@ export function ClientPaymentForm({
       </div>
     )
   }
+
   return (
     <Form {...form}>
       <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
@@ -973,7 +1026,7 @@ export function ClientPaymentForm({
               className="flex-[3]"
               data-testid="button-payment-submit"
             >
-              {isSubmitting ? 'Guardando...': mode === 'edit'? 'Guardar Cambios': 'Registrar Pago'}
+              {isSubmitting ? 'Guardando...' : mode === 'edit' ? 'Guardar Cambios' : 'Registrar Pago'}
             </Button>
           </div>
         )}
@@ -981,4 +1034,5 @@ export function ClientPaymentForm({
     </Form>
   )
 }
+
 export default ClientPaymentForm

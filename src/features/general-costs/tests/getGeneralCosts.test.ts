@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getGeneralCosts } from '../services/getGeneralCosts';
 import { supabase } from '@/lib/supabase';
+
 /**
  * Tests for getGeneralCosts service
  * 
@@ -9,16 +10,19 @@ import { supabase } from '@/lib/supabase';
  * - Returns empty array when no data found
  * - Throws errors when queries fail
  */
+
 // Mock de Supabase
 vi.mock('@/lib/supabase', () => ({
   supabase: {
     from: vi.fn()
   }
 }));
+
 describe('getGeneralCosts service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
+
   it('should return general costs for valid organization', async () => {
     const mockGeneralCosts = [
       { 
@@ -43,11 +47,14 @@ describe('getGeneralCosts service', () => {
     });
     
     (supabase.from as any) = mockFrom;
+
     const result = await getGeneralCosts('org-456');
+
     expect(result).toBeDefined();
     expect(result).toEqual(mockGeneralCosts);
     expect(mockFrom).toHaveBeenCalledWith('general_costs');
   });
+
   it('should return empty array when no data found', async () => {
     const mockFrom = vi.fn().mockReturnValue({
       select: vi.fn().mockReturnValue({
@@ -61,9 +68,11 @@ describe('getGeneralCosts service', () => {
     });
     
     (supabase.from as any) = mockFrom;
+
     const result = await getGeneralCosts('org-456');
     expect(result).toEqual([]);
   });
+
   it('should throw error when Supabase query fails', async () => {
     const mockError = new Error('Database connection failed');
     const mockFrom = vi.fn().mockReturnValue({
@@ -78,6 +87,7 @@ describe('getGeneralCosts service', () => {
     });
     
     (supabase.from as any) = mockFrom;
+
     await expect(getGeneralCosts('org-456'))
       .rejects.toThrow('Database connection failed');
   });

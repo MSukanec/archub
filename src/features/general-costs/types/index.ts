@@ -14,6 +14,7 @@ export interface GeneralCost {
     name: string;
   } | null;
 }
+
 export interface InsertGeneralCost {
   organization_id: string;
   name: string;
@@ -21,6 +22,7 @@ export interface InsertGeneralCost {
   created_by?: string | null;
   category_id?: string | null;
 }
+
 export interface GeneralCostValue {
   id?: string;
   general_cost_id: string;
@@ -29,6 +31,7 @@ export interface GeneralCostValue {
   valid_from: string;
   created_at?: string;
 }
+
 export interface GeneralCostPayment {
   id: string;
   organization_id: string;
@@ -42,7 +45,7 @@ export interface GeneralCostPayment {
   updated_at: string | null;
   wallet_id: string | null;
   general_cost_id: string | null;
-  status: 'confirmed'| 'pending'| 'rejected'| 'void';
+  status: 'confirmed' | 'pending' | 'rejected' | 'void';
   created_by: string | null;
   currency?: {
     id: string;
@@ -76,6 +79,7 @@ export interface GeneralCostPayment {
     } | null;
   } | null;
 }
+
 export interface InsertGeneralCostPayment {
   organization_id: string;
   amount: number;
@@ -89,6 +93,7 @@ export interface InsertGeneralCostPayment {
   status?: string;
   created_by?: string | null;
 }
+
 export interface GeneralCostCategory {
   id: string;
   organization_id: string;

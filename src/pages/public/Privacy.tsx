@@ -3,31 +3,39 @@ import { ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MarketingLayout } from "@/layouts/marketing";
+
 export default function Privacy() {
   const [activeSection, setActiveSection] = useState("about");
   const [showScrollTop, setShowScrollTop] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 400);
+
       const sections = document.querySelectorAll("[data-section]");
       let currentSection = "about";
+
       sections.forEach((section) => {
         const rect = section.getBoundingClientRect();
         if (rect.top <= 150 && rect.bottom >= 150) {
           currentSection = section.getAttribute("data-section") || "about";
         }
       });
+
       setActiveSection(currentSection);
     };
+
     window.addEventListener("scroll", handleScroll);
     
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
   const scrollToSection = (sectionId: string) => {
     const element = document.querySelector(`[data-section="${sectionId}"]`);
     if (element) {
@@ -35,6 +43,7 @@ export default function Privacy() {
       window.scrollTo({ top, behavior: "smooth" });
     }
   };
+
   const sections = [
     { id: "about", label: "Acerca de Seencel" },
     { id: "applicability", label: "Aplicabilidad" },
@@ -51,6 +60,7 @@ export default function Privacy() {
     { id: "changes", label: "Cambios a esta Política" },
     { id: "contact", label: "Contacto" },
   ];
+
   return (
     <MarketingLayout 
       headerNavigation={[
@@ -81,6 +91,7 @@ export default function Privacy() {
                   compartimos y protegemos tu información.
                 </p>
               </div>
+
               {/* About Seencel */}
               <section data-section="about" className="space-y-4">
                 <h2 className="text-2xl font-semibold tracking-tight">
@@ -106,6 +117,7 @@ export default function Privacy() {
                   <li>Sistema de pagos para cursos y suscripciones</li>
                 </ul>
               </section>
+
               {/* Applicability */}
               <section data-section="applicability" className="space-y-4">
                 <h2 className="text-2xl font-semibold tracking-tight">
@@ -124,6 +136,7 @@ export default function Privacy() {
                   <li>Te comunicas con nosotros para soporte o consultas</li>
                 </ul>
               </section>
+
               {/* Data Accessed */}
               <section data-section="data-accessed" className="space-y-4">
                 <h2 className="text-2xl font-semibold tracking-tight">
@@ -143,6 +156,7 @@ export default function Privacy() {
                   <li><strong>Información de Proyectos:</strong> Datos de proyectos, presupuestos, tareas, personal, cronogramas, ubicaciones</li>
                   <li><strong>Interacciones con IA:</strong> Consultas al asistente de IA, prompts, conversaciones</li>
                 </ul>
+
                 <h3 className="text-xl font-medium mt-6">Información que Recopilamos Automáticamente</h3>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   <li><strong>Información de Uso:</strong> Páginas visitadas, funciones utilizadas, tiempo de uso, patrones de navegación</li>
@@ -152,6 +166,7 @@ export default function Privacy() {
                   <li><strong>Datos de Rendimiento:</strong> Logs de servidor, tiempos de respuesta, errores, métricas de rendimiento</li>
                 </ul>
               </section>
+
               {/* Google Data */}
               <section data-section="google-data" className="space-y-4">
                 <h2 className="text-2xl font-semibold tracking-tight">
@@ -180,6 +195,7 @@ export default function Privacy() {
                   <li><strong>Datos de Visualización de Mapas:</strong> Interacciones con mapas, zoom, búsquedas de ubicación</li>
                 </ul>
               </section>
+
               {/* Data Usage */}
               <section data-section="data-usage" className="space-y-4">
                 <h2 className="text-2xl font-semibold tracking-tight">
@@ -188,6 +204,7 @@ export default function Privacy() {
                 <p className="text-muted-foreground leading-relaxed">
                   Utilizamos la información que recopilamos para los siguientes propósitos:
                 </p>
+
                 <h3 className="text-xl font-medium mt-6">Provisión del Servicio</h3>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   <li>Crear y gestionar tu cuenta de usuario</li>
@@ -197,6 +214,7 @@ export default function Privacy() {
                   <li>Facilitar la colaboración con otros miembros de tu organización</li>
                   <li>Generar reportes, análisis y visualizaciones de tus datos</li>
                 </ul>
+
                 <h3 className="text-xl font-medium mt-6">Mejora del Servicio</h3>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   <li>Analizar patrones de uso para optimizar la experiencia del usuario</li>
@@ -205,6 +223,7 @@ export default function Privacy() {
                   <li>Entrenar y mejorar nuestros modelos de inteligencia artificial</li>
                   <li>Identificar y solucionar problemas técnicos</li>
                 </ul>
+
                 <h3 className="text-xl font-medium mt-6">Comunicación</h3>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   <li>Enviarte notificaciones importantes sobre tu cuenta</li>
@@ -212,6 +231,7 @@ export default function Privacy() {
                   <li>Enviarte actualizaciones sobre el servicio y nuevas funciones</li>
                   <li>Comunicaciones de marketing (solo si aceptaste recibirlas)</li>
                 </ul>
+
                 <h3 className="text-xl font-medium mt-6">Transacciones y Pagos</h3>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   <li>Procesar pagos por suscripciones y cursos</li>
@@ -219,6 +239,7 @@ export default function Privacy() {
                   <li>Prevenir fraude y actividades no autorizadas</li>
                   <li>Gestionar reembolsos cuando sea aplicable</li>
                 </ul>
+
                 <h3 className="text-xl font-medium mt-6">Cumplimiento Legal y Seguridad</h3>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   <li>Cumplir con obligaciones legales y regulatorias</li>
@@ -227,6 +248,7 @@ export default function Privacy() {
                   <li>Hacer cumplir nuestros Términos de Servicio</li>
                 </ul>
               </section>
+
               {/* Data Sharing */}
               <section data-section="data-sharing" className="space-y-4">
                 <h2 className="text-2xl font-semibold tracking-tight">
@@ -236,6 +258,7 @@ export default function Privacy() {
                   <strong>Política General:</strong> No vendemos ni alquilamos tu información 
                   personal a terceros. Solo compartimos datos en las siguientes circunstancias limitadas:
                 </p>
+
                 <h3 className="text-xl font-medium mt-6">Proveedores de Servicios</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Compartimos información con proveedores de servicios que nos ayudan a operar 
@@ -253,12 +276,14 @@ export default function Privacy() {
                   <li><strong>Vimeo:</strong> Hosting y streaming de videos educativos</li>
                   <li><strong>Twilio:</strong> Envío de notificaciones por WhatsApp (si está habilitado)</li>
                 </ul>
+
                 <h3 className="text-xl font-medium mt-6">Dentro de tu Organización</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Cuando formas parte de una organización en Seencel, los datos de proyectos, 
                   documentos y actividades son compartidos con otros miembros autorizados de tu 
                   organización según los permisos establecidos por los administradores.
                 </p>
+
                 <h3 className="text-xl font-medium mt-6">Requisitos Legales</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Podemos divulgar tu información si es requerido por ley, orden judicial, 
@@ -269,6 +294,7 @@ export default function Privacy() {
                   <li>Proteger los derechos, propiedad o seguridad de Seencel, nuestros usuarios u otros</li>
                   <li>Prevenir fraude, abuso o violaciones de nuestros Términos de Servicio</li>
                 </ul>
+
                 <h3 className="text-xl font-medium mt-6">Transferencias Corporativas</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   En caso de fusión, adquisición, venta de activos o similar, tu información puede 
@@ -276,17 +302,20 @@ export default function Privacy() {
                   política de privacidad diferente.
                 </p>
               </section>
+
               {/* Data Storage */}
               <section data-section="data-storage" className="space-y-4">
                 <h2 className="text-2xl font-semibold tracking-tight">
                   Almacenamiento y Protección de Datos
                 </h2>
+
                 <h3 className="text-xl font-medium mt-6">Ubicación del Almacenamiento</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Tus datos se almacenan en servidores seguros ubicados en centros de datos certificados. 
                   Utilizamos Neon Database (PostgreSQL serverless) que opera en infraestructura cloud 
                   con alta disponibilidad y redundancia geográfica.
                 </p>
+
                 <h3 className="text-xl font-medium mt-6">Cifrado de Datos</h3>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   <li><strong>En Tránsito:</strong> Todos los datos transmitidos entre tu dispositivo y nuestros servidores están cifrados usando TLS/SSL (HTTPS)</li>
@@ -294,6 +323,7 @@ export default function Privacy() {
                   <li><strong>Contraseñas:</strong> Las contraseñas se almacenan con hash usando bcrypt, nunca en texto plano</li>
                   <li><strong>Tokens de Acceso:</strong> Los tokens de sesión y API keys se almacenan de forma segura y tienen tiempos de expiración</li>
                 </ul>
+
                 <h3 className="text-xl font-medium mt-6">Acceso Controlado</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Implementamos controles de acceso estrictos:
@@ -304,17 +334,20 @@ export default function Privacy() {
                   <li>Auditoría de accesos y actividades sospechosas</li>
                   <li>Acceso limitado del personal de Seencel solo cuando es necesario para soporte</li>
                 </ul>
+
                 <h3 className="text-xl font-medium mt-6">Respaldo y Recuperación</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Realizamos respaldos automáticos regulares de todos los datos para prevenir pérdida 
                   de información. Los respaldos están cifrados y almacenados en múltiples ubicaciones geográficas.
                 </p>
               </section>
+
               {/* Data Retention */}
               <section data-section="data-retention" className="space-y-4">
                 <h2 className="text-2xl font-semibold tracking-tight">
                   Retención y Eliminación de Datos
                 </h2>
+
                 <h3 className="text-xl font-medium mt-6">Política de Retención</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Conservamos tu información personal mientras tu cuenta esté activa o sea necesario 
@@ -328,6 +361,7 @@ export default function Privacy() {
                   <li><strong>Datos de Marketing:</strong> Hasta que retires tu consentimiento o 2 años de inactividad</li>
                   <li><strong>Respaldos:</strong> 30 días en respaldos automáticos</li>
                 </ul>
+
                 <h3 className="text-xl font-medium mt-6">Proceso de Eliminación</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Puedes solicitar la eliminación de tus datos en cualquier momento:
@@ -342,6 +376,7 @@ export default function Privacy() {
                   <strong>Excepciones:</strong> Podemos retener cierta información si es requerido por ley 
                   (ej: registros fiscales), o si hay disputas legales pendientes.
                 </p>
+
                 <h3 className="text-xl font-medium mt-6">Exportación de Datos</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Antes de eliminar tu cuenta, puedes solicitar una exportación de tus datos en formato 
@@ -349,6 +384,7 @@ export default function Privacy() {
                   y actividades.
                 </p>
               </section>
+
               {/* Your Rights */}
               <section data-section="your-rights" className="space-y-4">
                 <h2 className="text-2xl font-semibold tracking-tight">
@@ -357,39 +393,47 @@ export default function Privacy() {
                 <p className="text-muted-foreground leading-relaxed">
                   Dependiendo de tu ubicación, puedes tener los siguientes derechos respecto a tus datos personales:
                 </p>
+
                 <h3 className="text-xl font-medium mt-6">Derecho de Acceso</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Tienes derecho a solicitar y obtener confirmación de si procesamos tus datos personales 
                   y acceder a una copia de los mismos.
                 </p>
+
                 <h3 className="text-xl font-medium mt-6">Derecho de Rectificación</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Puedes corregir datos personales inexactos o incompletos directamente desde tu perfil 
                   o solicitando asistencia.
                 </p>
+
                 <h3 className="text-xl font-medium mt-6">Derecho de Eliminación</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Puedes solicitar que eliminemos tus datos personales en ciertas circunstancias, sujeto 
                   a excepciones legales.
                 </p>
+
                 <h3 className="text-xl font-medium mt-6">Derecho a Restricción del Procesamiento</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Puedes solicitar que limitemos el procesamiento de tus datos en ciertas situaciones.
                 </p>
+
                 <h3 className="text-xl font-medium mt-6">Derecho a la Portabilidad</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Puedes solicitar una copia de tus datos en formato estructurado y de uso común para 
                   transferirlos a otro servicio.
                 </p>
+
                 <h3 className="text-xl font-medium mt-6">Derecho de Oposición</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Puedes oponerte al procesamiento de tus datos con fines de marketing directo en cualquier momento.
                 </p>
+
                 <h3 className="text-xl font-medium mt-6">Derecho a Retirar Consentimiento</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Cuando procesamos datos basados en tu consentimiento, puedes retirarlo en cualquier momento 
                   sin afectar la legalidad del procesamiento anterior.
                 </p>
+
                 <h3 className="text-xl font-medium mt-6">Cómo Ejercer tus Derechos</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Para ejercer cualquiera de estos derechos, contáctanos en{" "}
@@ -399,6 +443,7 @@ export default function Privacy() {
                   . Responderemos a tu solicitud dentro de 30 días.
                 </p>
               </section>
+
               {/* Security */}
               <section data-section="security" className="space-y-4">
                 <h2 className="text-2xl font-semibold tracking-tight">
@@ -422,6 +467,7 @@ export default function Privacy() {
                   usar contraseñas fuertes y únicas, y nunca compartir tus credenciales.
                 </p>
               </section>
+
               {/* Third Party Services */}
               <section data-section="third-party" className="space-y-4">
                 <h2 className="text-2xl font-semibold tracking-tight">
@@ -468,6 +514,7 @@ export default function Privacy() {
                   servicios está sujeto a sus propios términos y condiciones.
                 </p>
               </section>
+
               {/* Children */}
               <section data-section="children" className="space-y-4">
                 <h2 className="text-2xl font-semibold tracking-tight">
@@ -488,6 +535,7 @@ export default function Privacy() {
                   .
                 </p>
               </section>
+
               {/* Changes */}
               <section data-section="changes" className="space-y-4">
                 <h2 className="text-2xl font-semibold tracking-tight">
@@ -510,6 +558,7 @@ export default function Privacy() {
                   servicios después de cambios constituye tu aceptación de la política actualizada.
                 </p>
               </section>
+
               {/* Contact */}
               <section data-section="contact" className="space-y-4">
                 <h2 className="text-2xl font-semibold tracking-tight">
@@ -544,6 +593,7 @@ export default function Privacy() {
                 </p>
               </section>
             </div>
+
             {/* Footer note */}
             <div className="pt-12 pb-6 border-t">
               <p className="text-sm text-muted-foreground">
@@ -551,6 +601,7 @@ export default function Privacy() {
               </p>
             </div>
           </main>
+
           {/* Table of Contents - Sticky Sidebar */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
             <div className="sticky top-24 space-y-2">
@@ -574,6 +625,7 @@ export default function Privacy() {
             </div>
           </aside>
       </div>
+
       {/* Scroll to Top Button */}
       {showScrollTop && (
         <Button

@@ -8,16 +8,21 @@ export const PERSONNEL_QUERY_KEYS = {
   insurance: (personnelId: string) => ['personnel-insurance', personnelId] as const,
   movementPersonnel: (movementId: string) => ['movement-personnel', movementId] as const,
 } as const;
+
 // ============ PERSONNEL PAYMENT QUERY KEYS ============
+
 export const PERSONNEL_PAYMENT_QUERY_KEYS = {
   payments: (projectId?: string) => ['personnel', 'payments', projectId] as const,
   payment: (paymentId?: string) => ['personnel', 'payment', paymentId] as const,
 } as const;
+
 // ============ PAYMENT STATUS OPTIONS ============
+
 export const PERSONNEL_PAYMENT_STATUS = {
-  confirmed: { value: 'confirmed', label: 'Confirmado', color: 'green'},
-  pending: { value: 'pending', label: 'Pendiente', color: 'yellow'},
-  rejected: { value: 'rejected', label: 'Rechazado', color: 'red'},
-  void: { value: 'void', label: 'Anulado', color: 'gray'},
+  confirmed: { value: 'confirmed', label: 'Confirmado', color: 'green' },
+  pending: { value: 'pending', label: 'Pendiente', color: 'yellow' },
+  rejected: { value: 'rejected', label: 'Rechazado', color: 'red' },
+  void: { value: 'void', label: 'Anulado', color: 'gray' },
 } as const;
+
 export const PERSONNEL_PAYMENT_STATUS_OPTIONS = Object.values(PERSONNEL_PAYMENT_STATUS);

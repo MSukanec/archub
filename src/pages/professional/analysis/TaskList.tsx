@@ -14,6 +14,7 @@ import { useMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 import { useLocation } from 'wouter'
 import { TaskCostPopover } from '@/features/legacy/components/tasks/TaskCostPopover'
+
 export default function TaskList() {
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
   const { openModal } = useGlobalModalStore()
@@ -36,6 +37,8 @@ export default function TaskList() {
   
   // Estado para modo de vista - por defecto "Todas"
   const [viewMode, setViewMode] = useState('all')
+
+
   // Configure mobile action bar - only set what's needed
   useEffect(() => {
     if (isMobile) {
@@ -54,12 +57,14 @@ export default function TaskList() {
       })
       setShowActionBar(true)
     }
+
     return () => {
       if (isMobile) {
         clearActions()
       }
     }
   }, [isMobile])
+
   // Configure filter options
   useEffect(() => {
     if (isMobile) {
@@ -72,14 +77,15 @@ export default function TaskList() {
             placeholder: 'Seleccionar agrupación',
             allOptionLabel: 'Sin agrupar',
             options: [
-              { value: 'none', label: 'Sin agrupar'},
-              { value: 'rubros', label: 'Por rubros'}
+              { value: 'none', label: 'Sin agrupar' },
+              { value: 'rubros', label: 'Por rubros' }
             ]
           }
         ]
       })
     }
   }, [isMobile, groupingType])
+
   // Filtrar tareas por modo de vista, agregar groupKey y ordenar
   const filteredTasks = useMemo(() => {
     let filtered = tasks;
@@ -121,7 +127,7 @@ export default function TaskList() {
         const rubroB = (b.division || 'Sin rubro').toLowerCase()
         
         // Primero ordenar por rubro alfabéticamente (A-Z)
-        const rubroComparison = rubroA.localeCompare(rubroB, 'es', { sensitivity: 'base'})
+        const rubroComparison = rubroA.localeCompare(rubroB, 'es', { sensitivity: 'base' })
         if (rubroComparison !== 0) {
           return rubroComparison
         }
@@ -129,13 +135,14 @@ export default function TaskList() {
         // Si el rubro es igual, ordenar por nombre de tarea
         const nameA = (a.custom_name || a.name_rendered || '').toLowerCase()
         const nameB = (b.custom_name || b.name_rendered || '').toLowerCase()
-        return nameA.localeCompare(nameB, 'es', { sensitivity: 'base'})
+        return nameA.localeCompare(nameB, 'es', { sensitivity: 'base' })
       }
       
       // Ordenamiento por defecto cuando no está agrupado por rubros (por fecha de creación, más recientes primero)
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     });
   }, [tasks, groupingType, viewMode, userData?.organization?.id]);
+
   // Columnas base para la tabla
   const baseColumns = [
     {
@@ -146,11 +153,11 @@ export default function TaskList() {
         <Badge 
           variant={task.is_system ? "default" : "secondary"}
           className={`text-xs ${task.is_system 
-            ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90'
+            ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
             : 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
           }`}
         >
-          {task.is_system ? 'Sistema': 'Organización'}
+          {task.is_system ? 'Sistema' : 'Organización'}
         </Badge>
       )
     },
@@ -193,6 +200,7 @@ export default function TaskList() {
       )
     }
   ]
+
   // Seleccionar columnas según el tipo de agrupación y modo de vista
   const columns = useMemo(() => {
     let filteredColumns = baseColumns;
@@ -209,9 +217,11 @@ export default function TaskList() {
     
     return filteredColumns;
   }, [groupingType, viewMode]);
+
   const handleEdit = (task: any) => {
     openModal('analysis-task', { taskId: task.id, isEditing: true })
   }
+
   const handleDuplicate = (task: any) => {
     // Create a duplicate object with "Copia" added to the name
     const duplicateTask = {
@@ -223,9 +233,11 @@ export default function TaskList() {
     }
     openModal('analysis-task', { task: duplicateTask, isDuplicating: true })
   }
+
   const handleView = (id: string) => {
     setLocation(`/analysis/${id}`);
   };
+
   const handleDelete = (task: any) => {
     openModal('delete-confirmation', {
       mode: 'dangerous',
@@ -240,12 +252,14 @@ export default function TaskList() {
       isLoading: deleteTaskMutation.isPending
     })
   }
+
   // Render grouping popover content
   const renderGroupingContent = () => {
     const groupingOptions = [
-      { value: 'none', label: 'Sin agrupar'},
-      { value: 'rubros', label: 'Agrupar por rubros'}
+      { value: 'none', label: 'Sin agrupar' },
+      { value: 'rubros', label: 'Agrupar por rubros' }
     ];
+
     return (
       <>
         <div className="text-xs font-medium mb-2 block">Agrupar por</div>
@@ -255,7 +269,7 @@ export default function TaskList() {
               key={option.value}
               variant={groupingType === option.value ? "secondary" : "ghost"}
               size="sm"
-              onClick={() => setGroupingType(option.value as 'none'| 'rubros')}
+              onClick={() => setGroupingType(option.value as 'none' | 'rubros')}
               className={cn(
                 "w-full justify-start text-xs font-normal h-8",
                 groupingType === option.value ? "button-secondary-pressed hover:bg-secondary" : ""
@@ -268,6 +282,7 @@ export default function TaskList() {
       </>
     );
   };
+
   if (tasksLoading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -275,6 +290,7 @@ export default function TaskList() {
       </div>
     )
   }
+
   if (tasks.length === 0) {
     return (
       <EmptyState
@@ -284,11 +300,12 @@ export default function TaskList() {
       />
     )
   }
+
   return (
     <Table
       columns={columns}
       data={filteredTasks}
-      groupBy={groupingType === 'none'? undefined : 'groupKey'}
+      groupBy={groupingType === 'none' ? undefined : 'groupKey'}
       renderCard={(task: any) => (
         <AnalysisTaskRow
           task={task}
@@ -318,15 +335,15 @@ export default function TaskList() {
             icon: Trash2,
             label: 'Eliminar',
             onClick: () => handleDelete(task),
-            variant: 'destructive'as const
+            variant: 'destructive' as const
           }] : [])
         ];
       }}
       topBar={{
         leftModeButtons: {
           options: [
-            { key: 'all', label: 'Todas'},
-            { key: 'organization', label: 'Solo de la Organización'}
+            { key: 'all', label: 'Todas' },
+            { key: 'organization', label: 'Solo de la Organización' }
           ],
           activeMode: viewMode,
           onModeChange: setViewMode
@@ -334,10 +351,10 @@ export default function TaskList() {
         renderGroupingContent: renderGroupingContent,
         isGroupingActive: groupingType !== 'none'
       }}
-      renderGroupHeader={groupingType === 'none'? undefined : (groupKey: string, groupRows: any[]) => (
+      renderGroupHeader={groupingType === 'none' ? undefined : (groupKey: string, groupRows: any[]) => (
         <>
           <div className="col-span-full text-sm font-medium">
-            {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea': 'Tareas'})
+            {groupKey} ({groupRows.length} {groupRows.length === 1 ? 'Tarea' : 'Tareas'})
           </div>
         </>
       )}

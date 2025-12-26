@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
 import type { RealtimeChannel } from '@supabase/supabase-js'
+
 interface OnlineUser {
   user_id: string
   full_name: string | null
@@ -9,6 +10,7 @@ interface OnlineUser {
   last_seen_at: string
   is_online: boolean
 }
+
 interface PresenceState {
   // Estado actual
   currentView: string | null
@@ -24,11 +26,13 @@ interface PresenceState {
   subscribeToPresenceChanges: () => void
   unsubscribe: () => void
 }
+
 export const usePresenceStore = create<PresenceState>((set, get) => ({
   currentView: null,
   onlineUsers: [],
   isSubscribed: false,
   presenceChannel: null,
+
   /**
    * Actualiza la vista actual del usuario
    * Llama a la RPC presence_set_view para actualizar en la BD
@@ -41,8 +45,10 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
         console.warn('⚠️ Usuario no autenticado, no se puede actualizar current_view')
         return
       }
+
       // Actualizar estado local inmediatamente
       set({ currentView: view })
+
       // Llamar a la función RPC para actualizar en la BD
       await supabase.rpc('presence_set_view', { 
         p_view: view 
@@ -51,6 +57,7 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
       console.error('❌ Error en setCurrentView:', err)
     }
   },
+
   /**
    * Obtiene la lista de usuarios online
    * Hace JOIN de user_presence con users para obtener datos completos
@@ -58,6 +65,7 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
   fetchOnlineUsers: async () => {
     try {
       const ninetySecondsAgo = new Date(Date.now() - 90000).toISOString()
+
       // Query con JOIN manual (sin vista users_online)
       const { data, error } = await supabase
         .from('user_presence')
@@ -72,7 +80,9 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
         `)
         .gte('last_seen_at', ninetySecondsAgo)
         .order('last_seen_at', { ascending: false })
+
       if (error) return
+
       // Transformar datos al formato esperado
       const onlineUsers: OnlineUser[] = (data || []).map((item: any) => ({
         user_id: item.user_id,
@@ -82,19 +92,23 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
         last_seen_at: item.last_seen_at,
         is_online: true // Si está en este query, está online
       }))
+
       set({ onlineUsers })
     } catch (err) {
       console.error('❌ Error en fetchOnlineUsers:', err)
     }
   },
+
   /**
    * Suscribirse a cambios en tiempo real de user_presence
    * Se ejecuta automáticamente cuando alguien se conecta/desconecta o cambia de vista
    */
   subscribeToPresenceChanges: () => {
     const { presenceChannel, isSubscribed } = get()
+
     // Evitar múltiples suscripciones
     if (isSubscribed || presenceChannel) return
+
     // Crear canal de suscripción
     const channel = supabase
       .channel('user_presence_realtime')
@@ -115,15 +129,19 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
           set({ isSubscribed: true })
         }
       })
+
     set({ presenceChannel: channel })
+
     // Fetch inicial
     get().fetchOnlineUsers()
   },
+
   /**
    * Desuscribirse de cambios (cleanup)
    */
   unsubscribe: () => {
     const { presenceChannel } = get()
+
     if (presenceChannel) {
       supabase.removeChannel(presenceChannel)
       set({ 

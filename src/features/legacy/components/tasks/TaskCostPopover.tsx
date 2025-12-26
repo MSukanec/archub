@@ -3,28 +3,34 @@ import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useTaskMaterials } from '@/hooks/use-generated-tasks'
 import { useTaskLabor } from '@/hooks/use-task-labor'
+
 export interface TaskCostPopoverProps {
   task: any
   showCost?: boolean
   cost_scope?: string
 }
+
 const TaskCostBreakdown = ({ task, cost_scope }: { task: any; cost_scope?: string }) => {
   const taskId = task.task_id || task.id
   const { data: materials = [], isLoading: materialsLoading } = useTaskMaterials(taskId)
   const { data: labor = [], isLoading: laborLoading } = useTaskLabor(taskId)
+
   const isLoading = materialsLoading || laborLoading
+
   const materialsTotalPerUnit = materials.reduce((sum, material) => {
     const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
     const unitPrice = materialView?.avg_price || 0;
     const quantity = material.amount || 0;
     return sum + (quantity * unitPrice);
   }, 0)
+
   const laborTotalPerUnit = labor.reduce((sum, laborItem) => {
     const laborView = laborItem.labor_view;
     const unitPrice = laborView?.avg_price || 0;
     const quantity = laborItem.quantity || 0;
     return sum + (quantity * unitPrice);
   }, 0)
+
   const effectiveCostScope = cost_scope || task.cost_scope || 'materials_and_labor'
   
   const getTotalPerUnit = () => {
@@ -40,6 +46,7 @@ const TaskCostBreakdown = ({ task, cost_scope }: { task: any; cost_scope?: strin
   }
   
   const totalPerUnit = getTotalPerUnit()
+
   return (
     <div className="w-full">
       <div className="px-3 py-2 flex items-center gap-2 border-b border-[var(--card-border)]">
@@ -48,7 +55,8 @@ const TaskCostBreakdown = ({ task, cost_scope }: { task: any; cost_scope?: strin
           Costos por unidad
         </h3>
       </div>
-      <div className="p-3" style={{ maxHeight: '400px', overflow: 'auto'}}>
+
+      <div className="p-3" style={{ maxHeight: '400px', overflow: 'auto' }}>
         {isLoading ? (
           <div className="text-center py-3">
             <div className="text-xs text-[var(--muted-fg)]">Cargando costos...</div>
@@ -61,9 +69,9 @@ const TaskCostBreakdown = ({ task, cost_scope }: { task: any; cost_scope?: strin
           </div>
         ) : (
           <div className="space-y-3">
-            {materials.length > 0 && (effectiveCostScope === 'materials_only'|| effectiveCostScope === 'materials_and_labor') && (
+            {materials.length > 0 && (effectiveCostScope === 'materials_only' || effectiveCostScope === 'materials_and_labor') && (
               <div>
-                <div className="flex items-center justify-between py-1 px-2 mb-2" style={{ backgroundColor: 'var(--accent)', color: 'white'}}>
+                <div className="flex items-center justify-between py-1 px-2 mb-2" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
                   <span className="text-xs font-semibold">Material ({materials.length})</span>
                   <span className="text-xs font-semibold">
                     $ {materialsTotalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
@@ -92,7 +100,7 @@ const TaskCostBreakdown = ({ task, cost_scope }: { task: any; cost_scope?: strin
                             </span>
                           </div>
                         </div>
-                        <div className="text-xs flex-shrink-0 text-right font-medium text-[var(--card-fg)]" style={{ minWidth: '80px'}}>
+                        <div className="text-xs flex-shrink-0 text-right font-medium text-[var(--card-fg)]" style={{ minWidth: '80px' }}>
                           $ {subtotal.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                         </div>
                       </div>
@@ -102,9 +110,9 @@ const TaskCostBreakdown = ({ task, cost_scope }: { task: any; cost_scope?: strin
               </div>
             )}
             
-            {labor.length > 0 && (effectiveCostScope === 'labor_only'|| effectiveCostScope === 'materials_and_labor') && (
+            {labor.length > 0 && (effectiveCostScope === 'labor_only' || effectiveCostScope === 'materials_and_labor') && (
               <div>
-                <div className="flex items-center justify-between py-1 px-2 mb-2" style={{ backgroundColor: 'var(--accent)', color: 'white'}}>
+                <div className="flex items-center justify-between py-1 px-2 mb-2" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
                   <span className="text-xs font-semibold">Mano de Obra ({labor.length})</span>
                   <span className="text-xs font-semibold">
                     $ {laborTotalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
@@ -133,7 +141,7 @@ const TaskCostBreakdown = ({ task, cost_scope }: { task: any; cost_scope?: strin
                             </span>
                           </div>
                         </div>
-                        <div className="text-xs flex-shrink-0 text-right font-medium text-[var(--card-fg)]" style={{ minWidth: '80px'}}>
+                        <div className="text-xs flex-shrink-0 text-right font-medium text-[var(--card-fg)]" style={{ minWidth: '80px' }}>
                           $ {subtotal.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                         </div>
                       </div>
@@ -145,14 +153,15 @@ const TaskCostBreakdown = ({ task, cost_scope }: { task: any; cost_scope?: strin
           </div>
         )}
       </div>
+
       {!isLoading && (
-        (effectiveCostScope === 'materials_only'&& materials.length > 0) ||
-        (effectiveCostScope === 'labor_only'&& labor.length > 0) ||
-        (effectiveCostScope === 'materials_and_labor'&& (materials.length > 0 || labor.length > 0))
+        (effectiveCostScope === 'materials_only' && materials.length > 0) ||
+        (effectiveCostScope === 'labor_only' && labor.length > 0) ||
+        (effectiveCostScope === 'materials_and_labor' && (materials.length > 0 || labor.length > 0))
       ) && (
         <div className="px-3 py-3 flex items-center justify-between border-t border-[var(--card-border)]">
           <span className="text-xs font-semibold uppercase text-[var(--card-fg)]">TOTAL POR UNIDAD:</span>
-          <div className="text-xs font-semibold text-right text-[var(--card-fg)]" style={{ minWidth: '80px'}}>
+          <div className="text-xs font-semibold text-right text-[var(--card-fg)]" style={{ minWidth: '80px' }}>
             $ {totalPerUnit.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </div>
         </div>
@@ -160,22 +169,26 @@ const TaskCostBreakdown = ({ task, cost_scope }: { task: any; cost_scope?: strin
     </div>
   )
 }
+
 export const TaskCostPopover = ({ task, showCost = false, cost_scope }: TaskCostPopoverProps) => {
   const taskId = task.task_id || task.id
   const { data: materials = [] } = useTaskMaterials(taskId)
   const { data: labor = [] } = useTaskLabor(taskId)
+
   const materialsTotalPerUnit = materials.reduce((sum, material) => {
     const materialView = Array.isArray(material.materials_view) ? material.materials_view[0] : material.materials_view;
     const unitPrice = materialView?.avg_price || 0;
     const quantity = material.amount || 0;
     return sum + (quantity * unitPrice);
   }, 0)
+
   const laborTotalPerUnit = labor.reduce((sum, laborItem) => {
     const laborView = laborItem.labor_view;
     const unitPrice = laborView?.avg_price || 0;
     const quantity = laborItem.quantity || 0;
     return sum + (quantity * unitPrice);
   }, 0)
+
   const effectiveCostScope = cost_scope || task.cost_scope || 'materials_and_labor'
   
   const getTotalPerUnit = () => {
@@ -191,6 +204,7 @@ export const TaskCostPopover = ({ task, showCost = false, cost_scope }: TaskCost
   }
   
   const totalPerUnit = getTotalPerUnit()
+
   const formatCost = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -199,6 +213,7 @@ export const TaskCostPopover = ({ task, showCost = false, cost_scope }: TaskCost
       maximumFractionDigits: 2
     }).format(amount)
   }
+
   return (
     <div className="flex items-center gap-2">
       {showCost && totalPerUnit > 0 && (

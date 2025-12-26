@@ -19,9 +19,11 @@ import { useProjectContext } from '@/stores/projectContext'
 import { useProjectTypes, useProjectModalities, ProjectColorAdvanced } from '@/features/projects'
 import { ColorPaletteField } from '@/components/shared/fields/ColorPaletteField'
 import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage'
+
 interface ProjectBasicDataViewProps {
   projectId?: string;
 }
+
 export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -30,6 +32,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
   const organizationId = userData?.organization?.id
   // Use projectId from props if provided, otherwise use selectedProjectId from context
   const activeProjectId = projectId || selectedProjectId
+
   // Hydration state - CRITICAL for preventing auto-save on page load
   const [isHydrated, setIsHydrated] = useState(false)
   
@@ -53,6 +56,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
   // Get project types and modalities (requires organizationId to be enabled)
   const { data: projectTypes = [] } = useProjectTypes(organizationId)
   const { data: projectModalities = [] } = useProjectModalities(organizationId)
+
   // Get project data for BasicData tab
   const { data: projectData, isSuccess: projectDataSuccess } = useQuery({
     queryKey: projectsKeys.data(activeProjectId),
@@ -74,6 +78,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     },
     enabled: !!activeProjectId && !!supabase
   });
+
   // Get actual project info for BasicData tab
   const { data: projectInfo, isSuccess: projectInfoSuccess } = useQuery({
     queryKey: projectsKeys.info(activeProjectId),
@@ -96,6 +101,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     },
     enabled: !!activeProjectId && !!supabase
   });
+
   // Mutation to upload project image using optimistic mutation
   const { mutate: uploadImage, isPending: isUploadingImage } = useOptimisticMutation({
     mutationFn: async (file: File) => {
@@ -137,6 +143,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       projectsKeys.image(activeProjectId),
     ],
   });
+
   // Mutation to delete project image using optimistic mutation
   const { mutate: deleteImage, isPending: isDeletingImage } = useOptimisticMutation<void, void>({
     mutationFn: async (): Promise<void> => {
@@ -172,24 +179,29 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       projectsKeys.list(organizationId),
     ],
   });
+
   // Handler for image file selection
   const handleImageFilesChange = useCallback((files: any[]) => {
     if (files.length > 0 && files[0].file) {
       uploadImage(files[0].file);
     }
   }, [uploadImage]);
+
   // Handler for image removal
   const handleImageRemove = useCallback(() => {
     deleteImage();
   }, [deleteImage]);
+
   // Mutation to save project color using optimistic mutation
   const { mutate: saveProjectColor } = useOptimisticMutation({
     mutationFn: async (colorData: { color?: string; use_custom_color?: boolean; custom_color_h?: number | null; custom_color_hex?: string | null }) => {
       if (!activeProjectId || !supabase) return;
+
       const { error } = await supabase
         .from('projects')
         .update(colorData)
         .eq('id', activeProjectId);
+
       if (error) {
         console.error('Error updating project color:', error);
         throw error;
@@ -208,6 +220,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       projectsKeys.list(organizationId),
     ],
   });
+
   // ENTERPRISE AUTOSAVE: Controller for coordinated saves
   // NEVER saves on onChange - only on onBlur, Enter, or select change
   const saveController = useAutosaveController({
@@ -215,6 +228,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     saveFn: async (dataToSave: any) => {
       
       if (!activeProjectId || !supabase) throw new Error('Project or Supabase not available');
+
       // Normalize empty strings to null
       const normalizedData = {
         name: normalizeStringValue(dataToSave.name),
@@ -225,6 +239,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
         description: normalizeStringValue(dataToSave.description),
         internal_notes: normalizeStringValue(dataToSave.internal_notes),
       };
+
       // Update fields in projects table (name, code, status)
       const projectsUpdate: any = {};
       if (normalizedData.name !== undefined) projectsUpdate.name = normalizedData.name;
@@ -236,8 +251,10 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
           .from('projects')
           .update(projectsUpdate)
           .eq('id', activeProjectId);
+
         if (projectError) throw projectError;
       }
+
       // Prepare project_data payload
       const projectDataPayload = {
         project_type_id: normalizedData.project_type_id,
@@ -245,6 +262,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
         description: normalizedData.description,
         internal_notes: normalizedData.internal_notes,
       };
+
       const { error } = await supabase
         .from('project_data')
         .upsert({
@@ -254,6 +272,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
         }, {
           onConflict: 'project_id'
         });
+
       if (error) throw error;
     },
     additionalQueryKeys: [projectsKeys.info(activeProjectId), projectsKeys.list(organizationId)],
@@ -261,6 +280,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
   });
   
   const { isSaving, hasUnsavedChanges } = saveController;
+
   // Build current form data for saving
   const getCurrentFormData = useCallback(() => ({
     name: projectName,
@@ -271,6 +291,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     description: description,
     internal_notes: internalNotes,
   }), [projectName, projectCode, projectTypeId, projectModalityId, status, description, internalNotes]);
+
   // Validate form data before saving - REQUIRED fields must have values
   const isFormValid = useCallback((formData: any): boolean => {
     // Project name is REQUIRED - don't save if empty
@@ -280,6 +301,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     }
     return true;
   }, []);
+
   // Handler for text fields: save on blur (with validation)
   const handleTextFieldBlur = useCallback(() => {
     if (!isHydrated) return;
@@ -293,9 +315,10 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     
     saveController.save(formData);
   }, [isHydrated, saveController, getCurrentFormData, isFormValid]);
+
   // Handler for text fields: save on Enter key (with validation)
   const handleTextFieldKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter'&& !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (!isHydrated) return;
       
@@ -309,6 +332,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       saveController.save(formData);
     }
   }, [isHydrated, saveController, getCurrentFormData, isFormValid]);
+
   // Handler for select fields: save immediately on change (with validation)
   const handleSelectChange = useCallback((field: string, value: string) => {
     if (!isHydrated) return;
@@ -336,12 +360,14 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     
     saveController.save(formData);
   }, [isHydrated, saveController, getCurrentFormData, isFormValid]);
+
   // UNIFIED hydration effect - loads ALL data at once, then marks as hydrated
   useEffect(() => {
     // Only hydrate when BOTH queries have completed (even if projectData is null)
     if (!projectInfoSuccess || !projectDataSuccess) {
       return;
     }
+
     // Load project info data (from projects table)
     if (projectInfo) {
       setProjectName(projectInfo.name || '');
@@ -352,6 +378,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       setCustomColorH(projectInfo.custom_color_h);
       setCustomColorHex(projectInfo.custom_color_hex);
     }
+
     // Load project data (from project_data table - may be null for new projects)
     // project_type_id and project_modality_id ARE in project_data table
     if (projectData) {
@@ -360,6 +387,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       setDescription(projectData.description || '');
       setInternalNotes(projectData.internal_notes || '');
     }
+
     // Mark as hydrated AFTER all state updates are queued
     // Also seed the controller with initial data for dirty checking
     setTimeout(() => {
@@ -377,6 +405,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       });
     }, 100);
   }, [projectInfo, projectData, projectInfoSuccess, projectDataSuccess]);
+
   // Generate project image URL with auto-refresh (React Query)
   const { data: projectImageUrl } = useQuery({
     queryKey: projectsKeys.image(activeProjectId),
@@ -388,6 +417,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     refetchInterval: 30 * 60 * 1000,  // Refresh every 30 minutes
     staleTime: 25 * 60 * 1000,         // Consider stale after 25 minutes
   });
+
   // Handlers for color changes - OPTIMIZED with optimistic updates (fire-and-forget)
   const handlePaletteColorChange = useCallback((color: string) => {
     // ⚡ PASO 1: Update state immediately (optimistic)
@@ -404,6 +434,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       custom_color_hex: null
     });
   }, [saveProjectColor]);
+
   const handleCustomColorChange = useCallback((params: { useCustom: boolean; hue: number | null; hex: string | null }) => {
     // ⚡ PASO 1: Update state immediately (optimistic)
     setUseCustomColor(params.useCustom);
@@ -422,6 +453,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       color: params.useCustom ? (params.hex ?? '#84cc16') : '#84cc16'
     });
   }, [saveProjectColor]);
+
   if (!activeProjectId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -429,6 +461,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       </div>
     )
   }
+
   return (
     <div className="space-y-6">
       {/* Two Column Layout - Section descriptions left, content right */}
@@ -443,6 +476,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
             Imagen que representa tu proyecto en tarjetas y vistas principales. Esta imagen aparecerá en el dashboard y listados de proyectos.
           </p>
         </div>
+
         {/* Right Column - Imagen Principal Content */}
         <div>
           {activeProjectId && organizationId && (
@@ -466,7 +500,9 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
           )}
         </div>
       </div>
+
       <hr className="border-t border-[var(--section-divider)] my-8" />
+
       {/* Información Básica Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column - Información Básica */}
@@ -479,6 +515,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
             Datos fundamentales que definen el proyecto. El nombre, tipo, modalidad, estado, descripción y notas ayudan a organizar y clasificar tus proyectos.
           </p>
         </div>
+
         {/* Right Column - Información Básica Content */}
         <div className="space-y-4">
           <div className="space-y-2">
@@ -496,6 +533,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
               required
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="project-code">
               Código Interno <span className="text-muted-foreground text-xs">(opcional)</span>
@@ -521,6 +559,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
               Máximo 30 caracteres. Solo letras, números, guiones y guiones bajos.
             </p>
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="project-type">Tipología</Label>
@@ -538,6 +577,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
                 </SelectContent>
               </Select>
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="modality">Modalidad</Label>
               <Select value={projectModalityId} onValueChange={(value) => handleSelectChange('project_modality_id', value)}>
@@ -555,6 +595,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
               </Select>
             </div>
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="status">Estado</Label>
             <Select value={status} onValueChange={(value) => handleSelectChange('status', value)}>
@@ -570,6 +611,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
               </SelectContent>
             </Select>
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="description">Descripción</Label>
             <Textarea 
@@ -582,6 +624,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
               data-testid="textarea-description"
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="internal-notes">Notas Internas</Label>
             <Textarea 
@@ -596,7 +639,9 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
           </div>
         </div>
       </div>
+
       <hr className="border-t border-[var(--section-divider)] my-8" />
+
       {/* Color Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column - Color del Proyecto */}
@@ -609,6 +654,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
             Define el color que identificará este proyecto en toda la plataforma. Puedes elegir entre nuestra paleta predefinida o crear un color personalizado.
           </p>
         </div>
+
         {/* Right Column - Color Content */}
         <div className="space-y-4">
           <div>
@@ -627,6 +673,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
           />
         </div>
       </div>
+
     </div>
   )
 }

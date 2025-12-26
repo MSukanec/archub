@@ -28,11 +28,14 @@
  *   )
  * }
  */
+
 /** Type alias para IDs que pueden ser null o undefined */
 type NullableId = string | null | undefined;
+
 export const contactsKeys = {
   /** Base key para todos los datos de contacts */
   all: ['contacts'] as const,
+
   // ═══════════════════════════════════════════════════════════════
   // LISTAS DE CONTACTOS
   // ═══════════════════════════════════════════════════════════════
@@ -43,6 +46,7 @@ export const contactsKeys = {
   /** Lista de contactos por organización (FUENTE ÚNICA DE VERDAD) */
   list: (organizationId: NullableId) => 
     [...contactsKeys.lists(), organizationId ?? undefined] as const,
+
   // ═══════════════════════════════════════════════════════════════
   // DETALLES DE CONTACTO INDIVIDUAL
   // ═══════════════════════════════════════════════════════════════
@@ -53,6 +57,7 @@ export const contactsKeys = {
   /** Detalle completo de un contacto */
   detail: (organizationId: NullableId, contactId: NullableId) => 
     [...contactsKeys.details(), organizationId ?? undefined, contactId ?? undefined] as const,
+
   // ═══════════════════════════════════════════════════════════════
   // ADJUNTOS DE CONTACTO
   // ═══════════════════════════════════════════════════════════════
@@ -64,9 +69,11 @@ export const contactsKeys = {
   attachmentList: (organizationId: NullableId, contactId: NullableId) => 
     [...contactsKeys.attachments(), organizationId ?? undefined, contactId ?? undefined] as const,
 } as const;
+
 export const contactTypesKeys = {
   /** Base key para todos los tipos de contacto */
   all: ['contact-types'] as const,
+
   // ═══════════════════════════════════════════════════════════════
   // LISTAS DE TIPOS
   // ═══════════════════════════════════════════════════════════════
@@ -78,6 +85,7 @@ export const contactTypesKeys = {
   list: (organizationId: NullableId) => 
     [...contactTypesKeys.lists(), organizationId ?? undefined] as const,
 } as const;
+
 /** Tipo de las query keys de contacts */
 export type ContactsQueryKey = readonly (string | undefined)[];
 export type ContactTypesQueryKey = readonly (string | undefined)[];

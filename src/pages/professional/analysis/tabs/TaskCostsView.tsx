@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Package, Plus, Edit, Trash2, DollarSign, TrendingUp, Calendar, Settings, Save, Truck, Users } from "lucide-react";
 import { formatDate, formatTime } from "@/lib/date-utils";
 import { useLocation } from "wouter";
+
 import { Table } from '@/components/shared/trees/Table';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal';
 import { useMobile } from '@/hooks/use-mobile';
@@ -18,9 +20,11 @@ import { useOrganizationTaskPrice, useUpsertOrganizationTaskPrice, useDeleteOrga
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
+
 interface TaskCostsViewProps {
   task: any;
 }
+
 export function TaskCostsView({ task }: TaskCostsViewProps) {
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
@@ -28,19 +32,22 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
   const [, navigate] = useLocation();
   
   // Verificar si el usuario es administrador
-  const isAdmin = userData?.role?.name === 'Administrador'|| userData?.role?.name === 'Admin';
+  const isAdmin = userData?.role?.name === 'Administrador' || userData?.role?.name === 'Admin';
   
   // Estados para controles del TableTopBar
   const [searchQuery, setSearchQuery] = useState('');
-  const [currencyView, setCurrencyView] = useState<'discriminado'| 'pesificado'| 'dolarizado'>('discriminado');
+  const [currencyView, setCurrencyView] = useState<'discriminado' | 'pesificado' | 'dolarizado'>('discriminado');
   const [groupBy, setGroupBy] = useState<string | undefined>('tipo');
+
   // Obtener datos reales de costos usando el hook unificado (materiales + mano de obra)
   const taskId = task?.task_id || task?.id;
   const { data: costs = [], isLoading } = useTaskCosts(taskId);
+
   // Custom pricing functionality
   const { data: customPrice } = useOrganizationTaskPrice(taskId);
   const upsertCustomPrice = useUpsertOrganizationTaskPrice();
   const deleteCustomPrice = useDeleteOrganizationTaskPrice();
+
   // Estados para edición individual de cada card
   const [isEditingMaterial, setIsEditingMaterial] = useState(false);
   const [isEditingLabor, setIsEditingLabor] = useState(false);
@@ -48,6 +55,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
   const [customMaterialCost, setCustomMaterialCost] = useState<string>('');
   const [customLaborCost, setCustomLaborCost] = useState<string>('');
   const [customSupplyCost, setCustomSupplyCost] = useState<string>('');
+
   // Mutaciones para eliminar costos
   const queryClient = useQueryClient();
   const deleteMaterialMutation = useDeleteTaskMaterial();
@@ -79,9 +87,11 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       });
     }
   });
+
   // Cálculos para KPIs de costos
   const kpiData = useMemo(() => {
     if (costs.length === 0) return null;
+
     // Separar materiales, mano de obra e insumos
     const materialCosts = costs.filter(c => c.type === 'Material');
     const laborCosts = costs.filter(c => c.type === 'Mano de Obra');
@@ -94,6 +104,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
     
     // Encontrar la fecha de última actualización (usar fecha actual como fallback)
     const lastUpdate = new Date();
+
     return {
       materialTotal,
       laborTotal,
@@ -102,6 +113,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       lastUpdate
     };
   }, [costs]);
+
   // Función para formatear montos
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -111,6 +123,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       maximumFractionDigits: 0
     }).format(amount);
   };
+
   // Cargar precios personalizados al inicializar
   useEffect(() => {
     if (customPrice) {
@@ -119,6 +132,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       setCustomSupplyCost(customPrice.supply_unit_cost?.toString() || '');
     }
   }, [customPrice]);
+
   // Función para guardar material cost
   const handleSaveMaterialCost = async (data: { materialCost: string }) => {
     try {
@@ -149,6 +163,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       console.error('Error saving material cost:', error);
     }
   };
+
   // Función para guardar labor cost
   const handleSaveLaborCost = async (data: { laborCost: string }) => {
     try {
@@ -179,6 +194,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       console.error('Error saving labor cost:', error);
     }
   };
+
   // Función para guardar supply cost
   const handleSaveSupplyCost = async (data: { supplyCost: string }) => {
     try {
@@ -209,6 +225,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       console.error('Error saving supply cost:', error);
     }
   };
+
+
   const handleDeleteCustomPrice = async () => {
     try {
       await deleteCustomPrice.mutateAsync(taskId);
@@ -222,6 +240,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       console.error('Error deleting custom price:', error);
     }
   };
+
+
   // Filtrar costos por búsqueda
   const filteredCosts = costs.filter(cost => {
     const searchLower = searchQuery.toLowerCase();
@@ -230,10 +250,12 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
     const typeMatch = cost.type?.toLowerCase().includes(searchLower);
     return !searchQuery || nameMatch || categoryMatch || typeMatch;
   });
+
   // Función para abrir modal de agregar costo
   const handleAddCost = () => {
     openModal('cost-modal', { task });
   };
+
   // Función para editar costo
   const handleEditCost = (cost: any) => {
     openModal('cost-modal', { 
@@ -242,9 +264,10 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       costData: cost
     });
   };
+
   // Función para eliminar costo
   const handleDeleteCost = (cost: any) => {
-    const costTypeName = cost.type === 'Material'? 'material': 'mano de obra';
+    const costTypeName = cost.type === 'Material' ? 'material' : 'mano de obra';
     
     openModal('delete-confirmation', {
       mode: 'simple',
@@ -268,6 +291,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       }
     });
   };
+
   // Definir columnas de la tabla
   const columns = [
     {
@@ -276,7 +300,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       sortable: true,
       width: '15%',
       render: (cost: any) => (
-        <div className="font-medium">{cost.type === 'Material'? 'Materiales': cost.type}</div>
+        <div className="font-medium">{cost.type === 'Material' ? 'Materiales' : cost.type}</div>
       )
     },
     {
@@ -322,6 +346,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       )
     }
   ];
+
   return (
     <div className="space-y-6">
       {/* Costos de Tarea - Solo para admins */}
@@ -348,24 +373,25 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                   data-testid="button-delete-custom-price"
                 >
                   <Trash2 className="h-4 w-4" />
-                  {deleteCustomPrice.isPending ? 'Eliminando...': 'Restaurar por defecto'}
+                  {deleteCustomPrice.isPending ? 'Eliminando...' : 'Restaurar por defecto'}
                 </Button>
               )}
             </div>
           </div>
+
           {/* Price Cards - Grid 1x4: todas una al lado de la otra */}
           <div className="grid grid-cols-4 gap-4">
                     {/* Fila 1, Columna 1: Mano de Obra */}
-                    <Card className="border-2" style={{ borderColor: customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? 'var(--accent)': 'var(--border)'}}>
+                    <Card className="border-2" style={{ borderColor: customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? 'var(--accent)' : 'var(--border)' }}>
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4" style={{ color: 'var(--accent)'}} />
+                            <Users className="h-4 w-4" style={{ color: 'var(--accent)' }} />
                             <span className="text-sm text-muted-foreground">Mano de obra</span>
                           </div>
                           <div className="flex items-center gap-2">
                             {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined && (
-                              <Badge className="text-xs" style={{ backgroundColor: 'var(--accent)', color: 'white'}}>Personalizado</Badge>
+                              <Badge className="text-xs" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>Personalizado</Badge>
                             )}
                             {!isEditingLabor ? (
                               <Button
@@ -403,7 +429,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                                 {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? formatCurrency(Number(customPrice.labor_unit_cost)) : formatCurrency(kpiData.laborTotal)}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? 'Costo Personalizado': 'Costo Automático'}
+                                {customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined ? 'Costo Personalizado' : 'Costo Automático'}
                               </p>
                             </>
                           ) : (
@@ -426,7 +452,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                                   className="ml-2"
                                   data-testid="button-save-labor"
                                 >
-                                  {upsertCustomPrice.isPending ? 'Guardando...': 'Guardar'}
+                                  {upsertCustomPrice.isPending ? 'Guardando...' : 'Guardar'}
                                 </Button>
                               </div>
                               <p className="text-xs text-muted-foreground">
@@ -435,10 +461,10 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                               <button
                                 onClick={() => {
                                   setCustomLaborCost('');
-                                  handleSaveLaborCost({ laborCost: ''});
+                                  handleSaveLaborCost({ laborCost: '' });
                                 }}
                                 className="text-xs hover:underline"
-                                style={{ color: 'var(--accent)'}}
+                                style={{ color: 'var(--accent)' }}
                                 type="button"
                               >
                                 Restaurar
@@ -448,17 +474,18 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                         </div>
                       </CardContent>
                     </Card>
+
                     {/* Fila 1, Columna 2: Materiales */}
-                    <Card className="border-2" style={{ borderColor: customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? 'var(--accent)': 'var(--border)'}}>
+                    <Card className="border-2" style={{ borderColor: customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? 'var(--accent)' : 'var(--border)' }}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <Package className="h-4 w-4" style={{ color: 'var(--accent)'}} />
+                        <Package className="h-4 w-4" style={{ color: 'var(--accent)' }} />
                         <span className="text-sm text-muted-foreground">Materiales</span>
                       </div>
                       <div className="flex items-center gap-2">
                         {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined && (
-                          <Badge className="text-xs" style={{ backgroundColor: 'var(--accent)', color: 'white'}}>Personalizado</Badge>
+                          <Badge className="text-xs" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>Personalizado</Badge>
                         )}
                         {!isEditingMaterial ? (
                           <Button
@@ -496,7 +523,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                             {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? formatCurrency(Number(customPrice.material_unit_cost)) : formatCurrency(kpiData.materialTotal)}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? 'Costo Personalizado': 'Costo Automático'}
+                            {customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined ? 'Costo Personalizado' : 'Costo Automático'}
                           </p>
                         </>
                       ) : (
@@ -519,7 +546,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                               className="ml-2"
                               data-testid="button-save-material"
                             >
-                              {upsertCustomPrice.isPending ? 'Guardando...': 'Guardar'}
+                              {upsertCustomPrice.isPending ? 'Guardando...' : 'Guardar'}
                             </Button>
                           </div>
                           <p className="text-xs text-muted-foreground">
@@ -528,10 +555,10 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                           <button
                             onClick={() => {
                               setCustomMaterialCost('');
-                              handleSaveMaterialCost({ materialCost: ''});
+                              handleSaveMaterialCost({ materialCost: '' });
                             }}
                             className="text-xs hover:underline"
-                            style={{ color: 'var(--accent)'}}
+                            style={{ color: 'var(--accent)' }}
                             type="button"
                           >
                             Restaurar
@@ -541,17 +568,18 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                     </div>
                   </CardContent>
                 </Card>
+
                     {/* Fila 2, Columna 1: Insumos */}
-                    <Card className="border-2" style={{ borderColor: customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? 'var(--accent)': 'var(--border)'}}>
+                    <Card className="border-2" style={{ borderColor: customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? 'var(--accent)' : 'var(--border)' }}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <Truck className="h-4 w-4" style={{ color: 'var(--accent)'}} />
+                        <Truck className="h-4 w-4" style={{ color: 'var(--accent)' }} />
                         <span className="text-sm text-muted-foreground">Insumos</span>
                       </div>
                       <div className="flex items-center gap-2">
                         {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined && (
-                          <Badge className="text-xs" style={{ backgroundColor: 'var(--accent)', color: 'white'}}>Personalizado</Badge>
+                          <Badge className="text-xs" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>Personalizado</Badge>
                         )}
                         {!isEditingSupply ? (
                           <Button
@@ -589,7 +617,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                             {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? formatCurrency(Number(customPrice.supply_unit_cost)) : formatCurrency(kpiData.supplyTotal)}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? 'Costo Personalizado': 'Costo Automático'}
+                            {customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined ? 'Costo Personalizado' : 'Costo Automático'}
                           </p>
                         </>
                       ) : (
@@ -612,7 +640,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                               className="ml-2"
                               data-testid="button-save-supply"
                             >
-                              {upsertCustomPrice.isPending ? 'Guardando...': 'Guardar'}
+                              {upsertCustomPrice.isPending ? 'Guardando...' : 'Guardar'}
                             </Button>
                           </div>
                           <p className="text-xs text-muted-foreground">
@@ -621,10 +649,10 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                           <button
                             onClick={() => {
                               setCustomSupplyCost('');
-                              handleSaveSupplyCost({ supplyCost: ''});
+                              handleSaveSupplyCost({ supplyCost: '' });
                             }}
                             className="text-xs hover:underline"
-                            style={{ color: 'var(--accent)'}}
+                            style={{ color: 'var(--accent)' }}
                             type="button"
                           >
                             Restaurar
@@ -634,12 +662,13 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                     </div>
                   </CardContent>
                 </Card>
+
                     {/* Fila 2, Columna 2: Total */}
-                    <Card className="border-2" style={{ borderColor: ((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined) || (customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined)) ? 'var(--accent)': 'var(--border)'}}>
+                    <Card className="border-2" style={{ borderColor: ((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined) || (customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined)) ? 'var(--accent)' : 'var(--border)' }}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4" style={{ color: 'var(--accent)'}} />
+                        <DollarSign className="h-4 w-4" style={{ color: 'var(--accent)' }} />
                         <span className="text-sm text-muted-foreground">Total</span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -654,7 +683,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                         {formatCurrency((customPrice?.material_unit_cost ?? kpiData.materialTotal) + (customPrice?.labor_unit_cost ?? kpiData.laborTotal) + (customPrice?.supply_unit_cost ?? kpiData.supplyTotal))}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined) || (customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined)) ? 'Costo Personalizado': 'Costo Automático'}
+                        {((customPrice?.material_unit_cost !== null && customPrice?.material_unit_cost !== undefined) || (customPrice?.labor_unit_cost !== null && customPrice?.labor_unit_cost !== undefined) || (customPrice?.supply_unit_cost !== null && customPrice?.supply_unit_cost !== undefined)) ? 'Costo Personalizado' : 'Costo Automático'}
                       </p>
                     </div>
                   </CardContent>
@@ -662,6 +691,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
           </div>
         </div>
       )}
+
       {/* Tabla de Costos */}
       {isLoading ? (
         // Estado de carga
@@ -673,8 +703,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
       ) : filteredCosts.length > 0 ? (
         <Table
           data={filteredCosts}
-          columns={groupBy === 'tipo'? columns.filter(col => col.key !== 'type') : columns}
-          groupBy={groupBy === 'tipo'? 'type': undefined}
+          columns={groupBy === 'tipo' ? columns.filter(col => col.key !== 'type') : columns}
+          groupBy={groupBy === 'tipo' ? 'type' : undefined}
           rowActions={isAdmin ? (cost) => [
             {
               icon: Edit,
@@ -685,7 +715,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
               icon: Trash2,
               label: 'Eliminar',
               onClick: () => handleDeleteCost(cost),
-              variant: 'destructive'as const
+              variant: 'destructive' as const
             }
           ] : undefined}
           renderGroupHeader={(groupKey: string, groupRows: any[]) => {
@@ -700,10 +730,11 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
                 maximumFractionDigits: 0
               }).format(amount);
             };
+
             return (
               <>
                 <div className="truncate text-sm font-medium">
-                  {groupKey === 'Material'? 'Materiales': groupKey} ({groupRows.length} {groupRows.length === 1 ? 'ítem': 'ítems'})
+                  {groupKey === 'Material' ? 'Materiales' : groupKey} ({groupRows.length} {groupRows.length === 1 ? 'ítem' : 'ítems'})
                 </div>
                 <div></div>
                 <div></div>
@@ -720,8 +751,8 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
             onSearchChange: setSearchQuery,
             searchValue: searchQuery,
             groupingOptions: [
-              { value: 'tipo', label: 'Tipo'},
-              { value: '', label: 'Sin agrupar'}
+              { value: 'tipo', label: 'Tipo' },
+              { value: '', label: 'Sin agrupar' }
             ],
             currentGrouping: groupBy || '',
             onGroupingChange: (value: string) => setGroupBy(value || undefined),
@@ -744,6 +775,7 @@ export function TaskCostsView({ task }: TaskCostsViewProps) {
           }
         />
       )}
+
     </div>
   );
 }

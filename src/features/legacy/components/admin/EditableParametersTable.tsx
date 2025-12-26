@@ -11,6 +11,7 @@ import { useGlobalModalStore } from '@/components/modal'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
+
 interface ParameterNode {
   id: string
   slug: string
@@ -23,24 +24,28 @@ interface ParameterNode {
   isExpanded?: boolean
   hasCircularDependency?: boolean
 }
+
 interface EditingState {
   parameterId: string | null
-  field: 'label'| 'slug'| 'parent'| 'order'| null
+  field: 'label' | 'slug' | 'parent' | 'order' | null
   value: string
 }
+
 interface HierarchyValidation {
   circularDependencies: string[]
   orphanParameters: string[]
   duplicateSlugs: string[]
 }
+
 export function EditableParametersTable() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [editingState, setEditingState] = useState<EditingState>({ parameterId: null, field: null, value: ''})
+  const [editingState, setEditingState] = useState<EditingState>({ parameterId: null, field: null, value: '' })
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set())
   const { data: parameters = [], isLoading } = useTaskParametersAdmin()
   const { openModal } = useGlobalModalStore()
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
   // Organizar parámetros en estructura jerárquica
   const hierarchicalParameters = buildHierarchy(parameters)
   
@@ -48,8 +53,10 @@ export function EditableParametersTable() {
   const filteredParameters = searchTerm 
     ? filterParametersWithSearch(hierarchicalParameters, searchTerm)
     : hierarchicalParameters
+
   // Validar jerarquía
   const hierarchyValidation = validateHierarchy(parameters)
+
   // Mutation para actualizar parámetro
   const updateParameterMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
@@ -79,9 +86,11 @@ export function EditableParametersTable() {
       console.error('Error updating parameter:', error)
     }
   })
+
   function buildHierarchy(params: any[]): ParameterNode[] {
     const paramMap = new Map<string, ParameterNode>()
     const rootNodes: ParameterNode[] = []
+
     // Crear nodos y mapearlos
     params.forEach(param => {
       paramMap.set(param.id, {
@@ -97,10 +106,12 @@ export function EditableParametersTable() {
         hasCircularDependency: false
       })
     })
+
     // Construir jerarquía y calcular niveles
     params.forEach(param => {
       const node = paramMap.get(param.id)
       if (!node) return
+
       if ((param as any).parent_id) {
         const parent = paramMap.get((param as any).parent_id)
         if (parent) {
@@ -114,6 +125,7 @@ export function EditableParametersTable() {
         rootNodes.push(node)
       }
     })
+
     // Calcular niveles recursivamente
     function calculateLevels(nodes: ParameterNode[], level: number = 0) {
       nodes.forEach(node => {
@@ -122,19 +134,23 @@ export function EditableParametersTable() {
       })
     }
     calculateLevels(rootNodes)
+
     // Ordenar por order dentro de cada nivel
     function sortChildren(nodes: ParameterNode[]) {
       nodes.sort((a, b) => a.order - b.order || a.label.localeCompare(b.label))
       nodes.forEach(node => sortChildren(node.children))
     }
     sortChildren(rootNodes)
+
     return rootNodes
   }
+
   function filterParametersWithSearch(params: ParameterNode[], searchTerm: string): ParameterNode[] {
     function nodeMatches(node: ParameterNode): boolean {
       return node.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
              node.slug.toLowerCase().includes(searchTerm.toLowerCase())
     }
+
     function filterNode(node: ParameterNode): ParameterNode | null {
       const childMatches = node.children.map(filterNode).filter(Boolean) as ParameterNode[]
       
@@ -147,8 +163,10 @@ export function EditableParametersTable() {
       
       return null
     }
+
     return params.map(filterNode).filter(Boolean) as ParameterNode[]
   }
+
   function validateHierarchy(params: any[]): HierarchyValidation {
     const circularDependencies: string[] = []
     const orphanParameters: string[] = []
@@ -166,6 +184,7 @@ export function EditableParametersTable() {
         duplicateSlugs.push(slug)
       }
     })
+
     // Detectar dependencias circulares
     function hasCircularDependency(paramId: string, visited: Set<string> = new Set()): boolean {
       if (visited.has(paramId)) return true
@@ -176,19 +195,23 @@ export function EditableParametersTable() {
       visited.add(paramId)
       return hasCircularDependency((param as any).parent_id, visited)
     }
+
     params.forEach(param => {
       if ((param as any).parent_id && hasCircularDependency(param.id)) {
         circularDependencies.push(param.label)
       }
     })
+
     // Detectar parámetros huérfanos (tienen parent_id pero el padre no existe)
     params.forEach(param => {
       if ((param as any).parent_id && !params.find(p => p.id === (param as any).parent_id)) {
         orphanParameters.push(param.label)
       }
     })
+
     return { circularDependencies, orphanParameters, duplicateSlugs }
   }
+
   function getAvailableParents(currentParamId: string): any[] {
     // Excluir el parámetro actual y sus descendientes para evitar loops
     function getDescendants(paramId: string): string[] {
@@ -202,14 +225,18 @@ export function EditableParametersTable() {
       
       return descendants
     }
+
     const excludeIds = new Set([currentParamId, ...getDescendants(currentParamId)])
     return parameters.filter(param => !excludeIds.has(param.id))
   }
-  function handleEdit(parameterId: string, field: 'label'| 'slug'| 'parent'| 'order', currentValue: string) {
+
+  function handleEdit(parameterId: string, field: 'label' | 'slug' | 'parent' | 'order', currentValue: string) {
     setEditingState({ parameterId, field, value: currentValue })
   }
+
   function handleSave() {
     if (!editingState.parameterId || !editingState.field) return
+
     const updates: any = {}
     
     // Convertir valores según el campo
@@ -220,15 +247,19 @@ export function EditableParametersTable() {
     } else {
       updates[editingState.field] = editingState.value
     }
+
     updateParameterMutation.mutate({
       id: editingState.parameterId,
       updates
     })
-    setEditingState({ parameterId: null, field: null, value: ''})
+
+    setEditingState({ parameterId: null, field: null, value: '' })
   }
+
   function handleCancel() {
-    setEditingState({ parameterId: null, field: null, value: ''})
+    setEditingState({ parameterId: null, field: null, value: '' })
   }
+
   function toggleExpanded(nodeId: string) {
     const newExpanded = new Set(expandedNodes)
     if (newExpanded.has(nodeId)) {
@@ -238,8 +269,10 @@ export function EditableParametersTable() {
     }
     setExpandedNodes(newExpanded)
   }
+
   function renderParameterRow(param: ParameterNode, index: number) {
     const isEditing = editingState.parameterId === param.id
+
     return (
       <div key={param.id} className="border border-muted-foreground/20 rounded-lg">
         <div className="grid grid-cols-12 gap-4 p-3 items-center">
@@ -273,7 +306,7 @@ export function EditableParametersTable() {
             
             <Settings className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             
-            {isEditing && editingState.field === 'label'? (
+            {isEditing && editingState.field === 'label' ? (
               <div className="flex items-center gap-2 flex-1">
                 <Input
                   value={editingState.value}
@@ -297,9 +330,10 @@ export function EditableParametersTable() {
               </span>
             )}
           </div>
+
           {/* Slug */}
           <div className="col-span-2">
-            {isEditing && editingState.field === 'slug'? (
+            {isEditing && editingState.field === 'slug' ? (
               <div className="flex items-center gap-2">
                 <Input
                   value={editingState.value}
@@ -324,9 +358,10 @@ export function EditableParametersTable() {
               </Badge>
             )}
           </div>
+
           {/* Parent */}
           <div className="col-span-2">
-            {isEditing && editingState.field === 'parent'? (
+            {isEditing && editingState.field === 'parent' ? (
               <div className="flex items-center gap-2">
                 <Select
                   value={editingState.value}
@@ -371,9 +406,10 @@ export function EditableParametersTable() {
               </div>
             )}
           </div>
+
           {/* Orden */}
           <div className="col-span-1">
-            {isEditing && editingState.field === 'order'? (
+            {isEditing && editingState.field === 'order' ? (
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
@@ -398,12 +434,14 @@ export function EditableParametersTable() {
               </span>
             )}
           </div>
+
           {/* Tipo */}
           <div className="col-span-2">
             <Badge variant="secondary" className="text-xs">
               {param.type}
             </Badge>
           </div>
+
           {/* Acciones */}
           <div className="col-span-2 flex items-center gap-1 justify-end">
             <Button
@@ -445,6 +483,7 @@ export function EditableParametersTable() {
             </Button>
           </div>
         </div>
+
         {/* Hijos (cuando esté expandido) */}
         {param.isExpanded && param.children.length > 0 && (
           <div className="border-t border-muted-foreground/20">
@@ -454,6 +493,7 @@ export function EditableParametersTable() {
       </div>
     )
   }
+
   if (isLoading) {
     return (
       <Card>
@@ -465,6 +505,7 @@ export function EditableParametersTable() {
       </Card>
     )
   }
+
   return (
     <div className="space-y-6">
       {/* Header con búsqueda y botón nuevo */}
@@ -502,6 +543,7 @@ export function EditableParametersTable() {
               />
             </div>
           </div>
+
           {/* Alertas de problemas */}
           {(hierarchyValidation.circularDependencies.length > 0 || 
             hierarchyValidation.orphanParameters.length > 0 || 
@@ -528,6 +570,7 @@ export function EditableParametersTable() {
           )}
         </CardContent>
       </Card>
+
       {/* Tabla de parámetros */}
       <Card>
         <CardHeader>
@@ -546,7 +589,7 @@ export function EditableParametersTable() {
               icon={<Settings className="w-12 h-12 text-muted-foreground" />}
               title={searchTerm ? "No se encontraron parámetros" : "No hay parámetros"}
               description={searchTerm 
-                ? 'Prueba ajustando el término de búsqueda'
+                ? 'Prueba ajustando el término de búsqueda' 
                 : 'Comienza creando tu primer parámetro para gestionar las tareas'
               }
             />

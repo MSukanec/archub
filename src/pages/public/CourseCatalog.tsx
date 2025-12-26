@@ -1,5 +1,6 @@
 import { MarketingLayout } from '@/layouts';
 import { CoursesCatalogContent } from '@/features/shared-content/courses';
+
 export default function CourseCatalog() {
   return (
     <MarketingLayout
@@ -29,9 +30,11 @@ export default function CourseCatalog() {
           </div>
         </div>
       </section>
+
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <CoursesCatalogContent mode="public" showTabs={true} />
       </section>
+
       <section className="relative bg-gradient-to-br from-muted/20 to-background py-12 -mx-6 px-6 mt-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto text-center space-y-4">

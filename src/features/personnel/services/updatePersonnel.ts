@@ -1,12 +1,14 @@
 import { apiRequest } from '@/lib/queryClient';
+
 export interface UpdatePersonnelData {
   organization_id: string;
   notes?: string;
   start_date?: string | null;
   end_date?: string | null;
-  status?: 'active'| 'inactive'| null;
+  status?: 'active' | 'inactive' | null;
   labor_type_id?: string | null;
 }
+
 export async function updatePersonnel(
   personnelId: string,
   data: UpdatePersonnelData
@@ -19,9 +21,11 @@ export async function updatePersonnel(
     status: data.status,
     labor_type_id: data.labor_type_id,
   });
+
   if (response.ok) {
     return await response.json();
   }
+
   const errorData = await response.json();
   throw new Error(errorData.error || 'Failed to update personnel');
 }

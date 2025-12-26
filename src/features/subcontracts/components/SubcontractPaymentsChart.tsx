@@ -4,17 +4,20 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { TrendingUp } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+
 interface PaymentData {
   month: string
   amount: number
   formattedMonth: string
 }
+
 interface SubcontractPaymentsChartProps {
   data: PaymentData[]
   isLoading?: boolean
   currencySymbol?: string
   title?: string
 }
+
 export function SubcontractPaymentsChart({
   data,
   isLoading = false,
@@ -35,6 +38,7 @@ export function SubcontractPaymentsChart({
       </Card>
     )
   }
+
   if (!data || data.length === 0) {
     return (
       <Card>
@@ -51,20 +55,22 @@ export function SubcontractPaymentsChart({
       </Card>
     )
   }
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
-      currency: currencySymbol === 'US$'? 'USD': 'ARS',
+      currency: currencySymbol === 'US$' ? 'USD' : 'ARS',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(value)
   }
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-background border rounded-lg shadow-lg p-3">
           <p className="text-sm font-medium">{label}</p>
-          <p className="text-sm" style={{ color: 'var(--chart-1)'}}>
+          <p className="text-sm" style={{ color: 'var(--chart-1)' }}>
             <span className="font-medium">Pagos: </span>
             {formatCurrency(payload[0].value)}
           </p>
@@ -73,6 +79,7 @@ export function SubcontractPaymentsChart({
     }
     return null
   }
+
   return (
     <Card>
       <CardHeader 

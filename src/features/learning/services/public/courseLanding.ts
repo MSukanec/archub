@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { Course, CourseDetails, CourseModule, Lesson, CourseFaq, Testimonial } from '@shared/schema';
+
 /**
  * Fetch public course data by slug (NO AUTH required)
  * Used for public landing pages
@@ -8,6 +9,7 @@ export async function fetchCourseLandingBySlug(slug: string) {
   if (!supabase) {
     throw new Error('Supabase client not initialized');
   }
+
   // 1. Fetch course with details (is_active check removed - handled by frontend BlockedRestricted)
   const { data: course, error: courseError } = await supabase
     .from('courses')
@@ -19,8 +21,10 @@ export async function fetchCourseLandingBySlug(slug: string) {
     .eq('visibility', 'public')
     .eq('is_deleted', false)
     .single();
+
   if (courseError) throw new Error(`Course not found: ${courseError.message}`);
   if (!course) throw new Error('Course not found');
+
   // Merge course_details into course object
   const courseDetails = (course as any).course_details?.[0] || (course as any).course_details;
   if (courseDetails) {
@@ -34,6 +38,7 @@ export async function fetchCourseLandingBySlug(slug: string) {
       seo_keywords: courseDetails.seo_keywords,
       landing_sections: courseDetails.landing_sections,
     });
+
     // Generate cover URL from course_details (NEW preferred method)
     if (courseDetails.image_bucket && courseDetails.image_path) {
       // Public bucket: use direct public URL
@@ -52,6 +57,7 @@ export async function fetchCourseLandingBySlug(slug: string) {
       }
     }
   }
+
   // 1.5. Fetch course media (instructor photo, og_image) - ONLY if not from course_details
   const { data: mediaLinks } = await supabase
     .from('media_links')
@@ -65,26 +71,30 @@ export async function fetchCourseLandingBySlug(slug: string) {
     .eq('course_id', course.id)
     .eq('media_files.is_deleted', false)
     .in('category', ['course_cover', 'instructor_photo', 'og_image']);
+
   // Attach media URLs to course object
   if (mediaLinks && mediaLinks.length > 0) {
     mediaLinks.forEach((link: any) => {
       // Only use media_links cover if not already set from course_details
-      if (link.category === 'course_cover'&& link.media_files?.file_url && !(course as any).cover_url) {
+      if (link.category === 'course_cover' && link.media_files?.file_url && !(course as any).cover_url) {
         (course as any).cover_url = link.media_files.file_url;
-      } else if (link.category === 'instructor_photo'&& link.media_files?.file_url) {
+      } else if (link.category === 'instructor_photo' && link.media_files?.file_url) {
         (course as any).instructor_photo_url = link.media_files.file_url;
-      } else if (link.category === 'og_image'&& link.media_files?.file_url) {
+      } else if (link.category === 'og_image' && link.media_files?.file_url) {
         (course as any).og_image_url = link.media_files.file_url;
       }
     });
   }
+
   // 2. Fetch modules
   const { data: modules, error: modulesError } = await supabase
     .from('course_modules')
     .select('*')
     .eq('course_id', course.id)
     .order('sort_index', { ascending: true });
+
   if (modulesError) throw new Error(`Modules fetch error: ${modulesError.message}`);
+
   // 2.5. Fetch module images and prepare lessons query
   let moduleIds: string[] = [];
   if (modules && modules.length > 0) {
@@ -102,6 +112,7 @@ export async function fetchCourseLandingBySlug(slug: string) {
       .in('course_module_id', moduleIds)
       .eq('category', 'module_image')
       .eq('media_files.is_deleted', false);
+
     // Attach module_image_url to each module
     if (moduleMediaLinks && moduleMediaLinks.length > 0) {
       modules.forEach((module: any) => {
@@ -117,6 +128,7 @@ export async function fetchCourseLandingBySlug(slug: string) {
       });
     }
   }
+
   // 3. Fetch lessons (active only)
   const { data: lessons, error: lessonsError } = await supabase
     .from('course_lessons')
@@ -124,14 +136,18 @@ export async function fetchCourseLandingBySlug(slug: string) {
     .in('module_id', moduleIds)
     .eq('is_active', true)
     .order('sort_index', { ascending: true });
+
   if (lessonsError) throw new Error(`Lessons fetch error: ${lessonsError.message}`);
+
   // 4. Fetch FAQs
   const { data: faqs, error: faqsError } = await supabase
     .from('course_faqs')
     .select('*')
     .eq('course_id', course.id)
     .order('sort_index', { ascending: true });
+
   if (faqsError) throw new Error(`FAQs fetch error: ${faqsError.message}`);
+
   // 5. Fetch Testimonials (graceful fallback if table doesn't exist yet)
   let testimonials: any[] = [];
   try {
@@ -142,6 +158,7 @@ export async function fetchCourseLandingBySlug(slug: string) {
       .eq('is_active', true)
       .eq('is_deleted', false)
       .order('sort_index', { ascending: true });
+
     if (!testimonialsError && testimonialsData) {
       testimonials = testimonialsData;
     }
@@ -149,6 +166,7 @@ export async function fetchCourseLandingBySlug(slug: string) {
     // Table might not exist yet - continue with empty testimonials
     console.log('Testimonials table not available yet');
   }
+
   // 6. Fetch Client Gallery images
   let clientGallery: { id: string; url: string }[] = [];
   try {
@@ -165,6 +183,7 @@ export async function fetchCourseLandingBySlug(slug: string) {
       .eq('category', 'client_gallery')
       .eq('media_files.is_deleted', false)
       .order('position', { ascending: true });
+
     if (!galleryError && galleryLinks) {
       clientGallery = galleryLinks
         .map((link: any) => {
@@ -181,6 +200,7 @@ export async function fetchCourseLandingBySlug(slug: string) {
   } catch {
     console.log('Client gallery fetch failed - continuing without');
   }
+
   return {
     course: course as Course,
     modules: (modules || []) as CourseModule[],
@@ -190,6 +210,7 @@ export async function fetchCourseLandingBySlug(slug: string) {
     clientGallery,
   };
 }
+
 /**
  * Fetch all public courses (NO AUTH required)
  * Used for course catalog page
@@ -198,6 +219,7 @@ export async function getAllPublicCourses() {
   if (!supabase) {
     throw new Error('Supabase client not initialized');
   }
+
   // is_active check removed - handled by frontend BlockedRestricted
   const { data: courses, error } = await supabase
     .from('courses')
@@ -220,10 +242,13 @@ export async function getAllPublicCourses() {
     .eq('visibility', 'public')
     .eq('is_deleted', false)
     .order('created_at', { ascending: false });
+
   if (error) throw new Error(`Failed to fetch courses: ${error.message}`);
+
   if (!courses || courses.length === 0) {
     return [];
   }
+
   // Build cover URL map from course_details (NEW preferred method)
   const coverUrlMap = new Map<string, string>();
   courses.forEach(course => {
@@ -238,6 +263,7 @@ export async function getAllPublicCourses() {
       }
     }
   });
+
   // Fetch cover images from media_links (LEGACY fallback)
   const courseIds = courses.map(c => c.id);
   const { data: mediaLinks } = await supabase
@@ -252,6 +278,7 @@ export async function getAllPublicCourses() {
     .in('course_id', courseIds)
     .eq('category', 'course_cover')
     .eq('media_files.is_deleted', false);
+
   // Attach cover_url and merge course_details
   const coursesWithCovers = courses.map(course => {
     // Prefer course_details URL over media_links
@@ -275,5 +302,6 @@ export async function getAllPublicCourses() {
       instructor_title: courseDetails?.instructor_title || null,
     };
   });
+
   return coursesWithCovers as any;
 }

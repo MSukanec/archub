@@ -1,23 +1,28 @@
 /**
  * 🤖 FloatingAIChat - Chat flotante tipo soporte en vivo
  */
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AIPanel } from '@/features/ai';
 import { Sparkles, X, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCurrentUser } from '@/hooks/use-current-user';
+
 export function FloatingAIChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const { data: userData } = useCurrentUser();
+
   // No mostrar si no hay usuario
   if (!userData?.user) {
     return null;
   }
+
   const userId = userData.user.id;
   const userFullName = userData.user.full_name || userData.user.first_name || 'Usuario';
   const userAvatarUrl = userData.user.avatar_url;
+
   return (
     <>
       {/* Botón Flotante */}
@@ -40,6 +45,7 @@ export function FloatingAIChat() {
           <Sparkles className="h-6 w-6 text-white group-hover:scale-110 transition-transform" />
         </button>
       )}
+
       {/* Chat Flotante - Tipo Popover */}
       {isOpen && (
         <div
@@ -92,6 +98,7 @@ export function FloatingAIChat() {
               </Button>
             </div>
           </div>
+
           {/* Contenido del Chat */}
           {!isMinimized && (
             <div className="flex-1 overflow-hidden">

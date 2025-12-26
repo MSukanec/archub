@@ -14,12 +14,15 @@ import { PartnerContributionForm, PartnerWithdrawalForm } from '@/features/capit
 import { GeneralCostPaymentFormFields } from '@/features/general-costs/forms/GeneralCostPaymentForm'
 import { WalletTransferFormFields } from '../forms/WalletTransferFormFields'
 import { CurrencyExchangeFormFields } from '../forms/CurrencyExchangeFormFields'
-type MovementType = 'client_payment'| 'material_payment'| 'personnel_payment'| 'partner_contribution'| 'partner_withdrawal'| 'general_cost_payment'| 'wallet_transfer'| 'currency_exchange'
+
+type MovementType = 'client_payment' | 'material_payment' | 'personnel_payment' | 'partner_contribution' | 'partner_withdrawal' | 'general_cost_payment' | 'wallet_transfer' | 'currency_exchange'
+
 const MOVEMENT_TYPES_REQUIRING_PROJECT: MovementType[] = [
   'client_payment',
   'material_payment',
   'personnel_payment',
 ]
+
 interface MovementTypeConfig {
   id: MovementType
   label: string
@@ -29,6 +32,7 @@ interface MovementTypeConfig {
   submitLabel: string
   hasNavigation?: boolean
 }
+
 const MOVEMENT_TYPES: MovementTypeConfig[] = [
   {
     id: 'partner_contribution',
@@ -97,12 +101,14 @@ const MOVEMENT_TYPES: MovementTypeConfig[] = [
     hasNavigation: false,
   },
 ]
+
 // Opciones jerárquicas para CascadingSelect
 interface CascadingOption {
   value: string
   label: string
   children?: CascadingOption[]
 }
+
 // Mapeo de tipos de movimiento a sus navegaciones (solo para tipos con navegación)
 const MOVEMENT_NAVIGATION: Partial<Record<MovementType, { label: string; path: (orgId: string) => string }>> = {
   client_payment: { label: 'Clientes', path: (orgId) => `/organization/${orgId}/clients?tab=payments` },
@@ -112,6 +118,7 @@ const MOVEMENT_NAVIGATION: Partial<Record<MovementType, { label: string; path: (
   partner_withdrawal: { label: 'Capital', path: (orgId) => `/organization/capital?tab=payments` },
   general_cost_payment: { label: 'Gastos Generales', path: (orgId) => `/organization/${orgId}/general-costs?tab=payments` },
 }
+
 const CASCADING_MOVEMENT_OPTIONS: CascadingOption[] = [
   {
     value: 'ingresos',
@@ -150,6 +157,7 @@ const CASCADING_MOVEMENT_OPTIONS: CascadingOption[] = [
     ],
   },
 ]
+
 interface NewMovementModalProps {
   modalData?: {
     projectId?: string
@@ -158,6 +166,7 @@ interface NewMovementModalProps {
   }
   onClose: () => void
 }
+
 export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) {
   const [selectedType, setSelectedType] = useState<MovementType | null>(null)
   const [selectedProjectIdForMovement, setSelectedProjectIdForMovement] = useState<string | null>(null)
@@ -165,34 +174,42 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
   const [, navigate] = useLocation()
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
   const { data: projects = [] } = useProjectsLite()
+
   const isProjectContext = modalData?.isProjectContext ?? false
   const contextProjectId = modalData?.projectId || (isProjectContext ? selectedProjectId : null) || undefined
   const organizationId = modalData?.organizationId || currentOrganizationId || undefined
+
   const requiresProjectSelector = useMemo(() => {
     if (!selectedType) return false
     if (isProjectContext || contextProjectId) return false
     return MOVEMENT_TYPES_REQUIRING_PROJECT.includes(selectedType)
   }, [selectedType, isProjectContext, contextProjectId])
+
   const effectiveProjectId = contextProjectId || selectedProjectIdForMovement || undefined
+
   const selectedConfig = selectedType 
     ? MOVEMENT_TYPES.find(t => t.id === selectedType) 
     : null
+
   const handleSubmit = () => {
     if (formRef.current) {
       formRef.current.requestSubmit()
     }
   }
+
   const renderFormFields = () => {
     if (!selectedType) return null
+
     const commonProps = {
       projectId: effectiveProjectId,
       organizationId,
-      mode: 'create'as const,
+      mode: 'create' as const,
       onSuccess: onClose,
       onCancel: onClose,
       hideActions: true,
       formRef,
     }
+
     switch (selectedType) {
       case 'client_payment':
         return <ClientPaymentForm {...commonProps} />
@@ -214,6 +231,7 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
         return null
     }
   }
+
   return (
     <ModalLayout 
       onClose={onClose} 
@@ -280,6 +298,7 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
             </SelectContent>
           </Select>
         </div>
+
         {requiresProjectSelector && (
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-muted-foreground">Proyecto</Label>
@@ -304,6 +323,7 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
             </Select>
           </div>
         )}
+
         {selectedType && (
           <div className="pt-4 border-t">
             {renderFormFields()}
@@ -313,4 +333,5 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
     </ModalLayout>
   )
 }
+
 export default NewMovementModal

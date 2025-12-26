@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button"
 import { format } from 'date-fns'
 import { parseLocalDate, formatDateForDB } from '@/lib/date-utils'
 import { useMemo } from 'react'
+
 // Hook para obtener todo el personal del proyecto (con status)
 function useProjectPersonnel(projectId: string | undefined) {
   return useQuery({
     queryKey: ['project-personnel-with-status', projectId],
     queryFn: async () => {
       if (!supabase || !projectId) return []
+
       const { data, error } = await supabase
         .from('project_personnel')
         .select(`
@@ -39,20 +41,25 @@ function useProjectPersonnel(projectId: string | undefined) {
         `)
         .eq('project_id', projectId)
         .neq('is_deleted', true)
+
       console.log('🔍 ATTENDANCE TAB - RAW PERSONNEL FROM SUPABASE:', JSON.stringify(data, null, 2))
+
       if (error) {
         return []
       }
+
       return data || []
     },
     enabled: !!supabase && !!projectId
   })
 }
+
 function useAttendanceData(projectId: string | undefined, organizationId: string | undefined) {
   return useQuery({
     queryKey: ['construction-attendance', projectId, organizationId],
     queryFn: async () => {
       if (!supabase || !projectId || !organizationId) return []
+
       const { data: attendanceData, error } = await supabase
         .from('personnel_attendees')
         .select(`
@@ -69,17 +76,21 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
           )
         `)
         .eq('project_id', projectId)
+
       if (error) {
         return []
       }
+
       const filteredData = (attendanceData || []).filter(item => 
         item.personnel?.contact?.organization_id === organizationId
       )
+
       return filteredData
     },
     enabled: !!supabase && !!projectId && !!organizationId
   })
 }
+
 function transformPersonnelAndAttendance(personnelData: any[], attendanceData: any[]) {
   // Primero, crear la lista de workers desde TODO el personal del proyecto
   const getDisplayName = (contact: any) => {
@@ -89,12 +100,14 @@ function transformPersonnelAndAttendance(personnelData: any[], attendanceData: a
     }
     return contact.full_name || 'Sin nombre'
   }
+
   // Filtrar solo personal activo (ya filtramos soft-deleted en la query)
   const filteredPersonnel = personnelData.filter(p => {
-    // Tratar NULL como 'active'por defecto (para registros antiguos)
+    // Tratar NULL como 'active' por defecto (para registros antiguos)
     const personStatus = p.status || 'active'
     return personStatus === 'active'
   })
+
   const workers = filteredPersonnel.map(personnel => {
     const contact = personnel.contact
     const contactTypeName = contact?.contact_type_links?.[0]?.contact_type?.name || 'Sin tipo'
@@ -108,6 +121,7 @@ function transformPersonnelAndAttendance(personnelData: any[], attendanceData: a
       status: personnel.status
     }
   })
+
   // Construir el array de attendance desde los registros
   const attendance: any[] = []
   attendanceData.forEach(attendanceRecord => {
@@ -122,7 +136,7 @@ function transformPersonnelAndAttendance(personnelData: any[], attendanceData: a
       // Map DB fields back to UI status
       // DB stores: attendance_type ('full'/'half') + status ('present'/'absent'/'leave'/'holiday')
       // UI expects: 'full', 'half', 'absent', 'sick'
-      let status: 'full'| 'half'| 'absent'| 'sick'= 'full'
+      let status: 'full' | 'half' | 'absent' | 'sick' = 'full'
       const dbStatus = attendanceRecord.status
       const dbAttendanceType = attendanceRecord.attendance_type
       
@@ -135,6 +149,7 @@ function transformPersonnelAndAttendance(personnelData: any[], attendanceData: a
       } else {
         status = 'full'
       }
+
       attendance.push({
         workerId,
         day,
@@ -142,13 +157,16 @@ function transformPersonnelAndAttendance(personnelData: any[], attendanceData: a
       })
     }
   })
+
   return { workers, attendance }
 }
+
 interface PersonnelAttendanceTabProps {
   openModal: any
   selectedProjectId: string | null
   currentOrganizationId: string | null
 }
+
 export default function PersonnelAttendanceTab({ 
   openModal, 
   selectedProjectId,
@@ -157,16 +175,20 @@ export default function PersonnelAttendanceTab({
   const { data: personnelData = [], isLoading: isPersonnelLoading } = useProjectPersonnel(
     selectedProjectId || undefined
   )
+
   const { data: attendanceData = [], isLoading: isAttendanceLoading } = useAttendanceData(
     selectedProjectId || undefined,
     currentOrganizationId || undefined
   )
+
   const { workers, attendance } = useMemo(() => {
     return transformPersonnelAndAttendance(personnelData, attendanceData)
   }, [personnelData, attendanceData])
+
   const handleEditAttendance = (workerId: string, date: Date, existingAttendance?: any) => {
     const worker = workers.find(w => w.id === workerId)
     if (!worker) return
+
     openModal('attendance', {
       isEditing: true,
       editingData: {
@@ -177,7 +199,9 @@ export default function PersonnelAttendanceTab({
       }
     })
   }
+
   const isLoading = isPersonnelLoading || isAttendanceLoading
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -185,6 +209,7 @@ export default function PersonnelAttendanceTab({
       </div>
     )
   }
+
   // EmptyState grande: Solo si NO hay personal en el proyecto
   if (personnelData.length === 0) {
     return (
@@ -200,6 +225,7 @@ export default function PersonnelAttendanceTab({
       />
     )
   }
+
   // Siempre mostrar el componente si HAY personal en el proyecto
   // El empty state interno se muestra si workers.length === 0 (por el filtro)
   return (

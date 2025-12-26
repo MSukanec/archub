@@ -21,6 +21,7 @@ import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+
 const scheduleTaskSchema = z.object({
   start_date: z.string().optional(),
   duration_in_days: z.number().min(1, "La duración debe ser mayor a 0").optional(),
@@ -40,7 +41,9 @@ const scheduleTaskSchema = z.object({
     path: ["duration_in_days"]
   }
 );
+
 type ScheduleTaskFormData = z.infer<typeof scheduleTaskSchema>;
+
 interface ConstructionTaskScheduleModalProps {
   modalData: {
     projectId: string;
@@ -50,6 +53,7 @@ interface ConstructionTaskScheduleModalProps {
   };
   onClose: () => void;
 }
+
 export function ConstructionTaskScheduleModal({ 
   modalData, 
   onClose 
@@ -59,6 +63,7 @@ export function ConstructionTaskScheduleModal({
   const { data: projectPhases = [] } = useConstructionProjectPhases(modalData.projectId);
   
   const updateTask = useUpdateConstructionTask();
+
   // Hook para obtener la fase actual de la tarea
   const { data: currentPhaseTask, isLoading: isLoadingPhase } = useQuery({
     queryKey: ['construction-phase-task', modalData.editingTask?.id],
@@ -72,15 +77,18 @@ export function ConstructionTaskScheduleModal({
         .select('project_phase_id, progress_percent')
         .eq('construction_task_id', modalData.editingTask.id)
         .maybeSingle();
+
       if (error) {
         console.error('Error fetching current phase task:', error);
         return null;
       }
+
       return data;
     },
     enabled: !!modalData.editingTask?.id,
     staleTime: 0
   });
+
   const form = useForm<ScheduleTaskFormData>({
     resolver: zodResolver(scheduleTaskSchema),
     defaultValues: {
@@ -91,7 +99,9 @@ export function ConstructionTaskScheduleModal({
       notes: ""
     }
   });
+
   const { register, handleSubmit, formState: { errors }, watch, setValue, reset } = form;
+
   // Cargar datos cuando el modal se abre o cambian los datos
   useEffect(() => {
     if (modalData.editingTask && !isLoadingPhase) {
@@ -110,6 +120,7 @@ export function ConstructionTaskScheduleModal({
       reset(taskData);
     }
   }, [modalData.editingTask, currentPhaseTask, isLoadingPhase, reset]);
+
   const onSubmit = async (data: ScheduleTaskFormData) => {
     if (!userData?.user?.id) {
       toast({
@@ -119,6 +130,7 @@ export function ConstructionTaskScheduleModal({
       });
       return;
     }
+
     setIsSubmitting(true);
     
     try {
@@ -129,6 +141,7 @@ export function ConstructionTaskScheduleModal({
         startDate.setDate(startDate.getDate() + data.duration_in_days);
         endDate = startDate.toISOString().split('T')[0];
       }
+
       // Update task with schedule data
       await updateTask.mutateAsync({
         id: modalData.editingTask.id,
@@ -139,11 +152,14 @@ export function ConstructionTaskScheduleModal({
         duration_in_days: data.duration_in_days || undefined,
         progress_percent: data.progress_percent || 0,
         project_phase_id: data.project_phase_id || undefined,
+
       });
+
       toast({
         title: "Éxito",
         description: "Cronograma de tarea actualizado correctamente",
       });
+
       onClose();
     } catch (error) {
       console.error('Error updating task schedule:', error);
@@ -156,6 +172,7 @@ export function ConstructionTaskScheduleModal({
       setIsSubmitting(false);
     }
   };
+
   const viewPanel = (
     <div className="space-y-6">
       <div className="text-center py-8 text-muted-foreground">
@@ -163,12 +180,13 @@ export function ConstructionTaskScheduleModal({
       </div>
     </div>
   );
+
   const editPanel = (
     <form 
       onSubmit={handleSubmit(onSubmit)} 
       className="space-y-6"
       onKeyDown={(e) => {
-        if (e.key === 'Enter'&& !e.shiftKey) {
+        if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
           handleSubmit(onSubmit)();
         }
@@ -181,6 +199,7 @@ export function ConstructionTaskScheduleModal({
           {modalData.editingTask?.task?.display_name || modalData.editingTask?.task?.code || 'Sin nombre'}
         </p>
       </div>
+
       {/* Fase y Progreso en línea */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
@@ -205,6 +224,7 @@ export function ConstructionTaskScheduleModal({
             <p className="text-sm text-destructive">{errors.project_phase_id.message}</p>
           )}
         </div>
+
         <div className="space-y-2">
           <Label htmlFor="progress_percent">Progreso (%)</Label>
           <Input
@@ -223,6 +243,7 @@ export function ConstructionTaskScheduleModal({
           )}
         </div>
       </div>
+
       {/* Fecha de inicio y Duración en línea */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
@@ -257,6 +278,7 @@ export function ConstructionTaskScheduleModal({
             <p className="text-sm text-destructive">{errors.start_date.message}</p>
           )}
         </div>
+
         <div className="space-y-2">
           <Label htmlFor="duration_in_days">Duración (días)</Label>
           <Input
@@ -274,6 +296,7 @@ export function ConstructionTaskScheduleModal({
           )}
         </div>
       </div>
+
       {/* Notas */}
       <div className="space-y-2">
         <Label htmlFor="notes">Notas</Label>
@@ -289,12 +312,14 @@ export function ConstructionTaskScheduleModal({
       </div>
     </form>
   );
+
   const headerContent = (
     <FormModalHeader 
       title="Cronograma de Tarea"
       icon={CalendarIcon}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
@@ -303,6 +328,7 @@ export function ConstructionTaskScheduleModal({
       onRightClick={handleSubmit(onSubmit)}
     />
   );
+
   return (
     <FormModalLayout
       columns={1}

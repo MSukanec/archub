@@ -11,6 +11,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useGlobalModalStore } from '@/components/modal'
 import AdminUserRow from '@/features/users/components/AdminUserRow'
+
 // Helper to format user acquisition origin
 function formatAcquisitionOrigin(acquisition: { source?: string; medium?: string; campaign?: string } | null): string {
   if (!acquisition || !acquisition.source) return 'Desconocido';
@@ -24,8 +25,9 @@ function formatAcquisitionOrigin(acquisition: { source?: string; medium?: string
   const parts = [formattedSource];
   if (campaign) parts.push(`· ${campaign}`);
   
-  return parts.join('');
+  return parts.join(' ');
 }
+
 interface User {
   id: string
   auth_id: string
@@ -47,15 +49,18 @@ interface User {
     campaign?: string
   } | null
 }
+
 // Componente para mostrar la última actividad
 function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
   const [tick, setTick] = useState(0);
+
   useEffect(() => {
     const interval = setInterval(() => setTick(t => t + 1), 30_000);
     return () => clearInterval(interval);
   }, []);
+
   const { label, isOnline, tooltip } = useMemo(() => {
-    if (!lastSeen) return { label: '—', isOnline: false, tooltip: 'Sin registro'};
+    if (!lastSeen) return { label: '—', isOnline: false, tooltip: 'Sin registro' };
     
     const lastSeenTime = new Date(lastSeen).getTime();
     const now = Date.now();
@@ -74,7 +79,7 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
     
     let relativeLabel = '';
     if (diffDays >= 1) {
-      relativeLabel = `hace ${diffDays} día${diffDays > 1 ? 's': ''}`;
+      relativeLabel = `hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
     } else if (diffHr >= 1) {
       relativeLabel = `hace ${diffHr} h`;
     } else if (diffMin >= 1) {
@@ -89,6 +94,7 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
       tooltip: format(new Date(lastSeen), 'dd/MM/yyyy HH:mm:ss', { locale: es })
     };
   }, [lastSeen, tick]);
+
   return (
     <div title={tooltip}>
       {isOnline ? (
@@ -101,6 +107,7 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
     </div>
   );
 }
+
 const AdminAdminUsers = () => {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
@@ -111,6 +118,7 @@ const AdminAdminUsers = () => {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { openModal } = useGlobalModalStore()
+
   // Fetch users with statistics from backend API (bypasses RLS)
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['admin-users', searchValue, sortBy, statusFilter, showActiveOnly],
@@ -143,6 +151,7 @@ const AdminAdminUsers = () => {
       return response.json()
     }
   })
+
   // Delete user mutation (uses backend API to bypass RLS)
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: string) => {
@@ -187,9 +196,11 @@ const AdminAdminUsers = () => {
       })
     }
   })
+
   const handleEdit = (user: User) => {
     openModal('admin-user', { user, isEditing: true })
   }
+
   const handleDeleteDangerous = (user: User) => {
     openModal('delete-confirmation', {
       title: 'Desactivar Usuario',
@@ -199,22 +210,24 @@ const AdminAdminUsers = () => {
       dangerous: true
     })
   }
+
   const confirmDelete = () => {
     if (deletingUser) {
       deleteUserMutation.mutate(deletingUser.id)
     }
   }
+
   const columns = [
     {
       key: 'last_activity',
       label: 'Activo',
-      type: 'status'as const,
+      type: 'status' as const,
       render: (user: User) => <LastActivityCell lastSeen={user.last_seen_at} />
     },
     {
       key: 'full_name',
       label: 'Usuario',
-      type: 'long-text'as const,
+      type: 'long-text' as const,
       render: (user: User) => (
         <IdentityBadge
           name={user.full_name || 'Sin nombre'}
@@ -227,7 +240,7 @@ const AdminAdminUsers = () => {
     {
       key: 'organizations_count',
       label: 'Orgs',
-      type: 'number'as const,
+      type: 'number' as const,
       render: (user: User) => (
         <span className="text-sm">{user.organizations_count}</span>
       )
@@ -235,7 +248,7 @@ const AdminAdminUsers = () => {
     {
       key: 'created_at',
       label: 'Registro',
-      type: 'date'as const,
+      type: 'date' as const,
       render: (user: User) => (
         <span className="text-sm text-muted-foreground">
           {format(new Date(user.created_at), 'dd/MM/yy', { locale: es })}
@@ -245,7 +258,7 @@ const AdminAdminUsers = () => {
     {
       key: 'acquisition',
       label: 'Origen',
-      type: 'status'as const,
+      type: 'status' as const,
       render: (user: User) => (
         <span className="text-sm text-muted-foreground">
           {formatAcquisitionOrigin(user.acquisition || null)}
@@ -253,6 +266,7 @@ const AdminAdminUsers = () => {
       )
     }
   ]
+
   return (
     <div className="space-y-6">
       {/* Users Table */}
@@ -270,7 +284,7 @@ const AdminAdminUsers = () => {
             icon: Trash2,
             label: 'Eliminar',
             onClick: () => handleDeleteDangerous(user),
-            variant: 'destructive'as const
+            variant: 'destructive' as const
           }
         ]}
         renderCard={(user) => (
@@ -288,6 +302,7 @@ const AdminAdminUsers = () => {
           </div>
         }
       />
+
       <AlertDialog open={!!deletingUser} onOpenChange={() => setDeletingUser(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -311,4 +326,5 @@ const AdminAdminUsers = () => {
     </div>
   )
 }
+
 export default AdminAdminUsers;

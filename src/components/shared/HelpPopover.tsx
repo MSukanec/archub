@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { HelpCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 interface HelpPopoverProps {
   title?: string;
   description: string;
@@ -14,6 +15,7 @@ interface HelpPopoverProps {
   placement?: "top" | "bottom" | "left" | "right";
   className?: string;
 }
+
 export function HelpPopover({
   title,
   description,
@@ -26,18 +28,21 @@ export function HelpPopover({
   className
 }: HelpPopoverProps) {
   const [isOpen, setIsOpen] = useState(false);
+
   const handlePrimaryAction = () => {
     if (onPrimaryAction) {
       onPrimaryAction();
     }
     setIsOpen(false);
   };
+
   const handleSecondaryAction = () => {
     if (onSecondaryAction) {
       onSecondaryAction();
     }
     setIsOpen(false);
   };
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>

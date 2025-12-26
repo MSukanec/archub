@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { 
   AppCard, 
   AppCardTitle, 
   AppCardValue, 
@@ -38,6 +39,7 @@ import { parseLocalDate } from '@/lib/date-utils';
 import { DollarSign, Edit, Trash2, Paperclip, User, Package, Users, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Scale, Hash, Plus } from 'lucide-react';
 import chroma from 'chroma-js';
 import type { UnifiedMovementWithRelations } from '@/features/finances/services/getUnifiedMovements';
+
 const MOVEMENT_TYPE_CONFIG: Record<string, { 
   label: string; 
   modalType: string;
@@ -74,11 +76,13 @@ const MOVEMENT_TYPE_CONFIG: Record<string, {
     icon: DollarSign,
   },
 };
+
 interface OrganizationFinancesMovementsViewProps {
   externalFilterIssueId?: string | null;
   onClearExternalFilter?: () => void;
   getAffectedIdsForIssue?: (issueId: string) => Set<string | number>;
 }
+
 export function OrganizationFinancesMovementsView({
   externalFilterIssueId,
   onClearExternalFilter,
@@ -100,6 +104,7 @@ export function OrganizationFinancesMovementsView({
     }
     setInternalFilterIssueId(issueId);
   }, [externalFilterIssueId, onClearExternalFilter]);
+
   const handleAddMovement = useCallback(() => {
     openModal('unified-payment', {
       organizationId: currentOrganizationId,
@@ -115,6 +120,7 @@ export function OrganizationFinancesMovementsView({
     currentOrganizationId || undefined,
     null
   );
+
   const sortedMovements = useMemo(() => {
     return [...rawMovements].sort((a, b) => {
       const dateComparison = new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime();
@@ -122,31 +128,38 @@ export function OrganizationFinancesMovementsView({
       return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
     });
   }, [rawMovements]);
+
   const dataHealth = useFinancesDataHealth(sortedMovements, {
     organizationId: currentOrganizationId || '',
     defaultCurrencyId: defaultCurrency?.id,
     isMultiCurrency,
     enabled: !!currentOrganizationId && sortedMovements.length > 0,
   });
+
   useEffect(() => {
     if (activeFilterIssueId && !dataHealth.hasIssues) {
       setActiveFilterIssueId(null);
     }
   }, [activeFilterIssueId, dataHealth.hasIssues]);
+
   const filteredMovementIds = useMemo(() => {
     if (!activeFilterIssueId) return null;
     const getAffectedIds = externalGetAffectedIds || dataHealth.getAffectedIdsForIssue;
     return getAffectedIds(activeFilterIssueId);
   }, [activeFilterIssueId, dataHealth, externalGetAffectedIds]);
+
   const movements = useMemo(() => {
     if (!filteredMovementIds) return sortedMovements;
     return sortedMovements.filter(m => filteredMovementIds.has(m.id));
   }, [sortedMovements, filteredMovementIds]);
+
   const kpis = useMemo(() => {
     const ingresosMovements = movements.filter(m => m.amount_sign > 0);
     const egresosMovements = movements.filter(m => m.amount_sign < 0);
+
     const ingresosCount = ingresosMovements.length;
     const egresosCount = egresosMovements.length;
+
     const ingresosKPI = calculateMonetaryKPI({
       items: ingresosMovements.map(m => ({
         amount: m.amount,
@@ -156,6 +169,7 @@ export function OrganizationFinancesMovementsView({
       })),
       baseCurrencyId: defaultCurrency?.code
     });
+
     const egresosKPI = calculateMonetaryKPI({
       items: egresosMovements.map(m => ({
         amount: m.amount,
@@ -165,11 +179,14 @@ export function OrganizationFinancesMovementsView({
       })),
       baseCurrencyId: defaultCurrency?.code
     });
+
     const balanceValue = ingresosKPI.value - egresosKPI.value;
+
     const totalMovimientosKPI = calculateCountKPI({
       count: movements.length,
       label: 'movimientos'
     });
+
     return {
       ingresos: ingresosKPI,
       egresos: egresosKPI,
@@ -179,26 +196,31 @@ export function OrganizationFinancesMovementsView({
       egresosCount,
     };
   }, [movements, defaultCurrency]);
+
   const deleteClientPaymentMutation = useDeleteClientPayment();
   const deleteMaterialPaymentMutation = useDeleteMaterialPayment();
   const deletePersonnelPaymentMutation = useDeletePersonnelPayment();
   const { mutate: deleteGeneralCostPayment, isPending: isDeleteGeneralCostPending } = useDeleteGeneralCostPayment();
   const deletePartnerContributionMutation = useDeletePartnerContribution();
   const deletePartnerWithdrawalMutation = useDeletePartnerWithdrawal();
+
   const formatCurrency = (amount: number, currencySymbol: string = '$') => {
     return `${currencySymbol} ${new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(Math.abs(amount))}`;
   };
+
   const handleEdit = (movement: UnifiedMovementWithRelations) => {
     const config = MOVEMENT_TYPE_CONFIG[movement.movement_type];
     if (!config) return;
+
     const modalData: any = {
       projectId: movement.project_id,
       organizationId: movement.organization_id,
       mode: 'edit',
     };
+
     // Map the ID field based on movement type
     if (movement.movement_type === 'partner_contribution') {
       modalData.contributionId = movement.id;
@@ -207,14 +229,18 @@ export function OrganizationFinancesMovementsView({
     } else {
       modalData.paymentId = movement.id;
     }
+
     openModal(config.modalType, modalData);
   };
+
   const handleDelete = (movement: UnifiedMovementWithRelations) => {
     if (!currentOrganizationId) return;
+
     const config = MOVEMENT_TYPE_CONFIG[movement.movement_type];
     const symbol = movement.currency?.symbol || '$';
     const formattedAmount = formatCurrency(movement.amount, symbol);
     const paymentLabel = `${movement.description} - ${formattedAmount}`;
+
     const deleteHandler = () => {
       switch (movement.movement_type) {
         case 'client_payment':
@@ -252,6 +278,7 @@ export function OrganizationFinancesMovementsView({
           });
       }
     };
+
     showDeleteConfirmation({
       mode: 'simple',
       title: `Eliminar ${config?.label || 'movimiento'}`,
@@ -267,11 +294,12 @@ export function OrganizationFinancesMovementsView({
                  deletePartnerWithdrawalMutation.isPending,
     });
   };
+
   const columns: Column<UnifiedMovementWithRelations>[] = [
     {
       key: 'payment_date',
       label: 'Fecha',
-      type: 'date'as const,
+      type: 'date' as const,
       sortable: true,
       sortType: 'date',
       render: (movement) => {
@@ -282,18 +310,18 @@ export function OrganizationFinancesMovementsView({
     {
       key: 'movement_type',
       label: 'Tipo',
-      type: 'name'as const,
+      type: 'name' as const,
       sortable: true,
       render: (movement) => {
         const config = MOVEMENT_TYPE_CONFIG[movement.movement_type];
         const creatorName = movement.creator_full_name || '';
         const creatorInitials = creatorName
-          ? creatorName.split('').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase()
+          ? creatorName.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase()
           : '?';
         
         return (
           <div className="flex items-center gap-2 min-w-0">
-            <Avatar className="h-8 w-8 flex-shrink-0 ring-2 ring-offset-0" style={{ '--tw-ring-color': 'var(--accent)'} as React.CSSProperties}>
+            <Avatar className="h-8 w-8 flex-shrink-0 ring-2 ring-offset-0" style={{ '--tw-ring-color': 'var(--accent)' } as React.CSSProperties}>
               {movement.creator_avatar_url && <AvatarImage src={movement.creator_avatar_url} alt={creatorName} />}
               <AvatarFallback className="text-xs font-semibold">{creatorInitials}</AvatarFallback>
             </Avatar>
@@ -312,7 +340,7 @@ export function OrganizationFinancesMovementsView({
     {
       key: 'project',
       label: 'Proyecto',
-      type: 'name'as const,
+      type: 'name' as const,
       sortable: true,
       render: (movement) => {
         if (!movement.project) return <span className="text-muted-foreground text-sm">-</span>;
@@ -336,7 +364,7 @@ export function OrganizationFinancesMovementsView({
     {
       key: 'description',
       label: 'Detalle',
-      type: 'long-text'as const,
+      type: 'long-text' as const,
       sortable: true,
       render: (movement) => (
         <div className="flex items-center gap-1.5 min-w-0">
@@ -355,7 +383,7 @@ export function OrganizationFinancesMovementsView({
     {
       key: 'wallet',
       label: 'Billetera',
-      type: 'wallet'as const,
+      type: 'wallet' as const,
       sortable: true,
       render: (movement) => (
         <span className="text-sm truncate" title={movement.wallet?.name}>{movement.wallet?.name || '-'}</span>
@@ -364,7 +392,7 @@ export function OrganizationFinancesMovementsView({
     {
       key: 'amount',
       label: 'Monto',
-      type: 'amount'as const,
+      type: 'amount' as const,
       sortable: true,
       sortType: 'number',
       render: (movement) => {
@@ -373,9 +401,9 @@ export function OrganizationFinancesMovementsView({
           <div className="flex flex-col items-end">
             <span 
               className="text-sm font-bold"
-              style={{ color: isPositive ? 'var(--positive)': 'var(--negative)'}}
+              style={{ color: isPositive ? 'var(--positive)' : 'var(--negative)' }}
             >
-              {isPositive ? '+': '-'}{formatCurrency(movement.amount, movement.currency?.symbol)}
+              {isPositive ? '+' : '-'}{formatCurrency(movement.amount, movement.currency?.symbol)}
             </span>
             {isMultiCurrency && movement.exchange_rate != null && (
               <span className="text-[10px] text-muted-foreground">
@@ -387,12 +415,16 @@ export function OrganizationFinancesMovementsView({
       },
     },
   ];
+
   const isCurrencyReady = !!defaultCurrency;
   const currencySymbol = defaultCurrency?.symbol || '$';
-  const balanceDirection: TrendDirection = kpis.balance > 0 ? 'up': kpis.balance < 0 ? 'down': 'neutral';
-  const balanceTrendLabel = kpis.balance > 0 ? 'Positivo': kpis.balance < 0 ? 'Negativo': 'Sin variación';
+
+  const balanceDirection: TrendDirection = kpis.balance > 0 ? 'up' : kpis.balance < 0 ? 'down' : 'neutral';
+  const balanceTrendLabel = kpis.balance > 0 ? 'Positivo' : kpis.balance < 0 ? 'Negativo' : 'Sin variación';
+
   const showIngresosBreakdown = isCurrencyReady && hasMultipleCurrencies(kpis.ingresos) && kpis.ingresos.breakdown && kpis.ingresos.breakdown.length > 0;
   const showEgresosBreakdown = isCurrencyReady && hasMultipleCurrencies(kpis.egresos) && kpis.egresos.breakdown && kpis.egresos.breakdown.length > 0;
+
   // Show empty state if no movements
   if (sortedMovements.length === 0 && !isLoading) {
     return (
@@ -410,6 +442,7 @@ export function OrganizationFinancesMovementsView({
       />
     );
   }
+
   return (
     <div className="space-y-6" data-testid="organization-finances-movements-tab">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -418,7 +451,7 @@ export function OrganizationFinancesMovementsView({
             <ArrowUpRight className="h-4 w-4 text-positive" />
             Ingresos
           </AppCardTitle>
-          <AppCardValue style={{ color: 'var(--positive)'}}>
+          <AppCardValue style={{ color: 'var(--positive)' }}>
             {isCurrencyReady ? formatMoney(kpis.ingresos.value, currencySymbol) : '-'}
           </AppCardValue>
           {showIngresosBreakdown && (
@@ -428,12 +461,13 @@ export function OrganizationFinancesMovementsView({
             {kpis.ingresosCount} movimientos
           </AppCardMeta>
         </AppCard>
+
         <AppCard data-testid="kpi-egresos">
           <AppCardTitle>
             <ArrowDownRight className="h-4 w-4 text-negative" />
             Egresos
           </AppCardTitle>
-          <AppCardValue style={{ color: 'var(--negative)'}}>
+          <AppCardValue style={{ color: 'var(--negative)' }}>
             {isCurrencyReady ? formatMoney(kpis.egresos.value, currencySymbol) : '-'}
           </AppCardValue>
           {showEgresosBreakdown && (
@@ -443,14 +477,15 @@ export function OrganizationFinancesMovementsView({
             {kpis.egresosCount} movimientos
           </AppCardMeta>
         </AppCard>
+
         <AppCard data-testid="kpi-balance">
           <AppCardTitle>
             <Scale className="h-4 w-4" />
             Balance
           </AppCardTitle>
-          <AppCardValue style={{ color: kpis.balance >= 0 ? 'var(--positive)': 'var(--negative)'}}>
+          <AppCardValue style={{ color: kpis.balance >= 0 ? 'var(--positive)' : 'var(--negative)' }}>
             {isCurrencyReady 
-              ? `${kpis.balance >= 0 ? '+': ''}${formatMoney(kpis.balance, currencySymbol)}`
+              ? `${kpis.balance >= 0 ? '+' : ''}${formatMoney(kpis.balance, currencySymbol)}`
               : '-'
             }
           </AppCardValue>
@@ -459,6 +494,7 @@ export function OrganizationFinancesMovementsView({
             value={balanceTrendLabel} 
           />
         </AppCard>
+
         <AppCard data-testid="kpi-total-movimientos">
           <AppCardTitle>
             <Hash className="h-4 w-4" />
@@ -472,6 +508,7 @@ export function OrganizationFinancesMovementsView({
           </AppCardMeta>
         </AppCard>
       </div>
+
       <Table
         columns={columns}
         data={movements}
@@ -498,7 +535,7 @@ export function OrganizationFinancesMovementsView({
             label: 'Eliminar',
             icon: Trash2,
             onClick: () => handleDelete(movement),
-            variant: 'destructive'as const,
+            variant: 'destructive' as const,
           },
         ]}
       />

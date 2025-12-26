@@ -6,15 +6,18 @@ import AdminAdminDashboard from './AdminAdminDashboard';
 import AdminAdminOrganizations from './AdminAdminOrganizations';
 import AdminAdminUsers from './AdminAdminUsers';
 import AdminActivityLogs from './AdminActivityLogs';
+
 const AdminAdmin = () => {
   const [activeTab, setActiveTab] = useState('resumen');
   const { openModal } = useGlobalModalStore();
+
   const tabs = [
-    { id: 'resumen', label: 'Resumen', isActive: activeTab === 'resumen'},
-    { id: 'organizaciones', label: 'Organizaciones', isActive: activeTab === 'organizaciones'},
-    { id: 'usuarios', label: 'Usuarios', isActive: activeTab === 'usuarios'},
-    { id: 'actividad', label: 'Actividad', isActive: activeTab === 'actividad'}
+    { id: 'resumen', label: 'Resumen', isActive: activeTab === 'resumen' },
+    { id: 'organizaciones', label: 'Organizaciones', isActive: activeTab === 'organizaciones' },
+    { id: 'usuarios', label: 'Usuarios', isActive: activeTab === 'usuarios' },
+    { id: 'actividad', label: 'Actividad', isActive: activeTab === 'actividad' }
   ];
+
   const getActionButton = () => {
     switch (activeTab) {
       case 'organizaciones':
@@ -33,6 +36,7 @@ const AdminAdmin = () => {
         return undefined;
     }
   };
+
   const headerProps = {
     title: "Administración",
     description: "Gestiona usuarios, organizaciones y actividad del sistema.",
@@ -43,6 +47,7 @@ const AdminAdmin = () => {
     onTabChange: setActiveTab,
     actionButton: getActionButton()
   };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'resumen':
@@ -57,10 +62,12 @@ const AdminAdmin = () => {
         return <AdminAdminDashboard />;
     }
   };
+
   return (
     <Layout wide={false} headerProps={headerProps}>
       {renderTabContent()}
     </Layout>
   );
 };
+
 export default AdminAdmin;

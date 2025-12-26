@@ -2,6 +2,7 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { CheckCircle2, AlertCircle, AlertTriangle, Clock, Info, XCircle, Play, Check, Pause, X, Calendar, Award, TrendingUp, TrendingDown, Scale } from 'lucide-react'
+
 /**
  * SEMANTIC BADGE VARIANTS
  * Each variant maps to a single color variable defined in index.css
@@ -27,6 +28,7 @@ export type BadgeVariant =
   | 'capital-over'
   | 'capital-under'
   | 'capital-equal'
+
 /**
  * Mapping of variants to their semantic color variables
  * Single color per variant - badge handles opacity internally
@@ -52,6 +54,7 @@ const BADGE_VARIANT_MAP: Record<BadgeVariant, string> = {
   'capital-under': 'var(--capital-badge-under)',
   'capital-equal': 'var(--capital-badge-equal)',
 }
+
 /**
  * Mapping of variants to their fixed icons
  * Each variant always displays its associated icon
@@ -78,6 +81,7 @@ const variantIcons: Record<BadgeVariant, React.ReactNode | null> = {
   'capital-under': <TrendingDown className="w-3.5 h-3.5" />,
   'capital-equal': <Scale className="w-3.5 h-3.5" />,
 }
+
 const badgeVariants = cva(
   "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border",
   {
@@ -109,6 +113,7 @@ const badgeVariants = cva(
     }
   }
 )
+
 const variantStyles: Record<BadgeVariant, React.CSSProperties> = {
   success: {
     borderColor: 'var(--success)',
@@ -206,11 +211,13 @@ const variantStyles: Record<BadgeVariant, React.CSSProperties> = {
     color: 'var(--capital-badge-equal)',
   },
 }
+
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {
   variant?: BadgeVariant;
 }
+
 function Badge({ className, variant = 'neutral', children, style, ...props }: BadgeProps) {
   const variantStyle = variantStyles[variant as BadgeVariant] || variantStyles.neutral
   const icon = variantIcons[variant as BadgeVariant]
@@ -226,4 +233,5 @@ function Badge({ className, variant = 'neutral', children, style, ...props }: Ba
     </div>
   )
 }
+
 export { Badge, badgeVariants, BADGE_VARIANT_MAP }

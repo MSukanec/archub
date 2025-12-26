@@ -4,6 +4,7 @@
 // A professional, scalable, and reusable modal system
 // inspired by Linear, Vercel, Notion, and Airtable.
 // ============================================================
+
 // Foundation Components (UI primitives)
 export { 
   ModalLayout, 
@@ -20,6 +21,7 @@ export {
   type DrawerBaseProps,
   type DrawerSnapPoint 
 } from './foundation/DrawerBase';
+
 // Legacy aliases (deprecated - for backwards compatibility only)
 export { ModalLayout as FormModalLayout } from './foundation/ModalLayout';
 export { ModalHeader as FormModalHeader } from './foundation/ModalHeader';
@@ -28,6 +30,7 @@ export { default as FormModalBody } from './foundation/ModalBody';
 export { ModalStepHeader as FormModalStepHeader } from './foundation/ModalStepHeader';
 export { ModalStepFooter as FormModalStepFooter } from './foundation/ModalStepFooter';
 export { ModalSectionButton as FormSubsectionButton } from './foundation/ModalSectionButton';
+
 // State Management (Zustand stores)
 export { 
   useGlobalModalStore,
@@ -38,13 +41,16 @@ export {
   useCanCloseModal,
   type ModalStackItem
 } from './state/globalModalStore';
+
 /**
  * @deprecated Use local useState in modals instead. See panelStore.ts for migration guide.
  */
 export { useModalPanelStore } from './state/panelStore';
+
 // Provider & Container (New in v2.0)
 export { ModalProvider } from './ModalProvider';
 export { ModalContainer } from './ModalContainer';
+
 // Registry (Modal registration and lookup)
 export { 
   registerModal, 
@@ -60,12 +66,14 @@ export {
   type ModalData
 } from './factory/registry';
 export { initializeModalRegistry } from './factory/registerModals';
+
 // Types
 export type { 
   StepModalConfig,
   StepFooterAction,
   StepModalFooterConfig
 } from './factory/types';
+
 // Utilities (Error handling, readiness, etc.)
 export * from './utils/modal-readiness';
 export { 

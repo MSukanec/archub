@@ -6,15 +6,18 @@ import { cn } from "@/lib/utils";
 import { useMultipleFeatureFlags } from "@/hooks/use-feature-flags";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import type { ComparisonCategory, Plan } from "../types";
-type SelectedPlan = 'free'| 'pro'| 'teams';
+
+type SelectedPlan = 'free' | 'pro' | 'teams';
+
 interface ComparisonTableProps {
   comparisonData: ComparisonCategory[];
   userPlanName?: string;
   isAuthenticated?: boolean;
   plans?: Plan[];
-  billingPeriod?: 'monthly'| 'annual';
+  billingPeriod?: 'monthly' | 'annual';
   onPlanSelect?: (plan: Plan) => void;
 }
+
 function renderValue(value: boolean | string, color: string) {
   if (typeof value === 'boolean') {
     return value ? (
@@ -23,13 +26,14 @@ function renderValue(value: boolean | string, color: string) {
       <X className="h-4 w-4 text-[var(--text-muted)]" />
     );
   }
-  if (value === 'Ilimitados'|| value === '—') {
+  if (value === 'Ilimitados' || value === '—') {
     return (
       <span className="text-[var(--text-muted)]">{value}</span>
     );
   }
   return <span className="text-sm text-[var(--text-default)]">{value}</span>;
 }
+
 export function ComparisonTable({ 
   comparisonData, 
   userPlanName = '', 
@@ -46,6 +50,7 @@ export function ComparisonTable({
     'pro_purchases_enabled',
     'teams_purchases_enabled'
   ], true);
+
   const getPlanLevel = (planName: string): number => {
     const levels: Record<string, number> = {
       'free': 1,
@@ -54,6 +59,7 @@ export function ComparisonTable({
     };
     return levels[planName.toLowerCase()] || 0;
   };
+
   const getButtonTextAndColor = (planName: string) => {
     const isTeams = planName.toLowerCase() === 'teams';
     const isPro = planName.toLowerCase() === 'pro';
@@ -84,6 +90,7 @@ export function ComparisonTable({
     
     return { text: `Cambiar a ${planName}`, color: getColor(), disabled: false, isMaintenance: false, isDisabledByFlag };
   };
+
   const handleTableButtonClick = (planName: string) => {
     const isCurrentPlan = planName.toLowerCase() === userPlanName?.toLowerCase();
     
@@ -99,7 +106,9 @@ export function ComparisonTable({
       onPlanSelect(plan);
     }
   };
+
   const planNames = ['free', 'pro', 'teams'] as const;
+
   return (
     <div className="mt-20 px-4">
       <h2 className="text-3xl font-bold text-center mb-12 text-[var(--text-default)]">
@@ -144,6 +153,7 @@ export function ComparisonTable({
               })}
             </div>
           </div>
+
           {/* Table Body */}
           <div>
             {comparisonData.map((section, sectionIdx) => (
@@ -176,6 +186,7 @@ export function ComparisonTable({
             ))}
           </div>
         </div>
+
         {/* Mobile: Sticky tabs + 2 columnas */}
         <div className="md:hidden">
           <div className="sticky top-0 z-10 bg-background py-3 border-b border-[var(--border-default)]">
@@ -197,6 +208,7 @@ export function ComparisonTable({
               ))}
             </div>
           </div>
+
           <div className="mt-4">
             {comparisonData.map((section, sectionIdx) => (
               <div key={sectionIdx}>

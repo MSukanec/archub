@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 /**
  * Elimina un archivo de media (de storage y base de datos).
  * 
@@ -15,22 +16,28 @@ export async function deleteMediaFile(fileId: string): Promise<void> {
   if (!supabase) {
     throw new Error('Supabase not initialized');
   }
+
   // Get file data first
   const { data: fileData, error: fetchError } = await supabase
     .from('project_media')
     .select('file_path')
     .eq('id', fileId)
     .single();
+
   if (fetchError) throw fetchError;
+
   // Delete from storage
   const { error: storageError } = await supabase.storage
     .from('media')
     .remove([fileData.file_path]);
+
   if (storageError) throw storageError;
+
   // Delete from database
   const { error: dbError } = await supabase
     .from('project_media')
     .delete()
     .eq('id', fileId);
+
   if (dbError) throw dbError;
 }

@@ -12,9 +12,11 @@ import { useToast } from '@/hooks/use-toast'
 import { useProjectContext } from '@/stores/projectContext'
 import { useGlobalModalStore } from '@/components/modal'
 import { useLocation } from 'wouter'
+
 interface BudgetItemsProps {
   onAddTask?: () => void
 }
+
 export function BudgetItems({ 
   onAddTask
 }: BudgetItemsProps) {
@@ -25,12 +27,15 @@ export function BudgetItems({
   const { toast } = useToast()
   const { openModal } = useGlobalModalStore()
   const [, navigate] = useLocation()
+
   const handleEdit = (budget: any) => {
-    openModal('budget', { budget, mode: 'edit'})
+    openModal('budget', { budget, mode: 'edit' })
   }
+
   const handleView = (budget: any) => {
     navigate(`/professional/budgets/view/${budget.id}`)
   }
+
   const handleDelete = (budget: any) => {
     openModal('delete-confirmation', {
       mode: 'dangerous',
@@ -58,12 +63,14 @@ export function BudgetItems({
       }
     })
   }
+
   const formatCurrency = (amount: number, symbol: string = '$') => {
     return new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount)
   }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'draft':
@@ -78,11 +85,12 @@ export function BudgetItems({
         return <Badge variant="neutral">{status}</Badge>
     }
   }
+
   const columns: Column[] = [
     {
       key: 'name',
       label: 'Nombre',
-      type: 'long-text'as const,
+      type: 'long-text' as const,
       render: (budget: any) => (
         <div>
           <div className="font-medium text-sm">{budget.name}</div>
@@ -97,7 +105,7 @@ export function BudgetItems({
     {
       key: 'version',
       label: 'Versión',
-      type: 'number'as const,
+      type: 'number' as const,
       render: (budget: any) => (
         <span className="text-sm">v{budget.version}</span>
       )
@@ -105,7 +113,7 @@ export function BudgetItems({
     {
       key: 'currency',
       label: 'Moneda',
-      type: 'short-text'as const,
+      type: 'short-text' as const,
       render: (budget: any) => (
         <div className="text-sm font-medium">
           {budget.currency?.code || 'N/A'}
@@ -115,7 +123,7 @@ export function BudgetItems({
     {
       key: 'total',
       label: 'Total',
-      type: 'amount'as const,
+      type: 'amount' as const,
       render: (budget: any) => (
         <div className="text-sm">
           <div className="font-medium text-green-700">
@@ -132,9 +140,9 @@ export function BudgetItems({
     {
       key: 'created_at',
       label: 'Creado',
-      type: 'date'as const,
+      type: 'date' as const,
       sortable: true,
-      sortType: 'date'as const,
+      sortType: 'date' as const,
       render: (budget: any) => (
         <div className="text-sm text-muted-foreground">
           {format(new Date(budget.created_at), 'dd/MM/yy', { locale: es })}
@@ -144,10 +152,11 @@ export function BudgetItems({
     {
       key: 'status',
       label: 'Estado',
-      type: 'status'as const,
+      type: 'status' as const,
       render: (budget: any) => getStatusBadge(budget.status)
     }
   ]
+
   const emptyState = (
     <EmptyState
       icon={<DollarSign className="h-12 w-12 text-muted-foreground" />}
@@ -163,6 +172,7 @@ export function BudgetItems({
       }
     />
   )
+
   if (budgets.length === 0 && !isLoading) {
     return (
       <EmptyState
@@ -180,6 +190,7 @@ export function BudgetItems({
       />
     )
   }
+
   return (
     <Table
       columns={columns}
@@ -199,11 +210,11 @@ export function BudgetItems({
           icon: Trash2,
           label: 'Eliminar',
           onClick: () => handleDelete(budget),
-          variant: 'destructive'as const
+          variant: 'destructive' as const
         }
       ]}
       isLoading={isLoading}
-      defaultSort={{ key: 'created_at', direction: 'desc'}}
+      defaultSort={{ key: 'created_at', direction: 'desc' }}
     />
   )
 }

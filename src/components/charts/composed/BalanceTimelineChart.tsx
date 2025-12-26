@@ -1,11 +1,13 @@
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { CHART_AXIS, CHART_STATES, CHART_DIMENSIONS, CHART_SHAPES, formatCompact } from '../theme'
+
 export interface BalanceTimelineDataPoint {
   label: string
   displayLabel: string
   dailyBalance: number
   cumulativeBalance: number
 }
+
 export interface BalanceTimelineChartProps {
   data: BalanceTimelineDataPoint[]
   height?: number
@@ -18,6 +20,7 @@ export interface BalanceTimelineChartProps {
   lineColor?: string
   showInterval?: number
 }
+
 export function BalanceTimelineChart({
   data,
   height = CHART_DIMENSIONS.height.lg,
@@ -37,6 +40,7 @@ export function BalanceTimelineChart({
       </div>
     )
   }
+
   if (!data || data.length === 0) {
     return (
       <div style={{ height }} className={CHART_STATES.empty.className}>
@@ -44,7 +48,9 @@ export function BalanceTimelineChart({
       </div>
     )
   }
+
   const interval = showInterval ?? (data.length > 30 ? Math.floor(data.length / 12) : 'preserveStartEnd')
+
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -71,15 +77,15 @@ export function BalanceTimelineChart({
                     <p className="text-sm font-medium text-foreground mb-2">{d.label}</p>
                     <div className="space-y-1">
                       <p className="text-xs text-muted-foreground">
-                        Balance:{''}
-                        <span className={isPositive ? 'text-chart-positive': 'text-chart-negative'}>
+                        Balance:{' '}
+                        <span className={isPositive ? 'text-chart-positive' : 'text-chart-negative'}>
                           {valueFormatter(d.cumulativeBalance)}
                         </span>
                       </p>
                       {d.dailyBalance !== 0 && (
                         <p className="text-xs text-muted-foreground">
-                          Daily:{''}
-                          <span className={d.dailyBalance >= 0 ? 'text-chart-positive': 'text-chart-negative'}>
+                          Daily:{' '}
+                          <span className={d.dailyBalance >= 0 ? 'text-chart-positive' : 'text-chart-negative'}>
                             {valueFormatter(d.dailyBalance)}
                           </span>
                         </p>
@@ -90,8 +96,9 @@ export function BalanceTimelineChart({
               }
               return null
             }}
-            cursor={{ fill: 'rgba(0, 0, 0, 0.05)'}}
+            cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
           />
+
           <Bar dataKey="dailyBalance" radius={[4, 4, 0, 0]}>
             {data.map((entry, index) => (
               <Cell
@@ -100,6 +107,7 @@ export function BalanceTimelineChart({
               />
             ))}
           </Bar>
+
           <Line
             type="monotone"
             dataKey="cumulativeBalance"

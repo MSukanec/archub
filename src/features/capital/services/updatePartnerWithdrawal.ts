@@ -1,8 +1,9 @@
 import { supabase } from '@/lib/supabase';
 import type { PartnerWithdrawal } from '../types';
+
 export async function updatePartnerWithdrawal(
   id: string,
-  updates: Partial<Omit<PartnerWithdrawal, 'id'| 'created_at'| 'organization_id'| 'created_by'>>,
+  updates: Partial<Omit<PartnerWithdrawal, 'id' | 'created_at' | 'organization_id' | 'created_by'>>,
   organizationId: string
 ): Promise<PartnerWithdrawal> {
   const { data, error } = await supabase
@@ -12,6 +13,7 @@ export async function updatePartnerWithdrawal(
     .eq('organization_id', organizationId)
     .select()
     .single();
+
   if (error) throw error;
   return data as PartnerWithdrawal;
 }

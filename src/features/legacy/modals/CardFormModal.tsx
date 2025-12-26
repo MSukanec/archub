@@ -18,12 +18,15 @@ import { useCreateKanbanCard, useUpdateKanbanCard } from "@/hooks/use-kanban";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/features/organization";
 import { useToast } from "@/hooks/use-toast";
+
 const cardSchema = z.object({
   assigned_to: z.string().optional(),
   title: z.string().min(1, "El título es requerido"),
   description: z.string().optional(),
 });
+
 type CardFormData = z.infer<typeof cardSchema>;
+
 interface CardFormModalProps {
   modalData?: {
     listId?: string;
@@ -33,6 +36,7 @@ interface CardFormModalProps {
   };
   onClose: () => void;
 }
+
 export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
   const { listId, card, isEditing = false, boardId } = modalData || {};
   const { toast } = useToast();
@@ -42,6 +46,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   const { data: members = [] } = useOrganizationMembers(organizationId);
+
   // Convert members to users format for UserSelector
   const users = members.map(member => ({
     id: member.id, // Use organization member ID, not user_id
@@ -49,6 +54,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
     email: member.users?.email || '',
     avatar_url: member.users?.avatar_url || undefined
   }));
+
   const form = useForm<CardFormData>({
     resolver: zodResolver(cardSchema),
     defaultValues: {
@@ -57,17 +63,22 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
       description: card?.description || '',
     }
   });
+
+
+
   // Set panel to edit mode when editing a card
   useEffect(() => {
     if (isEditing) {
       setPanel('edit');
     }
   }, [isEditing, setPanel]);
+
   const handleClose = () => {
     form.reset();
     setPanel('edit'); // Reset to edit panel
     onClose();
   };
+
   const onSubmit = async (data: CardFormData) => {
     try {
       if (isEditing && card) {
@@ -95,6 +106,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
           });
           return;
         }
+
         // Find current user's organization member ID
         const currentMember = members.find(m => m.user_id === userData?.user?.id);
         
@@ -131,6 +143,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
       });
     }
   };
+
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -158,6 +171,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="title"
@@ -174,6 +188,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="description"
@@ -194,21 +209,24 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
       </form>
     </Form>
   );
+
   const headerContent = (
     <FormModalHeader
-      title={isEditing ? 'Editar Tarjeta': 'Nueva Tarjeta'}
+      title={isEditing ? 'Editar Tarjeta' : 'Nueva Tarjeta'}
       icon={Plus}
     />
   );
+
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={isEditing ? 'Actualizar': 'Crear Tarjeta'}
+      rightLabel={isEditing ? 'Actualizar' : 'Crear Tarjeta'}
       onRightClick={form.handleSubmit(onSubmit)}
       showLoadingSpinner={createCardMutation.isPending || updateCardMutation.isPending}
     />
   );
+
   const viewPanel = isEditing ? (
     <div className="space-y-4">
       <div>
@@ -225,6 +243,7 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
       </div>
     </div>
   ) : editPanel;
+
   return (
     <FormModalLayout
       columns={1}

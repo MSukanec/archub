@@ -4,23 +4,28 @@ import { Edit, RotateCcw, Trash2 } from 'lucide-react'
 import { useGlobalModalStore } from '@/components/modal'
 import { useDeleteInsurance } from '@/features/personnel'
 import { InsuranceStatusRow } from '@/features/personnel/services/insurances'
+
 interface InsuranceActionsProps {
   insurance: InsuranceStatusRow
 }
+
 export function InsuranceActions({ insurance }: InsuranceActionsProps) {
   const { openModal } = useGlobalModalStore()
   const deleteInsurance = useDeleteInsurance()
+
   const handleEdit = () => {
     openModal('insurance', { 
       insurance,
       mode: 'edit'
     })
   }
+
   const handleRenew = () => {
     openModal('renew-insurance', { 
       previous: insurance
     })
   }
+
   const handleDelete = () => {
     openModal('delete-confirmation', {
       title: 'Eliminar Seguro',
@@ -28,6 +33,7 @@ export function InsuranceActions({ insurance }: InsuranceActionsProps) {
       onConfirm: () => deleteInsurance.mutate(insurance.id)
     })
   }
+
   return (
     <div className="flex items-center gap-1">
       <Button

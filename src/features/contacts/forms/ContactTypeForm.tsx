@@ -7,6 +7,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCreateContactType, useUpdateContactType } from '../hooks';
 import { contactTypeSchema, type ContactTypeFormData } from '../schemas';
 import type { ContactType } from '../types';
+
 export function FormPanel({
   form,
   onSubmit,
@@ -40,22 +41,27 @@ export function FormPanel({
     </Form>
   );
 }
+
 interface UseContactTypeFormProps {
   contactType?: ContactType;
-  mode: 'create'| 'edit';
+  mode: 'create' | 'edit';
   onClose: () => void;
 }
+
 export function useContactTypeForm({ contactType, mode, onClose }: UseContactTypeFormProps) {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
+
   const createMutation = useCreateContactType(organizationId || '');
   const updateMutation = useUpdateContactType(organizationId || '');
+
   const form = useForm<ContactTypeFormData>({
     resolver: zodResolver(contactTypeSchema),
     defaultValues: {
       name: '',
     }
   });
+
   useEffect(() => {
     if (contactType) {
       form.reset({
@@ -67,13 +73,15 @@ export function useContactTypeForm({ contactType, mode, onClose }: UseContactTyp
       });
     }
   }, [contactType, form]);
+
   const handleClose = () => {
     form.reset();
     onClose();
   };
+
   const onSubmit = async (data: ContactTypeFormData) => {
     try {
-      if (mode === 'edit'&& contactType) {
+      if (mode === 'edit' && contactType) {
         await updateMutation.mutateAsync({ typeId: contactType.id, input: { name: data.name } });
       } else {
         await createMutation.mutateAsync({ name: data.name });
@@ -82,8 +90,10 @@ export function useContactTypeForm({ contactType, mode, onClose }: UseContactTyp
     } catch {
     }
   };
+
   const canSubmit = !!organizationId;
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
   return {
     form,
     onSubmit,
@@ -92,4 +102,5 @@ export function useContactTypeForm({ contactType, mode, onClose }: UseContactTyp
     handleClose,
   };
 }
+
 export { ContactTypeFormData };

@@ -1,9 +1,11 @@
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, ComposedChart, Bar, Line, Legend, ReferenceLine } from 'recharts'
+
 interface MonthlyTrendData {
   month: string
   value: number
   label?: string
 }
+
 interface MultiSeriesData {
   month: string
   income?: number
@@ -11,13 +13,15 @@ interface MultiSeriesData {
   balance?: number
   [key: string]: string | number | undefined
 }
+
 interface SeriesConfig {
   key: string
   label: string
   color: string
-  type: 'area'| 'bar'| 'line'
+  type: 'area' | 'bar' | 'line'
   stackId?: string
 }
+
 interface MonthlyTrendChartProps {
   data: MonthlyTrendData[]
   isLoading?: boolean
@@ -29,6 +33,7 @@ interface MonthlyTrendChartProps {
   onBarClick?: (month: string, value: number) => void
   clickable?: boolean
 }
+
 interface MultiSeriesChartProps {
   data: MultiSeriesData[]
   series: SeriesConfig[]
@@ -42,6 +47,7 @@ interface MultiSeriesChartProps {
   showLegend?: boolean
   showZeroLine?: boolean
 }
+
 export function MonthlyTrendChart({
   data,
   isLoading = false,
@@ -64,6 +70,7 @@ export function MonthlyTrendChart({
       </div>
     )
   }
+
   if (!data || data.length === 0) {
     return (
       <div style={{ height }} className="flex items-center justify-center">
@@ -71,7 +78,9 @@ export function MonthlyTrendChart({
       </div>
     )
   }
+
   const sortedData = [...data].sort((a, b) => (a.month || '').localeCompare(b.month || ''))
+
   const formatMonth = (month: string) => {
     if (!month) return ''
     
@@ -92,10 +101,11 @@ export function MonthlyTrendChart({
     
     if (isNaN(date.getTime())) return month
     
-    const monthName = date.toLocaleDateString('es-AR', { month: 'short'})
+    const monthName = date.toLocaleDateString('es-AR', { month: 'short' })
     const year = date.getFullYear()
     return `${monthName} ${year}`
   }
+
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -149,7 +159,7 @@ export function MonthlyTrendChart({
             strokeWidth={2}
             fillOpacity={1}
             fill="url(#colorValue)"
-            style={clickable ? { cursor: 'pointer'} : undefined}
+            style={clickable ? { cursor: 'pointer' } : undefined}
             onClick={(data: any) => {
               if (clickable && onBarClick && data?.payload) {
                 onBarClick(data.payload.month, data.payload.value)
@@ -173,6 +183,7 @@ export function MonthlyTrendChart({
     </div>
   )
 }
+
 export function MultiSeriesTrendChart({
   data,
   series,
@@ -197,6 +208,7 @@ export function MultiSeriesTrendChart({
       </div>
     )
   }
+
   if (!data || data.length === 0) {
     return (
       <div style={{ height }} className="flex items-center justify-center">
@@ -204,7 +216,9 @@ export function MultiSeriesTrendChart({
       </div>
     )
   }
+
   const sortedData = [...data].sort((a, b) => (a.month || '').localeCompare(b.month || ''))
+
   const formatMonth = (month: string) => {
     if (!month) return ''
     
@@ -225,17 +239,19 @@ export function MultiSeriesTrendChart({
     
     if (isNaN(date.getTime())) return month
     
-    const monthName = date.toLocaleDateString('es-AR', { month: 'short'})
+    const monthName = date.toLocaleDateString('es-AR', { month: 'short' })
     const year = date.getFullYear()
     return `${monthName} ${year}`
   }
+
   const renderSeries = (config: SeriesConfig, index: number) => {
     const commonProps = {
       key: config.key,
       dataKey: config.key,
       name: config.label,
-      style: clickable ? { cursor: 'pointer'} : undefined,
+      style: clickable ? { cursor: 'pointer' } : undefined,
     }
+
     switch (config.type) {
       case 'bar':
         return (
@@ -259,7 +275,7 @@ export function MultiSeriesTrendChart({
             stroke={config.color}
             strokeWidth={2}
             dot={{ fill: config.color, strokeWidth: 2, r: 4 }}
-            activeDot={clickable ? { r: 6, cursor: 'pointer'} : undefined}
+            activeDot={clickable ? { r: 6, cursor: 'pointer' } : undefined}
           />
         )
       case 'area':
@@ -276,6 +292,7 @@ export function MultiSeriesTrendChart({
         )
     }
   }
+
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -325,7 +342,7 @@ export function MultiSeriesTrendChart({
             <Legend 
               verticalAlign="bottom"
               height={25}
-              wrapperStyle={{ fontSize: '12px', paddingTop: '0px'}}
+              wrapperStyle={{ fontSize: '12px', paddingTop: '0px' }}
             />
           )}
           {series.map((config, index) => renderSeries(config, index))}

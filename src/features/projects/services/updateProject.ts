@@ -1,5 +1,6 @@
 import { apiRequest } from '@/lib/queryClient';
 import type { Project, UpdateProjectData } from '../types';
+
 /**
  * Actualiza un proyecto existente mediante el endpoint Express API.
  * 
@@ -18,6 +19,7 @@ export async function updateProject(projectId: string, data: UpdateProjectData):
   if (!projectId || !data.organization_id) {
     throw new Error('Project ID and Organization ID required');
   }
+
   const response = await apiRequest('PATCH', `/api/projects/${projectId}`, {
     organization_id: data.organization_id,
     name: data.name,
@@ -30,6 +32,7 @@ export async function updateProject(projectId: string, data: UpdateProjectData):
     project_modality_id: data.project_modality_id,
     currency_id: data.currency_id,
   });
+
   // Si HTTP 200, el JSON ES el proyecto directamente
   if (response.ok) {
     const project = await response.json();

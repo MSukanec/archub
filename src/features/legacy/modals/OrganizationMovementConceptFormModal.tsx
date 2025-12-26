@@ -18,12 +18,15 @@ import { Switch } from '@/components/ui/switch';
 import { Package2, Plus, Tag, AlertTriangle } from 'lucide-react';
 import { useMovementConceptsAdmin } from '@/hooks/use-movement-concepts-admin';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+
 const conceptSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   parent_id: z.string().optional(),
 });
+
 type ConceptFormData = z.infer<typeof conceptSchema>;
+
 interface OrganizationMovementConceptFormModalProps {
   modalData?: {
     editingConcept?: any;
@@ -36,15 +39,18 @@ interface OrganizationMovementConceptFormModalProps {
   };
   onClose: () => void;
 }
+
 export function OrganizationMovementConceptFormModal({ modalData, onClose }: OrganizationMovementConceptFormModalProps) {
   const editingConcept = modalData?.editingConcept;
   const parentConcept = modalData?.parentConcept;
   const { data: userData } = useCurrentUser();
   const { currentPanel, setPanel } = useModalPanelStore();
   const { closeModal } = useGlobalModalStore();
+
   // Query for parent concepts - only non-system concepts for organization
   const { data: allConcepts = [] } = useMovementConceptsAdmin();
   const availableParentConcepts = allConcepts.filter(concept => !concept.is_system);
+
   const form = useForm<ConceptFormData>({
     resolver: zodResolver(conceptSchema),
     defaultValues: {
@@ -53,10 +59,12 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
       parent_id: editingConcept?.parent_id || parentConcept?.id || '',
     },
   });
+
   // Always show edit panel since this modal doesn't have view
   React.useEffect(() => {
     setPanel('edit');
   }, [setPanel]);
+
   // Reset form when editing concept changes
   React.useEffect(() => {
     if (editingConcept) {
@@ -73,11 +81,13 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
       });
     }
   }, [editingConcept, parentConcept, form]);
+
   const createMutation = useOptimisticMutation({
     mutationFn: async (data: ConceptFormData) => {
       if (!userData?.organization?.id) {
         throw new Error('No organization found');
       }
+
       const { data: result, error } = await supabase
         .from('movement_concepts')
         .insert([{
@@ -88,13 +98,14 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
           is_system: false,
         }])
         .select();
+
       if (error) throw error;
       return result[0];
     },
     queryKey: ['movement-concepts-admin'],
     optimisticUpdate: (oldData: any[], variables: ConceptFormData) => {
       if (!oldData) return oldData;
-      return [...oldData, { ...variables, id: 'temp-'+ Date.now(), is_system: false }];
+      return [...oldData, { ...variables, id: 'temp-' + Date.now(), is_system: false }];
     },
     onSuccessMessage: "El nuevo concepto se ha creado correctamente",
     onErrorMessage: "Error al crear el concepto",
@@ -103,11 +114,13 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
       ['system-movement-concepts']
     ]
   });
+
   const updateMutation = useOptimisticMutation({
     mutationFn: async (data: ConceptFormData) => {
       if (!editingConcept?.id) {
         throw new Error('No concept ID found');
       }
+
       const { data: result, error } = await supabase
         .from('movement_concepts')
         .update({
@@ -117,6 +130,7 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
         })
         .eq('id', editingConcept.id)
         .select();
+
       if (error) throw error;
       return result[0];
     },
@@ -134,16 +148,19 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
       ['system-movement-concepts']
     ]
   });
+
   const onSubmit = (data: ConceptFormData) => {
     // Prevent editing system concepts
     if (editingConcept?.is_system) {
       return;
     }
+
     // Add parent_id automatically from parentConcept
     const formData = {
       ...data,
       parent_id: parentConcept?.id || editingConcept?.parent_id || null
     };
+
     if (editingConcept) {
       updateMutation.mutate(formData);
     } else {
@@ -151,10 +168,13 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
     }
     closeModal();
   };
+
   const isPending = createMutation.isPending || updateMutation.isPending;
   const isSystemConcept = editingConcept?.is_system;
+
   // No view panel needed for this modal
   const viewPanel = null;
+
   const editPanel = (
     <>
       {isSystemConcept && (
@@ -167,6 +187,7 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
           </Alert>
         </div>
       )}
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
           {/* Nombre del Concepto */}
@@ -187,6 +208,7 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
               </FormItem>
             )}
           />
+
           {/* Descripción */}
           <FormField
             control={form.control}
@@ -205,6 +227,7 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
               </FormItem>
             )}
           />
+
           {/* Info about parent concept */}
           {parentConcept && (
             <div>
@@ -220,10 +243,11 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
       </Form>
     </>
   );
+
   const headerContent = (
     <FormModalHeader
       title={editingConcept 
-        ? `${isSystemConcept ? 'Ver': 'Editar'} Concepto` 
+        ? `${isSystemConcept ? 'Ver' : 'Editar'} Concepto` 
         : 'Nuevo Concepto'}
       description={editingConcept && isSystemConcept
         ? 'Los conceptos del sistema no pueden ser modificados'
@@ -233,6 +257,7 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
       icon={Tag}
     />
   );
+
   const footerContent = isSystemConcept ? (
     <FormModalFooter
       rightLabel="Cerrar"
@@ -247,6 +272,7 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
       showLoadingSpinner={isPending}
     />
   );
+
   return (
     <FormModalLayout
       columns={1}

@@ -2,13 +2,15 @@ import { DollarSign } from 'lucide-react'
 import { GeneralCostPaymentFormFields } from '../forms/GeneralCostPaymentForm'
 import { useRef } from 'react'
 import { Button } from '@/components/ui/button'
+
 interface GeneralCostPaymentDrawerProps {
   modalData?: any
   organizationId?: string
   paymentId?: string
-  mode?: 'create'| 'edit'
+  mode?: 'create' | 'edit'
   onClose: () => void
 }
+
 export default function GeneralCostPaymentDrawer({ 
   modalData, 
   organizationId: orgIdProp, 
@@ -20,12 +22,14 @@ export default function GeneralCostPaymentDrawer({
   
   const organizationId = orgIdProp || modalData?.organizationId
   const paymentId = paymentIdProp || modalData?.paymentId
-  const mode = modeProp || modalData?.mode || (paymentId ? 'edit': 'create')
+  const mode = modeProp || modalData?.mode || (paymentId ? 'edit' : 'create')
+
   const handleSubmit = () => {
     if (formRef.current) {
       formRef.current.requestSubmit()
     }
   }
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-auto p-4">
@@ -51,7 +55,7 @@ export default function GeneralCostPaymentDrawer({
           size="sm"
           onClick={handleSubmit}
         >
-          {mode === 'edit'? 'Actualizar Pago': 'Guardar Pago'}
+          {mode === 'edit' ? 'Actualizar Pago' : 'Guardar Pago'}
         </Button>
       </div>
     </div>

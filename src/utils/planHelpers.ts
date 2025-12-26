@@ -1,7 +1,9 @@
 /**
  * Helper functions for plan-related logic
  */
-export type PlanCode = 'free'| 'pro'| 'teams'| 'premium';
+
+export type PlanCode = 'free' | 'pro' | 'teams' | 'premium';
+
 /**
  * Checks if a plan is PRO or TEAMS (has advanced features)
  * @param planCode - The plan code to check
@@ -10,8 +12,9 @@ export type PlanCode = 'free'| 'pro'| 'teams'| 'premium';
 export function isProOrTeams(planCode?: PlanCode | string | null): boolean {
   if (!planCode) return false;
   const plan = String(planCode).toLowerCase();
-  return plan === 'pro'|| plan === 'teams'|| plan === 'premium';
+  return plan === 'pro' || plan === 'teams' || plan === 'premium';
 }
+
 /**
  * Gets a user-friendly plan name
  * @param planCode - The plan code

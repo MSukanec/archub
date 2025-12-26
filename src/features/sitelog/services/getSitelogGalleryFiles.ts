@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { SitelogGalleryFile } from '../types';
+
 async function getSignedUrl(bucket: string, path: string): Promise<string | null> {
   if (!supabase) return null;
   
@@ -19,6 +20,7 @@ async function getSignedUrl(bucket: string, path: string): Promise<string | null
     return null;
   }
 }
+
 /**
  * Obtiene archivos multimedia (fotos y videos) de bitácoras.
  * 
@@ -43,6 +45,7 @@ export async function getSitelogGalleryFiles(
   if (!organizationId || !supabase) {
     return [];
   }
+
   try {
     // Base query: JOIN entre media_links, media_files, site_logs y projects
     let query = supabase
@@ -89,19 +92,25 @@ export async function getSitelogGalleryFiles(
       .not('site_log_id', 'is', null) // CRÍTICO: Solo archivos de bitácoras
       .eq('media_files.is_deleted', false)
       .in('media_files.file_type', ['image', 'video']); // Solo fotos y videos
+
     // Filtrar por proyecto si está definido
     if (projectId) {
       query = query.eq('project_id', projectId);
     }
+
     const { data, error } = await query.order('created_at', { ascending: false });
+
     if (error) throw error;
+
     if (!data) return [];
+
     // Filtrar datos válidos primero
     const filteredData = data.filter((item: any) => {
       const mediaFile = Array.isArray(item.media_files) ? item.media_files[0] : item.media_files;
       const siteLog = Array.isArray(item.site_logs) ? item.site_logs[0] : item.site_logs;
       return mediaFile && siteLog;
     });
+
     // Mapear a estructura SitelogGalleryFile con signed URLs para private-assets
     const files: SitelogGalleryFile[] = await Promise.all(
       filteredData.map(async (item: any) => {
@@ -111,7 +120,7 @@ export async function getSitelogGalleryFiles(
         
         let displayUrl = mediaFile.file_url;
         
-        if (mediaFile.bucket === 'private-assets'&& mediaFile.file_path) {
+        if (mediaFile.bucket === 'private-assets' && mediaFile.file_path) {
           const signedUrl = await getSignedUrl(mediaFile.bucket, mediaFile.file_path);
           displayUrl = signedUrl || mediaFile.file_url;
         }
@@ -148,7 +157,9 @@ export async function getSitelogGalleryFiles(
         };
       })
     );
+
     return files;
+
   } catch (error) {
     console.error('Error fetching sitelog gallery files:', error);
     throw error;

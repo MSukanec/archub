@@ -2,11 +2,12 @@ import { useMemo } from 'react';
 import { TrendingUp, TrendingDown, Wallet, Scale, AlertTriangle, Crown, HandHeart } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/shared/AppCard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { usePartners, usePartnerCapitalKPI, type PartnerCapitalKPI } from '@/features/capital';
 import { CapitalBalanceCard } from '@/features/capital/components/CapitalBalanceCard';
+
 interface EnrichedPartnerBalance {
   partnerId: string;
   partnerName: string;
@@ -21,31 +22,37 @@ interface EnrichedPartnerBalance {
   net_status: PartnerCapitalKPI['net_status'];
   linkedUser?: { avatar_url?: string | null } | null;
 }
+
 export function CapitalBalancesView() {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
+
   const { data: defaultCurrency, isLoading: loadingCurrency } = useOrganizationDefaultCurrency(organizationId);
   const { data: partners = [], isLoading: loadingPartners } = usePartners(organizationId, { enabled: !!organizationId });
   const { data: kpiData = [], isLoading: loadingKPI } = usePartnerCapitalKPI(organizationId, { enabled: !!organizationId });
+
   // All totals come directly from the SQL view (first row has org totals)
   const orgTotals = kpiData.length > 0 ? kpiData[0] : null;
   const totalContributions = orgTotals?.org_total_contributions ?? 0;
   const totalWithdrawals = orgTotals?.org_total_withdrawals ?? 0;
   const totalAdjustments = orgTotals?.org_total_adjustments ?? 0;
   const totalNetCapital = orgTotals?.org_total_net_capital ?? 0;
+
   // Derived KPIs from partner-level data (aggregated from SQL view)
   const derivedKPIs = useMemo(() => {
     // Total absolute deviation (sum of |deviation_contribution|)
     const totalDeviation = kpiData.reduce((sum, kpi) => {
       return sum + Math.abs(kpi.deviation_contribution ?? 0);
     }, 0);
+
     // Count partners under-contributed
     const underContributedCount = kpiData.filter(
       kpi => kpi.contribution_status === 'bajo_aportado'
     ).length;
+
     // Find top over-contributor
     const overContributors = kpiData
-      .filter(kpi => kpi.contribution_status === 'sobre_aportado'&& (kpi.deviation_contribution ?? 0) > 0)
+      .filter(kpi => kpi.contribution_status === 'sobre_aportado' && (kpi.deviation_contribution ?? 0) > 0)
       .sort((a, b) => (b.deviation_contribution ?? 0) - (a.deviation_contribution ?? 0));
     
     const topOverContributor = overContributors[0];
@@ -56,6 +63,7 @@ export function CapitalBalancesView() {
       || topOverContributorPartner?.contacts?.company_name 
       || null;
     const topOverContributorAmount = topOverContributor?.deviation_contribution ?? 0;
+
     return {
       totalDeviation,
       underContributedCount,
@@ -63,6 +71,7 @@ export function CapitalBalancesView() {
       topOverContributorAmount,
     };
   }, [kpiData, partners]);
+
   // Build enriched balances from KPI data
   const enrichedBalances: EnrichedPartnerBalance[] = kpiData.map(kpi => {
     const partnerData = partners.find(p => p.id === kpi.partner_id);
@@ -71,6 +80,7 @@ export function CapitalBalancesView() {
       || 'Sin nombre';
     const linkedUser = partnerData?.contacts?.linked_user;
     const resolvedLinkedUser = Array.isArray(linkedUser) ? linkedUser[0] : linkedUser;
+
     return {
       partnerId: kpi.partner_id,
       partnerName,
@@ -86,8 +96,10 @@ export function CapitalBalancesView() {
       linkedUser: resolvedLinkedUser,
     };
   }).sort((a, b) => (b.ownershipPercentage ?? 0) - (a.ownershipPercentage ?? 0));
+
   const isLoading = loadingCurrency || loadingPartners || loadingKPI;
   const currencySymbol = defaultCurrency?.symbol || '$';
+
   const formatCurrency = (amount: number) => {
     const absAmount = Math.abs(amount);
     return new Intl.NumberFormat('es-AR', {
@@ -95,6 +107,7 @@ export function CapitalBalancesView() {
       maximumFractionDigits: 0
     }).format(absAmount);
   };
+
   if (!organizationId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -102,6 +115,7 @@ export function CapitalBalancesView() {
       </div>
     );
   }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -109,6 +123,7 @@ export function CapitalBalancesView() {
       </div>
     );
   }
+
   if (kpiData.length === 0) {
     return (
       <EmptyState
@@ -118,7 +133,9 @@ export function CapitalBalancesView() {
       />
     );
   }
+
   const isPositiveNetCapital = totalNetCapital >= 0;
+
   return (
     <div className="space-y-6">
       {/* Row 1: Core Capital Metrics */}
@@ -129,12 +146,13 @@ export function CapitalBalancesView() {
             Capital Neto Total
           </StatCardTitle>
           <StatCardValue className={isPositiveNetCapital ? "text-[var(--positive)]" : "text-[var(--negative)]"}>
-            {isPositiveNetCapital ? '': '-'}{currencySymbol} {formatCurrency(totalNetCapital)}
+            {isPositiveNetCapital ? '' : '-'}{currencySymbol} {formatCurrency(totalNetCapital)}
           </StatCardValue>
           <StatCardMeta>
             Aportes - Retiros + Ajustes
           </StatCardMeta>
         </StatCard>
+
         <StatCard data-testid="stat-card-total-aportes">
           <StatCardTitle showArrow={false}>
             <TrendingUp className="h-4 w-4" />
@@ -147,6 +165,7 @@ export function CapitalBalancesView() {
             Aportes confirmados
           </StatCardMeta>
         </StatCard>
+
         <StatCard data-testid="stat-card-total-retiros">
           <StatCardTitle showArrow={false}>
             <TrendingDown className="h-4 w-4" />
@@ -159,6 +178,7 @@ export function CapitalBalancesView() {
             Retiros confirmados
           </StatCardMeta>
         </StatCard>
+
         <StatCard data-testid="stat-card-desbalance-total">
           <StatCardTitle showArrow={false}>
             <Scale className="h-4 w-4" />
@@ -171,6 +191,7 @@ export function CapitalBalancesView() {
             Suma de desvíos absolutos
           </StatCardMeta>
         </StatCard>
+
         <StatCard data-testid="stat-card-bajo-aporte">
           <StatCardTitle showArrow={false}>
             <AlertTriangle className="h-4 w-4" />
@@ -180,9 +201,10 @@ export function CapitalBalancesView() {
             {derivedKPIs.underContributedCount}
           </StatCardValue>
           <StatCardMeta>
-            {derivedKPIs.underContributedCount === 0 ? 'Todos al día': 'Requieren atención'}
+            {derivedKPIs.underContributedCount === 0 ? 'Todos al día' : 'Requieren atención'}
           </StatCardMeta>
         </StatCard>
+
         <StatCard data-testid="stat-card-top-sobreaportado">
           <StatCardTitle showArrow={false}>
             <Crown className="h-4 w-4" />
@@ -198,6 +220,7 @@ export function CapitalBalancesView() {
           </StatCardMeta>
         </StatCard>
       </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {enrichedBalances.map((partner) => (
           <CapitalBalanceCard

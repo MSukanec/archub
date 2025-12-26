@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Download, ExternalLink, FileText } from 'lucide-react';
 import { PdfViewer } from '@/features/pdf';
 import { ImageViewer } from '@/components/shared/viewers/ImageViewer';
+
 interface DocumentPreviewModalProps {
   document: {
     id: string;
@@ -21,8 +22,10 @@ interface DocumentPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
 export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPreviewModalProps) {
   if (!document || !isOpen) return null;
+
   const isPDF = document.file_type === 'application/pdf';
   const isImage = document.file_type?.startsWith('image/');
   
@@ -30,7 +33,7 @@ export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPrev
     if (!bytes) return 'N/A';
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ''+ sizes[i];
+    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
   };
   
   const handleDownload = () => {
@@ -39,9 +42,11 @@ export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPrev
     link.download = document.file_name;
     link.click();
   };
+
   const handleOpenExternal = () => {
     window.open(document.file_url, '_blank');
   };
+
   // Header con información del documento
   const headerContent = (
     <FormModalHeader 
@@ -50,6 +55,7 @@ export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPrev
       description={formatFileSize(document.file_size)}
     />
   );
+
   // Footer con botones de acción
   const footerContent = (
     <FormModalFooter
@@ -58,9 +64,10 @@ export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPrev
       submitVariant="secondary"
     />
   );
+
   // Panel de vista con el contenido del documento
   const viewPanel = (
-    <div className="w-full" style={{ height: 'calc(100vh - 200px)'}}>
+    <div className="w-full" style={{ height: 'calc(100vh - 200px)' }}>
       {isPDF ? (
         <PdfViewer
           bucket="design-documents"
@@ -106,6 +113,7 @@ export function DocumentPreviewModal({ document, isOpen, onClose }: DocumentPrev
       )}
     </div>
   );
+
   return (
     <FormModalLayout
       wide={true}

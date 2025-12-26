@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+
 import { FormModalLayout } from '@/components/modal'
 import { FormModalHeader } from '@/components/modal'
 import { FormModalFooter } from '@/components/modal'
@@ -11,17 +12,21 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { CascadingSelect } from '@/components/shared/fields/CascadingSelectField'
+
 import { useCreateMaterial, useUpdateMaterial, Material, NewMaterialData, useMaterialCategories, MaterialCategory } from '@/features/materials'
 import { useUnits } from '@/hooks/use-units'
 import { useCurrentUser } from '@/hooks/use-current-user'
+
 import { Package } from 'lucide-react'
+
 const materialSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
-  material_type: z.enum(['material', 'consumable'], { required_error: 'Selecciona el tipo de material'}),
+  material_type: z.enum(['material', 'consumable'], { required_error: 'Selecciona el tipo de material' }),
   category_id: z.string().min(1, 'La categoría es requerida'),
   unit_id: z.string().min(1, 'La unidad es requerida'),
   is_completed: z.boolean().optional(),
 })
+
 // Helper function to convert MaterialCategory[] to CascadingSelect format
 function convertToCascadingOptions(categories: MaterialCategory[]): any[] {
   return categories.map(category => ({
@@ -32,6 +37,7 @@ function convertToCascadingOptions(categories: MaterialCategory[]): any[] {
       : undefined
   }))
 }
+
 // Helper function to find category path by ID
 function findCategoryPath(categories: MaterialCategory[], targetId: string): string[] {
   function search(cats: MaterialCategory[], path: string[] = []): string[] | null {
@@ -52,6 +58,7 @@ function findCategoryPath(categories: MaterialCategory[], targetId: string): str
   
   return search(categories) || [];
 }
+
 // Helper function to find category ID by name
 function findCategoryIdByName(categories: MaterialCategory[], targetName: string): string | null {
   function search(cats: MaterialCategory[]): string | null {
@@ -70,6 +77,7 @@ function findCategoryIdByName(categories: MaterialCategory[], targetName: string
   
   return search(categories);
 }
+
 interface MaterialFormModalProps {
   modalData: {
     editingMaterial?: Material | null
@@ -77,11 +85,13 @@ interface MaterialFormModalProps {
   }
   onClose: () => void
 }
+
 export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   
   const { editingMaterial, isDuplicating = false } = modalData
   const isEditing = !!editingMaterial && !isDuplicating
+
   // Hooks
   const createMutation = useCreateMaterial()
   const updateMutation = useUpdateMaterial()
@@ -100,10 +110,12 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
   
   // Track selected category path for CascadingSelect
   const [selectedCategoryPath, setSelectedCategoryPath] = useState<string[]>([])
+
   // Force edit mode when modal opens - enable user access
   useEffect(() => {
     setPanel('edit')
   }, [])
+
   // Form setup
   const form = useForm<z.infer<typeof materialSchema>>({
     resolver: zodResolver(materialSchema),
@@ -115,6 +127,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       is_completed: false,
     },
   })
+
   // Load editing data
   useEffect(() => {
     console.log('MaterialFormModal useEffect triggered:', { 
@@ -133,7 +146,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       
       form.reset({
         name: isDuplicating ? `${editingMaterial.name} - Copia` : editingMaterial.name,
-        material_type: (editingMaterial.material_type as 'material'| 'consumable') || 'material',
+        material_type: (editingMaterial.material_type as 'material' | 'consumable') || 'material',
         category_id: categoryId,
         unit_id: editingMaterial.unit_id,
         is_completed: editingMaterial.is_completed || false,
@@ -153,9 +166,11 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       setSelectedCategoryPath([])
     }
   }, [editingMaterial?.id, isEditing, isDuplicating, categories.length])
+
   // Submit handler
   const onSubmit = async (values: z.infer<typeof materialSchema>) => {
     setIsLoading(true)
+
     try {
       if (isEditing && editingMaterial) {
         // Actualizar material
@@ -190,10 +205,13 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       setIsLoading(false)
     }
   }
+
   // View panel (not needed for this modal as it's always in edit mode)
   const viewPanel = null
+
   // Allow editing all materials - remove system material blocking
   const isSystemMaterial = false
+
   // Edit panel
   const editPanel = (
     <Form {...form}>
@@ -215,6 +233,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             </FormItem>
           )}
         />
+
         {/* Material Type */}
         <FormField
           control={form.control}
@@ -237,6 +256,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             </FormItem>
           )}
         />
+
         {/* Category */}
         <FormField
           control={form.control}
@@ -262,6 +282,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             </FormItem>
           )}
         />
+
         {/* Unit */}
         <FormField
           control={form.control}
@@ -287,6 +308,9 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
             </FormItem>
           )}
         />
+
+
+
         {/* Is Completed */}
         <FormField
           control={form.control}
@@ -313,6 +337,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       </form>
     </Form>
   )
+
   // Header content
   const headerContent = (
     <FormModalHeader 
@@ -320,6 +345,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       icon={Package}
     />
   )
+
   // Footer content
   const footerContent = (
     <FormModalFooter
@@ -331,6 +357,7 @@ export function MaterialFormModal({ modalData, onClose }: MaterialFormModalProps
       showLoadingSpinner={isLoading}
     />
   )
+
   return (
     <FormModalLayout
       columns={1}

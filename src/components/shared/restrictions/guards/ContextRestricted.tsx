@@ -1,5 +1,6 @@
 import { EmptyStateBlock } from "../ui/EmptyStateBlock";
 import { AlertCircle } from "lucide-react";
+
 interface ContextRestrictedProps {
   isBlocked: boolean;
   blockTitle: string;
@@ -8,6 +9,7 @@ interface ContextRestrictedProps {
   useOverlay?: boolean;
   children: React.ReactNode;
 }
+
 export function ContextRestricted({
   isBlocked,
   blockTitle,
@@ -19,6 +21,7 @@ export function ContextRestricted({
   if (!isBlocked) {
     return <>{children}</>;
   }
+
   if (useOverlay) {
     return (
       <div className="relative w-full">
@@ -44,6 +47,7 @@ export function ContextRestricted({
       </div>
     );
   }
+
   // Default: EmptyStateBlock
   return (
     <EmptyStateBlock
@@ -54,4 +58,5 @@ export function ContextRestricted({
     />
   );
 }
+
 export default ContextRestricted;

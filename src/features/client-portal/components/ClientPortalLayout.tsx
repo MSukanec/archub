@@ -2,18 +2,21 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { Building2, Calendar, Receipt, BookOpen, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { ClientPortalTab, ClientPortalProject, ClientPortalSettings } from '../types';
+
 interface Tab {
   id: ClientPortalTab;
   label: string;
   icon: typeof Building2;
-  settingsKey: keyof Pick<ClientPortalSettings, 'show_dashboard'| 'show_installments'| 'show_payments'| 'show_logs'>;
+  settingsKey: keyof Pick<ClientPortalSettings, 'show_dashboard' | 'show_installments' | 'show_payments' | 'show_logs'>;
 }
+
 const PORTAL_TABS: Tab[] = [
-  { id: 'dashboard', label: 'Visión General', icon: Building2, settingsKey: 'show_dashboard'},
-  { id: 'installments', label: 'Cuotas', icon: Calendar, settingsKey: 'show_installments'},
-  { id: 'payments', label: 'Mis Pagos', icon: Receipt, settingsKey: 'show_payments'},
-  { id: 'logs', label: 'Avances', icon: BookOpen, settingsKey: 'show_logs'},
+  { id: 'dashboard', label: 'Visión General', icon: Building2, settingsKey: 'show_dashboard' },
+  { id: 'installments', label: 'Cuotas', icon: Calendar, settingsKey: 'show_installments' },
+  { id: 'payments', label: 'Mis Pagos', icon: Receipt, settingsKey: 'show_payments' },
+  { id: 'logs', label: 'Avances', icon: BookOpen, settingsKey: 'show_logs' },
 ];
+
 interface ClientPortalLayoutProps {
   project: ClientPortalProject;
   activeTab: ClientPortalTab;
@@ -23,6 +26,7 @@ interface ClientPortalLayoutProps {
   adminPreviewSlot?: React.ReactNode;
   settings?: ClientPortalSettings;
 }
+
 const DEFAULT_SETTINGS: ClientPortalSettings = {
   show_dashboard: true,
   show_installments: true,
@@ -32,6 +36,7 @@ const DEFAULT_SETTINGS: ClientPortalSettings = {
   show_progress: true,
   allow_comments: false,
 };
+
 export function ClientPortalLayout({
   project,
   activeTab,
@@ -43,14 +48,17 @@ export function ClientPortalLayout({
 }: ClientPortalLayoutProps) {
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const [underlineStyle, setUnderlineStyle] = useState<{ width: number; left: number }>({ width: 0, left: 0 });
+
   const visibleTabs = useMemo(() => {
     return PORTAL_TABS.filter(tab => settings[tab.settingsKey]);
   }, [settings]);
+
   useEffect(() => {
     if (visibleTabs.length > 0 && !visibleTabs.find(t => t.id === activeTab)) {
       onTabChange(visibleTabs[0].id);
     }
   }, [visibleTabs, activeTab, onTabChange]);
+
   useEffect(() => {
     const updateUnderlinePosition = () => {
       if (!tabsContainerRef.current) return;
@@ -71,6 +79,7 @@ export function ClientPortalLayout({
     updateUnderlinePosition();
     requestAnimationFrame(updateUnderlinePosition);
   }, [activeTab, visibleTabs]);
+
   return (
     <div className="min-h-screen bg-background">
       {isAdminPreview && (
@@ -91,6 +100,7 @@ export function ClientPortalLayout({
           </div>
         </div>
       )}
+
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="max-w-[1440px] mx-auto px-6 sm:px-20">
           <div className="flex items-center justify-between h-16">
@@ -115,6 +125,7 @@ export function ClientPortalLayout({
                 </div>
               </div>
             </div>
+
             <div className="flex items-center gap-2">
               <img 
                 src="/seencel-logo-192.png" 
@@ -123,10 +134,11 @@ export function ClientPortalLayout({
               />
             </div>
           </div>
+
           {/* Desktop Tabs - Idéntico al dashboard */}
           <div className="hidden sm:block">
             <div className="h-[45px] flex items-center relative overflow-hidden border-t border-border/30">
-              <div ref={tabsContainerRef} className="flex items-center relative" style={{ gap: '24px'}}>
+              <div ref={tabsContainerRef} className="flex items-center relative" style={{ gap: '24px' }}>
                 {visibleTabs.map((tab) => (
                   <button
                     key={tab.id}
@@ -162,6 +174,7 @@ export function ClientPortalLayout({
             </div>
           </div>
         </div>
+
         {/* Mobile Tabs - Chips horizontales scrollables */}
         <div className="sm:hidden border-t border-border/30">
           <div className="px-6 py-3">
@@ -174,7 +187,7 @@ export function ClientPortalLayout({
                     px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 
                     transition-all duration-200 flex items-center gap-2
                     ${tab.id === activeTab 
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-primary text-primary-foreground' 
                       : 'bg-muted text-muted-foreground border border-border hover:bg-muted/80'
                     }
                   `}
@@ -188,6 +201,7 @@ export function ClientPortalLayout({
           </div>
         </div>
       </header>
+
       <div className="max-w-[1440px] mx-auto px-6 sm:px-20 py-6">
         <main data-testid="client-portal-content">
           {children}

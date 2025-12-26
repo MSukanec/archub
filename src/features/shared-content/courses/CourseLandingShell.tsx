@@ -14,6 +14,7 @@ import { InfiniteCarousel } from '@/components/shared/InfiniteCarousel';
 import type { CoursesMode } from './types';
 import { CourseStickyCardWithMode } from './components/CourseStickyCardWithMode';
 import type { Testimonial } from '@shared/schema';
+
 interface CourseLandingShellProps {
   mode: CoursesMode;
   course: any;
@@ -27,6 +28,7 @@ interface CourseLandingShellProps {
   ctaButtonText: string;
   clientGallery?: { id: string; url: string }[];
 }
+
 export function CourseLandingShell({ 
   mode, 
   course, 
@@ -109,12 +111,14 @@ export function CourseLandingShell({
     </div>
   );
 }
+
 interface ClientsSectionProps {
   images: { id: string; url: string }[];
   title?: string;
   subtitle?: string;
   description?: string;
 }
+
 function ClientsSection({ 
   images, 
   title = "TRABAJOS REALIZADOS",
@@ -126,6 +130,7 @@ function ClientsSection({
     src: img.url,
     alt: 'Proyecto realizado',
   }));
+
   return (
     <section className="py-16 sm:py-20" data-testid="section-clients">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

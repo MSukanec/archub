@@ -9,10 +9,10 @@ import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';
 import { projectsKeys } from '@/core/query-keys';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/shared/AppCard';
-import { ActivityCard } from '@/components';
-import { InsightCard;
+
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ActivityCard';
 import { Badge } from '@/components/ui/badge';
+
 export function ProjectVisionGeneralView() {
   const [, navigate] = useLocation();
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
@@ -21,6 +21,7 @@ export function ProjectVisionGeneralView() {
   
   const { data: currentProject, isLoading: projectLoading } = useProject(selectedProjectId || undefined);
   const { data: siteLogs = [] } = useSiteLogs(selectedProjectId || undefined, organizationId || undefined);
+
   const { data: projectImageUrl } = useQuery({
     queryKey: projectsKeys.image(currentProject?.id),
     queryFn: () => getProjectImageUrlFromData(currentProject!.project_data!),
@@ -28,6 +29,7 @@ export function ProjectVisionGeneralView() {
     refetchInterval: 30 * 60 * 1000,
     staleTime: 25 * 60 * 1000,
   });
+
   // Render: No project selected
   if (!selectedProjectId) {
     return (
@@ -42,6 +44,7 @@ export function ProjectVisionGeneralView() {
       </div>
     );
   }
+
   // Render: Loading
   if (projectLoading) {
     return (
@@ -50,6 +53,7 @@ export function ProjectVisionGeneralView() {
       </div>
     );
   }
+
   // Render: Not found
   if (!currentProject) {
     return (
@@ -58,7 +62,9 @@ export function ProjectVisionGeneralView() {
       </div>
     );
   }
+
   const projectColor = currentProject?.color || 'var(--accent)';
+
   // Hero Section
   const heroSection = (
     <div 
@@ -89,6 +95,7 @@ export function ProjectVisionGeneralView() {
           }}
         />
       )}
+
       <div className="relative h-full flex flex-col justify-end px-4 sm:px-6 md:px-12 py-4 sm:py-6 md:py-8">
         <div className="max-w-3xl">
           <h1 
@@ -140,7 +147,7 @@ export function ProjectVisionGeneralView() {
                 }}
                 data-testid="badge-project-status"
               >
-                {currentProject.status === 'active'? 'En Proceso': currentProject.status}
+                {currentProject.status === 'active' ? 'En Proceso' : currentProject.status}
               </Badge>
             )}
           </div>
@@ -148,6 +155,7 @@ export function ProjectVisionGeneralView() {
       </div>
     </div>
   );
+
   // Main Content
   const mainContent = (
     <div className="space-y-6 project-breathing-bg px-4 sm:px-6 md:px-12 py-6 md:py-12">
@@ -218,22 +226,26 @@ export function ProjectVisionGeneralView() {
           )}
         </StatCard>
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="stat-card-mano-obra">
           <StatCardTitle showArrow={false}>Mano de Obra</StatCardTitle>
           <StatCardValue>-</StatCardValue>
           <StatCardMeta>Próximamente</StatCardMeta>
         </StatCard>
+
         <StatCard data-testid="stat-card-materiales">
           <StatCardTitle showArrow={false}>Materiales</StatCardTitle>
           <StatCardValue>-</StatCardValue>
           <StatCardMeta>Próximamente</StatCardMeta>
         </StatCard>
+
         <StatCard data-testid="stat-card-indirectos">
           <StatCardTitle showArrow={false}>Indirectos</StatCardTitle>
           <StatCardValue>-</StatCardValue>
           <StatCardMeta>Próximamente</StatCardMeta>
         </StatCard>
+
         <StatCard data-testid="stat-card-subcontratos">
           <StatCardTitle showArrow={false}>Subcontratos</StatCardTitle>
           <StatCardValue>-</StatCardValue>
@@ -242,6 +254,7 @@ export function ProjectVisionGeneralView() {
       </div>
     </div>
   );
+
   return (
     <div className="h-full overflow-auto">
       {heroSection}

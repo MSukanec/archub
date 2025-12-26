@@ -3,8 +3,10 @@ import { updateSubcontractBid } from '../services';
 import { SUBCONTRACT_QUERY_KEYS } from '../constants';
 import { toast } from '@/hooks/use-toast';
 import type { InsertSubcontractBid } from '../types';
+
 export function useUpdateSubcontractBid() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: ({ bidId, data }: { bidId: string; data: Partial<InsertSubcontractBid> }) => 
       updateSubcontractBid(bidId, data),

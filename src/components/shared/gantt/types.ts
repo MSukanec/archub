@@ -1,7 +1,7 @@
 export type GanttRowProps = {
   id: string;
   name: string;
-  type: 'task'| 'group'| 'phase';
+  type: 'task' | 'group' | 'phase';
   level: number;
   startDate?: string;
   endDate?: string;           // Optional: exact end date
@@ -12,6 +12,7 @@ export type GanttRowProps = {
   phaseTasks?: any[];         // Tasks contained in phase for automatic date calculation
   onClick?: (item: GanttRowProps) => void;
 };
+
 export type GanttContainerProps = {
   data: GanttRowProps[];
   dependencies?: Array<{
@@ -24,6 +25,7 @@ export type GanttContainerProps = {
   allTasks?: any[]; // Array de tareas para propagación de dependencias
   projectId?: string; // ID del proyecto
 };
+
 export interface ResolvedDateRange {
   startDate: Date;
   resolvedEndDate: Date;
@@ -31,10 +33,11 @@ export interface ResolvedDateRange {
   isValid: boolean;
   durationInDays: number;
 }
+
 // Utility function to calculate resolved end date with proper validation
 export function calculateResolvedEndDate(item: GanttRowProps): ResolvedDateRange {
   // Skip validation for groups without dates - but allow phases with dates to show bars
-  if (item.type === 'group'|| (!item.startDate && item.type !== 'phase')) {
+  if (item.type === 'group' || (!item.startDate && item.type !== 'phase')) {
     return {
       startDate: new Date(),
       resolvedEndDate: new Date(),
@@ -43,8 +46,9 @@ export function calculateResolvedEndDate(item: GanttRowProps): ResolvedDateRange
       durationInDays: 1
     };
   }
+
   // For phases: try to calculate from contained tasks first
-  if (item.type === 'phase'&& item.phaseTasks && item.phaseTasks.length > 0) {
+  if (item.type === 'phase' && item.phaseTasks && item.phaseTasks.length > 0) {
     // Calculate dates based on contained tasks
     const taskDates = item.phaseTasks
       .filter(task => task.start_date)
@@ -69,6 +73,7 @@ export function calculateResolvedEndDate(item: GanttRowProps): ResolvedDateRange
       };
     }
   }
+
   // For phases or headers without startDate, return invalid
   if (!item.startDate) {
     return {
@@ -79,6 +84,7 @@ export function calculateResolvedEndDate(item: GanttRowProps): ResolvedDateRange
       durationInDays: 1
     };
   }
+
   // Normalize startDate to avoid UTC interpretation issues
   const startDate = new Date(item.startDate + 'T00:00:00');
   

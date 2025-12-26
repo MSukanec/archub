@@ -6,17 +6,20 @@ import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useGlobalModalStore } from "@/components/modal";
 import type { AttendeeData } from '../../types';
+
 interface PersonnelFormProps {
   attendees: AttendeeData[];
   setAttendees: (attendees: AttendeeData[]) => void;
   projectPersonnel: any[];
 }
+
 export function PersonnelForm({ 
   attendees, 
   setAttendees, 
   projectPersonnel 
 }: PersonnelFormProps) {
   const { closeModal } = useGlobalModalStore();
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -26,6 +29,7 @@ export function PersonnelForm({
         <div className="col-span-3">Horario</div>
         <div className="col-span-4">Descripción</div>
       </div>
+
       {/* Lista completa de personal del proyecto */}
       <div className="space-y-1 max-h-96 overflow-y-auto">
         {projectPersonnel.length === 0 ? (
@@ -83,12 +87,14 @@ export function PersonnelForm({
                   className="h-4 w-4 rounded checkbox-accent"
                 />
               </div>
+
               {/* Nombre del contacto */}
               <div className="col-span-4">
-                <span className={`text-sm ${isPresent ? 'font-medium text-foreground': 'text-muted-foreground'}`}>
+                <span className={`text-sm ${isPresent ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
                   {contact?.first_name || ''} {contact?.last_name || ''}
                 </span>
               </div>
+
               {/* Selector de horario */}
               <div className="col-span-3">
                 <Select
@@ -97,7 +103,7 @@ export function PersonnelForm({
                     if (isPresent) {
                       const newAttendees = attendees.map((a: any) => 
                         a.personnel_id === personnel.id 
-                          ? { ...a, attendance_type: value as 'full'| 'half'}
+                          ? { ...a, attendance_type: value as 'full' | 'half' }
                           : a
                       );
                       setAttendees(newAttendees);
@@ -105,7 +111,7 @@ export function PersonnelForm({
                   }}
                   disabled={!isPresent}
                 >
-                  <SelectTrigger className={`h-8 text-xs ${!isPresent ? 'opacity-50': ''}`}>
+                  <SelectTrigger className={`h-8 text-xs ${!isPresent ? 'opacity-50' : ''}`}>
                     <SelectValue placeholder="Horario" />
                   </SelectTrigger>
                   <SelectContent>
@@ -114,6 +120,7 @@ export function PersonnelForm({
                   </SelectContent>
                 </Select>
               </div>
+
               {/* Campo de descripción */}
               <div className="col-span-4">
                 <Input
@@ -130,7 +137,7 @@ export function PersonnelForm({
                     }
                   }}
                   disabled={!isPresent}
-                  className={`h-8 text-xs ${!isPresent ? 'opacity-50': ''}`}
+                  className={`h-8 text-xs ${!isPresent ? 'opacity-50' : ''}`}
                 />  
               </div>
             </div>
@@ -138,6 +145,7 @@ export function PersonnelForm({
         })
         )}
       </div>
+
       {/* Contador de personal presente */}
       {attendees.length > 0 && (
         <div className="text-sm text-muted-foreground text-center pt-2 border-t">

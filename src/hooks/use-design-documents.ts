@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useCurrentUser } from './use-current-user';
+
 export interface DesignDocument {
   id: string;
   name?: string;
@@ -22,14 +23,17 @@ export interface DesignDocument {
     avatar_url: string;
   };
 }
+
 export function useDesignDocuments(folderId?: string) {
   const { data: userData } = useCurrentUser();
   const projectId = userData?.preferences?.last_project_id;
   const organizationId = userData?.preferences?.last_organization_id;
+
   return useQuery({
     queryKey: ['design-documents', projectId, organizationId, folderId],
     queryFn: async (): Promise<DesignDocument[]> => {
       if (!projectId || !organizationId) return [];
+
       let query = supabase
         .from('documents')
         .select(`
@@ -45,28 +49,35 @@ export function useDesignDocuments(folderId?: string) {
         `)
         .eq('project_id', projectId)
         .eq('organization_id', organizationId);
+
       if (folderId) {
         query = query.eq('folder_id', folderId);
       }
+
       const { data, error } = await query.order('created_at', { ascending: false });
+
       if (error) {
         console.error('Error fetching design documents:', error);
         return [];
       }
+
       return data || [];
     },
     enabled: !!projectId && !!organizationId
   });
 }
+
 // New hook for fetching documents by folder (including those without groups)
 export function useDesignDocumentsByFolder(folderId?: string) {
   const { data: userData } = useCurrentUser();
   const projectId = userData?.preferences?.last_project_id;
   const organizationId = userData?.preferences?.last_organization_id;
+
   return useQuery({
     queryKey: ['design-documents-folder', projectId, organizationId, folderId],
     queryFn: async (): Promise<DesignDocument[]> => {
       if (!projectId || !organizationId || !folderId) return [];
+
       // Get documents directly assigned to folder (folder_id matches)
       const { data, error } = await supabase
         .from('documents')
@@ -85,6 +96,7 @@ export function useDesignDocumentsByFolder(folderId?: string) {
         .eq('organization_id', organizationId)
         .eq('folder_id', folderId)
         .order('created_at', { ascending: false });
+
       console.log('useDesignDocumentsByFolder Query Result:', {
         folderId,
         projectId,
@@ -93,21 +105,25 @@ export function useDesignDocumentsByFolder(folderId?: string) {
         error: error,
         query: 'documents with folder_id OR group.folder_id filter'
       });
+
       if (error) {
         console.error('Error fetching folder documents:', error);
         return [];
       }
+
       return data || [];
     },
     enabled: !!projectId && !!organizationId && !!folderId
   });
 }
+
 export function useCreateDesignDocument() {
   const { data: userData } = useCurrentUser();
   const queryClient = useQueryClient();
   const projectId = userData?.preferences?.last_project_id;
   const organizationId = userData?.preferences?.last_organization_id;
   const userId = userData?.user?.id;
+
   return useMutation({
     mutationFn: async (documentData: {
       name: string;
@@ -123,6 +139,7 @@ export function useCreateDesignDocument() {
       if (!projectId || !organizationId || !userId) {
         throw new Error('Missing project, organization or user data');
       }
+
       // Get the organization member ID for the current user
       const { data: memberData, error: memberError } = await supabase
         .from('organization_members')
@@ -131,9 +148,11 @@ export function useCreateDesignDocument() {
         .eq('user_id', userId)
         .eq('is_active', true)
         .single();
+
       if (memberError || !memberData) {
         throw new Error('Could not find organization membership');
       }
+
       const { data, error } = await supabase
         .from('documents')
         .insert({
@@ -144,9 +163,11 @@ export function useCreateDesignDocument() {
         })
         .select()
         .single();
+
       if (error) {
         throw new Error(`Error creating document: ${error.message}`);
       }
+
       return data;
     },
     onSuccess: () => {
@@ -157,8 +178,10 @@ export function useCreateDesignDocument() {
     }
   });
 }
+
 export function useUpdateDesignDocument() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (data: {
       id: string;
@@ -168,15 +191,18 @@ export function useUpdateDesignDocument() {
       visibility?: string;
     }): Promise<DesignDocument> => {
       const { id, ...updateData } = data;
+
       const { data: result, error } = await supabase
         .from('documents')
         .update(updateData)
         .eq('id', id)
         .select()
         .single();
+
       if (error) {
         throw new Error(`Error updating document: ${error.message}`);
       }
+
       return result;
     },
     onSuccess: () => {
@@ -184,14 +210,17 @@ export function useUpdateDesignDocument() {
     }
   });
 }
+
 export function useDeleteDesignDocument() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (documentId: string): Promise<void> => {
       const { error } = await supabase
         .from('documents')
         .delete()
         .eq('id', documentId);
+
       if (error) {
         throw new Error(`Error deleting document: ${error.message}`);
       }

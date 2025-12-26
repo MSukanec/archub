@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { InsertGeneralCostPayment, GeneralCostPayment } from '../types';
+
 /**
  * Creates a new general cost payment in the database.
  * 
@@ -15,13 +16,16 @@ export async function createGeneralCostPayment(payment: InsertGeneralCostPayment
   if (!supabase) {
     throw new Error('Supabase client not initialized');
   }
+
   const { data, error } = await supabase
     .from('general_costs_payments')
     .insert(payment)
     .select()
     .single();
+
   if (error) {
     throw error;
   }
+
   return data;
 }

@@ -1,6 +1,7 @@
 import DataRowCard, { DataRowCardProps } from '@/components/shared/DataRowCard';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 // Interface para el movimiento (usando la estructura real de la app)
 interface Movement {
   id: string;
@@ -52,14 +53,16 @@ interface Movement {
     name: string;
   };
 }
+
 interface MovementRowProps {
   movement: Movement;
   onClick?: () => void;
   selected?: boolean;
-  density?: 'compact'| 'normal'| 'comfortable';
+  density?: 'compact' | 'normal' | 'comfortable';
   showProject?: boolean;  // Para mostrar proyecto cuando no hay filtro activo
   className?: string;
 }
+
 // Helper para formatear el importe con signo
 const formatMovementAmount = (amount: number, currencySymbol?: string): string => {
   const formattedAmount = new Intl.NumberFormat('es-AR', {
@@ -67,11 +70,12 @@ const formatMovementAmount = (amount: number, currencySymbol?: string): string =
     maximumFractionDigits: 2,
   }).format(Math.abs(amount));
   
-  const sign = amount >= 0 ? '+': '-';
+  const sign = amount >= 0 ? '+' : '-';
   const symbol = currencySymbol || '$';
   
   return `${sign}${symbol}${formattedAmount}`;
 };
+
 // Helper para obtener las iniciales del concepto/categoría
 const getConceptInitials = (movement: Movement): string => {
   const category = movement.movement_data?.category?.name;
@@ -84,7 +88,7 @@ const getConceptInitials = (movement: Movement): string => {
   }
   
   if (category) {
-    const words = category.split('');
+    const words = category.split(' ');
     if (words.length > 1) {
       return words.slice(0, 2).map(w => w[0]?.toUpperCase()).join('');
     }
@@ -93,6 +97,7 @@ const getConceptInitials = (movement: Movement): string => {
   
   return 'M';
 };
+
 // Helper para obtener el nombre completo del concepto
 const getConceptFullName = (movement: Movement): string => {
   const category = movement.movement_data?.category?.name;
@@ -108,6 +113,7 @@ const getConceptFullName = (movement: Movement): string => {
   
   return 'Sin categoría';
 };
+
 // Helper para obtener el texto de la tercera línea específica
 const getSpecificThirdLine = (movement: Movement): string | null => {
   // Para categoría "Indirectos", priorizar el tipo de indirecto sobre el miembro
@@ -152,6 +158,7 @@ const getSpecificThirdLine = (movement: Movement): string | null => {
   
   return null;
 };
+
 export default function MovementRow({ 
   movement, 
   onClick, 
@@ -162,7 +169,7 @@ export default function MovementRow({
 }: MovementRowProps) {
   
   // Determinar el color del borde basado en el tipo de movimiento
-  const getBorderColor = (movement: Movement): 'success'| 'danger'=> {
+  const getBorderColor = (movement: Movement): 'success' | 'danger' => {
     const typeName = movement.movement_data?.type?.name?.toLowerCase() || '';
     const categoryName = movement.movement_data?.category?.name?.toLowerCase() || '';
     
@@ -177,11 +184,13 @@ export default function MovementRow({
     }
     
     // Por defecto, si monto positivo, verde
-    return movement.amount >= 0 ? 'success': 'danger';
+    return movement.amount >= 0 ? 'success' : 'danger';
   };
+
   // Formatear importe para trailing
   const formattedAmount = formatMovementAmount(movement.amount, movement.movement_data?.currency?.symbol);
   const currencyCode = movement.movement_data?.currency?.code || 'ARS';
+
   // Obtener avatar del creador (como en la card vieja)
   const getCreatorAvatar = () => {
     // Si hay un campo creator en el movement
@@ -190,10 +199,11 @@ export default function MovementRow({
     }
     return undefined;
   };
+
   const getCreatorInitials = () => {
     if ((movement as any).creator?.full_name) {
       return (movement as any).creator.full_name
-        .split('')
+        .split(' ')
         .map((word: string) => word.charAt(0))
         .join('')
         .toUpperCase()
@@ -201,9 +211,13 @@ export default function MovementRow({
     }
     return 'A';
   };
+
+
+
   // Obtener la información específica de la tercera línea
   const specificThirdLine = getSpecificThirdLine(movement);
   
+
   // Contenido interno del card
   const cardContent = (
     <>
@@ -224,13 +238,14 @@ export default function MovementRow({
           </div>
         )}
       </div>
+
       {/* Columna trailing (dos líneas) */}
       <div className="flex flex-col items-end flex-shrink-0">
         {/* Línea 1: Moneda y monto en dos columnas */}
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">{currencyCode}</span>
           <span className={`font-mono text-sm font-bold ${
-            getBorderColor(movement) === 'success'? 'text-green-600': 'text-red-600'
+            getBorderColor(movement) === 'success' ? 'text-green-600' : 'text-red-600'
           }`}>
             {formattedAmount}
           </span>
@@ -243,6 +258,7 @@ export default function MovementRow({
       </div>
     </>
   );
+
   return (
     <DataRowCard
       avatarUrl={getCreatorAvatar()}
@@ -258,5 +274,6 @@ export default function MovementRow({
     </DataRowCard>
   );
 }
+
 // Export del tipo para uso externo
 export type { Movement };

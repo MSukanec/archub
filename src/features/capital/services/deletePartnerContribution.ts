@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+
 export async function deletePartnerContribution(
   id: string,
   organizationId: string
@@ -11,5 +12,6 @@ export async function deletePartnerContribution(
     })
     .eq('id', id)
     .eq('organization_id', organizationId);
+
   if (error) throw error;
 }

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -10,6 +11,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useCurrentUser } from '@/hooks/use-current-user'
+
 export const notificationSchema = z.object({
   type: z.string().min(1, 'El tipo es requerido'),
   title: z.string().min(1, 'El título es requerido'),
@@ -20,7 +22,9 @@ export const notificationSchema = z.object({
   data_route: z.string().optional(),
   data_course_slug: z.string().optional(),
 })
+
 export type NotificationFormData = z.infer<typeof notificationSchema>
+
 export interface Notification {
   id: string
   type: string
@@ -31,9 +35,11 @@ export interface Notification {
   created_at: string
   created_by: string
 }
+
 interface FormPanelProps {
   form: ReturnType<typeof useForm<NotificationFormData>>
 }
+
 export function FormPanel({ form }: FormPanelProps) {
   return (
     <Form {...form}>
@@ -63,6 +69,7 @@ export function FormPanel({ form }: FormPanelProps) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="title"
@@ -80,6 +87,7 @@ export function FormPanel({ form }: FormPanelProps) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="body"
@@ -98,6 +106,7 @@ export function FormPanel({ form }: FormPanelProps) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="audience"
@@ -121,6 +130,7 @@ export function FormPanel({ form }: FormPanelProps) {
             </FormItem>
           )}
         />
+
         <div className="border-t pt-4">
           <h4 className="text-sm font-medium mb-3">Datos de Navegación (opcional)</h4>
           
@@ -141,6 +151,7 @@ export function FormPanel({ form }: FormPanelProps) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="data_course_slug"
@@ -163,9 +174,11 @@ export function FormPanel({ form }: FormPanelProps) {
     </Form>
   )
 }
+
 interface ViewPanelProps {
   notification?: Notification
 }
+
 export function ViewPanel({ notification }: ViewPanelProps) {
   return (
     <div className="space-y-4">
@@ -196,14 +209,17 @@ export function ViewPanel({ notification }: ViewPanelProps) {
     </div>
   )
 }
+
 interface UseNotificationFormOptions {
   notification?: Notification
   onSuccess: () => void
 }
+
 export function useNotificationForm({ notification, onSuccess }: UseNotificationFormOptions) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { data: userData } = useCurrentUser()
+
   const form = useForm<NotificationFormData>({
     resolver: zodResolver(notificationSchema),
     defaultValues: {
@@ -215,6 +231,7 @@ export function useNotificationForm({ notification, onSuccess }: UseNotification
       data_course_slug: notification?.data?.course_slug || '',
     }
   })
+
   useEffect(() => {
     if (notification) {
       form.reset({
@@ -236,6 +253,7 @@ export function useNotificationForm({ notification, onSuccess }: UseNotification
       })
     }
   }, [notification, form])
+
   const createNotificationMutation = useMutation({
     mutationFn: async (data: NotificationFormData) => {
       if (!supabase || !userData?.user?.id) throw new Error('Supabase not initialized or user not found')
@@ -258,6 +276,7 @@ export function useNotificationForm({ notification, onSuccess }: UseNotification
         .single()
       
       if (error) throw error
+
       if (data.audience === 'all') {
         const { data: users } = await supabase
           .from('users')
@@ -294,6 +313,7 @@ export function useNotificationForm({ notification, onSuccess }: UseNotification
       })
     }
   })
+
   const updateNotificationMutation = useMutation({
     mutationFn: async (data: NotificationFormData) => {
       if (!supabase || !notification?.id) throw new Error('Supabase not initialized or notification not found')
@@ -332,6 +352,7 @@ export function useNotificationForm({ notification, onSuccess }: UseNotification
       })
     }
   })
+
   const onSubmit = async (data: NotificationFormData) => {
     if (notification) {
       await updateNotificationMutation.mutateAsync(data)
@@ -339,6 +360,7 @@ export function useNotificationForm({ notification, onSuccess }: UseNotification
       await createNotificationMutation.mutateAsync(data)
     }
   }
+
   return {
     form,
     onSubmit,

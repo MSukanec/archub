@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { LessonNote } from '../types';
+
 /**
  * Obtiene todas las notas de una lección.
  * 
@@ -14,12 +15,14 @@ export async function getLessonNotes(lessonId: string): Promise<LessonNote[]> {
   if (!lessonId) {
     return [];
   }
+
   const { data } = await supabase.auth.getSession();
   const session = data?.session;
   
   if (!session) {
     throw new Error('No active session');
   }
+
   const response = await fetch(`/api/lessons/${lessonId}/notes`, {
     method: 'GET',
     headers: {
@@ -28,9 +31,11 @@ export async function getLessonNotes(lessonId: string): Promise<LessonNote[]> {
     },
     credentials: 'include',
   });
+
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Failed to fetch lesson notes'}));
+    const error = await response.json().catch(() => ({ error: 'Failed to fetch lesson notes' }));
     throw new Error(error.error || 'Failed to fetch lesson notes');
   }
+
   return await response.json();
 }

@@ -30,12 +30,14 @@ import { useGeneralCostPaymentMedia } from '../hooks/use-general-cost-payment-me
 import { generalCostPaymentSchema, type GeneralCostPaymentFormData } from '../schemas'
 import type { GeneralCostPayment } from '../types'
 import type { BadgeVariant } from '@/components/ui/badge'
+
 const STATUS_MAP: Record<string, { label: string; variant: BadgeVariant }> = {
-  confirmed: { label: 'Confirmado', variant: 'success'},
-  pending: { label: 'Pendiente', variant: 'pending'},
-  rejected: { label: 'Rechazado', variant: 'error'},
-  void: { label: 'Anulado', variant: 'neutral'},
+  confirmed: { label: 'Confirmado', variant: 'success' },
+  pending: { label: 'Pendiente', variant: 'pending' },
+  rejected: { label: 'Rechazado', variant: 'error' },
+  void: { label: 'Anulado', variant: 'neutral' },
 }
+
 interface FormPanelProps {
   form: ReturnType<typeof useForm<GeneralCostPaymentFormData>>
   currencies: any[]
@@ -53,6 +55,7 @@ interface FormPanelProps {
   setOpenDatePicker: (open: boolean) => void
   visibility: any
 }
+
 export function FormPanel({
   form,
   currencies,
@@ -80,6 +83,7 @@ export function FormPanel({
       </div>
     )
   }
+
   return (
     <Form {...form}>
       <div className="space-y-4">
@@ -123,6 +127,7 @@ export function FormPanel({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="general_cost_id"
@@ -136,7 +141,7 @@ export function FormPanel({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">Sin asignar</SelectItem>
-                      {generalCosts?.sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base'})).map((gc) => (
+                      {generalCosts?.sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })).map((gc) => (
                         <SelectItem key={`general-cost-${gc.id}`} value={gc.id}>
                           {gc.name}
                         </SelectItem>
@@ -149,6 +154,7 @@ export function FormPanel({
             )}
           />
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -176,6 +182,7 @@ export function FormPanel({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="amount"
@@ -201,6 +208,7 @@ export function FormPanel({
             )}
           />
         </div>
+
         {(visibility.showCurrencySelector || visibility.showExchangeRate) && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {visibility.showCurrencySelector && (
@@ -231,6 +239,7 @@ export function FormPanel({
                 )}
               />
             )}
+
             {visibility.showExchangeRate && (
               <FormField
                 control={form.control}
@@ -255,6 +264,7 @@ export function FormPanel({
             )}
           </div>
         )}
+
         <FormField
           control={form.control}
           name="status"
@@ -280,6 +290,7 @@ export function FormPanel({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="notes"
@@ -298,6 +309,7 @@ export function FormPanel({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="reference"
@@ -315,6 +327,7 @@ export function FormPanel({
             </FormItem>
           )}
         />
+
         <div>
           <FileUploader
             mode="multiple"
@@ -330,15 +343,18 @@ export function FormPanel({
     </Form>
   )
 }
+
 interface ViewPanelProps {
   payment: GeneralCostPayment
   mediaFiles: any[]
 }
+
 export function ViewPanel({ payment, mediaFiles }: ViewPanelProps) {
   const statusConfig = STATUS_MAP[payment?.status || 'confirmed']
   const formattedDate = payment?.payment_date 
     ? format(parseLocalDate(payment.payment_date) || new Date(), 'dd MMMM yyyy', { locale: es }) 
     : 'Sin fecha'
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -348,6 +364,7 @@ export function ViewPanel({ payment, mediaFiles }: ViewPanelProps) {
             {formattedDate}
           </span>
         </div>
+
         {payment?.creator?.users && (
           <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
@@ -365,7 +382,9 @@ export function ViewPanel({ payment, mediaFiles }: ViewPanelProps) {
           </div>
         )}
       </div>
+
       <Separator />
+
       <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4">
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground flex items-center gap-2">
@@ -375,6 +394,7 @@ export function ViewPanel({ payment, mediaFiles }: ViewPanelProps) {
             {payment?.currency?.symbol || '$'} {payment?.amount?.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
           </p>
         </div>
+
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground flex items-center gap-2">
             <Coins className="h-4 w-4" /> Moneda
@@ -383,6 +403,7 @@ export function ViewPanel({ payment, mediaFiles }: ViewPanelProps) {
             {payment?.currency?.name || '-'} ({payment?.currency?.code})
           </p>
         </div>
+
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground flex items-center gap-2">
             <Wallet className="h-4 w-4" /> Billetera
@@ -391,12 +412,14 @@ export function ViewPanel({ payment, mediaFiles }: ViewPanelProps) {
             {payment?.wallet?.wallets?.name || '-'}
           </p>
         </div>
+
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground">Estado</p>
           <Badge variant={statusConfig.variant} data-testid="text-status">
             {statusConfig.label}
           </Badge>
         </div>
+
         {payment?.exchange_rate && (
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">Cotización</p>
@@ -405,6 +428,7 @@ export function ViewPanel({ payment, mediaFiles }: ViewPanelProps) {
             </p>
           </div>
         )}
+
         {payment?.general_cost && (
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">Categoría</p>
@@ -414,6 +438,7 @@ export function ViewPanel({ payment, mediaFiles }: ViewPanelProps) {
           </div>
         )}
       </div>
+
       {payment?.reference && (
         <>
           <Separator />
@@ -427,6 +452,7 @@ export function ViewPanel({ payment, mediaFiles }: ViewPanelProps) {
           </div>
         </>
       )}
+
       {payment?.notes && (
         <>
           <Separator />
@@ -438,6 +464,7 @@ export function ViewPanel({ payment, mediaFiles }: ViewPanelProps) {
           </div>
         </>
       )}
+
       {mediaFiles.length > 0 && (
         <>
           <Separator />
@@ -476,12 +503,14 @@ export function ViewPanel({ payment, mediaFiles }: ViewPanelProps) {
     </div>
   )
 }
+
 interface UseGeneralCostPaymentFormOptions {
   paymentId?: string
   organizationId?: string
-  mode: 'create'| 'edit'| 'view'
+  mode: 'create' | 'edit' | 'view'
   onSuccess: () => void
 }
+
 export function useGeneralCostPaymentForm({ paymentId, organizationId: orgIdProp, mode, onSuccess }: UseGeneralCostPaymentFormOptions) {
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
@@ -489,9 +518,11 @@ export function useGeneralCostPaymentForm({ paymentId, organizationId: orgIdProp
   
   const organizationId = orgIdProp || userData?.organization?.id
   const orgCurrencyContext = useOrgCurrencyContext(organizationId)
+
   const [filesToUpload, setFilesToUpload] = useState<any[]>([])
   const [existingFiles, setExistingFiles] = useState<any[]>([])
   const [openDatePicker, setOpenDatePicker] = useState(false)
+
   const form = useForm<GeneralCostPaymentFormData>({
     resolver: zodResolver(generalCostPaymentSchema),
     defaultValues: {
@@ -506,24 +537,28 @@ export function useGeneralCostPaymentForm({ paymentId, organizationId: orgIdProp
       status: 'confirmed',
     },
   })
+
   const { data: existingPayment, isLoading: loadingPayment, isSuccess: paymentLoaded } = useGeneralCostPayment(
-    mode === 'edit'|| mode === 'view'? paymentId : undefined,
+    mode === 'edit' || mode === 'view' ? paymentId : undefined,
     organizationId
   )
-  const { data: mediaFiles = [] } = useGeneralCostPaymentMedia(mode === 'edit'|| mode === 'view'? paymentId : undefined)
+  const { data: mediaFiles = [] } = useGeneralCostPaymentMedia(mode === 'edit' || mode === 'view' ? paymentId : undefined)
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId)
   const { data: generalCosts, isLoading: generalCostsLoading } = useGeneralCosts(organizationId || null)
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId)
   const { data: members = [] } = useOrganizationMembers(organizationId)
+
   const visibility = getCurrencyFieldsVisibility({
     context: orgCurrencyContext,
     selectedCurrencyId: form.watch('currency_id')
   })
-  const isLoading = currenciesLoading || generalCostsLoading || walletsLoading || (mode === 'edit'&& loadingPayment) || orgCurrencyContext.isLoading
-  const paymentLoading = (mode === 'edit'|| mode === 'view') && loadingPayment
+
+  const isLoading = currenciesLoading || generalCostsLoading || walletsLoading || (mode === 'edit' && loadingPayment) || orgCurrencyContext.isLoading
+  const paymentLoading = (mode === 'edit' || mode === 'view') && loadingPayment
+
   const hasLoadedPaymentRef = useRef<string | null>(null)
   useEffect(() => {
-    if (mode !== 'edit'|| !paymentLoaded || !existingPayment) return
+    if (mode !== 'edit' || !paymentLoaded || !existingPayment) return
     if (hasLoadedPaymentRef.current === paymentId) return
     
     hasLoadedPaymentRef.current = paymentId ?? null
@@ -545,23 +580,26 @@ export function useGeneralCostPaymentForm({ paymentId, organizationId: orgIdProp
       exchange_rate: existingPayment.exchange_rate ?? undefined,
       notes: existingPayment.notes || '',
       reference: existingPayment.reference || '',
-      status: (existingPayment.status || 'confirmed') as 'pending'| 'confirmed'| 'rejected'| 'void',
+      status: (existingPayment.status || 'confirmed') as 'pending' | 'confirmed' | 'rejected' | 'void',
     })
   }, [paymentId, paymentLoaded, existingPayment, mode, form])
+
   const mediaFilesRef = useRef<string>('')
   useEffect(() => {
     const currentMediaIds = (mediaFiles || []).map((f: any) => f.id).sort().join(',')
     if (mediaFilesRef.current === currentMediaIds) return
     mediaFilesRef.current = currentMediaIds
+
     if (mediaFiles && mediaFiles.length > 0) {
       setExistingFiles(mediaFiles)
     } else {
       setExistingFiles([])
     }
   }, [mediaFiles])
+
   const hasSetDefaultsRef = useRef(false)
   useEffect(() => {
-    if (mode !== 'create'|| paymentId || hasSetDefaultsRef.current) return
+    if (mode !== 'create' || paymentId || hasSetDefaultsRef.current) return
     
     if (currencies && currencies.length > 0 && wallets && wallets.length > 0) {
       hasSetDefaultsRef.current = true
@@ -581,8 +619,10 @@ export function useGeneralCostPaymentForm({ paymentId, organizationId: orgIdProp
       }
     }
   }, [currencies, wallets, mode, paymentId, form])
+
   const createPaymentMutation = useCreateGeneralCostPayment()
   const updatePaymentMutation = useUpdateGeneralCostPayment()
+
   const handleExistingFileDelete = async (fileId: string) => {
     try {
       await deleteFile(fileId, false)
@@ -599,28 +639,35 @@ export function useGeneralCostPaymentForm({ paymentId, organizationId: orgIdProp
       })
     }
   }
+
   const currentMember = useMemo(() => {
     return members.find((m: any) => m.user_id === userData?.user?.id)
   }, [members, userData?.user?.id])
+
   const isSubmitting = createPaymentMutation.isPending || updatePaymentMutation.isPending
+
   const onSubmit = async (data: GeneralCostPaymentFormData) => {
     if (!organizationId || !userData?.user?.id) {
-      toast({ title: 'Error', description: 'Organization ID or User ID not found', variant: 'destructive'})
+      toast({ title: 'Error', description: 'Organization ID or User ID not found', variant: 'destructive' })
       return
     }
+
     if (!data.wallet_id) {
-      toast({ title: 'Error', description: 'Wallet ID is required', variant: 'destructive'})
+      toast({ title: 'Error', description: 'Wallet ID is required', variant: 'destructive' })
       return
     }
+
     const selectedWallet = wallets?.find((w) => w.id === data.wallet_id)
     if (!selectedWallet) {
-      toast({ title: 'Error', description: `Wallet with ID ${data.wallet_id} not found`, variant: 'destructive'})
+      toast({ title: 'Error', description: `Wallet with ID ${data.wallet_id} not found`, variant: 'destructive' })
       return
     }
+
     if (!currentMember) {
-      toast({ title: 'Error', description: 'No se encontró el miembro de la organización', variant: 'destructive'})
+      toast({ title: 'Error', description: 'No se encontró el miembro de la organización', variant: 'destructive' })
       return
     }
+
     const paymentData = {
       organization_id: organizationId,
       payment_date: data.payment_date.toISOString().split('T')[0],
@@ -634,9 +681,11 @@ export function useGeneralCostPaymentForm({ paymentId, organizationId: orgIdProp
       status: data.status || 'confirmed',
       created_by: currentMember.id,
     }
+
     try {
       let savedPaymentId = paymentId
-      if (mode === 'edit'&& paymentId) {
+
+      if (mode === 'edit' && paymentId) {
         await updatePaymentMutation.mutateAsync({
           id: paymentId,
           organizationId: organizationId,
@@ -646,6 +695,7 @@ export function useGeneralCostPaymentForm({ paymentId, organizationId: orgIdProp
         const result = await createPaymentMutation.mutateAsync(paymentData)
         savedPaymentId = result.id
       }
+
       if (filesToUpload.length > 0 && savedPaymentId) {
         for (const fileInput of filesToUpload) {
           try {
@@ -658,21 +708,24 @@ export function useGeneralCostPaymentForm({ paymentId, organizationId: orgIdProp
               description: fileInput.description || fileInput.file.name,
             })
           } catch (uploadError: any) {
-            toast({ title: 'Error al subir archivo', description: uploadError.message, variant: 'destructive'})
+            toast({ title: 'Error al subir archivo', description: uploadError.message, variant: 'destructive' })
           }
         }
         queryClient.invalidateQueries({ queryKey: ['general-cost-payment-media', savedPaymentId] })
         setFilesToUpload([])
       }
+
       toast({
-        title: mode === 'edit'? 'Pago actualizado': 'Pago creado',
-        description: mode === 'edit'? 'El pago ha sido actualizado correctamente': 'El pago ha sido creado correctamente',
+        title: mode === 'edit' ? 'Pago actualizado' : 'Pago creado',
+        description: mode === 'edit' ? 'El pago ha sido actualizado correctamente' : 'El pago ha sido creado correctamente',
       })
+
       onSuccess()
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message || 'Error al guardar el pago', variant: 'destructive'})
+      toast({ title: 'Error', description: error.message || 'Error al guardar el pago', variant: 'destructive' })
     }
   }
+
   return {
     form,
     onSubmit,
@@ -696,15 +749,17 @@ export function useGeneralCostPaymentForm({ paymentId, organizationId: orgIdProp
     isSubmitting,
   }
 }
+
 interface GeneralCostPaymentFormFieldsProps {
   organizationId?: string
   paymentId?: string
-  mode?: 'create'| 'edit'
+  mode?: 'create' | 'edit'
   onSuccess?: () => void
   onCancel?: () => void
   hideActions?: boolean
   formRef?: React.RefObject<HTMLFormElement>
 }
+
 export function GeneralCostPaymentFormFields({
   organizationId,
   paymentId,
@@ -738,6 +793,7 @@ export function GeneralCostPaymentFormFields({
     mode,
     onSuccess: onSuccess || (() => {}),
   })
+
   return (
     <form
       ref={formRef}
@@ -762,6 +818,7 @@ export function GeneralCostPaymentFormFields({
         setOpenDatePicker={setOpenDatePicker}
         visibility={visibility}
       />
+
       {!hideActions && (
         <div className="flex gap-2 justify-end pt-4">
           {onCancel && (
@@ -778,7 +835,7 @@ export function GeneralCostPaymentFormFields({
             disabled={isSubmitting}
             className="px-4 py-2 text-sm bg-accent text-accent-foreground rounded-md hover:bg-accent/90 disabled:opacity-50"
           >
-            {isSubmitting ? 'Guardando...': mode === 'edit'? 'Actualizar Pago': 'Guardar Pago'}
+            {isSubmitting ? 'Guardando...' : mode === 'edit' ? 'Actualizar Pago' : 'Guardar Pago'}
           </button>
         </div>
       )}

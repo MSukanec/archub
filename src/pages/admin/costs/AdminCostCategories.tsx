@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { Plus, Tag, Layers } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+
 import { HierarchicalTree } from '@/components/shared/trees/HierarchicalTree';
+
 import { useMaterialCategories, useDeleteMaterialCategory, MaterialCategory } from '@/features/materials';
 import { useGlobalModalStore } from '@/components/modal';
 import { useCurrentUser } from '@/hooks/use-current-user';
+
 const AdminCostCategories = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
@@ -14,11 +18,14 @@ const AdminCostCategories = () => {
   const { openModal } = useGlobalModalStore();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
+
   const { data: categories = [], isLoading, error, isError } = useMaterialCategories(organizationId);
+
   // Debug query state (only log errors)
   if (isError) {
     console.error('❌ AdminMaterialCategories error:', error);
   }
+
   // Auto-expand categories that have children (only on initial load)
   React.useEffect(() => {
     if (categories.length > 0 && expandedCategories.size === 0) {
@@ -41,10 +48,13 @@ const AdminCostCategories = () => {
       }
     }
   }, [categories, expandedCategories.size]);
+
   const deleteMaterialCategoryMutation = useDeleteMaterialCategory();
+
   const handleSearch = (term: string) => {
     setSearchTerm(term);
   };
+
   const toggleCategoryExpansion = (categoryId: string) => {
     setExpandedCategories(prev => {
       const newSet = new Set(prev);
@@ -56,6 +66,7 @@ const AdminCostCategories = () => {
       return newSet;
     });
   };
+
   const handleDeleteCategory = (categoryId: string, categoryName: string) => {
     openModal('delete-confirmation', {
       title: "Eliminar categoría de material",
@@ -73,16 +84,19 @@ const AdminCostCategories = () => {
       mode: 'dangerous'
     });
   };
+
   const handleEditCategory = (category: MaterialCategory) => {
     openModal('material-category-form', { 
       editingMaterialCategory: category 
     });
   };
+
   const handleCreateCategory = () => {
     openModal('material-category-form', {
       editingMaterialCategory: null
     });
   };
+
   const findCategoryInTree = (cats: MaterialCategory[], id: string): MaterialCategory | null => {
     for (const cat of cats) {
       if (cat.id === id) return cat;
@@ -93,6 +107,7 @@ const AdminCostCategories = () => {
     }
     return null;
   };
+
   const handleCreateChildCategory = (parentCategory: MaterialCategory) => {
     openModal('material-category-form', {
       editingMaterialCategory: null,
@@ -102,9 +117,11 @@ const AdminCostCategories = () => {
       }
     });
   };
+
   // Filter categories based on search term
   const filteredCategories = React.useMemo(() => {
     if (!searchTerm) return categories;
+
     const filterCategories = (cats: MaterialCategory[]): MaterialCategory[] => {
       return cats.filter(cat => {
         const matchesSearch = cat.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -123,8 +140,10 @@ const AdminCostCategories = () => {
         children: cat.children ? filterCategories(cat.children) : []
       }));
     };
+
     return filterCategories(categories);
   }, [categories, searchTerm]);
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -137,6 +156,7 @@ const AdminCostCategories = () => {
       </div>
     );
   }
+
   return (
     <div className="space-y-6">
       {/* Hierarchical Category Tree */}
@@ -146,7 +166,7 @@ const AdminCostCategories = () => {
             <div className="text-center py-12">
               <Tag className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium text-muted-foreground mb-2">
-                {searchTerm ? 'No se encontraron categorías': 'No hay categorías creadas'}
+                {searchTerm ? 'No se encontraron categorías' : 'No hay categorías creadas'}
               </h3>
               <p className="text-sm text-muted-foreground mb-4">
                 {searchTerm 
@@ -201,4 +221,5 @@ const AdminCostCategories = () => {
     </div>
   );
 };
+
 export default AdminCostCategories;
