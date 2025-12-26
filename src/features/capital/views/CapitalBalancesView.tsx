@@ -1,12 +1,9 @@
-import { TrendingUp, TrendingDown, Wallet, HandHeart } from 'lucide-react';
-import { useMemo } from 'react';
+import { TrendingUp, TrendingDown, Wallet, HandHeart, Scale } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
-import { usePartnerMovements } from '@/features/finances/hooks/use-partner-movements';
-import { usePartnerMetrics } from '@/features/finances/hooks/use-partner-metrics';
 import { usePartners, usePartnerCapitalKPI, type PartnerCapitalKPI } from '@/features/capital';
 import { CapitalBalanceCard } from '@/features/capital/components/CapitalBalanceCard';
 
@@ -29,52 +26,43 @@ export function CapitalBalancesView() {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
 
-  const { data: movements = [], isLoading: loadingMovements } = usePartnerMovements(organizationId);
   const { data: defaultCurrency, isLoading: loadingCurrency } = useOrganizationDefaultCurrency(organizationId);
   const { data: partners = [], isLoading: loadingPartners } = usePartners(organizationId, { enabled: !!organizationId });
   const { data: kpiData = [], isLoading: loadingKPI } = usePartnerCapitalKPI(organizationId, { enabled: !!organizationId });
 
-  const {
-    totalContributions,
-    totalWithdrawals,
-    totalInPrimaryCurrency,
-    contributionsByCurrency,
-    withdrawalsByCurrency,
-    balanceByCurrency,
-    balanceByPartner,
-  } = usePartnerMetrics(movements, defaultCurrency?.code);
+  // All totals come directly from the SQL view (first row has org totals)
+  const orgTotals = kpiData.length > 0 ? kpiData[0] : null;
+  const totalContributions = orgTotals?.org_total_contributions ?? 0;
+  const totalWithdrawals = orgTotals?.org_total_withdrawals ?? 0;
+  const totalAdjustments = orgTotals?.org_total_adjustments ?? 0;
+  const totalNetCapital = orgTotals?.org_total_net_capital ?? 0;
 
-  // Calculate total adjustments from KPI data
-  const totalAdjustments = kpiData.length > 0 ? kpiData[0]?.total_adjustments ?? 0 : 0;
+  // Build enriched balances from KPI data
+  const enrichedBalances: EnrichedPartnerBalance[] = kpiData.map(kpi => {
+    const partnerData = partners.find(p => p.id === kpi.partner_id);
+    const partnerName = partnerData?.contacts?.full_name 
+      || partnerData?.contacts?.company_name 
+      || 'Sin nombre';
+    const linkedUser = partnerData?.contacts?.linked_user;
+    const resolvedLinkedUser = Array.isArray(linkedUser) ? linkedUser[0] : linkedUser;
 
-  const enrichedBalances = useMemo<EnrichedPartnerBalance[]>(() => {
-    if (balanceByPartner.length === 0) return [];
+    return {
+      partnerId: kpi.partner_id,
+      partnerName,
+      balance: kpi.current_balance,
+      ownershipPercentage: kpi.ownership_percentage,
+      partner_contributed: kpi.total_contributed,
+      expected_contribution: kpi.expected_contribution,
+      deviation_contribution: kpi.deviation_contribution,
+      contribution_status: kpi.contribution_status,
+      expected_net_capital: kpi.expected_net_capital,
+      deviation_net: kpi.deviation_net,
+      net_status: kpi.net_status,
+      linkedUser: resolvedLinkedUser,
+    };
+  }).sort((a, b) => (b.ownershipPercentage ?? 0) - (a.ownershipPercentage ?? 0));
 
-    return balanceByPartner.map(balance => {
-      const partnerData = partners.find(p => p.id === balance.partnerId);
-      const linkedUser = partnerData?.contacts?.linked_user;
-      const resolvedLinkedUser = Array.isArray(linkedUser) ? linkedUser[0] : linkedUser;
-
-      const kpi = kpiData.find(k => k.partner_id === balance.partnerId);
-
-      return {
-        partnerId: balance.partnerId,
-        partnerName: balance.partnerName,
-        balance: balance.balance,
-        ownershipPercentage: kpi?.ownership_percentage ?? null,
-        partner_contributed: kpi?.partner_contributed ?? 0,
-        expected_contribution: kpi?.expected_contribution ?? null,
-        deviation_contribution: kpi?.deviation_contribution ?? null,
-        contribution_status: kpi?.contribution_status ?? 'sin_porcentaje',
-        expected_net_capital: kpi?.expected_net_capital ?? null,
-        deviation_net: kpi?.deviation_net ?? null,
-        net_status: kpi?.net_status ?? 'sin_porcentaje',
-        linkedUser: resolvedLinkedUser,
-      };
-    }).sort((a, b) => (b.ownershipPercentage ?? 0) - (a.ownershipPercentage ?? 0));
-  }, [balanceByPartner, partners, kpiData]);
-
-  const isLoading = loadingMovements || loadingCurrency || loadingPartners || loadingKPI;
+  const isLoading = loadingCurrency || loadingPartners || loadingKPI;
   const currencySymbol = defaultCurrency?.symbol || '$';
 
   const formatCurrency = (amount: number) => {
@@ -83,18 +71,6 @@ export function CapitalBalancesView() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(absAmount);
-  };
-
-  const formatBreakdown = (items: Array<{ currencySymbol: string; amount: number }>) => {
-    if (!items || items.length === 0) return '';
-    if (items.length === 1) return items[0].currencySymbol;
-    return items.map(({ currencySymbol: sym, amount }) => {
-      const formattedAmount = new Intl.NumberFormat('es-AR', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-      }).format(Math.abs(amount));
-      return `${sym} ${formattedAmount}`;
-    }).join(' + ');
   };
 
   if (!organizationId) {
@@ -113,7 +89,7 @@ export function CapitalBalancesView() {
     );
   }
 
-  if (balanceByPartner.length === 0) {
+  if (kpiData.length === 0) {
     return (
       <EmptyState
         icon={<HandHeart />}
@@ -123,7 +99,7 @@ export function CapitalBalancesView() {
     );
   }
 
-  const isPositiveBalance = totalInPrimaryCurrency >= 0;
+  const isPositiveNetCapital = totalNetCapital >= 0;
 
   return (
     <div className="space-y-6">
@@ -137,10 +113,7 @@ export function CapitalBalancesView() {
             {currencySymbol} {formatCurrency(totalContributions)}
           </StatCardValue>
           <StatCardMeta>
-            {contributionsByCurrency.length > 1 
-              ? formatBreakdown(contributionsByCurrency)
-              : `${movements.filter(m => m.amount >= 0).length} aportes confirmados`
-            }
+            Aportes confirmados
           </StatCardMeta>
         </StatCard>
 
@@ -153,10 +126,20 @@ export function CapitalBalancesView() {
             {currencySymbol} {formatCurrency(totalWithdrawals)}
           </StatCardValue>
           <StatCardMeta>
-            {withdrawalsByCurrency.length > 1 
-              ? formatBreakdown(withdrawalsByCurrency)
-              : `${movements.filter(m => m.amount < 0).length} retiros confirmados`
-            }
+            Retiros confirmados
+          </StatCardMeta>
+        </StatCard>
+
+        <StatCard data-testid="stat-card-total-ajustes">
+          <StatCardTitle showArrow={false}>
+            <Scale className="h-4 w-4" />
+            Total Ajustes
+          </StatCardTitle>
+          <StatCardValue className={totalAdjustments >= 0 ? "text-[var(--positive)]" : "text-[var(--negative)]"}>
+            {totalAdjustments > 0 ? '+' : ''}{currencySymbol} {formatCurrency(totalAdjustments)}
+          </StatCardValue>
+          <StatCardMeta>
+            {totalAdjustments === 0 ? 'Sin ajustes' : 'Ajustes confirmados'}
           </StatCardMeta>
         </StatCard>
 
@@ -165,14 +148,11 @@ export function CapitalBalancesView() {
             <Wallet className="h-4 w-4" />
             Saldo Neto
           </StatCardTitle>
-          <StatCardValue className={isPositiveBalance ? "text-[var(--positive)]" : "text-[var(--negative)]"}>
-            {isPositiveBalance ? '' : '-'}{currencySymbol} {formatCurrency(totalInPrimaryCurrency)}
+          <StatCardValue className={isPositiveNetCapital ? "text-[var(--positive)]" : "text-[var(--negative)]"}>
+            {isPositiveNetCapital ? '' : '-'}{currencySymbol} {formatCurrency(totalNetCapital)}
           </StatCardValue>
           <StatCardMeta>
-            {balanceByCurrency.length > 1 
-              ? formatBreakdown(balanceByCurrency.map(c => ({ currencySymbol: c.currencySymbol, amount: c.balance })))
-              : 'Aportes - Retiros'
-            }
+            Aportes - Retiros + Ajustes
           </StatCardMeta>
         </StatCard>
 
@@ -182,23 +162,10 @@ export function CapitalBalancesView() {
             Socios
           </StatCardTitle>
           <StatCardValue>
-            {balanceByPartner.length}
+            {kpiData.length}
           </StatCardValue>
           <StatCardMeta>
             Participantes con movimientos
-          </StatCardMeta>
-        </StatCard>
-
-        <StatCard data-testid="stat-card-total-ajustes">
-          <StatCardTitle showArrow={false}>
-            <Wallet className="h-4 w-4" />
-            Total Ajustes
-          </StatCardTitle>
-          <StatCardValue className={totalAdjustments >= 0 ? "text-[var(--positive)]" : "text-[var(--negative)]"}>
-            {totalAdjustments > 0 ? '+' : ''}{currencySymbol} {formatCurrency(totalAdjustments)}
-          </StatCardValue>
-          <StatCardMeta>
-            {totalAdjustments === 0 ? 'Sin ajustes' : 'Ajustes confirmados'}
           </StatCardMeta>
         </StatCard>
       </div>
