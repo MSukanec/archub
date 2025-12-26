@@ -11,7 +11,8 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { useGlobalModalStore } from '@/components/modal';
 import { parseLocalDate } from '@/lib/date-utils';
 import { useMobile } from '@/hooks/use-mobile';
-import { usePartners, usePartnerContributions, usePartnerWithdrawals, CAPITAL_QUERY_KEYS } from '@/features/capital';
+import { usePartners, usePartnerContributions, usePartnerWithdrawals } from '@/features/capital';
+import { capitalKeys } from '@/core/query-keys';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
@@ -72,10 +73,10 @@ export function CapitalParticipantsListView() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.participants(organizationId!) });
-      queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.contributions(organizationId) });
-      queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.withdrawals(organizationId) });
-      queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.unifiedMovements() });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.participantsList(organizationId!) });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.contributionsList(organizationId) });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.withdrawalsList(organizationId) });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.unifiedMovements() });
       toast({
         title: "Socio eliminado",
         description: "El socio ha sido eliminado de la organización.",

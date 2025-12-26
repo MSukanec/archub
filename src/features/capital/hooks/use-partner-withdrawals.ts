@@ -6,7 +6,7 @@ import {
 import { createPartnerWithdrawal } from '../services/createPartnerWithdrawal';
 import { updatePartnerWithdrawal } from '../services/updatePartnerWithdrawal';
 import { deletePartnerWithdrawal } from '../services/deletePartnerWithdrawal';
-import { PARTNER_QUERY_KEYS } from '../constants';
+import { capitalKeys } from '@/core/query-keys';
 import type { PartnerWithdrawal, PartnerWithdrawalCreateInput } from '../types';
 
 export function usePartnerWithdrawals(
@@ -14,7 +14,7 @@ export function usePartnerWithdrawals(
   projectId?: string
 ) {
   return useQuery<PartnerWithdrawal[]>({
-    queryKey: PARTNER_QUERY_KEYS.withdrawals(organizationId || '', projectId),
+    queryKey: capitalKeys.withdrawalsList(organizationId || '', projectId),
     queryFn: () => getPartnerWithdrawals(organizationId!, projectId),
     enabled: !!organizationId,
   });
@@ -25,7 +25,7 @@ export function usePartnerWithdrawal(
   organizationId: string | undefined
 ) {
   return useQuery<PartnerWithdrawal | null>({
-    queryKey: PARTNER_QUERY_KEYS.withdrawal(withdrawalId || ''),
+    queryKey: capitalKeys.withdrawal(withdrawalId || ''),
     queryFn: () => getPartnerWithdrawalById(withdrawalId!, organizationId!),
     enabled: !!withdrawalId && !!organizationId,
   });
@@ -38,10 +38,10 @@ export function useCreatePartnerWithdrawal() {
     mutationFn: (input: PartnerWithdrawalCreateInput) => createPartnerWithdrawal(input),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: PARTNER_QUERY_KEYS.withdrawals(data.organization_id, data.project_id || undefined),
+        queryKey: capitalKeys.withdrawalsList(data.organization_id, data.project_id || undefined),
       });
-      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.unifiedMovements() });
-      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.partnerMovements(data.organization_id, data.project_id) });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.unifiedMovements() });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.partnerMovements(data.organization_id, data.project_id) });
     },
   });
 }
@@ -61,13 +61,13 @@ export function useUpdatePartnerWithdrawal() {
     }) => updatePartnerWithdrawal(withdrawalId, updates, organizationId),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: PARTNER_QUERY_KEYS.withdrawals(data.organization_id, data.project_id || undefined),
+        queryKey: capitalKeys.withdrawalsList(data.organization_id, data.project_id || undefined),
       });
       queryClient.invalidateQueries({
-        queryKey: PARTNER_QUERY_KEYS.withdrawal(data.id),
+        queryKey: capitalKeys.withdrawal(data.id),
       });
-      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.unifiedMovements() });
-      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.partnerMovements(data.organization_id, data.project_id) });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.unifiedMovements() });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.partnerMovements(data.organization_id, data.project_id) });
     },
   });
 }
@@ -86,11 +86,11 @@ export function useDeletePartnerWithdrawal() {
     }) => deletePartnerWithdrawal(withdrawalId, organizationId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: PARTNER_QUERY_KEYS.withdrawals(variables.organizationId, variables.projectId),
+        queryKey: capitalKeys.withdrawalsList(variables.organizationId, variables.projectId),
       });
-      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.unifiedMovements() });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.unifiedMovements() });
       queryClient.invalidateQueries({
-        queryKey: PARTNER_QUERY_KEYS.partnerMovements(variables.organizationId, variables.projectId),
+        queryKey: capitalKeys.partnerMovements(variables.organizationId, variables.projectId),
       });
     },
   });

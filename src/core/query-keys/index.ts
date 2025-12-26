@@ -37,3 +37,6 @@ export type { GeneralCostsQueryKey } from './general-costs.keys';
 
 export { usersKeys } from './users.keys';
 export type { UsersQueryKey } from './users.keys';
+
+export { capitalKeys } from './capital.keys';
+export type { CapitalQueryKey } from './capital.keys';

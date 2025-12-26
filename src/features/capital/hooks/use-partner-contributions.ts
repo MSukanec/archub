@@ -6,7 +6,7 @@ import {
 import { createPartnerContribution } from '../services/createPartnerContribution';
 import { updatePartnerContribution } from '../services/updatePartnerContribution';
 import { deletePartnerContribution } from '../services/deletePartnerContribution';
-import { PARTNER_QUERY_KEYS } from '../constants';
+import { capitalKeys } from '@/core/query-keys';
 import type { PartnerContribution, PartnerContributionCreateInput } from '../types';
 
 export function usePartnerContributions(
@@ -14,7 +14,7 @@ export function usePartnerContributions(
   projectId?: string
 ) {
   return useQuery<PartnerContribution[]>({
-    queryKey: PARTNER_QUERY_KEYS.contributions(organizationId || '', projectId),
+    queryKey: capitalKeys.contributionsList(organizationId || '', projectId),
     queryFn: () => getPartnerContributions(organizationId!, projectId),
     enabled: !!organizationId,
   });
@@ -25,7 +25,7 @@ export function usePartnerContribution(
   organizationId: string | undefined
 ) {
   return useQuery<PartnerContribution | null>({
-    queryKey: PARTNER_QUERY_KEYS.contribution(contributionId || ''),
+    queryKey: capitalKeys.contribution(contributionId || ''),
     queryFn: () => getPartnerContributionById(contributionId!, organizationId!),
     enabled: !!contributionId && !!organizationId,
   });
@@ -38,10 +38,10 @@ export function useCreatePartnerContribution() {
     mutationFn: (input: PartnerContributionCreateInput) => createPartnerContribution(input),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: PARTNER_QUERY_KEYS.contributions(data.organization_id, data.project_id || undefined),
+        queryKey: capitalKeys.contributionsList(data.organization_id, data.project_id || undefined),
       });
-      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.unifiedMovements() });
-      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.partnerMovements(data.organization_id, data.project_id) });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.unifiedMovements() });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.partnerMovements(data.organization_id, data.project_id) });
     },
   });
 }
@@ -61,13 +61,13 @@ export function useUpdatePartnerContribution() {
     }) => updatePartnerContribution(contributionId, updates, organizationId),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: PARTNER_QUERY_KEYS.contributions(data.organization_id, data.project_id || undefined),
+        queryKey: capitalKeys.contributionsList(data.organization_id, data.project_id || undefined),
       });
       queryClient.invalidateQueries({
-        queryKey: PARTNER_QUERY_KEYS.contribution(data.id),
+        queryKey: capitalKeys.contribution(data.id),
       });
-      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.unifiedMovements() });
-      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.partnerMovements(data.organization_id, data.project_id) });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.unifiedMovements() });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.partnerMovements(data.organization_id, data.project_id) });
     },
   });
 }
@@ -86,11 +86,11 @@ export function useDeletePartnerContribution() {
     }) => deletePartnerContribution(contributionId, organizationId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: PARTNER_QUERY_KEYS.contributions(variables.organizationId, variables.projectId),
+        queryKey: capitalKeys.contributionsList(variables.organizationId, variables.projectId),
       });
-      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.unifiedMovements() });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.unifiedMovements() });
       queryClient.invalidateQueries({
-        queryKey: PARTNER_QUERY_KEYS.partnerMovements(variables.organizationId, variables.projectId),
+        queryKey: capitalKeys.partnerMovements(variables.organizationId, variables.projectId),
       });
     },
   });

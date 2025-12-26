@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
-import { CAPITAL_QUERY_KEYS } from '../constants';
+import { capitalKeys } from '@/core/query-keys';
 
 const partnerSchema = z.object({
   contactId: z.string().min(1, 'Debe seleccionar un contacto'),
@@ -66,7 +66,7 @@ export function CapitalParticipantForm({
   const orgId = organizationId || userData?.preferences?.last_organization_id;
 
   const { data: contacts = [], isLoading: contactsLoading } = useQuery<Contact[]>({
-    queryKey: CAPITAL_QUERY_KEYS.contactsForPartner(orgId || ''),
+    queryKey: capitalKeys.contactsForPartner(orgId || ''),
     queryFn: async () => {
       if (!orgId) return [];
       
@@ -94,7 +94,7 @@ export function CapitalParticipantForm({
   });
 
   const { data: existingPartner, isLoading: partnerLoading } = useQuery({
-    queryKey: CAPITAL_QUERY_KEYS.partner(partnerId || ''),
+    queryKey: capitalKeys.partner(partnerId || ''),
     queryFn: async () => {
       if (!partnerId) return null;
       
@@ -111,7 +111,7 @@ export function CapitalParticipantForm({
   });
 
   const { data: existingPartnerContactIds = [] } = useQuery<string[]>({
-    queryKey: CAPITAL_QUERY_KEYS.partnerContactIds(orgId || ''),
+    queryKey: capitalKeys.partnerContactIds(orgId || ''),
     queryFn: async () => {
       if (!orgId) return [];
       
@@ -167,8 +167,8 @@ export function CapitalParticipantForm({
       return result;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.participants(orgId || '') });
-      queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.partnerContactIds(orgId || '') });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.participantsList(orgId || '') });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.partnerContactIds(orgId || '') });
       toast({
         title: 'Socio agregado',
         description: 'El socio ha sido agregado correctamente',
@@ -203,8 +203,8 @@ export function CapitalParticipantForm({
       return result;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.participants(orgId || '') });
-      queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.partnerContactIds(orgId || '') });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.participantsList(orgId || '') });
+      queryClient.invalidateQueries({ queryKey: capitalKeys.partnerContactIds(orgId || '') });
       toast({
         title: 'Socio actualizado',
         description: 'Los datos del socio han sido actualizados',
