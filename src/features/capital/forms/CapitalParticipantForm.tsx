@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
+import { usePartners } from '@/features/capital';
 import { capitalKeys } from '@/core/query-keys';
 
 const partnerSchema = z.object({
@@ -72,6 +73,7 @@ export function CapitalParticipantForm({
 
   const orgId = organizationId || userData?.preferences?.last_organization_id;
 
+  const { data: allPartners = [] } = usePartners(orgId);
   const { data: contacts = [], isLoading: contactsLoading } = useQuery<Contact[]>({
     queryKey: capitalKeys.contactsForPartner(orgId || ''),
     queryFn: async () => {
@@ -232,6 +234,22 @@ export function CapitalParticipantForm({
   });
 
   const handleSubmit = async (data: PartnerFormData) => {
+    // Validar que la sumatoria no exceda 100%
+    if (data.ownershipPercentage !== null && data.ownershipPercentage !== undefined) {
+      const otherPartners = allPartners.filter((p: any) => mode === 'edit' ? p.id !== partnerId : true);
+      const otherPercentageSum = otherPartners.reduce((sum: number, p: any) => sum + (p.ownership_percentage || 0), 0);
+      const totalPercentage = otherPercentageSum + data.ownershipPercentage;
+      
+      if (totalPercentage > 100) {
+        toast({
+          title: 'Porcentaje inválido',
+          description: `La sumatoria de participaciones no puede exceder 100%. Actual: ${totalPercentage.toFixed(1)}%`,
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
     if (mode === 'edit') {
       await updateMutation.mutateAsync(data);
     } else {

@@ -43,23 +43,29 @@ export function CapitalParticipantsListView() {
   }, [partners]);
 
   const metrics = useMemo(() => {
-    const now = new Date();
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setMonth(now.getMonth() - 1);
-
     const confirmedContributions = contributions.filter(c => c.status === 'confirmed');
     const confirmedWithdrawals = withdrawals.filter(w => w.status === 'confirmed');
     
-    const recentContributions = contributions.filter(contribution => {
-      const contributionDate = parseLocalDate(contribution.contribution_date);
-      return contributionDate && contributionDate >= oneMonthAgo && contributionDate <= now;
-    });
+    const totalOwnershipPercentage = partners.reduce((sum, p) => sum + (p.ownership_percentage || 0), 0);
+    const unassignedPercentage = 100 - totalOwnershipPercentage;
+    
+    let assignmentStatus = '';
+    if (totalOwnershipPercentage === 0) {
+      assignmentStatus = 'Sin asignaciones';
+    } else if (totalOwnershipPercentage < 100) {
+      assignmentStatus = `${unassignedPercentage.toFixed(1)}% sin asignar`;
+    } else if (totalOwnershipPercentage === 100) {
+      assignmentStatus = 'Totalmente asignado';
+    } else {
+      assignmentStatus = `Excede en ${(totalOwnershipPercentage - 100).toFixed(1)}%`;
+    }
 
     return {
       totalPartners: partners.length,
       totalContributions: confirmedContributions.length,
       totalWithdrawals: confirmedWithdrawals.length,
-      recentContributions: recentContributions.length,
+      totalOwnershipPercentage,
+      assignmentStatus,
     };
   }, [partners, contributions, withdrawals]);
 
@@ -268,16 +274,16 @@ export function CapitalParticipantsListView() {
           </StatCardMeta>
         </StatCard>
 
-        <StatCard data-testid="stat-card-recent-contributions">
+        <StatCard data-testid="stat-card-ownership-assignment">
           <StatCardTitle showArrow={false}>
-            <Calendar className="h-4 w-4" />
-            Recientes
+            <TrendingUp className="h-4 w-4" />
+            Asignación Capital
           </StatCardTitle>
           <StatCardValue>
-            {metrics.recentContributions}
+            {metrics.totalOwnershipPercentage.toFixed(1)}%
           </StatCardValue>
           <StatCardMeta>
-            Aportes del último mes
+            {metrics.assignmentStatus}
           </StatCardMeta>
         </StatCard>
       </div>
