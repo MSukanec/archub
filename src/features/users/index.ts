@@ -24,6 +24,9 @@ export { AnnouncementModal } from './modals/AnnouncementModal';
 export { ChangelogModal } from './modals/ChangelogModal';
 export { default as ResetTestDataModal } from './modals/ResetTestDataModal';
 
+// Support Forms
+export { useSupportConversationStartForm } from './forms/SupportConversationStartForm';
+
 // Organization Modals & Forms (re-export from organization)
 export { PlanModal, PlanUpgradeModal, DowngradeModal, InvitationModal, UpgradeModal } from '@/features/organization';
 
