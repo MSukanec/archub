@@ -259,7 +259,11 @@ export {
   AppCardTitle as StatCardTitle,
   AppCardValue as StatCardValue,
   AppCardMeta as StatCardMeta,
+  AppCardMetaContainer as StatCardMetaContainer,
   AppCardContent as StatCardContent,
+  AppCardSubValue as StatCardSubValue,
+  AppCardTrend as StatCardTrend,
   AppCardHistoricalComparison as StatCardHistoricalComparison,
   AppCard as DashboardCard,
 }
+export type { AppCardProps as StatCardProps }

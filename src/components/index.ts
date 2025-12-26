@@ -8,15 +8,21 @@ export {
   AppCard, 
   AppCardTitle, 
   AppCardValue, 
-  AppCardMeta, 
+  AppCardMeta,
+  AppCardMetaContainer,
+  AppCardSubValue,
+  AppCardContent,
   AppCardTrend, 
   AppCardHistoricalComparison,
   StatCard,
   StatCardTitle,
   StatCardValue,
   StatCardMeta,
+  StatCardMetaContainer,
   StatCardContent,
+  StatCardSubValue,
+  StatCardTrend,
   StatCardHistoricalComparison,
   DashboardCard
 } from './shared/AppCard';
-export type { TrendDirection } from './shared/AppCard';
+export type { TrendDirection, StatCardProps } from './shared/AppCard';
