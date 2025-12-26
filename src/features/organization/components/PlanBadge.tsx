@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useLocation } from "wouter";
 import { Star, Crown, Zap } from "lucide-react";
 
 interface PlanBadgeProps {
@@ -8,6 +9,7 @@ interface PlanBadgeProps {
 
 export default function PlanBadge({ isExpanded }: PlanBadgeProps) {
   const { data: userData } = useCurrentUser();
+  const [, navigate] = useLocation();
 
   return (
     <div className="flex justify-center w-full">
@@ -49,29 +51,43 @@ export default function PlanBadge({ isExpanded }: PlanBadgeProps) {
               {userData?.plan?.name?.toLowerCase() === 'teams' && "Máximo rendimiento para equipos"}
             </p>
             {(!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && (
-              <button className={cn(
-                "w-full py-2 px-3 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]",
-                "bg-[var(--plan-free-bg)] hover:bg-[var(--plan-free-bg)]/80"
-              )}>
+              <button 
+                onClick={() => navigate('/settings/pricing-plan')}
+                className={cn(
+                  "w-full py-2 px-3 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]",
+                  "bg-[var(--plan-free-bg)] hover:bg-[var(--plan-free-bg)]/80"
+                )}>
                 <Zap className="w-3 h-3" />
                 Actualizar a Pro
               </button>
             )}
             {userData?.plan?.name?.toLowerCase() === 'pro' && (
-              <button className="w-full py-2 px-3 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]" style={{backgroundColor: 'var(--plan-pro-bg)'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(213, 100%, 28%)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--plan-pro-bg)'}>
+              <button 
+                onClick={() => navigate('/settings/pricing-plan')}
+                className="w-full py-2 px-3 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]" 
+                style={{backgroundColor: 'var(--plan-pro-bg)'}} 
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(213, 100%, 28%)'} 
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--plan-pro-bg)'}>
                 <Crown className="w-3 h-3" />
                 Actualizar a Teams
               </button>
             )}
             {userData?.plan?.name?.toLowerCase() === 'teams' && (
-              <button className="w-full py-2 px-3 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]" style={{backgroundColor: 'var(--plan-teams-bg)'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(271, 76%, 48%)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--plan-teams-bg)'}>
+              <button 
+                onClick={() => navigate('/settings/pricing-plan')}
+                className="w-full py-2 px-3 rounded-lg text-xs font-medium text-white flex items-center justify-center gap-1 transition-all duration-150 opacity-0 animate-[fadeInUp_0.2s_ease-out_0.2s_forwards]" 
+                style={{backgroundColor: 'var(--plan-teams-bg)'}} 
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(271, 76%, 48%)'} 
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--plan-teams-bg)'}>
                 <Zap className="w-3 h-3" />
                 Plan Premium
               </button>
             )}
           </div>
         ) : (
-          <div className={cn(
+          <div 
+            onClick={() => navigate('/settings/pricing-plan')}
+            className={cn(
             "w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all duration-150 ease-out hover:scale-105",
             (!userData?.plan || userData.plan.name?.toLowerCase() === 'free') && "bg-[var(--plan-free-bg)]",
             userData?.plan?.name?.toLowerCase() === 'pro' && "bg-[var(--plan-pro-bg)]",
