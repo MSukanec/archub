@@ -79,7 +79,7 @@ export function HeatmapGrid({
           )
         })}
       </div>
-      <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground overflow-hidden">
+      <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
         <span>Low</span>
         <div className="flex gap-1 shrink-0">
           <div className="w-3 h-3 bg-muted rounded-sm border flex-shrink-0" />

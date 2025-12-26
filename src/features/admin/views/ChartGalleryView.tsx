@@ -121,11 +121,11 @@ interface ChartCardProps {
 }
 
 const ChartCard = ({ title, children }: ChartCardProps) => (
-  <Card data-testid={`chart-card-${title.toLowerCase().replace(/\s+/g, '-')}`}>
+  <Card className="overflow-hidden" data-testid={`chart-card-${title.toLowerCase().replace(/\s+/g, '-')}`}>
     <CardHeader className="pb-2">
       <CardTitle className="text-sm font-medium">{title}</CardTitle>
     </CardHeader>
-    <CardContent className="pt-0">
+    <CardContent className="pt-0 overflow-x-auto">
       {children}
     </CardContent>
   </Card>
@@ -137,12 +137,12 @@ interface ChartGroupProps {
 }
 
 const ChartGroup = ({ title, children }: ChartGroupProps) => (
-  <Card className="col-span-2" data-testid={`chart-group-${title.toLowerCase()}`}>
+  <Card className="col-span-2 overflow-hidden" data-testid={`chart-group-${title.toLowerCase()}`}>
     <CardHeader>
       <CardTitle className="text-lg">{title}</CardTitle>
     </CardHeader>
     <CardContent>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 overflow-x-hidden">
         {children}
       </div>
     </CardContent>
@@ -151,8 +151,8 @@ const ChartGroup = ({ title, children }: ChartGroupProps) => (
 
 const ChartGalleryView = () => {
   return (
-    <div className="space-y-6" data-testid="chart-gallery-view">
-      <div className="grid grid-cols-2 gap-6">
+    <div className="space-y-6 overflow-x-hidden" data-testid="chart-gallery-view">
+      <div className="grid grid-cols-2 gap-6 overflow-x-hidden">
         
         <ChartGroup title="LINE">
           <ChartCard title="TrendLineChart">
