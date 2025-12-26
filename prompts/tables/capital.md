@@ -74,10 +74,20 @@ create table public.capital_participants (
   created_by uuid null,
   is_deleted boolean not null default false,
   deleted_at timestamp with time zone null,
+  ownership_percentage numeric(5, 2) null,
   constraint partners_pkey primary key (id),
   constraint partners_contact_id_fkey foreign KEY (contact_id) references contacts (id) on delete set null,
   constraint partners_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
   constraint partners_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint capital_participants_ownership_percentage_check check (
+    (
+      (ownership_percentage is null)
+      or (
+        (ownership_percentage > (0)::numeric)
+        and (ownership_percentage <= (100)::numeric)
+      )
+    )
+  ),
   constraint partners_status_check check (
     (
       status = any (
@@ -98,6 +108,8 @@ create index IF not exists idx_partners_status on public.capital_participants us
 create unique INDEX IF not exists uniq_partner_organization_contact on public.capital_participants using btree (organization_id, contact_id) TABLESPACE pg_default
 where
   (is_deleted = false);
+
+create index IF not exists idx_capital_participants_ownership_percentage on public.capital_participants using btree (organization_id, ownership_percentage) TABLESPACE pg_default;
 
 ## Tabla CONTACTS:
 

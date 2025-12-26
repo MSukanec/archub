@@ -6,9 +6,10 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
@@ -18,6 +19,13 @@ const partnerSchema = z.object({
   contactId: z.string().min(1, 'Debe seleccionar un contacto'),
   notes: z.string().optional(),
   status: z.enum(['active', 'inactive']).default('active'),
+  ownershipPercentage: z.union([
+    z.string().transform((val) => val === '' ? null : parseFloat(val)),
+    z.number(),
+    z.null(),
+  ]).refine((val) => val === null || (val >= 0 && val <= 100), {
+    message: 'El porcentaje debe estar entre 0 y 100',
+  }).optional().nullable(),
 });
 
 type PartnerFormData = z.infer<typeof partnerSchema>;
@@ -100,7 +108,7 @@ export function CapitalParticipantForm({
       
       const { data, error } = await supabase
         .from('capital_participants')
-        .select('id, contact_id, notes, status')
+        .select('id, contact_id, notes, status, ownership_percentage')
         .eq('id', partnerId)
         .single();
 
@@ -135,6 +143,7 @@ export function CapitalParticipantForm({
       contactId: existingPartner?.contact_id || '',
       notes: existingPartner?.notes || '',
       status: (existingPartner?.status as 'active' | 'inactive') || 'active',
+      ownershipPercentage: existingPartner?.ownership_percentage ?? null,
     },
   });
 
@@ -144,6 +153,7 @@ export function CapitalParticipantForm({
         contactId: existingPartner.contact_id || '',
         notes: existingPartner.notes || '',
         status: (existingPartner.status as 'active' | 'inactive') || 'active',
+        ownershipPercentage: existingPartner.ownership_percentage ?? null,
       });
     }
   }, [existingPartner, mode, form]);
@@ -160,6 +170,7 @@ export function CapitalParticipantForm({
           notes: data.notes || null,
           status: data.status || 'active',
           created_by: userData?.memberships?.[0]?.id || null,
+          ownership_percentage: data.ownershipPercentage ?? null,
         })
         .select();
 
@@ -194,6 +205,7 @@ export function CapitalParticipantForm({
           contact_id: data.contactId,
           notes: data.notes || null,
           status: data.status || 'active',
+          ownership_percentage: data.ownershipPercentage ?? null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', partnerId)
@@ -320,6 +332,35 @@ export function CapitalParticipantForm({
                   <SelectItem value="inactive">Inactivo</SelectItem>
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="ownershipPercentage"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Porcentaje societario (%)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  placeholder="Ej: 25.5"
+                  value={field.value === null || field.value === undefined ? '' : field.value}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    field.onChange(val === '' ? null : parseFloat(val));
+                  }}
+                  data-testid="input-ownership-percentage"
+                />
+              </FormControl>
+              <FormDescription>
+                Participación acordada del socio en la sociedad
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

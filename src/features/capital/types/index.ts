@@ -30,6 +30,7 @@ export interface CapitalParticipant {
   created_by: string | null
   is_deleted: boolean
   deleted_at: string | null
+  ownership_percentage: number | null
   contacts: CapitalParticipantContact | null
 }
 
@@ -39,12 +40,14 @@ export interface CapitalParticipantCreateInput {
   notes?: string | null
   status?: 'active' | 'inactive'
   created_by?: string | null
+  ownership_percentage?: number | null
 }
 
 export interface CapitalParticipantUpdateInput {
   contact_id?: string
   notes?: string | null
   status?: 'active' | 'inactive' | 'deleted'
+  ownership_percentage?: number | null
 }
 
 export interface MediaFile {

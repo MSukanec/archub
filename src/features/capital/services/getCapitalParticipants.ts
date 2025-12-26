@@ -19,6 +19,7 @@ export async function getCapitalParticipants(organizationId: string): Promise<Ca
       created_by,
       is_deleted,
       deleted_at,
+      ownership_percentage,
       contacts(
         id, 
         first_name, 
