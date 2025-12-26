@@ -69,6 +69,11 @@ export const capitalKeys = {
   unifiedMovements: () => [...capitalKeys.all, 'unified-movements'] as const,
   partnerMovements: (organizationId?: NullableId, projectId?: NullableId) =>
     [...capitalKeys.all, 'partner-movements', organizationId, projectId] as const,
+
+  // KPI View (ownership ratios)
+  kpi: () => [...capitalKeys.all, 'kpi'] as const,
+  kpiList: (organizationId: NullableId) =>
+    [...capitalKeys.kpi(), organizationId ?? undefined] as const,
 } as const;
 
 export type CapitalQueryKey = readonly (string | undefined)[];
