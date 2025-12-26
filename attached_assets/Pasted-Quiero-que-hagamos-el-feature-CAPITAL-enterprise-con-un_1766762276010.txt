@@ -1,0 +1,35 @@
+Quiero que hagamos el feature CAPITAL “enterprise” con un enfoque de ledger (libro mayor) y balances derivados, porque hoy Capital es una copia de General Costs y no tiene propósito claro.
+
+CONTEXTO (ya existe en Supabase):
+- capital_participants (socios)
+- partner_contributions (aportes) => aumenta capital
+- partner_withdrawals (retiros) => reduce capital
+- partner_capital_balance + partner_balance_summary_view (snapshots actuales)
+
+PROBLEMA:
+No existe una tabla para movimientos de capital SIN billetera (correcciones, saldo inicial, reclasificaciones, FX, etc.). Eso rompe el sentido del módulo y obliga a hacks.
+
+PUNTO 1 (lo primero):
+Yo voy a crear en Supabase una tabla NUEVA llamada public.capital_adjustments (te paso el SQL por fuera).
+Reglas:
+- Es un “ledger entry” (asiento) que puede ser + o - (amount signed).
+- Tiene organization_id, partner_id (nullable), project_id (nullable), currency_id, exchange_rate, adjustment_date, reason, notes, reference, status, created_by, created_at/updated_at y soft delete.
+- NO tiene wallet_id porque no representa movimiento entre billeteras.
+
+TU TAREA (código):
+1) Crear el módulo de data layer para capital_adjustments:
+   - types, queryKeys centralizadas (core/query-keys/capital.keys.ts)
+   - hooks: useCapitalAdjustmentsList(organizationId, filtros), useCreateCapitalAdjustment, useUpdateCapitalAdjustment, useSoftDeleteCapitalAdjustment
+   - usar React Query con una única fuente de verdad por lista: ['capital-ledger', organizationId, filtros] o similar (definir estándar)
+2) Crear una vista unificada en el FRONT llamada “Capital Ledger”:
+   - Unificar contributions, withdrawals y adjustments en una sola tabla UI (puede ser por “rows” mapeadas) con columnas:
+     fecha, tipo (Aporte/Retiro/Ajuste), socio, proyecto, moneda, monto (+/-), estado, notas
+   - Por ahora el merge lo podés hacer del lado del frontend (3 queries + merge/sort) pero deja listo para migrar a una view SQL futura.
+3) Cuando se crea/edita/borra cualquiera de los 3 tipos, el dashboard y tablas deben refrescarse INSTANTÁNEO:
+   - invalidar SIEMPRE las keys correctas (lista ledger + KPIs/summary)
+   - y además hacer update optimista del cache base si aplica, sin duplicar fuentes de verdad.
+
+IMPORTANTE:
+- Documentá el estándar en el archivo de auditoría (agregar checklist: “query keys coherentes + invalidation completa + single source of truth + optimistic updates consistentes”)
+- No rompas General Costs; trabajá solo dentro de Capital.
+- Todo debe ser agnóstico/reutilizable (componentes de charts y tablas).
