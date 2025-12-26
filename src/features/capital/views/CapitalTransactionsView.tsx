@@ -186,7 +186,7 @@ export function CapitalTransactionsView({
       items: confirmedTransactions
         .filter(t => t.type === 'adjustment')
         .map(t => ({
-          amount: Math.abs(t.signedAmount),
+          amount: t.signedAmount,
           currency_id: t.currency_id,
           currency: { id: t.currency_id, code: (t.original as any).currency?.code, symbol: t.currency_symbol },
           exchange_rate: t.exchange_rate

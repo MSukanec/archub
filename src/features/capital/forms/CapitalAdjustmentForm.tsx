@@ -174,6 +174,7 @@ export function CapitalAdjustmentForm({
           updates: {
             partner_id: data.partner_id ?? null,
             amount: data.amount,
+            currency_id: data.currency_id as string,
             exchange_rate: data.exchange_rate || 1,
             adjustment_date: formatDateForDB(data.adjustment_date),
             reason: data.reason ?? null,
