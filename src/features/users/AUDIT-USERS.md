@@ -23,29 +23,30 @@ src/features/users/
 │   ├── index.ts                   # Service exports
 │   ├── userProfileService.ts      # Profile update operations
 │   └── onboardingChecklist.ts     # Onboarding checklist management (from src/features/onboarding)
-├── components/                    # Flattened: NO SUBFOLDERS (10 active files)
+├── components/                    # Flattened: NO SUBFOLDERS (9 active files)
 │   ├── AuthGuard.tsx              # Authentication protection
 │   ├── AuthAdmin.tsx              # Admin auth component
 │   ├── NotificationBell.tsx       # Bell icon in header
 │   ├── NotificationDropdown.tsx   # Notification list
-│   ├── SupportModal.tsx           # Support form modal
 │   ├── GlobalAnnouncement.tsx     # Global notification banner
 │   ├── UserSelectorField.tsx      # User dropdown selector
 │   ├── AdminUserRow.tsx           # Admin user list row
 │   ├── AdminChangelogRow.tsx      # Admin changelog row
 │   └── Step1UserData.tsx          # Onboarding step
-├── forms/                         # Agnostic forms (5 files) - SEPARATED FROM MODALS
+├── forms/                         # Agnostic forms (6 files) - SEPARATED FROM MODALS
 │   ├── UserForm.tsx               # Exports: FormPanel, ViewPanel, useUserForm
 │   ├── PlanForm.tsx               # Exports: FormPanel, ViewPanel, usePlanForm
 │   ├── NotificationForm.tsx       # Exports: FormPanel, ViewPanel, useNotificationForm
-│   ├── AnnouncementForm.tsx       # Exports: FormPanel, useAnnouncementForm
-│   └── ChangelogForm.tsx          # Exports: FormPanel, ViewPanel, useChangelogForm
-├── modals/                        # Modal wrappers (12 files) - ENVASES ONLY
+│   ├── AnnouncementForm.tsx       # Exports: FormPanel, ViewPanel, useAnnouncementForm
+│   ├── ChangelogForm.tsx          # Exports: FormPanel, ViewPanel, useChangelogForm
+│   └── SupportForm.tsx            # Exports: ChatPanel, FooterPanel, useSupportChat
+├── modals/                        # Modal wrappers (13 files) - ENVASES ONLY
 │   ├── UserModal.tsx              # Uses UserForm
 │   ├── PlanModal.tsx              # Uses PlanForm
 │   ├── NotificationModal.tsx      # Uses NotificationForm
 │   ├── AnnouncementModal.tsx      # Uses AnnouncementForm
 │   ├── ChangelogModal.tsx         # Uses ChangelogForm
+│   ├── SupportModal.tsx           # Uses SupportForm (chat)
 │   ├── PlanPriceFormModal.tsx     # DEPRECATED
 │   ├── SupportConversationStartModal.tsx
 │   ├── ResetTestDataModal.tsx
@@ -148,7 +149,8 @@ Uses semantic badge variants:
 2025-12-26 - Flattened modals/ - removed admin/ and plans/ subfolders, moved 12 modal files directly to modals/, updated all imports
 2025-12-26 - Moved MemberRow.tsx and PlanBadge.tsx to organization/components (they belong there)
 2025-12-26 - MAJOR: Separated forms from modals following FEATURE-AUDIT.md pattern:
-  - Created forms/: UserForm, PlanForm, NotificationForm, AnnouncementForm, ChangelogForm
+  - Created forms/: UserForm, PlanForm, NotificationForm, AnnouncementForm, ChangelogForm, SupportForm
   - Renamed modals: *FormModal → *Modal (UserModal, PlanModal, NotificationModal, AnnouncementModal, ChangelogModal)
+  - Moved SupportModal from components/ to modals/, extracted logic to SupportForm
   - Each form exports: FormPanel, ViewPanel (optional), useXxxForm hook
   - Each modal is now just an "envase" that imports and uses the form

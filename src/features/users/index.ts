@@ -39,7 +39,7 @@ export { NotificationBell } from './components/NotificationBell';
 export { NotificationDropdown } from './components/NotificationDropdown';
 
 // Support Components
-export { SupportModal } from './components/SupportModal';
+export { SupportModal } from './modals/SupportModal';
 
 // Plan Components (re-export from organization)
 export { default as PlanBadge } from '@/features/organization/components/PlanBadge';
