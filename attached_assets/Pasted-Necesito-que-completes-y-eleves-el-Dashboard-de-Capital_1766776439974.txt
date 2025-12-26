@@ -1,0 +1,83 @@
+Necesito que completes y eleves el Dashboard de Capital (Visión General)
+para que sea un dashboard de nivel SaaS, específico para capital societario
+y NO una copia del dashboard de gastos generales.
+
+IMPORTANTE:
+- NO hacer cálculos en el frontend.
+- Todos los valores deben provenir de views existentes en Supabase.
+- El frontend solo renderiza datos.
+
+--------------------------------------------------
+1. INSIGHTS DE CAPITAL
+--------------------------------------------------
+
+Revisar el sistema de insights actual:
+- Eliminar cualquier insight heredado de gastos generales.
+- Crear insights específicos de Capital.
+
+Los insights de Capital deben responder preguntas como:
+- ¿Hay socios sobreaportados o bajo aportados?
+- ¿El capital está desbalanceado?
+- ¿Existe concentración de capital en pocos socios?
+
+Ejemplos de insights a implementar:
+- "X socios están bajo aportados"
+- "El Y% del capital neto está concentrado en un solo socio"
+- "El capital presenta un desbalance del Z%"
+
+Los insights deben:
+- Basarse en datos agregados de views (desvíos, porcentajes, totales)
+- Usar thresholds simples y claros
+- Reutilizar el sistema de insights existente (no duplicar lógica)
+
+--------------------------------------------------
+2. KPIs DEL DASHBOARD
+--------------------------------------------------
+
+Mantener los KPIs actuales:
+- Capital Neto Total
+- Total Aportes
+- Total Retiros
+- Participantes Activos
+
+Agregar nuevos KPIs:
+- Desbalance Total de Capital (suma absoluta de desvíos)
+- Cantidad de Socios Bajo Aporte
+- Socio Más Sobreaportado (nombre + monto)
+
+--------------------------------------------------
+3. GRÁFICOS
+--------------------------------------------------
+
+Revisar los gráficos actuales y mejorar el dashboard visualmente.
+
+Mantener:
+- Evolución del Capital Neto (línea)
+- Distribución del Capital Neto por Socio (donut)
+
+Agregar nuevos gráficos:
+1) Desvío por Socio
+   - Gráfico de barras horizontal
+   - Verde = sobreaportado
+   - Rojo = bajo aportado
+
+2) Aporte Esperado vs Aporte Real
+   - Gráfico de barras dobles por socio
+
+Los gráficos deben:
+- Reutilizar componentes existentes de charts si es posible
+- Si no existe un chart adecuado, crear uno nuevo genérico y reutilizable
+- Tener títulos y descripciones claras
+
+--------------------------------------------------
+4. LAYOUT
+--------------------------------------------------
+
+El dashboard de Capital debe verse distinto al de gastos generales.
+Puedes:
+- Cambiar la disposición de KPIs
+- Dar más protagonismo a gráficos comparativos
+- Priorizar lectura rápida de desvíos y riesgos
+
+El objetivo es que un usuario diga:
+"Wow, ahora entiendo perfectamente cómo está el capital de la empresa."

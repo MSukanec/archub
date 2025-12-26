@@ -10,7 +10,10 @@ import {
   PieChart,
   ArrowDownCircle,
   ArrowUpCircle,
-  Plus
+  Plus,
+  Scale,
+  AlertTriangle,
+  Crown
 } from 'lucide-react';
 import { type InsightAction } from '@/components/dashboard/insights/types';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown } from '@/lib/kpis';
@@ -31,11 +34,12 @@ import {
   type TrendDirection
 } from '@/components/dashboard';
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
-import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/line/AreaTrendChart';
 import { DonutChart } from '@/components/charts/pie/DonutChart';
 import { SparklineChart } from '@/components/charts/sparkline/SparklineChart';
+import { HorizontalBarChart } from '@/components/charts/bar/HorizontalBarChart';
+import { GroupedBarChart } from '@/components/charts/bar/GroupedBarChart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
@@ -44,7 +48,8 @@ import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
 import { 
   usePartners, 
   usePartnerContributions, 
-  usePartnerWithdrawals 
+  usePartnerWithdrawals,
+  usePartnerCapitalKPI
 } from '@/features/capital';
 
 export type PeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all';
@@ -176,8 +181,97 @@ export function CapitalDashboardView({
   const { data: partners = [], isLoading: loadingPartners } = usePartners(organizationId);
   const { data: allContributions = [], isLoading: loadingContributions } = usePartnerContributions(organizationId);
   const { data: allWithdrawals = [], isLoading: loadingWithdrawals } = usePartnerWithdrawals(organizationId);
+  const { data: capitalKpiData = [], isLoading: loadingKPI } = usePartnerCapitalKPI(organizationId, { enabled: !!organizationId });
 
-  const isLoading = loadingPartners || loadingContributions || loadingWithdrawals;
+  const isLoading = loadingPartners || loadingContributions || loadingWithdrawals || loadingKPI;
+
+  // Capital health KPIs from SQL view data
+  const capitalHealthKPIs = useMemo(() => {
+    if (capitalKpiData.length === 0) {
+      return {
+        totalDeviation: 0,
+        underContributedCount: 0,
+        topOverContributorName: null as string | null,
+        topOverContributorAmount: 0,
+        deviationByPartner: [] as Array<{ name: string; value: number; status: string }>
+      };
+    }
+
+    // Total absolute deviation
+    const totalDeviation = capitalKpiData.reduce((sum, kpi) => {
+      return sum + Math.abs(kpi.deviation_contribution ?? 0);
+    }, 0);
+
+    // Count of under-contributed partners
+    const underContributedCount = capitalKpiData.filter(
+      kpi => kpi.contribution_status === 'bajo_aportado'
+    ).length;
+
+    // Find top over-contributor
+    const overContributors = capitalKpiData
+      .filter(kpi => kpi.contribution_status === 'sobre_aportado' && (kpi.deviation_contribution ?? 0) > 0)
+      .sort((a, b) => (b.deviation_contribution ?? 0) - (a.deviation_contribution ?? 0));
+    
+    const topOverContributor = overContributors[0];
+    const topPartner = topOverContributor 
+      ? partners.find(p => p.id === topOverContributor.partner_id) 
+      : null;
+    const topOverContributorName = topPartner?.contacts?.full_name 
+      || topPartner?.contacts?.company_name 
+      || null;
+    const topOverContributorAmount = topOverContributor?.deviation_contribution ?? 0;
+
+    // Deviation by partner for chart
+    const deviationByPartner = capitalKpiData
+      .filter(kpi => kpi.deviation_contribution !== null && kpi.deviation_contribution !== 0)
+      .map(kpi => {
+        const partnerData = partners.find(p => p.id === kpi.partner_id);
+        const name = partnerData?.contacts?.full_name 
+          || partnerData?.contacts?.company_name 
+          || 'Sin nombre';
+        return {
+          name,
+          value: kpi.deviation_contribution ?? 0,
+          status: kpi.contribution_status
+        };
+      })
+      .sort((a, b) => b.value - a.value);
+
+    return {
+      totalDeviation,
+      underContributedCount,
+      topOverContributorName,
+      topOverContributorAmount,
+      deviationByPartner
+    };
+  }, [capitalKpiData, partners]);
+
+  // Data for deviation bar chart
+  const deviationChartData = useMemo(() => {
+    return capitalHealthKPIs.deviationByPartner.map(item => ({
+      label: item.name.length > 15 ? item.name.substring(0, 15) + '...' : item.name,
+      value: item.value
+    }));
+  }, [capitalHealthKPIs.deviationByPartner]);
+
+  // Data for expected vs real contribution chart
+  const expectedVsRealData = useMemo(() => {
+    return capitalKpiData
+      .filter(kpi => kpi.expected_contribution !== null)
+      .map(kpi => {
+        const partnerData = partners.find(p => p.id === kpi.partner_id);
+        const name = partnerData?.contacts?.full_name 
+          || partnerData?.contacts?.company_name 
+          || 'Sin nombre';
+        return {
+          label: name.length > 12 ? name.substring(0, 12) + '...' : name,
+          expected: kpi.expected_contribution ?? 0,
+          real: kpi.total_contributed
+        };
+      })
+      .sort((a, b) => b.real - a.real)
+      .slice(0, 6);
+  }, [capitalKpiData, partners]);
 
   const handleInsightAction = useCallback((action: InsightAction) => {
     switch (action.type) {
@@ -458,27 +552,80 @@ export function CapitalDashboardView({
       .slice(0, 8);
   }, [confirmedContributions, confirmedWithdrawals]);
 
-  const autoInsights = useMemo(() => {
-    const totalContributions = kpis.contributions.value;
-    const totalWithdrawals = kpis.withdrawals.value;
+  // Capital-specific insights (using InsightItem format directly for InsightCard)
+  const capitalInsightItems = useMemo(() => {
+    const items: Array<{
+      title: string;
+      description: string;
+      variant: 'warning' | 'info' | 'success';
+      actions?: Array<{ id: string; label: string; type: 'navigate'; payload: Record<string, unknown> }>;
+    }> = [];
+
     const netCapital = kpis.netCapital.value;
-    
-    const context = buildInsightContext({
-      totalGasto: netCapital,
-      previousPeriodGasto: kpis.previousNetCapital,
-      categoryData: partnerDistributionData.map(p => ({ name: p.label, value: p.value })),
-      previousCategoryData: [],
-      monthlyData: monthlyChartData,
-      paymentsCount: confirmedContributions.length + confirmedWithdrawals.length,
-      monthCount: monthlyChartData.length || 1,
-      paymentsByConcept: [],
-      isShortPeriod: periodMeta.isShortPeriod,
-      daysCount: periodMeta.daysCount,
-      currentMonth: new Date().getMonth() + 1
-    });
-    
-    return generateInsights(context, 3);
-  }, [kpis, partnerDistributionData, monthlyChartData, confirmedContributions, confirmedWithdrawals, periodMeta]);
+    const underContributedCount = capitalHealthKPIs.underContributedCount;
+    const totalDeviation = capitalHealthKPIs.totalDeviation;
+    const partnerCount = capitalKpiData.length;
+
+    // Insight: Partners under-contributed
+    if (underContributedCount > 0) {
+      items.push({
+        variant: 'warning',
+        title: `${underContributedCount} socio${underContributedCount > 1 ? 's' : ''} bajo aporte`,
+        description: `Hay socios que no han aportado lo que corresponde según su participación.`,
+        actions: [{ id: 'view-balances', label: 'Ver balances', type: 'navigate', payload: { tab: 'balances' } }]
+      });
+    }
+
+    // Insight: Capital concentration
+    if (partnerDistributionData.length > 0 && netCapital > 0) {
+      const topPartnerValue = partnerDistributionData[0]?.value ?? 0;
+      const concentrationPercent = (topPartnerValue / netCapital) * 100;
+      
+      if (concentrationPercent > 50) {
+        items.push({
+          variant: 'info',
+          title: `${Math.round(concentrationPercent)}% del capital en un solo socio`,
+          description: `"${partnerDistributionData[0]?.label}" concentra la mayoría del capital neto.`,
+          actions: [{ id: 'view-distribution', label: 'Ver distribución', type: 'navigate', payload: { tab: 'balances' } }]
+        });
+      }
+    }
+
+    // Insight: Total deviation / imbalance
+    if (totalDeviation > 0 && netCapital > 0) {
+      const deviationPercent = (totalDeviation / netCapital) * 100;
+      if (deviationPercent > 10) {
+        items.push({
+          variant: 'warning',
+          title: `Desbalance del ${Math.round(deviationPercent)}%`,
+          description: 'El capital presenta desviaciones significativas respecto a los porcentajes acordados.',
+          actions: [{ id: 'view-deviations', label: 'Ver desvíos', type: 'navigate', payload: { tab: 'balances' } }]
+        });
+      }
+    }
+
+    // Insight: All balanced (positive)
+    if (underContributedCount === 0 && partnerCount > 0) {
+      items.push({
+        variant: 'success',
+        title: 'Capital equilibrado',
+        description: 'Todos los socios han aportado según su participación acordada.',
+        actions: [{ id: 'view-status', label: 'Ver detalle', type: 'navigate', payload: { tab: 'balances' } }]
+      });
+    }
+
+    // Insight: Top over-contributor
+    if (capitalHealthKPIs.topOverContributorName && capitalHealthKPIs.topOverContributorAmount > 0) {
+      items.push({
+        variant: 'info',
+        title: `Mayor sobreaporte: ${capitalHealthKPIs.topOverContributorName}`,
+        description: `Ha aportado ${defaultCurrency?.symbol || '$'} ${formatKPI(capitalHealthKPIs.topOverContributorAmount)} más de lo esperado.`,
+        actions: [{ id: 'view-contributor', label: 'Ver socio', type: 'navigate', payload: { tab: 'balances' } }]
+      });
+    }
+
+    return items.slice(0, 3);
+  }, [kpis, capitalHealthKPIs, capitalKpiData, partnerDistributionData, defaultCurrency]);
 
   const recentActivityItems = useMemo((): ActivityItem[] => {
     const allTransactions = [
@@ -528,9 +675,14 @@ export function CapitalDashboardView({
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => (
             <Skeleton key={i} className="h-32" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => (
+            <Skeleton key={`row2-${i}`} className="h-24" />
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -579,14 +731,15 @@ export function CapitalDashboardView({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Row 1: Core Capital Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard 
           data-testid="kpi-net-capital"
           onClick={onNavigateToBalances}
         >
           <StatCardTitle>
             <Wallet className="h-4 w-4" />
-            Capital Neto
+            Capital Neto Total
           </StatCardTitle>
           <StatCardValue className={kpis.netCapital.value >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}>
             {kpis.netCapital.value >= 0 ? '' : '-'}{currencySymbol} {formatKPI(Math.abs(kpis.netCapital.value))}
@@ -653,20 +806,57 @@ export function CapitalDashboardView({
             {confirmedWithdrawals.length} retiro{confirmedWithdrawals.length !== 1 ? 's' : ''} confirmado{confirmedWithdrawals.length !== 1 ? 's' : ''}
           </StatCardMeta>
         </StatCard>
+      </div>
 
+      {/* Row 2: Capital Health Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard 
-          data-testid="kpi-partners-count"
-          onClick={onNavigateToList}
+          data-testid="kpi-total-deviation"
+          onClick={onNavigateToBalances}
         >
           <StatCardTitle>
-            <Users className="h-4 w-4" />
-            Participantes
+            <Scale className="h-4 w-4" />
+            Desbalance Total
           </StatCardTitle>
-          <StatCardValue>
-            {kpis.partnersCount.value || 0}
+          <StatCardValue className={capitalHealthKPIs.totalDeviation > 0 ? 'text-[var(--pending)]' : 'text-[var(--neutral)]'}>
+            {currencySymbol} {formatKPI(capitalHealthKPIs.totalDeviation)}
           </StatCardValue>
           <StatCardMeta>
-            Socios activos
+            Suma de desvíos absolutos
+          </StatCardMeta>
+        </StatCard>
+
+        <StatCard 
+          data-testid="kpi-under-contributed"
+          onClick={onNavigateToBalances}
+        >
+          <StatCardTitle>
+            <AlertTriangle className="h-4 w-4" />
+            Socios Bajo Aporte
+          </StatCardTitle>
+          <StatCardValue className={capitalHealthKPIs.underContributedCount > 0 ? 'text-[var(--negative)]' : 'text-[var(--positive)]'}>
+            {capitalHealthKPIs.underContributedCount}
+          </StatCardValue>
+          <StatCardMeta>
+            {capitalHealthKPIs.underContributedCount === 0 ? 'Todos al día' : 'Requieren atención'}
+          </StatCardMeta>
+        </StatCard>
+
+        <StatCard 
+          data-testid="kpi-top-over-contributor"
+          onClick={onNavigateToBalances}
+        >
+          <StatCardTitle>
+            <Crown className="h-4 w-4" />
+            Mayor Sobreaporte
+          </StatCardTitle>
+          <StatCardValue className="text-[var(--positive)] text-lg truncate">
+            {capitalHealthKPIs.topOverContributorName 
+              ? `${currencySymbol} ${formatKPI(capitalHealthKPIs.topOverContributorAmount)}`
+              : '—'}
+          </StatCardValue>
+          <StatCardMeta className="truncate">
+            {capitalHealthKPIs.topOverContributorName || 'Sin sobreaportes'}
           </StatCardMeta>
         </StatCard>
       </div>
@@ -719,9 +909,62 @@ export function CapitalDashboardView({
         </DashboardCard>
       </div>
 
+      {/* Row 4: Deviation Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <DashboardCard
+          title="Desvío por Socio"
+          icon={<BarChart3 className="h-5 w-5" />}
+          description="Verde = sobreaportado, Rojo = bajo aportado"
+          data-testid="card-deviation-by-partner"
+        >
+          {deviationChartData.length > 0 ? (
+            <div className="h-52 overflow-hidden">
+              <HorizontalBarChart 
+                data={deviationChartData}
+                height={200}
+                valueFormatter={(v) => `${currencySymbol} ${formatKPI(Math.abs(v))}`}
+                colorByValue={true}
+                showZeroLine={true}
+              />
+            </div>
+          ) : (
+            <div className="h-52 flex items-center justify-center text-muted-foreground text-sm">
+              No hay desvíos registrados
+            </div>
+          )}
+        </DashboardCard>
+
+        <DashboardCard
+          title="Aporte Esperado vs Real"
+          icon={<Scale className="h-5 w-5" />}
+          description="Comparación por participante"
+          data-testid="card-expected-vs-real"
+        >
+          {expectedVsRealData.length > 0 ? (
+            <div className="h-52 overflow-hidden">
+              <GroupedBarChart 
+                data={expectedVsRealData}
+                series={[
+                  { key: 'expected', name: 'Esperado', color: 'hsl(var(--muted-foreground))' },
+                  { key: 'real', name: 'Real', color: 'hsl(var(--chart-positive))' }
+                ]}
+                height={200}
+                valueFormatter={(v) => `${currencySymbol} ${formatKPI(v)}`}
+                showLegend={true}
+              />
+            </div>
+          ) : (
+            <div className="h-52 flex items-center justify-center text-muted-foreground text-sm">
+              No hay datos de porcentaje de participación
+            </div>
+          )}
+        </DashboardCard>
+      </div>
+
+      {/* Row 5: Insights & Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <InsightCard
-          items={toInsightItems(autoInsights)}
+          items={capitalInsightItems}
           onAction={handleInsightAction}
           data-testid="card-insights"
         />
