@@ -71,8 +71,8 @@ export type { HeatmapDataPoint, HeatmapGridProps } from './heatmap/HeatmapGrid'
 // ═══════════════════════════════════════════════════════════════════════════
 
 // CategoryBalanceTable - Unique 3-column table with icons
-export { CategoryBalanceTable } from './CategoryBalanceTable'
-export type { CategoryBalanceRow } from './CategoryBalanceTable'
+export { CategoryBalanceTable } from './table/CategoryBalanceTable'
+export type { CategoryBalanceRow } from './table/CategoryBalanceTable'
 
 // Area/Composed trend charts
 export { MonthlyTrendChart, MultiSeriesTrendChart } from './line/AreaTrendChart'
