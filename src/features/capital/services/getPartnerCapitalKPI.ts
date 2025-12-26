@@ -73,7 +73,8 @@ export async function getPartnerCapitalKPI(organizationId: string): Promise<Part
       .from('capital_adjustments')
       .select('partner_id, amount')
       .eq('organization_id', organizationId)
-      .eq('status', 'confirmed'),
+      .eq('status', 'confirmed')
+      .eq('is_deleted', false),
   ]);
 
   if (kpiResult.error) {
