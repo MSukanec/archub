@@ -1,0 +1,111 @@
+PROMPT PARA REPLIT
+
+Replit, quiero hacer una refactorización estructural del sistema de Cards de Seencel.
+
+Contexto actual:
+
+Existen dos tipos de cards:
+
+Card base (la que vino por defecto desde shadcn/ui)
+
+Un StatCard custom que estoy usando para KPIs
+
+Esto genera duplicación, inconsistencia visual y dificultad de escalar UX.
+
+Objetivo:
+Tener UNA sola Card de aplicación, reutilizable, configurable y escalable, que se use en todas las vistas de dashboard, KPIs y gráficos, sin romper layouts existentes como tables o forms.
+
+🧱 Decisión de arquitectura (importante):
+
+NO modificar profundamente la Card base de shadcn/ui
+
+Crear un nuevo componente de alto nivel (por ejemplo AppCard o DashboardCard) que:
+
+Use internamente la Card base
+
+Centralice toda la lógica visual e interactiva
+
+🧠 Responsabilidades de la nueva AppCard:
+
+La AppCard debe soportar por props (todas opcionales):
+
+title
+
+description
+
+icon
+
+headerActions
+
+children (contenido principal: KPI, chart, tabla)
+
+footer
+
+insight (texto o badge contextual)
+
+variant (kpi | chart | neutral)
+
+interactive (hover / tap styles)
+
+expandable (boolean)
+
+onExpand (callback)
+
+La AppCard:
+
+NO debe saber nada del chart específico
+
+NO debe contener lógica de negocio
+
+Solo orquesta layout + UX
+
+🔍 Sistema de expansión (muy importante):
+
+Implementar un FocusOverlay global (modal o fullscreen según viewport)
+
+La AppCard, si expandable = true, debe:
+
+Mostrar affordance visual (ícono expandir)
+
+Al click/tap → llamar a openFocus({ title, component, props })
+
+El contenido expandido recibe mode: 'expanded'
+
+⚠️ El chart NO maneja fullscreen.
+⚠️ La expansión es responsabilidad del contenedor (AppCard).
+
+📱 Mobile / Desktop:
+
+En mobile:
+
+Tap en la card → expandir
+
+Overlay fullscreen
+
+En desktop:
+
+Click en ícono o header
+
+Modal grande o drawer
+
+🧹 Refactor requerido:
+
+Eliminar el componente StatCard
+
+Reemplazar todas las instancias de StatCard y Cards de dashboard por la nueva AppCard
+
+NO tocar cards usadas solo como contenedores neutros (tables, forms)
+
+Mantener consistencia visual en todas las páginas
+
+🎯 Objetivo final:
+
+Un solo componente de Card para dashboards
+
+UX consistente
+
+Soporte nativo para insights y expansión
+
+Base sólida para futuras features (IA, drill-down, comparativas)
+
+Implementá esto de forma progresiva y segura, revisando todas las vistas afectadas.

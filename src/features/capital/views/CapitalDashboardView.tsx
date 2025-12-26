@@ -806,10 +806,7 @@ export function CapitalDashboardView({
             {confirmedWithdrawals.length} retiro{confirmedWithdrawals.length !== 1 ? 's' : ''} confirmado{confirmedWithdrawals.length !== 1 ? 's' : ''}
           </StatCardMeta>
         </StatCard>
-      </div>
 
-      {/* Row 2: Capital Health Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <StatCard 
           data-testid="kpi-total-deviation"
           onClick={onNavigateToBalances}

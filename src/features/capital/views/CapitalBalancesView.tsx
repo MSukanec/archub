@@ -178,10 +178,7 @@ export function CapitalBalancesView() {
             Retiros confirmados
           </StatCardMeta>
         </StatCard>
-      </div>
 
-      {/* Row 2: Capital Health Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <StatCard data-testid="stat-card-desbalance-total">
           <StatCardTitle showArrow={false}>
             <Scale className="h-4 w-4" />
@@ -224,7 +221,7 @@ export function CapitalBalancesView() {
         </StatCard>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {enrichedBalances.map((partner) => (
           <CapitalBalanceCard
             key={partner.partnerId}
