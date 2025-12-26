@@ -400,6 +400,11 @@ body[data-scroll-locked] {
   --positive: hsl(80, 90%, 40%);
   --negative: hsl(0, 75%, 60%);
   --neutral: hsl(0, 0%, 50%);
+
+  /* Capital Badge Colors */
+  --capital-badge-over: hsl(80, 90%, 40%);
+  --capital-badge-under: hsl(0, 75%, 60%);
+  --capital-badge-equal: hsl(0, 0%, 50%);
 }
 
 /* ========================================

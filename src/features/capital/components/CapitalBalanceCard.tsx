@@ -24,71 +24,62 @@ interface CapitalBalanceCardProps {
   onPartnerClick?: () => void;
 }
 
-interface BadgeConfig {
-  icon: any;
-  label: string;
-  badgeVariant: 'neutral' | 'success';
-  className?: string;
-}
-
-function getContributionConfig(status: PartnerCapitalKPI['contribution_status']): BadgeConfig {
+function getContributionConfig(status: PartnerCapitalKPI['contribution_status']) {
   switch (status) {
     case 'equilibrado':
       return {
         icon: Scale,
         label: 'En equilibrio',
-        badgeVariant: 'neutral',
+        style: { backgroundColor: 'var(--capital-badge-equal)', color: 'white' },
       };
     case 'sobre_aportado':
       return {
         icon: TrendingUp,
         label: 'Sobre aportado',
-        badgeVariant: 'success',
+        style: { backgroundColor: 'var(--capital-badge-over)', color: 'white' },
       };
     case 'bajo_aportado':
       return {
         icon: TrendingDown,
         label: 'Bajo aportado',
-        badgeVariant: 'neutral',
-        className: 'bg-red-100 dark:bg-red-950 text-red-900 dark:text-red-100 border-red-300 dark:border-red-800',
+        style: { backgroundColor: 'var(--capital-badge-under)', color: 'white' },
       };
     case 'sin_porcentaje':
     default:
       return {
         icon: Minus,
         label: 'Sin % asignado',
-        badgeVariant: 'neutral',
+        style: { backgroundColor: 'var(--capital-badge-equal)', color: 'white' },
       };
   }
 }
 
-function getNetConfig(status: PartnerCapitalKPI['net_status']): BadgeConfig {
+function getNetConfig(status: PartnerCapitalKPI['net_status']) {
   switch (status) {
     case 'equilibrado':
       return {
         icon: Scale,
         label: 'En equilibrio',
-        badgeVariant: 'neutral',
+        style: { backgroundColor: 'var(--capital-badge-equal)', color: 'white' },
       };
     case 'arriba':
       return {
         icon: TrendingUp,
         label: 'Capital arriba',
-        badgeVariant: 'success',
+        style: { backgroundColor: 'var(--capital-badge-over)', color: 'white' },
       };
     case 'abajo':
       return {
         icon: TrendingDown,
         label: 'Capital abajo',
-        badgeVariant: 'neutral',
-        className: 'bg-red-100 dark:bg-red-950 text-red-900 dark:text-red-100 border-red-300 dark:border-red-800',
+        style: { backgroundColor: 'var(--capital-badge-under)', color: 'white' },
       };
     case 'sin_porcentaje':
     default:
       return {
         icon: Minus,
         label: 'Sin % asignado',
-        badgeVariant: 'neutral',
+        style: { backgroundColor: 'var(--capital-badge-equal)', color: 'white' },
       };
   }
 }
@@ -181,10 +172,13 @@ export function CapitalBalanceCard({
             </div>
             {partner.contribution_status !== 'sin_porcentaje' && (
               <div className="flex gap-2">
-                <Badge variant={contributionConfig.badgeVariant} className={cn('text-xs', contributionConfig.className)}>
-                  <ContributionIcon className="h-3 w-3 mr-1" />
+                <div 
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium"
+                  style={contributionConfig.style}
+                >
+                  <ContributionIcon className="h-3 w-3" />
                   {contributionConfig.label}
-                </Badge>
+                </div>
               </div>
             )}
           </div>
@@ -235,10 +229,13 @@ export function CapitalBalanceCard({
             </div>
             {partner.net_status !== 'sin_porcentaje' && (
               <div className="flex gap-2">
-                <Badge variant={netConfig.badgeVariant} className={cn('text-xs', netConfig.className)}>
-                  <NetIcon className="h-3 w-3 mr-1" />
+                <div 
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium"
+                  style={netConfig.style}
+                >
+                  <NetIcon className="h-3 w-3" />
                   {netConfig.label}
-                </Badge>
+                </div>
               </div>
             )}
           </div>
