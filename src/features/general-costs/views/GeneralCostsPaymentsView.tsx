@@ -915,9 +915,10 @@ export default function GeneralCostsPaymentsView({
     {
       key: 'notes',
       label: 'Notas',
+      type: 'long-text' as const,
       sortable: true,
       render: (payment: GeneralCostPayment) => (
-        <div className="max-w-full truncate text-xs" title={payment.notes || ''}>
+        <div className="text-xs text-muted-foreground line-clamp-2">
           {payment.notes || '-'}
         </div>
       ),

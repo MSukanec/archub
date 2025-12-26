@@ -303,6 +303,7 @@ export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCo
     {
       key: 'description' as const,
       label: 'Descripción',
+      type: 'long-text' as const,
       sortable: false,
       render: (item: typeof enrichedGeneralCosts[0]) => (
         <span className="text-sm text-muted-foreground line-clamp-2">
