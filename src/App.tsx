@@ -78,8 +78,8 @@ import AdminSubscriptions from "@/pages/admin/subscriptions/AdminSubscriptions";
 import AdminCosts from "@/pages/admin/costs/AdminCosts";
 import AdminTasks from "@/pages/admin/tasks/AdminTasks";
 import AdminGeneral from "@/pages/admin/general/AdminGeneral";
-import AdminCourses from "@/pages/admin/courses/AdminCourses";
-import AdminCourseView from "@/pages/admin/courses/AdminCourseView";
+import AdminCoursesPage from "@/pages/admin/AdminCoursesPage";
+import AdminCourseSettingsPage from "@/pages/admin/AdminCourseSettingsPage";
 import AdminLayoutPage from "@/pages/admin/AdminLayoutPage";
 import AdminEmailTemplates from "@/pages/admin/email-templates/EmailTemplatesAdmin";
 import AdminOps from "@/pages/admin/ops/AdminOps";
@@ -401,7 +401,7 @@ function Router() {
         <Route path="/admin/courses/:id">
           <Suspense fallback={<LazyLoadFallback />}>
             <AuthAdmin>
-              <AdminCourseView />
+              <AdminCourseSettingsPage />
             </AuthAdmin>
           </Suspense>
         </Route>
@@ -409,7 +409,7 @@ function Router() {
         <Route path="/admin/courses">
           <Suspense fallback={<LazyLoadFallback />}>
             <AuthAdmin>
-              <AdminCourses />
+              <AdminCoursesPage />
             </AuthAdmin>
           </Suspense>
         </Route>

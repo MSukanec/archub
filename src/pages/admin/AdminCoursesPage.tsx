@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react'
 import { BookOpen, Plus, Users, BarChart3 } from 'lucide-react'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal'
-import AdminCourseDashboardTab from './AdminCourseDashboardTab'
-import AdminCourseUsersTab from './AdminCourseUsersTab'
-import AdminCourseListTab from './AdminCourseListTab'
+import AdminCourseDashboardView from '@/features/learning/views/admin/AdminCourseDashboardView'
+import AdminCourseUsersView from '@/features/learning/views/admin/AdminCourseUsersView'
+import AdminCourseListView from '@/features/learning/views/admin/AdminCourseListView'
 
-export default function AdminCourses() {
+export default function AdminCoursesPage() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const { setSidebarLevel, sidebarLevel } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
@@ -78,9 +78,9 @@ export default function AdminCourses() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {activeTab === 'dashboard' && <AdminCourseDashboardTab />}
-        {activeTab === 'users' && <AdminCourseUsersTab />}
-        {activeTab === 'courses' && <AdminCourseListTab />}
+        {activeTab === 'dashboard' && <AdminCourseDashboardView />}
+        {activeTab === 'users' && <AdminCourseUsersView />}
+        {activeTab === 'courses' && <AdminCourseListView />}
       </div>
     </Layout>
   )

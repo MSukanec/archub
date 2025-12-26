@@ -5,15 +5,15 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
-import AdminCourseDataTab from './view/AdminCourseDataTab';
-import AdminCourseContentTab from './view/AdminCourseContentTab';
-import AdminCourseMarketingTab from './view/AdminCourseMarketingTab';
-import AdminCourseTestimonialsTab from './view/AdminCourseTestimonialsTab';
-import AdminCourseForumTab from './view/AdminCourseForumTab';
+import AdminCourseDataView from '@/features/learning/views/admin/AdminCourseDataView';
+import AdminCourseContentView from '@/features/learning/views/admin/AdminCourseContentView';
+import AdminCourseMarketingView from '@/features/learning/views/admin/AdminCourseMarketingView';
+import AdminCourseTestimonialsView from '@/features/learning/views/admin/AdminCourseTestimonialsView';
+import AdminCourseForumView from '@/features/learning/views/admin/AdminCourseForumView';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal';
 
-export default function AdminCourseView() {
+export default function AdminCourseSettingsPage() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState('Datos del Curso');
@@ -235,17 +235,17 @@ export default function AdminCourseView() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'Datos del Curso':
-        return <AdminCourseDataTab courseId={id} />;
+        return <AdminCourseDataView courseId={id} />;
       case 'Marketing/Landing':
-        return <AdminCourseMarketingTab courseId={id} />;
+        return <AdminCourseMarketingView courseId={id} />;
       case 'Contenido del Curso':
-        return <AdminCourseContentTab courseId={id} modules={modules} lessons={lessons} />;
+        return <AdminCourseContentView courseId={id} modules={modules} lessons={lessons} />;
       case 'Foro':
-        return <AdminCourseForumTab courseId={id} />;
+        return <AdminCourseForumView courseId={id} />;
       case 'Testimonios':
-        return <AdminCourseTestimonialsTab courseId={id} />;
+        return <AdminCourseTestimonialsView courseId={id} />;
       default:
-        return <AdminCourseDataTab courseId={id} />;
+        return <AdminCourseDataView courseId={id} />;
     }
   };
 
