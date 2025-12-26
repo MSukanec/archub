@@ -426,7 +426,7 @@ export function CapitalDashboardView({
   }, [monthlyChartData]);
 
   const partnerDistributionData = useMemo(() => {
-    const partnerTotals = new Map<string, { name: string; value: number }>();
+    const partnerTotals = new Map<string, { label: string; value: number }>();
     
     confirmedContributions.forEach(c => {
       if (!c.partner) return;
@@ -435,7 +435,7 @@ export function CapitalDashboardView({
         `${c.partner.contacts?.first_name || ''} ${c.partner.contacts?.last_name || ''}`.trim() ||
         c.partner.contacts?.company_name || 'Sin nombre';
       
-      const existing = partnerTotals.get(partnerId) || { name: partnerName, value: 0 };
+      const existing = partnerTotals.get(partnerId) || { label: partnerName, value: 0 };
       existing.value += c.amount * (c.exchange_rate || 1);
       partnerTotals.set(partnerId, existing);
     });
@@ -447,7 +447,7 @@ export function CapitalDashboardView({
         `${w.partner.contacts?.first_name || ''} ${w.partner.contacts?.last_name || ''}`.trim() ||
         w.partner.contacts?.company_name || 'Sin nombre';
       
-      const existing = partnerTotals.get(partnerId) || { name: partnerName, value: 0 };
+      const existing = partnerTotals.get(partnerId) || { label: partnerName, value: 0 };
       existing.value -= w.amount * (w.exchange_rate || 1);
       partnerTotals.set(partnerId, existing);
     });
@@ -466,7 +466,7 @@ export function CapitalDashboardView({
     const context = buildInsightContext({
       totalGasto: netCapital,
       previousPeriodGasto: kpis.previousNetCapital,
-      categoryData: partnerDistributionData,
+      categoryData: partnerDistributionData.map(p => ({ name: p.label, value: p.value })),
       previousCategoryData: [],
       monthlyData: monthlyChartData,
       paymentsCount: confirmedContributions.length + confirmedWithdrawals.length,
@@ -663,7 +663,7 @@ export function CapitalDashboardView({
             Participantes
           </StatCardTitle>
           <StatCardValue>
-            {kpis.partnersCount.count}
+            {kpis.partnersCount.value || 0}
           </StatCardValue>
           <StatCardMeta>
             Socios activos
@@ -674,9 +674,8 @@ export function CapitalDashboardView({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DashboardCard
           title="Evolución del Capital"
-          icon={Clock}
+          icon={<Clock className="h-5 w-5" />}
           description={`Movimientos netos mensuales`}
-          onClick={onNavigateToTransactions}
           data-testid="card-monthly-trend"
         >
           {monthlyChartData.length >= 2 ? (
@@ -685,8 +684,6 @@ export function CapitalDashboardView({
                 <MonthlyTrendChart 
                   data={monthlyChartData} 
                   height={200}
-                  onClick={handleMonthDrillDown}
-                  clickable
                 />
               </div>
               {currentMonthComparison && (
@@ -702,9 +699,8 @@ export function CapitalDashboardView({
 
         <DashboardCard
           title="Distribución por Socio"
-          icon={PieChart}
+          icon={<PieChart className="h-5 w-5" />}
           description="Balance neto por participante"
-          onClick={onNavigateToBalances}
           data-testid="card-partner-distribution"
         >
           {partnerDistributionData.length > 0 ? (
@@ -713,8 +709,6 @@ export function CapitalDashboardView({
                 data={partnerDistributionData} 
                 height={200}
                 showLegend
-                onClick={handlePartnerDrillDown}
-                clickable
               />
             </div>
           ) : (
@@ -727,15 +721,15 @@ export function CapitalDashboardView({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <InsightCard
-          insights={toInsightItems(autoInsights)}
+          items={toInsightItems(autoInsights)}
           onAction={handleInsightAction}
           data-testid="card-insights"
         />
 
         <ActivityCard
+          title="Actividad Reciente"
           items={recentActivityItems}
-          emptyMessage="No hay transacciones recientes"
-          onViewAll={onNavigateToTransactions}
+          emptyText="No hay transacciones recientes"
           data-testid="card-recent-activity"
         />
       </div>
