@@ -24,7 +24,7 @@ export function OrganizationSettingsFinancesView() {
   const { toast } = useToast();
 
   const [defaultCurrency, setDefaultCurrency] = useState<string>('');
-  const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
+  const [secondaryCurrency, setSecondaryCurrency] = useState<string>('');
   const [defaultWallet, setDefaultWallet] = useState<string>('');
   const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
   
@@ -293,7 +293,7 @@ export function OrganizationSettingsFinancesView() {
     if (prevOrganizationId.current !== organizationId) {
       prevOrganizationId.current = organizationId;
       setDefaultCurrency('');
-      setSecondaryCurrencies([]);
+      setSecondaryCurrency('');
       setDefaultWallet('');
       setSecondaryWallets([]);
     }
@@ -311,12 +311,12 @@ export function OrganizationSettingsFinancesView() {
     
     if (organizationCurrencies?.length) {
       const defaultCur = organizationCurrencies.find(c => c.is_default);
-      const secondaryCurs = organizationCurrencies.filter(c => !c.is_default);
+      const secondaryCur = organizationCurrencies.find(c => !c.is_default);
       
       if (defaultCur) {
         setDefaultCurrency(defaultCur.currency_id);
       }
-      setSecondaryCurrencies(secondaryCurs.map(c => c.currency_id));
+      setSecondaryCurrency(secondaryCur?.currency_id || '');
     }
   }, [organizationCurrencies, isLoadingOrgCurrencies, isLoadingAllCurrencies]);
 
@@ -355,7 +355,9 @@ export function OrganizationSettingsFinancesView() {
 
   const handleDefaultCurrencyChange = (currencyId: string) => {
     setDefaultCurrency(currencyId);
-    setSecondaryCurrencies(prev => prev.filter(id => id !== currencyId));
+    if (secondaryCurrency === currencyId) {
+      setSecondaryCurrency('');
+    }
     saveDefaultCurrencyMutation.mutate(currencyId);
   };
 
@@ -365,17 +367,9 @@ export function OrganizationSettingsFinancesView() {
     saveDefaultWalletMutation.mutate(walletId);
   };
 
-  const handleSecondaryCurrenciesChange = (currencyIds: string[]) => {
-    if (currencyIds.length > 1) {
-      toast({
-        title: 'Solo una moneda secundaria permitida',
-        description: 'Puedes tener como máximo 1 moneda secundaria junto con tu moneda principal.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    setSecondaryCurrencies(currencyIds);
-    updateSecondaryCurrenciesMutation.mutate(currencyIds);
+  const handleSecondaryCurrencyChange = (currencyId: string) => {
+    setSecondaryCurrency(currencyId);
+    updateSecondaryCurrenciesMutation.mutate(currencyId ? [currencyId] : []);
   };
 
   const handleSecondaryWalletsChange = (walletIds: string[]) => {
@@ -419,17 +413,20 @@ export function OrganizationSettingsFinancesView() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="secondary-currencies">Moneda Secundaria (Opcional)</Label>
-            <ComboBoxMultiSelectField
-              options={availableSecondaryCurrencies.map(currency => ({
-                value: currency.id,
-                label: `${currency.name} (${currency.symbol})`
-              }))}
-              value={secondaryCurrencies}
-              onChange={handleSecondaryCurrenciesChange}
-              placeholder="Selecciona 1 moneda secundaria"
-            />
-            <p className="text-xs text-muted-foreground">Máximo 1 moneda secundaria permitida</p>
+            <Label htmlFor="secondary-currency">Moneda Secundaria (Opcional)</Label>
+            <Select value={secondaryCurrency} onValueChange={handleSecondaryCurrencyChange}>
+              <SelectTrigger id="secondary-currency">
+                <SelectValue placeholder="Selecciona una moneda secundaria" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Ninguna</SelectItem>
+                {availableSecondaryCurrencies?.map((currency) => (
+                  <SelectItem key={currency.id} value={currency.id}>
+                    {currency.name} ({currency.symbol})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
