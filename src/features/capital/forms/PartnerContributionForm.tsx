@@ -292,7 +292,6 @@ export function PartnerContributionForm({
               description: fileInput.description || fileInput.file.name,
             })
           } catch (uploadError: any) {
-            console.error('Error uploading file:', uploadError)
             toast({
               variant: 'destructive',
               title: 'Error al subir archivo',
@@ -311,7 +310,6 @@ export function PartnerContributionForm({
 
       onSuccess()
     } catch (error: any) {
-      console.error('Error creating partner contribution:', error)
       toast({
         title: "Error al registrar aporte",
         description: error.message || "Ocurrió un error al registrar el aporte",

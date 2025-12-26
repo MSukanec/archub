@@ -186,7 +186,6 @@ export function CapitalTransactionsView({
 
   const handleEdit = (transaction: UnifiedTransaction) => {
     if (!organizationId) {
-      console.error('Cannot edit transaction: organizationId is required');
       return;
     }
 
@@ -207,7 +206,6 @@ export function CapitalTransactionsView({
 
   const handleDelete = (transaction: UnifiedTransaction) => {
     if (!organizationId) {
-      console.error('Cannot delete transaction: organizationId is required');
       return;
     }
 
@@ -240,7 +238,6 @@ export function CapitalTransactionsView({
 
   const handleAddTransaction = () => {
     if (!organizationId) {
-      console.error('Cannot add transaction: organizationId is required');
       return;
     }
     openModal('capital-transaction', {
@@ -305,7 +302,7 @@ export function CapitalTransactionsView({
     {
       key: 'wallet_name',
       label: 'Billetera',
-      type: 'wallet' as const,
+      type: 'medium-text' as const,
       render: (item: UnifiedTransaction) => (
         <span className="text-sm text-muted-foreground">
           {item.wallet_name || '-'}

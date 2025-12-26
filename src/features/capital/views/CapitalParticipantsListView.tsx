@@ -156,6 +156,7 @@ export function CapitalParticipantsListView() {
     {
       key: 'partnerName',
       label: 'Socio',
+      type: 'medium-text' as const,
       sortable: true,
       render: (partner: EnrichedPartner) => {
         const contact = partner.contacts;
@@ -177,6 +178,7 @@ export function CapitalParticipantsListView() {
     {
       key: 'email',
       label: 'Mail',
+      type: 'long-text' as const,
       sortable: true,
       render: (partner: EnrichedPartner) => {
         return partner.contacts?.email || '-';
@@ -185,6 +187,7 @@ export function CapitalParticipantsListView() {
     {
       key: 'phone',
       label: 'Teléfono',
+      type: 'medium-text' as const,
       sortable: true,
       render: (partner: EnrichedPartner) => {
         return partner.contacts?.phone || '-';
