@@ -149,7 +149,7 @@ export interface CapitalAdjustment {
   exchange_rate: number
   amount: number // SIGNED: can be + or -
   adjustment_date: string
-  reason: string
+  reason: string | null
   notes: string | null
   reference: string | null
   status: 'confirmed' | 'pending' | 'rejected' | 'void'
@@ -164,13 +164,13 @@ export interface CapitalAdjustment {
 
 export interface CapitalAdjustmentCreateInput {
   organization_id: string
-  partner_id: string | null
-  project_id: string | null
+  partner_id?: string | null
+  project_id?: string | null
   currency_id: string
   exchange_rate?: number
   amount: number // SIGNED
   adjustment_date: string
-  reason: string
+  reason?: string | null
   notes?: string | null
   reference?: string | null
   status: 'confirmed' | 'pending' | 'rejected' | 'void'

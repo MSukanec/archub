@@ -30,7 +30,7 @@ const capitalAdjustmentSchema = z.object({
   amount: z.number().refine(val => val !== 0, { message: 'El monto no puede ser 0' }),
   currency_id: z.string().min(1, 'Moneda es requerida'),
   exchange_rate: z.number().min(0.0001, 'Tipo de cambio debe ser mayor a 0').optional().nullable(),
-  reason: z.string().min(1, 'La razón es requerida'),
+  reason: z.string().optional().nullable(),
   status: z.enum(['confirmed', 'pending', 'rejected', 'void']),
   reference: z.string().optional(),
   notes: z.string().optional(),
@@ -116,11 +116,11 @@ export function CapitalAdjustmentForm({
     resolver: zodResolver(capitalAdjustmentSchema),
     defaultValues: {
       adjustment_date: new Date(),
-      partner_id: '',
+      partner_id: null,
       amount: 0,
       currency_id: '',
       exchange_rate: undefined,
-      reason: '',
+      reason: null,
       status: 'confirmed',
       reference: '',
       notes: '',
@@ -135,11 +135,11 @@ export function CapitalAdjustmentForm({
       
       form.reset({
         adjustment_date: adjustmentDate,
-        partner_id: existingAdjustment.partner_id || '',
+        partner_id: existingAdjustment.partner_id || null,
         amount: existingAdjustment.amount || 0,
         currency_id: existingAdjustment.currency_id || '',
         exchange_rate: existingAdjustment.exchange_rate || undefined,
-        reason: existingAdjustment.reason || '',
+        reason: existingAdjustment.reason || null,
         status: existingAdjustment.status || 'confirmed',
         reference: existingAdjustment.reference || '',
         notes: existingAdjustment.notes || '',
@@ -177,7 +177,7 @@ export function CapitalAdjustmentForm({
           updates: {
             amount: data.amount,
             adjustment_date: formatDateForDB(data.adjustment_date),
-            reason: data.reason,
+            reason: data.reason ?? undefined,
             status: data.status,
             reference: data.reference || null,
             notes: data.notes || null,
@@ -188,12 +188,12 @@ export function CapitalAdjustmentForm({
         await createMutation.mutateAsync({
           organization_id: organizationId,
           project_id: projectId || null,
-          partner_id: data.partner_id || null,
+          partner_id: data.partner_id ?? undefined,
           amount: data.amount,
           currency_id: data.currency_id,
           exchange_rate: effectiveExchangeRate,
           adjustment_date: formatDateForDB(data.adjustment_date),
-          reason: data.reason,
+          reason: data.reason ?? undefined,
           status: data.status,
           reference: data.reference || null,
           notes: data.notes || null,
@@ -302,26 +302,6 @@ export function CapitalAdjustmentForm({
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="reason"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Razón del ajuste <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Ej: Corrección de saldo inicial, Ajuste por diferencia de cambio..."
-                  {...field}
-                  data-testid="input-capital-adjustment-reason"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -374,6 +354,25 @@ export function CapitalAdjustmentForm({
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="reason"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Razón del ajuste (opcional)</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ej: Corrección de saldo inicial, Ajuste por diferencia de cambio..."
+                  {...field}
+                  value={field.value || ''}
+                  data-testid="input-capital-adjustment-reason"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {(() => {
           const visibility = getCurrencyFieldsVisibility({
