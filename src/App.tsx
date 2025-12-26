@@ -102,15 +102,15 @@ const ClientPortal = lazy(() => import("@/pages/client-portal/ClientPortal"));
 const PortalAuthCallback = lazy(() => import("@/pages/client-portal/PortalAuthCallback"));
 
 // Learning Pages (importado normalmente para evitar loader)
-import LearningDashboard from "@/pages/learning/dashboard/LearningDashboard";
-import CourseList from "@/pages/learning/courses/CourseList";
+import LearningDashboardPage from "@/pages/learning/LearningDashboardPage";
+import CoursesPage from "@/pages/learning/CoursesPage";
 
 // Founders Portal (Lazy Loaded - solo fundadores)
 const FoundersPortalPage = lazy(() => import("@/features/founders-portal").then(m => ({ default: m.FoundersPortalPage })));
-const CourseInfo = lazy(() => import("@/pages/learning/courses/CourseInfo"));
-const CourseView = lazy(() => import("@/pages/learning/courses/CourseView"));
+const CourseInfoPage = lazy(() => import("@/pages/learning/CourseInfoPage"));
+const CourseDetailsPage = lazy(() => import("@/pages/learning/CourseDetailsPage"));
 const CourseLandingPrivate = lazy(() => import("@/pages/professional/learning/CourseLanding"));
-const PaymentReturn = lazy(() => import("@/pages/learning/PaymentReturn"));
+const PaymentReturnPage = lazy(() => import("@/pages/learning/PaymentReturnPage"));
 const CheckoutPage = lazy(() => import("@/pages/checkout/CheckoutPage"));
 const MPSeatSubscriptionSuccess = lazy(() => import("@/pages/MPSeatSubscriptionSuccess"));
 const SubscriptionCheckout = lazy(() => import("@/pages/checkout/SubscriptionCheckout"));
@@ -260,16 +260,16 @@ function Router() {
         <Route path="/pricing-plan" component={PricingPlan} />
         
         {/* Learning Routes */}
-        <Route path="/learning/dashboard" component={LearningDashboard} />
-        <Route path="/learning/courses" component={CourseList} />
+        <Route path="/learning/dashboard" component={LearningDashboardPage} />
+        <Route path="/learning/courses" component={CoursesPage} />
         <Route path="/learning/courses/:slug/info">
           <Suspense fallback={<LazyLoadFallback />}>
-            <CourseInfo />
+            <CourseInfoPage />
           </Suspense>
         </Route>
         <Route path="/learning/courses/:id">
           <Suspense fallback={<LazyLoadFallback />}>
-            <CourseView />
+            <CourseDetailsPage />
           </Suspense>
         </Route>
         <Route path="/learning/landing/:slug">
@@ -279,7 +279,7 @@ function Router() {
         </Route>
         <Route path="/learning/retorno">
           <Suspense fallback={<LazyLoadFallback />}>
-            <PaymentReturn />
+            <PaymentReturnPage />
           </Suspense>
         </Route>
         <Route path="/checkout">
