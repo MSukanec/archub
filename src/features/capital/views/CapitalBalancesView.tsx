@@ -103,7 +103,7 @@ export function CapitalBalancesView() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="stat-card-total-aportes">
           <StatCardTitle showArrow={false}>
             <TrendingUp className="h-4 w-4" />
