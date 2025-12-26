@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { useToast } from '@/hooks/use-toast';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard';
 import {
   usePurchaseOrders,
   useDeletePurchaseOrder,

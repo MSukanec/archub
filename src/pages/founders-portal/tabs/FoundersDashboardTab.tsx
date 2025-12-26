@@ -1,7 +1,7 @@
 import { Building2, Calendar, Vote, MessageCircle, ChevronRight, Sparkles } from 'lucide-react';
 import { useFounderDirectory, useFounderEvents, useFounderVotes } from '@/features/founders-portal/services';
 import { useForumThreads } from '@/features/forum/services';
-import { StatCard, StatCardTitle, StatCardValue, StatCardContent } from '@/components/dashboard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardContent } from '@/components/ActivityCard';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface FoundersDashboardTabProps {

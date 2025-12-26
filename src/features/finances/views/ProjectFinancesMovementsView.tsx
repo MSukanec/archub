@@ -26,7 +26,7 @@ import {
   StatCardSubValue,
   StatCardTrend,
   type TrendDirection
-} from '@/components/dashboard';
+} from '@/components/ActivityCard';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown, hasMultipleCurrencies } from '@/lib/kpis';
 import { format as formatMoney } from '@/lib/money';
 import { format } from 'date-fns';

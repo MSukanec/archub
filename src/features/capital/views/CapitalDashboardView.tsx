@@ -15,7 +15,7 @@ import {
   AlertTriangle,
   Crown
 } from 'lucide-react';
-import { type InsightAction } from '@/components/dashboard/insights/types';
+import { type InsightAction } from '@/components/insights/types';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown } from '@/lib/kpis';
 import { format as formatMoneyAmount, formatKPI } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -31,7 +31,7 @@ import {
   InsightCard,
   type ActivityItem,
   type TrendDirection
-} from '@/components/dashboard';
+} from '@/components/ActivityCard';
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/line/AreaTrendChart';

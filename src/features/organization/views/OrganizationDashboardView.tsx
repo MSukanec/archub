@@ -16,7 +16,7 @@ import { Folder, ArrowRight, Camera, Loader2, Users, FileText, Users2 } from 'lu
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { AppCard, AppCardTitle, AppCardValue, AppCardMeta, AppCardContent } from '@/components/dashboard';
+import { AppCard, AppCardTitle, AppCardValue, AppCardMeta, AppCardContent } from '@/components/ActivityCard';
 import { ProjectItemCard } from '@/features/projects';
 import { getOrganizationInitials } from '@/utils/initials';
 import { cn } from '@/lib/utils';

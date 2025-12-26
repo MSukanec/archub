@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import { TrendingUp, DollarSign, CreditCard, Lightbulb, Clock, Plus, BarChart3, PieChart, Users } from 'lucide-react';
-import { type InsightAction } from '@/components/dashboard/insights/types';
+import { type InsightAction } from '@/components/insights/types';
 import { calculateMonetaryKPI, calculateCountKPI, calculateTextKPI } from '@/lib/kpis';
 import { format, convertToBaseCurrency } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -20,9 +20,9 @@ import {
   InsightCard,
   type ActivityItem,
   type TrendDirection
-} from '@/components/dashboard';
+} from '@/components/ActivityCard';
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
-import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
+import { generateInsights, buildInsightContext, toInsightItems } from '@/components/insights';
 import { DataHealthAlertMulti, type DataIssue } from '@/core/data-health';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/line/AreaTrendChart';

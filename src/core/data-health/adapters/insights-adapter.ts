@@ -1,6 +1,6 @@
 import type { DataHealthResult, DataIssue, DataSeverity } from '../types';
 import type { InsightItem } from '@/components/dashboard/InsightCard';
-import type { InsightAction } from '@/components/dashboard/insights/types';
+import type { InsightAction } from '@/components/insights/types';
 
 type InsightVariant = 'info' | 'success' | 'warning' | 'danger';
 

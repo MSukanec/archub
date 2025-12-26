@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { AppCard } from '@/components/shared/AppCard';
 import { Button } from '@/components/ui/button';
 import { Info, AlertTriangle, CheckCircle2, XCircle, LucideIcon, ChevronRight } from 'lucide-react';
-import { type InsightAction } from './insights/types';
+import { type InsightAction } from '@/components/insights/types';
 
 type InsightVariant = 'info' | 'warning' | 'success' | 'danger';
 

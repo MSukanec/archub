@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { IdentityBadge } from '@/components/shared/IdentityBadge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'

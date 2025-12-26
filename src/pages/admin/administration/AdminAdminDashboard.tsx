@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/ui/card'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard'
 import { Clock, TrendingUp, UserPlus } from 'lucide-react'
 import { format, subMonths, startOfMonth, endOfMonth, isAfter, isBefore } from 'date-fns'
 import { es } from 'date-fns/locale'

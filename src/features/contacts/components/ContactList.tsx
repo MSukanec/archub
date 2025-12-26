@@ -4,7 +4,7 @@ import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { Badge } from '@/components/ui/badge';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
-import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/dashboard';
+import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/ActivityCard';
 import { calculateCountKPI, calculatePercentageKPI } from '@/lib/kpis';
 import type { ContactWithRelations } from '@/features/contacts/types';
 

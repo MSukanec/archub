@@ -7,7 +7,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal'
-import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/dashboard'
+import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/ActivityCard'
 import { EmptyState } from '@/components/shared/EmptyState'
 import CommitmentAccordion from '@/features/clients/components/CommitmentAccordion'
 import {

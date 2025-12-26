@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ActivityCard'
 import { format, subMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Skeleton } from '@/components/ui/skeleton'
