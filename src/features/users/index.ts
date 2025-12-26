@@ -17,13 +17,13 @@ export {
 } from './services';
 
 // Modals
-export { UserFormModal } from './modals/UserFormModal';
-export { PlanFormModal } from './modals/PlanFormModal';
+export { UserModal } from './modals/UserModal';
+export { PlanModal } from './modals/PlanModal';
 export { PlanPriceFormModal } from './modals/PlanPriceFormModal';
-export { NotificationFormModal } from './modals/NotificationFormModal';
+export { NotificationModal } from './modals/NotificationModal';
 export { SupportConversationStartModal } from './modals/SupportConversationStartModal';
-export { AnnouncementFormModal } from './modals/AnnouncementFormModal';
-export { ChangelogFormModal } from './modals/ChangelogFormModal';
+export { AnnouncementModal } from './modals/AnnouncementModal';
+export { ChangelogModal } from './modals/ChangelogModal';
 export { default as ResetTestDataModal } from './modals/ResetTestDataModal';
 export { PlanUpgradeModal } from './modals/PlanUpgradeModal';
 export { DowngradeModal } from './modals/DowngradeModal';
