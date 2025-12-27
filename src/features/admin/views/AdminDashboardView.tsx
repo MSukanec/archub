@@ -124,7 +124,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       if (!supabase) throw new Error('Supabase not available')
       const { data, error } = await supabase
         .from('user_presence_activity_view')
-        .select('user_id, full_name, last_seen_at, current_view, status')
+        .select('user_id, full_name, avatar_url, last_seen_at, current_view, status')
       if (error) throw error
       return (data || []).slice(0, 10)
     },
