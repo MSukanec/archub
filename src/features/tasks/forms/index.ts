@@ -3,3 +3,4 @@ export { FormPanel as TaskDivisionFormPanel, ViewPanel as TaskDivisionViewPanel,
 export { FormPanel as TaskParameterFormPanel, ViewPanel as TaskParameterViewPanel, useTaskParameterForm } from './TaskParameterForm';
 export { FormPanel as TaskParameterOptionFormPanel, ViewPanel as TaskParameterOptionViewPanel, useTaskParameterOptionForm } from './TaskParameterOptionForm';
 export { FormPanel as TaskFormPanel, MaterialEditRow, useTaskForm, type TaskFormData } from './TaskForm';
+export { FormPanel as TaskMultiModalFormPanel, useTaskMultiModalForm, addTaskSchema, type AddTaskFormData, type SelectedTask, type ParameterSelection } from './TaskMultiModalForm';
