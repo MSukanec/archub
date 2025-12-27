@@ -9,19 +9,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card'
 
 import { Table } from '@/components/shared/trees/Table'
-import AdminTaskRow from '@/features/legacy/components/admin/AdminTaskRow'
+import { AdminTaskRow } from '@/features/tasks'
 import { useMobile } from '@/hooks/use-mobile'
 
 import { useGlobalModalStore } from '@/components/modal'
-import { useGeneratedTasks, useDeleteGeneratedTask, useTaskUsageCount, type GeneratedTask } from '@/hooks/use-generated-tasks'
+import { useGeneratedTasks, useDeleteGeneratedTask, useTaskUsageCount, type GeneratedTask, useTaskParametersAdmin } from '@/features/tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
 
 import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronRight, ChevronDown, Eye, Copy } from 'lucide-react'
 import { EditableParametersTable } from '@/features/legacy/components/admin/EditableParametersTable'
 import { exportToExcel, createExportColumns } from '@/lib/export-utils'
-import { TaskCostPopover } from '@/features/legacy/components/tasks/TaskCostPopover'
-import TaskLaborCost from '@/components/shared/construction/TaskLaborCost'
+import { TaskCostPopover, TaskLaborCost } from '@/features/tasks'
 import { useLocation } from 'wouter'
 
 const AdminTaskList = () => {

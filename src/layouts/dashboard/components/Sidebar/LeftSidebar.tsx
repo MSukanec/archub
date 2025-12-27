@@ -253,6 +253,7 @@ export function LeftSidebar() {
         { id: 'moodboard', label: 'Moodboard', icon: Palette, href: '/project/moodboard', restricted: 'coming_soon' },
         { type: 'section-header', id: 'section-construccion', label: 'Construcción' },
         { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets', restricted: 'coming_soon' },
+        { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/project/tasks', restricted: 'coming_soon' },
         { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel' },
         { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials' },
         { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'coming_soon' },

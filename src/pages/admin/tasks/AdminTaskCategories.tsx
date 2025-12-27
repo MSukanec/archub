@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 
 import { HierarchicalTree } from '@/components/shared/trees/HierarchicalTree';
 
-import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
+import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin } from '@/features/tasks';
 import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 

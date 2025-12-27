@@ -2,7 +2,7 @@ import { format, addDays, differenceInDays } from 'date-fns';
 import { GanttRowProps, calculateResolvedEndDate } from './types';
 import { useState, useRef, useCallback, useMemo } from 'react';
 import { useCreateConstructionDependency, useConstructionDependencies, ConstructionDependencyWithTasks } from '@/hooks/use-construction-dependencies';
-import { useUpdateConstructionTaskResize, useUpdateConstructionTaskDrag, ConstructionTask } from '@/hooks/use-construction-tasks';
+import { useUpdateConstructionTaskResize, useUpdateConstructionTaskDrag, ConstructionTask } from '@/features/tasks';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { propagateDependencyChanges, applyOptimisticPropagation } from '@/utils/dependencyPropagation';

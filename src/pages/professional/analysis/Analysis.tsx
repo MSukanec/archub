@@ -6,7 +6,7 @@ import { useGlobalModalStore } from '@/components/modal'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { BarChart3, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import TaskList from './TaskList'
+import { TaskListView } from '@/features/tasks'
 import MaterialList from './material-costs/MaterialList'
 import LaborList from './LaborList'
 
@@ -45,13 +45,13 @@ export default function Analysis() {
   const renderView = () => {
     switch (activeTab) {
       case 'tasks':
-        return <TaskList />
+        return <TaskListView />
       case 'labor':
         return <LaborList onNewLabor={handleNewLabor} />
       case 'materials':
         return <MaterialList />
       default:
-        return <TaskList />
+        return <TaskListView />
     }
   }
 

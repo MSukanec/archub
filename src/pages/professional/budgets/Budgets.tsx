@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { Plus, CheckSquare, Calendar, Home, Search, Filter, Bell } from 'lucide-react'
-import { useConstructionTasks, useConstructionTasksView, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
+import { useConstructionTasks, useConstructionTasksView, useDeleteConstructionTask } from '@/features/tasks'
 import { useConstructionProjectPhases, useUpdatePhasePositions } from '@/hooks/use-construction-phases'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
@@ -19,7 +19,7 @@ import { useToast } from '@/hooks/use-toast'
 import { BudgetItems } from './BudgetItemTab'
 import { EstimatePhases } from './EstimatePhases'
 import { EstimateSchedule } from './EstimateSchedule'
-import { useCreateConstructionTask } from '@/hooks/use-construction-tasks'
+import { useCreateConstructionTask } from '@/features/tasks'
 
 export default function Budgets() {
   const [activeTab, setActiveTab] = useState('listado-tareas')

@@ -19,7 +19,7 @@ interface CategoryTreeNode {
   order?: number;
 }
 
-import { useTaskDivisionsAdmin, useAllTaskDivisions, useDeleteTaskDivision, useUpdateTaskDivisionsOrder, useUpdateTaskDivision, TaskDivisionAdmin } from '@/hooks/use-task-divisions-admin';
+import { useTaskDivisionsAdmin, useAllTaskDivisions, useDeleteTaskDivision, useUpdateTaskDivisionsOrder, useUpdateTaskDivision, TaskDivisionAdmin } from '@/features/tasks';
 import { useGlobalModalStore } from '@/components/modal';
 import { toast } from '@/hooks/use-toast';
 

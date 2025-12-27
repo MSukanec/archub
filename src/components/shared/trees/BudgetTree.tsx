@@ -10,11 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
-import TaskMaterialsUnitCost from '@/components/shared/construction/TaskMaterialsUnitCost';
-import TaskTotalSubtotal from '@/components/shared/construction/TaskTotalSubtotal';
-import { useTaskMaterials } from '@/hooks/use-generated-tasks';
-import { useTaskLabor } from '@/hooks/use-task-labor';
-import { useOrganizationTaskPrice } from '@/hooks/use-organization-task-prices';
+import { TaskMaterialsUnitCost, TaskTotalSubtotal, useTaskMaterials, useTaskLabor, useOrganizationTaskPrice } from '@/features/tasks';
 import { useBudgets, useUpdateBudget } from '@/hooks/use-budgets';
 
 // Drag and Drop imports

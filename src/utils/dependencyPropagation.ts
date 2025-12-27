@@ -1,5 +1,5 @@
 import { format, addDays } from 'date-fns';
-import { ConstructionTask } from '@/hooks/use-construction-tasks';
+import { ConstructionTask } from '@/features/tasks';
 import { ConstructionDependencyWithTasks } from '@/hooks/use-construction-dependencies';
 
 export interface TaskUpdate {

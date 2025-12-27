@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useMemo, useState } from 'react'
 import { useMobile } from '@/hooks/use-mobile'
-import { useTaskMaterials } from '@/hooks/use-generated-tasks'
-import { useTaskLabor } from '@/hooks/use-task-labor'
+import { useTaskMaterials, useTaskLabor } from '@/features/tasks'
 import { useUpdateBudgetItem, useMoveBudgetItem } from '@/hooks/use-budget-items'
 
 interface BudgetListTabProps {

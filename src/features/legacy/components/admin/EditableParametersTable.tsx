@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { Plus, Edit, Copy, Trash2, Settings, ChevronRight, ChevronDown, AlertTriangle, Search, ArrowRight, Minus } from 'lucide-react'
-import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
+import { useTaskParametersAdmin } from '@/features/tasks'
 import { useGlobalModalStore } from '@/components/modal'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'

@@ -8,7 +8,7 @@ import { Plus } from 'lucide-react'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { Table } from '@/components/shared/trees/Table'
 
-import { useConstructionTasksView, useDeleteConstructionTask } from '@/hooks/use-construction-tasks'
+import { useConstructionTasksView, useDeleteConstructionTask } from '@/features/tasks'
 import { useConstructionProjectPhases } from '@/hooks/use-construction-phases'
 import { useConstructionDependencies } from '@/hooks/use-construction-dependencies'
 import { useCurrentUser } from '@/hooks/use-current-user'

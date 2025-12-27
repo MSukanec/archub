@@ -7,9 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/shared/trees/Table';
 import { EmptyState } from '@/components/shared/EmptyState';
 
-import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameterOption, TaskParameterWithOptions } from '@/hooks/use-task-parameters-admin';
+import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameterOption, TaskParameterWithOptions, useTopLevelCategories, useUnits } from '@/features/tasks';
 import { useGlobalModalStore } from '@/components/modal';
-import { useTopLevelCategories, useUnits } from '@/hooks/use-task-categories';
 
 const AdminTaskParameters = () => {
   const [searchTerm, setSearchTerm] = useState('');
