@@ -303,7 +303,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       
       const { data, error } = await supabase
         .from('user_view_history')
-        .select(`user_id, duration_seconds, users!inner(full_name, avatar_url)`)
+        .select(`user_id, duration_seconds`)
         .gte('entered_at', startDate.toISOString())
       
       if (error) throw error
@@ -315,8 +315,6 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         if (!userMap.has(userId)) {
           userMap.set(userId, {
             user_id: userId,
-            full_name: row.users?.full_name || 'Usuario',
-            avatar_url: row.users?.avatar_url,
             total_seconds: 0,
             session_count: 0
           })
@@ -328,7 +326,23 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         }
       })
       
+      // Obtener datos de usuarios
+      const userIds = Array.from(userMap.keys())
+      if (userIds.length === 0) return []
+      
+      const { data: usersData } = await supabase
+        .from('users')
+        .select('id, full_name, avatar_url')
+        .in('id', userIds)
+      
+      const usersById = new Map((usersData || []).map((u: any) => [u.id, u]))
+      
       return Array.from(userMap.values())
+        .map((u: any) => ({
+          ...u,
+          full_name: usersById.get(u.user_id)?.full_name || 'Usuario',
+          avatar_url: usersById.get(u.user_id)?.avatar_url
+        }))
         .sort((a: any, b: any) => b.session_count - a.session_count)
         .slice(0, 8)
     },
@@ -345,7 +359,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       
       const { data, error } = await supabase
         .from('user_view_history')
-        .select(`user_id, duration_seconds, users!inner(full_name, avatar_url)`)
+        .select(`user_id, duration_seconds`)
         .gte('entered_at', startDate.toISOString())
       
       if (error) throw error
@@ -357,8 +371,6 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         if (!userMap.has(userId)) {
           userMap.set(userId, {
             user_id: userId,
-            full_name: row.users?.full_name || 'Usuario',
-            avatar_url: row.users?.avatar_url,
             total_seconds: 0,
             session_count: 0
           })
@@ -370,8 +382,24 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         }
       })
       
+      // Obtener datos de usuarios
+      const userIds = Array.from(userMap.keys())
+      if (userIds.length === 0) return []
+      
+      const { data: usersData } = await supabase
+        .from('users')
+        .select('id, full_name, avatar_url')
+        .in('id', userIds)
+      
+      const usersById = new Map((usersData || []).map((u: any) => [u.id, u]))
+      
       // Drop off = usuarios con 1-2 sesiones (bajo engagement)
       return Array.from(userMap.values())
+        .map((u: any) => ({
+          ...u,
+          full_name: usersById.get(u.user_id)?.full_name || 'Usuario',
+          avatar_url: usersById.get(u.user_id)?.avatar_url
+        }))
         .filter((u: any) => u.session_count <= 2)
         .sort((a: any, b: any) => a.session_count - b.session_count)
         .slice(0, 8)
@@ -416,14 +444,15 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       
       const { data, error } = await supabase
         .from('user_acquisition')
-        .select('utm_source, utm_medium')
+        .select('source, medium')
       
       if (error) throw error
       
       const sourceMap: Map<string, number> = new Map()
       
       (data as any[] || []).forEach((row: any) => {
-        const source = row.utm_source || row.utm_medium || 'direct'
+        let source = row.source || row.medium || 'direct'
+        if (source === 'unknown' || source === '') source = 'direct'
         const label = source === 'direct' ? 'Directo' : 
                       source === 'google' ? 'Google' :
                       source === 'facebook' ? 'Facebook' :
@@ -432,7 +461,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                       source === 'twitter' ? 'Twitter/X' :
                       source === 'referral' ? 'Referido' :
                       source === 'organic' ? 'Orgánico' :
-                      source.charAt(0).toUpperCase() + source.slice(1)
+                      String(source).charAt(0).toUpperCase() + String(source).slice(1)
         sourceMap.set(label, (sourceMap.get(label) || 0) + 1)
       })
       
