@@ -1,0 +1,114 @@
+Contexto importante (leer todo):
+
+En Seencel ya existe un sistema de adquisición de usuarios en Supabase.
+
+Ya están creados:
+- Tabla: public.user_acquisition
+- Función SQL: step_create_user_acquisition
+- Esta función se ejecuta dentro de handle_new_user
+- Lee datos desde raw_user_meta_data:
+  utm_source, utm_medium, utm_campaign, utm_content, landing_page, referrer
+- Si utm_source no existe, guarda "direct"
+
+Problema actual:
+Todos los registros en user_acquisition dicen "direct" porque el frontend
+NO está enviando ningún dato UTM ni contexto al momento del signup.
+
+Objetivo:
+Implementar en el FRONTEND un sistema completo, reutilizable y centralizado
+para capturar y enviar datos de adquisición correctamente.
+
+------------------------------------------------
+PARTE 1 — CAPTURA DE DATOS AL ENTRAR A LA WEB
+------------------------------------------------
+
+Al cargar la aplicación (entry point global):
+
+1. Leer parámetros UTM desde window.location.search:
+   - utm_source
+   - utm_medium
+   - utm_campaign
+   - utm_content
+
+2. Leer:
+   - landing_page → window.location.pathname
+   - referrer → document.referrer (puede ser vacío)
+
+3. Crear un objeto acquisitionContext con esta estructura:
+
+{
+  utm_source: string | null,
+  utm_medium: string | null,
+  utm_campaign: string | null,
+  utm_content: string | null,
+  landing_page: string,
+  referrer: string | null,
+  captured_at: timestamp
+}
+
+4. Guardar este objeto en localStorage (no sessionStorage),
+   bajo una key única, por ejemplo:
+   "seencel_user_acquisition"
+
+5. Si el usuario navega internamente, NO sobrescribir
+   los datos si ya existen (first-touch attribution).
+
+------------------------------------------------
+PARTE 2 — ENVÍO AL REGISTRARSE
+------------------------------------------------
+
+Cuando el usuario se registra usando Supabase Auth (signUp):
+
+1. Leer el objeto "seencel_user_acquisition" desde localStorage
+
+2. Enviar estos valores dentro de:
+   supabase.auth.signUp({ options.data })
+
+Ejemplo conceptual:
+
+supabase.auth.signUp({
+  email,
+  password,
+  options: {
+    data: {
+      utm_source,
+      utm_medium,
+      utm_campaign,
+      utm_content,
+      landing_page,
+      referrer
+    }
+  }
+})
+
+3. Si NO existe acquisitionContext:
+   - Enviar explícitamente:
+     utm_source = 'direct'
+     landing_page = pathname actual
+
+------------------------------------------------
+PARTE 3 — LIMPIEZA Y ROBUSTEZ
+------------------------------------------------
+
+- No borrar acquisitionContext luego del signup
+  (sirve para debug y futuros eventos)
+- Asegurar que esto funcione:
+  - Desktop
+  - Mobile
+  - PWA
+- No depender de cookies (usar localStorage)
+
+------------------------------------------------
+PARTE 4 — ARQUITECTURA
+------------------------------------------------
+
+- Centralizar toda esta lógica en un solo lugar:
+  - helper / hook / service (no duplicar código)
+- Documentar el flujo en el archivo de auditoría del proyecto
+- Este sistema debe considerarse OBLIGATORIO
+  para cualquier futuro flujo de registro
+
+Resultado esperado:
+- user_acquisition deja de decir siempre "direct"
+- Se puede saber realmente si el usuario viene de:
+  YouTube, Instagram, WhatsApp, Ads, etc.

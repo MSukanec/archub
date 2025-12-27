@@ -1,6 +1,10 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import { captureAcquisitionContext } from "@/lib/acquisition";
+
+// Capturar datos de adquisición al cargar la aplicación (first-touch)
+captureAcquisitionContext();
 
 // Register Service Worker for PWA
 if ('serviceWorker' in navigator) {

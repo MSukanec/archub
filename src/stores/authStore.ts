@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { queryClient } from "@/lib/queryClient";
+import { getAcquisitionDataForSignup } from "@/lib/acquisition";
 
 interface AuthState {
   user: User | null;
@@ -100,12 +101,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     set({ loading: true });
 
+    const acquisitionData = getAcquisitionDataForSignup();
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           full_name: fullName,
+          ...acquisitionData,
         }
       }
     });
@@ -127,6 +131,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true });
 
     try {
+      const acquisitionData = getAcquisitionDataForSignup();
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -134,8 +140,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
-          }
-        }
+          },
+        },
       });
 
       if (error) {

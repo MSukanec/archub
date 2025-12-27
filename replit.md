@@ -18,10 +18,10 @@ Preferred communication style: Simple, everyday language.
 - **Unified Mobile Menu Architecture**: Single `MobileMenu` component serving both marketing and dashboard contexts, with mode-aware rendering.
 - **Layout Architecture**: Experience-based layouts including Dashboard Layout (authenticated app) and Marketing Layout (public-facing pages).
 - **Content Theming System**: Unified CSS theming layer with dynamic background switching.
-- **Financial Indicator Colors**: All positive/negative/neutral indicators MUST use Tailwind chart color utilities (`text-chart-positive`, `text-chart-negative`, etc.) which map to CSS variables.
-- **Chart Components (AGNOSTIC NORM)**: Charts in `src/components/charts/` must be COMPLETELY AGNOSTIC to features - no feature-specific names or content. Generic charts receive data via props; views transform feature data to generic formats. Example: `CategoryBalanceTable` (generic) vs `WalletCurrencyBalanceTable` (feature-specific, wrong).
-- **Card Component Architecture (Single Source)**: `AppCard` in `src/components/shared/AppCard.tsx` is the ONLY card component for the application. `Card.tsx` is a primitive only. API: `title`, `icon`, `description`, `actions` (header); `children` (content); subcomponents `AppCardTitle`, `AppCardValue`, `AppCardMeta`, `AppCardTrend`, `AppCardHistoricalComparison` for KPI-style cards. Helper components: `InsightCard` and `ActivityCard` (in `src/components/dashboard/`) compose AppCard internally for specialized use cases.
-- **Chart Library Architecture**: Type-based folder structure (`line/`, `bar/`, `pie/`, `radial/`, `composed/`, `heatmap/`, `sparkline/`, `table/`) with unified theme system (`theme.ts`) and centralized exports (`index.ts`). All charts follow Nivel 1 pattern: pure visualization, no Card wrappers, no business logic. Chart Gallery at `/admin/design-system` for visual catalog. Key charts: TrendLineChart, MultiLineChart, MonthlyTrendChart, MultiSeriesTrendChart, VerticalBarChart, HorizontalBarChart, GroupedBarChart, SegmentedBarChart, DonutChart, ProgressRingChart, ComposedBarLineChart, FinancialFlowChart, BalanceTimelineChart, HeatmapGrid, SparklineChart, CategoryBalanceTable.
+- **Financial Indicator Colors**: All positive/negative/neutral indicators MUST use Tailwind chart color utilities.
+- **Chart Components (Agnostic)**: Charts must be completely agnostic to features, receiving data via props.
+- **Card Component Architecture**: `AppCard` in `src/components/shared/AppCard.tsx` is the ONLY card component for the application, with subcomponents for KPI-style cards.
+- **Chart Library Architecture**: Type-based folder structure with unified theme system, following a Nivel 1 pattern (pure visualization, no wrappers, no business logic).
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
@@ -32,85 +32,42 @@ Preferred communication style: Simple, everyday language.
 
 ### System Design Choices
 - **Module Architecture**: Feature-Sliced Design for core modules (PROJECTS, SUBCONTRACTS, PERSONNEL, CLIENTS, FINANCES, CAPITAL, LEARNING, MEDIA, SITELOG, MOODBOARD, TASKS, etc.).
-- **TASKS Module**: Consolidated feature in `src/features/tasks/` with barrel exports. Contains 18 hooks, 6 modals, 4 forms, 15 components, 3 views (TaskBasicDataView, TaskCostsView, TasksView). Architecture follows GENERAL-COSTS pattern: agnostic forms in `/forms/` (export FormPanel, ViewPanel, useXXXForm hook), container modals in `/modals/` (thin wrappers using ModalLayout). Legacy modals (BudgetTaskFormModal, ConstructionTaskScheduleModal) moved to `src/features/legacy/modals/`.
-- **Technical Catalog (Catálogo Técnico)**: Page at `src/pages/dashboard/CatalogPage.tsx`, accessible via `/technical-catalog` from Organization sidebar. Shows task catalog (TasksView), materials, and labor cost analysis. Accessible via "Catálogo Técnico" button in GESTIÓN section (below Contactos).
-- **Catalog Folder Structure**: Renamed from `analysis` to `catalog` at `src/pages/professional/catalog/` containing task and material-related views. TaskDetailPage moved to `src/pages/dashboard/TaskDetailPage.tsx` for detail views with multiple tabs (/analysis/:id). Material-costs folder consolidated directly into catalog folder for streamlined organization.
-- **Page Architecture (3-Layer Pattern)**: Clean separation between **Page**, **Layout**, and **View**. Pages end with `*Page.tsx` and Views with `*View.tsx`.
-- **Lab Layout (3-Level Mega-Menu)**: Enterprise navigation with context switcher, page selector, and tab selector via hover-based full-width dropdowns.
-- **Lab Layout Drawer System**: Right-side drawer component (`LabDrawer`) for forms and page-specific content, managed via `useLabDrawerStore`.
-- **Moodboard Module**: Pinterest-style inspiration board at `/project/moodboard`, accessible via "DISEÑO" navigation.
-- **Finances Module (Dual-Context)**: Accessible from both Organization and Project sidebars, with movements auto-assigning `project_id` when in project context.
-- **Capital Module**: Consolidated feature in `src/features/capital/` with modern architecture. Page at `src/pages/dashboard/CapitalPage.tsx` (pattern: TASKS feature consolidation). Accessible at `/organization/capital` with 4 views: CapitalDashboardView, CapitalParticipantsListView, CapitalBalancesView, CapitalTransactionsView. Manages capital participants, contributions, withdrawals, and adjustments.
+- **TASKS Module**: Consolidated feature with barrel exports, agnostic forms, and container modals.
+- **Technical Catalog**: Page at `src/pages/dashboard/CatalogPage.tsx` for task, materials, and labor cost analysis.
+- **Page Architecture**: 3-Layer Pattern (Page, Layout, View) for clear separation.
+- **Lab Layout**: Enterprise navigation with context switcher, page selector, tab selector, and a right-side drawer component (`LabDrawer`).
+- **Moodboard Module**: Pinterest-style inspiration board at `/project/moodboard`.
+- **Finances Module**: Dual-context (Organization and Project sidebars) with automatic `project_id` assignment.
+- **Capital Module**: Consolidated feature for managing capital participants, contributions, withdrawals, and adjustments.
 - **Multi-tenancy**: Services consistently filter data by `organization_id`.
 - **Soft Delete**: Implemented for key entities.
-- **Core Feature Management**: Comprehensive CRUD for Projects, Subcontracts, Personnel, Materials, Financial, Contacts, Sitelog, Project Types, and Project Modalities.
-- **Learning Module**: Supports course management, video integration, progress tracking, notes, enrollment, pricing, and payment integration.
+- **Core Feature Management**: Comprehensive CRUD for key entities.
+- **Learning Module**: Supports course management, video integration, progress tracking, and payment integration.
 - **AI Assistant**: Clean frontend/backend separation, orchestrating context-aware GPT-4o powered responses.
-- **Payment Architecture**: Unified `payments` table supporting multiple gateways (PayPal, Mercado Pago), centralized checkout, proration, and a unified coupon system.
-- **Founders Program**: Annual subscribers receive permanent founder status and lifetime access to a bonus course.
+- **Payment Architecture**: Unified `payments` table supporting multiple gateways, centralized checkout, and a unified coupon system.
+- **Founders Program**: Annual subscribers receive permanent founder status and lifetime bonus course access.
 - **Access Control**: `PlanRestricted` component system for organization membership and subscription plans.
 - **Cost System**: Three-tier cost system (Seencel Cost, Organization Cost, Independent Cost).
-- **Media Uploads**: Unified component for image and multi-file uploads using a scalable `MEDIA_FILES` + `MEDIA_LINKS` architecture, with client-side image compression.
-- **Date Utilities**: All date handling uses `src/lib/date-utils.ts` to avoid timezone issues.
+- **Media Uploads**: Unified component using `MEDIA_FILES` + `MEDIA_LINKS` architecture with client-side image compression.
+- **Date Utilities**: All date handling uses `src/lib/date-utils.ts`.
 - **Project Activity Tracking**: `last_active_at` timestamp updated automatically via backend API.
 - **Delete/Replace Pattern**: Universal delete confirmation modal with optional replace functionality.
-- **Universal Import System**: 5-step wizard with reusable hooks for parsing, auto-mapping, validation, and AI-powered suggestions.
+- **Universal Import System**: 5-step wizard with reusable hooks for parsing, auto-mapping, validation, and AI suggestions.
 - **Subscription Expiry Notification System**: Scheduled daily job for multi-recipient email notifications.
-- **Soft-Lock System**: Plan limit enforcement via `is_over_limit` flags on `projects` and `organization_members`.
+- **Soft-Lock System**: Plan limit enforcement via `is_over_limit` flags.
 - **Automated Downgrade Execution**: Hourly cron job processes expired subscriptions and scheduled downgrades.
 - **Multicurrency System**: Centralized handling via `/lib/money.ts` with explicit conversion functions.
-- **KPI System (Headless)**: Centralized calculation logic in `/lib/kpis.ts` for various KPI types, with automatic refetching on currency changes.
-- **Subscription & Billing System**: Comprehensive management of plans, subscriptions, payments, billing cycles, proration, seat-based billing, coupons, soft-locks, and cron jobs.
+- **KPI System (Headless)**: Centralized calculation logic in `/lib/kpis.ts` with automatic refetching.
+- **Subscription & Billing System**: Comprehensive management of plans, payments, billing cycles, proration, and cron jobs.
 - **Internationalization (i18n) System**: Lightweight locale system in `src/lib/i18n/` with `I18nProvider`, `useI18n` hook, and typed translations.
 - **Table Component Architecture**: Modular table system in `src/components/shared/table/` with separate components and hooks for sorting, filtering, pagination, and selection.
-- **Operations Center (Admin Ops)**: Enterprise-grade monitoring and incident management at `/admin/ops`, featuring automated health checks, persistent alerts, preventive flow blocking, guided repair actions, and runbooks.
-- **Badge Semantic Architecture**: All badges use a semantic color system, mapping variants to CSS variables for consistent styling.
-- **Data Health Micro Rules Architecture**: Modular validation rule system in `src/core/data-health/rules/micro/` for atomic, reusable checks.
-- **Save Engine (Centralized Saving)**: Enterprise-grade saving system in `/core/save-engine/` with optimistic updates, automatic rollback, and debounced auto-save. Hooks: `useSaveEngine` for auto-save forms (delay ≤500ms), `useOptimisticMutation` for point actions. Documentation at `/docs/save-architecture.md`.
-- **Performance Standards (CRITICAL)**: 
-  - Auto-save delays: 500ms MAX (NOT 1500ms)
-  - Cache invalidations: SCOPED to organizationId/id (NEVER use `featureKeys.lists()` or `featureKeys.all()`)
-  - Query keys: ALWAYS use centralized factory from `/core/query-keys/`
-  - Optimistic updates: MUST work without backend dependency
-  - Rule: If a change takes >500ms, it's too slow - audit cache invalidations
-  - Audit guideline in `prompts/FEATURE-AUDIT.md` section 5.3
-
-## Capital Feature Setup
-
-### Database Triggers (Manual Setup Required)
-Run the following SQL in Supabase to activate capital_adjustments and auto-balance updates:
-
-**File:** `sql/capital-adjustments-setup.sql`
-
-```sql
--- 1. Populates partner_capital_balance with current balances
--- 2. Creates function: update_partner_balance_after_capital_change()
--- 3. Attaches triggers on:
---    - partner_contributions (INSERT/UPDATE/DELETE)
---    - partner_withdrawals (INSERT/UPDATE/DELETE)
---    - capital_adjustments (INSERT/UPDATE/DELETE)
-```
-
-**Action Required:** 
-1. Go to Supabase SQL Editor
-2. Copy content from `sql/capital-adjustments-setup.sql`
-3. Paste and execute
-4. Verify: SELECT COUNT(*) FROM partner_capital_balance; ← should show partner balances
-
-### Capital Adjustments Query Keys
-- Centralized in: `src/core/query-keys/capital.keys.ts`
-- Adjustments: `capitalKeys.adjustmentsList(orgId, projectId)`
-- Unified ledger: `capitalKeys.unifiedMovements()`
-- Single adjustment: `capitalKeys.adjustment(adjustmentId)`
-
-### Capital Ledger Merge
-- Function: `src/features/capital/services/mergeCapitalMovements.ts`
-- Unifies: contributions (+) + withdrawals (-) + adjustments (signed)
-- Returns: `LedgerEntry[]` with type discriminator and signedAmount
-- Used by: Future "Capital Ledger" UI component
+- **Operations Center (Admin Ops)**: Enterprise-grade monitoring and incident management at `/admin/ops`.
+- **Badge Semantic Architecture**: All badges use a semantic color system.
+- **Data Health Micro Rules Architecture**: Modular validation rule system for atomic, reusable checks.
+- **Save Engine**: Enterprise-grade saving system in `/core/save-engine/` with optimistic updates, automatic rollback, and debounced auto-save (delay ≤500ms).
 
 ## External Dependencies
-- **Supabase**: Authentication.
+- **Supabase**: Authentication & User Acquisition tracking.
 - **Neon Database**: Serverless PostgreSQL hosting.
 - **Radix UI**: Headless component primitives.
 - **TanStack Query**: Server state management.
