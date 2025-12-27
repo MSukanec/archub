@@ -7,7 +7,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TasksView } from '@/features/tasks'
-import MaterialList from '@/pages/professional/catalog/material-costs/MaterialList'
+import MaterialList from '@/pages/professional/catalog/MaterialList'
 import LaborList from '@/pages/professional/catalog/LaborList'
 
 const ANALYSIS_TABS = [

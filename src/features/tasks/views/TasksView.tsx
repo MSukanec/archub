@@ -13,7 +13,7 @@ import { useMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 import { useLocation } from 'wouter'
 
-export default function TaskList() {
+export default function TasksView() {
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()
   const { openModal } = useGlobalModalStore()
   const deleteTaskMutation = useDeleteGeneratedTask()

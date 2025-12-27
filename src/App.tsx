@@ -91,7 +91,7 @@ const Products = lazy(() => import("@/pages/providers/products/Products"));
 // Catalog Pages
 import CatalogPage from "@/pages/dashboard/CatalogPage";
 import TaskDetailPage from "@/pages/dashboard/TaskDetailPage";
-import MaterialsView from "@/pages/professional/catalog/material-costs/MaterialsView";
+import MaterialsView from "@/pages/professional/catalog/MaterialsView";
 import GeneralCostsPage from "@/pages/dashboard/GeneralCostsPage";
 
 // Community Pages
