@@ -117,12 +117,21 @@ create table public.user_presence (
   locale text null,
   updated_from text null,
   current_view text null,
+  updated_at timestamp with time zone null default now(),
   constraint user_presence_pkey primary key (user_id),
   constraint user_presence_user_id_key unique (user_id),
   constraint user_presence_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
 create index IF not exists user_presence_org_idx on public.user_presence using btree (org_id) TABLESPACE pg_default;
+
+create trigger set_user_presence_updated_at BEFORE
+update on user_presence for EACH row
+execute FUNCTION update_updated_at_column ();
+
+create trigger trg_prevent_user_presence_user_id_update BEFORE
+update on user_presence for EACH row
+execute FUNCTION prevent_user_presence_user_id_update ();
 
 ## Tabla USER_VIEW_HISTORY:
 
@@ -244,8 +253,6 @@ execute FUNCTION users_normalize_email ();
 
 ## Funcion analytics_enter_view
 
-CREATE OR REPLACE FUNCTION public.analytics_enter_view(p_view text)
-RETURNS VOID AS $$
 declare
   v_user_id uuid;
   v_org_id uuid;
@@ -255,12 +262,10 @@ begin
   select up.last_organization_id into v_org_id from public.user_preferences up where up.user_id = v_user_id limit 1;
   insert into public.user_view_history (user_id, organization_id, view_name) values (v_user_id, v_org_id, p_view);
 end;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 
 ## Funcion analytics_exit_previous_view
 
-CREATE OR REPLACE FUNCTION public.analytics_exit_previous_view()
-RETURNS VOID AS $$
 declare
   v_user_id uuid;
 begin
@@ -268,7 +273,7 @@ begin
   if v_user_id is null then return; end if;
   update public.user_view_history set exited_at = now(), duration_seconds = extract(epoch from (now() - entered_at))::integer where user_id = v_user_id and exited_at is null;
 end;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 
 ## Funcion heartbeat
 
