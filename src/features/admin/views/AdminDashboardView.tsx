@@ -428,98 +428,29 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         </AppCard>
       </div>
 
-      {/* Bottom Row - 2 columnas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Actividad Reciente */}
-        <AppCard 
-          title="Actividad Reciente"
-          icon={<LogOut />}
-          description="Últimas conexiones de usuarios"
-          data-testid="card-recent-activity"
-        >
-          <AppCardContent>
-            {loadingActivity ? (
-              <div className="space-y-3">
-                {[...Array(3)].map((_, i) => (
-                  <Skeleton key={i} className="h-12" />
-                ))}
-              </div>
-            ) : recentActivity && recentActivity.length > 0 ? (
-              <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                {recentActivity.map((activity: any) => (
-                  <div key={activity.user_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                    <Avatar className="h-8 w-8 flex-shrink-0">
-                      <AvatarImage src={activity.avatar_url || undefined} />
-                      <AvatarFallback>{activity.full_name?.charAt(0) || 'U'}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-xs truncate">{activity.full_name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{formatViewName(activity.current_view)}</p>
-                    </div>
-                    <Badge variant="secondary" className="text-xs flex-shrink-0">{format(new Date(activity.last_seen_at), 'HH:mm', { locale: es })}</Badge>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-8">Sin datos</p>
-            )}
-          </AppCardContent>
-        </AppCard>
-
-        {/* Usuarios Recientes */}
-        <AppCard 
-          title="Usuarios Registrados"
-          icon={<UserPlus />}
-          description="Nuevos registros"
-          data-testid="card-recent-users"
-        >
-          <AppCardContent>
-            {loadingUsers ? (
-              <div className="space-y-3">
-                {[...Array(3)].map((_, i) => (
-                  <Skeleton key={i} className="h-12" />
-                ))}
-              </div>
-            ) : recentUsers && recentUsers.length > 0 ? (
-              <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                {recentUsers.slice(0, 10).map((user: any, idx: number) => (
-                  <div key={user.id || idx} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-xs truncate">{user.full_name || user.email}</p>
-                      <p className="text-xs text-muted-foreground">{format(new Date(user.created_at), 'dd MMM, HH:mm', { locale: es })}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-8">Sin datos</p>
-            )}
-          </AppCardContent>
-        </AppCard>
-      </div>
-
-      {/* Top Usuarios Activos */}
-      <div className="grid grid-cols-1 gap-4">
+      {/* 4 Columnas Bottom */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Top Usuarios Activos */}
         <AppCard 
           title="Top Usuarios Activos"
           icon={<Zap />}
-          description="Usuarios con mayor engagement"
+          description="Mayor engagement"
           data-testid="card-top-users"
         >
           <AppCardContent>
             {loadingTopUsers ? (
               <div className="space-y-3">
                 {[...Array(3)].map((_, i) => (
-                  <Skeleton key={i} className="h-12" />
+                  <Skeleton key={i} className="h-10" />
                 ))}
               </div>
             ) : topUsersData && topUsersData.length > 0 ? (
               <div className="space-y-2">
                 {topUsersData.slice(0, 3).map((user: any, idx: number) => (
                   <div key={user.user_id} className="flex items-center gap-2 p-2 rounded-lg bg-success/5 hover:bg-success/10 transition-colors border border-success/20">
-                    <Avatar className="h-8 w-8 flex-shrink-0">
+                    <Avatar className="h-7 w-7 flex-shrink-0">
                       <AvatarImage src={user.avatar_url || undefined} />
-                      <AvatarFallback>{user.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                      <AvatarFallback className="text-xs">{user.full_name?.charAt(0) || 'U'}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-xs truncate">{user.full_name}</p>
@@ -528,33 +459,29 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                     <Badge variant="status-completed" className="text-xs">#{idx + 1}</Badge>
                   </div>
                 ))}
-                <p className="text-xs text-muted-foreground text-center mt-3">Total: {topUsersData.length} usuarios</p>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-8">Sin datos</p>
             )}
           </AppCardContent>
         </AppCard>
-      </div>
 
-      {/* Drop Off Users */}
-      <div className="grid grid-cols-1 gap-4">
+        {/* Drop Off Users */}
         <AppCard 
-          title="Usuarios con Baja Actividad"
+          title="Drop Off"
           icon={<Clock />}
-          description="Posibles churn - 1-2 sesiones"
+          description="Baja actividad (1-2 sesiones)"
           data-testid="card-drop-off"
         >
           <AppCardContent>
             {loadingDropOff ? (
               <div className="space-y-3">
                 {[...Array(3)].map((_, i) => (
-                  <Skeleton key={i} className="h-12" />
+                  <Skeleton key={i} className="h-10" />
                 ))}
               </div>
             ) : dropOffData && dropOffData.length > 0 ? (
               <div className="space-y-2">
-                <p className="text-xs text-muted-foreground mb-2">Usuarios con bajo engagement</p>
                 {dropOffData.slice(0, 3).map((user: any) => (
                   <div key={user.user_id} className="flex items-center gap-2 p-2 rounded-lg bg-destructive/5 hover:bg-destructive/10 transition-colors border border-destructive/20">
                     <Avatar className="h-7 w-7 flex-shrink-0">
@@ -567,7 +494,77 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                     </div>
                   </div>
                 ))}
-                <p className="text-xs text-muted-foreground text-center mt-3">Total: {dropOffData.length} usuarios</p>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">Sin datos</p>
+            )}
+          </AppCardContent>
+        </AppCard>
+
+        {/* Actividad Reciente */}
+        <AppCard 
+          title="Actividad Reciente"
+          icon={<LogOut />}
+          description="Últimas conexiones"
+          data-testid="card-recent-activity"
+        >
+          <AppCardContent>
+            {loadingActivity ? (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-10" />
+                ))}
+              </div>
+            ) : recentActivity && recentActivity.length > 0 ? (
+              <div className="space-y-2">
+                {recentActivity.slice(0, 3).map((activity: any) => (
+                  <div key={activity.user_id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                    <Avatar className="h-7 w-7 flex-shrink-0">
+                      <AvatarImage src={activity.avatar_url || undefined} />
+                      <AvatarFallback className="text-xs">{activity.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-xs truncate">{activity.full_name}</p>
+                      <p className="text-xs text-muted-foreground text-xs">{format(new Date(activity.last_seen_at), 'HH:mm', { locale: es })}</p>
+                    </div>
+                    <Badge variant="secondary" className="text-xs h-fit">Online</Badge>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">Sin datos</p>
+            )}
+          </AppCardContent>
+        </AppCard>
+
+        {/* Usuarios Registrados */}
+        <AppCard 
+          title="Usuarios Registrados"
+          icon={<UserPlus />}
+          description="Nuevos registros"
+          data-testid="card-recent-users"
+        >
+          <AppCardContent>
+            {loadingUsers ? (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-10" />
+                ))}
+              </div>
+            ) : recentUsers && recentUsers.length > 0 ? (
+              <div className="space-y-2">
+                {recentUsers.slice(0, 3).map((user: any, idx: number) => (
+                  <div key={user.id || idx} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                    <Avatar className="h-7 w-7 flex-shrink-0">
+                      <AvatarImage src={user.avatar_url || undefined} />
+                      <AvatarFallback className="text-xs">{user.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-xs truncate">{user.full_name || user.email}</p>
+                      <p className="text-xs text-muted-foreground">{format(new Date(user.created_at), 'dd MMM', { locale: es })}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-8">Sin datos</p>
