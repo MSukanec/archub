@@ -71,6 +71,7 @@ interface DashboardStats {
   newOrganizationsThisMonth: number
   totalUsers: number
   activeUsersNow: number
+  activeUsersToday: number
   newUsersThisMonth: number
   totalProjects: number
   newProjectsThisMonth: number
@@ -121,6 +122,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         totalUsersResult,
         newUsersThisMonthResult,
         activeUsersResult,
+        activeUsersTodayResult,
         totalProjectsResult,
         newProjectsThisMonthResult,
         sessionsResult,
@@ -132,6 +134,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         supabase.from('users').select('*', { count: 'exact', head: true }),
         supabase.from('users').select('*', { count: 'exact', head: true }).gte('created_at', thisMonthStart.toISOString()),
         supabase.from('user_presence').select('user_id').gte('last_seen_at', ninetySecondsAgo.toISOString()),
+        supabase.from('user_view_history').select('user_id').gte('entered_at', todayStart.toISOString()),
         supabase.from('projects').select('*', { count: 'exact', head: true }),
         supabase.from('projects').select('*', { count: 'exact', head: true }).gte('created_at', thisMonthStart.toISOString()),
         supabase.from('user_view_history').select('*', { count: 'exact', head: true }).gte('entered_at', todayStart.toISOString()),
@@ -139,6 +142,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       ])
 
       const uniqueActiveUsers = new Set(activeUsersResult.data?.map(u => u.user_id) || [])
+      const uniqueActiveUsersToday = new Set(activeUsersTodayResult.data?.map(u => u.user_id) || [])
       const avgDuration = avgDurationResult.data && avgDurationResult.data.length > 0
         ? avgDurationResult.data.reduce((sum, row) => sum + (row.duration_seconds || 0), 0) / avgDurationResult.data.length
         : 0
@@ -149,6 +153,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         newOrganizationsThisMonth: newOrgsThisMonthResult.count || 0,
         totalUsers: totalUsersResult.count || 0,
         activeUsersNow: uniqueActiveUsers.size,
+        activeUsersToday: uniqueActiveUsersToday.size,
         newUsersThisMonth: newUsersThisMonthResult.count || 0,
         totalProjects: totalProjectsResult.count || 0,
         newProjectsThisMonth: newProjectsThisMonthResult.count || 0,
@@ -355,7 +360,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
           <AppCardValue className="text-[var(--accent)]">
             {stats?.activeUsersNow || 0}
           </AppCardValue>
-          <AppCardMeta>Ahora mismo (últimos 90s)</AppCardMeta>
+          <AppCardMeta>{stats?.activeUsersToday || 0} activos hoy</AppCardMeta>
         </AppCard>
 
         <AppCard data-testid="kpi-nuevos-usuarios">

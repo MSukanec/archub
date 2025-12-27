@@ -36,9 +36,9 @@ const AdminAdministrationPage = () => {
     <Popover open={periodPopoverOpen} onOpenChange={setPeriodPopoverOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
-          className="gap-2"
+          className="gap-2 text-muted-foreground hover:text-foreground"
           data-testid="select-period"
         >
           <Calendar className="h-4 w-4" />
