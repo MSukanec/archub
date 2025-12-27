@@ -445,7 +445,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                 ))}
               </div>
             ) : topUsersData && topUsersData.length > 0 ? (
-              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+              <div className="space-y-2">
                 {topUsersData.slice(0, 10).map((user: any, idx: number) => (
                   <div key={user.user_id} className="flex items-center gap-2 p-2 rounded-lg bg-success/5 hover:bg-success/10 transition-colors border border-success/20">
                     <Avatar className="h-7 w-7 flex-shrink-0">
@@ -481,7 +481,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                 ))}
               </div>
             ) : dropOffData && dropOffData.length > 0 ? (
-              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+              <div className="space-y-2">
                 {dropOffData.slice(0, 10).map((user: any) => (
                   <div key={user.user_id} className="flex items-center gap-2 p-2 rounded-lg bg-destructive/5 hover:bg-destructive/10 transition-colors border border-destructive/20">
                     <Avatar className="h-7 w-7 flex-shrink-0">
@@ -516,7 +516,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                 ))}
               </div>
             ) : recentActivity && recentActivity.length > 0 ? (
-              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+              <div className="space-y-2">
                 {recentActivity.slice(0, 10).map((activity: any) => (
                   <div key={activity.user_id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <Avatar className="h-7 w-7 flex-shrink-0">
@@ -527,7 +527,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                       <p className="font-semibold text-xs truncate">{activity.full_name}</p>
                       <p className="text-xs text-muted-foreground text-xs">{format(new Date(activity.last_seen_at), 'HH:mm', { locale: es })}</p>
                     </div>
-                    <Badge variant="status-online" className="text-xs h-fit">Online</Badge>
+                    {activity.status === 'online' && <Badge variant="status-online" className="text-xs h-fit">Online</Badge>}
                   </div>
                 ))}
               </div>
@@ -552,7 +552,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                 ))}
               </div>
             ) : recentUsers && recentUsers.length > 0 ? (
-              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+              <div className="space-y-2">
                 {recentUsers.slice(0, 10).map((user: any, idx: number) => (
                   <div key={user.id || idx} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <Avatar className="h-7 w-7 flex-shrink-0">
