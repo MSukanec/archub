@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Activity, Users, TrendingUp, Building, Calendar, Eye, Clock } from 'lucide-react'
+import { Activity, Users, TrendingUp, Building, Calendar, Eye, Clock, UserPlus } from 'lucide-react'
 import { format, subMonths, startOfMonth, endOfMonth, subDays, startOfDay } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -51,6 +51,18 @@ function formatDuration(seconds: number): string {
   const secs = Math.round(seconds % 60);
   if (hours > 0) return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
   return secs > 0 ? `${minutes}m ${secs}s` : `${minutes}m`;
+}
+
+function formatAcquisitionOrigin(origin?: string): string {
+  if (!origin) return 'Directo'
+  const originMap: Record<string, string> = {
+    'direct': 'Directo',
+    'google': 'Google',
+    'email': 'Email',
+    'referral': 'Referido',
+    'social': 'Social Media',
+  }
+  return originMap[origin] || origin
 }
 
 interface DashboardStats {
@@ -143,6 +155,58 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         sessionsToday: sessionsResult.count || 0,
         avgSessionDuration: avgDuration
       } as DashboardStats
+    },
+    enabled: !!supabase,
+    staleTime: 30000,
+    refetchInterval: 60000
+  })
+
+  // Últimas conexiones de usuarios - OPTIMIZADO
+  const { data: recentActivity, isLoading: loadingActivity } = useQuery({
+    queryKey: ['recent-user-activity'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not available')
+
+      const { data } = await supabase
+        .from('user_presence')
+        .select(`
+          user_id,
+          last_seen_at,
+          current_view,
+          users!inner(full_name)
+        `)
+        .order('last_seen_at', { ascending: false })
+        .limit(10)
+
+      return data
+    },
+    enabled: !!supabase,
+    staleTime: 15000,
+    refetchInterval: 30000
+  })
+
+  // Últimos usuarios registrados con su organización y origen
+  const { data: recentUsers, isLoading: loadingUsers } = useQuery({
+    queryKey: ['recently-registered-users'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not available')
+      
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No active session')
+      
+      const response = await fetch('/api/admin/users/recent?limit=10', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to fetch recent users')
+      }
+      
+      return response.json()
     },
     enabled: !!supabase,
     staleTime: 30000,
@@ -396,6 +460,129 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
               </div>
             )}
           </CardContent>
+        </Card>
+      </div>
+
+      {/* Actividad Reciente y Últimos Registrados - 2 columnas */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Actividad Reciente */}
+        <Card className="p-4" data-testid="card-actividad-reciente">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="h-4 w-4" />
+            <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+              Actividad Reciente de Usuarios
+            </p>
+          </div>
+          {loadingActivity ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-16" />
+              ))}
+            </div>
+          ) : recentActivity && recentActivity.length > 0 ? (
+            <>
+              <div className="space-y-2">
+                {recentActivity.map((activity: any) => {
+                  const lastSeenTime = new Date(activity.last_seen_at).getTime()
+                  const now = Date.now()
+                  const diffMs = now - lastSeenTime
+                  const isActive = diffMs <= 90000
+
+                  return (
+                    <div key={activity.user_id} className="flex items-start justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold truncate text-sm">{activity.users?.full_name}</p>
+                        <p className="text-xs text-muted-foreground truncate mt-0.5">
+                          {formatViewName(activity.current_view)}
+                        </p>
+                      </div>
+                      <div className="flex-shrink-0">
+                        {isActive ? (
+                          <Badge className="bg-accent text-accent-foreground">
+                            Activo
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">
+                            {format(new Date(activity.last_seen_at), "d 'de' MMM, HH:mm", { locale: es })}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <a 
+                href="/admin/administration" 
+                onClick={(e) => {
+                  e.preventDefault()
+                  window.location.href = '/admin/administration'
+                }}
+                className="block mt-4 pt-3 border-t text-center text-sm hover:underline transition-all"
+                style={{ color: 'hsl(var(--accent))' }}
+              >
+                Ver más usuarios
+              </a>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No hay actividad reciente
+            </p>
+          )}
+        </Card>
+
+        {/* Últimos Registrados */}
+        <Card className="p-4" data-testid="card-usuarios-recientes">
+          <div className="flex items-center gap-2 mb-4">
+            <UserPlus className="h-4 w-4" />
+            <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
+              Últimos Registrados
+            </p>
+          </div>
+          {loadingUsers ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-16" />
+              ))}
+            </div>
+          ) : recentUsers && recentUsers.length > 0 ? (
+            <>
+              <div className="space-y-2">
+                {recentUsers.map((user: any) => (
+                  <div key={user.id} className="flex items-start justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold truncate text-sm">{user.full_name || user.email}</p>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">
+                        {user.organization_name || 'Sin organización'}
+                      </p>
+                      <p className="text-xs text-muted-foreground/70 truncate mt-0.5">
+                        Origen: {formatAcquisitionOrigin(user.acquisition)}
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {format(new Date(user.created_at), "d 'de' MMM, HH:mm", { locale: es })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <a 
+                href="/admin/administration" 
+                onClick={(e) => {
+                  e.preventDefault()
+                  window.location.href = '/admin/administration'
+                }}
+                className="block mt-4 pt-3 border-t text-center text-sm hover:underline transition-all"
+                style={{ color: 'hsl(var(--accent))' }}
+              >
+                Ver más usuarios
+              </a>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No hay usuarios registrados
+            </p>
+          )}
         </Card>
       </div>
 
