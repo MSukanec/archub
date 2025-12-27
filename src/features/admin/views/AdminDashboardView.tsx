@@ -406,6 +406,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
           description={`Tiempo promedio en cada sección (${periodLabel})`}
           data-testid="card-engagement"
         >
+          <div className="pt-3">
             {loadingEngagement ? (
               <Skeleton className="h-[250px]" />
             ) : engagementData && engagementData.length > 0 ? (
@@ -423,6 +424,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                 Sin datos
               </div>
             )}
+          </div>
         </AppCard>
 
         {/* Actividad por Hora */}
@@ -432,6 +434,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
           description="Sesiones iniciadas por hora del día"
           data-testid="card-hourly"
         >
+          <div className="pt-3">
             {loadingHourly ? (
               <Skeleton className="h-[250px]" />
             ) : hourlyData && hourlyData.length > 0 ? (
@@ -449,6 +452,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                 Sin datos
               </div>
             )}
+          </div>
         </AppCard>
       </div>
 
@@ -460,61 +464,63 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
           icon={<Clock />}
           data-testid="card-actividad-reciente"
         >
-          {loadingActivity ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-16" />
-              ))}
-            </div>
-          ) : recentActivity && recentActivity.length > 0 ? (
-            <>
-              <div className="space-y-2">
-                {recentActivity.map((activity: any) => {
-                  const lastSeenTime = new Date(activity.last_seen_at).getTime()
-                  const now = Date.now()
-                  const diffMs = now - lastSeenTime
-                  const isActive = diffMs <= 90000
-
-                  return (
-                    <div key={activity.user_id} className="flex items-start justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold truncate text-sm">{activity.users?.full_name}</p>
-                        <p className="text-xs text-muted-foreground truncate mt-0.5">
-                          {formatViewName(activity.current_view)}
-                        </p>
-                      </div>
-                      <div className="flex-shrink-0">
-                        {isActive ? (
-                          <Badge className="bg-accent text-accent-foreground">
-                            Activo
-                          </Badge>
-                        ) : (
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">
-                            {format(new Date(activity.last_seen_at), "d 'de' MMM, HH:mm", { locale: es })}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
+          <div className="pt-3">
+            {loadingActivity ? (
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-16" />
+                ))}
               </div>
-              <a 
-                href="/admin/administration" 
-                onClick={(e) => {
-                  e.preventDefault()
-                  window.location.href = '/admin/administration'
-                }}
-                className="block mt-4 pt-3 border-t text-center text-sm hover:underline transition-all"
-                style={{ color: 'hsl(var(--accent))' }}
-              >
-                Ver más usuarios
-              </a>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              No hay actividad reciente
-            </p>
-          )}
+            ) : recentActivity && recentActivity.length > 0 ? (
+              <>
+                <div className="space-y-2">
+                  {recentActivity.map((activity: any) => {
+                    const lastSeenTime = new Date(activity.last_seen_at).getTime()
+                    const now = Date.now()
+                    const diffMs = now - lastSeenTime
+                    const isActive = diffMs <= 90000
+
+                    return (
+                      <div key={activity.user_id} className="flex items-start justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold truncate text-sm">{activity.users?.full_name}</p>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                            {formatViewName(activity.current_view)}
+                          </p>
+                        </div>
+                        <div className="flex-shrink-0">
+                          {isActive ? (
+                            <Badge className="bg-accent text-accent-foreground">
+                              Activo
+                            </Badge>
+                          ) : (
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                              {format(new Date(activity.last_seen_at), "d 'de' MMM, HH:mm", { locale: es })}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+                <a 
+                  href="/admin/administration" 
+                  onClick={(e) => {
+                    e.preventDefault()
+                    window.location.href = '/admin/administration'
+                  }}
+                  className="block mt-4 pt-3 border-t text-center text-sm hover:underline transition-all"
+                  style={{ color: 'hsl(var(--accent))' }}
+                >
+                  Ver más usuarios
+                </a>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No hay actividad reciente
+              </p>
+            )}
+          </div>
         </AppCard>
 
         {/* Últimos Registrados */}
@@ -523,51 +529,53 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
           icon={<UserPlus />}
           data-testid="card-usuarios-recientes"
         >
-          {loadingUsers ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-16" />
-              ))}
-            </div>
-          ) : recentUsers && recentUsers.length > 0 ? (
-            <>
-              <div className="space-y-2">
-                {recentUsers.map((user: any) => (
-                  <div key={user.id} className="flex items-start justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold truncate text-sm">{user.full_name || user.email}</p>
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">
-                        {user.organization_name || 'Sin organización'}
-                      </p>
-                      <p className="text-xs text-muted-foreground/70 truncate mt-0.5">
-                        Origen: {formatAcquisitionOrigin(user.acquisition)}
-                      </p>
-                    </div>
-                    <div className="flex-shrink-0">
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {format(new Date(user.created_at), "d 'de' MMM, HH:mm", { locale: es })}
-                      </span>
-                    </div>
-                  </div>
+          <div className="pt-3">
+            {loadingUsers ? (
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-16" />
                 ))}
               </div>
-              <a 
-                href="/admin/administration" 
-                onClick={(e) => {
-                  e.preventDefault()
-                  window.location.href = '/admin/administration'
-                }}
-                className="block mt-4 pt-3 border-t text-center text-sm hover:underline transition-all"
-                style={{ color: 'hsl(var(--accent))' }}
-              >
-                Ver más usuarios
-              </a>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              No hay usuarios registrados
-            </p>
-          )}
+            ) : recentUsers && recentUsers.length > 0 ? (
+              <>
+                <div className="space-y-2">
+                  {recentUsers.map((user: any) => (
+                    <div key={user.id} className="flex items-start justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold truncate text-sm">{user.full_name || user.email}</p>
+                        <p className="text-xs text-muted-foreground truncate mt-0.5">
+                          {user.organization_name || 'Sin organización'}
+                        </p>
+                        <p className="text-xs text-muted-foreground/70 truncate mt-0.5">
+                          Origen: {formatAcquisitionOrigin(user.acquisition)}
+                        </p>
+                      </div>
+                      <div className="flex-shrink-0">
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {format(new Date(user.created_at), "d 'de' MMM, HH:mm", { locale: es })}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <a 
+                  href="/admin/administration" 
+                  onClick={(e) => {
+                    e.preventDefault()
+                    window.location.href = '/admin/administration'
+                  }}
+                  className="block mt-4 pt-3 border-t text-center text-sm hover:underline transition-all"
+                  style={{ color: 'hsl(var(--accent))' }}
+                >
+                  Ver más usuarios
+                </a>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No hay usuarios registrados
+              </p>
+            )}
+          </div>
         </AppCard>
       </div>
 
@@ -578,6 +586,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         description={`Top usuarios por tiempo en plataforma (${periodLabel})`}
         data-testid="card-top-users"
       >
+        <div className="pt-3">
           {loadingTopUsers ? (
             <Skeleton className="h-[200px]" />
           ) : topUsersData && topUsersData.length > 0 ? (
@@ -612,6 +621,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
               Sin datos
             </div>
           )}
+        </div>
       </AppCard>
     </div>
   )
