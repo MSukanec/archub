@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 // Removed direct Supabase import - now using server endpoints
-import { useCurrentUser } from './use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { toast } from '@/hooks/use-toast'
 import { useProjectContext } from '@/stores/projectContext'
 

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { useCurrentUser } from './use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 
 export interface DesignDocument {
   id: string;
