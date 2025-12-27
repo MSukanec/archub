@@ -440,13 +440,13 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
           <AppCardContent>
             {loadingTopUsers ? (
               <div className="space-y-3">
-                {[...Array(3)].map((_, i) => (
+                {[...Array(5)].map((_, i) => (
                   <Skeleton key={i} className="h-10" />
                 ))}
               </div>
             ) : topUsersData && topUsersData.length > 0 ? (
-              <div className="space-y-2">
-                {topUsersData.slice(0, 3).map((user: any, idx: number) => (
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                {topUsersData.slice(0, 10).map((user: any, idx: number) => (
                   <div key={user.user_id} className="flex items-center gap-2 p-2 rounded-lg bg-success/5 hover:bg-success/10 transition-colors border border-success/20">
                     <Avatar className="h-7 w-7 flex-shrink-0">
                       <AvatarImage src={user.avatar_url || undefined} />
@@ -476,13 +476,13 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
           <AppCardContent>
             {loadingDropOff ? (
               <div className="space-y-3">
-                {[...Array(3)].map((_, i) => (
+                {[...Array(5)].map((_, i) => (
                   <Skeleton key={i} className="h-10" />
                 ))}
               </div>
             ) : dropOffData && dropOffData.length > 0 ? (
-              <div className="space-y-2">
-                {dropOffData.slice(0, 3).map((user: any) => (
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                {dropOffData.slice(0, 10).map((user: any) => (
                   <div key={user.user_id} className="flex items-center gap-2 p-2 rounded-lg bg-destructive/5 hover:bg-destructive/10 transition-colors border border-destructive/20">
                     <Avatar className="h-7 w-7 flex-shrink-0">
                       <AvatarImage src={user.avatar_url || undefined} />
@@ -511,13 +511,13 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
           <AppCardContent>
             {loadingActivity ? (
               <div className="space-y-3">
-                {[...Array(3)].map((_, i) => (
+                {[...Array(5)].map((_, i) => (
                   <Skeleton key={i} className="h-10" />
                 ))}
               </div>
             ) : recentActivity && recentActivity.length > 0 ? (
-              <div className="space-y-2">
-                {recentActivity.slice(0, 3).map((activity: any) => (
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                {recentActivity.slice(0, 10).map((activity: any) => (
                   <div key={activity.user_id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <Avatar className="h-7 w-7 flex-shrink-0">
                       <AvatarImage src={activity.avatar_url || undefined} />
@@ -527,7 +527,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                       <p className="font-semibold text-xs truncate">{activity.full_name}</p>
                       <p className="text-xs text-muted-foreground text-xs">{format(new Date(activity.last_seen_at), 'HH:mm', { locale: es })}</p>
                     </div>
-                    <Badge variant="secondary" className="text-xs h-fit">Online</Badge>
+                    <Badge variant="status-online" className="text-xs h-fit">Online</Badge>
                   </div>
                 ))}
               </div>
@@ -547,13 +547,13 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
           <AppCardContent>
             {loadingUsers ? (
               <div className="space-y-3">
-                {[...Array(3)].map((_, i) => (
+                {[...Array(5)].map((_, i) => (
                   <Skeleton key={i} className="h-10" />
                 ))}
               </div>
             ) : recentUsers && recentUsers.length > 0 ? (
-              <div className="space-y-2">
-                {recentUsers.slice(0, 3).map((user: any, idx: number) => (
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                {recentUsers.slice(0, 10).map((user: any, idx: number) => (
                   <div key={user.id || idx} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <Avatar className="h-7 w-7 flex-shrink-0">
                       <AvatarImage src={user.avatar_url || undefined} />
@@ -561,6 +561,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-xs truncate">{user.full_name || user.email}</p>
+                      {user.organization_name && <p className="text-xs text-muted-foreground truncate">{user.organization_name}</p>}
                       <p className="text-xs text-muted-foreground">{format(new Date(user.created_at), 'dd MMM', { locale: es })}</p>
                     </div>
                   </div>
