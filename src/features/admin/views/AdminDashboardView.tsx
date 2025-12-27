@@ -495,7 +495,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                         </div>
                         <div className="flex-shrink-0">
                           {isActive ? (
-                            <Badge variant="status-active">Activo</Badge>
+                            <Badge variant="status-online">Online</Badge>
                           ) : (
                             <span className="text-xs text-muted-foreground whitespace-nowrap">
                               {format(new Date(activity.last_seen_at), "d 'de' MMM, HH:mm", { locale: es })}
