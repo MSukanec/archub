@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/shared/AppCard'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -401,17 +400,12 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       {/* Charts - 2 columnas */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Engagement por Vista */}
-        <Card data-testid="card-engagement">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Eye className="h-4 w-4" />
-              Engagement por Vista
-            </CardTitle>
-            <CardDescription>
-              Tiempo promedio en cada sección ({periodLabel})
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <AppCard 
+          title="Engagement por Vista" 
+          icon={<Eye />}
+          description={`Tiempo promedio en cada sección (${periodLabel})`}
+          data-testid="card-engagement"
+        >
             {loadingEngagement ? (
               <Skeleton className="h-[250px]" />
             ) : engagementData && engagementData.length > 0 ? (
@@ -429,19 +423,15 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                 Sin datos
               </div>
             )}
-          </CardContent>
-        </Card>
+        </AppCard>
 
         {/* Actividad por Hora */}
-        <Card data-testid="card-hourly">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Actividad por Hora
-            </CardTitle>
-            <CardDescription>Sesiones iniciadas por hora del día</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <AppCard 
+          title="Actividad por Hora" 
+          icon={<Calendar />}
+          description="Sesiones iniciadas por hora del día"
+          data-testid="card-hourly"
+        >
             {loadingHourly ? (
               <Skeleton className="h-[250px]" />
             ) : hourlyData && hourlyData.length > 0 ? (
@@ -459,20 +449,17 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                 Sin datos
               </div>
             )}
-          </CardContent>
-        </Card>
+        </AppCard>
       </div>
 
       {/* Actividad Reciente y Últimos Registrados - 2 columnas */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Actividad Reciente */}
-        <Card className="p-4" data-testid="card-actividad-reciente">
-          <div className="flex items-center gap-2 mb-4">
-            <Clock className="h-4 w-4" />
-            <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-              Actividad Reciente de Usuarios
-            </p>
-          </div>
+        <AppCard 
+          title="Actividad Reciente de Usuarios"
+          icon={<Clock />}
+          data-testid="card-actividad-reciente"
+        >
           {loadingActivity ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
@@ -528,16 +515,14 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
               No hay actividad reciente
             </p>
           )}
-        </Card>
+        </AppCard>
 
         {/* Últimos Registrados */}
-        <Card className="p-4" data-testid="card-usuarios-recientes">
-          <div className="flex items-center gap-2 mb-4">
-            <UserPlus className="h-4 w-4" />
-            <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-              Últimos Registrados
-            </p>
-          </div>
+        <AppCard 
+          title="Últimos Registrados"
+          icon={<UserPlus />}
+          data-testid="card-usuarios-recientes"
+        >
           {loadingUsers ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
@@ -583,19 +568,16 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
               No hay usuarios registrados
             </p>
           )}
-        </Card>
+        </AppCard>
       </div>
 
       {/* Usuarios con Mayor Uso */}
-      <Card data-testid="card-top-users">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            Usuarios con Mayor Uso
-          </CardTitle>
-          <CardDescription>Top usuarios por tiempo en plataforma ({periodLabel})</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <AppCard 
+        title="Usuarios con Mayor Uso"
+        icon={<Clock />}
+        description={`Top usuarios por tiempo en plataforma (${periodLabel})`}
+        data-testid="card-top-users"
+      >
           {loadingTopUsers ? (
             <Skeleton className="h-[200px]" />
           ) : topUsersData && topUsersData.length > 0 ? (
@@ -630,8 +612,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
               Sin datos
             </div>
           )}
-        </CardContent>
-      </Card>
+      </AppCard>
     </div>
   )
 }
