@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { AppCard, AppCardTitle, AppCardValue, AppCardMeta, AppCardContent } from '@/components/shared/AppCard'
+import { HorizontalBarChart } from '@/components/charts/bar/HorizontalBarChart'
+import { TrendLineChart } from '@/components/charts/line/TrendLineChart'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Activity, Users, TrendingUp, Building, Calendar, Eye, Clock, UserPlus } from 'lucide-react'
+import { Activity, Users, TrendingUp, Building, Calendar, Eye, Clock, UserPlus, LogOut, Zap } from 'lucide-react'
 import { format, subMonths, startOfMonth, endOfMonth, subDays, startOfDay } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -311,15 +312,63 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
             user_id: userId,
             full_name: row.users?.full_name || 'Usuario',
             avatar_url: row.users?.avatar_url,
-            total_seconds: 0
+            total_seconds: 0,
+            session_count: 0
           })
         }
         const user = userMap.get(userId) as any
-        if (user) user.total_seconds += row.duration_seconds || 0
+        if (user) {
+          user.total_seconds += row.duration_seconds || 0
+          user.session_count += 1
+        }
       })
       
       return Array.from(userMap.values())
         .sort((a: any, b: any) => b.total_seconds - a.total_seconds)
+        .slice(0, 8)
+    },
+    enabled: !!supabase
+  })
+
+  // Drop Off - Usuarios con bajo engagement
+  const { data: dropOffData, isLoading: loadingDropOff } = useQuery({
+    queryKey: ['admin-dashboard-dropoff', selectedPeriod],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not available')
+      
+      const startDate = getStartDate(selectedPeriod)
+      
+      const { data, error } = await supabase
+        .from('user_view_history')
+        .select(`user_id, duration_seconds, users!inner(full_name, avatar_url)`)
+        .gte('entered_at', startDate.toISOString())
+        .not('duration_seconds', 'is', null)
+      
+      if (error) throw error
+      
+      const userMap: Map<string, any> = new Map()
+      
+      (data as any[] || []).forEach((row: any) => {
+        const userId = row.user_id
+        if (!userMap.has(userId)) {
+          userMap.set(userId, {
+            user_id: userId,
+            full_name: row.users?.full_name || 'Usuario',
+            avatar_url: row.users?.avatar_url,
+            total_seconds: 0,
+            session_count: 0
+          })
+        }
+        const user = userMap.get(userId) as any
+        if (user) {
+          user.total_seconds += row.duration_seconds || 0
+          user.session_count += 1
+        }
+      })
+      
+      // Drop off = 1 sesión o < 300 segundos (5 minutos)
+      return Array.from(userMap.values())
+        .filter((u: any) => u.session_count === 1 || u.total_seconds < 300)
         .slice(0, 8)
     },
     enabled: !!supabase
@@ -412,23 +461,17 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
           data-testid="card-engagement"
         >
           <AppCardContent>
-            {loadingEngagement ? (
-              <Skeleton className="h-[250px]" />
-            ) : engagementData && engagementData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={engagementData} layout="horizontal">
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-                  <XAxis type="number" />
-                  <YAxis type="category" dataKey="view" width={100} tick={{ fontSize: 11 }} />
-                  <Tooltip formatter={(value: any) => formatDuration(value * 60)} />
-                  <Bar dataKey="avgMinutes" radius={[0, 4, 4, 0]} fill={accentColor} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-                Sin datos
-              </div>
-            )}
+            <HorizontalBarChart
+              data={(engagementData || []).map(d => ({
+                label: d.view,
+                value: d.avgMinutes
+              }))}
+              height={250}
+              isLoading={loadingEngagement}
+              valueFormatter={(v) => `${v.toFixed(1)}m`}
+              yAxisWidth={120}
+              emptyText="Sin datos"
+            />
           </AppCardContent>
         </AppCard>
 
@@ -440,29 +483,23 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
           data-testid="card-hourly"
         >
           <AppCardContent>
-            {loadingHourly ? (
-              <Skeleton className="h-[250px]" />
-            ) : hourlyData && hourlyData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
-                <LineChart data={hourlyData}>
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-                  <XAxis dataKey="hourLabel" tick={{ fontSize: 11 }} interval={2} />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="sessions" stroke={accentColor} strokeWidth={2} dot={{ fill: accentColor }} />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-                Sin datos
-              </div>
-            )}
+            <TrendLineChart
+              data={(hourlyData || []).map(d => ({
+                label: d.hourLabel,
+                value: d.sessions
+              }))}
+              height={250}
+              isLoading={loadingHourly}
+              valueFormatter={(v) => `${v} sesiones`}
+              color={accentColor}
+              emptyText="Sin datos"
+            />
           </AppCardContent>
         </AppCard>
       </div>
 
-      {/* Actividad Reciente y Últimos Registrados - 2 columnas */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Actividad Reciente, Últimos Registrados, Top Usuarios, Drop Off - 4 columnas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Actividad Reciente */}
         <AppCard 
           title="Actividad Reciente de Usuarios" 
@@ -541,7 +578,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
               </div>
             ) : recentUsers && recentUsers.length > 0 ? (
               <>
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-[300px] overflow-y-auto">
                   {recentUsers.map((user: any) => (
                     <div key={user.id} className="flex items-start justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
                       <div className="flex-1 min-w-0">
@@ -580,6 +617,81 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
             ) : (
               <p className="text-sm text-muted-foreground text-center py-8">
                 No hay usuarios registrados
+              </p>
+            )}
+          </AppCardContent>
+        </AppCard>
+
+        {/* Top Usuarios Activos - Top 3 */}
+        <AppCard 
+          title="Top Usuarios Activos" 
+          icon={<Zap />}
+          data-testid="card-top-users-active"
+        >
+          <AppCardContent>
+            {loadingTopUsers ? (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-12" />
+                ))}
+              </div>
+            ) : topUsersData && topUsersData.length > 0 ? (
+              <div className="space-y-2">
+                {topUsersData.slice(0, 3).map((user: any, idx: number) => (
+                  <div key={user.user_id} className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <Avatar className="h-8 w-8 flex-shrink-0">
+                      <AvatarImage src={user.avatar_url || undefined} />
+                      <AvatarFallback>{user.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-xs truncate">{user.full_name}</p>
+                      <p className="text-xs text-muted-foreground">{formatDuration(user.total_seconds)}</p>
+                    </div>
+                    <Badge variant="status-completed" className="text-xs">#{idx + 1}</Badge>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                Sin datos
+              </p>
+            )}
+          </AppCardContent>
+        </AppCard>
+
+        {/* Drop Off - Usuarios con bajo engagement */}
+        <AppCard 
+          title="Drop Off" 
+          icon={<LogOut />}
+          data-testid="card-dropoff"
+        >
+          <AppCardContent>
+            {loadingDropOff ? (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-12" />
+                ))}
+              </div>
+            ) : dropOffData && dropOffData.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground mb-2">Usuarios con bajo engagement</p>
+                {dropOffData.slice(0, 3).map((user: any) => (
+                  <div key={user.user_id} className="flex items-center gap-2 p-2 rounded-lg bg-destructive/5 hover:bg-destructive/10 transition-colors border border-destructive/20">
+                    <Avatar className="h-7 w-7 flex-shrink-0">
+                      <AvatarImage src={user.avatar_url || undefined} />
+                      <AvatarFallback className="text-xs">{user.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-xs truncate">{user.full_name}</p>
+                      <p className="text-xs text-muted-foreground">{user.session_count} sesión{user.session_count > 1 ? 'es' : ''}</p>
+                    </div>
+                  </div>
+                ))}
+                <p className="text-xs text-muted-foreground text-center mt-3">Total: {dropOffData.length} usuarios</p>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                Sin datos
               </p>
             )}
           </AppCardContent>
