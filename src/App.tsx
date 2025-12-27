@@ -30,7 +30,6 @@ import ProjectDataPage from "@/pages/dashboard/ProjectDataPage";
 
 
 
-import FinancesCapitalMovements from "@/pages/professional/capital/Capital";
 import OrganizationMovements from "@/pages/professional/movements/Movements";
 import { ClientsPage } from "@/pages/dashboard/ClientsPage";
 
@@ -300,11 +299,6 @@ function Router() {
           </Suspense>
         </Route>
 
-        {/* Finances Routes */}
-        <Route path="/finances/dashboard" component={FinancesCapitalMovements} />
-
-        <Route path="/finances/capital" component={FinancesCapitalMovements} />
-        
         {/* Profile Routes - redirect to /user */}
         <Route path="/profile/organizations" component={UserPage} />
         <Route path="/profile/preferences" component={UserPage} />

@@ -40,7 +40,7 @@ Preferred communication style: Simple, everyday language.
 - **Lab Layout Drawer System**: Right-side drawer component (`LabDrawer`) for forms and page-specific content, managed via `useLabDrawerStore`.
 - **Moodboard Module**: Pinterest-style inspiration board at `/project/moodboard`, accessible via "DISEÑO" navigation.
 - **Finances Module (Dual-Context)**: Accessible from both Organization and Project sidebars, with movements auto-assigning `project_id` when in project context.
-- **Capital Module**: Manages capital participants, contributions, and withdrawals at `/organization/capital`.
+- **Capital Module**: Consolidated feature in `src/features/capital/` with modern architecture. Page at `src/pages/dashboard/CapitalPage.tsx` (pattern: TASKS feature consolidation). Accessible at `/organization/capital` with 4 views: CapitalDashboardView, CapitalParticipantsListView, CapitalBalancesView, CapitalTransactionsView. Manages capital participants, contributions, withdrawals, and adjustments.
 - **Multi-tenancy**: Services consistently filter data by `organization_id`.
 - **Soft Delete**: Implemented for key entities.
 - **Core Feature Management**: Comprehensive CRUD for Projects, Subcontracts, Personnel, Materials, Financial, Contacts, Sitelog, Project Types, and Project Modalities.
