@@ -555,7 +555,11 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                           {user.organization_name || 'Sin organización'}
                         </p>
                         <p className="text-xs text-muted-foreground/70 truncate mt-0.5">
-                          Origen: {formatAcquisitionOrigin(user.acquisition)}
+                          Origen: {formatAcquisitionOrigin(
+                            typeof user.acquisition === 'object' 
+                              ? (user.acquisition?.source || user.acquisition?.medium || 'direct')
+                              : user.acquisition
+                          )}
                         </p>
                       </div>
                       <div className="flex-shrink-0">
