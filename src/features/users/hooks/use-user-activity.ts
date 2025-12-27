@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { format, subDays, subMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { useOrganizationMembers } from '@/hooks/use-organization-members'
+import { useOrganizationMembers } from '@/features/organization'
 
 type TimePeriod = 'week' | 'month' | 'year'
 
