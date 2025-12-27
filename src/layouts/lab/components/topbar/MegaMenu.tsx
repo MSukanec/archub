@@ -131,7 +131,7 @@ export function ContextMegaMenu() {
       id: 'admin',
       label: 'Administración',
       icon: Crown,
-      href: '/admin/dashboard',
+      href: '/admin/administration',
       description: 'Panel de administración'
     });
   }

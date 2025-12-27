@@ -118,7 +118,7 @@ export const CONTEXT_BUTTONS: ContextButton[] = [
     label: 'Administración',
     icon: Crown,
     testId: 'button-sidebar-admin',
-    href: '/admin/dashboard',
+    href: '/admin/administration',
     adminOnly: true,
   },
 ];
@@ -158,7 +158,6 @@ export const PROJECT_NAVIGATION: NavigationEntry[] = [
 export const ADMIN_NAVIGATION: NavigationEntry[] = [
   { type: 'section-header', id: 'section-operaciones', label: 'Operaciones' },
   { id: 'ops', label: 'Ops Center', icon: Activity, href: '/admin/ops', testId: 'nav-admin-ops' },
-  { id: 'dashboard', label: 'Analytics', icon: BarChart3, href: '/admin/dashboard', testId: 'nav-admin-dashboard' },
   { type: 'section-header', id: 'section-gestion', label: 'Gestión' },
   { id: 'administration', label: 'Administración', icon: Settings, href: '/admin/administration', testId: 'nav-admin-administration' },
   { id: 'support', label: 'Soporte', icon: Headphones, href: '/admin/support', testId: 'nav-admin-support' },
@@ -255,7 +254,7 @@ export function getDividerInfo(
   } else if (sidebarLevel === 'learning') {
     if (item.id === 'dashboard') return { show: true, text: 'Capacitaciones' };
   } else if (sidebarLevel === 'admin') {
-    if (item.id === 'dashboard') return { show: true, text: 'Administración' };
+    if (item.id === 'administration') return { show: true, text: 'Administración' };
     if (item.id === 'general') return { show: true, text: 'Construcción' };
   }
   return { show: false, text: '' };
