@@ -1,42 +1,27 @@
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { Card } from '@/components/ui/card'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components'
-import { Clock, TrendingUp, UserPlus } from 'lucide-react'
-import { format, subMonths, startOfMonth, endOfMonth, isAfter, isBefore } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/shared/AppCard'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Activity, Users, TrendingUp, Building, Calendar, Eye, Clock } from 'lucide-react'
+import { format, subMonths, startOfMonth, endOfMonth, subDays, startOfDay } from 'date-fns'
+import { es } from 'date-fns/locale'
 
-// Helper to format user acquisition origin
-function formatAcquisitionOrigin(acquisition: { source?: string; medium?: string; campaign?: string } | null): string {
-  if (!acquisition || !acquisition.source) return 'Desconocido';
-  
-  const { source, medium, campaign } = acquisition;
-  
-  // If direct, show simple label
-  if (source === 'direct') return 'Directo';
-  if (source === 'unknown') return 'Desconocido';
-  
-  // Capitalize first letter of source
-  const formattedSource = source.charAt(0).toUpperCase() + source.slice(1);
-  
-  // Build origin string
-  const parts = [formattedSource];
-  if (medium) parts.push(`(${medium})`);
-  if (campaign) parts.push(`· ${campaign}`);
-  
-  return parts.join(' ');
-}
+type PeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all'
 
 function formatViewName(view: string | null): string {
-  if (!view) return 'Sin ubicación';
+  if (!view) return 'Sin ubicación'
   
   const viewMap: Record<string, string> = {
     'home': 'Inicio',
     'organization_dashboard': 'Dashboard Organización',
     'organization_projects': 'Proyectos',
-    'organization_preferences': 'Preferencias',
+    'preferences': 'Preferencias',
     'organization_activity': 'Actividad',
     'organization': 'Organización',
     'project_dashboard': 'Dashboard Proyecto',
@@ -54,418 +39,412 @@ function formatViewName(view: string | null): string {
     'admin_dashboard': 'Admin - Analytics',
     'admin_administration': 'Admin - Administración',
     'admin_support': 'Admin - Soporte',
-    'admin_payments': 'Admin - Pagos',
-    'admin_courses': 'Admin - Cursos',
-    'admin_costs': 'Admin - Costos',
-    'admin_tasks': 'Admin - Tareas',
-    'admin_general': 'Admin - General',
-    'admin_layout': 'Admin - Layout',
-    'admin': 'Administración',
   };
   
-  return viewMap[view] || view;
+  return viewMap[view] || view.replace(/_/g, ' ');
+}
+
+function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.round(seconds % 60);
+  if (hours > 0) return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+  return secs > 0 ? `${minutes}m ${secs}s` : `${minutes}m`;
 }
 
 interface DashboardStats {
   totalOrganizations: number
   activeOrganizations: number
   newOrganizationsThisMonth: number
-  newOrganizationsLastMonth: number
   totalUsers: number
   activeUsersNow: number
   newUsersThisMonth: number
-  newUsersLastMonth: number
   totalProjects: number
   newProjectsThisMonth: number
-  newProjectsLastMonth: number
+  sessionsToday: number
+  avgSessionDuration: number
 }
 
-export default function AdminDashboardView() {
-  // Fetch dashboard statistics - OPTIMIZADO
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ['admin-administration-dashboard'],
+interface AdminDashboardViewProps {
+  selectedPeriod?: PeriodFilter
+}
+
+export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDashboardViewProps) {
+  const [accentColor, setAccentColor] = useState<string>('#8b5cf6')
+
+  useEffect(() => {
+    const computedColor = getComputedStyle(document.documentElement)
+      .getPropertyValue('--accent')
+      .trim();
+    if (computedColor) setAccentColor(computedColor);
+  }, []);
+
+  const getStartDate = (period: PeriodFilter): Date => {
+    const now = new Date();
+    switch (period) {
+      case '30d': return subDays(now, 30);
+      case '3m': return subDays(now, 90);
+      case '6m': return subDays(now, 180);
+      case '1y': return subDays(now, 365);
+      default: return new Date(0);
+    }
+  };
+
+  // KPI Data - Usuarios y Organizaciones
+  const { data: stats, isLoading: loadingStats } = useQuery({
+    queryKey: ['admin-dashboard-stats'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available')
 
       const now = new Date()
       const thisMonthStart = startOfMonth(now)
-      const lastMonthStart = startOfMonth(subMonths(now, 1))
-      const lastMonthEnd = endOfMonth(subMonths(now, 1))
       const ninetySecondsAgo = new Date(now.getTime() - 90000)
+      const todayStart = startOfDay(now)
 
-      // ✅ OPTIMIZACIÓN: Ejecutar queries en paralelo con Promise.all
       const [
         totalOrgsResult,
         activeOrgsResult,
         newOrgsThisMonthResult,
-        newOrgsLastMonthResult,
         totalUsersResult,
         newUsersThisMonthResult,
-        newUsersLastMonthResult,
         activeUsersResult,
         totalProjectsResult,
         newProjectsThisMonthResult,
-        newProjectsLastMonthResult
+        sessionsResult,
+        avgDurationResult
       ] = await Promise.all([
-        // Total organizaciones
-        supabase
-          .from('organizations')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_deleted', false),
-        
-        // Organizaciones activas
-        supabase
-          .from('organizations')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_deleted', false)
-          .eq('is_active', true),
-        
-        // Nuevas organizaciones este mes
-        supabase
-          .from('organizations')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_deleted', false)
-          .gte('created_at', thisMonthStart.toISOString()),
-        
-        // Nuevas organizaciones mes anterior
-        supabase
-          .from('organizations')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_deleted', false)
-          .gte('created_at', lastMonthStart.toISOString())
-          .lte('created_at', lastMonthEnd.toISOString()),
-        
-        // Total usuarios
-        supabase
-          .from('users')
-          .select('*', { count: 'exact', head: true }),
-        
-        // Nuevos usuarios este mes
-        supabase
-          .from('users')
-          .select('*', { count: 'exact', head: true })
-          .gte('created_at', thisMonthStart.toISOString()),
-        
-        // Nuevos usuarios mes anterior
-        supabase
-          .from('users')
-          .select('*', { count: 'exact', head: true })
-          .gte('created_at', lastMonthStart.toISOString())
-          .lte('created_at', lastMonthEnd.toISOString()),
-        
-        // Usuarios activos ahora (solo IDs únicos)
-        supabase
-          .from('user_presence')
-          .select('user_id')
-          .gte('last_seen_at', ninetySecondsAgo.toISOString()),
-        
-        // Total proyectos
-        supabase
-          .from('projects')
-          .select('*', { count: 'exact', head: true }),
-        
-        // Nuevos proyectos este mes
-        supabase
-          .from('projects')
-          .select('*', { count: 'exact', head: true })
-          .gte('created_at', thisMonthStart.toISOString()),
-        
-        // Nuevos proyectos mes anterior
-        supabase
-          .from('projects')
-          .select('*', { count: 'exact', head: true })
-          .gte('created_at', lastMonthStart.toISOString())
-          .lte('created_at', lastMonthEnd.toISOString())
+        supabase.from('organizations').select('*', { count: 'exact', head: true }).eq('is_deleted', false),
+        supabase.from('organizations').select('*', { count: 'exact', head: true }).eq('is_deleted', false).eq('is_active', true),
+        supabase.from('organizations').select('*', { count: 'exact', head: true }).eq('is_deleted', false).gte('created_at', thisMonthStart.toISOString()),
+        supabase.from('users').select('*', { count: 'exact', head: true }),
+        supabase.from('users').select('*', { count: 'exact', head: true }).gte('created_at', thisMonthStart.toISOString()),
+        supabase.from('user_presence').select('user_id').gte('last_seen_at', ninetySecondsAgo.toISOString()),
+        supabase.from('projects').select('*', { count: 'exact', head: true }),
+        supabase.from('projects').select('*', { count: 'exact', head: true }).gte('created_at', thisMonthStart.toISOString()),
+        supabase.from('user_view_history').select('*', { count: 'exact', head: true }).gte('entered_at', todayStart.toISOString()),
+        supabase.from('user_view_history').select('duration_seconds').gte('entered_at', todayStart.toISOString()).not('duration_seconds', 'is', null)
       ])
 
       const uniqueActiveUsers = new Set(activeUsersResult.data?.map(u => u.user_id) || [])
-      const activeUsersNow = uniqueActiveUsers.size
+      const avgDuration = avgDurationResult.data && avgDurationResult.data.length > 0
+        ? avgDurationResult.data.reduce((sum, row) => sum + (row.duration_seconds || 0), 0) / avgDurationResult.data.length
+        : 0
 
       return {
         totalOrganizations: totalOrgsResult.count || 0,
         activeOrganizations: activeOrgsResult.count || 0,
         newOrganizationsThisMonth: newOrgsThisMonthResult.count || 0,
-        newOrganizationsLastMonth: newOrgsLastMonthResult.count || 0,
         totalUsers: totalUsersResult.count || 0,
-        activeUsersNow,
+        activeUsersNow: uniqueActiveUsers.size,
         newUsersThisMonth: newUsersThisMonthResult.count || 0,
-        newUsersLastMonth: newUsersLastMonthResult.count || 0,
         totalProjects: totalProjectsResult.count || 0,
         newProjectsThisMonth: newProjectsThisMonthResult.count || 0,
-        newProjectsLastMonth: newProjectsLastMonthResult.count || 0
+        sessionsToday: sessionsResult.count || 0,
+        avgSessionDuration: avgDuration
       } as DashboardStats
-    },
-    enabled: !!supabase,
-    staleTime: 30000, // Cache 30 segundos
-    refetchInterval: 60000 // Auto-refresh cada minuto
-  })
-
-  // Últimas conexiones de usuarios - OPTIMIZADO
-  const { data: recentActivity, isLoading: loadingActivity } = useQuery({
-    queryKey: ['recent-user-activity'],
-    queryFn: async () => {
-      if (!supabase) throw new Error('Supabase not available')
-
-      const { data } = await supabase
-        .from('user_presence')
-        .select(`
-          user_id,
-          last_seen_at,
-          current_view,
-          users!inner(full_name)
-        `)
-        .order('last_seen_at', { ascending: false })
-        .limit(10)
-
-      return data
-    },
-    enabled: !!supabase,
-    staleTime: 15000, // Cache 15 segundos (actividad cambia rápido)
-    refetchInterval: 30000 // Auto-refresh cada 30 segundos
-  })
-
-  // Últimos usuarios registrados con su organización y origen (via backend endpoint)
-  const { data: recentUsers, isLoading: loadingUsers } = useQuery({
-    queryKey: ['recently-registered-users'],
-    queryFn: async () => {
-      if (!supabase) throw new Error('Supabase not available')
-      
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) throw new Error('No active session')
-      
-      const response = await fetch('/api/admin/users/recent?limit=10', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to fetch recent users')
-      }
-      
-      return response.json()
     },
     enabled: !!supabase,
     staleTime: 30000,
     refetchInterval: 60000
   })
 
-  const userGrowth = stats?.newUsersLastMonth 
-    ? ((stats.newUsersThisMonth - stats.newUsersLastMonth) / stats.newUsersLastMonth) * 100
-    : 0
-  
-  const orgGrowth = stats?.newOrganizationsLastMonth 
-    ? ((stats.newOrganizationsThisMonth - stats.newOrganizationsLastMonth) / stats.newOrganizationsLastMonth) * 100
-    : 0
+  // Engagement por Vista
+  const { data: engagementData, isLoading: loadingEngagement } = useQuery({
+    queryKey: ['admin-dashboard-engagement', selectedPeriod],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not available')
+      
+      const startDate = getStartDate(selectedPeriod)
+      
+      const { data, error } = await supabase
+        .from('user_view_history')
+        .select('view_name, duration_seconds')
+        .gte('entered_at', startDate.toISOString())
+        .not('duration_seconds', 'is', null)
+      
+      if (error) throw error
+      
+      const grouped = (data as any[] || []).reduce((acc: any, row: any) => {
+        if (!acc[row.view_name]) {
+          acc[row.view_name] = { total: 0, count: 0 };
+        }
+        acc[row.view_name].total += row.duration_seconds || 0;
+        acc[row.view_name].count += 1;
+        return acc;
+      }, {})
+      
+      return Object.entries(grouped)
+        .map(([view, stats]: [string, any]) => ({
+          view: formatViewName(view),
+          avgSeconds: stats.total / stats.count,
+          avgMinutes: (stats.total / stats.count) / 60,
+          sessions: stats.count
+        }))
+        .sort((a, b) => b.avgSeconds - a.avgSeconds)
+        .slice(0, 8)
+    },
+    enabled: !!supabase
+  })
 
-  const projectGrowth = stats?.newProjectsLastMonth 
-    ? ((stats.newProjectsThisMonth - stats.newProjectsLastMonth) / stats.newProjectsLastMonth) * 100
-    : 0
+  // Actividad por Hora
+  const { data: hourlyData, isLoading: loadingHourly } = useQuery({
+    queryKey: ['admin-dashboard-hourly', selectedPeriod],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not available')
+      
+      const startDate = getStartDate(selectedPeriod)
+      
+      const { data, error } = await supabase
+        .from('user_view_history')
+        .select('entered_at')
+        .gte('entered_at', startDate.toISOString())
+      
+      if (error) throw error
+      
+      const hourlyCounts = new Array(24).fill(0)
+      
+      (data as any[] || []).forEach((row: any) => {
+        const hour = new Date(row.entered_at).getHours()
+        hourlyCounts[hour]++
+      })
+      
+      return hourlyCounts.map((count: number, hour: number) => ({
+        hour,
+        hourLabel: `${hour.toString().padStart(2, '0')}:00`,
+        sessions: count
+      }))
+    },
+    enabled: !!supabase
+  })
 
-  if (isLoading) {
+  // Top Usuarios
+  const { data: topUsersData, isLoading: loadingTopUsers } = useQuery({
+    queryKey: ['admin-dashboard-top-users', selectedPeriod],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not available')
+      
+      const startDate = getStartDate(selectedPeriod)
+      
+      const { data, error } = await supabase
+        .from('user_view_history')
+        .select(`user_id, duration_seconds, users!inner(full_name, avatar_url)`)
+        .gte('entered_at', startDate.toISOString())
+        .not('duration_seconds', 'is', null)
+      
+      if (error) throw error
+      
+      const userMap = new Map<string, any>()
+      
+      (data as any[] || []).forEach((row: any) => {
+        const userId = row.user_id
+        if (!userMap.has(userId)) {
+          userMap.set(userId, {
+            user_id: userId,
+            full_name: row.users?.full_name || 'Usuario',
+            avatar_url: row.users?.avatar_url,
+            total_seconds: 0
+          })
+        }
+        const user = userMap.get(userId)
+        if (user) user.total_seconds += row.duration_seconds || 0
+      })
+      
+      return Array.from(userMap.values() as any[])
+        .sort((a: any, b: any) => b.total_seconds - a.total_seconds)
+        .slice(0, 8)
+    },
+    enabled: !!supabase
+  })
+
+  if (loadingStats) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-32" />
+            <Skeleton key={i} className="h-32" data-testid={`skeleton-kpi-${i}`} />
           ))}
         </div>
       </div>
     )
   }
 
+  const periodLabel = {
+    '30d': 'últimos 30 días',
+    '3m': 'últimos 3 meses',
+    '6m': 'últimos 6 meses',
+    '1y': 'último año',
+    'all': 'histórico'
+  }[selectedPeriod] || 'histórico'
+
   return (
     <div className="space-y-6">
-      {/* KPI Grande de Usuarios */}
-      <Card className="p-6" data-testid="card-users-overview">
-        <div className="flex items-center gap-2 mb-6">
-          <Clock className="h-5 w-5 text-[var(--accent)]" />
-          <h3 className="text-lg font-semibold">Usuarios de la Plataforma</h3>
-        </div>
-        
-        {/* Métricas principales en fila */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Total</p>
-            <p className="text-4xl font-bold">{stats?.totalUsers || 0}</p>
-          </div>
-          
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Activos Ahora</p>
-            <p className="text-4xl font-bold text-[var(--accent)]">{stats?.activeUsersNow || 0}</p>
-          </div>
-          
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Nuevos Este Mes</p>
-            <p className="text-4xl font-bold">{stats?.newUsersThisMonth || 0}</p>
-          </div>
-          
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Crecimiento</p>
-            <p className={`text-4xl font-bold ${userGrowth > 0 ? 'text-green-600' : userGrowth < 0 ? 'text-red-600' : 'text-muted-foreground'}`}>
-              {userGrowth > 0 ? '+' : ''}{userGrowth.toFixed(1)}%
-            </p>
-          </div>
-        </div>
+      {/* 4 KPIs Consolidados */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <AppCard data-testid="kpi-usuarios-activos">
+          <AppCardTitle>
+            <div className="flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              <span>Usuarios Activos</span>
+            </div>
+          </AppCardTitle>
+          <AppCardValue className="text-[var(--accent)]">
+            {stats?.activeUsersNow || 0}
+          </AppCardValue>
+          <AppCardMeta>Ahora mismo (últimos 90s)</AppCardMeta>
+        </AppCard>
 
-        {/* Barra visual de tendencia (opcional) */}
-        <div className="h-2 bg-muted rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-[var(--accent)] transition-all duration-500"
-            style={{ width: `${Math.min(100, Math.max(0, (stats?.newUsersThisMonth || 0) / (stats?.totalUsers || 1) * 100))}%` }}
-          />
-        </div>
-        <p className="text-xs text-muted-foreground mt-2">
-          {stats?.newUsersThisMonth || 0} nuevos de {stats?.totalUsers || 0} totales este mes
-        </p>
-      </Card>
+        <AppCard data-testid="kpi-nuevos-usuarios">
+          <AppCardTitle>
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span>Nuevos Usuarios</span>
+            </div>
+          </AppCardTitle>
+          <AppCardValue>
+            {stats?.newUsersThisMonth || 0}
+          </AppCardValue>
+          <AppCardMeta>Este mes</AppCardMeta>
+        </AppCard>
 
-      {/* Segunda fila: Organizaciones y Proyectos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <StatCard href="/admin/administration" data-testid="card-organizaciones">
-          <StatCardTitle>Organizaciones</StatCardTitle>
-          <StatCardValue>{stats?.totalOrganizations || 0}</StatCardValue>
-          {orgGrowth !== 0 && (
-            <StatCardMeta className={orgGrowth > 0 ? 'text-green-600' : 'text-red-600'}>
-              {orgGrowth > 0 ? '+' : ''}{orgGrowth.toFixed(1)}% vs mes anterior
-            </StatCardMeta>
-          )}
-        </StatCard>
+        <AppCard data-testid="kpi-organizaciones">
+          <AppCardTitle>
+            <div className="flex items-center gap-2">
+              <Building className="h-4 w-4" />
+              <span>Organizaciones</span>
+            </div>
+          </AppCardTitle>
+          <AppCardValue>
+            {stats?.activeOrganizations || 0}
+          </AppCardValue>
+          <AppCardMeta>Activas ({stats?.totalOrganizations || 0} totales)</AppCardMeta>
+        </AppCard>
 
-        <StatCard href="/admin/administration" data-testid="card-proyectos">
-          <StatCardTitle>Proyectos</StatCardTitle>
-          <StatCardValue>{stats?.totalProjects || 0}</StatCardValue>
-          {projectGrowth !== 0 && (
-            <StatCardMeta className={projectGrowth > 0 ? 'text-green-600' : 'text-red-600'}>
-              {projectGrowth > 0 ? '+' : ''}{projectGrowth.toFixed(1)}% vs mes anterior
-            </StatCardMeta>
-          )}
-        </StatCard>
+        <AppCard data-testid="kpi-proyectos">
+          <AppCardTitle>
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              <span>Proyectos</span>
+            </div>
+          </AppCardTitle>
+          <AppCardValue>
+            {stats?.totalProjects || 0}
+          </AppCardValue>
+          <AppCardMeta>{stats?.newProjectsThisMonth || 0} nuevos este mes</AppCardMeta>
+        </AppCard>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Actividad Reciente */}
-        <Card className="p-4" data-testid="card-actividad-reciente">
-          <div className="flex items-center gap-2 mb-4">
+      {/* Charts - 2 columnas */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Engagement por Vista */}
+        <Card data-testid="card-engagement">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Eye className="h-4 w-4" />
+              Engagement por Vista
+            </CardTitle>
+            <CardDescription>
+              Tiempo promedio en cada sección ({periodLabel})
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loadingEngagement ? (
+              <Skeleton className="h-[250px]" />
+            ) : engagementData && engagementData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={engagementData} layout="horizontal">
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                  <XAxis type="number" />
+                  <YAxis type="category" dataKey="view" width={100} tick={{ fontSize: 11 }} />
+                  <Tooltip formatter={(value: any) => formatDuration(value * 60)} />
+                  <Bar dataKey="avgMinutes" radius={[0, 4, 4, 0]} fill={accentColor} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                Sin datos
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Actividad por Hora */}
+        <Card data-testid="card-hourly">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Actividad por Hora
+            </CardTitle>
+            <CardDescription>Sesiones iniciadas por hora del día</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loadingHourly ? (
+              <Skeleton className="h-[250px]" />
+            ) : hourlyData && hourlyData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={hourlyData}>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                  <XAxis dataKey="hourLabel" tick={{ fontSize: 11 }} interval={2} />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="sessions" stroke={accentColor} strokeWidth={2} dot={{ fill: accentColor }} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                Sin datos
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Usuarios con Mayor Uso */}
+      <Card data-testid="card-top-users">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
-            <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-              Actividad Reciente de Usuarios
-            </p>
-          </div>
-          {loadingActivity ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-16" />
-              ))}
-            </div>
-          ) : recentActivity && recentActivity.length > 0 ? (
-            <>
-              <div className="space-y-2">
-                {recentActivity.map((activity: any) => {
-                  const lastSeenTime = new Date(activity.last_seen_at).getTime()
-                  const now = Date.now()
-                  const diffMs = now - lastSeenTime
-                  const isActive = diffMs <= 90000
-
-                  return (
-                    <div key={activity.user_id} className="flex items-start justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold truncate text-sm">{activity.users?.full_name}</p>
-                        <p className="text-xs text-muted-foreground truncate mt-0.5">
-                          {formatViewName(activity.current_view)}
-                        </p>
+            Usuarios con Mayor Uso
+          </CardTitle>
+          <CardDescription>Top usuarios por tiempo en plataforma ({periodLabel})</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loadingTopUsers ? (
+            <Skeleton className="h-[200px]" />
+          ) : topUsersData && topUsersData.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Usuario</TableHead>
+                  <TableHead className="text-right">Tiempo Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {topUsersData?.map((user: any, idx: number) => (
+                  <TableRow key={user.user_id} data-testid={`row-top-user-${idx}`}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={user.avatar_url || undefined} />
+                          <AvatarFallback>{user.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{user.full_name}</span>
                       </div>
-                      <div className="flex-shrink-0">
-                        {isActive ? (
-                          <Badge className="bg-accent text-accent-foreground">
-                            Activo
-                          </Badge>
-                        ) : (
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">
-                            {format(new Date(activity.last_seen_at), "d 'de' MMM, HH:mm", { locale: es })}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-              <a 
-                href="/admin/administration" 
-                onClick={(e) => {
-                  e.preventDefault()
-                  window.location.href = '/admin/administration'
-                }}
-                className="block mt-4 pt-3 border-t text-center text-sm hover:underline transition-all"
-                style={{ color: 'hsl(var(--accent))' }}
-              >
-                Ver más usuarios
-              </a>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              No hay actividad reciente
-            </p>
-          )}
-        </Card>
-
-        {/* Últimos Registrados */}
-        <Card className="p-4" data-testid="card-usuarios-recientes">
-          <div className="flex items-center gap-2 mb-4">
-            <UserPlus className="h-4 w-4" />
-            <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
-              Últimos Registrados
-            </p>
-          </div>
-          {loadingUsers ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-16" />
-              ))}
-            </div>
-          ) : recentUsers && recentUsers.length > 0 ? (
-            <>
-              <div className="space-y-2">
-                {recentUsers.map((user: any) => (
-                  <div key={user.id} className="flex items-start justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold truncate text-sm">{user.full_name || user.email}</p>
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">
-                        {user.organization_name || 'Sin organización'}
-                      </p>
-                      <p className="text-xs text-muted-foreground/70 truncate mt-0.5">
-                        Origen: {formatAcquisitionOrigin(user.acquisition)}
-                      </p>
-                    </div>
-                    <div className="flex-shrink-0">
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {format(new Date(user.created_at), "d 'de' MMM, HH:mm", { locale: es })}
-                      </span>
-                    </div>
-                  </div>
+                    </TableCell>
+                    <TableCell className="text-right font-mono">
+                      {formatDuration(user.total_seconds)}
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </div>
-              <a 
-                href="/admin/administration" 
-                onClick={(e) => {
-                  e.preventDefault()
-                  window.location.href = '/admin/administration'
-                }}
-                className="block mt-4 pt-3 border-t text-center text-sm hover:underline transition-all"
-                style={{ color: 'hsl(var(--accent))' }}
-              >
-                Ver más usuarios
-              </a>
-            </>
+              </TableBody>
+            </Table>
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              No hay usuarios registrados
-            </p>
+            <div className="h-[150px] flex items-center justify-center text-muted-foreground">
+              Sin datos
+            </div>
           )}
-        </Card>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
