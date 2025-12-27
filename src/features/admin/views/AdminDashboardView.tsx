@@ -4,11 +4,13 @@ import { supabase } from '@/lib/supabase'
 import { AppCard, AppCardTitle, AppCardValue, AppCardMeta, AppCardContent } from '@/components/shared/AppCard'
 import { HorizontalBarChart } from '@/components/charts/bar/HorizontalBarChart'
 import { TrendLineChart } from '@/components/charts/line/TrendLineChart'
+import { MonthlyTrendChart } from '@/components/charts/line/AreaTrendChart'
+import { DonutChart } from '@/components/charts/pie/DonutChart'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Activity, Users, TrendingUp, Building, Calendar, Eye, Clock, UserPlus, LogOut, Zap } from 'lucide-react'
+import { Activity, Users, TrendingUp, Building, Calendar, Eye, Clock, UserPlus, LogOut, Zap, LineChart, PieChart } from 'lucide-react'
 import { format, subMonths, startOfMonth, endOfMonth, subDays, startOfDay } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -374,6 +376,71 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
     enabled: !!supabase
   })
 
+  // Crecimiento de Usuarios por Mes
+  const { data: userGrowthData, isLoading: loadingUserGrowth } = useQuery({
+    queryKey: ['admin-dashboard-user-growth'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not available')
+      
+      const { data, error } = await supabase
+        .from('users')
+        .select('created_at')
+        .order('created_at', { ascending: true })
+      
+      if (error) throw error
+      
+      const monthlyData: Map<string, number> = new Map()
+      
+      (data as any[] || []).forEach((user: any) => {
+        const date = new Date(user.created_at)
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        monthlyData.set(monthKey, (monthlyData.get(monthKey) || 0) + 1)
+      })
+      
+      return Array.from(monthlyData.entries())
+        .map(([month, value]) => ({ month, value }))
+        .sort((a, b) => a.month.localeCompare(b.month))
+        .slice(-12) // Últimos 12 meses
+    },
+    enabled: !!supabase
+  })
+
+  // Distribución de Adquisición (UTM Sources)
+  const { data: acquisitionData, isLoading: loadingAcquisition } = useQuery({
+    queryKey: ['admin-dashboard-acquisition'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not available')
+      
+      const { data, error } = await supabase
+        .from('user_acquisition')
+        .select('utm_source, utm_medium')
+      
+      if (error) throw error
+      
+      const sourceMap: Map<string, number> = new Map()
+      
+      (data as any[] || []).forEach((row: any) => {
+        const source = row.utm_source || row.utm_medium || 'direct'
+        const label = source === 'direct' ? 'Directo' : 
+                      source === 'google' ? 'Google' :
+                      source === 'facebook' ? 'Facebook' :
+                      source === 'instagram' ? 'Instagram' :
+                      source === 'linkedin' ? 'LinkedIn' :
+                      source === 'twitter' ? 'Twitter/X' :
+                      source === 'referral' ? 'Referido' :
+                      source === 'organic' ? 'Orgánico' :
+                      source.charAt(0).toUpperCase() + source.slice(1)
+        sourceMap.set(label, (sourceMap.get(label) || 0) + 1)
+      })
+      
+      return Array.from(sourceMap.entries())
+        .map(([label, value]) => ({ label, value }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 6) // Top 6 fuentes
+    },
+    enabled: !!supabase
+  })
+
   if (loadingStats) {
     return (
       <div className="space-y-6">
@@ -451,25 +518,25 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         </AppCard>
       </div>
 
-      {/* Charts - 2 columnas */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Charts - 4 columnas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Engagement por Vista */}
         <AppCard 
           title="Engagement por Vista" 
           icon={<Eye />}
-          description={`Tiempo promedio en cada sección (${periodLabel})`}
+          description={`Tiempo promedio (${periodLabel})`}
           data-testid="card-engagement"
         >
           <AppCardContent>
             <HorizontalBarChart
-              data={(engagementData || []).map(d => ({
+              data={(engagementData || []).map((d: any) => ({
                 label: d.view,
                 value: d.avgMinutes
               }))}
-              height={250}
+              height={220}
               isLoading={loadingEngagement}
               valueFormatter={(v) => `${v.toFixed(1)}m`}
-              yAxisWidth={120}
+              yAxisWidth={100}
               emptyText="Sin datos"
             />
           </AppCardContent>
@@ -479,20 +546,58 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         <AppCard 
           title="Actividad por Hora" 
           icon={<Calendar />}
-          description="Sesiones iniciadas por hora del día"
+          description="Sesiones por hora del día"
           data-testid="card-hourly"
         >
           <AppCardContent>
             <TrendLineChart
-              data={(hourlyData || []).map(d => ({
+              data={(hourlyData || []).map((d: any) => ({
                 label: d.hourLabel,
                 value: d.sessions
               }))}
-              height={250}
+              height={220}
               isLoading={loadingHourly}
               valueFormatter={(v) => `${v} sesiones`}
               color={accentColor}
               emptyText="Sin datos"
+            />
+          </AppCardContent>
+        </AppCard>
+
+        {/* Crecimiento de Usuarios */}
+        <AppCard 
+          title="Crecimiento de Usuarios" 
+          icon={<LineChart />}
+          description="Registros por mes"
+          data-testid="card-user-growth"
+        >
+          <AppCardContent>
+            <MonthlyTrendChart
+              data={userGrowthData || []}
+              height={220}
+              isLoading={loadingUserGrowth}
+              color={accentColor}
+              emptyText="Sin datos"
+            />
+          </AppCardContent>
+        </AppCard>
+
+        {/* Distribución de Adquisición */}
+        <AppCard 
+          title="Fuentes de Adquisición" 
+          icon={<PieChart />}
+          description="De dónde vienen los usuarios"
+          data-testid="card-acquisition"
+        >
+          <AppCardContent>
+            <DonutChart
+              data={acquisitionData || []}
+              height={220}
+              isLoading={loadingAcquisition}
+              emptyText="Sin datos"
+              showLegend={true}
+              innerRadius={40}
+              outerRadius={70}
             />
           </AppCardContent>
         </AppCard>
