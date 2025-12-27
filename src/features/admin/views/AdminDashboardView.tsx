@@ -80,7 +80,7 @@ interface DashboardStats {
   newProjectsLastMonth: number
 }
 
-export default function AdminAdminDashboard() {
+export default function AdminDashboardView() {
   // Fetch dashboard statistics - OPTIMIZADO
   const { data: stats, isLoading } = useQuery({
     queryKey: ['admin-administration-dashboard'],

@@ -133,7 +133,7 @@ function useAllOrganizations() {
   });
 }
 
-const AdminAdminOrganizations = () => {
+const AdminOrganizationsView = () => {
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
@@ -411,4 +411,4 @@ const AdminAdminOrganizations = () => {
   );
 };
 
-export default AdminAdminOrganizations;
+export default AdminOrganizationsView;

@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Settings, Plus } from 'lucide-react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useGlobalModalStore } from '@/components/modal';
-import AdminAdminDashboard from './AdminAdminDashboard';
-import AdminAdminOrganizations from './AdminAdminOrganizations';
-import AdminAdminUsers from './AdminAdminUsers';
-import AdminActivityLogs from './AdminActivityLogs';
+import AdminDashboardView from '@/features/admin/views/AdminDashboardView';
+import AdminOrganizationsView from '@/features/admin/views/AdminOrganizationsView';
+import AdminUsersView from '@/features/admin/views/AdminUsersView';
+import AdminActivityLogsView from '@/features/admin/views/AdminActivityLogsView';
 
-const AdminAdmin = () => {
+const AdminAdministrationPage = () => {
   const [activeTab, setActiveTab] = useState('resumen');
   const { openModal } = useGlobalModalStore();
 
@@ -51,15 +51,15 @@ const AdminAdmin = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'resumen':
-        return <AdminAdminDashboard />;
+        return <AdminDashboardView />;
       case 'organizaciones':
-        return <AdminAdminOrganizations />;
+        return <AdminOrganizationsView />;
       case 'usuarios':
-        return <AdminAdminUsers />;
+        return <AdminUsersView />;
       case 'actividad':
-        return <AdminActivityLogs />;
+        return <AdminActivityLogsView />;
       default:
-        return <AdminAdminDashboard />;
+        return <AdminDashboardView />;
     }
   };
 
@@ -70,4 +70,4 @@ const AdminAdmin = () => {
   );
 };
 
-export default AdminAdmin;
+export default AdminAdministrationPage;

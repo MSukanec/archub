@@ -98,7 +98,7 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
   return (
     <div title={tooltip}>
       {isOnline ? (
-        <Badge variant="default">
+        <Badge>
           {label}
         </Badge>
       ) : (
@@ -108,7 +108,7 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
   );
 }
 
-const AdminAdminUsers = () => {
+const AdminUsersView = () => {
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('created_at')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -327,4 +327,4 @@ const AdminAdminUsers = () => {
   )
 }
 
-export default AdminAdminUsers;
+export default AdminUsersView;

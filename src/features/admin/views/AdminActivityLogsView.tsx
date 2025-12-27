@@ -18,7 +18,7 @@ function getOrganizationAvatarUrl(org: AdminActivityLog['organization']): string
   return data.publicUrl;
 }
 
-export default function AdminActivityLogs() {
+export default function AdminActivityLogsView() {
   const [activities, setActivities] = useState<AdminActivityLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -96,7 +96,7 @@ export default function AdminActivityLogs() {
       render: (activity: AdminActivityLog) => {
         const displayInfo = getActivityDisplayInfo(activity as any);
         return (
-          <Badge variant="default">
+          <Badge>
             {displayInfo.label}
           </Badge>
         );

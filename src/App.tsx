@@ -69,7 +69,7 @@ const FinancialLatticePage = lazy(() => import("@/pages/lab/FinancialLatticePage
 const ContactsLabPage = lazy(() => import("@/pages/lab/ContactsLabPage"));
 
 // Admin Pages (importados normalmente para evitar loader)
-import AdminAdmin from "@/pages/admin/administration/AdminAdmin";
+import AdminAdministrationPage from "@/pages/admin/AdminAdministrationPage";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminSupport from "@/pages/admin/support/AdminSupport";
 import AdminPayments from "@/pages/admin/payments/AdminPayments";
@@ -317,7 +317,7 @@ function Router() {
         <Route path="/admin/administration">
           <Suspense fallback={<LazyLoadFallback />}>
             <AuthAdmin>
-              <AdminAdmin />
+              <AdminAdministrationPage />
             </AuthAdmin>
           </Suspense>
         </Route>

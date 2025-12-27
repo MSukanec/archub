@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal';
 import AdminLayoutContentView from '@/features/admin/views/AdminLayoutContentView';
 import AdminLayoutCardView from '@/features/admin/views/AdminLayoutCardView';
-import ChartGalleryView from '@/features/admin/views/ChartGalleryView';
+import AdminLayoutChartView from '@/features/admin/views/AdminLayoutChartView';
 
 const AdminLayoutPage = () => {
   const [activeTab, setActiveTab] = useState('charts');
@@ -24,13 +24,13 @@ const AdminLayoutPage = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'charts':
-        return <ChartGalleryView />;
+        return <AdminLayoutChartView />;
       case 'content':
         return <AdminLayoutContentView />;
       case 'components':
         return <AdminLayoutCardView />;
       default:
-        return <ChartGalleryView />;
+        return <AdminLayoutChartView />;
     }
   };
 

@@ -149,7 +149,7 @@ const ChartGroup = ({ title, children }: ChartGroupProps) => (
   </Card>
 )
 
-const ChartGalleryView = () => {
+const AdminLayoutChartView = () => {
   return (
     <div className="space-y-6 overflow-x-hidden" data-testid="chart-gallery-view">
       <div className="grid grid-cols-2 gap-6 overflow-x-hidden">
@@ -298,4 +298,4 @@ const ChartGalleryView = () => {
   )
 }
 
-export default ChartGalleryView
+export default AdminLayoutChartView
