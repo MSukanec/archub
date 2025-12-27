@@ -47,6 +47,7 @@ function formatViewName(view: string | null): string {
   
   const coursePatterns = [
     /^courses_(.+)$/,
+    /^cursos_(.+)$/,
     /^learning_course_(.+)$/,
     /^course_(.+)$/
   ]
@@ -469,7 +470,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-xs truncate">{activity.full_name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{activity.current_view || 'Sin vista'}</p>
+                        <p className="text-xs text-muted-foreground truncate">{formatViewName(activity.current_view)}</p>
                       </div>
                       {isOnline && <Badge variant="status-online" className="text-xs h-fit">Online</Badge>}
                     </div>
