@@ -131,6 +131,7 @@ export async function getRecentlyRegisteredUsers(
         id,
         full_name,
         email,
+        avatar_url,
         created_at,
         user_acquisition (
           source,
@@ -175,6 +176,7 @@ export async function getRecentlyRegisteredUsers(
         id: user.id,
         full_name: user.full_name,
         email: user.email,
+        avatar_url: user.avatar_url,
         created_at: user.created_at,
         organization_name: userOrgMap.get(user.id) || null,
         acquisition: acquisition || null

@@ -110,7 +110,20 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       if (!supabase) throw new Error('Supabase not available')
       const { data, error } = await supabase.from('user_stats_summary_view').select('*').single()
       if (error) throw error
-      return data as DashboardStats
+      // Transform snake_case from DB to camelCase for frontend
+      return {
+        totalOrganizations: data.total_organizations,
+        activeOrganizations: data.active_organizations,
+        newOrganizationsThisMonth: data.new_organizations_this_month,
+        totalUsers: data.total_users,
+        activeUsersNow: data.active_users_now,
+        activeUsersToday: data.active_users_today,
+        newUsersThisMonth: data.new_users_this_month,
+        totalProjects: data.total_projects,
+        newProjectsThisMonth: data.new_projects_this_month,
+        sessionsToday: data.sessions_today,
+        avgSessionDuration: data.avg_session_duration
+      } as DashboardStats
     },
     enabled: !!supabase,
     staleTime: 30000,
@@ -517,19 +530,22 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
               </div>
             ) : recentActivity && recentActivity.length > 0 ? (
               <div className="space-y-2">
-                {recentActivity.slice(0, 10).map((activity: any) => (
-                  <div key={activity.user_id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                    <Avatar className="h-7 w-7 flex-shrink-0">
-                      <AvatarImage src={activity.avatar_url || undefined} />
-                      <AvatarFallback className="text-xs">{activity.full_name?.charAt(0) || 'U'}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-xs truncate">{activity.full_name}</p>
-                      <p className="text-xs text-muted-foreground text-xs">{format(new Date(activity.last_seen_at), 'HH:mm', { locale: es })}</p>
+                {recentActivity.slice(0, 10).map((activity: any) => {
+                  const isOnline = new Date(activity.last_seen_at).getTime() > Date.now() - 90000
+                  return (
+                    <div key={activity.user_id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                      <Avatar className="h-7 w-7 flex-shrink-0">
+                        <AvatarImage src={activity.avatar_url || undefined} />
+                        <AvatarFallback className="text-xs">{activity.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-xs truncate">{activity.full_name}</p>
+                        <p className="text-xs text-muted-foreground">{format(new Date(activity.last_seen_at), 'HH:mm', { locale: es })}</p>
+                      </div>
+                      {isOnline && <Badge variant="status-online" className="text-xs h-fit">Online</Badge>}
                     </div>
-                    {activity.status === 'online' && <Badge variant="status-online" className="text-xs h-fit">Online</Badge>}
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-8">Sin datos</p>
