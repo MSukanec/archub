@@ -10,8 +10,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { BarChart3, Users, Clock, Activity, Eye, Calendar, ChevronDown } from 'lucide-react'
-import { Layout } from "@/layouts/dashboard/DashboardLayout"
-import { LabLayout } from "@/layouts/lab/LabLayout"
 import { Tabs } from '@/components/shared/Tabs'
 import { startOfDay, subDays } from 'date-fns'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -96,7 +94,7 @@ function formatDurationHHMM(seconds: number): string {
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 }
 
-export default function AdminDashboard() {
+export default function AdminAnalyticsView() {
   const [dateRange, setDateRange] = useState<DateRange>('7days');
   const [accentColor, setAccentColor] = useState<string>('#8b5cf6');
   const { data: userData } = useCurrentUser();
@@ -632,61 +630,5 @@ export default function AdminDashboard() {
     </div>
   );
 
-  const secondaryRightContent = (
-    <div className="flex items-center gap-3">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            data-testid="button-date-range"
-          >
-            <Calendar className="h-4 w-4" />
-            <span>{DATE_RANGE_OPTIONS.find(opt => opt.value === dateRange)?.label}</span>
-            <ChevronDown className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-[140px]">
-          {DATE_RANGE_OPTIONS.map((option) => (
-            <DropdownMenuItem
-              key={option.value}
-              onClick={() => setDateRange(option.value as DateRange)}
-              className={dateRange === option.value ? "font-medium" : ""}
-              data-testid={`menu-item-range-${option.value}`}
-            >
-              {option.label}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  );
-
-  if (isLabLayout) {
-    return (
-      <LabLayout 
-        showToolbar={true}
-        toolbarProps={{
-          secondaryRightSlot: secondaryRightContent,
-        }}
-      >
-        {renderView()}
-      </LabLayout>
-    );
-  }
-
-  const headerProps = {
-    title: "Analytics Dashboard",
-    icon: BarChart3,
-    description: "Métricas de uso y comportamiento de usuarios",
-    showSearch: false,
-    showFilters: false,
-  };
-
-  return (
-    <Layout wide headerProps={headerProps}>
-      {renderView()}
-    </Layout>
-  );
+  return renderView()
 }

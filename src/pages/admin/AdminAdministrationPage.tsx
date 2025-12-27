@@ -2,16 +2,18 @@ import React, { useState } from 'react';
 import { Settings, Plus } from 'lucide-react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useGlobalModalStore } from '@/components/modal';
+import AdminAnalyticsView from '@/features/admin/views/AdminAnalyticsView';
 import AdminDashboardView from '@/features/admin/views/AdminDashboardView';
 import AdminOrganizationsView from '@/features/admin/views/AdminOrganizationsView';
 import AdminUsersView from '@/features/admin/views/AdminUsersView';
 import AdminActivityLogsView from '@/features/admin/views/AdminActivityLogsView';
 
 const AdminAdministrationPage = () => {
-  const [activeTab, setActiveTab] = useState('resumen');
+  const [activeTab, setActiveTab] = useState('analytics');
   const { openModal } = useGlobalModalStore();
 
   const tabs = [
+    { id: 'analytics', label: 'Analytics', isActive: activeTab === 'analytics' },
     { id: 'resumen', label: 'Resumen', isActive: activeTab === 'resumen' },
     { id: 'organizaciones', label: 'Organizaciones', isActive: activeTab === 'organizaciones' },
     { id: 'usuarios', label: 'Usuarios', isActive: activeTab === 'usuarios' },
@@ -50,6 +52,8 @@ const AdminAdministrationPage = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'analytics':
+        return <AdminAnalyticsView />;
       case 'resumen':
         return <AdminDashboardView />;
       case 'organizaciones':
@@ -59,7 +63,7 @@ const AdminAdministrationPage = () => {
       case 'actividad':
         return <AdminActivityLogsView />;
       default:
-        return <AdminDashboardView />;
+        return <AdminAnalyticsView />;
     }
   };
 

@@ -70,7 +70,7 @@ const ContactsLabPage = lazy(() => import("@/pages/lab/ContactsLabPage"));
 
 // Admin Pages (importados normalmente para evitar loader)
 import AdminAdministrationPage from "@/pages/admin/AdminAdministrationPage";
-import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminAnalyticsView from "@/features/admin/views/AdminAnalyticsView";
 import AdminSupport from "@/pages/admin/support/AdminSupport";
 import AdminPayments from "@/pages/admin/payments/AdminPayments";
 import AdminSubscriptions from "@/pages/admin/subscriptions/AdminSubscriptions";
@@ -310,7 +310,7 @@ function Router() {
         <Route path="/admin/dashboard">
           <Suspense fallback={<LazyLoadFallback />}>
             <AuthAdmin>
-              <AdminDashboard />
+              <AdminAdministrationPage />
             </AuthAdmin>
           </Suspense>
         </Route>
