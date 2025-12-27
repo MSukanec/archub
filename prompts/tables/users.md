@@ -153,6 +153,25 @@ after INSERT on public.user_view_history
 for each row
 execute FUNCTION public.update_org_last_activity();
 
+## ÍNDICES AGREGADOS (ejecutados):
+
+create index IF not exists idx_user_view_history_user_id 
+  on public.user_view_history using btree (user_id);
+
+create index IF not exists idx_user_view_history_entered_at 
+  on public.user_view_history using btree (entered_at);
+
+create index IF not exists idx_user_view_history_user_entered 
+  on public.user_view_history using btree (user_id, entered_at);
+
+create index IF not exists idx_user_view_history_org 
+  on public.user_view_history using btree (organization_id);
+
+## FOREIGN KEYS CON CASCADE (ejecutadas):
+
+-- FK organization_id ON DELETE CASCADE
+-- FK user_id ON DELETE CASCADE
+
 ## Tabla USERS:
 
 create table public.users (
