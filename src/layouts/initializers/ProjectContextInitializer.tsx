@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser, useHeartbeat } from '@/features/users/hooks'
 import { useUserOrganizationPreferences } from '@/features/organization'
 import { useProjectContext } from '@/stores/projectContext'
-import { useHeartbeat } from '@/hooks/use-heartbeat'
 import { updateProjectLastActive } from '@/features/projects'
 
 /**

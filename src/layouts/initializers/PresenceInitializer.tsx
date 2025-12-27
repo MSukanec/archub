@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser, usePresenceTracker } from '@/features/users/hooks';
 import { usePresenceStore } from '@/stores/presenceStore';
-import { usePresenceTracker } from '@/hooks/use-presence-tracker';
 import { supabase } from '@/lib/supabase';
 
 /**
