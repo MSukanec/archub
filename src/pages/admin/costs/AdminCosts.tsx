@@ -6,7 +6,7 @@ import { useGlobalModalStore } from '@/components/modal';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { Button } from '@/components/ui/button';
 import AdminCostProducts from './AdminCostProducts';
 import AdminCostMaterials from './AdminCostMaterials';

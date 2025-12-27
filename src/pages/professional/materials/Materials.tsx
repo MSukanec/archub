@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Layout } from "@/layouts/dashboard/DashboardLayout"
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal'

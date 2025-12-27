@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { FileUploader } from "@/components/shared/fields/FileUploader";
 
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useOrganizationMembers } from "@/features/organization";
 import { useProjectTypes, useProjectModalities } from "@/features/projects";
 import { useProjectContext } from "@/stores/projectContext";

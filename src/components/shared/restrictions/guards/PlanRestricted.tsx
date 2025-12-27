@@ -17,7 +17,7 @@ import {
   BottomSheetFooter,
 } from "@/components/ui/bottom-sheet";
 import { usePlanFeatures } from "@/hooks/usePlanFeatures";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useProjectContext } from "@/stores/projectContext";
 import { useMobile } from "@/hooks/use-mobile";
 import { PlanUpgradeModal } from "@/features/organization";

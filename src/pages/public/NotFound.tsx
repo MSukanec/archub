@@ -1,6 +1,6 @@
 import { useLocation } from "wouter"
 import { Button } from "@/components/ui/button"
-import { useCurrentUser } from "@/hooks/use-current-user"
+import { useCurrentUser } from "@/features/users/hooks"
 import { Home, ArrowLeft } from "lucide-react"
 
 export default function NotFound() {

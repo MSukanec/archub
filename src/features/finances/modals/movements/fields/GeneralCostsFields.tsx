@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { CreditCard } from 'lucide-react'
 import { useGeneralCosts } from '@/features/general-costs/hooks/use-general-costs'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 
 // General cost item interface
 export interface GeneralCostItem {

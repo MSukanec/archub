@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { Plus, Calendar, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OrganizationFinancesMovementsView, OrganizationFinancesDashboardView, calculateAvailablePeriods, type PeriodFilter } from "@/features/organization";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useGlobalModalStore } from "@/components/modal/state/globalModalStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useUnifiedMovements } from "@/features/finances/hooks/use-unified-movements";

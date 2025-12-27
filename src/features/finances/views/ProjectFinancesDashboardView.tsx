@@ -3,7 +3,7 @@ import { TrendingUp, TrendingDown, DollarSign, Scale, Lightbulb, Clock, BarChart
 import { type InsightAction, type MonthlyFinancialData } from '@/components/insights/types';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown, hasMultipleCurrencies } from '@/lib/kpis';
 import { format as formatMoney, formatKPI, convertToBaseCurrency } from '@/lib/money';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { 
   StatCard, 

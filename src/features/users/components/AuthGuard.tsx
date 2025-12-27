@@ -1,7 +1,7 @@
 import { useEffect, useRef, ReactNode } from 'react';
 import { useLocation } from 'wouter';
 import { useAuthStore } from '@/stores/authStore';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useProjectContextInit } from '@/hooks/use-project-context-init';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 

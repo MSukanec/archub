@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { organizationKeys } from '@/core/query-keys';
 import { FormModalHeader } from '@/components/modal';
 import { FormModalFooter } from '@/components/modal';

@@ -3,7 +3,7 @@ import { Plus, Calendar, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProjectFinancesMovementsView } from "./ProjectFinancesMovementsView";
 import { ProjectFinancesDashboardView, calculateAvailablePeriods, type PeriodFilter } from "./ProjectFinancesDashboardView";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useGlobalModalStore } from "@/components/modal/state/globalModalStore";
 import { useProjectContext } from "@/stores/projectContext";
 import { useNavigationStore } from "@/stores/navigationStore";

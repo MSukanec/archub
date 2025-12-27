@@ -3,7 +3,7 @@ import { TrendingUp, Calendar, DollarSign, CreditCard, Lightbulb, Clock, CheckCi
 import { type InsightAction } from '@/components/insights/types';
 import { calculateMonetaryKPI, calculateCountKPI, calculateTextKPI, formatBreakdown } from '@/lib/kpis';
 import { format, convertToBaseCurrency } from '@/lib/money';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/use-currencies';
 import { useGeneralCostsPayments } from '../hooks/use-general-costs-payments';
 import { useGeneralCostsMonthlySummary } from '../hooks/use-general-costs-monthly-summary';

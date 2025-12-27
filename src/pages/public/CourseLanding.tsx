@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useParams, useLocation } from 'wouter';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useCourseLanding, useCourseEnrollment, useCourseProgress } from '@/features/learning';
 import { CourseLandingShell } from '@/features/shared-content/courses';
 import { Header } from '@/layouts/marketing/components/Header';

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { TrendingUp, TrendingDown, Wallet, Scale, AlertTriangle, Crown, HandHeart } from 'lucide-react';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components';
 import { EmptyState } from '@/components/shared/EmptyState';

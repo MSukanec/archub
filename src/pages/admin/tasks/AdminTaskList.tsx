@@ -14,7 +14,7 @@ import { useMobile } from '@/hooks/use-mobile'
 
 import { useGlobalModalStore } from '@/components/modal'
 import { useGeneratedTasks, useDeleteGeneratedTask, useTaskUsageCount, type GeneratedTask, useTaskParametersAdmin } from '@/features/tasks'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 
 import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronRight, ChevronDown, Eye, Copy } from 'lucide-react'
 import { EditableParametersTable } from '@/features/legacy/components/admin/EditableParametersTable'

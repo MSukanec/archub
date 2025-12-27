@@ -21,7 +21,7 @@ import { CalendarIcon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { ProjectSelectorField } from '@/features/projects'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useWallets } from '@/hooks/use-wallets'
 import { useOrganizationMovementConcepts } from '@/hooks/use-organization-movement-concepts'

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Building } from 'lucide-react'
 import { useProjectClients } from '@/features/clients'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 
 

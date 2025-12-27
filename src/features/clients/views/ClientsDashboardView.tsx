@@ -4,7 +4,7 @@ import { LuHandshake } from 'react-icons/lu';
 import { type InsightAction } from '@/components/insights/types';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown } from '@/lib/kpis';
 import { format, convertToBaseCurrency } from '@/lib/money';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { useClientPayments, useClientDashboard } from '@/features/clients';
 import { useProjectContext } from '@/stores/projectContext';

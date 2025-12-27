@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { ArrowDownCircle, ArrowUpCircle, Edit, Trash2, Plus, TrendingUp, TrendingDown, Wallet, Receipt } from 'lucide-react';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { Button } from '@/components/ui/button';

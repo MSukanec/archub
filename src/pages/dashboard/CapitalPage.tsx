@@ -7,7 +7,7 @@ import { CapitalBalancesView } from '@/features/capital/views/CapitalBalancesVie
 import { CapitalTransactionsView } from '@/features/capital/views/CapitalTransactionsView';
 import { HandHeart, Plus, ChevronDown, Calendar } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useGlobalModalStore } from '@/components/modal';
 import { usePartners, usePartnerContributions, usePartnerWithdrawals } from '@/features/capital';
 import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/use-currencies';

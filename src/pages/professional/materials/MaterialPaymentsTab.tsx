@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { DollarSign, Plus, Edit, Trash2, Paperclip, CheckCircle2, Calendar, Upload } from 'lucide-react'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useProjectContext } from '@/stores/projectContext'
 import { Table, Column } from '@/components/shared/table'
 import { Button } from '@/components/ui/button'

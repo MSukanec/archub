@@ -3,7 +3,7 @@ import { AlertCircle, Building2 } from 'lucide-react';
 import { FormModalHeader } from '@/components/modal';
 import { FormModalFooter } from '@/components/modal';
 import { FormModalLayout } from '@/components/modal';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';

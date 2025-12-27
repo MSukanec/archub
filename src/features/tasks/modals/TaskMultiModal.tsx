@@ -3,7 +3,7 @@ import { useModalPanelStore } from "@/components/modal";
 import { FormModalLayout, FormModalHeader, FormModalFooter } from "@/components/modal";
 import { Button } from "@/components/ui/button";
 import { Plus, ArrowLeft, Layers, Wrench, CheckSquare } from "lucide-react";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 
 import {
   FormPanel,

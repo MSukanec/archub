@@ -11,7 +11,7 @@ import { SubcontractAwardedView } from './tabs/SubcontractAwardedView';
 import { SubcontractPaymentsView } from './tabs/SubcontractPaymentsView';
 import { SubcontractHistoryView } from './tabs/SubcontractHistoryView';
 import { useSubcontract } from "@/features/subcontracts";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useGlobalModalStore } from '@/components/modal';
 
 export default function SubcontractView() {

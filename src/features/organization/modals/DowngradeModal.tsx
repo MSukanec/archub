@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useProjectContext } from "@/stores/projectContext";
 import { FormModalHeader } from "@/components/modal";
 import { FormModalFooter } from "@/components/modal";

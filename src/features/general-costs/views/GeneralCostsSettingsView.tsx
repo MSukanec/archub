@@ -1,7 +1,7 @@
 import { FolderOpen, Plus, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useGeneralCostCategories, useDeleteGeneralCostCategory } from '@/features/general-costs/hooks/use-general-cost-categories';
 import { useReplaceGeneralCostCategory } from '@/features/general-costs/hooks/use-replace-general-cost-category';
 import { useGlobalModalStore } from '@/components/modal';

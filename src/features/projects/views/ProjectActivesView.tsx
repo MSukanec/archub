@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useProjects, useProjectsCount, ProjectItemCard, updateProjectLastActive } from '@/features/projects'
 import { projectsKeys } from '@/core/query-keys'
 import { useUserOrganizationPreferences } from '@/features/organization'

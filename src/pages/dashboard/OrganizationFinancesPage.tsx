@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { DollarSign, Plus, Calendar, ChevronDown } from "lucide-react";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { Button } from "@/components/ui/button";
 import { useGlobalModalStore } from "@/components/modal";
 import { useUnifiedMovements } from "@/features/finances/hooks/use-unified-movements";

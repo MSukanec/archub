@@ -8,7 +8,7 @@ import { HierarchicalTree } from '@/components/shared/trees/HierarchicalTree';
 
 import { useMaterialCategories, useDeleteMaterialCategory, MaterialCategory } from '@/features/materials';
 import { useGlobalModalStore } from '@/components/modal';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 
 const AdminCostCategories = () => {
   const [searchTerm, setSearchTerm] = useState('');

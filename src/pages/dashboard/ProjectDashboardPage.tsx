@@ -3,7 +3,7 @@ import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { LabLayout } from "@/layouts/lab/LabLayout";
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjectContext } from '@/stores/projectContext';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { ProjectVisionGeneralView } from "@/features/projects/views/ProjectVisionGeneralView";
 
 export default function ProjectDashboardPage() {

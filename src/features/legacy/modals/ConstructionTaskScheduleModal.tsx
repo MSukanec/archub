@@ -15,7 +15,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useUpdateConstructionTask } from "@/features/tasks";
 import { useConstructionProjectPhases } from "@/hooks/use-construction-phases";
 import { toast } from "@/hooks/use-toast";

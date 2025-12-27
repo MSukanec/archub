@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
 import { supabase } from '@/lib/supabase';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { FormModalLayout } from '@/components/modal';
 import { FormModalHeader } from '@/components/modal';
 import { FormModalFooter } from '@/components/modal';

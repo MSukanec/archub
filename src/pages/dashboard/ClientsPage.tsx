@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { Plus, Home, Bell, Search, Filter, ExternalLink, Calendar, ChevronDown } from 'lucide-react'
 import { LuHandshake } from 'react-icons/lu'
 import { Layout } from "@/layouts/dashboard/DashboardLayout"
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useGlobalModalStore } from '@/components/modal'
 import { 
   ClientsDashboardView, 

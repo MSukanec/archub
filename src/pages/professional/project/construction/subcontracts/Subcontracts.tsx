@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Handshake, Plus, Home, Search, Filter, Bell } from "lucide-react";
 
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal';
 import { useActionBarMobile } from '@/layouts';

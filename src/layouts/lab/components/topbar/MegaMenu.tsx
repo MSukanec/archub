@@ -4,7 +4,7 @@ import { ChevronDown, Building, FolderOpen, GraduationCap, Crown, Globe, Award, 
 import { cn } from '@/lib/utils';
 import { useNavigationStore, type SidebarLevel } from '@/stores/navigationStore';
 import { useProjectContext } from '@/stores/projectContext';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import { useAuthStore } from '@/stores/authStore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';

@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { DollarSign, Plus, Edit, Trash2, Paperclip, CheckCircle2, Calendar, Download, Filter, X } from 'lucide-react'
 import { formatKPI, format as formatMoney } from '@/lib/money'
 import { calculateMonetaryKPI, calculateCountKPI, calculateTextKPI, formatBreakdown } from '@/lib/kpis'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useProjectContext } from '@/stores/projectContext'
 import { Table } from '@/components/shared/table'
 import { IdentityBadge } from '@/components/shared/IdentityBadge'

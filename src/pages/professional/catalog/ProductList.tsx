@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useGlobalModalStore } from '@/components/modal'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { ImageLightbox, useImageLightbox } from '@/components/shared/viewers/ImageLightbox'
 import { cn } from '@/lib/utils'
 

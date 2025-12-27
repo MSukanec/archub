@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { supabase } from "@/lib/supabase";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingSpinner } from "@/components/shared/layout/LoadingSpinner";
 import { BillingToggle } from "./components/BillingToggle";

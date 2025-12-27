@@ -7,7 +7,7 @@ import { useGlobalModalStore } from '@/components/modal';
 // Import the existing components
 import MovementsList from './MovementsList';
 
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 
 export default function Movements() {
   const { setSidebarContext } = useNavigationStore();

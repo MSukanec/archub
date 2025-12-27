@@ -15,7 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { IdentityBadge } from "@/components/shared/IdentityBadge";
 import { useCreateKanbanCard, useUpdateKanbanCard } from "@/hooks/use-kanban";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useOrganizationMembers } from "@/features/organization";
 import { useToast } from "@/hooks/use-toast";
 

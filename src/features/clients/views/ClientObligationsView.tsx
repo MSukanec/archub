@@ -3,7 +3,7 @@ import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown } from '@/lib/
 import { format as formatMoney, formatKPI } from '@/lib/money'
 import { useToast } from '@/hooks/use-toast'
 import { Plus, DollarSign, CheckCircle2, AlertCircle, ListChecks, FileText } from 'lucide-react'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useProjectContext } from '@/stores/projectContext'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal'

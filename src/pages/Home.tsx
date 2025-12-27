@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 

@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar'
 import { DollarSign, CalendarIcon, Info, Building2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationMembers } from '@/features/organization'
 import { formatContactName } from '@/utils/contacts'

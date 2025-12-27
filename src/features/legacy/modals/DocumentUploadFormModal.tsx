@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useToast } from '@/hooks/use-toast';
 import { useOrganizationMembers } from '@/features/organization';
 import { useDesignDocumentFolders } from '@/hooks/use-design-document-folders';

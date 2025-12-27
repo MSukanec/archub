@@ -3,7 +3,7 @@ import { useLocation } from 'wouter';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useNavigationStore } from '@/stores/navigationStore';
 import type { PendingInvitation } from '@/hooks/use-pending-invitations';
 

@@ -15,7 +15,7 @@ import { CascadingSelect } from '@/components/shared/fields/CascadingSelectField
 
 import { useCreateMaterial, useUpdateMaterial, Material, NewMaterialData, useMaterialCategories, MaterialCategory } from '@/features/materials'
 import { useUnits } from '@/hooks/use-units'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 
 import { Package } from 'lucide-react'
 

@@ -5,7 +5,7 @@ import { FormModalFooter } from '@/components/modal';
 import { FormModalLayout } from '@/components/modal';
 import { useModalPanelStore } from '@/components/modal';
 import { TaskSelectionTable, SelectedTask, useBudgetTasks } from '@/features/tasks';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 
 interface BudgetTaskFormModalProps {
   modalData?: {

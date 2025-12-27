@@ -11,7 +11,7 @@ import { es } from 'date-fns/locale';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { markAsRead, markAllAsRead, resolveNotificationHref, type UserNotificationRow } from '@/lib/notifications';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { usersKeys } from '@/core/query-keys';
 
 export function UserNotificationsView() {

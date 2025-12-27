@@ -18,7 +18,7 @@ import {
 import { type InsightAction } from '@/components/insights/types';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown } from '@/lib/kpis';
 import { format as formatMoneyAmount, formatKPI } from '@/lib/money';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { 
   AppCard, 

@@ -13,7 +13,7 @@ import {
   useMoveConceptToParent,
   MovementConceptAdmin 
 } from '@/hooks/use-movement-concepts-admin';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useGlobalModalStore } from '@/components/modal';
 
 const AdminGeneralMovementConcepts = () => {

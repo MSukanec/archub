@@ -29,7 +29,7 @@ import {
   type ForumPostWithAuthor,
 } from '../services';
 import { useToast } from '@/hooks/use-toast';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useGlobalModalStore } from '@/components/modal';
 import { ImageLightbox, useImageLightbox } from '@/components/shared/viewers/ImageLightbox';
 

@@ -13,7 +13,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useGlobalModalStore } from '@/components/modal';
 import { useLocation } from 'wouter';
 import { useTaskMaterials, useTaskLabor } from '@/features/tasks';

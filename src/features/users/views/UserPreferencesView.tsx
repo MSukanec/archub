@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Settings } from 'lucide-react';
-import { useCurrentUser, type UserData } from '@/hooks/use-current-user';
+import { useCurrentUser, type UserData } from '@/features/users/hooks';
 import { useSidebarStore } from '@/stores/sidebarStore';
 import { useThemeStore } from '@/stores/themeStore';
 import { supabase } from '@/lib/supabase';

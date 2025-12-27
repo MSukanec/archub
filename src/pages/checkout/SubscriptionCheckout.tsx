@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useNavigationStore } from "@/stores/navigationStore";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useCountries } from "@/hooks/use-countries";
 import { PhoneField } from "@/components/shared/fields/PhoneField";
 import {

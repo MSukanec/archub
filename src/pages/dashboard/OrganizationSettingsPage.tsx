@@ -13,7 +13,7 @@ import { ComingSoonRestricted } from '@/components/shared/restrictions/guards/Co
 import { Settings, UserPlus, Sparkles, Building } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useNavigationStore } from '@/stores/navigationStore';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useGlobalModalStore } from '@/components/modal';
 import { useLocation } from 'wouter';
 import { PlanRestricted } from "@/features/users";

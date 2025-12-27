@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useContacts } from '@/features/contacts';
 import { useToast } from '@/hooks/use-toast';
 import { getAttachmentPublicUrl } from '@/features/contacts/utils';

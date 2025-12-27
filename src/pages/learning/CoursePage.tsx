@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { BookOpen, ChevronLeft, ChevronRight, CheckCircle, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useCourseOverview, useCourseEnrollment, useLastLessonInProgress, useCoursePlayerStore } from '@/features/learning';
 

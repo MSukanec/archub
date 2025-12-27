@@ -3,7 +3,7 @@ import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { Plus, CheckSquare, Calendar, Home, Search, Filter, Bell } from 'lucide-react'
 import { useConstructionTasks, useConstructionTasksView, useDeleteConstructionTask } from '@/features/tasks'
 import { useConstructionProjectPhases, useUpdatePhasePositions } from '@/hooks/use-construction-phases'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useProjectContext } from '@/stores/projectContext'
 import { useGlobalModalStore } from '@/components/modal'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'

@@ -1,7 +1,7 @@
 import { Tag, Edit2, Trash2, Layers, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useProjectTypes, useDeleteProjectType, useReplaceProjectType, useProjectModalities, useDeleteProjectModality, useReplaceProjectModality } from '@/features/projects';
 import type { ProjectType, ProjectModality } from '@/features/projects';
 import { useGlobalModalStore } from '@/components/modal';

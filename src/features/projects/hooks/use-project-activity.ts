@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getProjectActivity } from '../services/getProjectActivity';
 import { projectsKeys } from '@/core/query-keys';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 
 /**
  * Hook para obtener la actividad reciente del proyecto.

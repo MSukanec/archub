@@ -24,7 +24,7 @@ import {
   User
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useOrganizationCurrencies } from '@/hooks/use-currencies';
 import { formatContactName } from '@/utils/contacts';
 import { cn } from '@/lib/utils';

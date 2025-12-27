@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useProjectContext } from '@/stores/projectContext';
 
 /**

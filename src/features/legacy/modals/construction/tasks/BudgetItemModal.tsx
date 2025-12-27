@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Calendar, DollarSign } from "lucide-react";
 import { SearchField } from "@/components/shared/fields/SearchField";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useCreateBudgetItem, useUpdateBudgetItem } from "@/hooks/use-budget-items";
 import { useOrganizationTaskPrice, useTaskMaterials, useTaskLabor } from "@/features/tasks";
 import { toast } from "@/hooks/use-toast";

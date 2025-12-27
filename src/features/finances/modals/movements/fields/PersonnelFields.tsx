@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { Users } from 'lucide-react'
 import { useProjectPersonnel, type ProjectPersonnel } from '@/features/personnel'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 
 // Personnel item interface
 export interface PersonnelItem {

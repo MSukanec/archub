@@ -1,6 +1,6 @@
 import { Tag, Plus, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useSiteLogTypes, useDeleteSiteLogType, useReplaceSiteLogType } from '@/features/sitelog/hooks/use-sitelog-types';
 import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';

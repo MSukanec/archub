@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Package, CheckSquare, List, FolderOpen } from 'lucide-react';
 import { useConstructionTasks } from '@/features/tasks';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useProjectContext } from '@/stores/projectContext';
 
 export interface SelectedTask {

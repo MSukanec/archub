@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import { useCreateMaterialCategory, useUpdateMaterialCategory, useMaterialCategories, MaterialCategory, NewMaterialCategoryData } from '@/features/materials'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 
 import { Tag } from 'lucide-react'
 

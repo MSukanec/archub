@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { Layers } from "lucide-react";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useCreateConstructionPhase } from "@/hooks/use-construction-phases";
 import { useModalPanelStore } from "@/components/modal";
 import { toast } from "@/hooks/use-toast";

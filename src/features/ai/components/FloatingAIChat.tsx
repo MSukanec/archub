@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { AIPanel } from '@/features/ai';
 import { Sparkles, X, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 
 export function FloatingAIChat() {
   const [isOpen, setIsOpen] = useState(false);

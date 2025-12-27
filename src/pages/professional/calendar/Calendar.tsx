@@ -10,7 +10,7 @@ import { useKanbanBoards, useKanbanLists, useKanbanCards, useMoveKanbanCard, use
 import { useToast } from '@/hooks/use-toast';
 
 import { useKanbanStore } from '@/stores/kanbanStore';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useGlobalModalStore } from '@/components/modal';
 import { useNavigationStore } from '@/stores/navigationStore';
 

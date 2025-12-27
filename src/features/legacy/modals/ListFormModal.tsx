@@ -10,7 +10,7 @@ import { FormModalBody } from '@/components/modal';
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useCreateKanbanList, useUpdateKanbanList } from "@/hooks/use-kanban";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useOrganizationMembers } from "@/features/organization";
 import { useToast } from "@/hooks/use-toast";
 import { useModalPanelStore } from '@/components/modal';

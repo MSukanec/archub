@@ -3,7 +3,7 @@ import { Upload, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useProjectContext } from '@/stores/projectContext';
 import { useUpdateUserOrganizationPreferences } from '@/features/organization';
 

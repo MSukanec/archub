@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { getGeneralCostPaymentFiles } from '../services/getGeneralCostPaymentFiles';
 import { generalCostsKeys } from '@/core/query-keys';
 

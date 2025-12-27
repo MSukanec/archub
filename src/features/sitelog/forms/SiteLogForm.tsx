@@ -16,7 +16,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ImageLightbox, useImageLightbox } from "@/components/shared/viewers/ImageLightbox";
 import { useToast } from "@/hooks/use-toast";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useOrganizationMembers } from "@/features/organization";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useProjectContext } from "@/stores/projectContext";

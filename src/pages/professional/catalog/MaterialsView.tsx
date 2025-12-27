@@ -6,7 +6,7 @@ import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { MaterialCostsTab } from './MaterialCostsTab';
 import { MaterialBasicDataTab } from './MaterialBasicDataTab';
 import { useMaterial } from "@/features/materials";
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 
 export default function MaterialsView() {
   const { id } = useParams<{ id: string }>();

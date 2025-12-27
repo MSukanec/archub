@@ -11,7 +11,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useLocation } from 'wouter';
-import { useCurrentUser, type UserData } from '@/hooks/use-current-user';
+import { useCurrentUser, type UserData } from '@/features/users/hooks';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { supabase } from '@/lib/supabase';

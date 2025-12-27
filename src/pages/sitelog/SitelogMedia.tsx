@@ -1,4 +1,4 @@
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { useSitelogGallery } from '@/features/sitelog/hooks/use-sitelog-gallery';

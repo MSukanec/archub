@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { Search, Filter, UserPlus, Bell } from 'lucide-react';
 import { LuContact } from 'react-icons/lu';
 import { useState, useEffect, useMemo } from 'react';

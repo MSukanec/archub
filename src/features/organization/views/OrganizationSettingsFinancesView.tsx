@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ComboBoxMultiSelectField } from '@/components/shared/fields/ComboBoxMultiSelectField';
 
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies';
 import { useAllWallets } from '@/hooks/use-wallets';
 import { useOrganizationWallets } from '@/features/organization';

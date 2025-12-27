@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { LabLayout } from "@/layouts/lab/LabLayout";
 import { DollarSign, Plus, Calendar, ChevronDown } from "lucide-react";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useProjectContext } from "@/stores/projectContext";
 import { Button } from "@/components/ui/button";
 import { useGlobalModalStore } from "@/components/modal";

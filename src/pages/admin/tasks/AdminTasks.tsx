@@ -3,7 +3,7 @@ import { ListTodo, Plus } from 'lucide-react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { LabLayout } from "@/layouts/lab/LabLayout";
 import { useGlobalModalStore } from '@/components/modal';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { Button } from '@/components/ui/button';
 import AdminTaskList from './AdminTaskList';
 import AdminTaskCategories from './AdminTaskCategories';

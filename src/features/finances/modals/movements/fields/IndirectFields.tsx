@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { Calculator } from 'lucide-react'
 import { useIndirectCosts } from '@/hooks/use-indirect-costs'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 
 // Indirect item interface
 export interface IndirectItem {

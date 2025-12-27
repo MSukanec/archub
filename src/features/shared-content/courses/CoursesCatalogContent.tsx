@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useAllCourses, UnifiedCourseGrid, useLearningCourses } from '@/features/learning';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useLocation } from 'wouter';
 import type { CoursesCatalogContentProps, CourseCatalogTab } from './types';
 

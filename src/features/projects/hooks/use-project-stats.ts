@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getProjectStats } from '../services/getProjectStats';
 import { projectsKeys } from '@/core/query-keys';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 
 /**
  * Hook para obtener las estadísticas de un proyecto.

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
 
 interface RoleRestrictedProps {

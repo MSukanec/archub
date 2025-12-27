@@ -10,7 +10,7 @@ import { SubcontractPaymentsChart } from '@/features/subcontracts';
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency as globalFormatCurrency } from "@/lib/currency-formatter";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 
 interface SubcontractPaymentsViewProps {
   subcontract: any;

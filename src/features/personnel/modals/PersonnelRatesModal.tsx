@@ -20,7 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 
 import { useToast } from '@/hooks/use-toast'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { queryClient as globalQueryClient } from '@/lib/queryClient'
 import { usePersonnelRates, useCurrencies, useCreatePersonnelRate } from '@/features/personnel/hooks'
 

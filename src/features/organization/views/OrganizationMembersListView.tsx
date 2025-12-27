@@ -28,7 +28,7 @@ import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 
 import MemberRow from "@/features/organization/components/MemberRow";
 
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { supabase } from "@/lib/supabase";
 import { organizationKeys } from "@/core/query-keys";
 import { useToast } from "@/hooks/use-toast";

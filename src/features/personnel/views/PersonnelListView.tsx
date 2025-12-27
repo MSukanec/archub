@@ -9,7 +9,7 @@ import { Edit, Trash2, ShieldCheck, ShieldAlert, ShieldX, Shield, User } from "l
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner'
 import { IdentityBadge } from '@/components/shared/IdentityBadge'
 import { useProjectPersonnel, useDeletePersonnel, useReplacePersonnel, usePersonnelPayments } from '@/features/personnel/hooks'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useToast } from '@/hooks/use-toast'
 import { queryClient } from '@/lib/queryClient'
 

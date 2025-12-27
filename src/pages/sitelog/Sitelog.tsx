@@ -5,7 +5,7 @@ import { BookOpen, Plus } from "lucide-react";
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useProjectContext } from '@/stores/projectContext';
 import { useSiteLogs } from "@/features/sitelog/hooks/use-site-logs";
 import { useNavigationStore } from '@/stores/navigationStore';

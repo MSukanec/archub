@@ -18,7 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table } from '@/components/shared/trees/Table';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useQuery } from "@tanstack/react-query";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 
 interface SubcontractHistoryViewProps {

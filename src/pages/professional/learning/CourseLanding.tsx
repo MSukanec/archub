@@ -1,7 +1,7 @@
 import { useParams } from 'wouter';
 import { useEffect } from 'react';
 import { Layout as DashboardLayout } from '@/layouts/dashboard/DashboardLayout';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { 
   useCourseLanding,
   useCourseEnrollment,

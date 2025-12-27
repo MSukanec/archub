@@ -21,7 +21,7 @@ import { useMaterials } from '@/features/materials'
 import { useUnits } from '@/hooks/use-units'
 import { useUnitPresentations } from '@/hooks/use-unit-presentations'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 
 import { Package } from 'lucide-react'
 

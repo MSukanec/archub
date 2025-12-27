@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { createClientRole, updateClientRole, getClientRoleUsageCount, getClientRoles } from '@/features/clients/services/clientRoles';
 import { CLIENT_QUERY_KEYS } from '@/features/clients/constants';
 import { useDeleteClientRole } from '@/features/clients/hooks/use-client-roles';

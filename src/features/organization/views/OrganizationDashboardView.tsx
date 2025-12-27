@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useProjects, updateProjectLastActive } from '@/features/projects';
 import { useContacts } from '@/features/contacts';
 import { useSiteLogs } from '@/features/sitelog/hooks/use-site-logs';
@@ -11,7 +11,7 @@ import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { uploadOrgLogo } from '@/lib/storage';
 import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
-import type { UserData } from "@/hooks/use-current-user";
+import type { UserData } from "@/features/users/hooks";
 import { Folder, ArrowRight, Camera, Loader2, Users, FileText, Users2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from '@/components/ui/button';

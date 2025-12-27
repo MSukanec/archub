@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { InviteMemberForm } from '../forms/InviteMemberForm';
 import { Users, UserPlus } from 'lucide-react';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 
 interface InviteMemberModalProps {
   modalData?: {

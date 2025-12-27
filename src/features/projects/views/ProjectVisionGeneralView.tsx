@@ -3,7 +3,7 @@ import { FileText, ArrowRight, Building2 } from "lucide-react";
 import { useProjectContext } from '@/stores/projectContext';
 import { useProject } from '@/features/projects/hooks/use-project';
 import { useSiteLogs } from '@/features/sitelog/hooks/use-site-logs';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useQuery } from '@tanstack/react-query';
 import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';
 import { projectsKeys } from '@/core/query-keys';

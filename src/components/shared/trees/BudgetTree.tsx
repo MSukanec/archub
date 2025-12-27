@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useLocation } from 'wouter';
 import { useUpdateBudgetItem } from '@/hooks/use-budget-items';
 import { useAutoSave } from '@/hooks/useAutoSave';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { GripVertical, Calculator, FileText, Copy, Trash2, Info, Plus, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

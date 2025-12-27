@@ -1,4 +1,4 @@
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 
 interface PlanFeatures {
   features: Record<string, any>;

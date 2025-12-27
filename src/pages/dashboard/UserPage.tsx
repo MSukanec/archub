@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { User as UserIcon, Plus } from 'lucide-react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { LabLayout } from '@/layouts/lab/LabLayout';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import { useGlobalModalStore } from '@/components/modal';

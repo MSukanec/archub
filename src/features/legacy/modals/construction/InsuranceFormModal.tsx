@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useOrganizationMembers } from '@/features/organization'
 import { useCreateInsurance, useUpdateInsurance, useUploadCertificate } from '@/features/personnel'
 import { useQuery } from '@tanstack/react-query'

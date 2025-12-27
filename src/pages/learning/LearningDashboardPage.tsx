@@ -1,6 +1,6 @@
 import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { LabLayout } from "@/layouts/lab/LabLayout"
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { LearningDashboardView } from '@/features/learning/views/LearningDashboardView'
 
 export default function LearningDashboard() {

@@ -3,7 +3,7 @@ import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { OrganizationProfileView, OrganizationLocationView } from '@/features/organization';
 import { Building2 } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 
 export function OrganizationDataPage() {
   const { setSidebarLevel } = useNavigationStore();

@@ -2,7 +2,7 @@ import { Bell } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useEffect, useState } from 'react';
 import { getUnreadCount, subscribeUserNotifications } from '@/lib/notifications';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import {
   DropdownMenu,
   DropdownMenuContent,

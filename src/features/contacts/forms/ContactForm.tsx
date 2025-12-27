@@ -17,7 +17,7 @@ import { FileUploader } from "@/components/shared/fields/FileUploader";
 import { PhoneField } from "@/components/shared/fields/PhoneField";
 import { AvatarUploader } from "@/components/shared/fields/AvatarUploader";
 
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useContactTypes, useContact, useContactAttachments, useCreateContact, useUpdateContact, useInviteMember } from "@/features/contacts/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";

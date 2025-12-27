@@ -15,7 +15,7 @@ import { useDeletePersonnelPayment } from '@/features/personnel/hooks/use-person
 import { useDeleteGeneralCostPayment } from '@/hooks/use-general-costs-payments';
 import { useDeletePartnerContribution, useDeletePartnerWithdrawal } from '@/features/capital';
 import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/use-currencies';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useFinancesDataHealth } from '@/core/data-health';
 import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';

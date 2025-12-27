@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateKanbanBoard, useUpdateKanbanBoard } from '@/hooks/use-kanban';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useKanbanStore } from '@/stores/kanbanStore';
 import { useToast } from '@/hooks/use-toast';
 

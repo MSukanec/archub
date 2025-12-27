@@ -19,7 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { z } from 'zod';
 import { useContacts } from '@/features/contacts';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useCurrencies } from '@/hooks/use-currencies';
 import { useOrganizationMembers } from '@/features/organization';
 import { useSubcontractTasks } from '../hooks';

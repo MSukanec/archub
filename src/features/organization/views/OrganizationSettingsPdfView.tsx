@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Save, RotateCcw } from 'lucide-react';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { usePdfTemplate, useUpdatePdfTemplate, DEFAULT_PDF_TEMPLATE } from '@/features/pdf';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';

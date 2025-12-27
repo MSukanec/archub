@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Layout } from '@/layouts/dashboard/DashboardLayout';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import { useLocation } from 'wouter';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';

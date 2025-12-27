@@ -6,7 +6,7 @@ import { FormModalLayout } from '@/components/modal';
 import { useModalPanelStore } from '@/components/modal';
 import { TaskSelectionTable, SelectedTask } from '@/features/tasks';
 import { useSubcontractTasks } from '../hooks';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useProjectContext } from '@/stores/projectContext';
 
 interface SubcontractTaskFormModalProps {

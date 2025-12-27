@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useToast } from '@/hooks/use-toast'
 import { useOrganizationMembers } from '@/features/organization'
 import { useGeneralCostCategories } from '../hooks/use-general-cost-categories'

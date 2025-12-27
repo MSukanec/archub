@@ -8,7 +8,7 @@ import GeneralCostsConceptsView from '@/features/general-costs/views/GeneralCost
 import GeneralCostsPaymentsView from '@/features/general-costs/views/GeneralCostsPaymentsView'
 import GeneralCostsSettingsView from '@/features/general-costs/views/GeneralCostsSettingsView'
 import { useGlobalModalStore } from '@/components/modal'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useGeneralCosts } from '@/features/general-costs/hooks/use-general-costs'
 import { useGeneralCostsPayments } from '@/features/general-costs/hooks/use-general-costs-payments'
 import { useLabDrawerStore } from '@/layouts/lab/stores/useLabDrawerStore'

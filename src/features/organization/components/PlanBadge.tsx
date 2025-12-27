@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useLocation } from "wouter";
 import { Star, Crown, Users, Zap } from "lucide-react";
 

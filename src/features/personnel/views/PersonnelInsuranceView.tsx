@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Shield, Plus } from 'lucide-react'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useInsuranceList } from '@/features/personnel'
 import { useGlobalModalStore } from '@/components/modal'
 import { InsuranceKpis } from '../components/InsuranceKpis'

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ShoppingCart, Plus, Edit, Trash2, CheckCircle2, Clock, DollarSign, Paperclip } from 'lucide-react';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useProjectContext } from '@/stores/projectContext';
 import { Table, Column } from '@/components/shared/table';
 import { Button } from '@/components/ui/button';

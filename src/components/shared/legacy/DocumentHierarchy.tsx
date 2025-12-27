@@ -7,7 +7,7 @@ import { useDesignDocumentFolders, useDeleteDesignDocumentFolder } from '@/hooks
 
 import { useDesignDocuments, useDesignDocumentsByFolder, useDeleteDesignDocument } from '@/hooks/use-design-documents';
 import { useGlobalModalStore } from '@/components/modal';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';

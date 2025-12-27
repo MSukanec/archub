@@ -24,7 +24,7 @@ import {
   useTaskLabor,
 } from '@/features/tasks'
 import { useMaterials } from '@/features/materials'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useUnits } from '@/hooks/use-units'
 
 const taskSchema = z.object({

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useProjectContext } from '@/stores/projectContext';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';

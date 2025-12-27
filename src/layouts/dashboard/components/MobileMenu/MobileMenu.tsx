@@ -35,7 +35,7 @@ import { MobileMenuButton } from "./MobileMenuButton";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { Link, useLocation } from "wouter";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";

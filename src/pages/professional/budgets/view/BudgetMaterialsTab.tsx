@@ -3,7 +3,7 @@ import { Table } from '@/components/shared/trees/Table'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { Button } from '@/components/ui/button'
 
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useProjectContext } from '@/stores/projectContext'
 import { useBudgetItems } from '@/hooks/use-budget-items'
 import { Package, Plus } from 'lucide-react'

@@ -4,7 +4,7 @@ import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { HeroLayout } from "@/layouts/dashboard/HeroLayout";
 import { CourseLandingShell } from '@/features/shared-content/courses/CourseLandingShell';
 import { useCourseLanding, useCourseEnrollment, useCourseProgress } from '@/features/learning';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useNavigationStore } from '@/stores/navigationStore';
 
 export default function CourseLandingPage() {

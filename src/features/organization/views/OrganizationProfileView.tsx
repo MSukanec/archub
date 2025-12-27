@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { PhoneField } from '@/components/shared/fields/PhoneField';
 
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useAutosaveController, normalizeStringValue } from '@/core/autosave';
 import { organizationKeys } from '@/core/query-keys';
 import { useQuery, useQueryClient } from '@tanstack/react-query';

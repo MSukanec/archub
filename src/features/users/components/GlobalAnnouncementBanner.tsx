@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Info, AlertTriangle, XCircle, CheckCircle } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { supabase } from '@/lib/supabase';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { GlobalAnnouncement as AnnouncementType } from '@shared/schema';

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Users, Plus, Edit, Trash2, HandHeart, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { Button } from '@/components/ui/button';

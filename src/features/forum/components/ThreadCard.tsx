@@ -13,7 +13,7 @@ import {
 import { MessageSquare, Eye, Pin, Lock, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal';
 import { useDeleteThread, type ForumThreadWithAuthor } from '../services';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import { useToast } from '@/hooks/use-toast';
 

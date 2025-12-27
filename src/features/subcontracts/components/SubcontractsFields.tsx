@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { FileText } from 'lucide-react'
 import { useSubcontracts } from '../hooks'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 
 export interface SubcontractItem {
   subcontract_id: string

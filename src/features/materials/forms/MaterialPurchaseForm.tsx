@@ -17,7 +17,7 @@ import { ShoppingCart, CalendarIcon, FileText } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { useToast } from '@/hooks/use-toast'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationMembers } from '@/features/organization/hooks/use-organization-members'
 import { useContacts } from '@/features/contacts'

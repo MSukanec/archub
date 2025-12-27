@@ -7,8 +7,8 @@ import { LeftSidebar } from "./components/Sidebar/LeftSidebar";
 import { PageLayout } from "./PageLayout";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/stores/themeStore";
-import { useCurrentUser } from "@/hooks/use-current-user";
-import { useUserMode } from "@/hooks/use-user-mode";
+import { useCurrentUser } from "@/features/users/hooks";
+import { useUserMode } from "@/features/users/hooks";
 import {
   useSidebarStore,
   useSecondarySidebarStore,

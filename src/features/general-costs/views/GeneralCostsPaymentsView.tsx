@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { convertToBaseCurrency, formatKPI, formatSubValue } from '@/lib/money';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown } from '@/lib/kpis';
 
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { Table } from '@/components/shared/table/Table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

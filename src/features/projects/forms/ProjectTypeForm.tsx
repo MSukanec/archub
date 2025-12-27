@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 
 import { useOptimisticMutation } from '@/core/save-engine';
 import { projectsKeys } from '@/core/query-keys';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useOrganizationMembers } from '@/features/organization/hooks/use-organization-members';
 import { createProjectType } from '../services/createProjectType';
 import { updateProjectType } from '../services/updateProjectType';

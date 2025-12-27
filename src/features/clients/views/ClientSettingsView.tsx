@@ -1,6 +1,6 @@
 import { Users, Plus, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useClientRoles, useDeleteClientRole } from '@/features/clients/hooks/use-client-roles';
 import { useReplaceClientRole } from '@/features/clients/hooks/use-replace-client-role';
 import { useGlobalModalStore } from '@/components/modal';

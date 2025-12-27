@@ -17,7 +17,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useUnits } from '@/hooks/use-units'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 import { toast } from '@/hooks/use-toast'
 
 import { Users } from 'lucide-react'

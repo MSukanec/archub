@@ -1,7 +1,7 @@
 import { useState, useEffect, Fragment, useRef, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Shield, ShieldAlert, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { apiRequest } from '@/lib/queryClient';
 import { organizationKeys } from '@/core/query-keys';
 import { useOptimisticMutation } from '@/core/save-engine';

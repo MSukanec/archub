@@ -17,7 +17,7 @@ import { useCreateProduct, useUpdateProduct, Product, NewProductData } from '@/f
 import { useMaterials } from '@/features/materials'
 import { useBrands } from '@/hooks/use-brands'
 import { useUnitPresentations } from '@/hooks/use-unit-presentations'
-import { useCurrentUser } from '@/hooks/use-current-user'
+import { useCurrentUser } from '@/features/users/hooks'
 
 import { Package } from 'lucide-react'
 

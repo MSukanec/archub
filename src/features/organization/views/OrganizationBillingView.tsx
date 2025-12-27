@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 import { PDFDownloadLink, pdf } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/features/pdf';
 import { useToast } from '@/hooks/use-toast';
-import { useCurrentUser, refreshCurrentUserCache } from '@/hooks/use-current-user';
+import { useCurrentUser, refreshCurrentUserCache } from '@/features/users/hooks';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useGlobalModalStore } from '@/components/modal';
 import { useLocation } from 'wouter';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { LabLayout } from "@/layouts/lab/LabLayout";
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useGlobalModalStore } from '@/components/modal';
 import { LuContact } from 'react-icons/lu';
 import { Button } from '@/components/ui/button';

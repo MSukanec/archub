@@ -15,7 +15,7 @@ import {
   Ban,
   Receipt
 } from 'lucide-react';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useProjectContext } from '@/stores/projectContext';
 import { Table } from '@/components/shared/trees/Table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';

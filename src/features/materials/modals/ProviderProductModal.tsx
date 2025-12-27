@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Package } from 'lucide-react';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser } from '@/features/users/hooks';
 import { useOrganizationCurrencies } from '@/hooks/use-currencies';
 import { useToggleProviderProduct, useProviderProducts } from '@/features/materials';
 import { FormModalLayout } from "@/components/modal";
