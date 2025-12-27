@@ -183,8 +183,8 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         supabase.from('user_view_history').select('user_id').gte('entered_at', todayStart.toISOString()),
         supabase.from('projects').select('*', { count: 'exact', head: true }),
         supabase.from('projects').select('*', { count: 'exact', head: true }).gte('created_at', thisMonthStart.toISOString()),
-        supabase.from('user_view_history').select('*', { count: 'exact', head: true }).gte('entered_at', todayStart.toISOString()),
-        supabase.from('user_view_history').select('duration_seconds').gte('entered_at', todayStart.toISOString()).not('duration_seconds', 'is', null)
+        supabase.from('user_view_history').select('user_id').gte('entered_at', todayStart.toISOString()),
+        supabase.from('user_view_history').select('user_id, duration_seconds').gte('entered_at', todayStart.toISOString()).not('duration_seconds', 'is', null)
       ])
 
       const adminIdsSetLocal = new Set(adminIds)
@@ -198,8 +198,14 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
           .map(u => u.user_id)
           .filter(id => !adminIdsSetLocal.has(id))
       )
-      const avgDuration = avgDurationResult.data && avgDurationResult.data.length > 0
-        ? avgDurationResult.data.reduce((sum, row) => sum + (row.duration_seconds || 0), 0) / avgDurationResult.data.length
+      
+      // Filtrar sesiones de hoy excluyendo admins
+      const nonAdminSessions = (sessionsResult.data || []).filter((row: any) => !adminIdsSetLocal.has(row.user_id))
+      
+      // Filtrar duración promedio excluyendo admins
+      const nonAdminDurations = (avgDurationResult.data || []).filter((row: any) => !adminIdsSetLocal.has(row.user_id))
+      const avgDuration = nonAdminDurations.length > 0
+        ? nonAdminDurations.reduce((sum: number, row: any) => sum + (row.duration_seconds || 0), 0) / nonAdminDurations.length
         : 0
 
       return {
@@ -212,7 +218,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         newUsersThisMonth: newUsersThisMonthResult.count || 0,
         totalProjects: totalProjectsResult.count || 0,
         newProjectsThisMonth: newProjectsThisMonthResult.count || 0,
-        sessionsToday: sessionsResult.count || 0,
+        sessionsToday: nonAdminSessions.length,
         avgSessionDuration: avgDuration
       } as DashboardStats
     },
