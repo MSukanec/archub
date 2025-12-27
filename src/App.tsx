@@ -26,7 +26,6 @@ import PricingPlanPublic from "@/pages/public/PricingPlan";
 import OrganizationProjectsPage from "@/pages/dashboard/OrganizationProjectsPage";
 import ProjectDashboardPage from "@/pages/dashboard/ProjectDashboardPage";
 import ProjectDataPage from "@/pages/dashboard/ProjectDataPage";
-import TasksPage from "@/pages/dashboard/TasksPage";
 
 
 
@@ -217,7 +216,6 @@ function Router() {
         <Route path="/clients" component={ClientsPage} />
         <Route path="/media" component={Media} />
         <Route path="/project/moodboard" component={Moodboard} />
-        <Route path="/project/tasks" component={TasksPage} />
         <Route path="/budgets" component={Budgets} />
         <Route path="/professional/budgets" component={Budgets} />
         <Route path="/professional/budgets/view/:id" component={BudgetView} />
