@@ -96,3 +96,58 @@ Preferred communication style: Simple, everyday language.
 - **browser-image-compression**: Client-side image compression.
 - **@dnd-kit**: Modern drag-and-drop toolkit.
 - **node-cron**: Scheduled tasks.
+
+## Admin Dashboard Analytics System
+
+### Database Tables
+- **user_presence**: Real-time user activity tracking
+  - `user_id` (uuid, PK): References users.id
+  - `org_id` (uuid): Current organization
+  - `last_seen_at` (timestamptz): Last heartbeat timestamp
+  - `status` (text): Always 'online' in DB (legacy, not reliable)
+  - `current_view` (text): Current page/view name
+  - `user_agent`, `locale`, `updated_from`: Optional metadata
+
+- **user_view_history**: Historical view tracking for analytics
+
+### SQL Views (Optimized, exclude admin role_id = 'd5606324-af8d-487e-8c8e-552511fce2a2')
+- **user_stats_summary_view**: KPI aggregations (returns snake_case: total_users, active_users_now, etc.)
+- **user_presence_activity_view**: Recent activity with user info (includes avatar_url)
+- **user_top_performers_view**: Top users by session count
+- **user_drop_off_view**: Users with low engagement (1-2 sessions)
+- **user_engagement_by_view_view**: Average time per view
+- **user_hourly_activity_view**: Sessions by hour
+- **user_monthly_growth_view**: User growth by month
+- **user_acquisition_distribution_view**: Acquisition source breakdown
+
+### SQL Functions (RPC)
+- **heartbeat(p_org_id)**: Updates user_presence.last_seen_at every 30 seconds
+- **presence_set_view(p_view)**: Updates current_view in user_presence
+- **analytics_enter_view(p_org_id, p_view)**: Logs view entry in user_view_history
+- **analytics_exit_previous_view(p_org_id)**: Closes previous view session
+
+### Frontend Implementation
+- **Heartbeat**: `src/hooks/use-heartbeat.ts` - Sends heartbeat every 30 seconds
+- **Presence Store**: `src/stores/presenceStore.ts` - Zustand store for real-time presence
+- **Presence Tracker**: `src/hooks/use-presence-tracker.ts` - Tracks view changes
+- **Admin Dashboard**: `src/features/admin/views/AdminDashboardView.tsx`
+
+### CRITICAL: Online Status Calculation
+The `status` column in user_presence is NOT reliable (always 'online'). 
+**Calculate online status in frontend** based on last_seen_at:
+```typescript
+const isOnline = new Date(activity.last_seen_at).getTime() > Date.now() - 90000 // 90 seconds
+```
+
+### CRITICAL: Snake_case to CamelCase Mapping
+Views return snake_case, frontend expects camelCase. Transform in queryFn:
+```typescript
+return {
+  totalUsers: data.total_users,
+  activeUsersNow: data.active_users_now,
+  // ... etc
+} as DashboardStats
+```
+
+### API Endpoints
+- `GET /api/admin/users/recent`: Returns recently registered users with avatar_url, organization_name
