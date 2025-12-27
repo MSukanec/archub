@@ -266,14 +266,14 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       
       if (error) throw error
       
-      const hourlyCounts = new Array(24).fill(0)
+      const hourlyCounts: number[] = new Array(24).fill(0)
       
       (data as any[] || []).forEach((row: any) => {
         const hour = new Date(row.entered_at).getHours()
         hourlyCounts[hour]++
       })
       
-      return hourlyCounts.map((count: number, hour: number) => ({
+      return (hourlyCounts as any).map((count: number, hour: number) => ({
         hour,
         hourLabel: `${hour.toString().padStart(2, '0')}:00`,
         sessions: count
@@ -310,11 +310,11 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
             total_seconds: 0
           })
         }
-        const user = userMap.get(userId)
+        const user = userMap.get(userId) as any
         if (user) user.total_seconds += row.duration_seconds || 0
       })
       
-      return Array.from(userMap.values() as any[])
+      return Array.from((userMap as any).values())
         .sort((a: any, b: any) => b.total_seconds - a.total_seconds)
         .slice(0, 8)
     },

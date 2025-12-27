@@ -60,6 +60,12 @@ Preferred communication style: Simple, everyday language.
 - **KPI System (Headless)**: Centralized calculation logic in `/lib/kpis.ts` with automatic refetching.
 - **Subscription & Billing System**: Comprehensive management of plans, payments, billing cycles, proration, and cron jobs.
 - **Internationalization (i18n) System**: Lightweight locale system in `src/lib/i18n/` with `I18nProvider`, `useI18n` hook, and typed translations.
+- **User Acquisition Tracking (Complete)**: 
+  - Frontend: `src/lib/acquisition.ts` captures UTM params at app load, stored in localStorage
+  - Email/Password Signup: Sends acquisition data via `options.data` to Supabase Auth → backend `step_create_user_acquisition()` inserts into `user_acquisition` table ✅
+  - Google OAuth: Saves acquisition data in sessionStorage, then after OAuth redirect + auth confirmation, calls `POST /api/user/acquisition` endpoint to create record ✅
+  - Endpoint: `server/routes/acquisition.ts` - handles POST /api/user/acquisition, calls Supabase RPC `step_create_user_acquisition`
+  - Data accepted: utm_source, utm_medium, utm_campaign, utm_content, landing_page, referrer (any values allowed, cleaned to lowercase)
 - **Table Component Architecture**: Modular table system in `src/components/shared/table/` with separate components and hooks for sorting, filtering, pagination, and selection.
 - **Operations Center (Admin Ops)**: Enterprise-grade monitoring and incident management at `/admin/ops`.
 - **Badge Semantic Architecture**: All badges use a semantic color system.

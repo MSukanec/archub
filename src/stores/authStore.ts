@@ -57,13 +57,37 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
 
       // Set up auth state change listener
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
         // Silently handle auth state changes - no console log
         
         if (event === 'SIGNED_OUT' || !session?.user) {
           set({ user: null, loading: false });
         } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           set({ user: session.user, loading: false });
+          
+          // Si hay datos de adquisición pendientes (de OAuth), guardarlos ahora
+          if (event === 'SIGNED_IN' && session?.user) {
+            const pendingAcquisition = sessionStorage.getItem('pending_user_acquisition');
+            if (pendingAcquisition) {
+              try {
+                const acquisitionData = JSON.parse(pendingAcquisition);
+                // Enviar al endpoint para crear el registro de adquisición
+                await fetch('/api/user/acquisition', {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${session.access_token}`,
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(acquisitionData)
+                }).catch(() => {}); // Fire and forget
+                
+                // Limpiar sessionStorage
+                sessionStorage.removeItem('pending_user_acquisition');
+              } catch (err) {
+                // Silently handle acquisition save errors
+              }
+            }
+          }
         }
       });
       
@@ -131,7 +155,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true });
 
     try {
+      // Guardar datos de adquisición en sessionStorage ANTES de OAuth
+      // (se recuperarán después del redirect de Google)
       const acquisitionData = getAcquisitionDataForSignup();
+      sessionStorage.setItem('pending_user_acquisition', JSON.stringify(acquisitionData));
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',

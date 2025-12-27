@@ -31,10 +31,14 @@ import { registerFounderRoutes } from './routes/founders';
 import { registerForumRoutes } from './routes/forum';
 import { registerPinsRoutes } from './routes/pins';
 import { registerExtensionRoutes } from './routes/extension';
+import { registerAcquisitionRoutes } from './routes/acquisition';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get shared dependencies
   const deps = getRouteDeps();
+  
+  // Register acquisition routes (user acquisition tracking for OAuth)
+  registerAcquisitionRoutes(app, deps);
   
   // Register email routes (Resend integration)
   registerEmailRoutes(app, deps);
