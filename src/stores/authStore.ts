@@ -66,11 +66,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           set({ user: session.user, loading: false });
           
           // Si hay datos de adquisición pendientes (de OAuth), guardarlos ahora
+          // Prevención de duplicados: verificar que no se haya enviado ya
           if (event === 'SIGNED_IN' && session?.user) {
             const pendingAcquisition = sessionStorage.getItem('pending_user_acquisition');
-            if (pendingAcquisition) {
+            const acquisitionSent = sessionStorage.getItem('acquisition_sent');
+            
+            if (pendingAcquisition && !acquisitionSent) {
               try {
                 const acquisitionData = JSON.parse(pendingAcquisition);
+                
+                // Marcar como enviado ANTES de hacer el fetch (previene duplicados)
+                sessionStorage.setItem('acquisition_sent', 'true');
+                
                 // Enviar al endpoint para crear el registro de adquisición
                 await fetch('/api/user/acquisition', {
                   method: 'POST',
@@ -81,8 +88,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                   body: JSON.stringify(acquisitionData)
                 }).catch(() => {}); // Fire and forget
                 
-                // Limpiar sessionStorage
+                // Limpiar sessionStorage (es seguro después de marcar como enviado)
                 sessionStorage.removeItem('pending_user_acquisition');
+                sessionStorage.removeItem('acquisition_sent');
               } catch (err) {
                 // Silently handle acquisition save errors
               }

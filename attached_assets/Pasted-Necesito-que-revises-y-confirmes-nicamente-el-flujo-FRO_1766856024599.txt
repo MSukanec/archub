@@ -1,0 +1,139 @@
+Necesito que revises y confirmes únicamente el flujo FRONTEND de user acquisition.
+NO toques Supabase, SQL, funciones ni triggers.
+
+Objetivo
+
+Capturar correctamente datos de adquisición (UTMs + contexto) tanto para:
+
+Signup con email/password
+
+Signup con Google OAuth
+
+Y enviarlos una sola vez al backend.
+
+Reglas clave
+
+El frontend NO calcula ni infiere nada
+
+El frontend solo captura, guarda y envía
+
+El backend decide qué guardar
+
+Email / Password Signup
+
+Verificar que:
+
+Al cargar la app:
+
+Se capturen desde la URL:
+
+utm_source
+
+utm_medium
+
+utm_campaign
+
+utm_content
+
+Se capture también:
+
+landing_page (window.location.pathname)
+
+referrer (document.referrer)
+
+Estos datos:
+
+Se guarden temporalmente (localStorage o sessionStorage)
+
+Se envíen en options.data al hacer signup
+
+Si no hay UTMs:
+
+source = "direct"
+
+resto = null
+
+Google OAuth Signup (parte crítica)
+
+Implementar / verificar este flujo EXACTO:
+
+Antes del redirect a Google
+
+Capturar UTMs + landing_page + referrer
+
+Guardarlos en sessionStorage
+
+NO perderlos al redirigir
+
+Después del redirect (SIGNED_IN)
+
+Detectar evento SIGNED_IN
+
+Leer acquisition data desde sessionStorage
+
+Llamar UNA SOLA VEZ a:
+
+POST /api/user/acquisition
+
+
+NO enviar user_id desde el frontend
+
+Limpiar sessionStorage inmediatamente después del POST exitoso
+
+Prevención de duplicados (frontend)
+
+Asegurar que:
+
+Si el usuario refresca la página
+
+O si el evento SIGNED_IN se dispara más de una vez
+
+👉 NO se vuelva a llamar al endpoint
+
+Sugerencias válidas:
+
+Flag en sessionStorage tipo acquisition_sent = true
+
+O borrar acquisition data inmediatamente tras envío
+
+Convenciones de datos (frontend)
+
+source:
+
+utm_source || "direct"
+
+medium:
+
+utm_medium || null
+
+campaign:
+
+utm_campaign || null
+
+content:
+
+utm_content || null
+
+landing_page:
+
+pathname real
+
+referrer:
+
+document.referrer || null
+
+Entregable esperado
+
+Confirmación de que:
+
+Email/password funciona
+
+Google OAuth funciona
+
+No hay doble envío
+
+Ajustes mínimos si detectás riesgos
+
+Código claro, sin hardcodeos por página
+
+NO tocar backend ni Supabase.
