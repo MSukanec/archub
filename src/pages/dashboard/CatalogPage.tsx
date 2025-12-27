@@ -4,11 +4,11 @@ import { LabLayout } from "@/layouts/lab/LabLayout"
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { BarChart3, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TaskListView } from '@/features/tasks'
-import MaterialList from './material-costs/MaterialList'
-import LaborList from './LaborList'
+import MaterialList from '@/pages/professional/analysis/material-costs/MaterialList'
+import LaborList from '@/pages/professional/analysis/LaborList'
 
 const ANALYSIS_TABS = [
   { id: 'tasks', label: 'Tareas' },
@@ -16,7 +16,7 @@ const ANALYSIS_TABS = [
   { id: 'materials', label: 'Materiales' },
 ]
 
-export default function Analysis() {
+export default function CatalogPage() {
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
@@ -139,9 +139,9 @@ export default function Analysis() {
   }
 
   const headerProps = {
-    title: "Análisis de Costos",
-    description: "Crea y gestiona análisis de costos para tareas, materiales y mano de obra.",
-    icon: BarChart3,
+    title: "Catálogo Técnico",
+    description: "Explora el catálogo técnico de tareas, materiales y mano de obra.",
+    icon: Plus,
     organizationId,
     showMembers: true,
     actionButton: getActionButton(),

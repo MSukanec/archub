@@ -33,6 +33,7 @@ Preferred communication style: Simple, everyday language.
 ### System Design Choices
 - **Module Architecture**: Feature-Sliced Design for core modules (PROJECTS, SUBCONTRACTS, PERSONNEL, CLIENTS, FINANCES, CAPITAL, LEARNING, MEDIA, SITELOG, MOODBOARD, TASKS, etc.).
 - **TASKS Module**: Consolidated feature in `src/features/tasks/` with barrel exports. Contains 18 hooks, 8 modals, 15 components, 3 views. Accessible via project sidebar at `/project/tasks` (currently restricted as `coming_soon`). Pattern reference: GENERAL-COSTS feature.
+- **Technical Catalog (Catálogo Técnico)**: Page at `src/pages/dashboard/CatalogPage.tsx`, accessible via `/technical-catalog` from Organization sidebar. Shows task catalog, materials, and labor cost analysis. Accessible via "Catálogo Técnico" button in GESTIÓN section (below Contactos).
 - **Page Architecture (3-Layer Pattern)**: Clean separation between **Page**, **Layout**, and **View**. Pages end with `*Page.tsx` and Views with `*View.tsx`.
 - **Lab Layout (3-Level Mega-Menu)**: Enterprise navigation with context switcher, page selector, and tab selector via hover-based full-width dropdowns.
 - **Lab Layout Drawer System**: Right-side drawer component (`LabDrawer`) for forms and page-specific content, managed via `useLabDrawerStore`.

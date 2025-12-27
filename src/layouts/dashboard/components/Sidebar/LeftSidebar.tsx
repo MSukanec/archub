@@ -235,12 +235,12 @@ export function LeftSidebar() {
         { id: 'basic-data', label: 'Datos Básicos', icon: Building, href: '/organization/basic-data' },
         { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects' },
         { id: 'contacts', label: 'Contactos', icon: LuContact, href: '/contacts' },
+        { id: 'catalog', label: 'Catálogo Técnico', icon: BookOpen, href: '/technical-catalog' },
         { id: 'settings', label: 'Ajustes', icon: Settings, href: '/organization/settings' },
         { type: 'section-header', id: 'section-finanzas', label: 'Finanzas' },
         { id: 'finances-unified', label: 'Finanzas', icon: DollarSign, href: '/finances' },
         { id: 'capital', label: 'Capital', icon: HandHeart, href: '/organization/capital' },
         { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs' },
-        { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', restricted: 'lab_user' },
       ];
     } else if (sidebarLevel === 'project' && selectedProjectId) {
       return [

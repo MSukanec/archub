@@ -89,7 +89,7 @@ import AdminOps from "@/pages/admin/ops/AdminOps";
 const Products = lazy(() => import("@/pages/providers/products/Products"));
 
 // Analysis Pages
-import Analysis from "@/pages/professional/analysis/Analysis";
+import CatalogPage from "@/pages/dashboard/CatalogPage";
 import TaskView from "@/pages/professional/analysis/TaskView";
 import MaterialsView from "@/pages/professional/analysis/material-costs/MaterialsView";
 import GeneralCostsPage from "@/pages/dashboard/GeneralCostsPage";
@@ -239,7 +239,7 @@ function Router() {
         <Route path="/construction/logs" component={Sitelog} />
         <Route path="/construction/personnel" component={PersonnelPage} />
         <Route path="/construction/materials" component={Materials} />
-        <Route path="/analysis" component={Analysis} />
+        <Route path="/technical-catalog" component={CatalogPage} />
         <Route path="/analysis/:id" component={TaskView} />
         <Route path="/analysis/materials/:id" component={MaterialsView} />
         
