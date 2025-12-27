@@ -541,19 +541,26 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
               </div>
             ) : recentUsers && recentUsers.length > 0 ? (
               <div className="space-y-2">
-                {recentUsers.slice(0, 10).map((user: any, idx: number) => (
-                  <div key={user.id || idx} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                    <Avatar className="h-7 w-7 flex-shrink-0">
-                      <AvatarImage src={user.avatar_url || undefined} />
-                      <AvatarFallback className="text-xs">{user.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-xs truncate">{user.full_name || user.email}</p>
-                      {user.organization_name && <p className="text-xs text-muted-foreground truncate">{user.organization_name}</p>}
-                      <p className="text-xs text-muted-foreground">{format(new Date(user.created_at), 'dd MMM', { locale: es })}</p>
+                {recentUsers.slice(0, 10).map((user: any, idx: number) => {
+                  const acquisitionSource = user.acquisition?.source || 'directo';
+                  const sourceLabel = acquisitionSource === 'directo' ? 'Directo' :
+                    acquisitionSource.charAt(0).toUpperCase() + acquisitionSource.slice(1);
+                  return (
+                    <div key={user.id || idx} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                      <Avatar className="h-7 w-7 flex-shrink-0">
+                        <AvatarImage src={user.avatar_url || undefined} />
+                        <AvatarFallback className="text-xs">{user.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-xs truncate">{user.full_name || user.email}</p>
+                        {user.organization_name && <p className="text-xs text-muted-foreground truncate">{user.organization_name}</p>}
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(user.created_at), 'dd MMM', { locale: es })} · {sourceLabel}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-8">Sin datos</p>
