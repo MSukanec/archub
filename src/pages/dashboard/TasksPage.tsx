@@ -5,7 +5,7 @@ import { useGlobalModalStore } from '@/components/modal';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectContext } from '@/stores/projectContext';
 import { ListTodo, Plus } from 'lucide-react';
-import { TaskListView } from '@/features/tasks';
+import { TasksView } from '@/features/tasks';
 
 export default function TasksPage() {
   const { setSidebarContext } = useNavigationStore();
@@ -36,7 +36,7 @@ export default function TasksPage() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        <TaskListView />
+        <TasksView />
       </div>
     </Layout>
   );

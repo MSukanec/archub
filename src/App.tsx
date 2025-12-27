@@ -88,10 +88,10 @@ import AdminOps from "@/pages/admin/ops/AdminOps";
 // Provider Pages (Lazy Loaded - solo admins las usan)
 const Products = lazy(() => import("@/pages/providers/products/Products"));
 
-// Analysis Pages
+// Catalog Pages
 import CatalogPage from "@/pages/dashboard/CatalogPage";
-import TaskView from "@/pages/professional/analysis/TaskView";
-import MaterialsView from "@/pages/professional/analysis/material-costs/MaterialsView";
+import TaskDetailPage from "@/pages/dashboard/TaskDetailPage";
+import MaterialsView from "@/pages/professional/catalog/material-costs/MaterialsView";
 import GeneralCostsPage from "@/pages/dashboard/GeneralCostsPage";
 
 // Community Pages
@@ -240,7 +240,7 @@ function Router() {
         <Route path="/construction/personnel" component={PersonnelPage} />
         <Route path="/construction/materials" component={Materials} />
         <Route path="/technical-catalog" component={CatalogPage} />
-        <Route path="/analysis/:id" component={TaskView} />
+        <Route path="/analysis/:id" component={TaskDetailPage} />
         <Route path="/analysis/materials/:id" component={MaterialsView} />
         
         {/* Community Routes */}

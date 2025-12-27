@@ -6,9 +6,9 @@ import { useGlobalModalStore } from '@/components/modal'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { TaskListView } from '@/features/tasks'
-import MaterialList from '@/pages/professional/analysis/material-costs/MaterialList'
-import LaborList from '@/pages/professional/analysis/LaborList'
+import { TasksView } from '@/features/tasks'
+import MaterialList from '@/pages/professional/catalog/material-costs/MaterialList'
+import LaborList from '@/pages/professional/catalog/LaborList'
 
 const ANALYSIS_TABS = [
   { id: 'tasks', label: 'Tareas' },
@@ -45,13 +45,13 @@ export default function CatalogPage() {
   const renderView = () => {
     switch (activeTab) {
       case 'tasks':
-        return <TaskListView />
+        return <TasksView />
       case 'labor':
         return <LaborList onNewLabor={handleNewLabor} />
       case 'materials':
         return <MaterialList />
       default:
-        return <TaskListView />
+        return <TasksView />
     }
   }
 
