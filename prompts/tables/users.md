@@ -162,53 +162,6 @@ after INSERT on public.user_view_history
 for each row
 execute FUNCTION public.update_org_last_activity();
 
-## ÍNDICES AGREGADOS (ejecutados):
-
-create index IF not exists idx_user_view_history_user_id 
-  on public.user_view_history using btree (user_id);
-
-create index IF not exists idx_user_view_history_entered_at 
-  on public.user_view_history using btree (entered_at);
-
-create index IF not exists idx_user_view_history_user_entered 
-  on public.user_view_history using btree (user_id, entered_at);
-
-create index IF not exists idx_user_view_history_org 
-  on public.user_view_history using btree (organization_id);
-
-## FOREIGN KEYS CON CASCADE (ejecutadas):
-
--- FK organization_id ON DELETE CASCADE
--- FK user_id ON DELETE CASCADE
-
-## VISTAS OPTIMIZADAS PARA ANALYTICS:
-
-Todas las vistas excluyen automáticamente usuarios admin (role_id = 'd5606324-af8d-487e-8c8e-552511fce2a2')
-
-### Vista user_stats_summary_view
-Retorna KPIs consolidados: total_organizations, active_organizations, new_organizations_this_month, total_users, active_users_now, active_users_today, new_users_this_month, total_projects, new_projects_this_month, sessions_today, avg_session_duration
-
-### Vista user_engagement_by_view_view
-Retorna engagement por vista: view_name, session_count, avg_duration_seconds, avg_duration_minutes, last_activity_at (ordenado por duración promedio descendente)
-
-### Vista user_hourly_activity_view
-Retorna actividad por hora: hour, hour_label, session_count
-
-### Vista user_top_performers_view
-Retorna top 8 usuarios activos: user_id, full_name, avatar_url, session_count, total_seconds (ordenado por cantidad de sesiones)
-
-### Vista user_drop_off_view
-Retorna usuarios con baja actividad (1-2 sesiones): user_id, full_name, avatar_url, session_count, total_seconds
-
-### Vista user_monthly_growth_view
-Retorna crecimiento mensual de usuarios: month (YYYY-MM), new_users
-
-### Vista user_acquisition_distribution_view
-Retorna distribución de adquisición: acquisition_source (directo, google, facebook, etc), user_count (top 6)
-
-### Vista user_presence_activity_view
-Retorna últimas 20 actividades: user_id, full_name, last_seen_at, current_view, status
-
 ## Tabla USERS:
 
 create table public.users (
