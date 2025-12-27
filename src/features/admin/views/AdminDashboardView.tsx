@@ -43,7 +43,27 @@ function formatViewName(view: string | null): string {
     'admin_support': 'Admin - Soporte',
   };
   
-  return viewMap[view] || view.replace(/_/g, ' ');
+  if (viewMap[view]) return viewMap[view]
+  
+  const coursePatterns = [
+    /^courses_(.+)$/,
+    /^learning_course_(.+)$/,
+    /^course_(.+)$/
+  ]
+  
+  for (const pattern of coursePatterns) {
+    const match = view.match(pattern)
+    if (match) {
+      const slug = match[1]
+      const courseName = slug
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ')
+      return `Curso - ${courseName}`
+    }
+  }
+  
+  return view.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
 }
 
 function formatDuration(seconds: number): string {
@@ -85,6 +105,8 @@ interface AdminDashboardViewProps {
   selectedPeriod?: PeriodFilter
 }
 
+const ADMIN_ROLE_ID = 'd5606324-af8d-487e-8c8e-552511fce2a2'
+
 export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDashboardViewProps) {
   const [accentColor, setAccentColor] = useState<string>('#8b5cf6')
 
@@ -106,9 +128,30 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
     }
   };
 
+  // Obtener IDs de usuarios admin para excluirlos de las métricas
+  const { data: adminUserIds } = useQuery({
+    queryKey: ['admin-user-ids'],
+    queryFn: async () => {
+      if (!supabase) return []
+      const { data, error } = await supabase
+        .from('users')
+        .select('id')
+        .eq('role_id', ADMIN_ROLE_ID)
+      if (error) {
+        console.error('Error fetching admin users:', error)
+        return []
+      }
+      return (data || []).map((u: any) => u.id)
+    },
+    staleTime: 1000 * 60 * 10, // Cache por 10 minutos
+    enabled: !!supabase
+  })
+  
+  const adminIdsSet = new Set(adminUserIds || [])
+
   // KPI Data - Usuarios y Organizaciones
   const { data: stats, isLoading: loadingStats } = useQuery({
-    queryKey: ['admin-dashboard-stats'],
+    queryKey: ['admin-dashboard-stats', adminUserIds],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available')
 
@@ -116,6 +159,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       const thisMonthStart = startOfMonth(now)
       const ninetySecondsAgo = new Date(now.getTime() - 90000)
       const todayStart = startOfDay(now)
+      const adminIds = adminUserIds || []
 
       const [
         totalOrgsResult,
@@ -133,8 +177,8 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         supabase.from('organizations').select('*', { count: 'exact', head: true }).eq('is_deleted', false),
         supabase.from('organizations').select('*', { count: 'exact', head: true }).eq('is_deleted', false).eq('is_active', true),
         supabase.from('organizations').select('*', { count: 'exact', head: true }).eq('is_deleted', false).gte('created_at', thisMonthStart.toISOString()),
-        supabase.from('users').select('*', { count: 'exact', head: true }),
-        supabase.from('users').select('*', { count: 'exact', head: true }).gte('created_at', thisMonthStart.toISOString()),
+        supabase.from('users').select('*', { count: 'exact', head: true }).neq('role_id', ADMIN_ROLE_ID),
+        supabase.from('users').select('*', { count: 'exact', head: true }).neq('role_id', ADMIN_ROLE_ID).gte('created_at', thisMonthStart.toISOString()),
         supabase.from('user_presence').select('user_id').gte('last_seen_at', ninetySecondsAgo.toISOString()),
         supabase.from('user_view_history').select('user_id').gte('entered_at', todayStart.toISOString()),
         supabase.from('projects').select('*', { count: 'exact', head: true }),
@@ -143,8 +187,17 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         supabase.from('user_view_history').select('duration_seconds').gte('entered_at', todayStart.toISOString()).not('duration_seconds', 'is', null)
       ])
 
-      const uniqueActiveUsers = new Set(activeUsersResult.data?.map(u => u.user_id) || [])
-      const uniqueActiveUsersToday = new Set(activeUsersTodayResult.data?.map(u => u.user_id) || [])
+      const adminIdsSetLocal = new Set(adminIds)
+      const uniqueActiveUsers = new Set(
+        (activeUsersResult.data || [])
+          .map(u => u.user_id)
+          .filter(id => !adminIdsSetLocal.has(id))
+      )
+      const uniqueActiveUsersToday = new Set(
+        (activeUsersTodayResult.data || [])
+          .map(u => u.user_id)
+          .filter(id => !adminIdsSetLocal.has(id))
+      )
       const avgDuration = avgDurationResult.data && avgDurationResult.data.length > 0
         ? avgDurationResult.data.reduce((sum, row) => sum + (row.duration_seconds || 0), 0) / avgDurationResult.data.length
         : 0
@@ -163,14 +216,14 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         avgSessionDuration: avgDuration
       } as DashboardStats
     },
-    enabled: !!supabase,
+    enabled: !!supabase && adminUserIds !== undefined,
     staleTime: 30000,
     refetchInterval: 60000
   })
 
   // Últimas conexiones de usuarios - OPTIMIZADO
   const { data: recentActivity, isLoading: loadingActivity } = useQuery({
-    queryKey: ['recent-user-activity'],
+    queryKey: ['recent-user-activity', adminUserIds],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available')
 
@@ -183,11 +236,12 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
           users!inner(full_name)
         `)
         .order('last_seen_at', { ascending: false })
-        .limit(10)
+        .limit(20)
 
-      return data
+      const adminIdsSetLocal = new Set(adminUserIds || [])
+      return (data || []).filter((row: any) => !adminIdsSetLocal.has(row.user_id)).slice(0, 10)
     },
-    enabled: !!supabase,
+    enabled: !!supabase && adminUserIds !== undefined,
     staleTime: 15000,
     refetchInterval: 30000
   })
@@ -222,7 +276,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
 
   // Engagement por Vista
   const { data: engagementData, isLoading: loadingEngagement } = useQuery({
-    queryKey: ['admin-dashboard-engagement', selectedPeriod],
+    queryKey: ['admin-dashboard-engagement', selectedPeriod, adminUserIds],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available')
       
@@ -230,13 +284,16 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       
       const { data, error } = await supabase
         .from('user_view_history')
-        .select('view_name, duration_seconds')
+        .select('user_id, view_name, duration_seconds')
         .gte('entered_at', startDate.toISOString())
         .not('duration_seconds', 'is', null)
       
       if (error) throw error
       
-      const grouped = (data as any[] || []).reduce((acc: any, row: any) => {
+      const adminIdsSetLocal = new Set(adminUserIds || [])
+      const filteredData = (data as any[] || []).filter((row: any) => !adminIdsSetLocal.has(row.user_id))
+      
+      const grouped = filteredData.reduce((acc: any, row: any) => {
         if (!acc[row.view_name]) {
           acc[row.view_name] = { total: 0, count: 0 };
         }
@@ -255,12 +312,12 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         .sort((a, b) => b.avgSeconds - a.avgSeconds)
         .slice(0, 8)
     },
-    enabled: !!supabase
+    enabled: !!supabase && adminUserIds !== undefined
   })
 
   // Actividad por Hora
   const { data: hourlyData, isLoading: loadingHourly } = useQuery({
-    queryKey: ['admin-dashboard-hourly', selectedPeriod],
+    queryKey: ['admin-dashboard-hourly', selectedPeriod, adminUserIds],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available')
       
@@ -268,14 +325,17 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       
       const { data, error } = await supabase
         .from('user_view_history')
-        .select('entered_at')
+        .select('user_id, entered_at')
         .gte('entered_at', startDate.toISOString())
       
       if (error) throw error
       
+      const adminIdsSetLocal = new Set(adminUserIds || [])
+      const filteredData = (data as any[] || []).filter((row: any) => !adminIdsSetLocal.has(row.user_id))
+      
       const hourlyCounts = Array.from({ length: 24 }, () => 0)
       
-      (data as any[] || []).forEach((row: any) => {
+      filteredData.forEach((row: any) => {
         const hour = new Date(row.entered_at).getHours()
         hourlyCounts[hour]++
       })
@@ -286,16 +346,15 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         sessions: count
       }))
       
-      // Solo retornar si hay al menos alguna sesión
       const totalSessions = hourlyCounts.reduce((a, b) => a + b, 0)
       return totalSessions > 0 ? result : []
     },
-    enabled: !!supabase
+    enabled: !!supabase && adminUserIds !== undefined
   })
 
   // Top Usuarios (por cantidad de sesiones, no solo duración)
   const { data: topUsersData, isLoading: loadingTopUsers } = useQuery({
-    queryKey: ['admin-dashboard-top-users', selectedPeriod],
+    queryKey: ['admin-dashboard-top-users', selectedPeriod, adminUserIds],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available')
       
@@ -308,10 +367,12 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       
       if (error) throw error
       
+      const adminIdsSetLocal = new Set(adminUserIds || [])
       const userMap: Map<string, any> = new Map()
       
       (data as any[] || []).forEach((row: any) => {
         const userId = row.user_id
+        if (adminIdsSetLocal.has(userId)) return
         if (!userMap.has(userId)) {
           userMap.set(userId, {
             user_id: userId,
@@ -326,7 +387,6 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         }
       })
       
-      // Obtener datos de usuarios
       const userIds = Array.from(userMap.keys())
       if (userIds.length === 0) return []
       
@@ -346,12 +406,12 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         .sort((a: any, b: any) => b.session_count - a.session_count)
         .slice(0, 8)
     },
-    enabled: !!supabase
+    enabled: !!supabase && adminUserIds !== undefined
   })
 
   // Drop Off - Usuarios con bajo engagement (1-2 sesiones solamente)
   const { data: dropOffData, isLoading: loadingDropOff } = useQuery({
-    queryKey: ['admin-dashboard-dropoff', selectedPeriod],
+    queryKey: ['admin-dashboard-dropoff', selectedPeriod, adminUserIds],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available')
       
@@ -364,10 +424,12 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       
       if (error) throw error
       
+      const adminIdsSetLocal = new Set(adminUserIds || [])
       const userMap: Map<string, any> = new Map()
       
       (data as any[] || []).forEach((row: any) => {
         const userId = row.user_id
+        if (adminIdsSetLocal.has(userId)) return
         if (!userMap.has(userId)) {
           userMap.set(userId, {
             user_id: userId,
@@ -382,7 +444,6 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         }
       })
       
-      // Obtener datos de usuarios
       const userIds = Array.from(userMap.keys())
       if (userIds.length === 0) return []
       
@@ -393,7 +454,6 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       
       const usersById = new Map((usersData || []).map((u: any) => [u.id, u]))
       
-      // Drop off = usuarios con 1-2 sesiones (bajo engagement)
       return Array.from(userMap.values())
         .map((u: any) => ({
           ...u,
@@ -404,7 +464,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         .sort((a: any, b: any) => a.session_count - b.session_count)
         .slice(0, 8)
     },
-    enabled: !!supabase
+    enabled: !!supabase && adminUserIds !== undefined
   })
 
   // Crecimiento de Usuarios por Mes
@@ -416,6 +476,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       const { data, error } = await supabase
         .from('users')
         .select('created_at')
+        .neq('role_id', ADMIN_ROLE_ID)
         .order('created_at', { ascending: true })
       
       if (error) throw error
@@ -431,26 +492,29 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       return Array.from(monthlyData.entries())
         .map(([month, value]) => ({ month, value }))
         .sort((a, b) => a.month.localeCompare(b.month))
-        .slice(-12) // Últimos 12 meses
+        .slice(-12)
     },
     enabled: !!supabase
   })
 
   // Distribución de Adquisición (UTM Sources)
   const { data: acquisitionData, isLoading: loadingAcquisition } = useQuery({
-    queryKey: ['admin-dashboard-acquisition'],
+    queryKey: ['admin-dashboard-acquisition', adminUserIds],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available')
       
       const { data, error } = await supabase
         .from('user_acquisition')
-        .select('source, medium')
+        .select('user_id, source, medium')
       
       if (error) throw error
       
+      const adminIdsSetLocal = new Set(adminUserIds || [])
+      const filteredData = (data as any[] || []).filter((row: any) => !adminIdsSetLocal.has(row.user_id))
+      
       const sourceMap: Map<string, number> = new Map()
       
-      (data as any[] || []).forEach((row: any) => {
+      filteredData.forEach((row: any) => {
         let source = row.source || row.medium || 'direct'
         if (source === 'unknown' || source === '') source = 'direct'
         const label = source === 'direct' ? 'Directo' : 
@@ -468,9 +532,9 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       return Array.from(sourceMap.entries())
         .map(([label, value]) => ({ label, value }))
         .sort((a, b) => b.value - a.value)
-        .slice(0, 6) // Top 6 fuentes
+        .slice(0, 6)
     },
-    enabled: !!supabase
+    enabled: !!supabase && adminUserIds !== undefined
   })
 
   if (loadingStats) {
