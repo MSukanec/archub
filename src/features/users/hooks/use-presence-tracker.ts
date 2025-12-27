@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { usePresenceStore } from '@/stores/presenceStore';
+import { useProjectContext } from '@/stores/projectContext';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -103,6 +104,7 @@ function mapRouteToView(path: string): string {
 export function usePresenceTracker() {
   const [location] = useLocation();
   const { setCurrentView } = usePresenceStore();
+  const { currentOrganizationId } = useProjectContext();
 
   useEffect(() => {
     // No trackear rutas públicas de auth
@@ -121,10 +123,12 @@ export function usePresenceTracker() {
         if (!session?.user) return; // Solo trackear usuarios autenticados
 
         // Cerrar vista anterior (si existe)
-        await supabase.rpc('analytics_exit_previous_view');
+        await supabase.rpc('analytics_exit_previous_view', { p_org_id: currentOrganizationId });
         
-        // Abrir nueva vista
-        await supabase.rpc('analytics_enter_view', { p_view: viewName });
+        // Abrir nueva vista (requiere org_id)
+        if (currentOrganizationId) {
+          await supabase.rpc('analytics_enter_view', { p_org_id: currentOrganizationId, p_view: viewName });
+        }
       } catch (error) {
         // Silenciar errores de analytics (no afectan la UX)
       }
@@ -135,5 +139,5 @@ export function usePresenceTracker() {
     
     // FASE 2: Presencia - Actualizar estado en tiempo real
     setCurrentView(viewName);
-  }, [location, setCurrentView]);
+  }, [location, setCurrentView, currentOrganizationId]);
 }
