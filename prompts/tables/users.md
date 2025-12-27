@@ -61,53 +61,6 @@ create table public.user_notifications (
 
 create index IF not exists user_notifications_user_idx on public.user_notifications using btree (user_id, read_at) TABLESPACE pg_default;
 
-## Tabla USER_DATA:
-
-create table public.user_data (
-  id uuid not null default gen_random_uuid (),
-  user_id uuid not null,
-  country uuid null,
-  created_at timestamp with time zone null default now(),
-  birthdate date null,
-  updated_at timestamp with time zone null default now(),
-  first_name text null,
-  last_name text null,
-  phone_e164 text null,
-  constraint user_profile_data_pkey primary key (id),
-  constraint user_data_id_key unique (id),
-  constraint user_data_user_id_key unique (user_id),
-  constraint user_data_country_fkey foreign KEY (country) references countries (id) on delete set null,
-  constraint user_profile_data_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
-) TABLESPACE pg_default;
-
-create trigger set_updated_at BEFORE
-update on user_data for EACH row
-execute FUNCTION update_updated_at_column ();
-
-create trigger trg_user_data_fill_user BEFORE INSERT on user_data for EACH row
-execute FUNCTION fill_user_data_user_id_from_auth ();
-
-## Tabla USER_NOTIFICATIONS:
-
-create table public.user_notifications (
-  id uuid not null default gen_random_uuid (),
-  user_id uuid not null,
-  notification_id uuid not null,
-  delivered_at timestamp with time zone not null default now(),
-  read_at timestamp with time zone null,
-  clicked_at timestamp with time zone null,
-  constraint user_notifications_pkey primary key (id),
-  constraint user_notifications_user_id_notification_id_key unique (user_id, notification_id),
-  constraint user_notifications_notification_id_fkey foreign KEY (notification_id) references notifications (id) on delete CASCADE,
-  constraint user_notifications_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
-) TABLESPACE pg_default;
-
-create index IF not exists user_notifications_user_idx on public.user_notifications using btree (user_id, read_at) TABLESPACE pg_default;
-
-create trigger trg_prevent_user_notifications_user_id_update BEFORE
-update on user_notifications for EACH row
-execute FUNCTION prevent_user_notifications_user_id_update ();
-
 ## Tabla USER_ORGANIZATION_PREFERENCES:
 
 create table public.user_organization_preferences (
