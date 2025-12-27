@@ -1,8 +1,6 @@
 export { TaskModal } from './TaskModal';
-export { TaskParameterFormModal } from './TaskParameterFormModal';
-export { TaskParameterOptionFormModal } from './TaskParameterOptionFormModal';
-export { TaskDivisionFormModal } from './TaskDivisionFormModal';
-export { TaskCategoryFormModal } from './TaskCategoryFormModal';
+export { TaskParameterModal, TaskParameterFormModal } from './TaskParameterModal';
+export { TaskParameterOptionModal, TaskParameterOptionFormModal } from './TaskParameterOptionModal';
+export { TaskDivisionModal, TaskDivisionFormModal } from './TaskDivisionModal';
+export { TaskCategoryModal, TaskCategoryFormModal } from './TaskCategoryModal';
 export { TaskMultiModal } from './TaskMultiModal';
-export { ConstructionTaskScheduleModal } from './ConstructionTaskScheduleModal';
-export { BudgetTaskFormModal } from './BudgetTaskFormModal';

@@ -255,7 +255,7 @@ export function ConstructionTaskScheduleModal({
               <Calendar
                 mode="single"
                 selected={watch('start_date') ? new Date(watch('start_date')!) : undefined}
-                onSelect={(date) => {
+                onSelect={(date: Date | undefined) => {
                   if (date) {
                     setValue('start_date', date.toISOString().split('T')[0]);
                   }

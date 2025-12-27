@@ -13,8 +13,12 @@ export { RenewInsuranceFormModal } from './construction/RenewInsuranceFormModal'
 export { BudgetItemModal } from './construction/tasks/BudgetItemModal';
 export { CostModal } from './construction/tasks/CostModal';
 
-// Task modals - re-exported from @/features/tasks
-export { BudgetTaskFormModal, ConstructionTaskScheduleModal, TaskMultiModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, TaskModal } from '@/features/tasks';
+// Task modals - re-exported from @/features/tasks (active modals)
+export { TaskMultiModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, TaskModal } from '@/features/tasks';
+
+// Legacy task modals (moved from tasks feature)
+export { BudgetTaskFormModal } from './BudgetTaskFormModal';
+export { ConstructionTaskScheduleModal } from './ConstructionTaskScheduleModal';
 
 // Admin Modals (that still remain in legacy)
 export { ParameterVisibilityConfigModal } from './admin/ParameterVisibilityConfigModal';
