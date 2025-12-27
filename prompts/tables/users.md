@@ -136,9 +136,22 @@ create table public.user_view_history (
   duration_seconds integer null,
   created_at timestamp with time zone null default now(),
   constraint user_view_history_pkey primary key (id),
-  constraint user_view_history_organization_id_fkey foreign KEY (organization_id) references organizations (id),
-  constraint user_view_history_user_id_fkey foreign KEY (user_id) references users (id)
+  constraint user_view_history_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint user_view_history_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
 ) TABLESPACE pg_default;
+
+create index IF not exists idx_user_view_history_user_id on public.user_view_history using btree (user_id) TABLESPACE pg_default;
+
+create index IF not exists idx_user_view_history_entered_at on public.user_view_history using btree (entered_at) TABLESPACE pg_default;
+
+create index IF not exists idx_user_view_history_user_entered on public.user_view_history using btree (user_id, entered_at) TABLESPACE pg_default;
+
+create index IF not exists idx_user_view_history_org on public.user_view_history using btree (organization_id) TABLESPACE pg_default;
+
+create trigger trg_update_org_last_activity
+after INSERT on public.user_view_history
+for each row
+execute FUNCTION public.update_org_last_activity();
 
 ## Tabla USERS:
 
