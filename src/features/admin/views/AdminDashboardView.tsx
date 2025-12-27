@@ -904,51 +904,6 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
           </AppCardContent>
         </AppCard>
       </div>
-
-      {/* Usuarios con Mayor Uso */}
-      <AppCard 
-        title="Usuarios con Mayor Uso" 
-        icon={<Clock />}
-        description={`Top usuarios por tiempo en plataforma (${periodLabel})`}
-        data-testid="card-top-users"
-      >
-        <AppCardContent>
-          {loadingTopUsers ? (
-            <Skeleton className="h-[200px]" />
-          ) : topUsersData && topUsersData.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Usuario</TableHead>
-                  <TableHead className="text-right">Tiempo Total</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {topUsersData?.map((user: any, idx: number) => (
-                  <TableRow key={user.user_id} data-testid={`row-top-user-${idx}`}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={user.avatar_url || undefined} />
-                          <AvatarFallback>{user.full_name?.charAt(0) || 'U'}</AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium">{user.full_name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right font-mono">
-                      {formatDuration(user.total_seconds)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="h-[150px] flex items-center justify-center text-muted-foreground">
-              Sin datos
-            </div>
-          )}
-        </AppCardContent>
-      </AppCard>
     </div>
   )
 }
