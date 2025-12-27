@@ -280,16 +280,20 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         hourlyCounts[hour]++
       })
       
-      return hourlyCounts.map((count: number, hour: number) => ({
+      const result = hourlyCounts.map((count: number, hour: number) => ({
         hour,
         hourLabel: `${hour.toString().padStart(2, '0')}:00`,
         sessions: count
       }))
+      
+      // Solo retornar si hay al menos alguna sesión
+      const totalSessions = hourlyCounts.reduce((a, b) => a + b, 0)
+      return totalSessions > 0 ? result : []
     },
     enabled: !!supabase
   })
 
-  // Top Usuarios
+  // Top Usuarios (por cantidad de sesiones, no solo duración)
   const { data: topUsersData, isLoading: loadingTopUsers } = useQuery({
     queryKey: ['admin-dashboard-top-users', selectedPeriod],
     queryFn: async () => {
@@ -301,7 +305,6 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         .from('user_view_history')
         .select(`user_id, duration_seconds, users!inner(full_name, avatar_url)`)
         .gte('entered_at', startDate.toISOString())
-        .not('duration_seconds', 'is', null)
       
       if (error) throw error
       
@@ -326,13 +329,13 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
       })
       
       return Array.from(userMap.values())
-        .sort((a: any, b: any) => b.total_seconds - a.total_seconds)
+        .sort((a: any, b: any) => b.session_count - a.session_count)
         .slice(0, 8)
     },
     enabled: !!supabase
   })
 
-  // Drop Off - Usuarios con bajo engagement
+  // Drop Off - Usuarios con bajo engagement (1-2 sesiones solamente)
   const { data: dropOffData, isLoading: loadingDropOff } = useQuery({
     queryKey: ['admin-dashboard-dropoff', selectedPeriod],
     queryFn: async () => {
@@ -344,7 +347,6 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         .from('user_view_history')
         .select(`user_id, duration_seconds, users!inner(full_name, avatar_url)`)
         .gte('entered_at', startDate.toISOString())
-        .not('duration_seconds', 'is', null)
       
       if (error) throw error
       
@@ -368,9 +370,10 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
         }
       })
       
-      // Drop off = 1 sesión o < 300 segundos (5 minutos)
+      // Drop off = usuarios con 1-2 sesiones (bajo engagement)
       return Array.from(userMap.values())
-        .filter((u: any) => u.session_count === 1 || u.total_seconds < 300)
+        .filter((u: any) => u.session_count <= 2)
+        .sort((a: any, b: any) => a.session_count - b.session_count)
         .slice(0, 8)
     },
     enabled: !!supabase
@@ -621,7 +624,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
             ) : recentActivity && recentActivity.length > 0 ? (
               <>
                 <div className="space-y-2">
-                  {recentActivity.map((activity: any) => {
+                  {recentActivity.slice(0, 10).map((activity: any) => {
                     const lastSeenTime = new Date(activity.last_seen_at).getTime()
                     const now = Date.now()
                     const diffMs = now - lastSeenTime
@@ -683,8 +686,8 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
               </div>
             ) : recentUsers && recentUsers.length > 0 ? (
               <>
-                <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                  {recentUsers.map((user: any) => (
+                <div className="space-y-2">
+                  {recentUsers.slice(0, 10).map((user: any) => (
                     <div key={user.id} className="flex items-start justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold truncate text-sm">{user.full_name || user.email}</p>
@@ -750,7 +753,7 @@ export default function AdminDashboardView({ selectedPeriod = 'all' }: AdminDash
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-xs truncate">{user.full_name}</p>
-                      <p className="text-xs text-muted-foreground">{formatDuration(user.total_seconds)}</p>
+                      <p className="text-xs text-muted-foreground">{user.session_count} sesiones</p>
                     </div>
                     <Badge variant="status-completed" className="text-xs">#{idx + 1}</Badge>
                   </div>
