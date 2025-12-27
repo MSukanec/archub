@@ -20,26 +20,38 @@ function mapRouteToView(path: string): string {
   if (path.startsWith('/organization/projects')) return 'organization_projects';
   if (path.startsWith('/organization/preferences')) return 'organization_preferences';
   if (path.startsWith('/organization/activity')) return 'organization_activity';
+  if (path.startsWith('/organization/members')) return 'organization_members';
   if (path.startsWith('/organization')) return 'organization';
   
   // Project routes
   if (path.startsWith('/project/dashboard')) return 'project_dashboard';
+  if (path.startsWith('/project/details')) return 'project_details';
+  if (path.startsWith('/project/gallery')) return 'project_gallery';
+  if (path.startsWith('/project/documents')) return 'project_documents';
+  if (path.startsWith('/project/tasks')) return 'project_tasks';
+  if (path.startsWith('/project/team')) return 'project_team';
+  if (path.startsWith('/project/moodboard')) return 'moodboard';
+  if (path.startsWith('/project/sitelog')) return 'sitelog';
   if (path.startsWith('/project')) return 'project_data';
+  
+  // Financial & Budget routes
   if (path.startsWith('/budgets')) return 'budgets';
   if (path.startsWith('/construction')) return 'construction';
-  
-  // Contacts & Finances
   if (path.startsWith('/contacts')) return 'contacts';
   if (path.startsWith('/organization/capital')) return 'capital';
   if (path.startsWith('/general-costs')) return 'general_costs';
   if (path.startsWith('/analysis')) return 'analysis';
   
-  // Learning
+  // Learning routes - Capture course slugs
+  if (path.match(/^\/learning\/course\/[^/]+$/)) {
+    const slug = path.split('/').pop();
+    return `cursos_${slug}`;
+  }
   if (path.startsWith('/learning/dashboard')) return 'learning_dashboard';
   if (path.startsWith('/learning/courses')) return 'learning_courses';
   if (path.startsWith('/learning')) return 'learning';
   
-  // Admin
+  // Admin routes
   if (path.startsWith('/admin/dashboard')) return 'admin_dashboard';
   if (path.startsWith('/admin/administration')) return 'admin_administration';
   if (path.startsWith('/admin/support')) return 'admin_support';
@@ -49,22 +61,22 @@ function mapRouteToView(path: string): string {
   if (path.startsWith('/admin/tasks')) return 'admin_tasks';
   if (path.startsWith('/admin/general')) return 'admin_general';
   if (path.startsWith('/admin/layout')) return 'admin_layout';
+  if (path.startsWith('/admin/ops')) return 'admin_ops';
   if (path.startsWith('/admin')) return 'admin';
   
-  // Providers
+  // Provider routes
   if (path.startsWith('/providers/products')) return 'provider_products';
+  if (path.startsWith('/providers')) return 'providers';
   
-  // Notifications
+  // Other common routes
   if (path.startsWith('/notifications')) return 'notifications';
-  
-  // Calendar
   if (path.startsWith('/calendar')) return 'calendar';
-  
-  // Media
   if (path.startsWith('/media')) return 'media';
-  
-  // Clients
   if (path.startsWith('/clients')) return 'clients';
+  if (path.startsWith('/tasks')) return 'tasks';
+  if (path.startsWith('/personnel')) return 'personnel';
+  if (path.startsWith('/subcontracts')) return 'subcontracts';
+  if (path.startsWith('/founders')) return 'founders';
   
   // Public routes (no tracking)
   if (path === '/login' || path === '/register' || path === '/forgot-password') {

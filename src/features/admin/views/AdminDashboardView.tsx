@@ -21,26 +21,68 @@ function formatViewName(view: string | null): string {
   
   const viewMap: Record<string, string> = {
     'home': 'Inicio',
-    'organization_dashboard': 'Dashboard Organización',
+    'landing': 'Página de Inicio',
+    'profile': 'Mi Perfil',
+    'auth': 'Autenticación',
+    'onboarding': 'Onboarding',
+    'pricing': 'Planes de Precios',
+    
+    // Organization
+    'organization_dashboard': 'Dashboard de Organización',
     'organization_projects': 'Proyectos',
-    'preferences': 'Preferencias',
-    'organization_activity': 'Actividad',
+    'organization_preferences': 'Preferencias de Organización',
+    'organization_activity': 'Actividad de Organización',
+    'organization_members': 'Miembros de Organización',
     'organization': 'Organización',
-    'project_dashboard': 'Dashboard Proyecto',
+    
+    // Project
+    'project_dashboard': 'Dashboard del Proyecto',
+    'project_details': 'Detalles del Proyecto',
+    'project_gallery': 'Galería del Proyecto',
+    'project_documents': 'Documentos del Proyecto',
+    'project_tasks': 'Tareas del Proyecto',
+    'project_team': 'Equipo del Proyecto',
     'project_data': 'Datos del Proyecto',
+    'moodboard': 'Moodboard',
+    'sitelog': 'Registro del Sitio',
+    
+    // Financial & Budget
     'budgets': 'Presupuestos',
     'construction': 'Construcción',
     'contacts': 'Contactos',
-    'movements': 'Movimientos',
     'capital': 'Capital',
     'general_costs': 'Gastos Generales',
     'analysis': 'Análisis',
-    'learning_dashboard': 'Dashboard Capacitaciones',
+    
+    // Learning
+    'learning_dashboard': 'Dashboard de Capacitaciones',
     'learning_courses': 'Cursos',
     'learning': 'Capacitaciones',
+    
+    // Admin
     'admin_dashboard': 'Admin - Analytics',
     'admin_administration': 'Admin - Administración',
     'admin_support': 'Admin - Soporte',
+    'admin_payments': 'Admin - Pagos',
+    'admin_courses': 'Admin - Cursos',
+    'admin_costs': 'Admin - Costos',
+    'admin_tasks': 'Admin - Tareas',
+    'admin_general': 'Admin - General',
+    'admin_layout': 'Admin - Layout',
+    'admin_ops': 'Admin - Operations Center',
+    'admin': 'Admin',
+    
+    // Other
+    'providers': 'Proveedores',
+    'provider_products': 'Productos de Proveedor',
+    'notifications': 'Notificaciones',
+    'calendar': 'Calendario',
+    'media': 'Multimedia',
+    'clients': 'Clientes',
+    'tasks': 'Tareas',
+    'personnel': 'Personal',
+    'subcontracts': 'Subcontratos',
+    'founders': 'Programa Fundadores',
   };
   
   if (viewMap[view]) return viewMap[view]
