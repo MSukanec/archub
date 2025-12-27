@@ -2,6 +2,48 @@
  * User Acquisition Context Service
  * Centralizado para capturar y manejar datos de adquisición de usuarios
  * Integrado con Supabase Auth para first-touch attribution
+ * 
+ * CONVENCIONES UTM RECOMENDADAS:
+ * 
+ * utm_source (¿de dónde?) - Fuente de tráfico:
+ *   - youtube
+ *   - instagram
+ *   - whatsapp
+ *   - google
+ *   - newsletter
+ *   - alumni
+ *   - tiktok
+ *   - linkedin
+ * 
+ * utm_medium (¿cómo?) - Medio de distribución:
+ *   - video
+ *   - bio
+ *   - post
+ *   - story
+ *   - share
+ *   - email
+ *   - paid
+ *   - organic
+ * 
+ * utm_campaign (¿qué?) - Campaña específica:
+ *   - curso_archicad
+ *   - plan_fundadores
+ *   - lanzamiento_2025
+ *   - webinar_febrero
+ *   - descuento_navidad
+ * 
+ * utm_content (¿qué variante?) - Variante específica:
+ *   - video_40min
+ *   - link_bio
+ *   - story_1
+ *   - mensaje_directo
+ *   - cta_verde
+ *   - cta_rojo
+ * 
+ * EJEMPLOS DE URLs:
+ * https://seencel.com/register?utm_source=youtube&utm_medium=video&utm_campaign=lanzamiento_2025&utm_content=video_40min
+ * https://seencel.com/register?utm_source=instagram&utm_medium=story&utm_campaign=plan_fundadores&utm_content=story_1
+ * https://seencel.com/register?utm_source=alumni&utm_medium=share&utm_campaign=curso_archicad
  */
 
 export interface AcquisitionContext {
