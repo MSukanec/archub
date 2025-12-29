@@ -1,0 +1,254 @@
+AUDITORÍA TOTAL DEL SISTEMA DE PAGOS (READ-ONLY)
+
+⚠️ IMPORTANTE
+NO modifiques código.
+NO refactorices.
+NO “mejores” nada.
+
+El objetivo es ENTENDER exactamente qué está pasando hoy.
+
+🎯 OBJETIVO
+
+Generar UN SOLO ARCHIVO DE AUDITORÍA que documente todo el flujo de pagos del sistema, desde que el usuario inicia un pago hasta lo último que sucede después del webhook.
+
+Este archivo será la fuente de verdad para refactorizar el sistema correctamente más adelante.
+
+📄 FORMATO DEL RESULTADO
+
+Crear un archivo nuevo llamado:
+
+PAYMENTS_AUDIT.md
+
+
+Escribirlo en Markdown
+
+No dividirlo en múltiples archivos
+
+Todo debe estar explicado con palabras, no solo con código
+
+🔍 QUÉ TENÉS QUE AUDITAR (OBLIGATORIO)
+1️⃣ INVENTARIO DE ARCHIVOS RELACIONADOS A PAGOS
+
+Listar todos los archivos que tengan relación directa o indirecta con pagos, incluyendo pero no limitado a:
+
+APIs (/api/*)
+
+Webhooks
+
+Frontend (botones, hooks, redirects)
+
+Utils
+
+Servicios
+
+Supabase RPC / funciones llamadas
+
+Configuración de Mercado Pago
+
+Configuración de PayPal
+
+Para cada archivo indicar:
+
+Ruta completa
+
+Rol que cumple
+
+Si es frontend, backend o webhook
+
+2️⃣ FLUJO COMPLETO — SUSCRIPCIONES
+
+Describir paso a paso:
+
+Dónde se inicia el pago en el frontend
+
+Qué endpoint se llama
+
+Qué datos se envían
+
+Qué hace ese endpoint
+
+A qué proveedor se redirige (MP / PayPal)
+
+Qué webhook recibe la confirmación
+
+Qué archivo maneja ese webhook
+
+Qué funciones se ejecutan después
+
+Qué tablas se tocan
+
+Qué RPC o funciones de Supabase se llaman (si existen)
+
+📌 Si hay pasos que no están claros o no existen, marcarlo explícitamente como:
+
+⚠️ “PASO NO CLARO / NO CONTROLADO”
+
+3️⃣ FLUJO COMPLETO — COMPRA DE CURSOS
+
+Mismo nivel de detalle que suscripciones:
+
+Inicio
+
+API
+
+Provider
+
+Webhook
+
+Consecuencias
+
+Enrollments
+
+Accesos
+
+4️⃣ WEBHOOKS (CRÍTICO)
+
+Para cada webhook:
+
+URL
+
+Proveedor (MP / PayPal)
+
+Eventos que escucha
+
+Validaciones que hace
+
+Qué pasa si:
+
+el pago es approved
+
+rejected
+
+pending
+
+Qué funciones llama
+
+Qué pasa si falla algo
+
+Si hay logs o no
+
+5️⃣ FUNCIONES Y RPC DE SUPABASE
+
+Listar todas las funciones RPC o SQL que estén involucradas directa o indirectamente en pagos:
+
+Para cada una:
+
+Nombre
+
+Parámetros
+
+Quién la llama
+
+En qué momento del flujo
+
+Qué tablas toca
+
+Si es:
+
+step
+
+orquestadora
+
+lógica mezclada
+
+Si NO existen funciones orquestadoras, indicarlo explícitamente.
+
+6️⃣ TABLAS AFECTADAS
+
+Listar todas las tablas que se ven afectadas por pagos, por ejemplo:
+
+subscriptions
+
+organization_subscriptions
+
+course_enrollments
+
+payments
+
+user_badges
+
+plans
+
+cualquier otra
+
+Para cada tabla:
+
+Quién la escribe
+
+Desde dónde
+
+En qué momento
+
+7️⃣ RESPONSABILIDADES (ANÁLISIS)
+
+Agregar una sección final llamada:
+
+⚠️ PROBLEMAS DETECTADOS
+
+Donde indiques, con total honestidad:
+
+Lógica duplicada
+
+Lógica en frontend que debería ser backend
+
+Lógica en API que debería ser Supabase
+
+Falta de orden
+
+Falta de atomicidad
+
+Falta de orquestación
+
+Falta de logs
+
+Falta de idempotencia
+
+Riesgos de inconsistencia
+
+8️⃣ DIAGRAMA SIMPLIFICADO (TEXTO)
+
+Agregar un diagrama tipo:
+
+User
+ ↓
+Frontend
+ ↓
+API
+ ↓
+Provider (MP / PayPal)
+ ↓
+Webhook
+ ↓
+???
+
+
+Y completar con lo que realmente ocurre hoy.
+
+🚫 RESTRICCIONES ABSOLUTAS
+
+❌ No modificar código
+
+❌ No crear funciones nuevas
+
+❌ No refactorizar
+
+❌ No proponer soluciones todavía
+
+❌ No eliminar archivos
+
+👉 Solo observar, listar, describir y auditar.
+
+✅ CRITERIO DE ÉXITO
+
+El archivo PAYMENTS_AUDIT.md debe permitir que una persona que NO escribió el código pueda entender:
+
+Qué pasa cuando alguien paga
+
+En qué orden
+
+Dónde
+
+Y por qué hoy es difícil de mantener
+
+📌 No seas optimista. Sé preciso.
+Si algo no sabés o no está claro, decilo.
