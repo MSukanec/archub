@@ -27,10 +27,12 @@ export function PresenceInitializer() {
     return () => {
       // Solo hacer cleanup si hay un usuario (evitar cleanup en mount inicial)
       if (userData?.user) {
-        // FASE 1: Cerrar vista actual en analytics (fire-and-forget, async)
+        // FASE 1: Cerrar vista actual en analytics y presencia (fire-and-forget, async)
         (async () => {
           try {
             await supabase.rpc('analytics_exit_previous_view');
+            // También limpiar la presencia
+            await supabase.rpc('presence_set_view', { p_view: 'offline' });
           } catch {
             // Silenciar error, es cleanup no crítico
           }

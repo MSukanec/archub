@@ -4,8 +4,8 @@ import { usePresenceStore } from '@/stores/presenceStore';
 import { supabase } from '@/lib/supabase';
 
 /**
- * Mapea rutas a nombres de vistas legibles
- * Simplifica rutas complejas a nombres entendibles
+ * Mapea rutas a identificadores de vistas
+ * Solo identifica, NO traduce (la traducción está centralizada en view-name-translator.ts)
  */
 function mapRouteToView(path: string): string {
   // Rutas específicas primero
@@ -123,8 +123,11 @@ export function usePresenceTracker() {
         // Cerrar vista anterior (si existe) - no recibe parámetros
         await supabase.rpc('analytics_exit_previous_view');
         
-        // Abrir nueva vista - solo recibe p_view
+        // Abrir nueva vista en analytics
         await supabase.rpc('analytics_enter_view', { p_view: viewName });
+        
+        // TAMBIÉN actualizar presencia en tiempo real
+        await supabase.rpc('presence_set_view', { p_view: viewName });
       } catch (error) {
         // Silenciar errores de analytics (no afectan la UX)
       }
@@ -133,7 +136,7 @@ export function usePresenceTracker() {
     // Ejecutar tracking en background (no esperamos respuesta)
     trackViewChange();
     
-    // FASE 2: Presencia - Actualizar estado en tiempo real
+    // FASE 2: Presencia - Actualizar estado en tiempo real (local)
     setCurrentView(viewName);
   }, [location, setCurrentView]);
 }
