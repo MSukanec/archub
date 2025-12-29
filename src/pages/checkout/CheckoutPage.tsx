@@ -1134,23 +1134,13 @@ Titular: Matias Esteban Sukanec`;
   };
 
   return (
-    <Layout headerProps={headerProps}>
-      <div className="max-w-7xl mx-auto py-6 lg:py-8">
-        {/* Title Section - Full Width */}
-        <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
-            Elegí cómo pagar
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Seleccioná tu método de pago preferido y completá la compra de forma segura
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <Layout headerProps={headerProps} wide={false}>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Payment Methods (Mobile: shows first) */}
           <div className={cn(
             "order-1 lg:order-1",
-            showBankInfo ? "lg:col-span-12" : "lg:col-span-7"
+            showBankInfo ? "lg:col-span-3" : "lg:col-span-2"
           )}>
             <div className="space-y-6">
               {!showBankInfo ? (
@@ -1768,7 +1758,7 @@ Titular: Matias Esteban Sukanec`;
 
           {/* Right Column - Coupon & Order Summary (Mobile: shows second) */}
           {!showBankInfo && (
-            <div className="lg:col-span-5 order-2 lg:order-2">
+            <div className="lg:col-span-1 order-2 lg:order-2">
               <div className="lg:sticky lg:top-24 space-y-6">
                 {/* Coupon Section */}
                 {!appliedCoupon ? (
