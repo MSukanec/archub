@@ -1258,12 +1258,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         }
       })
 
-      queryClient.invalidateQueries({ queryKey: ['movements'] })
-      queryClient.invalidateQueries({ queryKey: ['movements-view'] })
-      queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
-      queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
-      queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
-      queryClient.invalidateQueries({ queryKey: ['installments'] })
+      const transferOrgId = userData?.organization?.id
+      const transferProjId = variables.project_id
+      queryClient.invalidateQueries({ queryKey: financesKeys.movementsList(transferOrgId, transferProjId) })
+      queryClient.invalidateQueries({ queryKey: financesKeys.unifiedMovementsList(transferOrgId, transferProjId) })
+      queryClient.invalidateQueries({ queryKey: financesKeys.walletsList(transferOrgId) })
+      queryClient.invalidateQueries({ queryKey: financesKeys.movements() })
+      queryClient.invalidateQueries({ queryKey: financesKeys.wallets() })
       toast({
         title: 'Transferencia creada',
         description: 'La transferencia ha sido creada correctamente',

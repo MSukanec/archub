@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { financesKeys } from '@/core/query-keys'
 import { useDropzone } from 'react-dropzone'
 import * as XLSX from 'xlsx'
 // @ts-ignore
@@ -882,10 +883,9 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['movements'] })
-      queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
-      queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
-      queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
+      queryClient.invalidateQueries({ queryKey: financesKeys.movements() })
+      queryClient.invalidateQueries({ queryKey: financesKeys.unifiedMovements() })
+      queryClient.invalidateQueries({ queryKey: financesKeys.wallets() })
       toast({
         title: "Éxito",
         description: `${selectedRows.size > 0 ? selectedRows.size : parsedData?.rows.length || 0} movimientos importados correctamente.`
