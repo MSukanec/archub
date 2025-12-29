@@ -5,23 +5,21 @@ Seencel is a comprehensive construction management platform designed to optimize
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
-**CRITICAL PERFORMANCE REQUIREMENT:** System must be INSTANTANEOUS. All cache invalidations must be scoped (no `featureKeys.lists()`/`all()`). Auto-save delays ≤500ms.
+CRITICAL PERFORMANCE REQUIREMENT: System must be INSTANTANEOUS. All cache invalidations must be scoped (no `featureKeys.lists()`/`all()`). Auto-save delays ≤500ms.
 
 ## System Architecture
 
 ### UI/UX Decisions
 - **Design System**: "new-york" style with a neutral color palette, dark mode, reusable UI components using `shadcn/ui` and Tailwind CSS.
-- **Typography System**: Unified Inter Variable Font with Apple-style optical letter-spacing.
+- **Typography**: Unified Inter Variable Font with Apple-style optical letter-spacing.
 - **Dynamic Color System**: Project-based color theming using `chroma-js` for intelligent color calculations, including dynamic accent colors and organic radial gradients.
 - **Modal Architecture**: Enterprise SaaS-level modal system with stacking, dirty form blocking, size variants, portal rendering, and a registry pattern.
-- **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub with a two-level sidebar system.
-- **Unified Mobile Menu Architecture**: Single `MobileMenu` component serving both marketing and dashboard contexts, with mode-aware rendering.
+- **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub with a two-level sidebar system. Unified `MobileMenu` component for marketing and dashboard contexts.
 - **Layout Architecture**: Experience-based layouts including Dashboard Layout (authenticated app) and Marketing Layout (public-facing pages).
-- **Content Theming System**: Unified CSS theming layer with dynamic background switching.
-- **Financial Indicator Colors**: All positive/negative/neutral indicators MUST use Tailwind chart color utilities.
-- **Chart Components (Agnostic)**: Charts must be completely agnostic to features, receiving data via props.
-- **Card Component Architecture**: `AppCard` in `src/components/shared/AppCard.tsx` is the ONLY card component for the application, with subcomponents for KPI-style cards.
-- **Chart Library Architecture**: Type-based folder structure with unified theme system, following a Nivel 1 pattern (pure visualization, no wrappers, no business logic).
+- **Content Theming**: Unified CSS theming layer with dynamic background switching.
+- **Financial Indicators**: All positive/negative/neutral indicators MUST use Tailwind chart color utilities.
+- **Chart Components**: Completely agnostic to features, receiving data via props, following a Nivel 1 pattern (pure visualization, no wrappers, no business logic).
+- **Card Component**: `AppCard` in `src/components/shared/AppCard.tsx` is the ONLY card component, with subcomponents for KPI-style cards.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
@@ -33,8 +31,8 @@ Preferred communication style: Simple, everyday language.
 ### System Design Choices
 - **Module Architecture**: Feature-Sliced Design for core modules (PROJECTS, SUBCONTRACTS, PERSONNEL, CLIENTS, FINANCES, CAPITAL, LEARNING, MEDIA, SITELOG, MOODBOARD, TASKS, etc.).
 - **TASKS Module**: Consolidated feature with barrel exports, agnostic forms, and container modals.
-- **Technical Catalog**: Page at `src/pages/dashboard/CatalogPage.tsx` for task, materials, and labor cost analysis.
-- **Page Architecture**: 3-Layer Pattern (Page, Layout, View) for clear separation.
+- **Technical Catalog**: Page for task, materials, and labor cost analysis.
+- **Page Architecture**: 3-Layer Pattern (Page, Layout, View).
 - **Lab Layout**: Enterprise navigation with context switcher, page selector, tab selector, and a right-side drawer component (`LabDrawer`).
 - **Moodboard Module**: Pinterest-style inspiration board at `/project/moodboard`.
 - **Finances Module**: Dual-context (Organization and Project sidebars) with automatic `project_id` assignment.
@@ -58,21 +56,16 @@ Preferred communication style: Simple, everyday language.
 - **Automated Downgrade Execution**: Hourly cron job processes expired subscriptions and scheduled downgrades.
 - **Multicurrency System**: Centralized handling via `/lib/money.ts` with explicit conversion functions.
 - **KPI System (Headless)**: Centralized calculation logic in `/lib/kpis.ts` with automatic refetching.
-- **Subscription & Billing System**: Comprehensive management of plans, payments, billing cycles, proration, and cron jobs.
+- **Subscription & Billing System**: Comprehensive management of plans, payments, billing cycles, proration, and cron jobs. Supports MercadoPago (ARS) and PayPal (USD) gateways, plus Bank Transfer for courses. Includes proration for upgrades and seat additions, and a Founders Program for annual subscribers.
 - **Internationalization (i18n) System**: Lightweight locale system in `src/lib/i18n/` with `I18nProvider`, `useI18n` hook, and typed translations.
-- **User Acquisition Tracking (Complete)**: 
-  - Frontend: `src/lib/acquisition.ts` captures UTM params at app load, stored in localStorage
-  - Email/Password Signup: Sends acquisition data via `options.data` to Supabase Auth → backend `step_create_user_acquisition()` inserts into `user_acquisition` table ✅
-  - Google OAuth: Saves acquisition data in sessionStorage, then after OAuth redirect + auth confirmation, calls `POST /api/user/acquisition` endpoint to create record ✅
-  - Endpoint: `server/routes/acquisition.ts` - handles POST /api/user/acquisition, calls Supabase RPC `step_create_user_acquisition`
-  - Data accepted: utm_source, utm_medium, utm_campaign, utm_content, landing_page, referrer (any values allowed, cleaned to lowercase)
+- **User Acquisition Tracking**: Captures UTM parameters at app load, stored in localStorage, and integrated with Supabase Auth for signup.
 - **Table Component Architecture**: Modular table system in `src/components/shared/table/` with separate components and hooks for sorting, filtering, pagination, and selection.
 - **Operations Center (Admin Ops)**: Enterprise-grade monitoring and incident management at `/admin/ops`.
 - **Badge Semantic Architecture**: All badges use a semantic color system.
 - **Data Health Micro Rules Architecture**: Modular validation rule system for atomic, reusable checks.
 - **Save Engine**: Enterprise-grade saving system in `/core/save-engine/` with optimistic updates, automatic rollback, and debounced auto-save (delay ≤500ms).
-- **Inactivity Logout**: Global session security feature via `src/hooks/useInactivityLogout.ts` - automatically logs out users after 60 minutes of inactivity (mousemove, keydown, scroll, touchstart). No modal, silent logout.
-- **View Name Translation System**: Centralized translator at `src/lib/view-name-translator.ts` for consistent page names across analytics and admin dashboard. Single source of truth for all UI labeling.
+- **Inactivity Logout**: Global session security feature via `src/hooks/useInactivityLogout.ts` - automatically logs out users after 60 minutes of inactivity.
+- **View Name Translation System**: Centralized translator at `src/lib/view-name-translator.ts` for consistent page names across analytics and admin dashboard.
 
 ## External Dependencies
 - **Supabase**: Authentication & User Acquisition tracking.
@@ -98,58 +91,3 @@ Preferred communication style: Simple, everyday language.
 - **browser-image-compression**: Client-side image compression.
 - **@dnd-kit**: Modern drag-and-drop toolkit.
 - **node-cron**: Scheduled tasks.
-
-## Admin Dashboard Analytics System
-
-### Database Tables
-- **user_presence**: Real-time user activity tracking
-  - `user_id` (uuid, PK): References users.id
-  - `org_id` (uuid): Current organization
-  - `last_seen_at` (timestamptz): Last heartbeat timestamp
-  - `status` (text): Always 'online' in DB (legacy, not reliable)
-  - `current_view` (text): Current page/view name
-  - `user_agent`, `locale`, `updated_from`: Optional metadata
-
-- **user_view_history**: Historical view tracking for analytics
-
-### SQL Views (Optimized, exclude admin role_id = 'd5606324-af8d-487e-8c8e-552511fce2a2')
-- **user_stats_summary_view**: KPI aggregations (returns snake_case: total_users, active_users_now, etc.)
-- **user_presence_activity_view**: Recent activity with user info (includes avatar_url)
-- **user_top_performers_view**: Top users by session count
-- **user_drop_off_view**: Users with low engagement (1-2 sessions)
-- **user_engagement_by_view_view**: Average time per view
-- **user_hourly_activity_view**: Sessions by hour
-- **user_monthly_growth_view**: User growth by month
-- **user_acquisition_distribution_view**: Acquisition source breakdown
-
-### SQL Functions (RPC)
-- **heartbeat(p_org_id)**: Updates user_presence.last_seen_at every 30 seconds
-- **presence_set_view(p_view)**: Updates current_view in user_presence
-- **analytics_enter_view(p_org_id, p_view)**: Logs view entry in user_view_history
-- **analytics_exit_previous_view(p_org_id)**: Closes previous view session
-
-### Frontend Implementation
-- **Heartbeat**: `src/hooks/use-heartbeat.ts` - Sends heartbeat every 30 seconds
-- **Presence Store**: `src/stores/presenceStore.ts` - Zustand store for real-time presence
-- **Presence Tracker**: `src/hooks/use-presence-tracker.ts` - Tracks view changes
-- **Admin Dashboard**: `src/features/admin/views/AdminDashboardView.tsx`
-
-### CRITICAL: Online Status Calculation
-The `status` column in user_presence is NOT reliable (always 'online'). 
-**Calculate online status in frontend** based on last_seen_at:
-```typescript
-const isOnline = new Date(activity.last_seen_at).getTime() > Date.now() - 90000 // 90 seconds
-```
-
-### CRITICAL: Snake_case to CamelCase Mapping
-Views return snake_case, frontend expects camelCase. Transform in queryFn:
-```typescript
-return {
-  totalUsers: data.total_users,
-  activeUsersNow: data.active_users_now,
-  // ... etc
-} as DashboardStats
-```
-
-### API Endpoints
-- `GET /api/admin/users/recent`: Returns recently registered users with avatar_url, organization_name

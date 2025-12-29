@@ -72,11 +72,27 @@ export async function createSubscription(req: Request, res: Response) {
       });
     }
     
-    return res.json({
-      ok: true,
-      order_id: result.orderId,
-      approval_url: result.approvalUrl,
-      order: result.order
+    if ('gifted' in result && result.gifted) {
+      return res.json({
+        ok: true,
+        gifted: true,
+        subscription_id: result.subscriptionId,
+        message: result.message
+      });
+    }
+    
+    if ('orderId' in result) {
+      return res.json({
+        ok: true,
+        order_id: result.orderId,
+        approval_url: result.approvalUrl,
+        order: result.order
+      });
+    }
+    
+    return res.status(500).json({
+      ok: false,
+      error: "Unexpected result format"
     });
   } catch (error: any) {
     console.error("[PayPal create-subscription controller] Error:", error);
