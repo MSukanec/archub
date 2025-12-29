@@ -6,8 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/stores/authStore";
 import { ActionBarMobileProvider } from "@/layouts";
-import { AuthGuard, AuthAdmin, useCurrentUser } from "@/features/users";
-import { useInactivityLogout } from "@/hooks/useInactivityLogout";
+import { AuthGuard, AuthAdmin } from "@/features/users";
 
 // Public Pages
 import Landing from "@/pages/public/Landing";
@@ -133,7 +132,7 @@ import CapitalPage from "@/pages/dashboard/CapitalPage";
 
 import NotFound from "@/pages/public/NotFound";
 import { ModalProvider } from "@/components/modal";
-import { PresenceInitializer, ProjectContextInitializer } from "@/layouts/initializers";
+import { PresenceInitializer, ProjectContextInitializer, InactivityLogoutInitializer } from "@/layouts/initializers";
 import { LoadingSpinner } from "@/components/shared/layout/LoadingSpinner";
 
 function LazyLoadFallback() {
@@ -459,10 +458,6 @@ function Router() {
 
 function App() {
   const { initialize } = useAuthStore();
-  const { data: userData } = useCurrentUser();
-  
-  // Activar logout por inactividad solo si el usuario está autenticado
-  useInactivityLogout(!!userData?.user);
 
   useEffect(() => {
     initialize();
@@ -472,6 +467,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ActionBarMobileProvider>
+          <InactivityLogoutInitializer />
           <ProjectContextInitializer />
           <PresenceInitializer />
           <Toaster />
