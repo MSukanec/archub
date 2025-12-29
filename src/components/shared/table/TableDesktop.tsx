@@ -141,7 +141,7 @@ export function TableDesktop<T>({
   const hasActions = !!rowActions;
 
   return (
-    <div className="hidden lg:block overflow-hidden rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] shadow-lg">
+    <div className="hidden lg:block overflow-hidden rounded-[var(--radius-lg)] border border-[var(--accent)] bg-[var(--card-bg)] shadow-lg">
       <TableTopBar
         topBar={topBar}
         selectable={selectable}
