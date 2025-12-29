@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchCourseLandingBySlug } from '../services';
 import { mapModulesWithLessons, calculateCourseStats } from '../mappers';
+import { LEARNING_QUERY_KEYS } from '../constants';
 import type { CourseLandingData } from '../types';
 
 /**
@@ -9,7 +10,7 @@ import type { CourseLandingData } from '../types';
  */
 export function useCourseLanding(slug: string) {
   return useQuery<CourseLandingData>({
-    queryKey: ['course-landing', slug],
+    queryKey: LEARNING_QUERY_KEYS.courseLanding(slug),
     queryFn: async () => {
       const rawData = await fetchCourseLandingBySlug(slug);
       

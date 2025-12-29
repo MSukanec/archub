@@ -24,6 +24,16 @@ export const LEARNING_QUERY_KEYS = {
   studyTime: (userId: string, courseId?: string) => ['learning', 'study-time', userId, courseId] as const,
   monthlyStudyTime: ['learning', 'monthly-study-time'] as const,
   
+  // Course data (additional)
+  courseLanding: (slug: string) => ['learning', 'courses', slug, 'landing'] as const,
+  coursePrice: (courseSlug: string, currency?: string, provider?: string) => 
+    ['learning', 'courses', courseSlug, 'price', currency, provider] as const,
+  courseRecentNotes: (courseId: string) => ['learning', 'courses', courseId, 'recent-notes'] as const,
+  courseRecentMarkers: (courseId: string) => ['learning', 'courses', courseId, 'recent-markers'] as const,
+  courseMarkers: (courseId: string) => ['learning', 'courses', courseId, 'markers'] as const,
+  coursesPublic: ['learning', 'courses', 'public'] as const,
+  adminCourses: ['learning', 'admin', 'courses'] as const,
+  
   // Lessons
   lesson: (lessonId: string) => ['learning', 'lessons', lessonId] as const,
   lessonProgress: (lessonId: string) => ['learning', 'lessons', lessonId, 'progress'] as const,

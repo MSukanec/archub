@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getAllPublicCourses } from '../services/public/courseLanding';
+import { LEARNING_QUERY_KEYS } from '../constants';
 import type { Course } from '@shared/schema';
 
 /**
@@ -8,9 +9,9 @@ import type { Course } from '@shared/schema';
  */
 export function useAllCourses() {
   return useQuery<Course[]>({
-    queryKey: ['courses', 'public'],
+    queryKey: LEARNING_QUERY_KEYS.coursesPublic,
     queryFn: getAllPublicCourses,
-    staleTime: 60000, // Cache for 1 minute
-    gcTime: 300000, // Keep in cache for 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
   });
 }

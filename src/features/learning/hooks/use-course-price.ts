@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCoursePricing } from '../services/student/getCoursePricing';
+import { LEARNING_QUERY_KEYS } from '../constants';
 import type { CoursePricing } from '../types';
 
 /**
@@ -99,7 +100,7 @@ export function useCoursePrice({
   provider
 }: UseCoursePriceParams) {
   return useQuery<CoursePricing | null>({
-    queryKey: ['course-price', courseSlug, currency, provider],
+    queryKey: LEARNING_QUERY_KEYS.coursePrice(courseSlug, currency, provider),
     queryFn: async () => {
       if (!courseSlug) {
         return null;
