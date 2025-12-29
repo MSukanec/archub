@@ -158,7 +158,7 @@ const CASCADING_MOVEMENT_OPTIONS: CascadingOption[] = [
   },
 ]
 
-interface NewMovementModalProps {
+interface UnifiedMovementsModalProps {
   modalData?: {
     projectId?: string
     organizationId?: string
@@ -167,7 +167,7 @@ interface NewMovementModalProps {
   onClose: () => void
 }
 
-export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) {
+export function UnifiedMovementsModal({ modalData, onClose }: UnifiedMovementsModalProps) {
   const [selectedType, setSelectedType] = useState<MovementType | null>(null)
   const [selectedProjectIdForMovement, setSelectedProjectIdForMovement] = useState<string | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
@@ -334,4 +334,4 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
   )
 }
 
-export default NewMovementModal
+export default UnifiedMovementsModal

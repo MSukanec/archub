@@ -34,8 +34,8 @@ export * from './components/FinancialStatsSection';
 export * from './components/PartnerStatsSection';
 
 // Modals
-export { MovementModalView } from './modals/movements/MovementModalView';
-export { MovementImportStepModal } from './modals/movements/MovementImportStepModal';
+export { MovementModalView } from './modals/MovementModalView';
+export { MovementImportStepModal } from './modals/MovementImportStepModal';
 
 // Legacy Admin Modals
 export { default as MovementConceptFormModal } from '../legacy/modals/MovementConceptFormModal';
