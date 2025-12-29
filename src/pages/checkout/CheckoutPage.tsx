@@ -1422,7 +1422,7 @@ Titular: Matias Esteban Sukanec`;
                                     >
                                       <CreditCard className="h-5 w-5 text-accent" />
                                       Mercado Pago
-                                      <Badge className="text-xs font-normal bg-[hsl(210,40%,55%)] hover:bg-[hsl(210,40%,55%)] text-white border-0">
+                                      <Badge variant="info">
                                         Pago en ARS
                                       </Badge>
                                     </Label>
@@ -1485,7 +1485,7 @@ Titular: Matias Esteban Sukanec`;
                                   >
                                     <CreditCard className="h-5 w-5 text-accent" />
                                     PayPal
-                                    <Badge className="text-xs font-normal bg-success hover:bg-success text-white border-0">
+                                    <Badge variant="success">
                                       Pago en USD
                                     </Badge>
                                   </Label>
@@ -1540,11 +1540,11 @@ Titular: Matias Esteban Sukanec`;
                                 >
                                   <Building2 className="h-5 w-5 text-accent" />
                                   Transferencia
-                                  <Badge className="text-xs font-normal bg-[hsl(210,40%,55%)] hover:bg-[hsl(210,40%,55%)] text-white border-0">
+                                  <Badge variant="info">
                                     Pago en ARS
                                   </Badge>
-                                  <Badge className="text-xs font-semibold bg-accent hover:bg-accent/90 text-white border-0">
-                                    5% descuento extra
+                                  <Badge variant="warning">
+                                    5% descuento
                                   </Badge>
                                 </Label>
                                 <p className="text-sm text-muted-foreground mt-1">
