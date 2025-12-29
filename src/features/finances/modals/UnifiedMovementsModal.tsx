@@ -12,8 +12,8 @@ import { MaterialPaymentFormFields } from '@/features/materials/forms/MaterialPa
 import { PersonnelPaymentFormFields } from '@/features/personnel/forms/PersonnelPaymentForm'
 import { PartnerContributionForm, PartnerWithdrawalForm } from '@/features/capital'
 import { GeneralCostPaymentFormFields } from '@/features/general-costs/forms/GeneralCostPaymentForm'
-import { WalletTransferFormFields } from '../forms/WalletTransferFormFields'
-import { CurrencyExchangeFormFields } from '../forms/CurrencyExchangeFormFields'
+import { WalletTransferForm } from '../forms/WalletTransferForm'
+import { CurrencyExchangeForm } from '../forms/CurrencyExchangeForm'
 
 type MovementType = 'client_payment' | 'material_payment' | 'personnel_payment' | 'partner_contribution' | 'partner_withdrawal' | 'general_cost_payment' | 'wallet_transfer' | 'currency_exchange'
 
@@ -224,9 +224,9 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
       case 'general_cost_payment':
         return <GeneralCostPaymentFormFields {...commonProps} />
       case 'wallet_transfer':
-        return <WalletTransferFormFields {...commonProps} />
+        return <WalletTransferForm {...commonProps} />
       case 'currency_exchange':
-        return <CurrencyExchangeFormFields {...commonProps} />
+        return <CurrencyExchangeForm {...commonProps} />
       default:
         return null
     }

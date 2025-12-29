@@ -33,7 +33,7 @@ import ForumThreadForm from '@/features/forum/forms/ForumThreadForm';
 import ForumPostForm from '@/features/forum/forms/ForumPostForm';
 import ForumCategoryForm from '@/features/forum/forms/ForumCategoryForm';
 import CourseForumCategoryForm from '@/features/forum/forms/CourseForumCategoryForm';
-import { NewMovementModal } from '@/features/finances/modals/NewMovementModal';
+import { UnifiedMovementsModal } from '@/features/finances/modals/UnifiedMovementsModal';
 import { DataHealthDetailsModal } from '@/core/data-health/components/DataHealthDetailsModal';
 import { NewMoodboardItemModal } from '@/features/moodboard';
 
@@ -583,7 +583,7 @@ export function initializeModalRegistry(): void {
     }),
   });
 
-  registerModal('unified-payment', NewMovementModal as any, {
+  registerModal('unified-payment', UnifiedMovementsModal as any, {
     ...financeConfig,
     size: 'lg',
     mapDataToProps: (data) => ({

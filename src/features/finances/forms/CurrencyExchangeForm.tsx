@@ -35,7 +35,7 @@ const currencyExchangeSchema = z.object({
 
 type CurrencyExchangeFormData = z.infer<typeof currencyExchangeSchema>
 
-export interface CurrencyExchangeFormFieldsProps {
+export interface CurrencyExchangeFormProps {
   projectId?: string
   organizationId?: string
   mode: 'create' | 'edit' | 'view'
@@ -45,7 +45,7 @@ export interface CurrencyExchangeFormFieldsProps {
   formRef?: React.RefObject<HTMLFormElement>
 }
 
-export function CurrencyExchangeFormFields({ 
+export function CurrencyExchangeForm({ 
   projectId, 
   organizationId,
   mode, 
@@ -53,7 +53,7 @@ export function CurrencyExchangeFormFields({
   onCancel,
   hideActions = false,
   formRef
-}: CurrencyExchangeFormFieldsProps) {
+}: CurrencyExchangeFormProps) {
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
 

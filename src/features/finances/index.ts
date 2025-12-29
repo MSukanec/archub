@@ -18,8 +18,8 @@ export * from './hooks/use-partner-metrics';
 export * from './hooks/use-financial-operations';
 
 // Forms
-export { WalletTransferFormFields } from './forms/WalletTransferFormFields';
-export { CurrencyExchangeFormFields } from './forms/CurrencyExchangeFormFields';
+export { WalletTransferForm } from './forms/WalletTransferForm';
+export { CurrencyExchangeForm } from './forms/CurrencyExchangeForm';
 
 // Mappers
 export * from './mappers';

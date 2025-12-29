@@ -34,7 +34,7 @@ const walletTransferSchema = z.object({
 
 type WalletTransferFormData = z.infer<typeof walletTransferSchema>
 
-export interface WalletTransferFormFieldsProps {
+export interface WalletTransferFormProps {
   projectId?: string
   organizationId?: string
   mode: 'create' | 'edit' | 'view'
@@ -44,7 +44,7 @@ export interface WalletTransferFormFieldsProps {
   formRef?: React.RefObject<HTMLFormElement>
 }
 
-export function WalletTransferFormFields({ 
+export function WalletTransferForm({ 
   projectId, 
   organizationId,
   mode, 
@@ -52,7 +52,7 @@ export function WalletTransferFormFields({
   onCancel,
   hideActions = false,
   formRef
-}: WalletTransferFormFieldsProps) {
+}: WalletTransferFormProps) {
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
 
