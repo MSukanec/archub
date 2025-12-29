@@ -11,8 +11,9 @@ export async function getPayPalAccessToken(): Promise<string> {
 
   const clientIdPreview = PAYPAL_CLIENT_ID?.substring(0, 10) || "UNDEFINED";
   const mode = isPayPalSandbox ? "SANDBOX 🧪" : "PRODUCTION 🚨";
+  const sandboxSource = process.env.PAYPAL_ENV_SANDBOX ? "(via PAYPAL_ENV_SANDBOX)" : "(via NODE_ENV)";
   
-  console.log(`[PayPal Auth] Authenticating in ${mode}`);
+  console.log(`[PayPal Auth] Authenticating in ${mode} ${isPayPalSandbox ? sandboxSource : ""}`);
   console.log(`[PayPal Auth] Endpoint: ${PAYPAL_BASE_URL}`);
   console.log(`[PayPal Auth] Client ID preview: ${clientIdPreview}...`);
 

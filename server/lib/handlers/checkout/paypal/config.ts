@@ -1,7 +1,12 @@
-// Force sandbox in development mode for testing
-const PAYPAL_ENV = process.env.NODE_ENV === 'development' 
-  ? 'sandbox' 
-  : (process.env.PAYPAL_ENV || "production");
+// Priority order for PayPal environment selection:
+// 1. PAYPAL_ENV_SANDBOX if set (when sandbox is explicitly enabled)
+// 2. NODE_ENV in development (auto-sandbox for dev)
+// 3. PAYPAL_ENV for production
+const PAYPAL_ENV = process.env.PAYPAL_ENV_SANDBOX 
+  ? 'sandbox'
+  : (process.env.NODE_ENV === 'development' 
+    ? 'sandbox' 
+    : (process.env.PAYPAL_ENV || "production"));
 
 export const isPayPalSandbox = PAYPAL_ENV === "sandbox";
 
