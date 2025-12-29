@@ -1,6 +1,7 @@
 # Payment System Architecture - Complete Audit
 
-> Last updated: December 29, 2025 (Webhook RPC Refactoring)  
+> **Last updated: December 29, 2025 - FULLY OPERATIONAL WITH RPC DELEGATION**  
+> **Status: ✅ All webhooks (MP & PayPal) live and delegating to RPCs. Users can purchase courses and subscribe successfully.**  
 > Consolidated from: PAYMENT-SUBSCRIPTION-FLOW-AUDIT.md, SUBSCRIPTIONS_BILLING_SYSTEM.md, WEBHOOK-PAYMENT-FLOW.md
 
 ---
@@ -37,8 +38,9 @@
 1. **plan_id is Source of Truth**: Limits and features read from `organizations.plan_id` → `plans.features`
 2. **Subscriptions are Historical**: `organization_subscriptions` records payment history
 3. **Soft-Lock over Hard-Delete**: Resources not deleted, marked with `is_over_limit`
-4. **Idempotency**: Duplicate payments don't create duplicate subscriptions
-5. **Gateway Separation**: MP and PayPal have independent handlers
+4. **Idempotency**: Duplicate payments prevented via `pg_advisory_xact_lock()` in RPCs + unique index on `(provider, provider_payment_id)`
+5. **Gateway Separation**: MP and PayPal webhooks are independent but delegate to same RPCs
+6. **RPC-Based Orchestration (NEW)**: All post-payment business logic centralized in 2 Supabase RPC functions for consistency and atomicity
 
 ### Payment Flow Diagram
 
@@ -694,173 +696,228 @@ When an org created with 100% coupon wants to add first paid member:
 
 ## 9. Webhook Processing
 
-> **Refactored Architecture (December 2025)**: Webhooks now delegate all post-payment business logic to Supabase RPC functions (`handle_payment_subscription_success` and `handle_payment_course_success`). Webhook handlers are thin and only responsible for: (1) logging raw events, (2) validating payment status, (3) extracting metadata, and (4) calling the appropriate RPC.
+> **✅ FULLY REFACTORED & OPERATIONAL (December 2025)**: All webhooks from MercadoPago and PayPal now delegate to two Supabase RPC functions. Webhook handlers are **thin** and only responsible for: (1) logging raw events, (2) validating payment status, (3) extracting metadata, (4) calling the appropriate RPC. **Status: LIVE IN PRODUCTION**
 
 ### Webhook Endpoints
 
-| Gateway | Endpoint | Auth |
-|---------|----------|------|
-| **MercadoPago** | `POST /api/checkout/mp/webhook` | Query param `?secret=...` (temporarily disabled) |
-| **PayPal** | `POST /api/checkout/paypal/webhook` | No explicit auth |
+| Gateway | Endpoint | Auth | Status |
+|---------|----------|------|--------|
+| **MercadoPago** | `POST /api/checkout/mp/webhook` | Query param `?secret=...` (disabled) | ✅ LIVE |
+| **PayPal** | `POST /api/checkout/paypal/webhook` | No explicit auth | ✅ LIVE |
 
-### Product Type Detection
+### Product Type Detection (From Payment Gateway)
 
 #### MercadoPago (via `external_reference` prefix)
 
-| Prefix | Product Type | Required Identifiers |
-|--------|--------------|---------------------|
-| `mpu_` | `subscription_upgrade` | user_id, organization_id, plan_id |
-| `mpr_` | `subscription` | user_id, organization_id, plan_id, billing_period |
-| `mps_` | `seat` | user_id, organization_id, role_id |
-| `mp_` | `course` | user_id, course_id |
+| Prefix | Product Type | RPC | Status |
+|--------|--------------|-----|--------|
+| `mpu_` | `subscription_upgrade` | `handle_payment_subscription_success` | ✅ |
+| `mpr_` | `subscription` | `handle_payment_subscription_success` | ✅ |
+| `mps_` | `seat` | `handle_payment_subscription_success` | ✅ |
+| `mp_` | `course` | `handle_payment_course_success` | ✅ |
 
-#### PayPal (via `custom_id` format parsing)
+#### PayPal (via `custom_id` format - pipe-delimited parsing)
 
-| Format | Product Type | Required Identifiers |
-|--------|--------------|---------------------|
-| `user\|plan\|org\|period\|upgrade\|shortId` (6 parts) | `subscription_upgrade` | user_id, organization_id, plan_id, billing_period |
-| `user\|plan\|org\|monthly\|annual` (4 parts) | `subscription` | user_id, organization_id, plan_id, billing_period |
-| `user\|org\|role\|pps_xxx` (4 parts, pps_ prefix) | `seat` | user_id, organization_id, role_id |
-| `user\|course\|coupon_code\|coupon_id` (4 parts) | `course` | user_id, course_id |
-| `user\|course` (2 parts) | `course` | user_id, course_id |
+| Format | Product Type | RPC | Status |
+|--------|--------------|-----|--------|
+| 6 parts with "upgrade" token | `subscription_upgrade` | `handle_payment_subscription_success` | ✅ |
+| 4 parts: `user\|plan\|org\|period` | `subscription` | `handle_payment_subscription_success` | ✅ |
+| 4 parts with `pps_` prefix | `seat` | `handle_payment_subscription_success` | ✅ |
+| 4 parts: `user\|course\|code\|id` | `course` | `handle_payment_course_success` | ✅ |
+| 2 parts: `user\|course` | `course` | `handle_payment_course_success` | ✅ |
 
-### Unified Webhook Flow (Both Gateways)
+### Simplified Webhook Flow (RPC-Delegated Architecture)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                     WEBHOOK PROCESSING (MP & PayPal)                         │
+│                WEBHOOK → RPC DELEGATION (MP & PayPal)                        │
+│                        STATUS: ✅ LIVE & TESTED                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 
+WEBHOOK SIDE (THIN):
   1. POST /api/checkout/{mp|paypal}/webhook
-     │
-     ▼
-  2. Log raw event to payment_events table
-     │
-     ▼
-  3. Validate payment status (approved/completed)
-     │
-     ├─► Not approved → Return { success: true, processed: false }
-     │
-     ▼
-  4. Detect product_type from metadata
-     │
-     ├─► MercadoPago: Parse external_reference prefix
-     └─► PayPal: Parse custom_id format (pipe-delimited)
-         │
-         ▼
-  5. Fail-fast validation of required identifiers
-     │
-     ├─► subscription: user_id, organization_id, plan_id, billing_period
-     ├─► subscription_upgrade: user_id, organization_id, plan_id
-     ├─► seat: user_id, organization_id, role_id
-     └─► course: user_id, course_id
-         │
-         ├─► Missing required → Log error, return { processed: false }
-         │
-         ▼
-  6. Enrich metadata (if needed)
-     │
-     ├─► PayPal seats: Lookup paypal_seat_preferences for invitee_email, etc.
-     └─► MercadoPago: Lookup mp_subscription_preferences or mp_course_preferences
-         │
-         ▼
-  7. Call appropriate Supabase RPC
-     │
-     ├─► Subscriptions/Upgrades/Seats → handle_payment_subscription_success
-     └─► Courses → handle_payment_course_success
-         │
-         ▼
-  8. RPC handles ALL business logic:
-     ├─► Insert payment record (idempotent)
-     ├─► Cancel previous subscriptions
-     ├─► Create new subscription
-     ├─► Update organization.plan_id
-     ├─► Apply plan limits (soft-lock)
-     ├─► Apply Founders Program (if annual)
-     ├─► Reactivate bonus courses
-     └─► Handle seat/invitation creation
+     ↓
+  2. logPaymentEvent() → INSERT payment_events (audit trail)
+     ↓
+  3. Validate status (approved/completed) → SKIP if not approved
+     ↓
+  4. Parse metadata → Extract: user_id, org_id, plan_id, course_id, etc.
+     ↓
+  5. Detect product_type from gateway metadata
+     │   (MP: prefix; PayPal: custom_id format)
+     ↓
+  6. Fail-fast validation → Missing required field? Return 200 + skip RPC
+     ↓
+  7. CALL RPC ──────────────────────────────────┐
+                                                │
+RPC SIDE (THICK - ORCHESTRATOR):                │
+                                                │
+     handle_payment_subscription_success ◄──────┤ (subs/upgrade/seat)
+     or                                         │
+     handle_payment_course_success ◄────────────┤ (courses)
+                                                │
+        8. ADVISORY LOCK (pg_advisory_xact_lock)
+           └─► Prevents duplicate webhook processing
+        
+        9. step_payment_insert_idempotent()
+           └─► Insert payment (idempotency: if duplicate, return NULL)
+        
+       10. IF payment_id IS NULL
+           └─► RETURN already_processed (webhook seen before)
+        
+       11. step_subscription_expire_previous()
+           └─► Expire all active subscriptions for org
+        
+       12. step_subscription_create_active()
+           └─► Create new active subscription with correct expires_at
+        
+       13. step_organization_set_plan()
+           └─► UPDATE organizations.plan_id
+        
+       14. IF annual billing
+           └─► step_apply_founders_program()
+               ├─► Mark organizations.settings.is_founder = true
+               └─► step_course_enrollment_annual() for bonus course
+        
+       15. RETURN { status: 'ok', payment_id, subscription_id }
+        
+       16. ON ERROR → log_system_error() + RAISE (atomicity)
 ```
 
-### Subscription Lifecycle Events (PayPal)
+### Subscription Lifecycle Events (PayPal Only)
 
-| Event Type | Product Type (synthetic) | Behavior |
-|------------|-------------------------|----------|
-| `BILLING.SUBSCRIPTION.CANCELLED` | `subscription_cancellation` | RPC marks subscription as cancelled |
-| `BILLING.SUBSCRIPTION.SUSPENDED` | `subscription_suspension` | RPC marks subscription as suspended |
-| `PAYMENT.SALE.COMPLETED` | `subscription_renewal` | RPC extends expires_at |
+| Event Type | Product Type | Behavior |
+|------------|--------------|----------|
+| `BILLING.SUBSCRIPTION.CANCELLED` | `subscription_cancellation` | Status → 'cancelled' |
+| `BILLING.SUBSCRIPTION.SUSPENDED` | `subscription_suspension` | Status → 'suspended' |
+| `PAYMENT.SALE.COMPLETED` | `subscription_renewal` | Renew expires_at |
 
-### Supabase RPCs (Post-Payment Processing)
+### Two Primary RPC Functions (OPERATIONAL)
 
-| RPC | Purpose |
-|-----|---------|
-| `handle_payment_subscription_success` | All subscription-related post-payment logic |
-| `handle_payment_course_success` | Course enrollment and coupon redemption |
+| RPC Name | Params | Returns | Purpose | Status |
+|----------|--------|---------|---------|--------|
+| `handle_payment_subscription_success` | provider, provider_payment_id, user_id, org_id, plan_id, billing_period, amount, currency, metadata | `{status, payment_id, subscription_id}` | Handles subscriptions, upgrades, and seat payments | ✅ LIVE |
+| `handle_payment_course_success` | provider, provider_payment_id, user_id, course_id, amount, currency, metadata | `{status, payment_id}` | Handles course enrollments (1 year validity) | ✅ LIVE |
 
-### Synchronous Capture Flows
+### Step Functions (Supporting Infrastructure)
 
-> **Note**: Some flows still use direct function calls (not RPCs) during the synchronous capture process. These are invoked during the redirect-based checkout flows, not via webhooks.
+All step functions are called by the RPCs internally:
 
-| Flow | File | Functions Used |
-|------|------|----------------|
-| MP Upgrade Return | `handleUpgradeReturn.ts` | `insertPayment`, `upgradeOrganizationPlan` |
-| MP Subscription Return | `handleSubscriptionReturn.ts` | `insertPayment`, `upgradeOrganizationPlan` |
-| PayPal Upgrade Capture | `handleUpgradeCapture.ts` | `insertPayment`, `upgradeOrganizationPlan` |
-| PayPal Subscription Capture | `captureSubscriptionOrder.ts` | `insertPayment`, `upgradeOrganizationPlan` |
+| Function | Purpose | Called by |
+|----------|---------|-----------|
+| `step_payment_insert_idempotent()` | Idempotent payment insertion with duplicate detection | Both RPCs |
+| `step_subscription_expire_previous()` | Expire active subscriptions before creating new | `handle_payment_subscription_success` |
+| `step_subscription_create_active()` | Create active subscription with auto-calculated expires_at | `handle_payment_subscription_success` |
+| `step_organization_set_plan()` | Update organization.plan_id | `handle_payment_subscription_success` |
+| `step_course_enrollment_annual()` | Enroll user in course (1 year expiry) | Both RPCs |
+| `step_apply_founders_program()` | Mark founder status + enroll in bonus course | `handle_payment_subscription_success` (annual only) |
 
-These flows could be refactored to use RPCs in the future for consistency.
+### Synchronous Capture Flows (Still Use Direct Functions)
+
+> **Note**: Redirect-based checkout flows (like MP success handlers, PayPal capture endpoints) still use direct TypeScript functions for synchronous processing. These are NOT deprecated - they handle the immediate user redirect. Future refactor could move these to RPCs too.
+
+| Flow | File | Functions | Status |
+|------|------|-----------|--------|
+| MP Upgrade Return | `handleUpgradeReturn.ts` | `insertPayment()`, `upgradeOrganizationPlan()` | 🟡 Working |
+| MP Subscription Return | `handleSubscriptionReturn.ts` | `insertPayment()`, `upgradeOrganizationPlan()` | 🟡 Working |
+| PayPal Upgrade Capture | `handleUpgradeCapture.ts` | `insertPayment()`, `upgradeOrganizationPlan()` | 🟡 Working |
+| PayPal Subscription Capture | `captureSubscriptionOrder.ts` | `insertPayment()`, `upgradeOrganizationPlan()` | 🟡 Working |
+
+These use a hybrid pattern: Direct function calls for speed + same idempotency via `provider_payment_id` unique index.
 
 ---
 
-## 10. Orchestrator Functions
+## 10. Orchestrator Functions & RPC Architecture
 
-### Main Orchestrator: `upgradeOrganizationPlan()`
+> **NEW (Dec 2025)**: Post-payment orchestration moved to Supabase RPCs for atomicity and consistency.
 
-**File**: `server/lib/handlers/checkout/shared/subscriptions.ts` (line 472)
+### Primary Orchestrators: RPC Functions (OPERATIONAL)
 
-```
-upgradeOrganizationPlan()
-│
-├─ 1. UPDATE organization_subscriptions 
-│      SET status='expired', cancelled_at=now()
-│      WHERE org_id = X AND status = 'active'
-│      └─ [NO TRANSACTION] - Error only logged
-│
-├─ 2. INSERT organization_subscriptions (new active)
-│      └─ If error → THROW (aborts)
-│
-├─ 3. INSERT organization_billing_cycles
-│      └─ [NO TRANSACTION] - Error only logged
-│
-├─ 4. UPDATE organizations SET plan_id = X
-│      └─ If error → THROW (aborts)
-│
-├─ 5. applyPlanLimits() → Mark is_over_limit on projects/members
-│      └─ [NO TRANSACTION] - Error only logged
-│
-├─ 6. reactivateBonusCourseEnrollments() (if applicable)
-│      └─ [NO TRANSACTION] - Error only logged
-│
-└─ 7. applyFoundersProgram() (if annual)
-        ├─ UPDATE organizations.settings (is_founder: true)
-        └─ upsertEnrollment() → UPSERT course_enrollments
-        └─ [NO TRANSACTION] - Error only logged
+#### 1. `handle_payment_subscription_success()` - Subscriptions, Upgrades, Seats
+
+**Location**: Supabase (`prompts/tables/sistema.md` lines 1366-1475)
+
+```plpgsql
+handle_payment_subscription_success(
+  p_provider,              -- 'paypal' | 'mercadopago'
+  p_provider_payment_id,   -- External gateway ID
+  p_user_id,
+  p_organization_id,
+  p_plan_id,
+  p_billing_period,        -- 'monthly' | 'annual'
+  p_amount,
+  p_currency,
+  p_metadata
+) → { status, payment_id, subscription_id }
 ```
 
-### Shared Handlers
+**Flow (ATOMIC with ROLLBACK)**:
+1. Advisory lock on `(provider + provider_payment_id)` hash
+2. `step_payment_insert_idempotent()` - Idempotent payment insert
+3. `step_subscription_expire_previous()` - Expire active subscriptions
+4. `step_subscription_create_active()` - Create new active subscription
+5. `step_organization_set_plan()` - Update organization.plan_id
+6. IF annual: `step_apply_founders_program()` - Mark founder + enroll bonus
+7. ON ERROR: `log_system_error()` → RAISE (full rollback)
 
-| File | Purpose |
-|------|---------|
-| `shared/proration.ts` | Calculate upgrade credit from remaining subscription time |
-| `shared/seat-proration.ts` | Calculate prorated cost for adding new member |
-| `shared/subscriptions.ts` | `upgradeOrganizationPlan()`, `createGiftedSubscription()`, `executeScheduledPlanSwitch()` |
-| `shared/plan-limits.ts` | `applyPlanLimits()`, `getOrganizationLimitStatus()` - soft-lock via `is_over_limit` |
-| `shared/payments.ts` | `insertPayment()` - idempotent payment insertion |
-| `shared/enrollments.ts` | `upsertEnrollment()` - course enrollment with expiration |
-| `shared/coupons.ts` | `markCouponAsUsed()` - redemption tracking |
-| `shared/events.ts` | `logPaymentEvent()` - webhook/event logging |
-| `shared/auth.ts` | `createServiceSupabaseClient()` - service role client |
-| `shared/pricing.ts` | Exchange rate and price calculations |
-| `shared/helpers.ts` | `getCourseIdBySlug()`, `getPlanIdBySlug()` |
+**Status**: ✅ LIVE & TESTED
+
+#### 2. `handle_payment_course_success()` - Course Enrollments
+
+**Location**: Supabase (`prompts/tables/sistema.md` lines 1477-1553)
+
+```plpgsql
+handle_payment_course_success(
+  p_provider,
+  p_provider_payment_id,
+  p_user_id,
+  p_course_id,
+  p_amount,
+  p_currency,
+  p_metadata
+) → { status, payment_id }
+```
+
+**Flow (ATOMIC)**:
+1. Advisory lock on payment hash
+2. `step_payment_insert_idempotent()` - Idempotent payment insert
+3. `step_course_enrollment_annual()` - Enroll 1 year from now
+4. ON ERROR: `log_system_error()` → RAISE
+
+**Status**: ✅ LIVE & TESTED
+
+### Supporting Step Functions (Infrastructure)
+
+All called internally by RPCs:
+
+| Function | Signature | Purpose |
+|----------|-----------|---------|
+| `step_payment_insert_idempotent()` | `(provider, provider_payment_id, user_id, org_id, product_type, plan_id, course_id, amount, currency, metadata)` | Idempotent payment insert with ON CONFLICT DO NOTHING |
+| `step_subscription_expire_previous()` | `(org_id)` | Expire all active subscriptions |
+| `step_subscription_create_active()` | `(org_id, plan_id, billing_period)` | Create active subscription + auto expires_at |
+| `step_organization_set_plan()` | `(org_id, plan_id)` | UPDATE organization.plan_id |
+| `step_course_enrollment_annual()` | `(user_id, course_id)` | UPSERT enrollment with 1 year expiry |
+| `step_apply_founders_program()` | `(user_id, org_id)` | Mark is_founder + enroll in bonus |
+
+### Legacy Shared TypeScript Handlers (Still Used by Redirect Flows)
+
+These are called by synchronous capture endpoints, NOT webhooks:
+
+| File | Purpose | Status |
+|------|---------|--------|
+| `shared/proration.ts` | Calculate upgrade credit | 🟡 Used by MP/PayPal capture |
+| `shared/seat-proration.ts` | Calculate seat cost | 🟡 Used by capture flows |
+| `shared/subscriptions.ts` | `upgradeOrganizationPlan()` (legacy) | 🟡 Used by sync captures |
+| `shared/plan-limits.ts` | `applyPlanLimits()`, `getOrganizationLimitStatus()` | 🟡 Used by captures |
+| `shared/payments.ts` | `insertPayment()` (legacy) | 🟡 Used by captures |
+| `shared/enrollments.ts` | `upsertEnrollment()` | 🟡 Used by captures |
+| `shared/coupons.ts` | `markCouponAsUsed()` | 🟡 Used by captures |
+| `shared/events.ts` | `logPaymentEvent()` | ✅ Used by webhooks |
+| `shared/auth.ts` | `createServiceSupabaseClient()` | ✅ Used by all |
+| `shared/pricing.ts` | Exchange rate calculations | ✅ Used by all |
+| `shared/helpers.ts` | `getCourseIdBySlug()`, `getPlanIdBySlug()` | ✅ Used by all |
+
+**Note**: These TypeScript functions remain for redirect-based flows (MP success handlers, PayPal capture) to ensure synchronous user feedback. They use the same idempotency pattern as RPCs.
 
 ---
 

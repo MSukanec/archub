@@ -1162,6 +1162,401 @@ after
 update on users for EACH row
 execute FUNCTION sync_contact_on_user_update ();
 
+# FUNCIONES:
+
+## Funcion step_payment_insert_idempotent:
+
+CREATE OR REPLACE FUNCTION public.step_payment_insert_idempotent(
+  p_provider text,
+  p_provider_payment_id text,
+  p_user_id uuid,
+  p_organization_id uuid,
+  p_product_type text,
+  p_plan_id uuid,
+  p_course_id uuid,
+  p_amount numeric,
+  p_currency text,
+  p_metadata jsonb
+)
+RETURNS uuid
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_payment_id uuid;
+BEGIN
+  INSERT INTO public.payments (
+    provider,
+    provider_payment_id,
+    user_id,
+    organization_id,
+    product_type,
+    plan_id,
+    course_id,
+    amount,
+    currency,
+    status,
+    metadata
+  )
+  VALUES (
+    p_provider,
+    p_provider_payment_id,
+    p_user_id,
+    p_organization_id,
+    p_product_type,
+    p_plan_id,
+    p_course_id,
+    p_amount,
+    p_currency,
+    'approved',
+    coalesce(p_metadata, '{}'::jsonb)
+  )
+  ON CONFLICT (provider, provider_payment_id)
+  DO NOTHING
+  RETURNING id INTO v_payment_id;
+
+  RETURN v_payment_id;
+END;
+$$;
+
+## Funcion step_subscription_expire_previous:
+
+CREATE OR REPLACE FUNCTION public.step_subscription_expire_previous(
+  p_organization_id uuid
+)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  UPDATE public.organization_subscriptions
+  SET
+    status = 'expired',
+    expires_at = now()
+  WHERE organization_id = p_organization_id
+    AND status = 'active';
+END;
+$$;
+
+## Funcion step_subscription_create_active:
+
+CREATE OR REPLACE FUNCTION public.step_subscription_create_active(
+  p_organization_id uuid,
+  p_plan_id uuid,
+  p_billing_period text
+)
+RETURNS uuid
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_subscription_id uuid;
+  v_expires_at timestamptz;
+BEGIN
+  IF p_billing_period = 'annual' THEN
+    v_expires_at := now() + interval '1 year';
+  ELSE
+    v_expires_at := now() + interval '1 month';
+  END IF;
+
+  INSERT INTO public.organization_subscriptions (
+    organization_id,
+    plan_id,
+    billing_period,
+    status,
+    starts_at,
+    expires_at
+  )
+  VALUES (
+    p_organization_id,
+    p_plan_id,
+    p_billing_period,
+    'active',
+    now(),
+    v_expires_at
+  )
+  RETURNING id INTO v_subscription_id;
+
+  RETURN v_subscription_id;
+END;
+$$;
+
+## Funcion step_organization_set_plan:
+
+CREATE OR REPLACE FUNCTION public.step_organization_set_plan(
+  p_organization_id uuid,
+  p_plan_id uuid
+)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  UPDATE public.organizations
+  SET
+    plan_id = p_plan_id,
+    updated_at = now()
+  WHERE id = p_organization_id;
+END;
+$$;
+
+## Funcion step_course_enrollment_annual:
+
+CREATE OR REPLACE FUNCTION public.step_course_enrollment_annual(
+  p_user_id uuid,
+  p_course_id uuid
+)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  INSERT INTO public.course_enrollments (
+    user_id,
+    course_id,
+    status,
+    expires_at
+  )
+  VALUES (
+    p_user_id,
+    p_course_id,
+    'active',
+    now() + interval '1 year'
+  )
+  ON CONFLICT (user_id, course_id)
+  DO UPDATE
+  SET
+    status = 'active',
+    expires_at = excluded.expires_at,
+    updated_at = now();
+END;
+$$;
+
+## Funcion step_apply_founders_program:
+
+CREATE OR REPLACE FUNCTION public.step_apply_founders_program(
+  p_user_id uuid,
+  p_organization_id uuid
+)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_bonus_course_id uuid;
+BEGIN
+  -- marcar organización como founder
+  UPDATE public.organizations
+  SET
+    settings = coalesce(settings, '{}'::jsonb)
+      || jsonb_build_object('is_founder', true),
+    updated_at = now()
+  WHERE id = p_organization_id;
+
+  -- curso bonus desde app_settings
+  SELECT value::uuid
+  INTO v_bonus_course_id
+  FROM public.app_settings
+  WHERE key = 'founder_bonus_course_id'
+  LIMIT 1;
+
+  IF v_bonus_course_id IS NOT NULL THEN
+    PERFORM public.step_course_enrollment_annual(
+      p_user_id,
+      v_bonus_course_id
+    );
+  END IF;
+END;
+$$;
+
+## Funcion handle_payment_subscription_success:
+
+CREATE OR REPLACE FUNCTION public.handle_payment_subscription_success(
+  p_provider text,
+  p_provider_payment_id text,
+  p_user_id uuid,
+  p_organization_id uuid,
+  p_plan_id uuid,
+  p_billing_period text, -- 'monthly' | 'annual'
+  p_amount numeric,
+  p_currency text,
+  p_metadata jsonb
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_payment_id uuid;
+  v_subscription_id uuid;
+BEGIN
+  -- ============================================================
+  -- 1) Idempotencia fuerte (anti-webhook duplicado)
+  -- ============================================================
+  PERFORM pg_advisory_xact_lock(
+    hashtext(p_provider || p_provider_payment_id)
+  );
+
+  -- ============================================================
+  -- 2) Registrar pago (o detectar duplicado)
+  -- ============================================================
+  v_payment_id := public.step_payment_insert_idempotent(
+    p_provider,
+    p_provider_payment_id,
+    p_user_id,
+    p_organization_id,
+    'subscription',
+    p_plan_id,
+    NULL,
+    p_amount,
+    p_currency,
+    p_metadata
+  );
+
+  IF v_payment_id IS NULL THEN
+    RETURN jsonb_build_object(
+      'status', 'already_processed'
+    );
+  END IF;
+
+  -- ============================================================
+  -- 3) Expirar suscripción anterior
+  -- ============================================================
+  PERFORM public.step_subscription_expire_previous(
+    p_organization_id
+  );
+
+  -- ============================================================
+  -- 4) Crear nueva suscripción activa
+  -- ============================================================
+  v_subscription_id := public.step_subscription_create_active(
+    p_organization_id,
+    p_plan_id,
+    p_billing_period
+  );
+
+  -- ============================================================
+  -- 5) Actualizar plan activo de la organización
+  -- ============================================================
+  PERFORM public.step_organization_set_plan(
+    p_organization_id,
+    p_plan_id
+  );
+
+  -- ============================================================
+  -- 6) Fundadores (SOLO si es anual)
+  -- ============================================================
+  IF p_billing_period = 'annual' THEN
+    PERFORM public.step_apply_founders_program(
+      p_user_id,
+      p_organization_id
+    );
+  END IF;
+
+  -- ============================================================
+  -- 7) OK
+  -- ============================================================
+  RETURN jsonb_build_object(
+    'status', 'ok',
+    'payment_id', v_payment_id,
+    'subscription_id', v_subscription_id
+  );
+
+EXCEPTION
+  WHEN OTHERS THEN
+    PERFORM public.log_system_error(
+      'payment',
+      'subscription',
+      'handle_payment_subscription_success',
+      SQLERRM,
+      jsonb_build_object(
+        'provider', p_provider,
+        'provider_payment_id', p_provider_payment_id,
+        'user_id', p_user_id,
+        'organization_id', p_organization_id
+      ),
+      'critical'
+    );
+    RAISE;
+END;
+$$;
+
+## Funcion handle_payment_subscription_success:
+
+CREATE OR REPLACE FUNCTION public.handle_payment_course_success(
+  p_provider text,
+  p_provider_payment_id text,
+  p_user_id uuid,
+  p_course_id uuid,
+  p_amount numeric,
+  p_currency text,
+  p_metadata jsonb
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_payment_id uuid;
+BEGIN
+  -- ============================================================
+  -- 1) Idempotencia
+  -- ============================================================
+  PERFORM pg_advisory_xact_lock(
+    hashtext(p_provider || p_provider_payment_id)
+  );
+
+  -- ============================================================
+  -- 2) Registrar pago
+  -- ============================================================
+  v_payment_id := public.step_payment_insert_idempotent(
+    p_provider,
+    p_provider_payment_id,
+    p_user_id,
+    NULL,
+    'course',
+    NULL,
+    p_course_id,
+    p_amount,
+    p_currency,
+    p_metadata
+  );
+
+  IF v_payment_id IS NULL THEN
+    RETURN jsonb_build_object(
+      'status', 'already_processed'
+    );
+  END IF;
+
+  -- ============================================================
+  -- 3) Enroll anual al curso
+  -- ============================================================
+  PERFORM public.step_course_enrollment_annual(
+    p_user_id,
+    p_course_id
+  );
+
+  RETURN jsonb_build_object(
+    'status', 'ok',
+    'payment_id', v_payment_id
+  );
+
+EXCEPTION
+  WHEN OTHERS THEN
+    PERFORM public.log_system_error(
+      'payment',
+      'course',
+      'handle_payment_course_success',
+      SQLERRM,
+      jsonb_build_object(
+        'provider', p_provider,
+        'provider_payment_id', p_provider_payment_id,
+        'user_id', p_user_id,
+        'course_id', p_course_id
+      ),
+      'critical'
+    );
+    RAISE;
+END;
+$$;
+
+
+
+
+
+
 
 
 
