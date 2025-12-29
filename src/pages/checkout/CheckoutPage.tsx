@@ -1128,19 +1128,9 @@ Titular: Matias Esteban Sukanec`;
     icon: ShoppingCart,
     title: "Checkout",
     pageTitle: "Completá tu compra de forma segura",
-    actions: [
-      <Button
-        key="back"
-        variant="ghost"
-        size="sm"
-        onClick={() => navigate("/learning/courses")}
-        className="gap-2"
-        data-testid="button-back-to-course"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Volver al curso
-      </Button>
-    ]
+    showBackButton: true,
+    onBackClick: () => navigate("/learning/courses"),
+    backButtonText: "Volver al curso"
   };
 
   return (
