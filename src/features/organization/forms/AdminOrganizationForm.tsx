@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { apiRequest } from '@/lib/queryClient';
 import { useCurrentUser } from '@/features/users/hooks';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
@@ -94,12 +95,7 @@ export function AdminOrganizationForm({
 
   const { mutate: createOrganization, isPending: isCreating } = useOptimisticMutation({
     mutationFn: async (data: OrganizationFormData) => {
-      const response = await fetch('/api/organizations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: data.name }),
-        credentials: 'include'
-      });
+      const response = await apiRequest('POST', '/api/organizations', { name: data.name });
       
       if (!response.ok) {
         const errorData = await response.json();
