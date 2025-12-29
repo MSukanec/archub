@@ -106,6 +106,10 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
     let months: number | null = null;
     let coupon_code: string | null = null;
     let coupon_id: string | null = null;
+    let role_id: string | null = null;
+    let invitee_email: string | null = null;
+    let subscription_id: string | null = null;
+    let seat_preference_id: string | null = null;
 
     // Parse custom_id
     if (custom_id_raw) {
@@ -113,13 +117,32 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
         if (custom_id_raw.includes("|")) {
           const parts = custom_id_raw.split("|");
 
-          // Subscription format: user_id|plan_id|organization_id|billing_period (4 parts)
-          if (parts.length === 4 && (parts[3] === "monthly" || parts[3] === "annual")) {
+          // Upgrade format: user_id|plan_id|organization_id|billing_period|upgrade|shortId (6 parts)
+          if (parts.length === 6 && parts[4] === "upgrade") {
+            user_hint = parts[0] || null;
+            plan_id = parts[1] || null;
+            organization_id = parts[2] || null;
+            billing_period = (parts[3] as "monthly" | "annual") || null;
+            product_type = "subscription_upgrade";
+            // shortId is parts[5] - can lookup paypal_upgrade_preferences if needed
+          }
+          // Subscription format: user_id|plan_id|organization_id|billing_period (4 parts, last is monthly/annual)
+          else if (parts.length === 4 && (parts[3] === "monthly" || parts[3] === "annual")) {
             user_hint = parts[0] || null;
             plan_id = parts[1] || null;
             organization_id = parts[2] || null;
             billing_period = parts[3];
             product_type = "subscription";
+          }
+          // Seat format: user_id|organization_id|role_id|pps_shortId (4 parts, last starts with pps_)
+          else if (parts.length === 4 && parts[3]?.startsWith("pps_")) {
+            user_hint = parts[0] || null;
+            organization_id = parts[1] || null;
+            role_id = parts[2] || null;
+            seat_preference_id = parts[3];
+            product_type = "seat";
+            // Note: Seat payments are primarily handled by handleSeatCapture,
+            // but we support webhook processing as fallback
           }
           // Course format with coupon: user_id|course_id|coupon_code|coupon_id (4 parts)
           else if (parts.length === 4) {
@@ -177,6 +200,29 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       const bp = parsed.billing_period;
       if (bp === "monthly" || bp === "annual") {
         billing_period = bp;
+      }
+    }
+
+    // Fetch seat preference data if we detected a seat payment
+    if (product_type === "seat" && seat_preference_id) {
+      const { data: seatPref, error: seatPrefError } = await supabase
+        .from("paypal_seat_preferences")
+        .select("*")
+        .eq("id", seat_preference_id)
+        .maybeSingle();
+
+      if (seatPref && !seatPrefError) {
+        // Enrich with seat preference data
+        invitee_email = seatPref.invitee_email || null;
+        subscription_id = seatPref.subscription_id || null;
+        billing_period = seatPref.billing_period as "monthly" | "annual" || null;
+        // Ensure we have the user_id from preference if not already set
+        if (!user_hint) user_hint = seatPref.user_id;
+        if (!organization_id) organization_id = seatPref.organization_id;
+        if (!role_id) role_id = seatPref.role_id;
+        console.log("[PayPal webhook] Enriched seat data from preference:", seat_preference_id);
+      } else {
+        console.warn("[PayPal webhook] ⚠️ Could not fetch seat preference:", seat_preference_id, seatPrefError);
       }
     }
 
@@ -283,18 +329,55 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       return { success: true, processed: false, eventType };
     }
 
-    // 3. Call appropriate RPC based on product type
-    if (product_type === "subscription") {
-      if (!organization_id || !billing_period || !captureId) {
-        console.error(`[PayPal webhook] ❌ Missing subscription data:`, { organization_id, billing_period, captureId });
+    // 3. Call appropriate RPC based on product type with VALIDATION
+    if (product_type === "subscription" || product_type === "subscription_upgrade" || product_type === "seat") {
+      // VALIDATE common required identifiers
+      if (!user_hint) {
+        console.error(`[PayPal webhook] ❌ Missing user_id for ${product_type}`);
+        return { success: true, processed: false, eventType };
+      }
+      
+      if (!organization_id) {
+        console.error(`[PayPal webhook] ❌ Missing organization_id for ${product_type}`);
+        return { success: true, processed: false, eventType };
+      }
+      
+      if (!captureId) {
+        console.error(`[PayPal webhook] ❌ Missing captureId for ${product_type}`);
         return { success: true, processed: false, eventType };
       }
 
-      const metadata = {
+      // For subscription and subscription_upgrade, plan_id is required
+      if ((product_type === "subscription" || product_type === "subscription_upgrade") && !plan_id) {
+        console.error(`[PayPal webhook] ❌ Missing plan_id for ${product_type}`);
+        return { success: true, processed: false, eventType };
+      }
+      
+      // For subscription, billing_period is required
+      if (product_type === "subscription" && !billing_period) {
+        console.error(`[PayPal webhook] ❌ Missing billing_period for subscription`);
+        return { success: true, processed: false, eventType };
+      }
+
+      // For seats, role_id is required
+      if (product_type === "seat" && !role_id) {
+        console.error(`[PayPal webhook] ❌ Missing role_id for seat payment`);
+        return { success: true, processed: false, eventType };
+      }
+
+      const metadata: Record<string, any> = {
         order_id: order_id,
         invoice_id: invoice_id,
         plan_slug: plan_slug,
       };
+
+      // Add seat-specific metadata
+      if (product_type === "seat") {
+        metadata.role_id = role_id;
+        metadata.invitee_email = invitee_email;
+        metadata.subscription_id = subscription_id;
+        metadata.seat_preference_id = seat_preference_id;
+      }
 
       console.log(`[PayPal webhook] Calling handle_payment_subscription_success:`, {
         provider: 'paypal',
@@ -302,6 +385,8 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
         user_id: user_hint,
         organization_id,
         plan_id,
+        billing_period,
+        product_type,
       });
 
       const { data: rpcResult, error: rpcError } = await supabase.rpc('handle_payment_subscription_success', {
@@ -311,7 +396,7 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
         p_organization_id: organization_id,
         p_plan_id: plan_id,
         p_billing_period: billing_period,
-        p_product_type: 'subscription',
+        p_product_type: product_type,
         p_amount: amount,
         p_currency: currency,
         p_metadata: metadata,
@@ -322,12 +407,28 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
         return { success: false, error: "rpc_error", warn: rpcError.message };
       }
 
-      console.log(`[PayPal webhook] ✅ Subscription RPC success:`, rpcResult);
+      console.log(`[PayPal webhook] ✅ ${product_type} RPC success:`, rpcResult);
       return { success: true, processed: true, eventType };
     }
 
     // Course purchase
-    if (user_hint && course_hint && captureId) {
+    if (product_type === "course") {
+      // VALIDATE all required identifiers
+      if (!user_hint) {
+        console.error(`[PayPal webhook] ❌ Missing user_id for course purchase`);
+        return { success: true, processed: false, eventType };
+      }
+      
+      if (!course_hint) {
+        console.error(`[PayPal webhook] ❌ Missing course_id for course purchase`);
+        return { success: true, processed: false, eventType };
+      }
+      
+      if (!captureId) {
+        console.error(`[PayPal webhook] ❌ Missing captureId for course purchase`);
+        return { success: true, processed: false, eventType };
+      }
+
       const metadata = {
         order_id: order_id,
         invoice_id: invoice_id,
@@ -362,7 +463,12 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       return { success: true, processed: true, eventType };
     }
 
-    console.log(`[PayPal webhook] No action taken for event:`, { eventType, product_type });
+    // Fail fast if product_type is unknown or not provided
+    if (!product_type) {
+      console.error(`[PayPal webhook] ❌ Cannot determine product_type from event data`);
+    } else {
+      console.error(`[PayPal webhook] ❌ Unhandled product_type: ${product_type}`);
+    }
     return { success: true, processed: false, eventType };
   } catch (e: any) {
     console.error("[PayPal webhook] Error:", e);

@@ -124,7 +124,24 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       const amount = Number(pay?.transaction_amount ?? 0);
       const currency = String(pay?.currency_id ?? "ARS");
 
-      const productType = md.product_type || fromExt.product_type || 'course';
+      // CRITICAL: Determine product type from external_reference prefix (most reliable)
+      // DO NOT default to 'course' - fail fast if type cannot be determined
+      let productType: string | null = null;
+      
+      if (externalRef.startsWith("mpu_")) {
+        productType = 'subscription_upgrade';
+      } else if (externalRef.startsWith("mpr_")) {
+        productType = 'subscription';
+      } else if (externalRef.startsWith("mps_")) {
+        productType = 'seat';
+      } else if (externalRef.startsWith("mp_")) {
+        productType = 'course';
+      } else if (md.product_type) {
+        productType = md.product_type;
+      } else if (fromExt.product_type) {
+        productType = fromExt.product_type;
+      }
+      
       const resolvedUserId = md.user_id ?? fromExt.user_id ?? null;
 
       // 1. Log RAW event
@@ -148,8 +165,37 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
         return { success: true, processed: "not_approved", id: finalId };
       }
 
-      // 3. Call appropriate RPC based on product type
+      // 3. Fail fast if product type cannot be determined
+      if (!productType) {
+        console.error(`[MP webhook] ❌ Cannot determine product_type from external_reference: ${externalRef}`);
+        return { success: true, processed: "unknown_product_type", id: finalId };
+      }
+
+      // 4. Call appropriate RPC based on product type with VALIDATION
       if (productType === 'subscription' || productType === 'subscription_upgrade' || productType === 'seat') {
+        // VALIDATE required identifiers for subscription-type payments
+        if (!resolvedUserId) {
+          console.error(`[MP webhook] ❌ Missing user_id for ${productType}`);
+          return { success: true, processed: "missing_user_id", id: finalId };
+        }
+        
+        if (!fromExt.organization_id) {
+          console.error(`[MP webhook] ❌ Missing organization_id for ${productType}`);
+          return { success: true, processed: "missing_organization_id", id: finalId };
+        }
+
+        // For new subscriptions and upgrades, plan_id is required
+        if ((productType === 'subscription' || productType === 'subscription_upgrade') && !fromExt.plan_id) {
+          console.error(`[MP webhook] ❌ Missing plan_id for ${productType}`);
+          return { success: true, processed: "missing_plan_id", id: finalId };
+        }
+
+        // For seats, role_id is required
+        if (productType === 'seat' && !fromExt.role_id) {
+          console.error(`[MP webhook] ❌ Missing role_id for seat payment`);
+          return { success: true, processed: "missing_role_id", id: finalId };
+        }
+
         const metadata = {
           preference_id: externalRef,
           preference_table: preferenceTable,
@@ -177,7 +223,7 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
           p_provider: 'mercadopago',
           p_provider_payment_id: providerPaymentId,
           p_user_id: resolvedUserId,
-          p_organization_id: fromExt.organization_id || null,
+          p_organization_id: fromExt.organization_id,
           p_plan_id: fromExt.plan_id || null,
           p_billing_period: fromExt.billing_period || null,
           p_product_type: productType,
@@ -196,6 +242,17 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       } 
       
       if (productType === 'course') {
+        // VALIDATE required identifiers for course payments
+        if (!resolvedUserId) {
+          console.error(`[MP webhook] ❌ Missing user_id for course payment`);
+          return { success: true, processed: "missing_user_id", id: finalId };
+        }
+        
+        if (!fromExt.course_id) {
+          console.error(`[MP webhook] ❌ Missing course_id for course payment`);
+          return { success: true, processed: "missing_course_id", id: finalId };
+        }
+
         const metadata = {
           preference_id: externalRef,
           preference_table: preferenceTable,
@@ -218,7 +275,7 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
           p_provider: 'mercadopago',
           p_provider_payment_id: providerPaymentId,
           p_user_id: resolvedUserId,
-          p_course_id: fromExt.course_id || null,
+          p_course_id: fromExt.course_id,
           p_amount: amount,
           p_currency: currency,
           p_metadata: metadata,
@@ -233,7 +290,9 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
         return { success: true, processed: "course", id: finalId };
       }
 
-      return { success: true, processed: "unknown_product_type", id: finalId };
+      // Should never reach here since we validated productType above
+      console.error(`[MP webhook] ❌ Unhandled product_type: ${productType}`);
+      return { success: true, processed: "unhandled_product_type", id: finalId };
     }
 
     // === MERCHANT ORDER ===
