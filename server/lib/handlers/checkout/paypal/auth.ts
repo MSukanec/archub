@@ -10,11 +10,15 @@ export async function getPayPalAccessToken(): Promise<string> {
   }
 
   const clientIdPreview = PAYPAL_CLIENT_ID?.substring(0, 10) || "UNDEFINED";
-  const hasSecret = !!PAYPAL_CLIENT_SECRET;
+  const mode = isPayPalSandbox ? "SANDBOX 🧪" : "PRODUCTION 🚨";
+  
+  console.log(`[PayPal Auth] Authenticating in ${mode}`);
+  console.log(`[PayPal Auth] Endpoint: ${PAYPAL_BASE_URL}`);
+  console.log(`[PayPal Auth] Client ID preview: ${clientIdPreview}...`);
 
   if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
     throw new Error(
-      `PayPal credentials missing! CLIENT_ID: ${!!PAYPAL_CLIENT_ID}, SECRET: ${!!PAYPAL_CLIENT_SECRET}`
+      `PayPal credentials missing! CLIENT_ID: ${!!PAYPAL_CLIENT_ID}, SECRET: ${!!PAYPAL_CLIENT_SECRET}. Mode: ${mode}`
     );
   }
 

@@ -1,4 +1,7 @@
-const PAYPAL_ENV = process.env.PAYPAL_ENV || "production";
+// Force sandbox in development mode for testing
+const PAYPAL_ENV = process.env.NODE_ENV === 'development' 
+  ? 'sandbox' 
+  : (process.env.PAYPAL_ENV || "production");
 
 export const isPayPalSandbox = PAYPAL_ENV === "sandbox";
 
@@ -19,4 +22,9 @@ export const PAYPAL_BASE_URL = isPayPalSandbox
   : "https://api-m.paypal.com";
 
 export function logPayPalMode(context: string): void {
+  if (isPayPalSandbox) {
+    console.log(`[PayPal] ${context} - MODE: SANDBOX (development)`);
+  } else {
+    console.log(`[PayPal] ${context} - MODE: PRODUCTION`);
+  }
 }
