@@ -2,6 +2,13 @@
 
 ## Funcion analytics_enter_view:
 
+```sql
+CREATE OR REPLACE FUNCTION public.analytics_enter_view(p_view text)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 declare
   v_user_id uuid;
   v_org_id uuid;
@@ -11,9 +18,18 @@ begin
   select up.last_organization_id into v_org_id from public.user_preferences up where up.user_id = v_user_id limit 1;
   insert into public.user_view_history (user_id, organization_id, view_name) values (v_user_id, v_org_id, p_view);
 end;
+$$;
+```
 
 ## Funcion analytics_exit_previous_view:
 
+```sql
+CREATE OR REPLACE FUNCTION public.analytics_exit_previous_view()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 declare
   v_user_id uuid;
 begin
@@ -21,9 +37,18 @@ begin
   if v_user_id is null then return; end if;
   update public.user_view_history set exited_at = now(), duration_seconds = extract(epoch from (now() - entered_at))::integer where user_id = v_user_id and exited_at is null;
 end;
+$$;
+```
 
 ## Funcion heartbeat:
 
+```sql
+CREATE OR REPLACE FUNCTION public.heartbeat(p_org_id uuid, p_status text DEFAULT NULL, p_from text DEFAULT NULL)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 declare
   v_auth_id uuid;
   v_user_id uuid;
@@ -34,9 +59,25 @@ begin
   if v_user_id is null then raise exception 'User not provisioned'; end if;
   insert into public.user_presence (user_id, org_id, last_seen_at, status, updated_from) values (v_user_id, p_org_id, now(), coalesce(p_status, 'online'), p_from) on conflict (user_id) do update set last_seen_at = excluded.last_seen_at, status = excluded.status, updated_from = excluded.updated_from;
 end;
+$$;
+```
 
 ## Funcion log_activity:
 
+```sql
+CREATE OR REPLACE FUNCTION public.log_activity(
+  p_organization_id uuid,
+  p_user_id uuid,
+  p_action text,
+  p_target_table text,
+  p_target_id uuid,
+  p_metadata jsonb DEFAULT NULL
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 begin
   insert into public.organization_activity_logs (
     organization_id,
@@ -57,9 +98,18 @@ begin
     now()
   );
 end;
+$$;
+```
 
 ## Funcion presence_set_view:
 
+```sql
+CREATE OR REPLACE FUNCTION public.presence_set_view(p_view text)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 declare
   v_user_id uuid;
 begin
@@ -67,27 +117,34 @@ begin
   if v_user_id is null then raise exception 'User not authenticated'; end if;
   update public.user_presence set current_view = p_view where user_id = v_user_id;
 end;
+$$;
+```
 
 ## Funcion update_org_last_activity:
 
+```sql
+CREATE OR REPLACE FUNCTION public.update_org_last_activity()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 begin
   if new.organization_id is not null then
     update public.organizations set last_activity_at = now() where id = new.organization_id;
   end if;
   return new;
 end;
+$$;
+```
 
+---
 
+## Instrucciones:
 
+1. Ve a Supabase → SQL Editor
+2. Copia cada función SQL de arriba
+3. Ejecuta una por una en el SQL Editor
+4. Reinicia el servidor
 
-
-
-
-
-
-
-
-
-
-
-
+¡Con SECURITY DEFINER, las funciones tendrán permisos para usar `auth.uid()` correctamente!
