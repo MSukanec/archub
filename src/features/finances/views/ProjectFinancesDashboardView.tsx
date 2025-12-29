@@ -238,7 +238,7 @@ export function ProjectFinancesDashboardView({
 
     const totalIngresos = calculateMonetaryKPI({
       items: ingresosMovements.map(m => ({
-        amount: m.amount,
+        amount: Math.abs(m.amount),
         currency_id: m.currency_id,
         currency: m.currency,
         exchange_rate: m.exchange_rate
@@ -250,7 +250,7 @@ export function ProjectFinancesDashboardView({
 
     const totalEgresos = calculateMonetaryKPI({
       items: egresosMovements.map(m => ({
-        amount: m.amount,
+        amount: Math.abs(m.amount),
         currency_id: m.currency_id,
         currency: m.currency,
         exchange_rate: m.exchange_rate
@@ -267,7 +267,7 @@ export function ProjectFinancesDashboardView({
 
     const previousIngresos = calculateMonetaryKPI({
       items: previousIngresosMovements.map(m => ({
-        amount: m.amount,
+        amount: Math.abs(m.amount),
         currency_id: m.currency_id,
         currency: m.currency,
         exchange_rate: m.exchange_rate
@@ -279,7 +279,7 @@ export function ProjectFinancesDashboardView({
 
     const previousEgresos = calculateMonetaryKPI({
       items: previousEgresosMovements.map(m => ({
-        amount: m.amount,
+        amount: Math.abs(m.amount),
         currency_id: m.currency_id,
         currency: m.currency,
         exchange_rate: m.exchange_rate
