@@ -113,7 +113,7 @@ export function ProjectFinancesView({ activeTab, onTabChange }: ProjectFinancesV
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       {activeTab === "dashboard" && (
         <ProjectFinancesDashboardView
           movements={allMovements}
