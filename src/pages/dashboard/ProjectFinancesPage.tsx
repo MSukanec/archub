@@ -130,7 +130,9 @@ export function ProjectFinancesPage() {
 
   return (
     <Layout wide={false} headerProps={headerProps}>
-      <ProjectFinancesView activeTab={activeTab} onTabChange={setActiveTab} />
+      <div className="space-y-6">
+        <ProjectFinancesView activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
     </Layout>
   );
 }
