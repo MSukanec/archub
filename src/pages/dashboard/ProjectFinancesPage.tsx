@@ -1,15 +1,23 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { LabLayout } from "@/layouts/lab/LabLayout";
 import { DollarSign, Plus, Calendar, ChevronDown } from "lucide-react";
 import { useCurrentUser } from "@/features/users/hooks";
 import { useProjectContext } from "@/stores/projectContext";
+import { useNavigationStore } from "@/stores/navigationStore";
 import { Button } from "@/components/ui/button";
 import { useGlobalModalStore } from "@/components/modal";
 import { useUnifiedMovements } from "@/features/finances/hooks/use-unified-movements";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ProjectFinancesView } from "@/features/finances/views/ProjectFinancesView";
-import { calculateAvailablePeriods, type PeriodFilter } from "@/features/finances";
+import { 
+  ProjectFinancesDashboardView, 
+  ProjectFinancesMovementsView,
+  calculateAvailablePeriods, 
+  type PeriodFilter 
+} from "@/features/finances";
+import { useFinancesDataHealth, DataHealthAlertMulti } from "@/core/data-health";
+import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from "@/hooks/use-currencies";
+import { LoadingSpinner } from "@/components/shared/layout/LoadingSpinner";
 
 const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
   { value: '30d', label: 'Últimos 30 días' },
@@ -28,15 +36,57 @@ export function ProjectFinancesPage() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all');
   const [periodPopoverOpen, setPeriodPopoverOpen] = useState(false);
+  const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
+  const [activeFilterIssueId, setActiveFilterIssueId] = useState<string | null>(null);
+  
   const { data: userData } = useCurrentUser();
   const { currentOrganizationId, selectedProjectId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
+  const { setSidebarLevel } = useNavigationStore();
+  
   const organizationId = currentOrganizationId || userData?.organization?.id;
-
   const layoutPreference = userData?.preferences?.layout || 'experimental';
   const isLabLayout = layoutPreference === 'lab';
 
-  const { data: allMovements = [] } = useUnifiedMovements(organizationId, selectedProjectId || undefined);
+  useEffect(() => {
+    setSidebarLevel('project');
+  }, [setSidebarLevel]);
+
+  const { data: allMovements = [], isLoading: movementsLoading } = useUnifiedMovements(organizationId, selectedProjectId || undefined);
+  const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
+  const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
+  
+  const dataHealth = useFinancesDataHealth(allMovements, {
+    organizationId: organizationId || '',
+    defaultCurrencyId: defaultCurrency?.id,
+    isMultiCurrency,
+    enabled: !!organizationId && allMovements.length > 0,
+  });
+
+  useEffect(() => {
+    if (activeFilterIssueId && !dataHealth.hasIssues) {
+      setActiveFilterIssueId(null);
+    }
+  }, [activeFilterIssueId, dataHealth.hasIssues]);
+
+  const filteredMovementIds = useMemo(() => {
+    if (!activeFilterIssueId) return null;
+    return dataHealth.getAffectedIdsForIssue(activeFilterIssueId);
+  }, [activeFilterIssueId, dataHealth]);
+
+  const handleDataHealthClick = useCallback((issueId: string) => {
+    if (activeTab !== 'movements') {
+      setActiveTab('movements');
+      setActiveFilterIssueId(issueId);
+    } else {
+      if (activeFilterIssueId === issueId) {
+        setActiveFilterIssueId(null);
+      } else {
+        setActiveFilterIssueId(issueId);
+      }
+    }
+  }, [activeTab, activeFilterIssueId]);
+
   const availablePeriods = useMemo(() => calculateAvailablePeriods(allMovements), [allMovements]);
   
   const validSelectedPeriod = useMemo(() => {
@@ -110,6 +160,55 @@ export function ProjectFinancesPage() {
     } : undefined,
   };
 
+  const isProjectReady = !!selectedProjectId;
+
+  const renderContent = () => {
+    if (!isProjectReady) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <LoadingSpinner size="lg" />
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        {activeTab === "dashboard" && (
+          <ProjectFinancesDashboardView
+            movements={allMovements}
+            organizationId={organizationId}
+            onNavigateToMovements={() => setActiveTab('movements')}
+            onNavigateToTab={(tab) => {
+              if (tab === 'movements') setActiveTab('movements');
+            }}
+            onScrollToPanel={(panelId) => {
+              const panelIdToTestId: Record<string, string> = {
+                monthlyChart: 'chart-monthly-trend',
+                categoryBreakdown: 'chart-category-breakdown'
+              };
+              const testId = panelIdToTestId[panelId] || `chart-${panelId}`;
+              const element = document.querySelector(`[data-testid="${testId}"]`);
+              element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }}
+            selectedPeriod={validSelectedPeriod}
+            dismissedIssueIds={dismissedIssueIds}
+            onDismissIssue={(issueId: string) => {
+              setDismissedIssueIds(prev => new Set([...Array.from(prev), issueId]));
+            }}
+          />
+        )}
+        {activeTab === "movements" && (
+          <ProjectFinancesMovementsView 
+            projectId={selectedProjectId}
+            externalFilterIssueId={activeFilterIssueId}
+            onClearExternalFilter={() => setActiveFilterIssueId(null)}
+            getAffectedIdsForIssue={dataHealth.getAffectedIdsForIssue}
+          />
+        )}
+      </div>
+    );
+  };
+
   if (isLabLayout) {
     return (
       <LabLayout 
@@ -120,10 +219,10 @@ export function ProjectFinancesPage() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         toolbarProps={{
-          secondaryRightSlot: secondaryRightContent,
+          secondaryRightSlot: periodContent,
         }}
       >
-        <ProjectFinancesView activeTab={activeTab} onTabChange={setActiveTab} />
+        {renderContent()}
       </LabLayout>
     );
   }
@@ -131,7 +230,7 @@ export function ProjectFinancesPage() {
   return (
     <Layout wide={false} headerProps={headerProps}>
       <div className="space-y-6">
-        <ProjectFinancesView activeTab={activeTab} onTabChange={setActiveTab} />
+        {renderContent()}
       </div>
     </Layout>
   );

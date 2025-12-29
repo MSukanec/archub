@@ -49,6 +49,5 @@ export { default as AdminPaymentTransferRow } from './components/admin/AdminPaym
 export { OrganizationFinancesDashboardView, calculateAvailablePeriods } from './views/OrganizationFinancesDashboardView';
 export type { PeriodFilter } from './views/OrganizationFinancesDashboardView';
 export { OrganizationFinancesMovementsView } from './views/OrganizationFinancesMovementsView';
-export { ProjectFinancesView } from './views/ProjectFinancesView';
-export { ProjectFinancesDashboardView, type PeriodFilter as ProjectPeriodFilter } from './views/ProjectFinancesDashboardView';
+export { ProjectFinancesDashboardView } from './views/ProjectFinancesDashboardView';
 export { ProjectFinancesMovementsView } from './views/ProjectFinancesMovementsView';
