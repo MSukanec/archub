@@ -45,6 +45,7 @@ export function useCourseEnrollment(courseId: string | undefined, userId: string
       };
     },
     enabled: !!userId && !!courseId,
-    staleTime: 5000, // Cache for 5 seconds only (quick refresh after changes)
+    staleTime: 2 * 60 * 1000, // 2 minutes - enrollment data changes less frequently after purchase
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 }

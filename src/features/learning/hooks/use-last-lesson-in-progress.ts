@@ -24,7 +24,7 @@ export function useLastLessonInProgress(
     queryKey: LEARNING_QUERY_KEYS.lastLessonInProgress(courseId!, userId!),
     queryFn: () => getLastLessonInProgress(courseId, userId),
     enabled: !!courseId && !!userId,
-    staleTime: 10000, // 10 seconds
-    refetchInterval: 15000, // Auto refresh every 15s
+    staleTime: 5 * 60 * 1000, // 5 minutes - lesson progress data
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
   });
 }

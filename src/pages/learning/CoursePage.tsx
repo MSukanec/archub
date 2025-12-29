@@ -79,7 +79,7 @@ export default function CourseView() {
   const { data: course, isLoading: courseLoading } = useCourseOverview(id);
 
   // Detect if coming from successful payment
-  const enrolledParam = urlParams.get('enrolled');
+  const paymentParam = urlParams.get('payment');
   
   // 🚀 Check if user is enrolled in this course (SECURITY CHECK)
   const { data: enrollment, isLoading: enrollmentLoading, refetch: refetchEnrollment } = useCourseEnrollment(
@@ -93,15 +93,16 @@ export default function CourseView() {
     userData?.user?.id
   );
   
-  // Force refetch if coming from payment
+  // Force immediate refetch if coming from payment completion to fetch fresh enrollment data
   useEffect(() => {
-    if (enrolledParam === 'true' && course?.id && userData?.user?.id) {
+    if (paymentParam === 'success' && course?.id && userData?.user?.id) {
+      // Refetch enrollment data immediately (ignores staleTime)
       refetchEnrollment();
       // Clean URL parameter
-      const newUrl = window.location.pathname + (window.location.search.replace(/[?&]enrolled=true/, '').replace(/^\?$/, '') || '');
+      const newUrl = window.location.pathname + (window.location.search.replace(/[?&]payment=success/, '').replace(/^\?$/, '') || '');
       window.history.replaceState({}, '', newUrl);
     }
-  }, [enrolledParam, course?.id, userData?.user?.id, refetchEnrollment]);
+  }, [paymentParam, course?.id, userData?.user?.id, refetchEnrollment]);
 
   const isLoading = courseLoading || enrollmentLoading;
 

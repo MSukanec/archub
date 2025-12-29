@@ -15,5 +15,7 @@ export function useCourseOverview(courseIdOrSlug: string | undefined) {
     queryKey: LEARNING_QUERY_KEYS.courseOverview(courseIdOrSlug!),
     queryFn: () => getCourseOverview(courseIdOrSlug!),
     enabled: !!courseIdOrSlug,
+    staleTime: 5 * 60 * 1000, // 5 minutes - course data doesn't change often
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
   });
 }
