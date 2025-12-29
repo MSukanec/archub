@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useProjectContext } from '@/stores/projectContext';
+import { financesKeys } from '@/core/query-keys';
 import { 
   getUnifiedMovements, 
   getUnifiedMovementsStats,
@@ -87,7 +88,10 @@ export function useUnifiedMovements(
   const isPending = scope.type === 'pending';
 
   return useQuery<UnifiedMovementWithRelations[]>({
-    queryKey: getQueryKey('unified-movements', effectiveOrgId, scope),
+    queryKey: financesKeys.unifiedMovementsList(
+      effectiveOrgId,
+      scope.type === 'project' ? scope.projectId : (scope.type === 'org' ? null : undefined)
+    ),
     queryFn: () => getUnifiedMovements(
       effectiveOrgId!, 
       scope.type === 'project' ? scope.projectId : null
@@ -123,7 +127,10 @@ export function useUnifiedMovementsStats(
   const isPending = scope.type === 'pending';
 
   return useQuery({
-    queryKey: getQueryKey('unified-movements-stats', effectiveOrgId, scope),
+    queryKey: financesKeys.unifiedMovementsStatsList(
+      effectiveOrgId,
+      scope.type === 'project' ? scope.projectId : (scope.type === 'org' ? null : undefined)
+    ),
     queryFn: () => getUnifiedMovementsStats(
       effectiveOrgId!, 
       scope.type === 'project' ? scope.projectId : null

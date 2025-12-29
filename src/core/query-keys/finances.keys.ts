@@ -34,16 +34,31 @@ export const financesKeys = {
   all: ['finances'] as const,
 
   // Financial Operations (Movements)
-  movements: () => [...financesKeys.all, 'movements'] as const,
+  movements: () => ['movements'] as const,
   movementsList: (organizationId: NullableId, projectId?: NullableId) =>
     [...financesKeys.movements(), organizationId ?? undefined, projectId ?? undefined] as const,
   movement: (movementId: NullableId) =>
     [...financesKeys.movements(), movementId ?? undefined] as const,
 
-  // Unified Movements (across all types)
-  unifiedMovements: () => [...financesKeys.all, 'unified-movements'] as const,
-  unifiedMovementsList: (organizationId: NullableId, projectId?: NullableId) =>
-    [...financesKeys.unifiedMovements(), organizationId ?? undefined, projectId ?? undefined] as const,
+  // Unified Movements (across all types) - CRITICAL: MUST match use-unified-movements.ts key generation
+  // Key format: ['unified-movements', orgId, 'scope:org'] or ['unified-movements', orgId, 'scope:project', projectId]
+  unifiedMovements: () => ['unified-movements'] as const,
+  unifiedMovementsList: (organizationId: NullableId, projectId?: NullableId) => {
+    if (!organizationId) return [...financesKeys.unifiedMovements(), undefined] as const;
+    if (projectId) {
+      return [...financesKeys.unifiedMovements(), organizationId, 'scope:project', projectId] as const;
+    }
+    return [...financesKeys.unifiedMovements(), organizationId, 'scope:org'] as const;
+  },
+  
+  unifiedMovementsStats: () => ['unified-movements-stats'] as const,
+  unifiedMovementsStatsList: (organizationId: NullableId, projectId?: NullableId) => {
+    if (!organizationId) return [...financesKeys.unifiedMovementsStats(), undefined] as const;
+    if (projectId) {
+      return [...financesKeys.unifiedMovementsStats(), organizationId, 'scope:project', projectId] as const;
+    }
+    return [...financesKeys.unifiedMovementsStats(), organizationId, 'scope:org'] as const;
+  },
 
   // Partner Contributions
   partnerContributions: () => [...financesKeys.all, 'partner-contributions'] as const,
