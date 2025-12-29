@@ -107,7 +107,6 @@ import CoursesListPage from "@/pages/learning/CoursesListPage";
 const FoundersPortalPage = lazy(() => import("@/features/founders-portal").then(m => ({ default: m.FoundersPortalPage })));
 const PrivateCourseLandingPage = lazy(() => import("@/pages/learning/CourseLandingPage"));
 const CoursePage = lazy(() => import("@/pages/learning/CoursePage"));
-const CourseLandingPrivate = lazy(() => import("@/pages/professional/learning/CourseLanding"));
 const PaymentReturnPage = lazy(() => import("@/pages/learning/PaymentReturnPage"));
 const CheckoutPage = lazy(() => import("@/pages/checkout/CheckoutPage"));
 const MPSeatSubscriptionSuccess = lazy(() => import("@/pages/MPSeatSubscriptionSuccess"));
@@ -268,11 +267,6 @@ function Router() {
         <Route path="/learning/courses/:id">
           <Suspense fallback={<LazyLoadFallback />}>
             <CoursePage />
-          </Suspense>
-        </Route>
-        <Route path="/learning/landing/:slug">
-          <Suspense fallback={<LazyLoadFallback />}>
-            <CourseLandingPrivate />
           </Suspense>
         </Route>
         <Route path="/learning/retorno">

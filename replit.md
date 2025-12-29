@@ -66,6 +66,7 @@ CRITICAL PERFORMANCE REQUIREMENT: System must be INSTANTANEOUS. All cache invali
 - **Save Engine**: Enterprise-grade saving system in `/core/save-engine/` with optimistic updates, automatic rollback, and debounced auto-save (delay ≤500ms).
 - **Inactivity Logout**: Global session security feature via `src/hooks/useInactivityLogout.ts` - automatically logs out users after 60 minutes of inactivity.
 - **View Name Translation System**: Centralized translator at `src/lib/view-name-translator.ts` for consistent page names across analytics and admin dashboard.
+- **Course Landing Pages**: Consolidated into 2 pages sharing the same view logic via `useCourseLandingView()` hook. Page-specific layouts determine presentation (public marketing layout vs. dashboard layout). Routes: `/cursos/:slug` (public) and `/learning/courses/:slug/info` (authenticated dashboard).
 
 ## External Dependencies
 - **Supabase**: Authentication & User Acquisition tracking.
