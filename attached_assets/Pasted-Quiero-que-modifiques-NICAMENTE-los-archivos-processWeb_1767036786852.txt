@@ -1,0 +1,76 @@
+Quiero que modifiques ÚNICAMENTE los archivos processWebhook.ts del sistema de pagos.
+
+CONTEXTO:
+- El proyecto tiene múltiples handlers de pago (MercadoPago y PayPal).
+- Ya NO debe existir lógica de negocio en el backend.
+- Toda la lógica post-pago vive en Supabase.
+
+EXISTEN EXACTAMENTE 2 FUNCIONES RPC EN SUPABASE QUE SON LA FUENTE DE VERDAD:
+1) handle_payment_subscription_success
+2) handle_payment_course_success
+
+REGLAS OBLIGATORIAS:
+1. NO borres archivos
+2. NO reestructures carpetas
+3. NO cambies nombres de endpoints
+4. NO crees nuevas funciones de negocio
+5. SOLO modificar processWebhook.ts (y su equivalente si hay uno por proveedor)
+
+OBJETIVO DE processWebhook.ts:
+- Validar que el evento sea un pago aprobado / completed
+- Extraer datos normalizados del provider (id de pago, user_id, organization_id, plan_id, course_id, billing_period, amount, currency)
+- Determinar el TIPO DE PRODUCTO:
+  - "subscription"
+  - "course"
+- Llamar EXACTAMENTE UNA RPC de Supabase
+- No hacer nada más
+
+COMPORTAMIENTO ESPERADO:
+
+SI el pago es una SUSCRIPCIÓN:
+  llamar a supabase.rpc('handle_payment_subscription_success', {
+    p_provider,
+    p_provider_payment_id,
+    p_user_id,
+    p_organization_id,
+    p_plan_id,
+    p_billing_period,
+    p_amount,
+    p_currency,
+    p_metadata
+  })
+
+SI el pago es un CURSO:
+  llamar a supabase.rpc('handle_payment_course_success', {
+    p_provider,
+    p_provider_payment_id,
+    p_user_id,
+    p_course_id,
+    p_amount,
+    p_currency,
+    p_metadata
+  })
+
+RESTRICCIONES ABSOLUTAS:
+- processWebhook.ts NO puede:
+  - crear suscripciones
+  - expirar planes
+  - asignar founders
+  - enrolar cursos
+  - actualizar organizations
+  - decidir duraciones
+- Toda esa lógica ya está en Supabase
+
+LOGGING:
+- Dejar logs claros antes y después de llamar a la RPC
+- Loggear la respuesta de Supabase
+- No silenciar errores
+
+RESULTADO FINAL:
+- processWebhook.ts debe quedar corto, legible y declarativo
+- Debe ser IMPOSIBLE que haya lógica de negocio fuera de Supabase
+- El mismo webhook debe poder ejecutarse 2 veces sin efectos secundarios
+
+IMPORTANTE:
+Si detectás lógica vieja (comentada o activa), dejala comentada y marcada como "LEGACY - MOVED TO SUPABASE".
+NO la elimines.
