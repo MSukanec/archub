@@ -6,7 +6,7 @@ import {
 import { createPartnerContribution } from '../services/createPartnerContribution';
 import { updatePartnerContribution } from '../services/updatePartnerContribution';
 import { deletePartnerContribution } from '../services/deletePartnerContribution';
-import { capitalKeys } from '@/core/query-keys';
+import { capitalKeys, financesKeys } from '@/core/query-keys';
 import type { PartnerContribution, PartnerContributionCreateInput } from '../types';
 
 export function usePartnerContributions(
@@ -42,6 +42,10 @@ export function useCreatePartnerContribution() {
       });
       queryClient.invalidateQueries({ queryKey: capitalKeys.unifiedMovements() });
       queryClient.invalidateQueries({ queryKey: capitalKeys.partnerMovements(data.organization_id, data.project_id) });
+      // Invalidate finances unified movements since contributions are part of unified movements
+      queryClient.invalidateQueries({
+        queryKey: financesKeys.unifiedMovementsList(data.organization_id, data.project_id || undefined),
+      });
     },
   });
 }
@@ -68,6 +72,10 @@ export function useUpdatePartnerContribution() {
       });
       queryClient.invalidateQueries({ queryKey: capitalKeys.unifiedMovements() });
       queryClient.invalidateQueries({ queryKey: capitalKeys.partnerMovements(data.organization_id, data.project_id) });
+      // Invalidate finances unified movements since contributions are part of unified movements
+      queryClient.invalidateQueries({
+        queryKey: financesKeys.unifiedMovementsList(data.organization_id, data.project_id || undefined),
+      });
     },
   });
 }
@@ -91,6 +99,10 @@ export function useDeletePartnerContribution() {
       queryClient.invalidateQueries({ queryKey: capitalKeys.unifiedMovements() });
       queryClient.invalidateQueries({
         queryKey: capitalKeys.partnerMovements(variables.organizationId, variables.projectId),
+      });
+      // Invalidate finances unified movements since contributions are part of unified movements
+      queryClient.invalidateQueries({
+        queryKey: financesKeys.unifiedMovementsList(variables.organizationId, variables.projectId),
       });
     },
   });

@@ -6,7 +6,7 @@ import {
 import { createPartnerWithdrawal } from '../services/createPartnerWithdrawal';
 import { updatePartnerWithdrawal } from '../services/updatePartnerWithdrawal';
 import { deletePartnerWithdrawal } from '../services/deletePartnerWithdrawal';
-import { capitalKeys } from '@/core/query-keys';
+import { capitalKeys, financesKeys } from '@/core/query-keys';
 import type { PartnerWithdrawal, PartnerWithdrawalCreateInput } from '../types';
 
 export function usePartnerWithdrawals(
@@ -42,6 +42,10 @@ export function useCreatePartnerWithdrawal() {
       });
       queryClient.invalidateQueries({ queryKey: capitalKeys.unifiedMovements() });
       queryClient.invalidateQueries({ queryKey: capitalKeys.partnerMovements(data.organization_id, data.project_id) });
+      // Invalidate finances unified movements since withdrawals are part of unified movements
+      queryClient.invalidateQueries({
+        queryKey: financesKeys.unifiedMovementsList(data.organization_id, data.project_id || undefined),
+      });
     },
   });
 }
@@ -68,6 +72,10 @@ export function useUpdatePartnerWithdrawal() {
       });
       queryClient.invalidateQueries({ queryKey: capitalKeys.unifiedMovements() });
       queryClient.invalidateQueries({ queryKey: capitalKeys.partnerMovements(data.organization_id, data.project_id) });
+      // Invalidate finances unified movements since withdrawals are part of unified movements
+      queryClient.invalidateQueries({
+        queryKey: financesKeys.unifiedMovementsList(data.organization_id, data.project_id || undefined),
+      });
     },
   });
 }
@@ -91,6 +99,10 @@ export function useDeletePartnerWithdrawal() {
       queryClient.invalidateQueries({ queryKey: capitalKeys.unifiedMovements() });
       queryClient.invalidateQueries({
         queryKey: capitalKeys.partnerMovements(variables.organizationId, variables.projectId),
+      });
+      // Invalidate finances unified movements since withdrawals are part of unified movements
+      queryClient.invalidateQueries({
+        queryKey: financesKeys.unifiedMovementsList(variables.organizationId, variables.projectId),
       });
     },
   });
