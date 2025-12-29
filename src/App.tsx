@@ -105,7 +105,7 @@ import CoursesListPage from "@/pages/learning/CoursesListPage";
 
 // Founders Portal (Lazy Loaded - solo fundadores)
 const FoundersPortalPage = lazy(() => import("@/features/founders-portal").then(m => ({ default: m.FoundersPortalPage })));
-const CourseLandingPage = lazy(() => import("@/pages/learning/CourseLandingPage"));
+const PrivateCourseLandingPage = lazy(() => import("@/pages/learning/CourseLandingPage"));
 const CoursePage = lazy(() => import("@/pages/learning/CoursePage"));
 const CourseLandingPrivate = lazy(() => import("@/pages/professional/learning/CourseLanding"));
 const PaymentReturnPage = lazy(() => import("@/pages/learning/PaymentReturnPage"));
@@ -262,7 +262,7 @@ function Router() {
         <Route path="/learning/courses" component={CoursesListPage} />
         <Route path="/learning/courses/:slug/info">
           <Suspense fallback={<LazyLoadFallback />}>
-            <CourseLandingPage />
+            <PrivateCourseLandingPage />
           </Suspense>
         </Route>
         <Route path="/learning/courses/:id">
