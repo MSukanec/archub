@@ -1,34 +1,35 @@
 import { useEffect } from 'react';
 import { useParams, useLocation } from 'wouter';
-import { useCurrentUser } from '@/features/users/hooks';
-import { useCourseLanding, useCourseEnrollment, useCourseProgress } from '@/features/learning';
+import { useCourseLandingView } from '@/features/learning/views/CourseLandingView';
 import { CourseLandingShell } from '@/features/shared-content/courses';
 import { Header } from '@/layouts/marketing/components/Header';
 import { Footer } from '@/layouts/marketing/components/Footer';
 
-export default function CourseLanding() {
+export default function CourseLandingPage() {
   const { slug } = useParams<{ slug: string }>();
-  const [location, navigate] = useLocation();
-  const { data: userData } = useCurrentUser();
-  const { data, isLoading, error } = useCourseLanding(slug || '');
-  const { data: enrollmentData } = useCourseEnrollment(data?.course?.id, userData?.user?.id);
-  const { data: progressData } = useCourseProgress(data?.course?.id);
-
-  const isEnrolled = enrollmentData?.isEnrolled || false;
-  const progressPercentage = (() => {
-    if (!progressData || progressData.length === 0) return 0;
-    const completed = progressData.filter(p => p.is_completed).length;
-    return Math.round((completed / progressData.length) * 100);
-  })();
+  const [location] = useLocation();
+  const { 
+    course, 
+    modules, 
+    faqs, 
+    testimonials, 
+    stats, 
+    clientGallery,
+    isEnrolled, 
+    progressPercentage, 
+    ctaButtonText, 
+    isLoading, 
+    error,
+    handleCTAClick 
+  } = useCourseLandingView(slug);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [location]);
 
   useEffect(() => {
-    if (!data?.course) return;
+    if (!course) return;
     
-    const course = data.course;
     const seo = {
       title: `${course.title} - Curso Online | Seencel`,
       description: course.short_description || '',
@@ -59,19 +60,7 @@ export default function CourseLanding() {
     return () => {
       document.title = originalTitle;
     };
-  }, [data]);
-
-  const handleCTAClick = () => {
-    if (isEnrolled) {
-      navigate(`/learning/courses/${data?.course?.slug}`);
-    } else if (userData?.user) {
-      navigate(`/checkout?course=${data?.course?.slug}`);
-    } else {
-      navigate('/register');
-    }
-  };
-
-  const ctaButtonText = isEnrolled ? 'CONTINUAR CURSO' : 'INSCRIBIRME';
+  }, [course]);
 
   if (isLoading) {
     return (
@@ -87,7 +76,7 @@ export default function CourseLanding() {
     );
   }
 
-  if (error || !data) {
+  if (error || !course) {
     return (
       <div className="min-h-screen">
         <Header />
@@ -114,47 +103,47 @@ export default function CourseLanding() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Course',
-            name: data.course.title,
-            description: data.course.short_description,
+            name: course.title,
+            description: course.short_description,
             provider: {
               '@type': 'Organization',
               name: 'Seencel',
               url: 'https://seencel.com',
             },
-            ...(data.course.instructor_name && {
+            ...(course.instructor_name && {
               instructor: {
                 '@type': 'Person',
-                name: data.course.instructor_name,
+                name: course.instructor_name,
               },
             }),
-            ...(data.course.price && {
+            ...(course.price && {
               offers: {
                 '@type': 'Offer',
-                price: data.course.price,
+                price: course.price,
                 priceCurrency: 'USD',
                 availability: 'https://schema.org/InStock',
               },
             }),
             educationalLevel: 'Beginner to Advanced',
             inLanguage: 'es',
-            numberOfCredits: data.stats.total_lessons,
-            timeRequired: `PT${data.stats.total_duration_hours}H`,
+            numberOfCredits: stats?.total_lessons,
+            timeRequired: `PT${stats?.total_duration_hours}H`,
           }),
         }}
       />
       
       <CourseLandingShell 
         mode="public" 
-        course={data.course}
-        modules={data.modules}
-        faqs={data.faqs}
-        testimonials={data.testimonials}
-        stats={data.stats}
+        course={course}
+        modules={modules}
+        faqs={faqs}
+        testimonials={testimonials}
+        stats={stats}
         isEnrolled={isEnrolled}
         progressPercentage={progressPercentage}
         onCTAClick={handleCTAClick}
         ctaButtonText={ctaButtonText}
-        clientGallery={data.clientGallery}
+        clientGallery={clientGallery}
       />
       
       <Footer />

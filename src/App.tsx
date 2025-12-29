@@ -15,7 +15,7 @@ import Register from "@/pages/public/Register";
 import ForgotPassword from "@/pages/public/ForgotPassword";
 import Privacy from "@/pages/public/Privacy";
 import Contact from "@/pages/public/Contact";
-import CourseLanding from "@/pages/public/CourseLanding";
+import PublicCourseLandingPage from "@/pages/public/CourseLandingPage";
 import CourseCatalog from "@/pages/public/CourseCatalog";
 import FoundersPage from "@/pages/public/FoundersPage";
 import PricingPlanPublic from "@/pages/public/PricingPlan";
@@ -164,7 +164,7 @@ function Router() {
           <Route path="/precios" component={PricingPlanPublic} />
           <Route path="/founders" component={FoundersPage} />
           <Route path="/cursos" component={CourseCatalog} />
-          <Route path="/cursos/:slug" component={CourseLanding} />
+          <Route path="/cursos/:slug" component={PublicCourseLandingPage} />
           <Route path="/privacy" component={Privacy} />
           <Route path="/contact" component={Contact} />
           <Route path="/login" component={Login} />

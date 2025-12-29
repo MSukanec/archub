@@ -1,27 +1,28 @@
 import { useEffect } from 'react';
-import { useParams, useLocation } from 'wouter';
+import { useParams } from 'wouter';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { HeroLayout } from "@/layouts/dashboard/HeroLayout";
 import { CourseLandingShell } from '@/features/shared-content/courses/CourseLandingShell';
-import { useCourseLanding, useCourseEnrollment, useCourseProgress } from '@/features/learning';
-import { useCurrentUser } from '@/features/users/hooks';
+import { useCourseLandingView } from '@/features/learning/views/CourseLandingView';
 import { useNavigationStore } from '@/stores/navigationStore';
 
 export default function CourseLandingPage() {
   const { slug } = useParams<{ slug: string }>();
-  const [, navigate] = useLocation();
   const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore();
-  const { data: userData } = useCurrentUser();
-  const { data, isLoading, error } = useCourseLanding(slug || '');
-  const { data: enrollmentData } = useCourseEnrollment(data?.course?.id, userData?.user?.id);
-  const { data: progressData } = useCourseProgress(data?.course?.id);
-
-  const isEnrolled = enrollmentData?.isEnrolled || false;
-  const progressPercentage = (() => {
-    if (!isEnrolled || !progressData || progressData.length === 0) return 0;
-    const completed = progressData.filter(p => p.is_completed).length;
-    return Math.round((completed / progressData.length) * 100);
-  })();
+  const { 
+    course, 
+    modules, 
+    faqs, 
+    testimonials, 
+    stats, 
+    clientGallery,
+    isEnrolled, 
+    progressPercentage, 
+    ctaButtonText, 
+    isLoading, 
+    error,
+    handleCTAClick 
+  } = useCourseLandingView(slug);
 
   useEffect(() => {
     setSidebarContext('learning');
@@ -29,23 +30,6 @@ export default function CourseLandingPage() {
       setSidebarLevel('learning');
     }
   }, [setSidebarContext, setSidebarLevel, sidebarLevel]);
-
-  const handleCTAClick = () => {
-    if (isEnrolled) {
-      // Usuario inscrito → ir al curso
-      navigate(`/learning/courses/${data?.course?.slug}`);
-    } else if (userData?.user) {
-      // Usuario logueado pero NO inscrito → ir a checkout
-      navigate(`/checkout?course=${data?.course?.slug}`);
-    } else {
-      // Usuario no logueado → ir a registro
-      navigate('/register');
-    }
-  };
-
-  const ctaButtonText = isEnrolled 
-    ? (progressPercentage > 0 ? 'CONTINUAR CURSO' : 'VER CURSO')
-    : 'INSCRIBIRME AHORA';
 
   if (isLoading) {
     return (
@@ -60,7 +44,7 @@ export default function CourseLandingPage() {
     );
   }
 
-  if (error || !data) {
+  if (error || !course) {
     return (
       <Layout hideHeader wide>
         <div className="flex items-center justify-center min-h-screen">
@@ -80,16 +64,16 @@ export default function CourseLandingPage() {
       <HeroLayout noPadding>
         <CourseLandingShell 
           mode="dashboard" 
-          course={data.course}
-          modules={data.modules}
-          faqs={data.faqs}
-          testimonials={data.testimonials}
-          stats={data.stats}
+          course={course}
+          modules={modules}
+          faqs={faqs}
+          testimonials={testimonials}
+          stats={stats}
           isEnrolled={isEnrolled}
           progressPercentage={progressPercentage}
           onCTAClick={handleCTAClick}
           ctaButtonText={ctaButtonText}
-          clientGallery={data.clientGallery}
+          clientGallery={clientGallery}
         />
       </HeroLayout>
     </Layout>
