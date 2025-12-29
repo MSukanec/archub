@@ -24,6 +24,7 @@ import { FileUploader } from '@/components/shared/fields/FileUploader'
 import { uploadFile, deleteFile } from '@/lib/storage'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { financesKeys } from '@/core/query-keys'
 import type { Partner } from '../types'
 
 const partnerContributionSchema = z.object({
@@ -296,6 +297,10 @@ export function PartnerContributionForm({
         }
         setFilesToUpload([])
       }
+
+      // Invalidate finances queries to refresh unified movements
+      queryClient.invalidateQueries({ queryKey: financesKeys.unifiedMovementsList(organizationId, projectId || null) })
+      queryClient.invalidateQueries({ queryKey: financesKeys.unifiedMovementsList(organizationId, null) })
 
       const successMessage = mode === 'edit' ? 'actualizado' : 'registrado';
       toast({
