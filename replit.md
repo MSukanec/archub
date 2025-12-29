@@ -57,6 +57,9 @@ CRITICAL PERFORMANCE REQUIREMENT: System must be INSTANTANEOUS. All cache invali
 - **Multicurrency System**: Centralized handling via `/lib/money.ts` with explicit conversion functions.
 - **KPI System (Headless)**: Centralized calculation logic in `/lib/kpis.ts` with automatic refetching.
 - **Subscription & Billing System**: Comprehensive management of plans, payments, billing cycles, proration, and cron jobs. Supports MercadoPago (ARS) and PayPal (USD) gateways, plus Bank Transfer for courses. Includes proration for upgrades and seat additions, and a Founders Program for annual subscribers.
+- **Payment Gateway Test Mode**: Dynamic environment-based test/production switching:
+  - **PayPal**: Uses `PAYPAL_ENV_SANDBOX` to activate sandbox credentials. When set, uses `PAYPAL_CLIENT_ID_SANDBOX`, `PAYPAL_CLIENT_SECRET_SANDBOX`, and `PAYPAL_WEBHOOK_ID_SANDBOX`. Automatically switches to `https://api-m.sandbox.paypal.com` endpoint.
+  - **MercadoPago**: Uses `MP_ACCESS_TOKEN_TEST` to activate test credentials. When set, uses test token instead of production `MP_ACCESS_TOKEN`. Shares `MP_WEBHOOK_SECRET` between test and production.
 - **Internationalization (i18n) System**: Lightweight locale system in `src/lib/i18n/` with `I18nProvider`, `useI18n` hook, and typed translations.
 - **User Acquisition Tracking**: Captures UTM parameters at app load, stored in localStorage, and integrated with Supabase Auth for signup.
 - **Table Component Architecture**: Modular table system in `src/components/shared/table/` with separate components and hooks for sorting, filtering, pagination, and selection.

@@ -1,6 +1,7 @@
 import { getPayPalAccessToken } from "./auth.js";
 import { PAYPAL_BASE_URL } from "./config.js";
 
+
 export type PayPalProductResult =
   | { success: true; productId: string; product: any }
   | { success: false; error: string; status?: number; details?: any };

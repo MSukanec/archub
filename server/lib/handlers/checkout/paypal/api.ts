@@ -1,5 +1,5 @@
 import { getPayPalAccessToken } from "./auth.js";
-import { getPayPalConfig } from "./config.js";
+import { PAYPAL_BASE_URL } from "./config.js";
 
 export type PayPalOrderBody = {
   intent: string;
@@ -29,9 +29,8 @@ export async function createPayPalOrder(
   orderBody: PayPalOrderBody
 ): Promise<PayPalOrderResult> {
   const token = await getPayPalAccessToken();
-  const config = await getPayPalConfig();
   
-  const r = await fetch(`${config.baseUrl}/v2/checkout/orders`, {
+  const r = await fetch(`${PAYPAL_BASE_URL}/v2/checkout/orders`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -73,9 +72,8 @@ export async function createPayPalOrder(
 
 export async function capturePayPalOrder(orderId: string): Promise<any> {
   const token = await getPayPalAccessToken();
-  const config = await getPayPalConfig();
   
-  const r = await fetch(`${config.baseUrl}/v2/checkout/orders/${orderId}/capture`, {
+  const r = await fetch(`${PAYPAL_BASE_URL}/v2/checkout/orders/${orderId}/capture`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -93,9 +91,8 @@ export async function capturePayPalOrder(orderId: string): Promise<any> {
 
 export async function getPayPalOrder(orderId: string): Promise<any> {
   const token = await getPayPalAccessToken();
-  const config = await getPayPalConfig();
   
-  const r = await fetch(`${config.baseUrl}/v2/checkout/orders/${orderId}`, {
+  const r = await fetch(`${PAYPAL_BASE_URL}/v2/checkout/orders/${orderId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

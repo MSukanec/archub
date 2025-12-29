@@ -111,6 +111,8 @@ export async function createSubscriptionOrder(
       };
     }
 
+    console.log('[PayPal create-subscription-order] Creating subscription order');
+
     // ============================================================
     // COUPON VALIDATION & GIFTED SUBSCRIPTION HANDLING
     // ============================================================
