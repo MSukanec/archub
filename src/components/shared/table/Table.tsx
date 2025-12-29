@@ -172,7 +172,7 @@ export function Table<T = any>({
   }
 
   return (
-    <div className={cn("space-y-3 border-2 border-[var(--accent)] rounded-lg p-2", className)}>
+    <div className={cn("space-y-3", className)}>
       <TableDesktop
         columns={columns}
         data={data}
