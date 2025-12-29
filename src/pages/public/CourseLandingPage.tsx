@@ -5,7 +5,7 @@ import { CourseLandingShell } from '@/features/shared-content/courses';
 import { Header } from '@/layouts/marketing/components/Header';
 import { Footer } from '@/layouts/marketing/components/Footer';
 
-export default function CourseLandingPage() {
+export default function PublicCourseLandingPage() {
   const { slug } = useParams<{ slug: string }>();
   const [location] = useLocation();
   const { 

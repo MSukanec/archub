@@ -6,7 +6,7 @@ import { CourseLandingShell } from '@/features/shared-content/courses/CourseLand
 import { useCourseLandingView } from '@/features/learning/views/CourseLandingView';
 import { useNavigationStore } from '@/stores/navigationStore';
 
-export default function CourseLandingPage() {
+export default function DashboardCourseLandingPage() {
   const { slug } = useParams<{ slug: string }>();
   const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore();
   const { 
