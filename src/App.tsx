@@ -6,7 +6,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/stores/authStore";
 import { ActionBarMobileProvider } from "@/layouts";
-import { AuthGuard, AuthAdmin } from "@/features/users";
+import { AuthGuard, AuthAdmin, useCurrentUser } from "@/features/users";
+import { useInactivityLogout } from "@/hooks/useInactivityLogout";
 
 // Public Pages
 import Landing from "@/pages/public/Landing";
@@ -458,6 +459,10 @@ function Router() {
 
 function App() {
   const { initialize } = useAuthStore();
+  const { data: userData } = useCurrentUser();
+  
+  // Activar logout por inactividad solo si el usuario está autenticado
+  useInactivityLogout(!!userData?.user);
 
   useEffect(() => {
     initialize();

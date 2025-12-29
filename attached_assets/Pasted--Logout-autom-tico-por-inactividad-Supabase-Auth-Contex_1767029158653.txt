@@ -1,0 +1,123 @@
+(Logout automático por inactividad – Supabase Auth)
+
+Contexto del proyecto
+Estamos trabajando en una web app React (SPA) que usa Supabase Auth.
+Queremos implementar logout automático por inactividad del usuario por razones de seguridad, como hacen los SaaS profesionales.
+
+🎯 OBJETIVO
+
+Implementar un sistema global que:
+
+Detecte actividad del usuario (mouse, teclado, scroll, click)
+
+Si el usuario está inactivo durante X minutos, cerrar sesión automáticamente
+
+Use supabase.auth.signOut() correctamente
+
+Funcione en toda la app desde un único lugar
+
+Sea fácil de ajustar (tiempo de inactividad configurable)
+
+⏱️ REGLAS
+
+Tiempo de inactividad inicial: 60 minutos
+
+El timer se resetea ante cualquier interacción
+
+El logout debe ser silencioso (sin modal por ahora)
+
+Debe limpiarse correctamente al desmontar componentes
+
+No debe generar múltiples listeners ni intervalos duplicados
+
+🧩 IMPLEMENTACIÓN SOLICITADA
+1️⃣ Crear un hook global
+
+Archivo sugerido:
+
+src/hooks/useInactivityLogout.ts
+
+
+Responsabilidades:
+
+Escuchar eventos:
+
+mousemove
+
+mousedown
+
+keydown
+
+scroll
+
+touchstart
+
+Guardar lastActivityTimestamp
+
+Verificar cada X segundos si se superó el tiempo límite
+
+Ejecutar supabase.auth.signOut() si corresponde
+
+2️⃣ Lógica base esperada (conceptual)
+INACTIVITY_LIMIT = 60 * 60 * 1000 // 60 min
+
+onUserActivity → actualizar lastActivity
+
+setInterval:
+  if (Date.now() - lastActivity > INACTIVITY_LIMIT):
+    supabase.auth.signOut()
+
+3️⃣ Uso del hook
+
+El hook debe activarse una sola vez
+
+Debe llamarse desde un componente raíz, por ejemplo:
+
+App.tsx
+
+AuthProvider
+
+Solo debe correr si el usuario está autenticado
+
+4️⃣ Consideraciones importantes
+
+Usar useEffect correctamente
+
+Limpiar:
+
+removeEventListener
+
+clearInterval
+
+Evitar memory leaks
+
+No romper el flujo actual de auth
+
+✅ RESULTADO ESPERADO
+
+El usuario se desloguea automáticamente tras 60 minutos sin interacción
+
+Supabase limpia la sesión correctamente
+
+El frontend reacciona como si el usuario hubiera hecho logout manual
+
+Código claro, mantenible y centralizado
+
+Extra (opcional, no ahora):
+Dejar preparado el hook para que luego podamos agregar:
+
+Modal de advertencia
+
+Configuración por plan (Free / Pro)
+
+Persistencia de lastActiveAt
+
+🟡 COSAS QUE NO HAY QUE HACER
+
+❌ No modificar JWT
+
+❌ No tocar tokens manualmente
+
+❌ No crear lógica en Supabase SQL
+
+❌ No duplicar listeners por página

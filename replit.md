@@ -71,6 +71,8 @@ Preferred communication style: Simple, everyday language.
 - **Badge Semantic Architecture**: All badges use a semantic color system.
 - **Data Health Micro Rules Architecture**: Modular validation rule system for atomic, reusable checks.
 - **Save Engine**: Enterprise-grade saving system in `/core/save-engine/` with optimistic updates, automatic rollback, and debounced auto-save (delay ≤500ms).
+- **Inactivity Logout**: Global session security feature via `src/hooks/useInactivityLogout.ts` - automatically logs out users after 60 minutes of inactivity (mousemove, keydown, scroll, touchstart). No modal, silent logout.
+- **View Name Translation System**: Centralized translator at `src/lib/view-name-translator.ts` for consistent page names across analytics and admin dashboard. Single source of truth for all UI labeling.
 
 ## External Dependencies
 - **Supabase**: Authentication & User Acquisition tracking.
