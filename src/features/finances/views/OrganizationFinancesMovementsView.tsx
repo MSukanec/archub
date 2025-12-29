@@ -140,7 +140,7 @@ export function OrganizationFinancesMovementsView({
     if (activeFilterIssueId && !dataHealth.hasIssues) {
       setActiveFilterIssueId(null);
     }
-  }, [activeFilterIssueId, dataHealth.hasIssues]);
+  }, [activeFilterIssueId, dataHealth.hasIssues, setActiveFilterIssueId]);
 
   const filteredMovementIds = useMemo(() => {
     if (!activeFilterIssueId) return null;
@@ -200,7 +200,7 @@ export function OrganizationFinancesMovementsView({
   const deleteClientPaymentMutation = useDeleteClientPayment();
   const deleteMaterialPaymentMutation = useDeleteMaterialPayment();
   const deletePersonnelPaymentMutation = useDeletePersonnelPayment();
-  const { mutate: deleteGeneralCostPayment, isPending: isDeleteGeneralCostPending } = useDeleteGeneralCostPayment();
+  const deleteGeneralCostPaymentMutation = useDeleteGeneralCostPayment();
   const deletePartnerContributionMutation = useDeletePartnerContribution();
   const deletePartnerWithdrawalMutation = useDeletePartnerWithdrawal();
 
@@ -262,8 +262,8 @@ export function OrganizationFinancesMovementsView({
             projectId: movement.project_id || '',
           });
         case 'general_cost_payment':
-          return deleteGeneralCostPayment({
-            paymentId: movement.id,
+          return deleteGeneralCostPaymentMutation.mutate({
+            id: movement.id,
             organizationId: currentOrganizationId,
           });
         case 'partner_contribution':
@@ -289,7 +289,7 @@ export function OrganizationFinancesMovementsView({
       isLoading: deleteClientPaymentMutation.isPending || 
                  deleteMaterialPaymentMutation.isPending || 
                  deletePersonnelPaymentMutation.isPending ||
-                 isDeleteGeneralCostPending ||
+                 deleteGeneralCostPaymentMutation.isPending ||
                  deletePartnerContributionMutation.isPending ||
                  deletePartnerWithdrawalMutation.isPending,
     });

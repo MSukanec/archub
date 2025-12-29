@@ -19,12 +19,12 @@ import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { 
-  StatCard, 
-  StatCardTitle, 
-  StatCardValue, 
-  StatCardMeta,
-  StatCardSubValue,
-  StatCardTrend,
+  AppCard, 
+  AppCardTitle, 
+  AppCardValue, 
+  AppCardMeta,
+  AppCardSubValue,
+  AppCardTrend,
   type TrendDirection
 } from '@/components';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown, hasMultipleCurrencies } from '@/lib/kpis';
@@ -367,67 +367,67 @@ export function ProjectFinancesMovementsView({
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard data-testid="kpi-ingresos">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-ingresos">
+          <AppCardTitle>
             <ArrowUpRight className="h-4 w-4 text-positive" />
             Ingresos
-          </StatCardTitle>
-          <StatCardValue className="text-positive">
+          </AppCardTitle>
+          <AppCardValue style={{ color: 'var(--positive)' }}>
             {isCurrencyReady ? formatMoney(kpis.ingresos.value, currencySymbol) : '-'}
-          </StatCardValue>
+          </AppCardValue>
           {showIngresosBreakdown && (
-            <StatCardSubValue>{formatBreakdown(kpis.ingresos)}</StatCardSubValue>
+            <AppCardSubValue>{formatBreakdown(kpis.ingresos)}</AppCardSubValue>
           )}
-          <StatCardMeta>
+          <AppCardMeta>
             {kpis.ingresosCount} movimientos
-          </StatCardMeta>
-        </StatCard>
+          </AppCardMeta>
+        </AppCard>
 
-        <StatCard data-testid="kpi-egresos">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-egresos">
+          <AppCardTitle>
             <ArrowDownRight className="h-4 w-4 text-negative" />
             Egresos
-          </StatCardTitle>
-          <StatCardValue className="text-negative">
+          </AppCardTitle>
+          <AppCardValue style={{ color: 'var(--negative)' }}>
             {isCurrencyReady ? formatMoney(kpis.egresos.value, currencySymbol) : '-'}
-          </StatCardValue>
+          </AppCardValue>
           {showEgresosBreakdown && (
-            <StatCardSubValue>{formatBreakdown(kpis.egresos)}</StatCardSubValue>
+            <AppCardSubValue>{formatBreakdown(kpis.egresos)}</AppCardSubValue>
           )}
-          <StatCardMeta>
+          <AppCardMeta>
             {kpis.egresosCount} movimientos
-          </StatCardMeta>
-        </StatCard>
+          </AppCardMeta>
+        </AppCard>
 
-        <StatCard data-testid="kpi-balance">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-balance">
+          <AppCardTitle>
             <Scale className="h-4 w-4" />
             Balance
-          </StatCardTitle>
-          <StatCardValue className={kpis.balance >= 0 ? 'text-positive' : 'text-negative'}>
+          </AppCardTitle>
+          <AppCardValue style={{ color: kpis.balance >= 0 ? 'var(--positive)' : 'var(--negative)' }}>
             {isCurrencyReady 
               ? `${kpis.balance >= 0 ? '+' : ''}${formatMoney(kpis.balance, currencySymbol)}`
               : '-'
             }
-          </StatCardValue>
-          <StatCardTrend 
+          </AppCardValue>
+          <AppCardTrend 
             direction={balanceDirection} 
             value={balanceTrendLabel} 
           />
-        </StatCard>
+        </AppCard>
 
-        <StatCard data-testid="kpi-total-movimientos">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-total-movimientos">
+          <AppCardTitle>
             <Hash className="h-4 w-4" />
             Total Movimientos
-          </StatCardTitle>
-          <StatCardValue>
+          </AppCardTitle>
+          <AppCardValue>
             {kpis.totalMovimientos.formatted}
-          </StatCardValue>
-          <StatCardMeta>
+          </AppCardValue>
+          <AppCardMeta>
             {kpis.ingresosCount} ingresos · {kpis.egresosCount} egresos
-          </StatCardMeta>
-        </StatCard>
+          </AppCardMeta>
+        </AppCard>
       </div>
 
       <Table
