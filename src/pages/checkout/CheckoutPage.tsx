@@ -1135,8 +1135,7 @@ Titular: Matias Esteban Sukanec`;
 
   return (
     <Layout headerProps={headerProps} wide={false}>
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Payment Methods (Mobile: shows first) */}
           <div className={cn(
             "order-1 lg:order-1",
@@ -2025,7 +2024,6 @@ Titular: Matias Esteban Sukanec`;
           </div>
           )}
         </div>
-      </div>
     </Layout>
   );
 }
