@@ -1,0 +1,75 @@
+Necesito que audites y refactorices el sistema de pagos del proyecto.
+
+CONTEXTO IMPORTANTE:
+- Toda la lógica de negocio post-pago ya existe en Supabase.
+- Existen 2 funciones RPC que SON la única fuente de verdad:
+  1) handle_payment_subscription_success
+  2) handle_payment_course_success
+
+REGLAS OBLIGATORIAS:
+1. El backend NO debe:
+   - crear suscripciones
+   - cambiar planes
+   - asignar founders
+   - enrollar cursos
+   - expirar accesos
+   - decidir billing_period
+2. El backend SOLO puede:
+   - validar que el pago esté aprobado
+   - extraer datos del provider (MercadoPago / PayPal)
+   - normalizar el payload
+   - llamar a UNA RPC de Supabase
+
+TAREAS CONCRETAS:
+1. Identificá TODOS los archivos relacionados a:
+   - webhooks de MercadoPago
+   - webhooks de PayPal
+   - creación de pagos
+   - upgrades de plan
+   - compras de cursos
+
+2. Para cada webhook:
+   - asegurate de guardar el evento RAW (si existe payment_events)
+   - verificá que el estado sea "approved" / "completed"
+
+3. Luego, según el tipo de producto:
+   - Si es una SUSCRIPCIÓN:
+     llamar a supabase.rpc('handle_payment_subscription_success', {
+       provider,
+       provider_payment_id,
+       user_id,
+       organization_id,
+       plan_id,
+       billing_period,
+       amount,
+       currency,
+       metadata
+     })
+
+   - Si es un CURSO:
+     llamar a supabase.rpc('handle_payment_course_success', {
+       provider,
+       provider_payment_id,
+       user_id,
+       course_id,
+       amount,
+       currency,
+       metadata
+     })
+
+4. Eliminá o comentá cualquier lógica que:
+   - actualice tablas directamente
+   - llame funciones antiguas
+   - haga decisiones de negocio post-pago
+
+5. El resultado final debe ser:
+   - webhooks simples
+   - sin lógica duplicada
+   - con logs claros
+   - sin side-effects fuera de Supabase
+
+IMPORTANTE:
+- NO crear nuevas tablas
+- NO modificar Supabase
+- NO agregar lógica nueva
+- SOLO refactorizar el backend para delegar TODO en las RPC

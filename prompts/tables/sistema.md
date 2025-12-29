@@ -1,14 +1,5 @@
-# Detalle de las tablas de Supabase de SISTEMA:
-
-## Vista ADMIN_USERS:
-
-create view public.admin_users as
-select
-  users.auth_id
-from
-  users
-where
-  users.role_id = 'd5606324-af8d-487e-8c8e-552511fce2a2'::uuid;
+# Detalle de las tablas de Supabase relacionadas a PAGOS Y SUSCRIPCIONES:
+# IMPORTANTE: NUNCA MODIFICAR, SOLO LA PUEDO MODIFICAR YO.
 
 ## Tabla APP_SETTINGS:
 
@@ -92,49 +83,6 @@ create unique INDEX IF not exists billing_profiles_user_id_uniq on public.billin
 create trigger trg_billing_profiles_user_id_immutable BEFORE
 update on billing_profiles for EACH row
 execute FUNCTION forbid_user_id_change ();
-
-## Tabla CONTACTS:
-
-create table public.contacts (
-  id uuid not null default gen_random_uuid (),
-  organization_id uuid not null,
-  first_name text null,
-  email text null,
-  phone text null,
-  company_name text null,
-  location text null,
-  notes text null,
-  created_at timestamp with time zone null default now(),
-  last_name text null,
-  linked_user_id uuid null,
-  full_name text null,
-  updated_at timestamp with time zone null default now(),
-  national_id text null,
-  avatar_updated_at timestamp with time zone null,
-  is_local boolean null default true,
-  display_name_override text null,
-  linked_at timestamp with time zone null,
-  sync_status text null default 'local'::text,
-  is_deleted boolean not null default false,
-  deleted_at timestamp with time zone null,
-  image_bucket text null,
-  image_path text null,
-  constraint contacts_pkey primary key (id),
-  constraint contacts_national_id_org_key unique (organization_id, national_id),
-  constraint contacts_linked_user_id_fkey foreign KEY (linked_user_id) references users (id) on delete set null,
-  constraint contacts_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
-) TABLESPACE pg_default;
-
-create unique INDEX IF not exists uniq_contacts_org_linked_user on public.contacts using btree (organization_id, linked_user_id) TABLESPACE pg_default
-where
-  (linked_user_id is not null);
-
-create index IF not exists idx_contacts_org_email on public.contacts using btree (organization_id, email) TABLESPACE pg_default;
-
-create trigger on_contact_link_user BEFORE INSERT
-or
-update OF email on contacts for EACH row
-execute FUNCTION handle_contact_link_user ();
 
 ## Tabla COUPON_COURSES:
 
@@ -237,84 +185,6 @@ create index IF not exists course_enrollments_user_id_course_id_idx on public.co
 
 create index IF not exists idx_course_enrollments_user on public.course_enrollments using btree (user_id) TABLESPACE pg_default;
 
-## Tabla COURSE_LESSON_NOTES:
-
-create table public.course_lesson_notes (
-  id uuid not null default gen_random_uuid (),
-  user_id uuid not null,
-  lesson_id uuid not null,
-  body text not null,
-  time_sec integer null,
-  is_pinned boolean not null default false,
-  created_at timestamp with time zone not null default now(),
-  updated_at timestamp with time zone not null default now(),
-  note_type text not null default 'marker'::text,
-  constraint course_lesson_notes_pkey primary key (id),
-  constraint course_lesson_notes_lesson_id_fkey foreign KEY (lesson_id) references course_lessons (id) on delete CASCADE,
-  constraint course_lesson_notes_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE,
-  constraint course_lesson_notes_time_nonneg_chk check (
-    (
-      (time_sec is null)
-      or (time_sec >= 0)
-    )
-  ),
-  constraint course_lesson_notes_type_chk check (
-    (
-      note_type = any (
-        array[
-          'summary'::text,
-          'marker'::text,
-          'todo'::text,
-          'question'::text
-        ]
-      )
-    )
-  )
-) TABLESPACE pg_default;
-
-create unique INDEX IF not exists uniq_summary_per_user_lesson on public.course_lesson_notes using btree (user_id, lesson_id) TABLESPACE pg_default
-where
-  (note_type = 'summary'::text);
-
-create index IF not exists lesson_notes_by_user_lesson on public.course_lesson_notes using btree (user_id, lesson_id, created_at desc) TABLESPACE pg_default;
-
-create index IF not exists lesson_markers_idx on public.course_lesson_notes using btree (lesson_id, user_id, time_sec) TABLESPACE pg_default
-where
-  (note_type = 'marker'::text);
-
-## Tabla COURSE_LESSON_PROGRESS:
-
-create table public.course_lesson_progress (
-  id uuid not null default gen_random_uuid (),
-  user_id uuid not null,
-  lesson_id uuid not null,
-  progress_pct numeric(5, 2) not null default 0,
-  last_position_sec integer not null default 0,
-  completed_at timestamp with time zone null,
-  updated_at timestamp with time zone not null default now(),
-  is_completed boolean null default false,
-  is_favorite boolean not null default false,
-  constraint lesson_progress_pkey primary key (id),
-  constraint lesson_progress_unique unique (user_id, lesson_id),
-  constraint lesson_progress_lesson_id_fkey foreign KEY (lesson_id) references course_lessons (id) on delete CASCADE,
-  constraint lesson_progress_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
-) TABLESPACE pg_default;
-
-create index IF not exists idx_lesson_progress_favorites on public.course_lesson_progress using btree (user_id, is_favorite) TABLESPACE pg_default
-where
-  (is_favorite = true);
-
-create index IF not exists lesson_progress_user_id_lesson_id_idx on public.course_lesson_progress using btree (user_id, lesson_id) TABLESPACE pg_default;
-
-create index IF not exists idx_progress_user_updated_at on public.course_lesson_progress using btree (user_id, updated_at) TABLESPACE pg_default;
-
-create unique INDEX IF not exists uq_progress_user_lesson on public.course_lesson_progress using btree (user_id, lesson_id) TABLESPACE pg_default;
-
-create index IF not exists idx_course_lesson_progress_user_completed on public.course_lesson_progress using btree (user_id, is_completed, completed_at desc) TABLESPACE pg_default;
-
-create trigger trg_progress_fill_user BEFORE INSERT on course_lesson_progress for EACH row
-execute FUNCTION fill_progress_user_id_from_auth ();
-
 ## Tabla COURSES:
 
 create table public.courses (
@@ -351,158 +221,36 @@ create index IF not exists courses_not_deleted_idx on public.courses using btree
 where
   (is_deleted = false);
 
-## Tabla FEEDBACK:
+## Tabla EXCHANGE_RATES:
 
-create table public.feedback (
+create table public.exchange_rates (
   id uuid not null default gen_random_uuid (),
-  user_id uuid not null,
-  message text not null,
+  from_currency text not null,
+  to_currency text not null,
+  rate numeric(12, 6) not null,
+  is_active boolean not null default true,
+  updated_at timestamp with time zone not null default now(),
   created_at timestamp with time zone not null default now(),
-  metadata jsonb null default '{}'::jsonb,
-  constraint feedback_pkey primary key (id)
+  constraint exchange_rates_pkey primary key (id),
+  constraint exchange_rates_unique_pair unique (from_currency, to_currency)
 ) TABLESPACE pg_default;
 
-create trigger trg_feedback_fill_user BEFORE INSERT on feedback for EACH row
-execute FUNCTION fill_feedback_user_from_auth ();
-
-## Tabla FORUM_POSTS:
-
-create table public.forum_posts (
-  id uuid not null default gen_random_uuid (),
-  thread_id uuid not null,
-  organization_id uuid not null,
-  author_id uuid not null,
-  parent_id uuid null,
-  content jsonb not null,
-  is_accepted_answer boolean null default false,
-  is_deleted boolean null default false,
-  created_at timestamp with time zone null default now(),
-  updated_at timestamp with time zone null default now(),
-  constraint forum_posts_pkey primary key (id),
-  constraint forum_posts_author_id_fkey foreign KEY (author_id) references users (id) on delete CASCADE,
-  constraint forum_posts_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
-  constraint forum_posts_parent_id_fkey foreign KEY (parent_id) references forum_posts (id) on delete set null,
-  constraint forum_posts_thread_id_fkey foreign KEY (thread_id) references forum_threads (id) on delete CASCADE
-) TABLESPACE pg_default;
-
-create index IF not exists idx_forum_posts_thread on public.forum_posts using btree (thread_id) TABLESPACE pg_default
+create index IF not exists idx_exchange_rates_active on public.exchange_rates using btree (from_currency, to_currency) TABLESPACE pg_default
 where
-  (is_deleted = false);
+  (is_active = true);
 
-create trigger trg_update_thread_activity
-after INSERT
-or DELETE on forum_posts for EACH row
-execute FUNCTION update_forum_thread_activity ();
+## Tabla FEATURE_FLAGS:
 
-## Tabla FORUM_THREADS:
-
-create table public.forum_threads (
+create table public.feature_flags (
   id uuid not null default gen_random_uuid (),
-  category_id uuid not null,
-  organization_id uuid not null,
-  author_id uuid not null,
-  title text not null,
-  slug text not null,
-  content jsonb not null,
-  view_count integer null default 0,
-  reply_count integer null default 0,
-  last_activity_at timestamp with time zone null default now(),
-  is_pinned boolean null default false,
-  is_locked boolean null default false,
-  is_deleted boolean null default false,
-  created_at timestamp with time zone null default now(),
-  updated_at timestamp with time zone null default now(),
-  constraint forum_threads_pkey primary key (id),
-  constraint forum_threads_slug_key unique (slug),
-  constraint forum_threads_author_id_fkey foreign KEY (author_id) references users (id) on delete set null,
-  constraint forum_threads_category_id_fkey foreign KEY (category_id) references forum_categories (id) on delete RESTRICT,
-  constraint forum_threads_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
-) TABLESPACE pg_default;
-
-create index IF not exists idx_forum_threads_category on public.forum_threads using btree (category_id) TABLESPACE pg_default
-where
-  (is_deleted = false);
-
-create index IF not exists idx_forum_last_activity on public.forum_threads using btree (last_activity_at desc) TABLESPACE pg_default;
-
-## Tabla GLOBAL_ANNOUNCEMENTS:
-
-create table public.global_announcements (
-  id uuid not null default gen_random_uuid (),
-  title text not null,
-  message text not null,
-  type text not null,
-  link_text text null,
-  link_url text null,
-  audience text null default 'all'::text,
-  is_active boolean null default true,
-  starts_at timestamp with time zone null default now(),
-  ends_at timestamp with time zone null,
-  created_at timestamp with time zone null default now(),
-  created_by uuid null,
-  primary_button_text text null,
-  primary_button_url text null,
-  secondary_button_text text null,
-  secondary_button_url text null,
-  constraint global_announcements_pkey primary key (id),
-  constraint global_announcements_created_by_fkey foreign KEY (created_by) references users (id) on delete set null,
-  constraint global_announcements_audience_check check (
-    (
-      audience = any (
-        array[
-          'all'::text,
-          'free'::text,
-          'pro'::text,
-          'teams'::text
-        ]
-      )
-    )
-  ),
-  constraint global_announcements_type_check check (
-    (
-      type = any (
-        array[
-          'info'::text,
-          'warning'::text,
-          'error'::text,
-          'success'::text
-        ]
-      )
-    )
-  )
-) TABLESPACE pg_default;
-
-## Tabla HERO_SECTIONS:
-
-create table public.hero_sections (
-  id uuid not null default gen_random_uuid (),
-  section_type text not null default 'learning_dashboard'::text,
-  order_index integer not null default 0,
-  title text null,
+  key character varying(100) not null,
+  value boolean not null default true,
   description text null,
-  primary_button_text text null,
-  primary_button_action text null,
-  primary_button_action_type text null default 'url'::text,
-  secondary_button_text text null,
-  secondary_button_action text null,
-  secondary_button_action_type text null default 'url'::text,
-  is_active boolean null default true,
-  created_at timestamp without time zone null default now(),
-  updated_at timestamp without time zone null default now(),
-  constraint hero_sections_pkey primary key (id)
-) TABLESPACE pg_default;
-
-## Tabla LINKED_ACCOUNTS:
-
-create table public.linked_accounts (
-  id uuid not null default gen_random_uuid (),
-  user_id uuid not null,
-  auth_id uuid not null,
-  provider_source text null,
+  category character varying(50) null default 'general'::character varying,
   created_at timestamp with time zone null default now(),
-  constraint linked_accounts_pkey primary key (id),
-  constraint linked_accounts_auth_id_key unique (auth_id),
-  constraint linked_accounts_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+  updated_at timestamp with time zone null default now(),
+  constraint feature_flags_pkey primary key (id),
+  constraint feature_flags_key_key unique (key)
 ) TABLESPACE pg_default;
 
 ## Tabla MP_SUBSCRIPTION_PREFERENCES:
@@ -534,9 +282,6 @@ create table public.mp_subscription_preferences (
   )
 ) TABLESPACE pg_default;
 
-create trigger trg_enforce_mp_subscription_preferences_user_id BEFORE INSERT on mp_subscription_preferences for EACH row
-execute FUNCTION enforce_mp_subscription_preferences_user_id ();
-
 create trigger trg_prevent_mp_subscription_preferences_org_id_update BEFORE
 update on mp_subscription_preferences for EACH row
 execute FUNCTION prevent_mp_subscription_preferences_org_id_update ();
@@ -566,29 +311,126 @@ create table public.notifications (
 
 create index IF not exists notifications_created_at_idx on public.notifications using btree (created_at desc) TABLESPACE pg_default;
 
-## Tabla ORGANIZATION_ACTIVITY_LOGS:
+## Tabla OPS_ALERTS:
 
-create table public.organization_activity_logs (
+create table public.ops_alerts (
   id uuid not null default gen_random_uuid (),
-  organization_id uuid not null,
-  user_id uuid null,
-  action text not null,
-  target_table text not null,
-  target_id uuid null,
-  metadata jsonb null default '{}'::jsonb,
   created_at timestamp with time zone not null default now(),
-  constraint organization_activity_logs_pkey primary key (id),
-  constraint organization_activity_logs_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
-  constraint organization_activity_logs_user_id_fkey foreign KEY (user_id) references users (id) on delete set null
+  updated_at timestamp with time zone not null default now(),
+  severity text not null default 'high'::text,
+  status text not null default 'open'::text,
+  alert_type text not null,
+  title text not null,
+  description text null,
+  organization_id uuid null,
+  user_id uuid null,
+  provider text null,
+  provider_payment_id text null,
+  payment_id uuid null,
+  event_id uuid null,
+  fingerprint text null,
+  evidence jsonb not null default '{}'::jsonb,
+  ack_by uuid null,
+  ack_at timestamp with time zone null,
+  resolved_by uuid null,
+  resolved_at timestamp with time zone null,
+  constraint ops_alerts_pkey primary key (id),
+  constraint ops_alerts_event_id_fkey foreign KEY (event_id) references payment_events (id) on delete set null,
+  constraint ops_alerts_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete set null,
+  constraint ops_alerts_ack_by_fkey foreign KEY (ack_by) references users (id) on delete set null,
+  constraint ops_alerts_resolved_by_fkey foreign KEY (resolved_by) references users (id) on delete set null,
+  constraint ops_alerts_user_id_fkey foreign KEY (user_id) references users (id) on delete set null,
+  constraint ops_alerts_payment_id_fkey foreign KEY (payment_id) references payments (id) on delete set null
 ) TABLESPACE pg_default;
 
-create index IF not exists idx_org_activity_logs_org_id on public.organization_activity_logs using btree (organization_id) TABLESPACE pg_default;
+create index IF not exists idx_ops_alerts_status on public.ops_alerts using btree (status, severity, created_at desc) TABLESPACE pg_default;
 
-create index IF not exists idx_org_activity_logs_user_id on public.organization_activity_logs using btree (user_id) TABLESPACE pg_default;
+create index IF not exists idx_ops_alerts_org on public.ops_alerts using btree (organization_id, created_at desc) TABLESPACE pg_default;
 
-create index IF not exists idx_org_activity_logs_target on public.organization_activity_logs using btree (target_table, target_id) TABLESPACE pg_default;
+create unique INDEX IF not exists ux_ops_alerts_fingerprint_open on public.ops_alerts using btree (fingerprint) TABLESPACE pg_default
+where
+  (
+    (fingerprint is not null)
+    and (status = any (array['open'::text, 'ack'::text]))
+  );
 
-create index IF not exists idx_org_activity_logs_created_at on public.organization_activity_logs using btree (created_at desc) TABLESPACE pg_default;
+create trigger ops_alerts_set_updated_at BEFORE
+update on ops_alerts for EACH row
+execute FUNCTION update_updated_at_column ();
+
+## Tabla OPS_CHECK_RUNS:
+
+create table public.ops_check_runs (
+  id uuid not null default gen_random_uuid (),
+  created_at timestamp with time zone not null default now(),
+  check_suite text not null default 'ops_core'::text,
+  status text not null default 'success'::text,
+  duration_ms integer null,
+  stats jsonb not null default '{}'::jsonb,
+  error_message text null,
+  constraint ops_check_runs_pkey primary key (id)
+) TABLESPACE pg_default;
+
+create index IF not exists idx_ops_check_runs_created_at on public.ops_check_runs using btree (created_at desc) TABLESPACE pg_default;
+
+## Tabla OPS_REPAIR_ACTIONS:
+
+create table public.ops_repair_actions (
+  id text not null,
+  alert_type text not null,
+  label text not null,
+  description text null,
+  requires_confirmation boolean null default true,
+  is_dangerous boolean null default false,
+  is_active boolean null default true,
+  metadata jsonb null default '{}'::jsonb,
+  created_at timestamp with time zone null default now(),
+  constraint ops_repair_actions_pkey primary key (id)
+) TABLESPACE pg_default;
+
+create index IF not exists idx_ops_repair_actions_alert_type on public.ops_repair_actions using btree (alert_type) TABLESPACE pg_default;
+
+## Tabla OPS_REPAIR_LOGS:
+
+create table public.ops_repair_logs (
+  id uuid not null default gen_random_uuid (),
+  alert_id uuid null,
+  action_id text not null,
+  executed_by uuid null,
+  result text null,
+  details jsonb null default '{}'::jsonb,
+  created_at timestamp with time zone null default now(),
+  constraint ops_repair_logs_pkey primary key (id),
+  constraint ops_repair_logs_alert_id_fkey foreign KEY (alert_id) references ops_alerts (id) on delete CASCADE,
+  constraint ops_repair_logs_executed_by_fkey foreign KEY (executed_by) references auth.users (id),
+  constraint ops_repair_logs_result_check check (
+    (
+      result = any (array['success'::text, 'error'::text])
+    )
+  )
+) TABLESPACE pg_default;
+
+create index IF not exists idx_ops_repair_logs_alert_id on public.ops_repair_logs using btree (alert_id) TABLESPACE pg_default;
+
+create index IF not exists idx_ops_repair_logs_created_at on public.ops_repair_logs using btree (created_at desc) TABLESPACE pg_default;
+
+## Tabla OPS_RUNBOOKS:
+
+create table public.ops_runbooks (
+  id uuid not null default gen_random_uuid (),
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  alert_type text not null,
+  title text not null,
+  steps_md text not null,
+  links jsonb not null default '[]'::jsonb,
+  constraint ops_runbooks_pkey primary key (id),
+  constraint ops_runbooks_alert_type_key unique (alert_type)
+) TABLESPACE pg_default;
+
+create trigger ops_runbooks_set_updated_at BEFORE
+update on ops_runbooks for EACH row
+execute FUNCTION update_updated_at_column ();
 
 ## Tabla ORGANIZATION_BILLING_CYCLES:
 
@@ -669,6 +511,38 @@ create trigger trigger_create_contact_on_registered_invitation
 after INSERT on organization_invitations for EACH row
 execute FUNCTION handle_registered_invitation ();
 
+## Tabla ORGANIZATION_MEMBER_EVENTS (AUN VACIA):
+
+create table public.organization_member_events (
+  id uuid not null default gen_random_uuid (),
+  organization_id uuid not null,
+  subscription_id uuid null,
+  member_id uuid not null,
+  user_id uuid null,
+  event_type text not null,
+  was_billable boolean null,
+  is_billable boolean null,
+  event_date timestamp with time zone not null default now(),
+  performed_by uuid null,
+  created_at timestamp with time zone null default now(),
+  constraint organization_member_events_pkey primary key (id),
+  constraint organization_member_events_member_id_fkey foreign KEY (member_id) references organization_members (id) on delete CASCADE,
+  constraint organization_member_events_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint organization_member_events_performed_by_fkey foreign KEY (performed_by) references users (id),
+  constraint organization_member_events_subscription_id_fkey foreign KEY (subscription_id) references organization_subscriptions (id) on delete set null,
+  constraint organization_member_events_user_id_fkey foreign KEY (user_id) references users (id) on delete set null
+) TABLESPACE pg_default;
+
+create index IF not exists idx_member_events_org on public.organization_member_events using btree (organization_id) TABLESPACE pg_default;
+
+create index IF not exists idx_member_events_subscription on public.organization_member_events using btree (subscription_id) TABLESPACE pg_default;
+
+create index IF not exists idx_member_events_member on public.organization_member_events using btree (member_id) TABLESPACE pg_default;
+
+create index IF not exists idx_member_events_date on public.organization_member_events using btree (event_date) TABLESPACE pg_default;
+
+create index IF not exists idx_member_events_type on public.organization_member_events using btree (event_type) TABLESPACE pg_default;
+
 ## Tabla ORGANIZATION_MEMBERS:
 
 create table public.organization_members (
@@ -702,10 +576,6 @@ create index IF not exists idx_org_members_org_user on public.organization_membe
 
 create index IF not exists org_members_over_limit_idx on public.organization_members using btree (organization_id, is_over_limit) TABLESPACE pg_default;
 
-create trigger on_member_joins_founder_org
-after INSERT on organization_members for EACH row
-execute FUNCTION auto_enroll_founder_members ();
-
 create trigger set_updated_at BEFORE
 update on organization_members for EACH row
 execute FUNCTION update_updated_at_column ();
@@ -714,34 +584,7 @@ create trigger trigger_create_contact_on_new_member
 after INSERT on organization_members for EACH row
 execute FUNCTION handle_new_org_member_contact ();
 
-## Tabla ORGANIZATION_PREFERENCES:
-
-create table public.organization_preferences (
-  id uuid not null default gen_random_uuid (),
-  organization_id uuid null,
-  default_pdf_template_id uuid null,
-  created_at timestamp with time zone null default now(),
-  default_currency_id uuid null,
-  default_wallet_id uuid null,
-  updated_at timestamp with time zone null default now(),
-  use_currency_exchange boolean not null default false,
-  constraint organization_preferences_pkey primary key (id),
-  constraint unique_organization_preferences unique (organization_id),
-  constraint organization_preferences_default_currency_id_fkey foreign KEY (default_currency_id) references currencies (id) on delete set null,
-  constraint organization_preferences_default_pdf_template_id_fkey foreign KEY (default_pdf_template_id) references pdf_templates (id) on delete CASCADE,
-  constraint organization_preferences_default_wallet_id_fkey foreign KEY (default_wallet_id) references wallets (id) on delete set null,
-  constraint organization_preferences_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
-) TABLESPACE pg_default;
-
-create trigger set_updated_at BEFORE
-update on organization_preferences for EACH row
-execute FUNCTION update_updated_at_column ();
-
-create trigger update_organization_preferences_updated_at BEFORE
-update on organization_preferences for EACH row
-execute FUNCTION update_updated_at_column ();
-
-## Tabla ORGANIZATION_SUSCRIPTIONS:
+## Tabla ORGANIZATION_SUBSCRIPTIONS:
 
 create table public.organization_subscriptions (
   id uuid not null default gen_random_uuid (),
@@ -784,45 +627,6 @@ where
   (status = 'active'::text);
 
 create index IF not exists idx_org_subscriptions_coupon on public.organization_subscriptions using btree (coupon_id) TABLESPACE pg_default;
-
-## Tabla ORGANIZATION_WALLETS:
-
-create table public.organization_wallets (
-  id uuid not null default gen_random_uuid (),
-  organization_id uuid not null,
-  wallet_id uuid null,
-  is_active boolean not null default true,
-  created_at timestamp with time zone not null default now(),
-  is_default boolean not null default false,
-  updated_at timestamp with time zone null default now(),
-  is_deleted boolean not null default false,
-  deleted_at timestamp with time zone null,
-  created_by uuid null,
-  constraint organization_wallets_pkey primary key (id),
-  constraint organization_wallets_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
-  constraint organization_wallets_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
-  constraint organization_wallets_wallet_id_fkey foreign KEY (wallet_id) references wallets (id) on delete set null,
-  constraint org_wallets_default_active_chk check (
-    (
-      (not is_default)
-      or is_active
-    )
-  )
-) TABLESPACE pg_default;
-
-create unique INDEX IF not exists org_wallets_org_wallet_uniq on public.organization_wallets using btree (organization_id, wallet_id) TABLESPACE pg_default;
-
-create unique INDEX IF not exists org_wallets_org_default_uniq on public.organization_wallets using btree (organization_id) TABLESPACE pg_default
-where
-  (is_default = true);
-
-create index IF not exists org_wallets_org_idx on public.organization_wallets using btree (organization_id) TABLESPACE pg_default;
-
-create index IF not exists org_wallets_wallet_idx on public.organization_wallets using btree (wallet_id) TABLESPACE pg_default;
-
-create trigger organization_wallets_set_updated_at BEFORE
-update on organization_wallets for EACH row
-execute FUNCTION set_timestamp ();
 
 ## Tabla ORGANIZATIONS:
 
@@ -888,51 +692,30 @@ create index IF not exists idx_payment_events_custom_id on public.payment_events
 
 ## Tabla PAYMENTS:
 
-create table public.payments (
+create table public.payment_events (
   id uuid not null default gen_random_uuid (),
-  provider text not null,
+  provider_event_id text null,
+  provider_event_type text null,
+  status text null default 'RECEIVED'::text,
+  raw_headers jsonb null,
+  raw_payload jsonb not null,
+  created_at timestamp with time zone null default now(),
+  order_id text null,
+  custom_id text null,
+  user_hint text null,
+  course_hint text null,
+  provider text not null default 'paypal'::text,
   provider_payment_id text null,
-  user_id uuid not null,
-  course_id uuid null,
   amount numeric null,
-  currency text null default 'USD'::text,
-  status text not null default 'completed'::text,
-  created_at timestamp with time zone not null default now(),
-  product_type text null,
-  product_id uuid null,
-  organization_id uuid null,
-  approved_at timestamp with time zone null,
-  metadata jsonb null,
-  gateway text null,
-  constraint payments_pkey primary key (id),
-  constraint payments_course_id_fkey foreign KEY (course_id) references courses (id) on delete set null,
-  constraint payments_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete set null,
-  constraint payments_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE,
-  constraint payments_status_chk check (
-    (
-      status = any (
-        array[
-          'pending'::text,
-          'completed'::text,
-          'rejected'::text,
-          'refunded'::text
-        ]
-      )
-    )
-  )
+  currency text null,
+  constraint paypal_events_pkey primary key (id)
 ) TABLESPACE pg_default;
 
-create unique INDEX IF not exists uq_payments_provider_payment on public.payments using btree (provider, provider_payment_id) TABLESPACE pg_default
-where
-  (provider_payment_id is not null);
+create index IF not exists idx_payment_events_provider on public.payment_events using btree (provider) TABLESPACE pg_default;
 
-create index IF not exists idx_payments_user on public.payments using btree (user_id) TABLESPACE pg_default;
+create index IF not exists idx_payment_events_order_id on public.payment_events using btree (order_id) TABLESPACE pg_default;
 
-create index IF not exists idx_payments_course on public.payments using btree (course_id) TABLESPACE pg_default;
-
-create trigger on_payment_created_send_email
-after INSERT on payments for EACH row
-execute FUNCTION notify_replit_email ();
+create index IF not exists idx_payment_events_custom_id on public.payment_events using btree (custom_id) TABLESPACE pg_default;
 
 ## Tabla PAYPAL_SEAT_PREFERENCES:
 
@@ -1034,6 +817,67 @@ create table public.plans (
   )
 ) TABLESPACE pg_default;
 
+## Tabla PROJECTS:
+
+create table public.projects (
+  created_at timestamp with time zone not null default now(),
+  name text not null,
+  organization_id uuid not null,
+  is_active boolean not null default true,
+  id uuid not null default gen_random_uuid (),
+  status text not null default 'Activo'::text,
+  updated_at timestamp with time zone not null default now(),
+  created_by uuid null,
+  color text null,
+  use_custom_color boolean not null default false,
+  custom_color_h integer null,
+  custom_color_hex text null,
+  code text null,
+  is_deleted boolean not null default false,
+  deleted_at timestamp with time zone null,
+  last_active_at timestamp with time zone null,
+  is_over_limit boolean null default false,
+  currency_id uuid not null,
+  constraint projects_pkey primary key (id),
+  constraint projects_id_key unique (id),
+  constraint projects_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
+  constraint projects_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint projects_currency_id_fkey foreign KEY (currency_id) references currencies (id) on delete RESTRICT,
+  constraint projects_custom_color_h_check check (
+    (
+      (custom_color_h >= 0)
+      and (custom_color_h <= 360)
+    )
+  ),
+  constraint projects_name_not_blank_chk check ((btrim(name) <> ''::text))
+) TABLESPACE pg_default;
+
+create index IF not exists projects_org_idx on public.projects using btree (organization_id) TABLESPACE pg_default;
+
+create index IF not exists projects_created_by_idx on public.projects using btree (created_by) TABLESPACE pg_default;
+
+create index IF not exists projects_org_active_idx on public.projects using btree (organization_id, is_active) TABLESPACE pg_default;
+
+create index IF not exists projects_created_at_idx on public.projects using btree (created_at) TABLESPACE pg_default;
+
+create unique INDEX IF not exists projects_org_code_uniq on public.projects using btree (organization_id, code) TABLESPACE pg_default
+where
+  (code is not null);
+
+create index IF not exists idx_projects_org_status_active on public.projects using btree (organization_id, status, is_active, is_deleted) TABLESPACE pg_default;
+
+create index IF not exists idx_projects_code on public.projects using btree (code) TABLESPACE pg_default;
+
+create unique INDEX IF not exists projects_org_name_lower_uniq on public.projects using btree (organization_id, lower(name)) TABLESPACE pg_default
+where
+  (is_deleted = false);
+
+create index IF not exists projects_over_limit_idx on public.projects using btree (organization_id, is_over_limit) TABLESPACE pg_default;
+
+create trigger projects_set_updated_at BEFORE
+update on projects for EACH row
+execute FUNCTION set_timestamp ();
+
 ## Tabla ROLE_PERMISSIONS:
 
 create table public.role_permissions (
@@ -1070,7 +914,7 @@ where
 
 create index IF not exists idx_roles_organization_id on public.roles using btree (organization_id) TABLESPACE pg_default;
 
-## Tabla SUSCRIPTION_NOTIFICATIONS_LOG:
+## Tabla SUBSCRIPTION_NOTIFICATIONS_LOG:
 
 create table public.subscription_notifications_log (
   id uuid not null default gen_random_uuid (),
@@ -1082,35 +926,24 @@ create table public.subscription_notifications_log (
   constraint subscription_notifications_log_subscription_id_fkey foreign KEY (subscription_id) references organization_subscriptions (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
-## Tabla SUPPORT_MESSAGES:
+## Tabla SYSTEM_ERRORS:
 
-create table public.support_messages (
+create table public.system_errors (
   id uuid not null default gen_random_uuid (),
-  user_id uuid not null,
-  message text not null,
-  sender text not null,
-  created_at timestamp with time zone null default now(),
-  read_by_admin boolean not null default false,
-  read_by_user boolean not null default false,
-  constraint support_messages_pkey primary key (id),
-  constraint support_messages_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE,
-  constraint support_messages_sender_check check (
-    (sender = any (array['user'::text, 'admin'::text]))
-  )
+  source text not null,
+  entity text null,
+  operation text null,
+  error_message text not null,
+  context jsonb null,
+  severity text not null default 'critical'::text,
+  occurred_at timestamp with time zone not null default now(),
+  resolved_at timestamp with time zone null,
+  constraint system_errors_pkey primary key (id)
 ) TABLESPACE pg_default;
 
-create index IF not exists idx_support_messages_read_by_user on public.support_messages using btree (read_by_user, sender, user_id) TABLESPACE pg_default;
+create index IF not exists system_errors_severity_resolved_at_idx on public.system_errors using btree (severity, resolved_at) TABLESPACE pg_default;
 
-create index IF not exists idx_support_messages_read_by_admin on public.support_messages using btree (read_by_admin, sender) TABLESPACE pg_default;
-
-create index IF not exists idx_support_messages_unread_user on public.support_messages using btree (sender, read_by_admin, user_id) TABLESPACE pg_default;
-
-create trigger trg_enforce_support_messages_user_id BEFORE INSERT on support_messages for EACH row
-execute FUNCTION enforce_support_messages_user_id ();
-
-create trigger trg_prevent_support_messages_user_id_update BEFORE
-update on support_messages for EACH row
-execute FUNCTION prevent_support_messages_user_id_update ();
+create index IF not exists system_errors_occurred_at_idx on public.system_errors using btree (occurred_at) TABLESPACE pg_default;
 
 ## Tabla SYSTEM_JOB_LOGS:
 
@@ -1127,94 +960,23 @@ create table public.system_job_logs (
   constraint system_job_logs_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
-## Tabla TESTIMONIALS:
+## Tabla USER_ACQUISITION:
 
-create table public.testimonials (
-  id uuid not null default gen_random_uuid (),
-  course_id uuid null,
-  organization_id uuid null,
-  product_id uuid null,
-  author_name text not null,
-  author_title text null,
-  author_avatar_url text null,
-  content text not null,
-  rating integer null,
-  is_featured boolean null default false,
-  is_active boolean null default true,
-  sort_index integer null default 0,
-  is_deleted boolean null default false,
-  created_at timestamp with time zone null default now(),
-  updated_at timestamp with time zone null default now(),
-  user_id uuid null,
-  constraint testimonials_pkey primary key (id),
-  constraint testimonials_course_id_fkey foreign KEY (course_id) references courses (id) on delete CASCADE,
-  constraint testimonials_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
-  constraint testimonials_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE,
-  constraint testimonials_rating_check check (
-    (
-      (rating >= 1)
-      and (rating <= 5)
-    )
-  )
-) TABLESPACE pg_default;
-
-create index IF not exists idx_testimonials_course on public.testimonials using btree (course_id) TABLESPACE pg_default
-where
-  (is_deleted = false);
-
-create index IF not exists idx_testimonials_org on public.testimonials using btree (organization_id) TABLESPACE pg_default
-where
-  (is_deleted = false);
-
-create index IF not exists idx_testimonials_active on public.testimonials using btree (is_active, is_deleted) TABLESPACE pg_default;
-
-create index IF not exists idx_testimonials_user on public.testimonials using btree (user_id) TABLESPACE pg_default
-where
-  (
-    (user_id is not null)
-    and (is_deleted = false)
-  );
-
-create index IF not exists idx_testimonials_course_user on public.testimonials using btree (course_id, user_id) TABLESPACE pg_default
-where
-  (is_deleted = false);
-
-create trigger trg_enforce_testimonials_user_id BEFORE INSERT on testimonials for EACH row
-execute FUNCTION enforce_testimonials_user_id ();
-
-create trigger trg_prevent_testimonials_user_id_update BEFORE
-update on testimonials for EACH row
-execute FUNCTION prevent_testimonials_user_id_update ();
-
-create trigger trigger_testimonials_updated_at BEFORE
-update on testimonials for EACH row
-execute FUNCTION update_testimonials_updated_at ();
-
-## Tabla USER_DATA:
-
-create table public.user_data (
+create table public.user_acquisition (
   id uuid not null default gen_random_uuid (),
   user_id uuid not null,
-  country uuid null,
-  created_at timestamp with time zone null default now(),
-  birthdate date null,
-  updated_at timestamp with time zone null default now(),
-  first_name text null,
-  last_name text null,
-  phone_e164 text null,
-  constraint user_profile_data_pkey primary key (id),
-  constraint user_data_id_key unique (id),
-  constraint user_data_user_id_key unique (user_id),
-  constraint user_data_country_fkey foreign KEY (country) references countries (id) on delete set null,
-  constraint user_profile_data_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+  source text not null,
+  medium text null,
+  campaign text null,
+  content text null,
+  landing_page text null,
+  referrer text null,
+  created_at timestamp with time zone not null default now(),
+  constraint user_acquisition_pkey primary key (id),
+  constraint user_acquisition_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
-create trigger set_updated_at BEFORE
-update on user_data for EACH row
-execute FUNCTION update_updated_at_column ();
-
-create trigger trg_user_data_fill_user BEFORE INSERT on user_data for EACH row
-execute FUNCTION fill_user_data_user_id_from_auth ();
+create unique INDEX IF not exists uniq_user_acquisition_user on public.user_acquisition using btree (user_id) TABLESPACE pg_default;
 
 ## Tabla USER_NOTIFICATIONS:
 
@@ -1232,9 +994,6 @@ create table public.user_notifications (
 ) TABLESPACE pg_default;
 
 create index IF not exists user_notifications_user_idx on public.user_notifications using btree (user_id, read_at) TABLESPACE pg_default;
-
-create trigger trg_enforce_user_notifications_user_id BEFORE INSERT on user_notifications for EACH row
-execute FUNCTION enforce_user_notifications_user_id ();
 
 create trigger trg_prevent_user_notifications_user_id_update BEFORE
 update on user_notifications for EACH row
@@ -1255,9 +1014,6 @@ create table public.user_organization_preferences (
   constraint user_organization_preferences_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
   constraint user_organization_preferences_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
 ) TABLESPACE pg_default;
-
-create trigger trg_enforce_user_org_prefs_user_id BEFORE INSERT on user_organization_preferences for EACH row
-execute FUNCTION enforce_user_org_prefs_user_id ();
 
 create trigger trg_prevent_user_org_prefs_org_id_update BEFORE
 update on user_organization_preferences for EACH row
@@ -1296,9 +1052,6 @@ create trigger set_updated_at BEFORE
 update on user_preferences for EACH row
 execute FUNCTION update_updated_at_column ();
 
-create trigger trg_enforce_user_preferences_user_id BEFORE INSERT on user_preferences for EACH row
-execute FUNCTION enforce_user_preferences_user_id ();
-
 create trigger trg_prevent_user_preferences_user_id_update BEFORE
 update on user_preferences for EACH row
 execute FUNCTION prevent_user_preferences_user_id_update ();
@@ -1326,9 +1079,6 @@ create trigger set_user_presence_updated_at BEFORE
 update on user_presence for EACH row
 execute FUNCTION update_updated_at_column ();
 
-create trigger trg_enforce_user_presence_user_id BEFORE INSERT on user_presence for EACH row
-execute FUNCTION enforce_user_presence_user_id ();
-
 create trigger trg_prevent_user_presence_user_id_update BEFORE
 update on user_presence for EACH row
 execute FUNCTION prevent_user_presence_user_id_update ();
@@ -1349,12 +1099,21 @@ create table public.user_view_history (
   constraint user_view_history_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
-create trigger trg_enforce_user_view_history_user_id BEFORE INSERT on user_view_history for EACH row
-execute FUNCTION enforce_user_view_history_user_id ();
+create index IF not exists idx_user_view_history_user_id on public.user_view_history using btree (user_id) TABLESPACE pg_default;
+
+create index IF not exists idx_user_view_history_entered_at on public.user_view_history using btree (entered_at) TABLESPACE pg_default;
+
+create index IF not exists idx_user_view_history_user_entered on public.user_view_history using btree (user_id, entered_at) TABLESPACE pg_default;
+
+create index IF not exists idx_user_view_history_org on public.user_view_history using btree (organization_id) TABLESPACE pg_default;
 
 create trigger trg_prevent_user_view_history_user_id_update BEFORE
 update on user_view_history for EACH row
 execute FUNCTION prevent_user_view_history_user_id_update ();
+
+create trigger trg_update_org_last_activity
+after INSERT on user_view_history for EACH row
+execute FUNCTION update_org_last_activity ();
 
 ## Tabla USERS:
 
@@ -1402,3 +1161,8 @@ create trigger trigger_sync_contact_on_user_update
 after
 update on users for EACH row
 execute FUNCTION sync_contact_on_user_update ();
+
+
+
+
+
