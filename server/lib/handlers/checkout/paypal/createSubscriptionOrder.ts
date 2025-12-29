@@ -8,6 +8,7 @@ import { createSubscription as createPayPalSubscription } from "./subscriptions-
 import { calculateProration } from "../shared/proration.js";
 import { validateSubscriptionCoupon, createGiftedSubscription } from "../shared/subscription-coupons.js";
 import { getAdminClient } from "../../../../routes/_base.js";
+import { logPayPalMode } from "./config.js";
 
 export type CreateSubscriptionOrderResult =
   | { success: true; orderId: string; approvalUrl: string; order: any; isRecurring?: boolean; subscriptionId?: string }

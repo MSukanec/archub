@@ -5,6 +5,7 @@ import { getUserData } from "../shared/user.js";
 import { buildURLContext, buildCourseBackUrls } from "../shared/urls.js";
 import { encodeInvoiceId, encodeCustomId } from "./encoding.js";
 import { createPayPalOrder } from "./api.js";
+import { logPayPalMode } from "./config.js";
 
 export type CreateCourseOrderResult =
   | { success: true; orderId: string; approvalUrl: string; order: any }
