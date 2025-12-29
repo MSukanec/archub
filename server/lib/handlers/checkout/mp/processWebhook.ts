@@ -1,11 +1,6 @@
 import type { Request } from "express";
 import { createServiceSupabaseClient } from "../shared/auth.js";
 import { logPaymentEvent } from "../shared/events.js";
-import { insertPayment } from "../shared/payments.js";
-import { upsertEnrollment } from "../shared/enrollments.js";
-import { upgradeOrganizationPlan } from "../shared/subscriptions.js";
-import { getCourseIdBySlug, getPlanIdBySlug } from "../shared/helpers.js";
-import { markCouponAsUsed } from "../shared/coupons.js";
 import { getMPPayment, getMPMerchantOrder } from "./api.js";
 import { getMPPreapproval } from "./subscriptions-api.js";
 import { extractMetadata, decodeExternalReference } from "./encoding.js";
@@ -25,12 +20,9 @@ async function parseBody(req: Request): Promise<any> {
     }
   } catch {}
   try {
-    // @ts-ignore
     const raw: string = await new Promise((resolve) => {
       let data = "";
-      // @ts-ignore
       req.on("data", (c: Buffer) => (data += c.toString("utf8")));
-      // @ts-ignore
       req.on("end", () => resolve(data));
     });
     if (!raw) return {};
@@ -51,30 +43,21 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
   const supabase = createServiceSupabaseClient();
 
   try {
-    // 1. Validación de secret (TEMPORALMENTE DESHABILITADA PARA DEBUG)
+    // 1. Validate secret (temporarily disabled for debug)
     if (MP_WEBHOOK_SECRET) {
       const q = String(req.query?.secret ?? "");
-      
       if (!q || q !== MP_WEBHOOK_SECRET) {
-        console.warn("[mp/webhook] secret mismatch - PERO CONTINUANDO PARA DEBUG");
-        // TEMPORALMENTE COMENTADO: return { success: true, processed: "ignored", id: "secret_mismatch" };
+        console.warn("[MP webhook] secret mismatch - CONTINUING FOR DEBUG");
       }
     }
 
     // 2. Parse body
     const body = await parseBody(req);
-    const type =
-      body?.type ||
-      body?.topic ||
-      (typeof body?.action === "string"
-        ? String(body.action).split(".")[0]
-        : undefined);
+    const type = body?.type || body?.topic || 
+      (typeof body?.action === "string" ? String(body.action).split(".")[0] : undefined);
 
     const idFromBody = body?.data?.id || body?.id || null;
-    const idFromQuery =
-      (req.query?.["data.id"] as string) ||
-      (req.query?.["id"] as string) ||
-      null;
+    const idFromQuery = (req.query?.["data.id"] as string) || (req.query?.["id"] as string) || null;
     const finalId = idFromBody || idFromQuery || null;
 
     // === PAYMENT ===
@@ -83,11 +66,12 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       const md = extractMetadata(pay);
       const externalRef = md.external_reference || "";
       
-      // NUEVO: Buscar datos en mp_course_preferences si es un ID corto (empieza con "mp_")
-      // UPGRADE: Buscar datos en mp_subscription_preferences si es un ID corto (empieza con "mpu_")
+      // Extract metadata from preferences tables
       let fromDb: any = null;
-      if (externalRef.startsWith("mpu_")) {
-        console.log("[MP webhook] Looking up upgrade preference:", externalRef);
+      let preferenceTable: string | null = null;
+
+      if (externalRef.startsWith("mpu_") || externalRef.startsWith("mpr_") || externalRef.startsWith("mps_")) {
+        preferenceTable = "mp_subscription_preferences";
         const { data: prefData, error: prefError } = await supabase
           .from("mp_subscription_preferences")
           .select("*")
@@ -99,918 +83,267 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
             user_id: prefData.user_id,
             organization_id: prefData.organization_id,
             plan_slug: prefData.plan_slug,
+            plan_id: prefData.plan_id,
             billing_period: prefData.billing_period,
-            product_type: prefData.product_type || 'subscription_upgrade',
-          };
-          console.log("[MP webhook] Found upgrade preference data:", fromDb);
-        } else {
-          console.warn("[MP webhook] ⚠️ No upgrade preference data found:", prefError);
-        }
-      } else if (externalRef.startsWith("mpr_")) {
-        // RECURRING SUBSCRIPTION PAYMENT: Lookup recurring subscription preference data
-        console.log("[MP webhook] Looking up recurring subscription preference:", externalRef);
-        const { data: prefData, error: prefError } = await supabase
-          .from("mp_subscription_preferences")
-          .select("*")
-          .eq("id", externalRef)
-          .maybeSingle();
-        
-        if (prefData && !prefError) {
-          fromDb = {
-            user_id: prefData.user_id,
-            organization_id: prefData.organization_id,
-            plan_slug: prefData.plan_slug,
-            billing_period: prefData.billing_period,
-            product_type: 'subscription',
-          };
-          console.log("[MP webhook] Found recurring subscription preference data:", fromDb);
-        } else {
-          console.warn("[MP webhook] ⚠️ No recurring subscription preference data found:", prefError);
-        }
-      } else if (externalRef.startsWith("mps_")) {
-        // SEAT PAYMENT: Lookup seat preference data
-        console.log("[MP webhook] Looking up seat preference:", externalRef);
-        const { data: prefData, error: prefError } = await supabase
-          .from("mp_subscription_preferences")
-          .select("*")
-          .eq("id", externalRef)
-          .maybeSingle();
-        
-        if (prefData && !prefError) {
-          fromDb = {
-            user_id: prefData.user_id,
-            organization_id: prefData.organization_id,
+            product_type: prefData.product_type || (externalRef.startsWith("mpu_") ? 'subscription_upgrade' : 
+                          externalRef.startsWith("mps_") ? 'seat' : 'subscription'),
             invitee_email: prefData.invitee_email,
             role_id: prefData.role_id,
             subscription_id: prefData.subscription_id,
-            billing_period: prefData.billing_period,
-            product_type: prefData.product_type || 'seat',
             amount_ars: prefData.amount_ars,
+            coupon_code: prefData.coupon_code,
+            coupon_id: prefData.coupon_id,
           };
-          console.log("[MP webhook] Found seat preference data:", fromDb);
-        } else {
-          console.warn("[MP webhook] ⚠️ No seat preference data found:", prefError);
         }
       } else if (externalRef.startsWith("mp_")) {
+        preferenceTable = "mp_course_preferences";
         const { data: prefData, error: prefError } = await supabase
           .from("mp_course_preferences")
-          .select("*, courses!inner(slug)")
+          .select("*, courses!inner(id, slug)")
           .eq("id", externalRef)
           .maybeSingle();
         
         if (prefData && !prefError) {
           fromDb = {
             user_id: prefData.user_id,
+            course_id: prefData.courses?.id,
             course_slug: prefData.courses?.slug,
             months: prefData.access_months,
             coupon_code: prefData.coupon_code,
             coupon_id: prefData.coupon_id,
             product_type: 'course',
           };
-        } else {
-          console.warn("[MP webhook] ⚠️ No se encontraron datos en BD:", prefError);
         }
       }
-      
-      // Fallback al viejo método (base64) si no hay datos en BD
-      const fromExt = fromDb || decodeExternalReference(externalRef);
-      const effectiveMonths = md.months ?? fromExt.months ?? 12;
-      const resolvedUserId = md.user_id ?? fromExt.user_id ?? null;
-      const resolvedSlug = md.course_slug ?? fromExt.course_slug ?? null;
 
+      // Fallback to old base64 method if no DB data
+      const fromExt = fromDb || decodeExternalReference(externalRef);
+      
       const providerPaymentId = String(pay?.id ?? "");
       const status = String(pay?.status ?? "");
-      const statusDetail = String(pay?.status_detail ?? "");
       const amount = Number(pay?.transaction_amount ?? 0);
       const currency = String(pay?.currency_id ?? "ARS");
 
       const productType = md.product_type || fromExt.product_type || 'course';
-      const organizationId = md.organization_id || fromExt.organization_id;
-      const planIdFromMetadata = md.plan_id;
-      const planSlug = md.plan_slug || fromExt.plan_slug;
-      const billingPeriod = md.billing_period || fromExt.billing_period;
-      const couponCode = md.coupon_code || fromExt.coupon_code || null;
-      const couponId = md.coupon_id || fromExt.coupon_id || null;
+      const resolvedUserId = md.user_id ?? fromExt.user_id ?? null;
 
-      // CRITICAL: Get user_id for payment record
-      // For subscription_upgrade: user_id from mp_subscription_preferences is ALREADY public.users.id
-      // For other types (courses): user_id might be auth_id and needs conversion
-      let publicUserId: string | null = null;
-      
-      // ALL flows store auth_id as user_id - we must convert to public.users.id
-      if (resolvedUserId) {
-        console.log('[MP webhook] Converting auth_id to user_id:', { auth_id: resolvedUserId, productType });
-        const { data: userProfile, error: profileError } = await supabase
-          .from("users")
-          .select("id")
-          .eq("auth_id", resolvedUserId)
-          .maybeSingle();
-
-        if (profileError || !userProfile) {
-          console.error('[MP webhook] ❌ Failed to resolve auth_id to user_id:', {
-            auth_id: resolvedUserId,
-            error: profileError,
-            productType
-          });
-        } else {
-          publicUserId = userProfile.id;
-          console.log('[MP webhook] ✅ Resolved user_id:', { publicUserId });
-        }
-      } else {
-        console.error('[MP webhook] ❌ No resolvedUserId available:', { fromDb, fromExt: fromDb ? 'fromDb' : 'decoded', productType });
-      }
-
-      // 1. Insertar en payment_events
+      // 1. Log RAW event
       await logPaymentEvent(supabase, "mercadopago", {
         providerEventId: providerPaymentId,
         providerEventType: "payment.webhook",
-        status: "PROCESSED",
+        status: "RECEIVED",
         rawPayload: pay,
         orderId: String(pay?.order?.id ?? ""),
-        customId: md.external_reference ?? null,
+        customId: externalRef,
         userHint: resolvedUserId,
-        courseHint: resolvedSlug,
+        courseHint: fromExt.course_slug || null,
         providerPaymentId: providerPaymentId,
         amount: amount || null,
         currency: currency,
       });
 
-      // 2. Si está aprobado, procesar según product_type
-      if (status === "approved") {
-        // UPGRADE: Handle subscription_upgrade - just record payment, actual upgrade happens in handleUpgradeReturn
-        if (productType === 'subscription_upgrade') {
-          console.log("[MP webhook] Processing subscription upgrade payment:", {
-            externalRef,
-            organizationId,
-            planSlug,
-            amount,
-          });
-          
-          let resolvedPlanId: string | null = null;
-          if (planSlug) {
-            resolvedPlanId = await getPlanIdBySlug(supabase, planSlug);
-          }
-          
-          const upgradePaymentResult = await insertPayment(supabase, "mercadopago", {
-            providerPaymentId: providerPaymentId,
-            userId: publicUserId,
-            amount: amount || null,
-            currency: currency,
-            status: "completed",
-            productType: 'subscription_upgrade',
-            organizationId: organizationId || undefined,
-            productId: resolvedPlanId || undefined,
-          });
-          
-          if (upgradePaymentResult.inserted) {
-            console.log("[MP webhook] ✅ Upgrade payment recorded:", upgradePaymentResult.paymentId);
-          } else {
-            console.log("[MP webhook] Upgrade payment already existed (duplicate webhook)");
-          }
-          
-          return { success: true, processed: "subscription_upgrade_payment", id: finalId };
-        }
-
-        // SEAT PAYMENT: Handle seat purchase - record payment and create invitation
-        if (productType === 'seat') {
-          const inviteeEmail = fromExt.invitee_email;
-          const roleId = fromExt.role_id;
-          const subscriptionId = fromExt.subscription_id;
-          const seatBillingPeriod = fromExt.billing_period;
-
-          console.log("[MP webhook] Processing seat payment:", {
-            externalRef,
-            organizationId,
-            inviteeEmail,
-            roleId,
-            amount,
-          });
-
-          if (!organizationId || !inviteeEmail || !roleId) {
-            console.error("[MP webhook] ❌ Missing seat data:", { organizationId, inviteeEmail, roleId });
-            return { success: true, processed: "seat_missing_data", id: finalId };
-          }
-
-          // Check for duplicate payment
-          const { data: existingPayment } = await supabase
-            .from('payments')
-            .select('id')
-            .eq('gateway', 'mercadopago')
-            .eq('gateway_payment_id', providerPaymentId)
-            .maybeSingle();
-
-          if (existingPayment) {
-            console.log("[MP webhook] Seat payment already processed (duplicate webhook):", existingPayment.id);
-            return { success: true, processed: "seat_duplicate", id: finalId };
-          }
-
-          // Get organization and role info
-          const { data: org } = await supabase
-            .from('organizations')
-            .select('id, name')
-            .eq('id', organizationId)
-            .single();
-
-          const { data: role } = await supabase
-            .from('roles')
-            .select('id, name')
-            .eq('id', roleId)
-            .single();
-
-          if (!org || !role) {
-            console.error("[MP webhook] ❌ Org or role not found:", { org, role });
-            return { success: true, processed: "seat_org_role_not_found", id: finalId };
-          }
-
-          // Insert payment
-          const { error: paymentError } = await supabase
-            .from('payments')
-            .insert({
-              user_id: publicUserId,
-              organization_id: organizationId,
-              product_type: 'seat',
-              product_id: roleId,
-              gateway: 'mercadopago',
-              gateway_payment_id: providerPaymentId,
-              amount: amount,
-              currency: currency,
-              status: 'completed',
-              metadata: {
-                invitee_email: inviteeEmail,
-                role_id: roleId,
-                role_name: role.name,
-                organization_name: org.name,
-                preference_id: externalRef,
-              },
-            });
-
-          if (paymentError) {
-            console.error('[MP webhook] ❌ Seat payment insert failed:', paymentError);
-          } else {
-            console.log('[MP webhook] ✅ Seat payment recorded');
-          }
-
-          // Check if invitee already exists as user
-          const { data: existingUser } = await supabase
-            .from('users')
-            .select('id, auth_id')
-            .eq('email', inviteeEmail.toLowerCase())
-            .maybeSingle();
-
-          // Get inviter info
-          const { data: inviterMember } = await supabase
-            .from('organization_members')
-            .select('id, users!left(first_name, last_name)')
-            .eq('user_id', publicUserId)
-            .eq('organization_id', organizationId)
-            .eq('is_active', true)
-            .maybeSingle();
-
-          const inviterUser = (inviterMember as any)?.users;
-          const inviterName = inviterUser?.first_name && inviterUser?.last_name 
-            ? `${inviterUser.first_name} ${inviterUser.last_name}`
-            : inviterUser?.first_name || 'Un administrador';
-
-          // Check for existing invitation
-          const { data: existingInvitation } = await supabase
-            .from('organization_invitations')
-            .select('id, status')
-            .eq('email', inviteeEmail.toLowerCase())
-            .eq('organization_id', organizationId)
-            .maybeSingle();
-
-          if (existingInvitation) {
-            // Reset existing invitation to pending
-            await supabase
-              .from('organization_invitations')
-              .update({
-                status: 'pending',
-                role_id: roleId,
-                accepted_at: null,
-                updated_at: new Date().toISOString(),
-                user_id: existingUser?.id || null,
-              })
-              .eq('id', existingInvitation.id);
-
-            console.log('[MP webhook] ✅ Existing invitation reset to pending:', existingInvitation.id);
-
-            if (existingUser) {
-              await supabase.from('notifications').insert({
-                type: 'organization_invitation',
-                title: `Te invitaron nuevamente a ${org.name}`,
-                body: `Has sido invitado a unirte a la organización "${org.name}". Aceptá la invitación para comenzar a colaborar.`,
-                data: {
-                  invitation_id: existingInvitation.id,
-                  organization_id: organizationId,
-                  organization_name: org.name,
-                  user_id: existingUser.id,
-                },
-                audience: 'direct',
-                created_by: publicUserId,
-              });
-            } else {
-              // Send invitation email for new users
-              const { sendInvitationEmail } = await import("../../../email/sendInvitationEmail.js");
-              await sendInvitationEmail({
-                inviteeEmail: inviteeEmail.toLowerCase(),
-                organizationName: org.name,
-                inviterName,
-                roleName: role.name,
-                invitationId: existingInvitation.id,
-              });
-            }
-          } else {
-            // Create new invitation
-            const { data: invitation, error: invitationError } = await supabase
-              .from('organization_invitations')
-              .insert({
-                organization_id: organizationId,
-                email: inviteeEmail.toLowerCase(),
-                role_id: roleId,
-                user_id: existingUser?.id || null,
-                invited_by: inviterMember?.id || null,
-                status: 'pending',
-              })
-              .select()
-              .single();
-
-            if (invitationError || !invitation) {
-              console.error('[MP webhook] ❌ Invitation creation failed:', invitationError);
-              return { success: true, processed: "seat_invitation_failed", id: finalId };
-            }
-
-            console.log('[MP webhook] ✅ Invitation created:', invitation.id);
-
-            if (existingUser) {
-              await supabase.from('notifications').insert({
-                type: 'organization_invitation',
-                title: `Te invitaron a ${org.name}`,
-                body: `Has sido invitado a unirte a la organización "${org.name}". Aceptá la invitación para comenzar a colaborar.`,
-                data: {
-                  invitation_id: invitation.id,
-                  organization_id: organizationId,
-                  organization_name: org.name,
-                  user_id: existingUser.id,
-                },
-                audience: 'direct',
-                created_by: publicUserId,
-              });
-            } else {
-              // Send invitation email for new users
-              const { sendInvitationEmail } = await import("../../../email/sendInvitationEmail.js");
-              await sendInvitationEmail({
-                inviteeEmail: inviteeEmail.toLowerCase(),
-                organizationName: org.name,
-                inviterName,
-                roleName: role.name,
-                invitationId: invitation.id,
-              });
-            }
-          }
-
-          // Update subscription for new seat if applicable
-          if (subscriptionId && seatBillingPeriod) {
-            try {
-              const { updateSubscriptionForNewSeat } = await import("./updateSeatSubscription.js");
-              const updateResult = await updateSubscriptionForNewSeat({
-                supabase,
-                subscriptionId,
-                organizationId,
-                billingPeriod: seatBillingPeriod as 'monthly' | 'annual',
-              });
-              
-              if (!updateResult.success) {
-                console.error('[MP webhook] ⚠️ Failed to update subscription for seat (non-fatal):', updateResult.error);
-              } else {
-                console.log('[MP webhook] ✅ Subscription updated for new seat:', {
-                  oldAmount: updateResult.oldAmount,
-                  newAmount: updateResult.newAmount,
-                });
-              }
-            } catch (e) {
-              console.error('[MP webhook] ⚠️ Error updating subscription (non-fatal):', e);
-            }
-          }
-
-          return { success: true, processed: "seat_payment", id: finalId };
-        }
-        
-        if (productType === 'subscription') {
-          if (organizationId && billingPeriod) {
-            let resolvedPlanId = planIdFromMetadata;
-            
-            if (!resolvedPlanId && planSlug) {
-              resolvedPlanId = await getPlanIdBySlug(supabase, planSlug);
-              
-              if (!resolvedPlanId) {
-                console.error(`[MP webhook] ❌ Failed to resolve plan_id from slug "${planSlug}"`);
-                return { success: true, processed: "error", id: 'plan_not_found' };
-              }
-            }
-            
-            if (!resolvedPlanId) {
-              console.error(`[MP webhook] ❌ Missing both plan_id and plan_slug`);
-              return { success: true, processed: "error", id: 'missing_plan_data' };
-            }
-            
-            // Insert payment (subscription) - userId is REQUIRED even for subscriptions
-            const subPaymentResult = await insertPayment(supabase, "mercadopago", {
-              providerPaymentId: providerPaymentId,
-              userId: publicUserId, // ✅ CRITICAL: Required for payments table
-              amount: amount || null,
-              currency: currency,
-              status: "completed",
-              productType: 'subscription',
-              organizationId: organizationId,
-              productId: resolvedPlanId,
-            });
-
-            // IDEMPOTENT: Only upgrade organization plan if payment was NEWLY inserted
-            if (subPaymentResult.inserted && subPaymentResult.paymentId) {
-              await upgradeOrganizationPlan(supabase, {
-                organizationId: organizationId,
-                planId: resolvedPlanId,
-                billingPeriod: billingPeriod as 'monthly' | 'annual',
-                paymentId: subPaymentResult.paymentId, // ✅ UUID from payments table
-                amount: amount,
-                currency: currency,
-                userId: publicUserId, // ✅ For Founders Program
-              });
-            } else if (!subPaymentResult.inserted) {
-              // Duplicate webhook - payment already processed
-            } else {
-              console.error(`[MP webhook] ❌ No payment ID returned for subscription`);
-            }
-          } else {
-            console.error(`[MP webhook] ❌ Missing subscription data:`, { organizationId, billingPeriod });
-          }
-        } else {
-          // course_id si podemos
-          let course_id: string | null = null;
-          if (resolvedSlug) course_id = await getCourseIdBySlug(supabase, resolvedSlug);
-
-          if (publicUserId && course_id) {
-            // Insert payment (course) - using publicUserId from public.users table
-            const paymentResult = await insertPayment(supabase, "mercadopago", {
-              providerPaymentId: providerPaymentId,
-              userId: publicUserId,
-              courseId: course_id,
-              amount: amount || null,
-              currency: currency,
-              status: "completed",
-              productType: 'course',
-              couponCode: couponCode,
-              couponId: couponId,
-            });
-
-            // IDEMPOTENT: Only mark coupon as used if payment was NEWLY inserted (not duplicate)
-            if (paymentResult.inserted && paymentResult.paymentId && couponId && couponCode) {
-              // Calculate amount saved (we need to store original price in metadata for this)
-              // For now, use 0 as placeholder - ideally we'd store original_price in metadata
-              const amountSaved = 0; // TODO: Store original_price in metadata to calculate discount
-              const couponResult = await markCouponAsUsed(
-                supabase, 
-                couponId,
-                publicUserId,
-                course_id,
-                paymentResult.paymentId, // ✅ Usar UUID de payments table, no el ID de MP
-                amountSaved,
-                currency
-              );
-              if (!couponResult.success) {
-                console.error(`[MP webhook] ⚠️ Failed to redeem coupon:`, couponResult.error);
-              }
-            }
-
-            // Upsert enrollment - using publicUserId
-            await upsertEnrollment(supabase, publicUserId, course_id, effectiveMonths);
-          } else {
-            console.error(`[MP webhook] ❌ Missing course data:`, { 
-              auth_id: resolvedUserId, 
-              publicUserId, 
-              course_id, 
-              resolvedSlug 
-            });
-          }
-        }
+      // 2. Validate status is "approved"
+      if (status !== "approved") {
+        console.log(`[MP webhook] Payment not approved: ${status}`);
+        return { success: true, processed: "not_approved", id: finalId };
       }
 
-      return { success: true, processed: "payment", id: finalId };
+      // 3. Call appropriate RPC based on product type
+      if (productType === 'subscription' || productType === 'subscription_upgrade' || productType === 'seat') {
+        const metadata = {
+          preference_id: externalRef,
+          preference_table: preferenceTable,
+          external_reference: externalRef,
+          plan_slug: fromExt.plan_slug,
+          invitee_email: fromExt.invitee_email,
+          role_id: fromExt.role_id,
+          subscription_id: fromExt.subscription_id,
+          preapproval_id: pay?.preapproval_id || null,
+        };
+
+        console.log(`[MP webhook] Calling handle_payment_subscription_success:`, {
+          provider: 'mercadopago',
+          provider_payment_id: providerPaymentId,
+          user_id: resolvedUserId,
+          organization_id: fromExt.organization_id,
+          plan_id: fromExt.plan_id,
+          billing_period: fromExt.billing_period,
+          product_type: productType,
+          amount,
+          currency,
+        });
+
+        const { data: rpcResult, error: rpcError } = await supabase.rpc('handle_payment_subscription_success', {
+          p_provider: 'mercadopago',
+          p_provider_payment_id: providerPaymentId,
+          p_user_id: resolvedUserId,
+          p_organization_id: fromExt.organization_id || null,
+          p_plan_id: fromExt.plan_id || null,
+          p_billing_period: fromExt.billing_period || null,
+          p_product_type: productType,
+          p_amount: amount,
+          p_currency: currency,
+          p_metadata: metadata,
+        });
+
+        if (rpcError) {
+          console.error(`[MP webhook] RPC error:`, rpcError);
+          return { success: true, processed: "rpc_error", id: finalId };
+        }
+
+        console.log(`[MP webhook] ✅ RPC success:`, rpcResult);
+        return { success: true, processed: productType, id: finalId };
+      } 
+      
+      if (productType === 'course') {
+        const metadata = {
+          preference_id: externalRef,
+          preference_table: preferenceTable,
+          course_slug: fromExt.course_slug,
+          months: fromExt.months || 12,
+          coupon_code: fromExt.coupon_code,
+          coupon_id: fromExt.coupon_id,
+        };
+
+        console.log(`[MP webhook] Calling handle_payment_course_success:`, {
+          provider: 'mercadopago',
+          provider_payment_id: providerPaymentId,
+          user_id: resolvedUserId,
+          course_id: fromExt.course_id,
+          amount,
+          currency,
+        });
+
+        const { data: rpcResult, error: rpcError } = await supabase.rpc('handle_payment_course_success', {
+          p_provider: 'mercadopago',
+          p_provider_payment_id: providerPaymentId,
+          p_user_id: resolvedUserId,
+          p_course_id: fromExt.course_id || null,
+          p_amount: amount,
+          p_currency: currency,
+          p_metadata: metadata,
+        });
+
+        if (rpcError) {
+          console.error(`[MP webhook] RPC error:`, rpcError);
+          return { success: true, processed: "rpc_error", id: finalId };
+        }
+
+        console.log(`[MP webhook] ✅ RPC success:`, rpcResult);
+        return { success: true, processed: "course", id: finalId };
+      }
+
+      return { success: true, processed: "unknown_product_type", id: finalId };
     }
 
     // === MERCHANT ORDER ===
     if (type === "merchant_order" && finalId) {
       const mo = await getMPMerchantOrder(String(finalId));
-      const md = extractMetadata(mo);
-      const externalRefMo = md.external_reference || "";
       
-      // NUEVO: Buscar datos en mp_course_preferences si es un ID corto (empieza con "mp_")
-      // UPGRADE: Buscar datos en mp_subscription_preferences si es un ID corto (empieza con "mpu_")
-      let fromDbMo: any = null;
-      if (externalRefMo.startsWith("mpu_")) {
-        console.log("[MP webhook MO] Looking up upgrade preference:", externalRefMo);
-        const { data: prefDataMo, error: prefErrorMo } = await supabase
-          .from("mp_subscription_preferences")
-          .select("*")
-          .eq("id", externalRefMo)
-          .maybeSingle();
-        
-        if (prefDataMo && !prefErrorMo) {
-          fromDbMo = {
-            user_id: prefDataMo.user_id,
-            organization_id: prefDataMo.organization_id,
-            plan_slug: prefDataMo.plan_slug,
-            billing_period: prefDataMo.billing_period,
-            product_type: prefDataMo.product_type || 'subscription_upgrade',
-          };
-          console.log("[MP webhook MO] Found upgrade preference data:", fromDbMo);
-        } else {
-          console.warn("[MP webhook MO] ⚠️ No upgrade preference data found:", prefErrorMo);
-        }
-      } else if (externalRefMo.startsWith("mp_")) {
-        const { data: prefDataMo, error: prefErrorMo } = await supabase
-          .from("mp_course_preferences")
-          .select("*, courses!inner(slug)")
-          .eq("id", externalRefMo)
-          .maybeSingle();
-        
-        if (prefDataMo && !prefErrorMo) {
-          fromDbMo = {
-            user_id: prefDataMo.user_id,
-            course_slug: prefDataMo.courses?.slug,
-            months: prefDataMo.access_months,
-            coupon_code: prefDataMo.coupon_code,
-            coupon_id: prefDataMo.coupon_id,
-            product_type: 'course',
-          };
-        } else {
-          console.warn("[MP webhook MO] ⚠️ No se encontraron datos en BD:", prefErrorMo);
-        }
-      }
-      
-      const fromExt = fromDbMo || decodeExternalReference(externalRefMo);
-      const effectiveMonths = md.months ?? fromExt.months ?? 12;
-      const resolvedUserId = md.user_id ?? fromExt.user_id ?? null;
-      const resolvedSlug =
-        md.course_slug ??
-        fromExt.course_slug ??
-        mo?.items?.[0]?.category_id ??
-        null;
-
-      const productType = md.product_type || fromExt.product_type || 'course';
-      const organizationId = md.organization_id || fromExt.organization_id;
-      const planIdFromMetadata = md.plan_id;
-      const planSlug = md.plan_slug || fromExt.plan_slug;
-      const billingPeriod = md.billing_period || fromExt.billing_period;
-      const couponCode = md.coupon_code || fromExt.coupon_code || null;
-      const couponId = md.coupon_id || fromExt.coupon_id || null;
-
-      // CRITICAL: Get user_id for payment record (merchant_order)
-      // For subscription_upgrade: user_id from mp_subscription_preferences is ALREADY public.users.id
-      // For other types (courses): user_id might be auth_id and needs conversion
-      let moPublicUserId: string | null = null;
-      
-      // ALL flows store auth_id as user_id - we must convert to public.users.id
-      if (resolvedUserId) {
-        console.log('[MP webhook MO] Converting auth_id to user_id:', { auth_id: resolvedUserId, productType });
-        const { data: userProfile, error: profileError } = await supabase
-          .from("users")
-          .select("id")
-          .eq("auth_id", resolvedUserId)
-          .maybeSingle();
-
-        if (profileError || !userProfile) {
-          console.error('[MP webhook MO] ❌ Failed to resolve auth_id to user_id:', {
-            auth_id: resolvedUserId,
-            error: profileError,
-            productType
-          });
-        } else {
-          moPublicUserId = userProfile.id;
-          console.log('[MP webhook MO] ✅ Resolved user_id:', { moPublicUserId });
-        }
-      } else {
-        console.error('[MP webhook MO] ❌ No resolvedUserId available');
-      }
-
-      // ¿Hay pago aprobado?
-      const approved = Array.isArray(mo?.payments)
-        ? mo.payments.some((p: any) => String(p?.status) === "approved")
-        : false;
-
-      const orderId = String(mo?.id ?? "");
-      const amount = Number(mo?.total_amount ?? 0);
-
-      // 1. Insertar en payment_events
       await logPaymentEvent(supabase, "mercadopago", {
-        providerEventId: orderId,
+        providerEventId: String(mo?.id ?? finalId),
         providerEventType: "merchant_order.webhook",
-        status: "PROCESSED",
+        status: "RECEIVED",
         rawPayload: mo,
-        orderId: orderId,
-        customId: md.external_reference ?? null,
-        userHint: resolvedUserId,
-        courseHint: resolvedSlug,
+        orderId: String(mo?.id ?? ""),
+        customId: mo?.external_reference ?? null,
+        userHint: null,
+        courseHint: null,
         providerPaymentId: null,
-        amount: amount || null,
+        amount: mo?.total_amount ?? null,
         currency: null,
       });
-
-      // 2. Si está aprobado, procesar según product_type
-      if (approved) {
-        const approvedPayment = mo?.payments?.find((p: any) => String(p?.status) === "approved");
-        const providerPaymentId = approvedPayment ? String(approvedPayment.id) : null;
-
-        if (providerPaymentId) {
-          // UPGRADE: Handle subscription_upgrade (MO) - just record payment, actual upgrade happens in handleUpgradeReturn
-          if (productType === 'subscription_upgrade') {
-            console.log("[MP webhook MO] Processing subscription upgrade payment:", {
-              externalRef: externalRefMo,
-              organizationId,
-              planSlug,
-              amount,
-            });
-            
-            let resolvedPlanId: string | null = null;
-            if (planSlug) {
-              resolvedPlanId = await getPlanIdBySlug(supabase, planSlug);
-            }
-            
-            const upgradePaymentResult = await insertPayment(supabase, "mercadopago", {
-              providerPaymentId: providerPaymentId,
-              userId: moPublicUserId,
-              amount: amount || null,
-              currency: "ARS",
-              status: "completed",
-              productType: 'subscription_upgrade',
-              organizationId: organizationId || undefined,
-              productId: resolvedPlanId || undefined,
-            });
-            
-            if (upgradePaymentResult.inserted) {
-              console.log("[MP webhook MO] ✅ Upgrade payment recorded:", upgradePaymentResult.paymentId);
-            } else {
-              console.log("[MP webhook MO] Upgrade payment already existed (duplicate webhook)");
-            }
-            
-            return { success: true, processed: "subscription_upgrade_mo", id: finalId };
-          }
-          
-          if (productType === 'subscription') {
-            if (organizationId && billingPeriod) {
-              let resolvedPlanId = planIdFromMetadata;
-              
-              if (!resolvedPlanId && planSlug) {
-                resolvedPlanId = await getPlanIdBySlug(supabase, planSlug);
-                
-                if (!resolvedPlanId) {
-                  console.error(`[MP webhook] ❌ Failed to resolve plan_id from slug "${planSlug}"`);
-                  return { success: true, processed: "error", id: 'plan_not_found' };
-                }
-              }
-              
-              if (!resolvedPlanId) {
-                console.error(`[MP webhook] ❌ Missing both plan_id and plan_slug`);
-                return { success: true, processed: "error", id: 'missing_plan_data' };
-              }
-              
-              // Insert payment (subscription) - userId is REQUIRED even for subscriptions
-              const moSubPaymentResult = await insertPayment(supabase, "mercadopago", {
-                providerPaymentId: providerPaymentId,
-                userId: moPublicUserId, // ✅ CRITICAL: Required for payments table
-                amount: amount || null,
-                currency: "ARS",
-                status: "completed",
-                productType: 'subscription',
-                organizationId: organizationId,
-                productId: resolvedPlanId,
-              });
-
-              // IDEMPOTENT: Only upgrade organization plan if payment was NEWLY inserted
-              if (moSubPaymentResult.inserted && moSubPaymentResult.paymentId) {
-                await upgradeOrganizationPlan(supabase, {
-                  organizationId: organizationId,
-                  planId: resolvedPlanId,
-                  billingPeriod: billingPeriod as 'monthly' | 'annual',
-                  paymentId: moSubPaymentResult.paymentId, // ✅ UUID from payments table
-                  amount: amount,
-                  currency: "ARS",
-                  userId: moPublicUserId, // ✅ For Founders Program
-                });
-              } else if (!moSubPaymentResult.inserted) {
-                // Duplicate merchant_order webhook - payment already processed
-              } else {
-                console.error(`[MP webhook] ❌ No payment ID returned for subscription (MO)`);
-              }
-            } else {
-              console.error(`[MP webhook] ❌ Missing subscription data in merchant order:`, { organizationId, billingPeriod });
-            }
-          } else {
-            // course_id si podemos
-            let course_id: string | null = null;
-            if (resolvedSlug) course_id = await getCourseIdBySlug(supabase, resolvedSlug);
-
-            if (moPublicUserId && course_id) {
-              const paymentResult = await insertPayment(supabase, "mercadopago", {
-                providerPaymentId: providerPaymentId,
-                userId: moPublicUserId,
-                courseId: course_id,
-                amount: amount || null,
-                currency: "ARS",
-                status: "completed",
-                productType: 'course',
-                couponCode: couponCode,
-                couponId: couponId,
-              });
-
-              // IDEMPOTENT: Only mark coupon as used if payment was NEWLY inserted
-              if (paymentResult.inserted && paymentResult.paymentId && couponId && couponCode) {
-                const amountSaved = 0; // TODO: Store original_price in metadata to calculate discount
-                const couponResult = await markCouponAsUsed(
-                  supabase,
-                  couponId,
-                  moPublicUserId,
-                  course_id,
-                  paymentResult.paymentId, // ✅ Usar UUID de payments table, no el ID de MP
-                  amountSaved,
-                  "ARS"
-                );
-                if (!couponResult.success) {
-                  console.error(`[MP webhook] ⚠️ Failed to redeem coupon (MO):`, couponResult.error);
-                }
-              }
-
-              await upsertEnrollment(supabase, moPublicUserId, course_id, effectiveMonths);
-            } else {
-              console.error(`[MP webhook] ❌ Missing course data in merchant order:`, { 
-                auth_id: resolvedUserId, 
-                moPublicUserId, 
-                course_id, 
-                resolvedSlug 
-              });
-            }
-          }
-        }
-      }
 
       return { success: true, processed: "merchant_order", id: finalId };
     }
 
-    // === SUBSCRIPTION PREAPPROVAL (Recurring Subscriptions) ===
-    if ((type === "subscription_preapproval" || type === "preapproval") && finalId) {
-      console.log("[MP webhook] Processing preapproval event:", finalId);
+    // === SUBSCRIPTION PREAPPROVAL ===
+    if (type === "subscription_preapproval" && finalId) {
+      console.log("[MP webhook] Processing preapproval:", finalId);
       
       const preapprovalResult = await getMPPreapproval(String(finalId));
       
       if (!preapprovalResult.success) {
         console.error("[MP webhook] Failed to get preapproval:", preapprovalResult.error);
-        await logPaymentEvent(supabase, "mercadopago", {
-          providerEventId: finalId,
-          providerEventType: "preapproval.error",
-          status: "ERROR",
-          rawPayload: { body, error: preapprovalResult.error },
-          orderId: null,
-          customId: null,
-          userHint: null,
-          courseHint: null,
-          providerPaymentId: null,
-          amount: null,
-          currency: null,
-        });
-        return { success: true, processed: "preapproval_error", id: finalId };
+        return { success: true, processed: "preapproval_fetch_error", id: finalId };
       }
       
       const preapproval = preapprovalResult.preapproval;
-      const preapprovalStatus = preapproval.status; // 'pending', 'authorized', 'paused', 'cancelled'
-      const externalRef = preapproval.external_reference || "";
-      
-      // NEW: Lookup subscription data from mp_subscription_preferences if short ID format (mpr_... or legacy mps_...)
-      let fromDb: any = null;
-      if (externalRef.startsWith("mpr_") || externalRef.startsWith("mps_")) {
-        console.log("[MP webhook preapproval] Looking up subscription preference:", externalRef);
-        const { data: prefData, error: prefError } = await supabase
+      const status = preapproval?.status;
+      const externalRef = preapproval?.external_reference || "";
+      const amount = preapproval?.auto_recurring?.transaction_amount || 0;
+      const currency = preapproval?.auto_recurring?.currency_id || "ARS";
+      const payerEmail = preapproval?.payer_email || null;
+
+      await logPaymentEvent(supabase, "mercadopago", {
+        providerEventId: finalId,
+        providerEventType: "subscription_preapproval",
+        status: "RECEIVED",
+        rawPayload: preapproval,
+        orderId: null,
+        customId: externalRef,
+        userHint: null,
+        courseHint: null,
+        providerPaymentId: String(finalId),
+        amount: amount || null,
+        currency: currency,
+      });
+
+      // Only process authorized preapprovals
+      if (status === "authorized") {
+        // Get preference data
+        const { data: prefData } = await supabase
           .from("mp_subscription_preferences")
           .select("*")
           .eq("id", externalRef)
           .maybeSingle();
-        
-        if (prefData && !prefError) {
-          fromDb = {
-            user_id: prefData.user_id,
-            organization_id: prefData.organization_id,
-            plan_slug: prefData.plan_slug,
-            billing_period: prefData.billing_period,
-            product_type: 'subscription',
-          };
-          console.log("[MP webhook preapproval] Found preference data:", fromDb);
-        } else {
-          console.warn("[MP webhook preapproval] ⚠️ No preference data found:", prefError);
+
+        if (!prefData) {
+          console.warn(`[MP webhook] No preference found for preapproval: ${externalRef}`);
+          return { success: true, processed: "preapproval_no_preference", id: finalId };
         }
-      }
-      
-      // Fallback to old Base64 method if no DB data
-      const fromExt = fromDb || decodeExternalReference(externalRef);
-      
-      const resolvedUserId = fromExt.user_id || null;
-      const organizationId = fromExt.organization_id;
-      const planSlug = fromExt.plan_slug;
-      const billingPeriod = fromExt.billing_period;
-      const amount = preapproval.auto_recurring?.transaction_amount || 0;
-      const currency = preapproval.auto_recurring?.currency_id || "ARS";
-      
-      console.log("[MP webhook preapproval] Resolved data:", {
-        externalRef,
-        resolvedUserId,
-        organizationId,
-        planSlug,
-        billingPeriod,
-        preapprovalStatus,
-      });
-      
-      // Resolve public user ID
-      let publicUserId: string | null = null;
-      if (resolvedUserId) {
-        const { data: userProfile } = await supabase
-          .from("users")
-          .select("id")
-          .eq("auth_id", resolvedUserId)
-          .maybeSingle();
-        publicUserId = userProfile?.id || null;
-      }
-      
-      await logPaymentEvent(supabase, "mercadopago", {
-        providerEventId: finalId,
-        providerEventType: `preapproval.${preapprovalStatus}`,
-        status: "PROCESSED",
-        rawPayload: preapproval,
-        orderId: null,
-        customId: externalRef,
-        userHint: resolvedUserId,
-        courseHint: null,
-        providerPaymentId: null,
-        amount: amount || null,
-        currency: currency,
-      });
-      
-      // Handle authorized preapproval (user confirmed recurring subscription)
-      if (preapprovalStatus === "authorized" && organizationId && planSlug && billingPeriod) {
-        let resolvedPlanId = await getPlanIdBySlug(supabase, planSlug);
-        
-        if (!resolvedPlanId) {
-          console.error(`[MP webhook preapproval] Plan not found: ${planSlug}`);
-          return { success: true, processed: "preapproval_plan_not_found", id: finalId };
-        }
-        
-        // Check if subscription already exists to avoid duplicates
-        const { data: existingSub } = await supabase
-          .from("organization_subscriptions")
-          .select("id, provider_subscription_id")
-          .eq("organization_id", organizationId)
-          .eq("plan_id", resolvedPlanId)
-          .eq("status", "active")
-          .maybeSingle();
-        
-        if (existingSub && existingSub.provider_subscription_id === finalId) {
-          console.log(`[MP webhook preapproval] Subscription already exists: ${existingSub.id}`);
-          return { success: true, processed: "preapproval_duplicate", id: finalId };
-        }
-        
-        // Insert payment for initial subscription
-        const paymentResult = await insertPayment(supabase, "mercadopago", {
-          providerPaymentId: `preapproval_${finalId}`,
-          userId: publicUserId,
-          amount: amount || null,
-          currency: currency,
-          status: "completed",
-          productType: 'subscription',
-          organizationId: organizationId,
-          productId: resolvedPlanId,
+
+        const metadata = {
+          preference_id: externalRef,
+          preapproval_id: finalId,
+          payer_email: payerEmail,
+        };
+
+        console.log(`[MP webhook] Calling handle_payment_subscription_success for preapproval:`, {
+          provider: 'mercadopago',
+          provider_payment_id: `preapproval_${finalId}`,
+          user_id: prefData.user_id,
+          organization_id: prefData.organization_id,
         });
-        
-        if (paymentResult.inserted && paymentResult.paymentId) {
-          await upgradeOrganizationPlan(supabase, {
-            organizationId: organizationId,
-            planId: resolvedPlanId,
-            billingPeriod: billingPeriod as 'monthly' | 'annual',
-            paymentId: paymentResult.paymentId,
-            amount: amount,
-            currency: currency,
-            userId: publicUserId,
-            providerSubscriptionId: finalId, // Store MP preapproval ID for renewals
-          });
-          
-          console.log(`[MP webhook preapproval] ✅ Subscription activated for org ${organizationId}`);
+
+        const { data: rpcResult, error: rpcError } = await supabase.rpc('handle_payment_subscription_success', {
+          p_provider: 'mercadopago',
+          p_provider_payment_id: `preapproval_${finalId}`,
+          p_user_id: prefData.user_id,
+          p_organization_id: prefData.organization_id,
+          p_plan_id: prefData.plan_id,
+          p_billing_period: prefData.billing_period,
+          p_product_type: prefData.product_type || 'subscription',
+          p_amount: amount,
+          p_currency: currency,
+          p_metadata: metadata,
+        });
+
+        if (rpcError) {
+          console.error(`[MP webhook] RPC error for preapproval:`, rpcError);
+          return { success: true, processed: "preapproval_rpc_error", id: finalId };
         }
+
+        console.log(`[MP webhook] ✅ Preapproval RPC success:`, rpcResult);
       }
-      
+
       return { success: true, processed: "preapproval", id: finalId };
     }
-    
+
     // === SUBSCRIPTION AUTHORIZED PAYMENT (Automatic Renewal) ===
     if (type === "subscription_authorized_payment" && finalId) {
-      console.log("[MP webhook] Processing subscription renewal payment:", finalId);
+      console.log("[MP webhook] Processing subscription renewal:", finalId);
       
-      // Get payment details
       const pay = await getMPPayment(String(finalId));
       const preapprovalId = pay.preapproval_id;
       const status = pay.status;
@@ -1020,7 +353,7 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       await logPaymentEvent(supabase, "mercadopago", {
         providerEventId: finalId,
         providerEventType: "subscription_authorized_payment",
-        status: "PROCESSED",
+        status: "RECEIVED",
         rawPayload: pay,
         orderId: null,
         customId: preapprovalId,
@@ -1030,82 +363,48 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
         amount: amount || null,
         currency: currency,
       });
-      
+
       if (status === "approved" && preapprovalId) {
-        // Find existing subscription by provider_subscription_id
-        const { data: existingSub, error: subError } = await supabase
-          .from("organization_subscriptions")
-          .select("id, organization_id, plan_id, billing_period, expires_at")
-          .eq("provider_subscription_id", preapprovalId)
-          .eq("status", "active")
-          .maybeSingle();
-        
-        if (subError || !existingSub) {
-          console.warn(`[MP webhook renewal] No active subscription found for preapproval ${preapprovalId}`);
-          return { success: true, processed: "renewal_no_subscription", id: finalId };
+        const metadata = {
+          preapproval_id: preapprovalId,
+          is_renewal: true,
+        };
+
+        console.log(`[MP webhook] Calling handle_payment_subscription_success for renewal:`, {
+          provider: 'mercadopago',
+          provider_payment_id: String(finalId),
+          preapproval_id: preapprovalId,
+        });
+
+        const { data: rpcResult, error: rpcError } = await supabase.rpc('handle_payment_subscription_success', {
+          p_provider: 'mercadopago',
+          p_provider_payment_id: String(finalId),
+          p_user_id: null,
+          p_organization_id: null,
+          p_plan_id: null,
+          p_billing_period: null,
+          p_product_type: 'subscription_renewal',
+          p_amount: amount,
+          p_currency: currency,
+          p_metadata: metadata,
+        });
+
+        if (rpcError) {
+          console.error(`[MP webhook] RPC error for renewal:`, rpcError);
+          return { success: true, processed: "renewal_rpc_error", id: finalId };
         }
-        
-        // Check for duplicate payment
-        const { data: existingPayment } = await supabase
-          .from("payments")
-          .select("id")
-          .eq("provider_payment_id", String(finalId))
-          .maybeSingle();
-        
-        if (existingPayment) {
-          console.log(`[MP webhook renewal] Payment already processed: ${finalId}`);
-          return { success: true, processed: "renewal_duplicate", id: finalId };
-        }
-        
-        // Insert renewal payment
-        const { data: newPayment } = await supabase
-          .from("payments")
-          .insert({
-            provider: "mercadopago",
-            provider_payment_id: String(finalId),
-            user_id: null, // Renewal doesn't need user_id
-            amount: amount,
-            currency: currency,
-            status: "completed",
-            product_type: "subscription",
-            organization_id: existingSub.organization_id,
-            product_id: existingSub.plan_id,
-          })
-          .select()
-          .single();
-        
-        // Extend subscription expiration
-        const currentExpires = new Date(existingSub.expires_at || new Date());
-        const newExpires = new Date(currentExpires);
-        if (existingSub.billing_period === 'monthly') {
-          newExpires.setMonth(newExpires.getMonth() + 1);
-        } else {
-          newExpires.setFullYear(newExpires.getFullYear() + 1);
-        }
-        
-        const { error: updateError } = await supabase
-          .from("organization_subscriptions")
-          .update({
-            expires_at: newExpires.toISOString(),
-            payment_id: newPayment?.id,
-          })
-          .eq("id", existingSub.id);
-        
-        if (updateError) {
-          console.error(`[MP webhook renewal] Failed to extend subscription:`, updateError);
-        } else {
-          console.log(`[MP webhook renewal] ✅ Subscription ${existingSub.id} renewed until ${newExpires.toISOString()}`);
-        }
+
+        console.log(`[MP webhook] ✅ Renewal RPC success:`, rpcResult);
       }
-      
+
       return { success: true, processed: "subscription_renewal", id: finalId };
     }
 
-    // === OTROS / DESCONOCIDOS ===
+    // === UNKNOWN / OTHER ===
     await logPaymentEvent(supabase, "mercadopago", {
       providerEventId: finalId ?? null,
       providerEventType: type || "unknown.webhook",
-      status: "PROCESSED",
+      status: "RECEIVED",
       rawPayload: body,
       orderId: null,
       customId: null,
@@ -1118,7 +417,7 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
 
     return { success: true, processed: "received", id: type ?? 'null' };
   } catch (e: any) {
-    console.error("[mp/webhook] error:", e);
+    console.error("[MP webhook] error:", e);
     return { success: false, error: e.message || String(e) };
   }
 }
