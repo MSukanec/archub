@@ -43,6 +43,8 @@ import { getApiBase } from "@/utils/apiBase";
 import { toE164, fromE164 } from "@/utils/phone";
 import { orderedMethods, getPaymentButtonText, isArgentineCountry } from "@/utils/paymentOrder";
 import { apiRequest } from "@/lib/queryClient";
+import { useMultipleFeatureFlags } from "@/hooks/use-feature-flags";
+import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import mercadoPagoLogo from "/MercadoPago_logo.png";
 import paypalLogo from "/Paypal_2014_logo.png";
 
@@ -73,10 +75,15 @@ export default function CheckoutPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { setSidebarContext, setSidebarLevel, sidebarLevel, currentSidebarContext } = useNavigationStore();
+  const isAdmin = useIsAdmin();
+  const { flags: featureFlags, isReady: flagsReady } = useMultipleFeatureFlags(['courses_purchases_enabled'], true);
 
   // Get query params (courseSlug)
   const params = new URLSearchParams(window.location.search);
   const courseSlug = params.get("course") || "";
+  
+  const isCoursesDisabledByFlag = flagsReady && !featureFlags.courses_purchases_enabled;
+  const isCheckoutDisabled = isCoursesDisabledByFlag && !isAdmin;
 
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [loading, setLoading] = useState(false);
@@ -2003,7 +2010,8 @@ Titular: Matias Esteban Sukanec`;
                         loading || 
                         priceLoading || 
                         !acceptTerms || 
-                        !acceptCommunications
+                        !acceptCommunications ||
+                        isCheckoutDisabled
                       }
                       className="w-full h-12 text-base font-medium mt-6"
                       data-testid="button-continue-payment"
