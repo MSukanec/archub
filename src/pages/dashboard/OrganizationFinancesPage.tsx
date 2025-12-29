@@ -11,7 +11,7 @@ import {
   OrganizationFinancesMovementsView,
   calculateAvailablePeriods,
   type PeriodFilter
-} from "@/features/organization";
+} from "@/features/finances";
 
 const FINANCES_TABS = [
   { id: "dashboard", label: "Visión General" },

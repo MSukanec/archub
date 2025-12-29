@@ -46,6 +46,9 @@ export { PaymentFormModal as AdminPaymentsModal } from '../legacy/modals/AdminPa
 export { default as AdminPaymentTransferRow } from './components/admin/AdminPaymentTransferRow';
 
 // Views
+export { OrganizationFinancesDashboardView, calculateAvailablePeriods } from './views/OrganizationFinancesDashboardView';
+export type { PeriodFilter } from './views/OrganizationFinancesDashboardView';
+export { OrganizationFinancesMovementsView } from './views/OrganizationFinancesMovementsView';
 export { ProjectFinancesView } from './views/ProjectFinancesView';
-export { ProjectFinancesDashboardView, calculateAvailablePeriods, type PeriodFilter } from './views/ProjectFinancesDashboardView';
+export { ProjectFinancesDashboardView, type PeriodFilter as ProjectPeriodFilter } from './views/ProjectFinancesDashboardView';
 export { ProjectFinancesMovementsView } from './views/ProjectFinancesMovementsView';
