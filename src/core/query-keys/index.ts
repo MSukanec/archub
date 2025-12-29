@@ -40,3 +40,6 @@ export type { UsersQueryKey } from './users.keys';
 
 export { capitalKeys } from './capital.keys';
 export type { CapitalQueryKey } from './capital.keys';
+
+export { financesKeys } from './finances.keys';
+export type { FinancesQueryKey } from './finances.keys';

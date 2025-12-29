@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { financesKeys } from '@/core/query-keys'
 
 export interface FinancialOperation {
   id: string
@@ -107,9 +108,9 @@ export function useCreateWalletTransfer() {
       return operation
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['financial-operations', variables.organization_id] })
-      queryClient.invalidateQueries({ queryKey: ['unified-movements', variables.organization_id] })
-      queryClient.invalidateQueries({ queryKey: ['organization-wallets', variables.organization_id] })
+      queryClient.invalidateQueries({ queryKey: financesKeys.operationsList(variables.organization_id) })
+      queryClient.invalidateQueries({ queryKey: financesKeys.unifiedMovementsList(variables.organization_id) })
+      queryClient.invalidateQueries({ queryKey: financesKeys.walletsList(variables.organization_id) })
     },
   })
 }
@@ -170,16 +171,16 @@ export function useCreateCurrencyExchange() {
       return operation
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['financial-operations', variables.organization_id] })
-      queryClient.invalidateQueries({ queryKey: ['unified-movements', variables.organization_id] })
-      queryClient.invalidateQueries({ queryKey: ['organization-wallets', variables.organization_id] })
+      queryClient.invalidateQueries({ queryKey: financesKeys.operationsList(variables.organization_id) })
+      queryClient.invalidateQueries({ queryKey: financesKeys.unifiedMovementsList(variables.organization_id) })
+      queryClient.invalidateQueries({ queryKey: financesKeys.walletsList(variables.organization_id) })
     },
   })
 }
 
 export function useFinancialOperations(organizationId?: string) {
   return useQuery({
-    queryKey: ['financial-operations', organizationId],
+    queryKey: financesKeys.operationsList(organizationId),
     queryFn: async () => {
       if (!organizationId) return []
 

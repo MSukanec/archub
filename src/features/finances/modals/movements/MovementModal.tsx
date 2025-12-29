@@ -36,6 +36,7 @@ import { supabase } from '@/lib/supabase'
 import { CommitmentItem } from './fields/ClientsFields'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
+import { financesKeys } from '@/core/query-keys'
 import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMovementSubcontracts } from '@/features/subcontracts'
 import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity'
 
@@ -956,37 +957,20 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         }
       }
 
-      // Invalidar todas las queries relacionadas
-      queryClient.invalidateQueries({ queryKey: ['movements'] })
-      queryClient.invalidateQueries({ queryKey: ['movements-view'] })
-      queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
-      queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
-      queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
-      queryClient.invalidateQueries({ queryKey: ['installments'] })
+      // Invalidar todas las queries relacionadas usando query keys centralizados
+      const orgId = userData?.organization?.id
+      const projId = variables.project_id
       
-      // IMPORTANTE: Invalidar la nueva vista de pagos que usa InstallmentHeatmapChart
-      queryClient.invalidateQueries({ queryKey: ['movement-payments-view'] })
+      queryClient.invalidateQueries({ queryKey: financesKeys.movementsList(orgId, projId) })
+      queryClient.invalidateQueries({ queryKey: financesKeys.unifiedMovementsList(orgId, projId) })
+      queryClient.invalidateQueries({ queryKey: financesKeys.partnerContributionsList(orgId, projId) })
+      queryClient.invalidateQueries({ queryKey: financesKeys.partnerWithdrawalsList(orgId, projId) })
+      queryClient.invalidateQueries({ queryKey: financesKeys.walletsList(orgId) })
       
-      // Invalidar análisis de clientes
-      queryClient.invalidateQueries({ queryKey: ['client-analysis'] })
-      queryClient.invalidateQueries({ queryKey: ['client-payment-details'] })
-      queryClient.invalidateQueries({ queryKey: ['client-obligations'] })
-      
-      // Invalidar específicamente los clientes del movimiento
-      if (result?.id) {
-        queryClient.invalidateQueries({ 
-          queryKey: ['movement-project-clients', result.id] 
-        })
-        queryClient.invalidateQueries({ 
-          queryKey: ['movement-partners', result.id] 
-        })
-        queryClient.invalidateQueries({ 
-          queryKey: ['all-movement-partners'] 
-        })
-        queryClient.invalidateQueries({ 
-          queryKey: ['movement-general-costs', result.id] 
-        })
-      }
+      // Invalidar parent queries para refrescar el listado general
+      queryClient.invalidateQueries({ queryKey: financesKeys.movements() })
+      queryClient.invalidateQueries({ queryKey: financesKeys.unifiedMovements() })
+      queryClient.invalidateQueries({ queryKey: financesKeys.wallets() })
       
       // Invalidar current-user para refrescar el checklist
       queryClient.invalidateQueries({ queryKey: ['current-user'] })
@@ -1172,12 +1156,13 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         }
       })
 
-      queryClient.invalidateQueries({ queryKey: ['movements'] })
-      queryClient.invalidateQueries({ queryKey: ['movements-view'] })
-      queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
-      queryClient.invalidateQueries({ queryKey: ['wallet-balances'] })
-      queryClient.invalidateQueries({ queryKey: ['financial-summary'] })
-      queryClient.invalidateQueries({ queryKey: ['installments'] })
+      const convOrgId = userData?.organization?.id
+      const convProjId = variables.project_id
+      queryClient.invalidateQueries({ queryKey: financesKeys.movementsList(convOrgId, convProjId) })
+      queryClient.invalidateQueries({ queryKey: financesKeys.unifiedMovementsList(convOrgId, convProjId) })
+      queryClient.invalidateQueries({ queryKey: financesKeys.walletsList(convOrgId) })
+      queryClient.invalidateQueries({ queryKey: financesKeys.movements() })
+      queryClient.invalidateQueries({ queryKey: financesKeys.wallets() })
       toast({
         title: isEditing ? 'Conversión actualizada' : 'Conversión creada',
         description: isEditing ? 'La conversión ha sido actualizada correctamente' : 'La conversión ha sido creada correctamente',
