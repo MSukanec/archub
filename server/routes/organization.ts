@@ -22,11 +22,17 @@ import {
   handleGetRolesWithPermissions, 
   handleUpdateRolePermissions 
 } from '../controllers/organization/permissions.controller.js';
+import { handleCreateOrganization } from '../controllers/organization/create.controller.js';
 
 /**
  * Register organization-related endpoints (members, invitations, profile, clients)
  */
 export function registerOrganizationRoutes(app: Express, deps: RouteDeps): void {
+  // ========== ORGANIZATION - CREATE ENDPOINTS ==========
+  
+  // POST /api/organizations - Create a new organization (admin only)
+  app.post("/api/organizations", handleCreateOrganization);
+
   // ========== ORGANIZATION - ROLES ENDPOINTS ==========
   
   // GET /api/roles - Get roles for an organization (query param: organizationId)

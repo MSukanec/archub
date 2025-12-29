@@ -94,17 +94,22 @@ export function AdminOrganizationForm({
 
   const { mutate: createOrganization, isPending: isCreating } = useOptimisticMutation({
     mutationFn: async (data: OrganizationFormData) => {
-      if (!supabase) throw new Error('Supabase not initialized');
+      const response = await fetch('/api/organizations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: data.name }),
+        credentials: 'include'
+      });
       
-      const { data: orgId, error } = await supabase
-        .rpc('handle_new_organization', {
-          _organization_name: data.name,
-          _user_id: currentUser?.user?.id
-        });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al crear la organización');
+      }
       
-      if (error) throw error;
+      const { id: orgId } = await response.json();
       
-      if (orgId && (data.plan_id || data.is_founder || !data.is_active)) {
+      // Update plan, founder, and active status if needed
+      if (supabase && orgId && (data.plan_id || data.is_founder || !data.is_active)) {
         const updates: Record<string, any> = {};
         if (data.plan_id) updates.plan_id = data.plan_id;
         if (!data.is_active) updates.is_active = false;
