@@ -121,15 +121,24 @@ export function usePresenceTracker() {
         if (!session?.user) return; // Solo trackear usuarios autenticados
 
         // Cerrar vista anterior (si existe) - no recibe parámetros
-        await supabase.rpc('analytics_exit_previous_view');
+        const exitResult = await supabase.rpc('analytics_exit_previous_view');
+        if (exitResult.error) {
+          console.error('[Analytics] Exit error:', exitResult.error);
+        }
         
         // Abrir nueva vista en analytics
-        await supabase.rpc('analytics_enter_view', { p_view: viewName });
+        const enterResult = await supabase.rpc('analytics_enter_view', { p_view: viewName });
+        if (enterResult.error) {
+          console.error('[Analytics] Enter error:', enterResult.error);
+        }
         
         // TAMBIÉN actualizar presencia en tiempo real
-        await supabase.rpc('presence_set_view', { p_view: viewName });
+        const presenceResult = await supabase.rpc('presence_set_view', { p_view: viewName });
+        if (presenceResult.error) {
+          console.error('[Analytics] Presence error:', presenceResult.error);
+        }
       } catch (error) {
-        // Silenciar errores de analytics (no afectan la UX)
+        console.error('[Analytics] Unexpected error:', error);
       }
     };
 
