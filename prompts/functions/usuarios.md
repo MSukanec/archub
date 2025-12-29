@@ -152,218 +152,119 @@ end;
 
 ## Funcion handle_new_organization:
 
-declare
-  -- ============================================================
-  -- IDs y timestamps
-  -- ============================================================
-  org_id uuid := gen_random_uuid();
-  now_timestamp timestamptz := now();
 
-  -- ============================================================
-  -- Plan y defaults
-  -- ============================================================
-  plan_free_id uuid := '015d8a97-6b6e-4aec-87df-5d1e6b0e4ed2';
-  default_currency_id uuid := '58c50aa7-b8b1-4035-b509-58028dd0e33f';
-  default_wallet_id uuid := '2658c575-0fa8-4cf6-85d7-6430ded7e188';
-  default_pdf_template_id uuid := 'b6266a04-9b03-4f3a-af2d-f6ee6d0a948b';
+DECLARE
+  v_org_id uuid;
+  v_admin_role_id uuid;
 
-  -- ============================================================
-  -- Roles por organización
-  -- ============================================================
-  admin_role_id uuid := gen_random_uuid();
-  editor_role_id uuid := gen_random_uuid();
-  viewer_role_id uuid := gen_random_uuid();
-begin
-  ------------------------------------------------------------------------------------
+  -- Defaults
+  v_plan_free_id uuid := '015d8a97-6b6e-4aec-87df-5d1e6b0e4ed2';
+  v_default_currency_id uuid := '58c50aa7-b8b1-4035-b509-58028dd0e33f';
+  v_default_wallet_id uuid := '2658c575-0fa8-4cf6-85d7-6430ded7e188';
+  v_default_pdf_template_id uuid := 'b6266a04-9b03-4f3a-af2d-f6ee6d0a948b';
+BEGIN
+  ----------------------------------------------------------------
   -- 1) Crear organización
-  ------------------------------------------------------------------------------------
-  insert into public.organizations (
-    id,
-    name,
-    created_by,
-    owner_id,
-    created_at,
-    updated_at,
-    is_active,
-    plan_id
-  ) values (
-    org_id,
-    _organization_name,
-    _user_id,
-    _user_id,
-    now_timestamp,
-    now_timestamp,
-    true,
-    plan_free_id
+  ----------------------------------------------------------------
+  v_org_id := public.step_create_organization(
+    p_user_id,
+    p_organization_name,
+    v_plan_free_id
   );
 
-  ------------------------------------------------------------------------------------
-  -- 2) organization_data
-  ------------------------------------------------------------------------------------
-  insert into public.organization_data (organization_id)
-  values (org_id);
+  ----------------------------------------------------------------
+  -- 2) Organization data
+  ----------------------------------------------------------------
+  PERFORM public.step_create_organization_data(v_org_id);
 
-  ------------------------------------------------------------------------------------
-  -- 3) Crear roles base de la organización
-  --    (siempre se crean antes de asignar permisos)
-  ------------------------------------------------------------------------------------
-  insert into public.roles (
-    id,
-    slug,
-    name,
-    description,
-    type,
-    organization_id,
-    is_system
-  ) values
-    (
-      admin_role_id,
-      'admin',
-      'Administrador',
-      'Acceso total a los recursos de la organización',
+  ----------------------------------------------------------------
+  -- 3) Roles base de la organización
+  ----------------------------------------------------------------
+  PERFORM public.step_create_organization_roles(v_org_id);
+
+  ----------------------------------------------------------------
+  -- 4) Obtener rol Administrador
+  ----------------------------------------------------------------
+  SELECT id
+  INTO v_admin_role_id
+  FROM public.roles
+  WHERE organization_id = v_org_id
+    AND name = 'Administrador'
+    AND is_system = false
+  LIMIT 1;
+
+  IF v_admin_role_id IS NULL THEN
+    RAISE EXCEPTION 'Admin role not found for organization %', v_org_id;
+  END IF;
+
+  ----------------------------------------------------------------
+  -- 5) Agregar usuario como Admin
+  ----------------------------------------------------------------
+  PERFORM public.step_add_org_member(
+    p_user_id,
+    v_org_id,
+    v_admin_role_id
+  );
+
+  ----------------------------------------------------------------
+  -- 6) Asignar permisos a roles
+  ----------------------------------------------------------------
+  PERFORM public.step_assign_org_role_permissions(v_org_id);
+
+  ----------------------------------------------------------------
+  -- 7) Monedas
+  ----------------------------------------------------------------
+  PERFORM public.step_create_organization_currencies(
+    v_org_id,
+    v_default_currency_id
+  );
+
+  ----------------------------------------------------------------
+  -- 8) Billeteras
+  ----------------------------------------------------------------
+  PERFORM public.step_create_organization_wallets(
+    v_org_id,
+    v_default_wallet_id
+  );
+
+  ----------------------------------------------------------------
+  -- 9) Organization preferences
+  ----------------------------------------------------------------
+  PERFORM public.step_create_organization_preferences(
+    v_org_id,
+    v_default_currency_id,
+    v_default_wallet_id,
+    v_default_pdf_template_id
+  );
+
+  ----------------------------------------------------------------
+  -- 10) Setear como organización activa
+  ----------------------------------------------------------------
+  UPDATE public.user_preferences
+  SET
+    last_organization_id = v_org_id,
+    updated_at = now()
+  WHERE user_id = p_user_id;
+
+  ----------------------------------------------------------------
+  RETURN v_org_id;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    PERFORM public.log_system_error(
+      'function',
+      'handle_new_organization',
       'organization',
-      org_id,
-      false
-    ),
-    (
-      editor_role_id,
-      'editor',
-      'Editor',
-      'Puede ver y editar contenidos, pero no gestionar el equipo',
-      'organization',
-      org_id,
-      false
-    ),
-    (
-      viewer_role_id,
-      'viewer',
-      'Lector',
-      'Puede solo ver contenidos',
-      'organization',
-      org_id,
-      false
-    )
-  on conflict do nothing;
+      SQLERRM,
+      jsonb_build_object(
+        'user_id', p_user_id,
+        'organization_name', p_organization_name
+      ),
+      'critical'
+    );
+    RAISE;
+END;
 
-  ------------------------------------------------------------------------------------
-  -- 4) Bootstrap de permisos por rol (CRÍTICO)
-  --    Esta llamada garantiza que has_permission() funcione
-  ------------------------------------------------------------------------------------
-  perform public.assign_default_permissions_to_org_roles(org_id);
-
-  ------------------------------------------------------------------------------------
-  -- 5) organization_members (creador como Admin)
-  ------------------------------------------------------------------------------------
-  insert into public.organization_members (
-    id,
-    user_id,
-    organization_id,
-    role_id,
-    is_active,
-    created_at,
-    joined_at,
-    last_active_at
-  ) values (
-    gen_random_uuid(),
-    _user_id,
-    org_id,
-    admin_role_id,
-    true,
-    now_timestamp,
-    now_timestamp,
-    now_timestamp
-  );
-
-  ------------------------------------------------------------------------------------
-  -- 6) organization_currencies
-  ------------------------------------------------------------------------------------
-  insert into public.organization_currencies (
-    id,
-    organization_id,
-    currency_id,
-    is_active,
-    is_default,
-    created_at
-  ) values (
-    gen_random_uuid(),
-    org_id,
-    default_currency_id,
-    true,
-    true,
-    now_timestamp
-  );
-
-  ------------------------------------------------------------------------------------
-  -- 7) organization_wallets
-  ------------------------------------------------------------------------------------
-  insert into public.organization_wallets (
-    id,
-    organization_id,
-    wallet_id,
-    is_active,
-    is_default,
-    created_at
-  ) values (
-    gen_random_uuid(),
-    org_id,
-    default_wallet_id,
-    true,
-    true,
-    now_timestamp
-  );
-
-  ------------------------------------------------------------------------------------
-  -- 8) organization_preferences
-  ------------------------------------------------------------------------------------
-  insert into public.organization_preferences (
-    organization_id,
-    default_currency_id,
-    default_wallet_id,
-    default_pdf_template_id,
-    use_currency_exchange,
-    created_at,
-    updated_at
-  ) values (
-    org_id,
-    default_currency_id,
-    default_wallet_id,
-    default_pdf_template_id,
-    false,
-    now_timestamp,
-    now_timestamp
-  );
-
-  ------------------------------------------------------------------------------------
-  -- 9) user_organization_preferences
-  ------------------------------------------------------------------------------------
-  insert into public.user_organization_preferences (
-    id,
-    user_id,
-    organization_id,
-    last_project_id,
-    created_at,
-    updated_at
-  ) values (
-    gen_random_uuid(),
-    _user_id,
-    org_id,
-    null,
-    now_timestamp,
-    now_timestamp
-  );
-
-  ------------------------------------------------------------------------------------
-  -- 10) Setear esta organización como activa
-  ------------------------------------------------------------------------------------
-  update public.user_preferences
-  set
-    last_organization_id = org_id,
-    updated_at = now_timestamp
-  where user_id = _user_id;
-
-  ------------------------------------------------------------------------------------
-  return org_id;
-end;
 
 # Funciones STEP para las funciones "PADRE":
 
