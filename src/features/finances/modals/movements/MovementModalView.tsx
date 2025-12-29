@@ -31,13 +31,7 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
   // Handler para abrir el modal de edición
   const handleEdit = () => {
     onClose() // Cerrar el modal de vista primero
-    if (movement._isConversion) {
-      openModal('movement', { editingMovement: movement })
-    } else if (movement._isTransfer) {
-      openModal('movement', { editingMovement: movement })
-    } else {
-      openModal('movement', { editingMovement: movement })
-    }
+    openModal('unified-payment', { editingMovement: movement })
   }
 
   // Helper para formatear fecha
