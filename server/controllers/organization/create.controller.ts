@@ -14,8 +14,8 @@ export async function handleCreateOrganization(req: Request, res: Response) {
 
     // Call Supabase RPC to create organization
     const { data: organizationId, error } = await supabase.rpc('handle_new_organization', {
-      _organization_name: name.trim(),
-      _user_id: userId,
+      p_organization_name: name.trim(),
+      p_user_id: userId,
     });
 
     if (error) {
