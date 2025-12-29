@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 
 interface EnrollmentData {
   isEnrolled: boolean;
@@ -20,7 +20,7 @@ interface EnrollmentData {
  */
 export function useCourseEnrollment(courseId: string | undefined, userId: string | undefined) {
   return useQuery({
-    queryKey: LEARNING_QUERY_KEYS.courseEnrollment(courseId!, userId!),
+    queryKey: learningKeys.courseEnrollment(courseId, userId),
     queryFn: async (): Promise<EnrollmentData> => {
       if (!userId || !courseId) {
         return { isEnrolled: false };

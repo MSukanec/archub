@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 import type { Course } from '@shared/schema';
 
 /**
@@ -41,7 +41,7 @@ import type { Course } from '@shared/schema';
  */
 export function useAdminCourses() {
   return useQuery<Course[]>({
-    queryKey: LEARNING_QUERY_KEYS.adminCourses,
+    queryKey: learningKeys.adminCourses(),
     queryFn: async () => {
       if (!supabase) return [];
       

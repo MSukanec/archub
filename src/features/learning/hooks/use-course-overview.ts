@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCourseOverview } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 
 /**
  * Hook para obtener la información básica de un curso.
@@ -12,7 +12,7 @@ import { LEARNING_QUERY_KEYS } from '../constants';
  */
 export function useCourseOverview(courseIdOrSlug: string | undefined) {
   return useQuery({
-    queryKey: LEARNING_QUERY_KEYS.courseOverview(courseIdOrSlug!),
+    queryKey: learningKeys.courseOverview(courseIdOrSlug),
     queryFn: () => getCourseOverview(courseIdOrSlug!),
     enabled: !!courseIdOrSlug,
     staleTime: 5 * 60 * 1000, // 5 minutes - course data doesn't change often

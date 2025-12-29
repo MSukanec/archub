@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCourseMarkers, type MarkerWithLesson } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 
 /**
  * Hook para obtener todos los marcadores de un curso.
@@ -9,7 +9,7 @@ import { LEARNING_QUERY_KEYS } from '../constants';
  * incluyendo información de lección y módulo asociados.
  * 
  * Usa el patrón estándar del proyecto:
- * - queryKey centralizado en LEARNING_QUERY_KEYS
+ * - queryKey centralizado en learningKeys
  * - queryFn que llama al servicio getCourseMarkers
  * 
  * @param courseId - ID del curso (opcional)
@@ -17,7 +17,7 @@ import { LEARNING_QUERY_KEYS } from '../constants';
  */
 export function useCourseMarkers(courseId?: string) {
   return useQuery<MarkerWithLesson[]>({
-    queryKey: LEARNING_QUERY_KEYS.courseMarkers(courseId!),
+    queryKey: learningKeys.courseMarkers(courseId),
     queryFn: () => getCourseMarkers(courseId!),
     enabled: !!courseId,
     staleTime: 5 * 60 * 1000, // 5 minutes

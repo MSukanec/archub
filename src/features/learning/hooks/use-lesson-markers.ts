@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getLessonMarkers } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 
 /**
  * Hook para obtener todos los marcadores de una lección.
@@ -13,7 +13,7 @@ import { LEARNING_QUERY_KEYS } from '../constants';
  */
 export function useLessonMarkers(lessonId: string | undefined) {
   return useQuery({
-    queryKey: LEARNING_QUERY_KEYS.lessonMarkers(lessonId!),
+    queryKey: learningKeys.lessonMarkers(lessonId),
     queryFn: () => getLessonMarkers(lessonId!),
     enabled: !!lessonId,
   });

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getLastLessonInProgress } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 
 /**
  * Hook para obtener la última lección en progreso del usuario.
@@ -21,7 +21,7 @@ export function useLastLessonInProgress(
   userId: string | undefined
 ) {
   return useQuery({
-    queryKey: LEARNING_QUERY_KEYS.lastLessonInProgress(courseId!, userId!),
+    queryKey: learningKeys.lastLessonInProgress(courseId, userId),
     queryFn: () => getLastLessonInProgress(courseId, userId),
     enabled: !!courseId && !!userId,
     staleTime: 5 * 60 * 1000, // 5 minutes - lesson progress data

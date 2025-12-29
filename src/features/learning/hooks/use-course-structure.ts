@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCourseStructure } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 
 /**
  * Hook para obtener la estructura completa de un curso (módulos y lecciones).
@@ -14,7 +14,7 @@ import { LEARNING_QUERY_KEYS } from '../constants';
  */
 export function useCourseStructure(courseId: string | undefined) {
   return useQuery({
-    queryKey: LEARNING_QUERY_KEYS.courseStructure(courseId!),
+    queryKey: learningKeys.courseStructure(courseId),
     queryFn: () => getCourseStructure(courseId!),
     enabled: !!courseId,
   });

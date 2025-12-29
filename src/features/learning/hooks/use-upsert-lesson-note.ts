@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { upsertLessonNote } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 import type { UpsertLessonNotePayload } from '../types';
 import { useToast } from '@/hooks/use-toast';
 
@@ -22,7 +22,7 @@ export function useUpsertLessonNote() {
     onSuccess: (data, variables) => {
       // Invalidar cache de notas de la lección
       queryClient.invalidateQueries({
-        queryKey: LEARNING_QUERY_KEYS.lessonNotes(variables.lessonId),
+        queryKey: learningKeys.lessonNotes(variables.lessonId),
       });
 
       toast({

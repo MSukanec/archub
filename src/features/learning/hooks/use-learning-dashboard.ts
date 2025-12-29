@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getLearningDashboard } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 
 /**
  * Hook para obtener el dashboard de aprendizaje del usuario.
@@ -15,7 +15,7 @@ import { LEARNING_QUERY_KEYS } from '../constants';
  */
 export function useLearningDashboard() {
   return useQuery({
-    queryKey: LEARNING_QUERY_KEYS.dashboard,
+    queryKey: learningKeys.dashboard(),
     queryFn: () => getLearningDashboard(),
   });
 }

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCoursePricing } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 
 /**
  * Hook para obtener la información de pricing de un curso.
@@ -16,7 +16,7 @@ export function useCoursePricing(
   provider?: string
 ) {
   return useQuery({
-    queryKey: LEARNING_QUERY_KEYS.coursePricing(courseSlug!, currency, provider),
+    queryKey: learningKeys.coursePricing(courseSlug, currency, provider),
     queryFn: () => getCoursePricing(courseSlug!, currency, provider),
     enabled: !!courseSlug,
   });

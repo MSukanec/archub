@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCourseRecentMarkers } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 
 /**
  * Hook para obtener los marcadores recientes de un curso.
@@ -10,7 +10,7 @@ import { LEARNING_QUERY_KEYS } from '../constants';
  */
 export function useCourseRecentMarkers(courseId: string | undefined) {
   return useQuery({
-    queryKey: LEARNING_QUERY_KEYS.courseRecentMarkers(courseId!),
+    queryKey: learningKeys.courseRecentMarkers(courseId),
     queryFn: () => getCourseRecentMarkers(courseId!),
     enabled: !!courseId,
     staleTime: 5 * 60 * 1000, // 5 minutes

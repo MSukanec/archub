@@ -43,3 +43,6 @@ export type { CapitalQueryKey } from './capital.keys';
 
 export { financesKeys } from './finances.keys';
 export type { FinancesQueryKey } from './finances.keys';
+
+export { learningKeys } from './learning.keys';
+export type { LearningQueryKey } from './learning.keys';

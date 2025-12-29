@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getLessonProgress } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 
 /**
  * Hook para obtener el progreso de una lección específica.
@@ -10,7 +10,7 @@ import { LEARNING_QUERY_KEYS } from '../constants';
  */
 export function useLessonProgress(lessonId: string | undefined, userId: string | undefined) {
   return useQuery({
-    queryKey: LEARNING_QUERY_KEYS.lessonProgress(lessonId!),
+    queryKey: learningKeys.lessonProgress(lessonId),
     queryFn: () => getLessonProgress(lessonId!, userId!),
     enabled: !!lessonId && !!userId,
   });

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCourseLessonsSummary } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 
 /**
  * Hook para obtener resumen de lecciones de múltiples cursos.
@@ -21,7 +21,7 @@ import { LEARNING_QUERY_KEYS } from '../constants';
  */
 export function useCourseLessonsSummary(courseIds: string[]) {
   return useQuery({
-    queryKey: LEARNING_QUERY_KEYS.courseLessonsSummary(courseIds),
+    queryKey: learningKeys.courseLessonsSummary(courseIds),
     queryFn: () => getCourseLessonsSummary(courseIds),
     enabled: courseIds.length > 0,
     staleTime: 300000, // 5 minutes

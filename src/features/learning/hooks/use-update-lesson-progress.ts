@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateLessonProgress } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 import type { UpdateLessonProgressPayload } from '../types';
 import { useToast } from '@/hooks/use-toast';
 
@@ -28,13 +28,13 @@ export function useUpdateLessonProgress(courseId?: string) {
     onSuccess: (data, variables) => {
       // Invalidar progreso de la lección específica
       queryClient.invalidateQueries({
-        queryKey: LEARNING_QUERY_KEYS.lessonProgress(variables.lessonId),
+        queryKey: learningKeys.lessonProgress(variables.lessonId),
       });
 
       // Invalidar progreso del curso si se proporciona courseId
       if (courseId) {
         queryClient.invalidateQueries({
-          queryKey: LEARNING_QUERY_KEYS.courseProgress(courseId),
+          queryKey: learningKeys.courseProgress(courseId),
         });
       }
 

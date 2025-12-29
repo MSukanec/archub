@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getMonthlyStudyTime } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 
 /**
  * Hook para obtener el tiempo de estudio del mes actual.
@@ -20,7 +20,7 @@ import { LEARNING_QUERY_KEYS } from '../constants';
  */
 export function useMonthlyStudyTime() {
   return useQuery({
-    queryKey: LEARNING_QUERY_KEYS.monthlyStudyTime,
+    queryKey: learningKeys.monthlyStudyTime(),
     queryFn: () => getMonthlyStudyTime(),
   });
 }

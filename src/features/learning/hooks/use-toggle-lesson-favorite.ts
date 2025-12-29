@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toggleLessonFavorite } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 import { useToast } from '@/hooks/use-toast';
 
 interface UseToggleLessonFavoriteProps {
@@ -32,17 +32,17 @@ export function useToggleLessonFavorite({
     onMutate: async (isFavorite: boolean) => {
       // ⚡ OPTIMISTIC UPDATE - Cancelar queries en progreso
       await queryClient.cancelQueries({
-        queryKey: LEARNING_QUERY_KEYS.courseProgress(courseId),
+        queryKey: learningKeys.courseProgress(courseId),
       });
 
       // Guardar snapshot anterior para rollback
       const previousProgress = queryClient.getQueryData(
-        LEARNING_QUERY_KEYS.courseProgress(courseId)
+        learningKeys.courseProgress(courseId)
       );
 
       // Actualizar cache optimistamente
       queryClient.setQueryData(
-        LEARNING_QUERY_KEYS.courseProgress(courseId),
+        learningKeys.courseProgress(courseId),
         (old: any) => {
           if (!old || !Array.isArray(old)) return old;
 
@@ -70,7 +70,7 @@ export function useToggleLessonFavorite({
       // Revertir cache al estado anterior
       if (context?.previousProgress) {
         queryClient.setQueryData(
-          LEARNING_QUERY_KEYS.courseProgress(courseId),
+          learningKeys.courseProgress(courseId),
           context.previousProgress
         );
       }

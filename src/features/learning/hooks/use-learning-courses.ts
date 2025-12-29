@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getLearningCourses } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 
 /**
  * Hook para obtener todos los cursos con enrollments y progreso del usuario.
@@ -13,7 +13,7 @@ import { LEARNING_QUERY_KEYS } from '../constants';
  */
 export function useLearningCourses() {
   return useQuery({
-    queryKey: LEARNING_QUERY_KEYS.coursesFull,
+    queryKey: learningKeys.coursesFull(),
     queryFn: () => getLearningCourses(),
   });
 }

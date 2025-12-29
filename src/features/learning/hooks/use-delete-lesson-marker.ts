@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteLessonNote } from '../services';
-import { LEARNING_QUERY_KEYS } from '../constants';
+import { learningKeys } from '@/core/query-keys';
 import { useToast } from '@/hooks/use-toast';
 
 /**
@@ -21,7 +21,7 @@ export function useDeleteLessonMarker(lessonId: string) {
     onSuccess: () => {
       // Invalidar cache de marcadores de la lección
       queryClient.invalidateQueries({
-        queryKey: LEARNING_QUERY_KEYS.lessonMarkers(lessonId),
+        queryKey: learningKeys.lessonMarkers(lessonId),
       });
 
       toast({
