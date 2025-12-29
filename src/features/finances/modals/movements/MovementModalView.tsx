@@ -182,7 +182,7 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
               {movement._conversionData.movements?.map((mov: any, index: number) => (
                 <div key={mov.id} className="p-3 border rounded-md">
                   <div className="flex items-center justify-between mb-2">
-                    <Badge variant={mov.amount > 0 ? "default" : "destructive"}>
+                    <Badge variant={mov.amount > 0 ? "secondary" : "outline"}>
                       {mov.amount > 0 ? 'Entrada' : 'Salida'}
                     </Badge>
                     <span className="font-bold">
@@ -212,7 +212,7 @@ export function MovementModalView({ modalData, onClose, onEdit, onDelete }: Move
               {movement._transferData.movements?.map((mov: any, index: number) => (
                 <div key={mov.id} className="p-3 border rounded-md">
                   <div className="flex items-center justify-between mb-2">
-                    <Badge variant={mov.amount > 0 ? "default" : "destructive"}>
+                    <Badge variant={mov.amount > 0 ? "secondary" : "outline"}>
                       {mov.amount > 0 ? 'Destino' : 'Origen'}
                     </Badge>
                     <span className="font-bold">

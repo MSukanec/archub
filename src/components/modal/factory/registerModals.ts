@@ -11,7 +11,7 @@ import { ClientPaymentModal } from '@/features/clients/modals/ClientPaymentModal
 import ClientRoleForm from '@/features/clients/forms/ClientRoleForm';
 import { ClientCommitmentForm } from '@/features/clients/forms/ClientCommitmentForm';
 import { ClientScheduleItemForm } from '@/features/clients/forms/ClientScheduleItemForm';
-import { MovementModal, MovementModalView, MovementImportStepModal, MovementConceptFormModal, BankTransferReceiptModal, PaymentFormModal } from '@/features/finances';
+import { MovementModal, MovementModalView, MovementImportStepModal, MovementConceptFormModal, BankTransferReceiptModal, AdminPaymentsModal } from '@/features/finances';
 import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConfirmationForm';
 import { default as PaymentFeedbackModal } from '@/components/forms/PaymentFeedbackModal';
 import { UniversalImportForm } from '@/features/imports';
@@ -321,7 +321,7 @@ export function initializeModalRegistry(): void {
   registerModal('movements-view', MovementModalView as any, financeConfig);
   registerModal('movement-concept', MovementConceptFormModal as any, { ...financeConfig, size: 'md' });
   registerModal('movement-import', MovementImportStepModal as any, { ...financeConfig, size: 'xl' });
-  registerModal('payment', PaymentFormModal as any, financeConfig);
+  registerModal('payment', AdminPaymentsModal as any, financeConfig);
   registerModal('bank-transfer-receipt', BankTransferReceiptModal as any, { 
     ...financeConfig, 
     size: 'md',
