@@ -5,7 +5,6 @@ import { verifyAdminRoleForOrganization } from "../shared/permissions.js";
 import { buildURLContext } from "../shared/urls.js";
 import { getAdminClient } from "../../../../routes/_base.js";
 import { createPayPalOrder } from "./api.js";
-import { logPayPalMode } from "./config.js";
 
 export interface CreateSeatOrderParams {
   userId: string;
@@ -23,8 +22,6 @@ export type CreateSeatOrderResult =
   | { success: false; error: string; status?: number };
 
 export async function createSeatOrder(req: Request): Promise<CreateSeatOrderResult> {
-  logPayPalMode("create-seat-order");
-
   const { 
     organization_id,
     invitee_email,

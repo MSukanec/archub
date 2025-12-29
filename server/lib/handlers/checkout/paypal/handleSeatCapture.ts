@@ -2,11 +2,8 @@ import type { Request, Response } from "express";
 import { getAdminClient } from "../../../../routes/_base.js";
 import { capturePayPalOrder, getPayPalOrder } from "./api.js";
 import { sendInvitationEmail } from "../../../email/sendInvitationEmail.js";
-import { logPayPalMode } from "./config.js";
 
 export async function handleSeatCapture(req: Request, res: Response) {
-  logPayPalMode("seat-capture");
-  
   console.log('[PayPal seat-capture] Handler called with query:', req.query);
   
   const baseUrl = process.env.VITE_APP_URL || 'https://seencel.com';

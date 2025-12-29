@@ -6,15 +6,12 @@ import { buildURLContext } from "../shared/urls.js";
 import { calculateProration } from "../shared/proration.js";
 import { getAdminClient } from "../../../../routes/_base.js";
 import { createPayPalOrder } from "./api.js";
-import { logPayPalMode } from "./config.js";
 
 export type CreateUpgradeOrderResult =
   | { success: true; orderId: string; approvalUrl: string; isFreeUpgrade?: boolean }
   | { success: false; error: string; status?: number };
 
 export async function createUpgradeOrder(req: Request): Promise<CreateUpgradeOrderResult> {
-  logPayPalMode("create-upgrade-order");
-
   const { 
     plan_slug,
     organization_id,

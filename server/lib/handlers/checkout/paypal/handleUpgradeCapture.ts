@@ -6,15 +6,12 @@ import { upgradeOrganizationPlan } from "../shared/subscriptions.js";
 import { buildURLContext } from "../shared/urls.js";
 import { capturePayPalOrder, getPayPalOrder } from "./api.js";
 import { createPayPalSubscription, cancelPayPalSubscription, revisePayPalSubscription } from "./subscriptions-api.js";
-import { logPayPalMode } from "./config.js";
 
 export type HandleUpgradeCaptureResult =
   | { success: true; activated: boolean; message: string; redirectUrl: string; approvalUrl?: string }
   | { success: false; error: string; redirectUrl?: string };
 
 export async function handleUpgradeCapture(req: Request): Promise<HandleUpgradeCaptureResult> {
-  logPayPalMode("upgrade-capture");
-  
   const baseUrl = process.env.VITE_APP_URL || 'https://seencel.com';
   const supabase = createServiceSupabaseClient();
   const adminClient = getAdminClient();

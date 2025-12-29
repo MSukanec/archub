@@ -1,4 +1,4 @@
-import { PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PAYPAL_BASE_URL, isPayPalSandbox } from "./config.js";
+import { getPayPalConfig } from "./config.js";
 
 let cachedToken: { accessToken: string; expiresAt: number } | null = null;
 
@@ -9,23 +9,25 @@ export async function getPayPalAccessToken(): Promise<string> {
     return cachedToken.accessToken;
   }
 
-  const clientIdPreview = PAYPAL_CLIENT_ID?.substring(0, 10) || "UNDEFINED";
-  const mode = isPayPalSandbox ? "SANDBOX 🧪" : "PRODUCTION 🚨";
-  const sandboxSource = process.env.PAYPAL_ENV_SANDBOX ? "(via PAYPAL_ENV_SANDBOX)" : "(via NODE_ENV)";
+  // Get dynamic configuration based on paypal_test_mode flag
+  const config = await getPayPalConfig();
   
-  console.log(`[PayPal Auth] Authenticating in ${mode} ${isPayPalSandbox ? sandboxSource : ""}`);
-  console.log(`[PayPal Auth] Endpoint: ${PAYPAL_BASE_URL}`);
+  const clientIdPreview = config.clientId?.substring(0, 10) || "UNDEFINED";
+  const mode = config.isTestMode ? "SANDBOX 🧪 (Test Mode Flag ON)" : "PRODUCTION 🚨 (Test Mode Flag OFF)";
+  
+  console.log(`[PayPal Auth] Authenticating in ${mode}`);
+  console.log(`[PayPal Auth] Endpoint: ${config.baseUrl}`);
   console.log(`[PayPal Auth] Client ID preview: ${clientIdPreview}...`);
 
-  if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
+  if (!config.clientId || !config.clientSecret) {
     throw new Error(
-      `PayPal credentials missing! CLIENT_ID: ${!!PAYPAL_CLIENT_ID}, SECRET: ${!!PAYPAL_CLIENT_SECRET}. Mode: ${mode}`
+      `PayPal credentials missing! CLIENT_ID: ${!!config.clientId}, SECRET: ${!!config.clientSecret}. Mode: ${mode}`
     );
   }
 
-  const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString("base64");
+  const auth = Buffer.from(`${config.clientId}:${config.clientSecret}`).toString("base64");
   
-  const r = await fetch(`${PAYPAL_BASE_URL}/v1/oauth2/token`, {
+  const r = await fetch(`${config.baseUrl}/v1/oauth2/token`, {
     method: "POST",
     headers: {
       Authorization: `Basic ${auth}`,
@@ -39,13 +41,13 @@ export async function getPayPalAccessToken(): Promise<string> {
     console.error(`[PayPal Auth] Token request FAILED`);
     console.error(`[PayPal Auth] Status: ${r.status}`);
     console.error(`[PayPal Auth] Response: ${errorText}`);
-    console.error(`[PayPal Auth] Endpoint: ${PAYPAL_BASE_URL}/v1/oauth2/token`);
+    console.error(`[PayPal Auth] Endpoint: ${config.baseUrl}/v1/oauth2/token`);
     console.error(`[PayPal Auth] Client ID preview: ${clientIdPreview}...`);
     
     throw new Error(
       `PayPal authentication failed (${r.status}): ${errorText}. ` +
-      `Check that your ${isPayPalSandbox ? 'SANDBOX' : 'PRODUCTION'} credentials are correct. ` +
-      `Endpoint: ${PAYPAL_BASE_URL}`
+      `Check that your ${config.isTestMode ? 'SANDBOX' : 'PRODUCTION'} credentials are correct. ` +
+      `Endpoint: ${config.baseUrl}`
     );
   }
 

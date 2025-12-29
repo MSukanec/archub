@@ -3,7 +3,6 @@ import { getAuthenticatedClient } from "../shared/auth.js";
 import { validateAndApplyCoupon } from "../shared/coupons.js";
 import { getUserData } from "../shared/user.js";
 import { buildURLContext, buildCourseBackUrls } from "../shared/urls.js";
-import { logPayPalMode } from "./config.js";
 import { encodeInvoiceId, encodeCustomId } from "./encoding.js";
 import { createPayPalOrder } from "./api.js";
 

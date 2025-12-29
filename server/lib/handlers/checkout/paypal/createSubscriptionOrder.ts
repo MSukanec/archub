@@ -3,7 +3,6 @@ import { getAuthenticatedClient } from "../shared/auth.js";
 import { verifyAdminRoleForOrganization } from "../shared/permissions.js";
 import { getUserData } from "../shared/user.js";
 import { buildURLContext } from "../shared/urls.js";
-import { logPayPalMode } from "./config.js";
 import { createPayPalOrder } from "./api.js";
 import { createSubscription as createPayPalSubscription } from "./subscriptions-api.js";
 import { calculateProration } from "../shared/proration.js";
