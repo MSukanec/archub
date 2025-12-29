@@ -67,6 +67,7 @@ CRITICAL PERFORMANCE REQUIREMENT: System must be INSTANTANEOUS. All cache invali
 - **Inactivity Logout**: Global session security feature via `src/hooks/useInactivityLogout.ts` - automatically logs out users after 60 minutes of inactivity.
 - **View Name Translation System**: Centralized translator at `src/lib/view-name-translator.ts` for consistent page names across analytics and admin dashboard.
 - **Course Landing Pages**: Consolidated into 2 pages sharing the same view logic via `useCourseLandingView()` hook. Page-specific layouts determine presentation (public marketing layout vs. dashboard layout). Routes: `/cursos/:slug` (public) and `/learning/courses/:slug/info` (authenticated dashboard).
+- **Founders Landing Pages**: Dual-context pattern (public vs. private) using shared `FoundersContent` and `HeroSection` components from `@/features/shared-content/founders`. Routes: `/founders` (public marketing layout) and `/settings/founders` (dashboard layout). Components receive `mode="public"` or `mode="dashboard"` to control navigation behavior.
 
 ## External Dependencies
 - **Supabase**: Authentication & User Acquisition tracking.
