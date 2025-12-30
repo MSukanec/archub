@@ -1,8 +1,7 @@
 import type { Request } from "express";
 import { createServiceSupabaseClient } from "../shared/auth.js";
 import { logPaymentEvent } from "../shared/events.js";
-import { getPayPalAccessToken } from "./auth.js";
-import { PAYPAL_BASE_URL } from "./config.js";
+import { getPayPalAccessToken, getPayPalBaseUrl } from "./auth.js";
 
 export type ProcessWebhookResult =
   | { success: true; processed: boolean; eventType: string }
@@ -36,7 +35,8 @@ function extractOrderId(evt: any): string | null {
 async function fetchOrderInvoiceId(orderId: string): Promise<string | null> {
   try {
     const token = await getPayPalAccessToken();
-    const r = await fetch(`${PAYPAL_BASE_URL}/v2/checkout/orders/${orderId}`, {
+    const baseUrl = await getPayPalBaseUrl();
+    const r = await fetch(`${baseUrl}/v2/checkout/orders/${orderId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!r.ok) return null;

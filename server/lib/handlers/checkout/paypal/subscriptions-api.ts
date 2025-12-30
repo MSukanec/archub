@@ -1,5 +1,4 @@
-import { getPayPalAccessToken } from "./auth.js";
-import { PAYPAL_BASE_URL } from "./config.js";
+import { getPayPalAccessToken, getPayPalBaseUrl } from "./auth.js";
 
 
 export type PayPalProductResult =
@@ -26,8 +25,9 @@ export async function createPayPalProduct(params: {
 }): Promise<PayPalProductResult> {
   try {
     const token = await getPayPalAccessToken();
+    const baseUrl = await getPayPalBaseUrl();
 
-    const response = await fetch(`${PAYPAL_BASE_URL}/v1/catalogs/products`, {
+    const response = await fetch(`${baseUrl}/v1/catalogs/products`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -99,8 +99,9 @@ export async function createPayPalBillingPlan(params: {
 }): Promise<PayPalBillingPlanResult> {
   try {
     const token = await getPayPalAccessToken();
+    const baseUrl = await getPayPalBaseUrl();
 
-    const response = await fetch(`${PAYPAL_BASE_URL}/v1/billing/plans`, {
+    const response = await fetch(`${baseUrl}/v1/billing/plans`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -179,6 +180,7 @@ export async function createPayPalSubscription(params: {
 }): Promise<PayPalSubscriptionResult> {
   try {
     const token = await getPayPalAccessToken();
+    const baseUrl = await getPayPalBaseUrl();
 
     const body: any = {
       plan_id: params.planId,
@@ -209,7 +211,7 @@ export async function createPayPalSubscription(params: {
       console.log("[PayPal Subscriptions API] Using plan override:", JSON.stringify(params.planOverride, null, 2));
     }
 
-    const response = await fetch(`${PAYPAL_BASE_URL}/v1/billing/subscriptions`, {
+    const response = await fetch(`${baseUrl}/v1/billing/subscriptions`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -263,9 +265,10 @@ export async function getPayPalSubscription(
 ): Promise<PayPalSubscriptionDetailsResult> {
   try {
     const token = await getPayPalAccessToken();
+    const baseUrl = await getPayPalBaseUrl();
 
     const response = await fetch(
-      `${PAYPAL_BASE_URL}/v1/billing/subscriptions/${subscriptionId}`,
+      `${baseUrl}/v1/billing/subscriptions/${subscriptionId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -307,9 +310,10 @@ export async function cancelPayPalSubscription(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const token = await getPayPalAccessToken();
+    const baseUrl = await getPayPalBaseUrl();
 
     const response = await fetch(
-      `${PAYPAL_BASE_URL}/v1/billing/subscriptions/${subscriptionId}/cancel`,
+      `${baseUrl}/v1/billing/subscriptions/${subscriptionId}/cancel`,
       {
         method: "POST",
         headers: {
@@ -358,6 +362,7 @@ export async function revisePayPalSubscription(params: {
 }): Promise<ReviseSubscriptionResult> {
   try {
     const token = await getPayPalAccessToken();
+    const baseUrl = await getPayPalBaseUrl();
 
     const body: any = {
       plan_id: params.newPlanId,
@@ -378,7 +383,7 @@ export async function revisePayPalSubscription(params: {
     });
 
     const response = await fetch(
-      `${PAYPAL_BASE_URL}/v1/billing/subscriptions/${params.subscriptionId}/revise`,
+      `${baseUrl}/v1/billing/subscriptions/${params.subscriptionId}/revise`,
       {
         method: "POST",
         headers: {
@@ -433,9 +438,10 @@ export async function getPayPalProduct(
 ): Promise<PayPalProductResult> {
   try {
     const token = await getPayPalAccessToken();
+    const baseUrl = await getPayPalBaseUrl();
 
     const response = await fetch(
-      `${PAYPAL_BASE_URL}/v1/catalogs/products/${productId}`,
+      `${baseUrl}/v1/catalogs/products/${productId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -473,9 +479,10 @@ export async function getPayPalBillingPlan(
 ): Promise<PayPalBillingPlanResult> {
   try {
     const token = await getPayPalAccessToken();
+    const baseUrl = await getPayPalBaseUrl();
 
     const response = await fetch(
-      `${PAYPAL_BASE_URL}/v1/billing/plans/${planId}`,
+      `${baseUrl}/v1/billing/plans/${planId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -515,9 +522,10 @@ export async function listPayPalSubscriptionTransactions(
 ): Promise<{ success: boolean; transactions?: any[]; error?: string }> {
   try {
     const token = await getPayPalAccessToken();
+    const baseUrl = await getPayPalBaseUrl();
 
     const response = await fetch(
-      `${PAYPAL_BASE_URL}/v1/billing/subscriptions/${subscriptionId}/transactions?start_time=${startTime}&end_time=${endTime}`,
+      `${baseUrl}/v1/billing/subscriptions/${subscriptionId}/transactions?start_time=${startTime}&end_time=${endTime}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -560,6 +568,7 @@ export async function updatePayPalBillingPlanPricing(params: {
 }): Promise<PayPalUpdatePricingResult> {
   try {
     const token = await getPayPalAccessToken();
+    const baseUrl = await getPayPalBaseUrl();
     const currencyCode = params.currencyCode || "USD";
 
     console.log(`[PayPal Subscriptions API] Updating pricing for plan ${params.planId}:`, {
@@ -569,7 +578,7 @@ export async function updatePayPalBillingPlanPricing(params: {
     });
 
     const response = await fetch(
-      `${PAYPAL_BASE_URL}/v1/billing/plans/${params.planId}/update-pricing-schemes`,
+      `${baseUrl}/v1/billing/plans/${params.planId}/update-pricing-schemes`,
       {
         method: "POST",
         headers: {

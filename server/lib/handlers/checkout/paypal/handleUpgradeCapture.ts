@@ -6,7 +6,7 @@ import { upgradeOrganizationPlan } from "../shared/subscriptions.js";
 import { buildURLContext } from "../shared/urls.js";
 import { capturePayPalOrder, getPayPalOrder } from "./api.js";
 import { createPayPalSubscription, cancelPayPalSubscription, revisePayPalSubscription } from "./subscriptions-api.js";
-import { isPayPalSandbox } from "./config.js";
+import { getPayPalMode } from "./config.js";
 
 export type HandleUpgradeCaptureResult =
   | { success: true; activated: boolean; message: string; redirectUrl: string; approvalUrl?: string }
@@ -172,6 +172,9 @@ export async function handleUpgradeCapture(req: Request): Promise<HandleUpgradeC
     console.error('[PayPal upgrade-capture] No email found for user:', publicUserId);
     return { success: false, error: "No email found", redirectUrl: `${baseUrl}/organization/billing?payment=error&reason=no_email` };
   }
+
+  // Get PayPal mode from database feature flag
+  const isPayPalSandbox = await getPayPalMode();
 
   // Get the target PayPal plan ID for the new plan (use sandbox or production columns based on mode)
   const paypalPlanId = target_paypal_plan_id || 

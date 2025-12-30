@@ -7,7 +7,7 @@ import {
   getPayPalBillingPlan,
   updatePayPalBillingPlanPricing,
 } from "./subscriptions-api.js";
-import { isPayPalSandbox, logPayPalMode } from "./config.js";
+import { getPayPalMode, logPayPalMode } from "./config.js";
 
 export type SyncPlansResult =
   | {
@@ -74,6 +74,9 @@ export async function syncPayPalPlans(req: Request): Promise<SyncPlansResult> {
       annualPlanId: string | null;
       created: boolean;
     }> = [];
+
+    // Get PayPal mode from database feature flag
+    const isPayPalSandbox = await getPayPalMode();
 
     for (const plan of plans) {
       // Use sandbox or production columns based on mode

@@ -7,7 +7,7 @@ import { createSubscription as createPayPalSubscription } from "./subscriptions-
 import { calculateProration } from "../shared/proration.js";
 import { validateSubscriptionCoupon, createGiftedSubscription } from "../shared/subscription-coupons.js";
 import { getAdminClient } from "../../../../routes/_base.js";
-import { logPayPalMode, isPayPalSandbox } from "./config.js";
+import { logPayPalMode, getPayPalMode } from "./config.js";
 
 export type CreateSubscriptionOrderResult =
   | { success: true; orderId: string; approvalUrl: string; order: any; isRecurring?: boolean; subscriptionId?: string }
@@ -111,6 +111,9 @@ export async function createSubscriptionOrder(
         status: 404,
       };
     }
+
+    // Get PayPal mode from database feature flag
+    const isPayPalSandbox = await getPayPalMode();
 
     const priceAmount =
       billing_period === "monthly"

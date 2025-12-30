@@ -6,7 +6,7 @@ import { buildURLContext } from "../shared/urls.js";
 import { calculateProration } from "../shared/proration.js";
 import { getAdminClient } from "../../../../routes/_base.js";
 import { createPayPalOrder } from "./api.js";
-import { isPayPalSandbox } from "./config.js";
+import { getPayPalMode } from "./config.js";
 
 export type CreateUpgradeOrderResult =
   | { success: true; orderId: string; approvalUrl: string; isFreeUpgrade?: boolean }
@@ -112,6 +112,9 @@ export async function createUpgradeOrder(req: Request): Promise<CreateUpgradeOrd
     }
 
     let prorationAmountUSD = prorationResult.finalPrice.usd;
+
+    // Get PayPal mode from database feature flag
+    const isPayPalSandbox = await getPayPalMode();
 
     if (prorationAmountUSD <= 0) {
       console.log('[PayPal create-upgrade-order] Free upgrade (credit >= new price)');
