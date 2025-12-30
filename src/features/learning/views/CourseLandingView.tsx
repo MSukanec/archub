@@ -32,10 +32,16 @@ export function useCourseLandingView(slug: string | undefined): CourseLandingVie
   })();
 
   const handleCTAClick = () => {
+    const course = data?.course;
+    // Block checkout if course is disabled
+    if (!isEnrolled && course?.is_active === false) {
+      return;
+    }
+    
     if (isEnrolled) {
-      navigate(`/learning/courses/${data?.course?.slug}`);
+      navigate(`/learning/courses/${course?.slug}`);
     } else if (userData?.user) {
-      navigate(`/checkout?course=${data?.course?.slug}`);
+      navigate(`/checkout?course=${course?.slug}`);
     } else {
       navigate('/register');
     }

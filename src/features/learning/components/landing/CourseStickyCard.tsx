@@ -3,8 +3,9 @@ import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Clock, CheckCircle, MessageCircle, Shield } from 'lucide-react';
+import { BookOpen, Clock, CheckCircle, MessageCircle, Shield, Lock } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
+import { BlockedRestricted } from '@/components/shared/restrictions';
 import type { Course } from '@shared/schema';
 import type { CourseStats } from '../../types';
 
@@ -19,8 +20,16 @@ export function CourseStickyCard({ course, stats, isEnrolled = false, progressPe
   const user = useAuthStore((state) => state.user);
   const [, navigate] = useLocation();
 
+  // Block checkout if course is disabled
+  const isCheckoutBlocked = !isEnrolled && course.is_active === false;
+
   // Determine button state and action
   const handleCTAClick = useCallback(() => {
+    // Don't allow checkout if course is disabled
+    if (!isEnrolled && course.is_active === false) {
+      return;
+    }
+    
     if (isEnrolled) {
       // User is enrolled - go to course view
       navigate(`/learning/courses/${course.slug}`);
@@ -31,7 +40,7 @@ export function CourseStickyCard({ course, stats, isEnrolled = false, progressPe
       // User is not logged in - go to register
       navigate('/register');
     }
-  }, [isEnrolled, user, course.slug, navigate]);
+  }, [isEnrolled, user, course.slug, navigate, course.is_active]);
 
   // Determine button text and variant
   const buttonText = isEnrolled ? 'CONTINUAR CURSO' : 'INSCRIBIRME';
@@ -117,15 +126,23 @@ export function CourseStickyCard({ course, stats, isEnrolled = false, progressPe
 
         {/* CTA Button - Only ONE button shown at a time */}
         <div className="pt-2">
-          <Button 
-            size="lg" 
-            variant={buttonVariant}
-            className="w-full text-base font-semibold"
-            onClick={handleCTAClick}
-            data-testid={isEnrolled ? "button-continue" : "button-enroll"}
+          <BlockedRestricted
+            isBlocked={isCheckoutBlocked}
+            title="Curso no disponible"
+            message="Este curso no está disponible para inscripción en este momento."
           >
-            {buttonText}
-          </Button>
+            <Button 
+              size="lg" 
+              variant={buttonVariant}
+              className="w-full text-base font-semibold"
+              onClick={handleCTAClick}
+              disabled={isCheckoutBlocked}
+              data-testid={isEnrolled ? "button-continue" : "button-enroll"}
+            >
+              {isCheckoutBlocked && !isEnrolled && <Lock className="w-4 h-4 mr-2" />}
+              {buttonText}
+            </Button>
+          </BlockedRestricted>
         </div>
       </CardContent>
     </Card>

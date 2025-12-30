@@ -1,8 +1,9 @@
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ArrowRight, BookOpen, Eye, Clock, CheckCircle } from 'lucide-react';
+import { ArrowRight, BookOpen, Eye, Clock, CheckCircle, Lock } from 'lucide-react';
 import { useCurrentUser } from '@/features/users/hooks';
+import { BlockedRestricted } from '@/components/shared/restrictions';
 import { 
   useCourseLanding, 
   useCourseEnrollment,
@@ -55,7 +56,14 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
 
   const { course, modules, faqs, stats, clientGallery } = data;
 
+  const isCheckoutBlocked = !isEnrolled && course.is_active === false;
+
   const handleCTAClick = () => {
+    // Block checkout if course is disabled
+    if (!isEnrolled && course.is_active === false) {
+      return;
+    }
+    
     if (isEnrolled) {
       // Usuario inscrito → ir al curso
       navigate(`/learning/courses/${course.slug}`);
@@ -83,6 +91,7 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
           progressPercentage={progressPercentage}
           onCTAClick={handleCTAClick}
           ctaButtonText={ctaButtonText}
+          isCheckoutBlocked={isCheckoutBlocked}
         />
       )}
       
@@ -116,6 +125,7 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
             isEnrolled={isEnrolled}
             onCTAClick={handleCTAClick}
             ctaButtonText={ctaButtonText}
+            isCheckoutBlocked={isCheckoutBlocked}
           />
         )}
         
@@ -123,6 +133,7 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
           <DashboardCTAFooter 
             onCTAClick={handleCTAClick}
             ctaButtonText={ctaButtonText}
+            isCheckoutBlocked={isCheckoutBlocked}
           />
         )}
       </div>
@@ -137,6 +148,7 @@ interface DashboardCourseHeaderProps {
   progressPercentage: number;
   onCTAClick: () => void;
   ctaButtonText: string;
+  isCheckoutBlocked?: boolean;
 }
 
 function DashboardCourseHeader({ 
@@ -145,7 +157,8 @@ function DashboardCourseHeader({
   isEnrolled, 
   progressPercentage, 
   onCTAClick,
-  ctaButtonText 
+  ctaButtonText,
+  isCheckoutBlocked = false
 }: DashboardCourseHeaderProps) {
   return (
     <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background rounded-lg overflow-hidden mb-8">
@@ -191,10 +204,17 @@ function DashboardCourseHeader({
             </div>
           </div>
           
-          <Button onClick={onCTAClick} className="gap-2" data-testid="button-cta-header">
-            <Eye className="w-4 h-4" />
-            {ctaButtonText}
-          </Button>
+          <BlockedRestricted
+            isBlocked={isCheckoutBlocked}
+            title="Curso no disponible"
+            message="Este curso no está disponible para inscripción en este momento."
+          >
+            <Button onClick={onCTAClick} className="gap-2" disabled={isCheckoutBlocked} data-testid="button-cta-header">
+              {isCheckoutBlocked && <Lock className="w-4 h-4" />}
+              <Eye className="w-4 h-4" />
+              {ctaButtonText}
+            </Button>
+          </BlockedRestricted>
         </div>
       </div>
     </div>
@@ -206,9 +226,10 @@ interface PublicCTAFooterProps {
   isEnrolled: boolean;
   onCTAClick: () => void;
   ctaButtonText: string;
+  isCheckoutBlocked?: boolean;
 }
 
-function PublicCTAFooter({ course, isEnrolled, onCTAClick, ctaButtonText }: PublicCTAFooterProps) {
+function PublicCTAFooter({ course, isEnrolled, onCTAClick, ctaButtonText, isCheckoutBlocked = false }: PublicCTAFooterProps) {
   return (
     <section className="py-20 bg-gradient-to-br from-primary/10 via-primary/5 to-background rounded-lg">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -224,10 +245,17 @@ function PublicCTAFooter({ course, isEnrolled, onCTAClick, ctaButtonText }: Publ
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Button size="lg" className="px-8 text-lg" onClick={onCTAClick}>
-              {ctaButtonText}
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
+            <BlockedRestricted
+              isBlocked={isCheckoutBlocked}
+              title="Curso no disponible"
+              message="Este curso no está disponible para inscripción en este momento."
+            >
+              <Button size="lg" className="px-8 text-lg" onClick={onCTAClick} disabled={isCheckoutBlocked}>
+                {isCheckoutBlocked && !isEnrolled && <Lock className="w-4 h-4 mr-2" />}
+                {ctaButtonText}
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </BlockedRestricted>
             {course.price && !isEnrolled && (
               <div className="text-center">
                 <p className="text-3xl font-bold">${course.price}</p>
@@ -251,15 +279,23 @@ function PublicCTAFooter({ course, isEnrolled, onCTAClick, ctaButtonText }: Publ
 interface DashboardCTAFooterProps {
   onCTAClick: () => void;
   ctaButtonText: string;
+  isCheckoutBlocked?: boolean;
 }
 
-function DashboardCTAFooter({ onCTAClick, ctaButtonText }: DashboardCTAFooterProps) {
+function DashboardCTAFooter({ onCTAClick, ctaButtonText, isCheckoutBlocked = false }: DashboardCTAFooterProps) {
   return (
     <div className="flex justify-center py-8">
-      <Button size="lg" onClick={onCTAClick} className="gap-2 px-8" data-testid="button-cta-footer">
-        <Eye className="w-5 h-5" />
-        {ctaButtonText}
-      </Button>
+      <BlockedRestricted
+        isBlocked={isCheckoutBlocked}
+        title="Curso no disponible"
+        message="Este curso no está disponible para inscripción en este momento."
+      >
+        <Button size="lg" onClick={onCTAClick} className="gap-2 px-8" disabled={isCheckoutBlocked} data-testid="button-cta-footer">
+          {isCheckoutBlocked && <Lock className="w-4 h-4" />}
+          <Eye className="w-5 h-5" />
+          {ctaButtonText}
+        </Button>
+      </BlockedRestricted>
     </div>
   );
 }
