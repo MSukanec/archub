@@ -96,34 +96,21 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
           };
         }
       } else if (externalRef.startsWith("mp_")) {
-        preferenceTable = "mp_course_preferences";
-        const { data: prefData, error: prefError } = await supabase
-          .from("mp_course_preferences")
-          .select("*")
-          .eq("id", externalRef)
-          .maybeSingle();
-        
-        if (prefData && !prefError) {
-          // Get course slug by joining with courses table separately
-          let courseSlug = null;
-          if (prefData.course_id) {
-            const { data: courseData } = await supabase
-              .from("courses")
-              .select("slug")
-              .eq("id", prefData.course_id)
-              .maybeSingle();
-            courseSlug = courseData?.slug || null;
-          }
+        // Course: resolve course_id from course_slug via separate query
+        // (We don't rely on mp_course_preferences table)
+        if (md.course_slug) {
+          const { data: courseData } = await supabase
+            .from("courses")
+            .select("id")
+            .eq("slug", md.course_slug)
+            .maybeSingle();
           
-          fromDb = {
-            user_id: prefData.user_id,
-            course_id: prefData.course_id,
-            course_slug: courseSlug,
-            months: prefData.access_months,
-            coupon_code: prefData.coupon_code,
-            coupon_id: prefData.coupon_id,
-            product_type: 'course',
-          };
+          if (courseData) {
+            fromDb = {
+              course_id: courseData.id,
+              product_type: 'course',
+            };
+          }
         }
       }
 

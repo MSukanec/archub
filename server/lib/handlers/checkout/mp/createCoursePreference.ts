@@ -206,25 +206,10 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
       return { success: false, error: result.error, status: result.status };
     }
 
-    // 13. Guardar datos en mp_course_preferences para que el webhook los lea
-    const { error: insertError } = await supabase
-      .from("mp_course_preferences")
-      .insert({
-        id: shortId,
-        preference_id: result.preferenceId,
-        user_id: user_id,
-        course_id: course.id,
-        coupon_id: couponData?.coupon_id || null,
-        coupon_code: couponData ? code.trim().toUpperCase() : null,
-        student_price_usd: String(unit_price),
-        original_price_usd: String(basePriceUsd),
-        currency,
-        access_months: accessMonths,
-      });
-
-    if (insertError) {
-      console.error("[MP create-course-preference] ⚠️ Error guardando preferencia en BD (continúa):", insertError);
-    }
+    // 13. Skip DB save - we already have all data in MercadoPago metadata
+    // The webhook will extract course_id from course_slug via separate query
+    console.log(`[MP create-course-preference] ✅ Preference created, webhook will use metadata`);
+    
 
     return { 
       success: true, 
