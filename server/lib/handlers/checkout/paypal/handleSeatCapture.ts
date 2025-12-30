@@ -25,7 +25,7 @@ export async function handleSeatCapture(req: Request, res: Response) {
 
     if (!preferenceId) {
       console.log('[PayPal seat-capture] Missing preference_id');
-      return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=missing_id`);
+      return res.redirect(`${baseUrl}/organization/billing?payment=failed&reason=missing_id`);
     }
 
     const { data: prefData, error: prefError } = await adminClient
@@ -36,7 +36,7 @@ export async function handleSeatCapture(req: Request, res: Response) {
 
     if (prefError || !prefData) {
       console.error('[PayPal seat-capture] Preference not found:', preferenceId, prefError);
-      return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=preference_not_found`);
+      return res.redirect(`${baseUrl}/organization/billing?payment=failed&reason=preference_not_found`);
     }
 
     console.log('[PayPal seat-capture] Found preference data:', {
@@ -50,7 +50,7 @@ export async function handleSeatCapture(req: Request, res: Response) {
 
     if (prefData.status === 'completed') {
       console.log('[PayPal seat-capture] Payment already processed');
-      return res.redirect(`${baseUrl}/organization/members?payment=success`);
+      return res.redirect(`${baseUrl}/organization/billing?payment=success`);
     }
 
     const organizationId = prefData.organization_id;
@@ -63,12 +63,12 @@ export async function handleSeatCapture(req: Request, res: Response) {
 
     if (!organizationId || !inviteeEmail || !roleId) {
       console.error('[PayPal seat-capture] Missing required data in preference');
-      return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=missing_data`);
+      return res.redirect(`${baseUrl}/organization/billing?payment=failed&reason=missing_data`);
     }
 
     if (!orderId) {
       console.error('[PayPal seat-capture] No order_id to capture');
-      return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=no_order_id`);
+      return res.redirect(`${baseUrl}/organization/billing?payment=failed&reason=no_order_id`);
     }
 
     let captureData: any = null;
@@ -90,18 +90,18 @@ export async function handleSeatCapture(req: Request, res: Response) {
         
         if (captureData.status !== 'COMPLETED') {
           console.error('[PayPal seat-capture] Capture not completed:', captureData.status);
-          return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=capture_failed`);
+          return res.redirect(`${baseUrl}/organization/billing?payment=failed&reason=capture_failed`);
         }
         
         gatewayPaymentId = captureData.purchase_units?.[0]?.payments?.captures?.[0]?.id || orderId;
         paymentAmount = parseFloat(captureData.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value) || paymentAmount;
       } else {
         console.error('[PayPal seat-capture] Order not approved:', orderDetails.status);
-        return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=order_not_approved`);
+        return res.redirect(`${baseUrl}/organization/billing?payment=failed&reason=order_not_approved`);
       }
     } catch (captureError: any) {
       console.error('[PayPal seat-capture] Error capturing order:', captureError);
-      return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=capture_error`);
+      return res.redirect(`${baseUrl}/organization/billing?payment=failed&reason=capture_error`);
     }
 
     if (gatewayPaymentId) {
@@ -114,7 +114,7 @@ export async function handleSeatCapture(req: Request, res: Response) {
 
       if (existingPayment) {
         console.log('[PayPal seat-capture] Payment already processed:', existingPayment.id);
-        return res.redirect(`${baseUrl}/organization/members?payment=success`);
+        return res.redirect(`${baseUrl}/organization/billing?payment=success`);
       }
     }
 
@@ -126,7 +126,7 @@ export async function handleSeatCapture(req: Request, res: Response) {
 
     if (userError || !dbUser) {
       console.error('[PayPal seat-capture] User lookup failed:', userError);
-      return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=user_not_found`);
+      return res.redirect(`${baseUrl}/organization/billing?payment=failed&reason=user_not_found`);
     }
 
     const { data: org, error: orgError } = await adminClient
@@ -137,7 +137,7 @@ export async function handleSeatCapture(req: Request, res: Response) {
 
     if (orgError || !org) {
       console.error('[PayPal seat-capture] Organization lookup failed:', orgError);
-      return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=org_not_found`);
+      return res.redirect(`${baseUrl}/organization/billing?payment=failed&reason=org_not_found`);
     }
 
     const { data: role, error: roleError } = await adminClient
@@ -148,7 +148,7 @@ export async function handleSeatCapture(req: Request, res: Response) {
 
     if (roleError || !role) {
       console.error('[PayPal seat-capture] Role lookup failed:', roleError);
-      return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=role_not_found`);
+      return res.redirect(`${baseUrl}/organization/billing?payment=failed&reason=role_not_found`);
     }
 
     if (gatewayPaymentId) {
@@ -232,7 +232,7 @@ export async function handleSeatCapture(req: Request, res: Response) {
 
       if (updateError) {
         console.error('[PayPal seat-capture] Invitation update failed:', updateError);
-        return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=invitation_update_failed`);
+        return res.redirect(`${baseUrl}/organization/billing?payment=failed&reason=invitation_update_failed`);
       }
 
       console.log('[PayPal seat-capture] Existing invitation reset to pending:', existingInvitation.id);
@@ -261,7 +261,7 @@ export async function handleSeatCapture(req: Request, res: Response) {
         });
       }
 
-      return res.redirect(`${baseUrl}/organization/members?payment=success&invited=${encodeURIComponent(inviteeEmail)}`);
+      return res.redirect(`${baseUrl}/organization/billing?payment=success&invited=${encodeURIComponent(inviteeEmail)}`);
     }
 
     const { data: invitation, error: invitationError } = await adminClient
@@ -279,7 +279,7 @@ export async function handleSeatCapture(req: Request, res: Response) {
 
     if (invitationError || !invitation) {
       console.error('[PayPal seat-capture] Invitation creation failed:', invitationError);
-      return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=invitation_failed`);
+      return res.redirect(`${baseUrl}/organization/billing?payment=failed&reason=invitation_failed`);
     }
 
     console.log('[PayPal seat-capture] Invitation created:', invitation.id);
@@ -315,10 +315,10 @@ export async function handleSeatCapture(req: Request, res: Response) {
       paymentAmount,
     });
 
-    return res.redirect(`${baseUrl}/organization/members?payment=success&invited=${encodeURIComponent(inviteeEmail)}`);
+    return res.redirect(`${baseUrl}/organization/billing?payment=success&invited=${encodeURIComponent(inviteeEmail)}`);
 
   } catch (error: any) {
     console.error('[PayPal seat-capture] Error:', error);
-    return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=error`);
+    return res.redirect(`${baseUrl}/organization/billing?payment=failed&reason=error`);
   }
 }

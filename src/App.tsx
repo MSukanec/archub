@@ -110,7 +110,6 @@ const PrivateCourseLandingPage = lazy(() => import("@/pages/learning/CourseLandi
 const CoursePage = lazy(() => import("@/pages/learning/CoursePage"));
 const PaymentReturnPage = lazy(() => import("@/pages/learning/PaymentReturnPage"));
 const CheckoutPage = lazy(() => import("@/pages/checkout/CheckoutPage"));
-const MPSeatSubscriptionSuccess = lazy(() => import("@/pages/MPSeatSubscriptionSuccess"));
 const SubscriptionCheckout = lazy(() => import("@/pages/checkout/SubscriptionCheckout"));
 
 // Finances Pages
@@ -291,12 +290,6 @@ function Router() {
           </Suspense>
         </Route>
         
-        {/* MP Payment Return Routes - Redirect to API endpoints */}
-        <Route path="/mp/seat-subscription-success">
-          <Suspense fallback={<LazyLoadFallback />}>
-            <MPSeatSubscriptionSuccess />
-          </Suspense>
-        </Route>
 
         {/* Profile Routes - redirect to /user */}
         <Route path="/profile/organizations" component={UserPage} />

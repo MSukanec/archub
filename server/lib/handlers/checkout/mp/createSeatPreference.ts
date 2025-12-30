@@ -116,9 +116,9 @@ export async function createSeatPreference(
       },
       notification_url: `${baseUrl}/api/checkout/mp/webhook?secret=${MP_WEBHOOK_SECRET}`,
       back_urls: {
-        success: `${baseUrl}/api/checkout/mp/seat-success?preference_id=${shortId}`,
-        failure: `${baseUrl}/organization/members?payment=failed`,
-        pending: `${baseUrl}/organization/members?payment=pending`,
+        success: `${baseUrl}/organization/billing?payment=success`,
+        failure: `${baseUrl}/organization/billing?payment=failed`,
+        pending: `${baseUrl}/organization/billing?payment=pending`,
       },
       auto_return: 'approved',
       binary_mode: true,
