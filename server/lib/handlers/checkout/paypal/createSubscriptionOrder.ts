@@ -8,7 +8,7 @@ import { createSubscription as createPayPalSubscription } from "./subscriptions-
 import { calculateProration } from "../shared/proration.js";
 import { validateSubscriptionCoupon, createGiftedSubscription } from "../shared/subscription-coupons.js";
 import { getAdminClient } from "../../../../routes/_base.js";
-import { logPayPalMode } from "./config.js";
+import { logPayPalMode, isPayPalSandbox } from "./config.js";
 
 export type CreateSubscriptionOrderResult =
   | { success: true; orderId: string; approvalUrl: string; order: any; isRecurring?: boolean; subscriptionId?: string }
@@ -79,7 +79,7 @@ export async function createSubscriptionOrder(
 
     const { data: plan, error: planError } = await supabase
       .from("plans")
-      .select("id, name, slug, is_active, monthly_amount, annual_amount, paypal_plan_monthly_id, paypal_plan_annual_id")
+      .select("id, name, slug, is_active, monthly_amount, annual_amount, paypal_plan_monthly_id, paypal_plan_annual_id, paypal_plan_monthly_id_sandbox, paypal_plan_annual_id_sandbox")
       .eq("slug", plan_slug)
       .eq("is_active", true)
       .single();
@@ -197,9 +197,10 @@ export async function createSubscriptionOrder(
 
     const { returnBase } = buildURLContext(req);
 
+    // Use sandbox or production plan IDs based on mode
     const paypalPlanId = billing_period === "monthly" 
-      ? plan.paypal_plan_monthly_id 
-      : plan.paypal_plan_annual_id;
+      ? (isPayPalSandbox ? plan.paypal_plan_monthly_id_sandbox : plan.paypal_plan_monthly_id)
+      : (isPayPalSandbox ? plan.paypal_plan_annual_id_sandbox : plan.paypal_plan_annual_id);
 
     if (paypalPlanId) {
       console.log("[PayPal create-subscription-order] Using PayPal Subscriptions API (recurring billing)");

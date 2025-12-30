@@ -6,6 +6,7 @@ import { upgradeOrganizationPlan } from "../shared/subscriptions.js";
 import { buildURLContext } from "../shared/urls.js";
 import { capturePayPalOrder, getPayPalOrder } from "./api.js";
 import { createPayPalSubscription, cancelPayPalSubscription, revisePayPalSubscription } from "./subscriptions-api.js";
+import { isPayPalSandbox } from "./config.js";
 
 export type HandleUpgradeCaptureResult =
   | { success: true; activated: boolean; message: string; redirectUrl: string; approvalUrl?: string }
@@ -81,14 +82,14 @@ export async function handleUpgradeCapture(req: Request): Promise<HandleUpgradeC
   if (plan_id) {
     const { data: planData } = await supabase
       .from("plans")
-      .select("id, name, slug, monthly_amount, annual_amount, paypal_plan_monthly_id, paypal_plan_annual_id")
+      .select("id, name, slug, monthly_amount, annual_amount, paypal_plan_monthly_id, paypal_plan_annual_id, paypal_plan_monthly_id_sandbox, paypal_plan_annual_id_sandbox")
       .eq("id", plan_id)
       .maybeSingle();
     plan = planData;
   } else if (plan_slug) {
     const { data: planData } = await supabase
       .from("plans")
-      .select("id, name, slug, monthly_amount, annual_amount, paypal_plan_monthly_id, paypal_plan_annual_id")
+      .select("id, name, slug, monthly_amount, annual_amount, paypal_plan_monthly_id, paypal_plan_annual_id, paypal_plan_monthly_id_sandbox, paypal_plan_annual_id_sandbox")
       .eq("slug", plan_slug)
       .eq("is_active", true)
       .maybeSingle();
@@ -172,9 +173,11 @@ export async function handleUpgradeCapture(req: Request): Promise<HandleUpgradeC
     return { success: false, error: "No email found", redirectUrl: `${baseUrl}/organization/billing?payment=error&reason=no_email` };
   }
 
-  // Get the target PayPal plan ID for the new plan
+  // Get the target PayPal plan ID for the new plan (use sandbox or production columns based on mode)
   const paypalPlanId = target_paypal_plan_id || 
-                       (billing_period === 'monthly' ? plan.paypal_plan_monthly_id : plan.paypal_plan_annual_id);
+                       (billing_period === 'monthly' 
+                         ? (isPayPalSandbox ? plan.paypal_plan_monthly_id_sandbox : plan.paypal_plan_monthly_id)
+                         : (isPayPalSandbox ? plan.paypal_plan_annual_id_sandbox : plan.paypal_plan_annual_id));
 
   // Get the old subscription to try revising it
   // Use adminClient to bypass RLS and ensure we can read the subscription

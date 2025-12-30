@@ -7,6 +7,7 @@ import {
   getPayPalBillingPlan,
   updatePayPalBillingPlanPricing,
 } from "./subscriptions-api.js";
+import { isPayPalSandbox, logPayPalMode } from "./config.js";
 
 export type SyncPlansResult =
   | {
@@ -49,9 +50,11 @@ export async function syncPayPalPlans(req: Request): Promise<SyncPlansResult> {
       return { success: false, error: "Admin access required", status: 403 };
     }
 
+    logPayPalMode("sync-plans");
+
     const { data: plans, error: plansError } = await supabase
       .from("plans")
-      .select("id, name, slug, monthly_amount, annual_amount, is_active, paypal_product_id, paypal_plan_monthly_id, paypal_plan_annual_id")
+      .select("id, name, slug, monthly_amount, annual_amount, is_active, paypal_product_id, paypal_plan_monthly_id, paypal_plan_annual_id, paypal_product_id_sandbox, paypal_plan_monthly_id_sandbox, paypal_plan_annual_id_sandbox")
       .eq("is_active", true)
       .neq("slug", "free");
 
@@ -73,9 +76,10 @@ export async function syncPayPalPlans(req: Request): Promise<SyncPlansResult> {
     }> = [];
 
     for (const plan of plans) {
-      let productId = plan.paypal_product_id;
-      let monthlyPlanId = plan.paypal_plan_monthly_id;
-      let annualPlanId = plan.paypal_plan_annual_id;
+      // Use sandbox or production columns based on mode
+      let productId = isPayPalSandbox ? plan.paypal_product_id_sandbox : plan.paypal_product_id;
+      let monthlyPlanId = isPayPalSandbox ? plan.paypal_plan_monthly_id_sandbox : plan.paypal_plan_monthly_id;
+      let annualPlanId = isPayPalSandbox ? plan.paypal_plan_annual_id_sandbox : plan.paypal_plan_annual_id;
       let created = false;
 
       if (productId) {
@@ -236,17 +240,28 @@ export async function syncPayPalPlans(req: Request): Promise<SyncPlansResult> {
       }
 
       if (created) {
+        // Update sandbox or production columns based on mode
+        const updateData = isPayPalSandbox 
+          ? {
+              paypal_product_id_sandbox: productId,
+              paypal_plan_monthly_id_sandbox: monthlyPlanId,
+              paypal_plan_annual_id_sandbox: annualPlanId,
+            }
+          : {
+              paypal_product_id: productId,
+              paypal_plan_monthly_id: monthlyPlanId,
+              paypal_plan_annual_id: annualPlanId,
+            };
+
         const { error: updateError } = await supabase
           .from("plans")
-          .update({
-            paypal_product_id: productId,
-            paypal_plan_monthly_id: monthlyPlanId,
-            paypal_plan_annual_id: annualPlanId,
-          })
+          .update(updateData)
           .eq("id", plan.id);
 
         if (updateError) {
           console.error(`[PayPal sync-plans] Failed to update plan ${plan.slug}:`, updateError);
+        } else {
+          console.log(`[PayPal sync-plans] Updated plan ${plan.slug} with ${isPayPalSandbox ? 'SANDBOX' : 'PRODUCTION'} IDs`);
         }
       }
 

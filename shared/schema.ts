@@ -99,10 +99,14 @@ export const plans = pgTable("plans", {
   is_active: boolean("is_active").default(true),
   status: text("status").notNull().default("available"), // available | coming_soon | maintenance
   billing_type: text("billing_type").default("per_user"),
-  // PayPal Billing Plans (for recurring subscriptions)
+  // PayPal Billing Plans - Production
   paypal_product_id: text("paypal_product_id"),
   paypal_plan_monthly_id: text("paypal_plan_monthly_id"),
   paypal_plan_annual_id: text("paypal_plan_annual_id"),
+  // PayPal Billing Plans - Sandbox
+  paypal_product_id_sandbox: text("paypal_product_id_sandbox"),
+  paypal_plan_monthly_id_sandbox: text("paypal_plan_monthly_id_sandbox"),
+  paypal_plan_annual_id_sandbox: text("paypal_plan_annual_id_sandbox"),
   // MercadoPago Preapproval Plans (for recurring subscriptions)
   mp_plan_monthly_id: text("mp_plan_monthly_id"),
   mp_plan_annual_id: text("mp_plan_annual_id"),

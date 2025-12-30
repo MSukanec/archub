@@ -6,6 +6,7 @@ import { buildURLContext } from "../shared/urls.js";
 import { calculateProration } from "../shared/proration.js";
 import { getAdminClient } from "../../../../routes/_base.js";
 import { createPayPalOrder } from "./api.js";
+import { isPayPalSandbox } from "./config.js";
 
 export type CreateUpgradeOrderResult =
   | { success: true; orderId: string; approvalUrl: string; isFreeUpgrade?: boolean }
@@ -77,7 +78,7 @@ export async function createUpgradeOrder(req: Request): Promise<CreateUpgradeOrd
 
     const { data: plan, error: planError } = await supabase
       .from("plans")
-      .select("id, name, slug, is_active, monthly_amount, annual_amount, paypal_plan_monthly_id, paypal_plan_annual_id")
+      .select("id, name, slug, is_active, monthly_amount, annual_amount, paypal_plan_monthly_id, paypal_plan_annual_id, paypal_plan_monthly_id_sandbox, paypal_plan_annual_id_sandbox")
       .eq("slug", plan_slug)
       .eq("is_active", true)
       .single();
@@ -116,7 +117,10 @@ export async function createUpgradeOrder(req: Request): Promise<CreateUpgradeOrd
       console.log('[PayPal create-upgrade-order] Free upgrade (credit >= new price)');
       
       const shortId = `ppu_${nanoid(12)}`;
-      const targetPaypalPlanId = billing_period === 'monthly' ? plan.paypal_plan_monthly_id : plan.paypal_plan_annual_id;
+      // Use sandbox or production plan IDs based on mode
+      const targetPaypalPlanId = billing_period === 'monthly' 
+        ? (isPayPalSandbox ? plan.paypal_plan_monthly_id_sandbox : plan.paypal_plan_monthly_id)
+        : (isPayPalSandbox ? plan.paypal_plan_annual_id_sandbox : plan.paypal_plan_annual_id);
       const fullPriceUsd = String(billing_period === 'monthly' ? plan.monthly_amount : plan.annual_amount);
       
       const { returnBase } = buildURLContext(req);
@@ -156,15 +160,17 @@ export async function createUpgradeOrder(req: Request): Promise<CreateUpgradeOrd
     }
 
     const shortId = `ppu_${nanoid(12)}`;
-    const targetPaypalPlanId = billing_period === 'monthly' ? plan.paypal_plan_monthly_id : plan.paypal_plan_annual_id;
+    // Use sandbox or production plan IDs based on mode
+    const targetPaypalPlanId = billing_period === 'monthly' 
+      ? (isPayPalSandbox ? plan.paypal_plan_monthly_id_sandbox : plan.paypal_plan_monthly_id)
+      : (isPayPalSandbox ? plan.paypal_plan_annual_id_sandbox : plan.paypal_plan_annual_id);
     
     console.log('[PayPal create-upgrade-order] Target PayPal Plan ID:', {
       planName: plan.name,
       planSlug: plan.slug,
       billingPeriod: billing_period,
       targetPaypalPlanId,
-      monthlyPlanId: plan.paypal_plan_monthly_id,
-      annualPlanId: plan.paypal_plan_annual_id,
+      isSandbox: isPayPalSandbox,
     });
 
     if (!targetPaypalPlanId) {
