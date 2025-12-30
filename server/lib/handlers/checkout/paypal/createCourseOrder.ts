@@ -74,7 +74,7 @@ export async function createCourseOrder(
     // Resolve course_id from course_slug and get price in USD
     const { data: course, error: courseError } = await supabase
       .from("courses")
-      .select("id, title, slug, short_description, price")
+      .select("id, title, slug, short_description, price, is_active")
       .eq("slug", course_slug)
       .single();
 
@@ -83,6 +83,15 @@ export async function createCourseOrder(
         success: false,
         error: "Course not found",
         status: 404,
+      };
+    }
+
+    // SECURITY: Prevent checkout if course is disabled
+    if (!course.is_active) {
+      return {
+        success: false,
+        error: "This course is not available for purchase at this time",
+        status: 403,
       };
     }
 

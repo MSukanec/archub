@@ -8,6 +8,7 @@ interface PayButtonProps {
   className?: string;
   variant?: 'default' | 'secondary' | 'outline';
   size?: 'default' | 'sm' | 'lg';
+  disabled?: boolean;
 }
 
 export default function PayButton({
@@ -15,7 +16,8 @@ export default function PayButton({
   currency = 'ARS',
   className,
   variant = 'default',
-  size = 'sm'
+  size = 'sm',
+  disabled = false
 }: PayButtonProps) {
   const [, navigate] = useLocation();
 
@@ -28,6 +30,7 @@ export default function PayButton({
       variant={variant}
       size={size}
       onClick={handlePay}
+      disabled={disabled}
       className={className}
       data-testid="button-pay-course"
     >

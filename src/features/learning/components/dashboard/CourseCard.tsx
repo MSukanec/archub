@@ -104,6 +104,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
             variant="default"
             size="sm"
             className="w-full"
+            disabled={!course.is_active}
           />
         )}
       </div>
