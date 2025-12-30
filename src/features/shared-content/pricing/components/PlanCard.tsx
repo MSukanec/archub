@@ -161,7 +161,7 @@ export function PlanCard({
                   "text-sm",
                   isPopular ? "text-gray-400" : "text-[var(--text-muted)]"
                 )}>
-                  USD
+                  DESDE $
                 </span>
                 <span className={cn(
                   "text-5xl font-bold tracking-tight",
@@ -173,7 +173,7 @@ export function PlanCard({
                   "text-lg",
                   isPopular ? "text-gray-400" : "text-[var(--text-muted)]"
                 )}>
-                  /mes
+                  por mes
                 </span>
               </div>
               {billingPeriod === 'annual' && (
