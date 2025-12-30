@@ -142,6 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         flagsMap[flag.key] = flag.value;
       }
       
+      console.log('[FeatureFlags] Returning flags:', flagsMap);
       res.set('Cache-Control', 'public, max-age=5');
       return res.json(flagsMap);
     } catch (e: any) {
