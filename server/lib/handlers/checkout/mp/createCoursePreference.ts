@@ -43,7 +43,19 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
     return { success: false, error: "Authentication failed", status: 401 };
   }
 
-  const user_id = user.id;
+  // Look up actual user ID from auth_id in users table (same as PayPal)
+  const { data: userRecord, error: userLookupError } = await supabase
+    .from('users')
+    .select('id')
+    .eq('auth_id', user.id)
+    .single();
+  
+  if (userLookupError || !userRecord) {
+    console.error("[MP create-course-preference] User lookup failed:", userLookupError);
+    return { success: false, error: "User not found", status: 404 };
+  }
+
+  const user_id = userRecord.id;
 
   try {
     // 5. Obtener curso y precio en USD
