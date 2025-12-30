@@ -42,11 +42,14 @@ function mapRouteToView(path: string): string {
   if (path.startsWith('/general-costs')) return 'general_costs';
   if (path.startsWith('/analysis')) return 'analysis';
   
-  // Learning routes - Capture course slugs
-  if (path.match(/^\/learning\/course\/[^/]+$/)) {
-    const slug = path.split('/').pop();
-    return `cursos_${slug}`;
+  // Learning routes - Capture specific course view (viewing a single course)
+  // Match /learning/courses/:id or /learning/course/:id
+  const courseMatch = path.match(/^\/learning\/courses?\/([^/?]+)/);
+  if (courseMatch) {
+    const courseId = courseMatch[1];
+    return `cursos_${courseId}`;
   }
+  
   if (path.startsWith('/learning/dashboard')) return 'learning_dashboard';
   if (path.startsWith('/learning/courses')) return 'learning_courses';
   if (path.startsWith('/learning')) return 'learning';
