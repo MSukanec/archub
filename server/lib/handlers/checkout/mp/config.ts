@@ -1,10 +1,13 @@
-// Use MP_MODE variable to determine test vs production
-// When MP_MODE=test (or MP_ACCESS_TOKEN_TEST is set), use test credentials
-// When MP_MODE=production (or MP_ACCESS_TOKEN is set without TEST), use production
-const MP_MODE = process.env.MP_MODE?.toLowerCase() || 'production';
-const USE_MP_TEST = MP_MODE === 'test' || !!process.env.MP_ACCESS_TOKEN_TEST;
+// FEATURE FLAG LOGIC: If _TEST variables exist, we're in TEST mode
+// This allows the feature flag to control which variables are active
+const USE_MP_TEST = !!(process.env.MP_MODE_TEST || process.env.MP_ACCESS_TOKEN_TEST);
 
 export const isTestMode = USE_MP_TEST;
+
+// Read the appropriate variables based on whether we're in test mode
+const MP_MODE = USE_MP_TEST 
+  ? process.env.MP_MODE_TEST! 
+  : process.env.MP_MODE!;
 
 export const MP_ACCESS_TOKEN = USE_MP_TEST 
   ? process.env.MP_ACCESS_TOKEN_TEST! 
@@ -25,8 +28,8 @@ export function validateMPToken(): { valid: true } | { valid: false; error: stri
 
 export function logMPMode(context: string): void {
   if (isTestMode) {
-    console.log(`[MercadoPago] ${context} - MODE: TEST (via MP_MODE or MP_ACCESS_TOKEN_TEST)`);
+    console.log(`[MercadoPago] ${context} - MODE: TEST (via MP_MODE_TEST variables)`);
   } else {
-    console.log(`[MercadoPago] ${context} - MODE: PRODUCTION`);
+    console.log(`[MercadoPago] ${context} - MODE: PRODUCTION (via MP_MODE variables)`);
   }
 }

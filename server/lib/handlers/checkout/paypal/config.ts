@@ -1,6 +1,6 @@
-// Use PAYPAL_ENV_SANDBOX variable to determine test vs production
-// When PAYPAL_ENV_SANDBOX is set, use sandbox credentials; otherwise use production
-const USE_PAYPAL_SANDBOX = !!process.env.PAYPAL_ENV_SANDBOX;
+// FEATURE FLAG LOGIC: If _SANDBOX variables exist, we're in SANDBOX mode
+// This allows the feature flag to control which variables are active
+const USE_PAYPAL_SANDBOX = !!(process.env.PAYPAL_CLIENT_ID_SANDBOX || process.env.PAYPAL_ENV_SANDBOX);
 
 export const isPayPalSandbox = USE_PAYPAL_SANDBOX;
 
