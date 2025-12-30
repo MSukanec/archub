@@ -212,11 +212,11 @@ export function UserBasicDataView() {
         useWebWorker: true,
       });
 
-      // Upload to storage (social-assets bucket for public user avatars)
-      const fileName = `avatars/${userData?.user?.id}/avatar-${Date.now()}.webp`;
+      // Upload to storage (user-avatars bucket - dedicated public bucket)
+      const fileName = `${userData?.user?.id}/avatar.webp`;
       const { error: uploadError } = await supabase
         .storage
-        .from('social-assets')
+        .from('user-avatars')
         .upload(fileName, compressedFile, {
           upsert: true,
           contentType: 'image/webp',
@@ -235,7 +235,7 @@ export function UserBasicDataView() {
       // Get public URL
       const { data } = supabase
         .storage
-        .from('social-assets')
+        .from('user-avatars')
         .getPublicUrl(fileName);
 
       if (data?.publicUrl) {
