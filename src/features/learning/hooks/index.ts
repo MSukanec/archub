@@ -54,3 +54,6 @@ export { useDeleteLessonNote } from './use-delete-lesson-note';
 // ========== MUTATIONS - MARKERS ==========
 export { useUpsertLessonMarker } from './use-upsert-lesson-marker';
 export { useDeleteLessonMarker } from './use-delete-lesson-marker';
+
+// ========== MUTATIONS - ENROLLMENT ==========
+export { useRemoveCourseEnrollment } from './use-remove-course-enrollment';

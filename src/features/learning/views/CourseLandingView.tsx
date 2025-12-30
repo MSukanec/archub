@@ -14,13 +14,14 @@ export interface CourseLandingViewData {
   ctaButtonText: string;
   isLoading: boolean;
   error: any;
+  refetchEnrollment?: () => Promise<any>;
 }
 
 export function useCourseLandingView(slug: string | undefined): CourseLandingViewData & { handleCTAClick: () => void } {
   const [, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const { data, isLoading, error } = useCourseLanding(slug || '');
-  const { data: enrollmentData } = useCourseEnrollment(data?.course?.id, userData?.user?.id);
+  const { data: enrollmentData, refetch: refetchEnrollment } = useCourseEnrollment(data?.course?.id, userData?.user?.id);
   const { data: progressData } = useCourseProgress(data?.course?.id);
 
   const isEnrolled = enrollmentData?.isEnrolled || false;
@@ -56,6 +57,7 @@ export function useCourseLandingView(slug: string | undefined): CourseLandingVie
     ctaButtonText,
     isLoading,
     error,
+    refetchEnrollment,
     handleCTAClick,
   };
 }
