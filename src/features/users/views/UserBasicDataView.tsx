@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Camera, User, Settings, Building, Package, Hammer, Eye, CalendarIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -19,6 +18,8 @@ import { useCountries } from '@/hooks/use-countries';
 import { useSaveEngine } from '@/core/save-engine';
 import { usersKeys } from '@/core/query-keys';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
+import { AvatarUploader } from '@/components/shared/fields/AvatarUploader';
+import imageCompression from 'browser-image-compression';
 
 interface FormData {
   firstName: string;
@@ -61,6 +62,7 @@ export function UserBasicDataView() {
   const [birthdate, setBirthdate] = useState<Date | undefined>(undefined);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const hasHydratedRef = useRef(false);
   const lastHydratedIdRef = useRef<string | null>(null);
@@ -189,6 +191,68 @@ export function UserBasicDataView() {
     }
   };
 
+  const handleAvatarSelect = async (file: File) => {
+    try {
+      setIsUploadingAvatar(true);
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Error",
+          description: "Sesión expirada. Por favor inicia sesión de nuevo.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Compress image
+      const compressedFile = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      });
+
+      // Upload to storage
+      const fileName = `${userData?.user?.id}/avatar-${Date.now()}.webp`;
+      const { error: uploadError } = await supabase
+        .storage
+        .from('media_files')
+        .upload(fileName, compressedFile, {
+          upsert: false,
+          contentType: 'image/webp',
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        toast({
+          title: "Error",
+          description: "No se pudo subir la imagen. Inténtalo de nuevo.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Get public URL
+      const { data } = supabase
+        .storage
+        .from('media_files')
+        .getPublicUrl(fileName);
+
+      if (data?.publicUrl) {
+        setAvatarUrl(data.publicUrl);
+      }
+    } catch (error: any) {
+      console.error('Avatar upload error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Error al subir la imagen.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   const getInitials = () => {
     if (firstName && lastName) {
       return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -229,22 +293,14 @@ export function UserBasicDataView() {
           <div className="space-y-6">
             <div className="space-y-2">
               <Label className="text-sm font-medium">Avatar</Label>
-              <div className="flex items-center gap-4">
-                <Avatar className="w-16 h-16">
-                  <AvatarImage src={avatarUrl} />
-                  <AvatarFallback className="text-lg font-medium">
-                    {getInitials()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="space-y-2">
-                  <Button size="sm" data-testid="button-change-avatar">
-                    Cambiar
-                  </Button>
-                  <p className="text-xs text-muted-foreground">
-                    Sube una foto o proporciona una URL
-                  </p>
-                </div>
-              </div>
+              <AvatarUploader
+                avatarUrl={avatarUrl}
+                initials={getInitials()}
+                displayName={userData.user.full_name || 'Usuario'}
+                onAvatarSelect={handleAvatarSelect}
+                isUploading={isUploadingAvatar}
+                className="items-center justify-center"
+              />
             </div>
             
             <div className="space-y-2">
