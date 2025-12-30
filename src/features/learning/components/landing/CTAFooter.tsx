@@ -1,9 +1,10 @@
-import { Link } from 'wouter';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { useMultipleFeatureFlags } from '@/hooks/use-feature-flags';
 import { BlockedRestricted } from '@/components/shared/restrictions';
 import { ComingSoonCard } from '@/components/shared/restrictions/guards/ComingSoonCard';
+import { useCurrentUser } from '@/features/users/hooks';
 import type { Course } from '@shared/schema';
 
 interface CTAFooterProps {
@@ -11,11 +12,26 @@ interface CTAFooterProps {
 }
 
 export function CTAFooter({ course }: CTAFooterProps) {
+  const [, navigate] = useLocation();
+  const { data: userData } = useCurrentUser();
+  const isAuthenticated = !!userData?.user;
+  
   const { flags: featureFlags, isReady: flagsReady } = useMultipleFeatureFlags(['course_purchases_enabled'], true);
   
   const isCourseDisabled = course.is_active === false;
   const isPurchasesDisabled = flagsReady && !featureFlags.course_purchases_enabled;
-  const isBlocked = isCourseDisabled || isPurchasesDisabled;
+  
+  // Only block if user is authenticated (going to checkout) AND purchases are disabled
+  // Registration should NEVER be blocked by purchase flags
+  const isCheckoutBlocked = isAuthenticated && (isCourseDisabled || isPurchasesDisabled);
+  
+  const handleClick = () => {
+    if (isAuthenticated) {
+      navigate(`/checkout?course=${course.slug}`);
+    } else {
+      navigate('/register');
+    }
+  };
   
   return (
     <section className="py-20 bg-gradient-to-br from-primary/10 via-primary/5 to-background">
@@ -29,18 +45,22 @@ export function CTAFooter({ course }: CTAFooterProps) {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <ComingSoonCard status={isPurchasesDisabled ? 'maintenance' : 'available'}>
+            {/* Only show maintenance badge if authenticated user going to checkout */}
+            <ComingSoonCard status={isAuthenticated && isPurchasesDisabled ? 'maintenance' : 'available'}>
               <BlockedRestricted
-                isBlocked={isBlocked}
+                isBlocked={isCheckoutBlocked}
                 title="Curso no disponible"
                 message="Este curso no está disponible para inscripción en este momento."
               >
-                <Link href="/register">
-                  <Button size="lg" className="px-8 text-lg" disabled={isBlocked}>
-                    Inscribirme Ahora
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </Button>
-                </Link>
+                <Button 
+                  size="lg" 
+                  className="px-8 text-lg" 
+                  disabled={isCheckoutBlocked}
+                  onClick={handleClick}
+                >
+                  Inscribirme Ahora
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
               </BlockedRestricted>
             </ComingSoonCard>
             {course.price && (
