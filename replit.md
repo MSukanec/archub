@@ -7,6 +7,8 @@ Seencel is a comprehensive construction management platform designed to optimize
 Preferred communication style: Simple, everyday language.
 CRITICAL PERFORMANCE REQUIREMENT: System must be INSTANTANEOUS. All cache invalidations must be scoped (no `featureKeys.lists()`/`all()`). Auto-save delays ≤500ms.
 
+**CRITICAL - DO NOT TOUCH DATABASE**: NEVER modify or query the database directly. All feature flags and data ALREADY EXIST in the database. The user manages them via admin panel. Only modify frontend/backend code to READ existing data correctly.
+
 ## System Architecture
 
 ### UI/UX Decisions

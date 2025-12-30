@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Tabs } from '@/components/shared/Tabs';
 import { BookOpen, Clock, CheckCircle, MessageCircle, Shield, ChevronUp, Crown, ArrowRight, Sparkles, Award, Lock } from 'lucide-react';
 import { BlockedRestricted, ComingSoonCard } from '@/components/shared/restrictions';
-import { useIsAdmin } from '@/hooks/use-admin-permissions';
+import { useMultipleFeatureFlags } from '@/hooks/use-feature-flags';
 import type { CoursesMode } from '../types';
 import type { ItemStatus } from '@shared/schema';
 
@@ -41,11 +41,15 @@ export function CourseStickyCardWithMode({
 }: CourseStickyCardWithModeProps) {
   const [, navigate] = useLocation();
   const [pricingTab, setPricingTab] = useState<PricingTab>('course');
-  const isAdmin = useIsAdmin();
-  const status = (course.status || 'available') as ItemStatus;
+  const { flags: featureFlags, isReady: flagsReady } = useMultipleFeatureFlags(['course_purchases_enabled'], true);
   
-  // Block checkout if course is disabled (is_active === false)
-  const isCheckoutBlocked = !isEnrolled && course.is_active === false;
+  // Block checkout if course is disabled OR feature flag is disabled (FOR EVERYONE)
+  const isCourseDisabled = course.is_active === false;
+  const isPurchasesDisabled = flagsReady && !featureFlags.course_purchases_enabled;
+  const isCheckoutBlocked = !isEnrolled && (isCourseDisabled || isPurchasesDisabled);
+  
+  // Use maintenance status when purchases are disabled via feature flag
+  const status: ItemStatus = !isEnrolled && isPurchasesDisabled ? 'maintenance' : (course.status || 'available') as ItemStatus;
   
   const foundersUrl = mode === 'dashboard' ? '/settings/founders' : '/founders';
   
@@ -377,6 +381,7 @@ export function CourseStickyCardWithMode({
         onCTAClick={onCTAClick}
         ctaButtonText={ctaButtonText}
         isCheckoutBlocked={isCheckoutBlocked}
+        isPurchasesDisabled={isPurchasesDisabled}
       />
     </>
   );
@@ -391,6 +396,7 @@ interface MobileBottomBarProps {
   onCTAClick: () => void;
   ctaButtonText: string;
   isCheckoutBlocked: boolean;
+  isPurchasesDisabled: boolean;
 }
 
 function MobileBottomBar({
@@ -402,6 +408,7 @@ function MobileBottomBar({
   onCTAClick,
   ctaButtonText,
   isCheckoutBlocked,
+  isPurchasesDisabled,
 }: MobileBottomBarProps) {
   const [, navigate] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
@@ -548,18 +555,20 @@ function MobileBottomBar({
                   
                   {/* CTA Button */}
                   <div className="pt-4 space-y-3">
-                    <Button 
-                      size="lg" 
-                      className="w-full text-base font-semibold"
-                      onClick={() => {
-                        setIsOpen(false);
-                        onCTAClick();
-                      }}
-                      disabled={isCheckoutBlocked}
-                    >
-                      {isCheckoutBlocked && <Lock className="w-4 h-4 mr-2" />}
-                      {ctaButtonText}
-                    </Button>
+                    <ComingSoonCard status={!isEnrolled && isPurchasesDisabled ? 'maintenance' : 'available'}>
+                      <Button 
+                        size="lg" 
+                        className="w-full text-base font-semibold"
+                        onClick={() => {
+                          setIsOpen(false);
+                          onCTAClick();
+                        }}
+                        disabled={isCheckoutBlocked}
+                      >
+                        {isCheckoutBlocked && <Lock className="w-4 h-4 mr-2" />}
+                        {ctaButtonText}
+                      </Button>
+                    </ComingSoonCard>
                     
                     {!isEnrolled && (
                       <Button 
@@ -581,21 +590,23 @@ function MobileBottomBar({
             </Sheet>
             
             {/* Main CTA */}
-            <BlockedRestricted 
-              isBlocked={!isEnrolled && course.is_active === false}
-              title="Curso no disponible"
-              message="Este curso no está disponible para inscripción en este momento."
-            >
-              <Button 
-                size="sm"
-                className="font-semibold whitespace-nowrap"
-                onClick={onCTAClick}
-                disabled={isCheckoutBlocked}
+            <ComingSoonCard status={!isEnrolled && isPurchasesDisabled ? 'maintenance' : 'available'}>
+              <BlockedRestricted 
+                isBlocked={isCheckoutBlocked}
+                title="Curso no disponible"
+                message="Este curso no está disponible para inscripción en este momento."
               >
-                {isCheckoutBlocked && <Lock className="w-3 h-3 mr-1" />}
-                {ctaButtonText}
-              </Button>
-            </BlockedRestricted>
+                <Button 
+                  size="sm"
+                  className="font-semibold whitespace-nowrap"
+                  onClick={onCTAClick}
+                  disabled={isCheckoutBlocked}
+                >
+                  {isCheckoutBlocked && <Lock className="w-3 h-3 mr-1" />}
+                  {ctaButtonText}
+                </Button>
+              </BlockedRestricted>
+            </ComingSoonCard>
           </div>
         </div>
       </div>
