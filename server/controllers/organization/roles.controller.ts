@@ -21,7 +21,7 @@ export async function handleGetOrganizationRoles(req: Request, res: Response) {
       .from('roles')
       .select('id, name, type, description, is_system')
       .eq('type', 'organization')
-      .or(`organization_id.eq.${organizationId},is_system.eq.true`)
+      .or(`and(organization_id.eq.${organizationId}),and(is_system.eq.true,organization_id.is.null)`)
       .order('is_system', { ascending: false })
       .order('name');
 
