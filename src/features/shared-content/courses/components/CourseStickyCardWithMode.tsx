@@ -8,6 +8,7 @@ import { Tabs } from '@/components/shared/Tabs';
 import { BookOpen, Clock, CheckCircle, MessageCircle, Shield, ChevronUp, Crown, ArrowRight, Sparkles, Award, Lock } from 'lucide-react';
 import { BlockedRestricted, ComingSoonCard } from '@/components/shared/restrictions';
 import { useMultipleFeatureFlags } from '@/hooks/use-feature-flags';
+import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import type { CoursesMode } from '../types';
 import type { ItemStatus } from '@shared/schema';
 
@@ -42,11 +43,15 @@ export function CourseStickyCardWithMode({
   const [, navigate] = useLocation();
   const [pricingTab, setPricingTab] = useState<PricingTab>('course');
   const { flags: featureFlags, isReady: flagsReady } = useMultipleFeatureFlags(['course_purchases_enabled'], true);
+  const isAdmin = useIsAdmin();
   
-  // Block checkout if course is disabled OR feature flag is disabled (FOR EVERYONE)
+  // Block checkout if course is disabled OR feature flag is disabled
   const isCourseDisabled = course.is_active === false;
   const isPurchasesDisabled = flagsReady && !featureFlags.course_purchases_enabled;
   const isCheckoutBlocked = !isEnrolled && (isCourseDisabled || isPurchasesDisabled);
+  
+  // Admin bypass: admins see the blocked visual state but can still click
+  const isButtonDisabled = isCheckoutBlocked && !isAdmin;
   
   // Use maintenance status when purchases are disabled via feature flag
   const status: ItemStatus = !isEnrolled && isPurchasesDisabled ? 'maintenance' : (course.status || 'available') as ItemStatus;
@@ -155,7 +160,7 @@ export function CourseStickyCardWithMode({
                     size="lg" 
                     className="w-full text-base font-semibold"
                     onClick={onCTAClick}
-                    disabled={isCheckoutBlocked}
+                    disabled={isButtonDisabled}
                     data-testid={isEnrolled ? "button-continue" : "button-enroll"}
                   >
                     {isCheckoutBlocked && <Lock className="w-4 h-4 mr-2" />}
@@ -335,7 +340,7 @@ export function CourseStickyCardWithMode({
                     size="lg" 
                     className="w-full text-base font-semibold"
                     onClick={onCTAClick}
-                    disabled={isCheckoutBlocked}
+                    disabled={isButtonDisabled}
                     data-testid={isEnrolled ? "button-continue" : "button-enroll"}
                   >
                     {isCheckoutBlocked && <Lock className="w-4 h-4 mr-2" />}
@@ -381,6 +386,7 @@ export function CourseStickyCardWithMode({
         onCTAClick={onCTAClick}
         ctaButtonText={ctaButtonText}
         isCheckoutBlocked={isCheckoutBlocked}
+        isButtonDisabled={isButtonDisabled}
         isPurchasesDisabled={isPurchasesDisabled}
       />
     </>
@@ -396,6 +402,7 @@ interface MobileBottomBarProps {
   onCTAClick: () => void;
   ctaButtonText: string;
   isCheckoutBlocked: boolean;
+  isButtonDisabled: boolean;
   isPurchasesDisabled: boolean;
 }
 
@@ -408,6 +415,7 @@ function MobileBottomBar({
   onCTAClick,
   ctaButtonText,
   isCheckoutBlocked,
+  isButtonDisabled,
   isPurchasesDisabled,
 }: MobileBottomBarProps) {
   const [, navigate] = useLocation();
@@ -563,7 +571,7 @@ function MobileBottomBar({
                           setIsOpen(false);
                           onCTAClick();
                         }}
-                        disabled={isCheckoutBlocked}
+                        disabled={isButtonDisabled}
                       >
                         {isCheckoutBlocked && <Lock className="w-4 h-4 mr-2" />}
                         {ctaButtonText}
@@ -600,7 +608,7 @@ function MobileBottomBar({
                   size="sm"
                   className="font-semibold whitespace-nowrap"
                   onClick={onCTAClick}
-                  disabled={isCheckoutBlocked}
+                  disabled={isButtonDisabled}
                 >
                   {isCheckoutBlocked && <Lock className="w-3 h-3 mr-1" />}
                   {ctaButtonText}

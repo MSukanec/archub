@@ -5,6 +5,7 @@ import { useMultipleFeatureFlags } from '@/hooks/use-feature-flags';
 import { BlockedRestricted } from '@/components/shared/restrictions';
 import { ComingSoonCard } from '@/components/shared/restrictions/guards/ComingSoonCard';
 import { useCurrentUser } from '@/features/users/hooks';
+import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import type { Course } from '@shared/schema';
 
 interface CTAFooterProps {
@@ -15,6 +16,7 @@ export function CTAFooter({ course }: CTAFooterProps) {
   const [, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
   const isAuthenticated = !!userData?.user;
+  const isAdmin = useIsAdmin();
   
   const { flags: featureFlags, isReady: flagsReady } = useMultipleFeatureFlags(['course_purchases_enabled'], true);
   
@@ -24,6 +26,9 @@ export function CTAFooter({ course }: CTAFooterProps) {
   // Only block if user is authenticated (going to checkout) AND purchases are disabled
   // Registration should NEVER be blocked by purchase flags
   const isCheckoutBlocked = isAuthenticated && (isCourseDisabled || isPurchasesDisabled);
+  
+  // Admin bypass: admins see the blocked visual state but can still click
+  const isButtonDisabled = isCheckoutBlocked && !isAdmin;
   
   const handleClick = () => {
     if (isAuthenticated) {
@@ -55,7 +60,7 @@ export function CTAFooter({ course }: CTAFooterProps) {
                 <Button 
                   size="lg" 
                   className="px-8 text-lg" 
-                  disabled={isCheckoutBlocked}
+                  disabled={isButtonDisabled}
                   onClick={handleClick}
                 >
                   Inscribirme Ahora
