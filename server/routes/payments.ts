@@ -554,6 +554,153 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
   // POST /api/checkout/mp/update-subscription (Authenticated - updates existing MP subscription in-place)
   app.post("/api/checkout/mp/update-subscription", mpController.updateSubscription);
 
+  // POST /api/dev/paypal/sync-plans (DEV ONLY - no auth required for testing)
+  if (process.env.NODE_ENV !== 'production') {
+    app.post("/api/dev/paypal/sync-plans", async (req, res) => {
+      try {
+        const adminClient = getAdminClient();
+        const { isPayPalSandbox, logPayPalMode } = await import('../lib/handlers/checkout/paypal/config.js');
+        const { 
+          createPayPalProduct, 
+          createPayPalBillingPlan, 
+          getPayPalProduct, 
+          getPayPalBillingPlan 
+        } = await import('../lib/handlers/checkout/paypal/subscriptions-api.js');
+        
+        logPayPalMode("dev-sync-plans");
+        console.log(`[DEV PayPal sync] Starting in ${isPayPalSandbox ? 'SANDBOX' : 'PRODUCTION'} mode`);
+
+        const { data: plans, error: plansError } = await adminClient
+          .from("plans")
+          .select("id, name, slug, monthly_amount, annual_amount, is_active, paypal_product_id, paypal_plan_monthly_id, paypal_plan_annual_id, paypal_product_id_sandbox, paypal_plan_monthly_id_sandbox, paypal_plan_annual_id_sandbox")
+          .eq("is_active", true)
+          .neq("slug", "free");
+
+        if (plansError) {
+          console.error(`[DEV PayPal sync] Error fetching plans:`, plansError);
+          return res.status(500).json({ error: plansError.message });
+        }
+
+        if (!plans?.length) {
+          return res.status(404).json({ error: "No active paid plans found" });
+        }
+
+        const results = [];
+
+        for (const plan of plans) {
+          let productId = isPayPalSandbox ? plan.paypal_product_id_sandbox : plan.paypal_product_id;
+          let monthlyPlanId = isPayPalSandbox ? plan.paypal_plan_monthly_id_sandbox : plan.paypal_plan_monthly_id;
+          let annualPlanId = isPayPalSandbox ? plan.paypal_plan_annual_id_sandbox : plan.paypal_plan_annual_id;
+          let created = false;
+
+          // Check/create product
+          if (productId) {
+            const existing = await getPayPalProduct(productId);
+            if (!existing.success) {
+              console.log(`[DEV PayPal sync] Product ${productId} not found, creating new`);
+              productId = null;
+            }
+          }
+
+          if (!productId) {
+            const result = await createPayPalProduct({
+              name: `Seencel ${plan.name}`,
+              description: `Subscription plan for Seencel ${plan.name}`,
+              type: "SERVICE",
+              category: "SOFTWARE",
+            });
+            if (result.success) {
+              productId = result.productId;
+              created = true;
+              console.log(`[DEV PayPal sync] Created product ${productId} for ${plan.slug}`);
+            } else {
+              console.error(`[DEV PayPal sync] Failed to create product:`, result.error);
+              results.push({ planSlug: plan.slug, error: result.error });
+              continue;
+            }
+          }
+
+          // Check/create monthly plan
+          if (monthlyPlanId) {
+            const existing = await getPayPalBillingPlan(monthlyPlanId);
+            if (!existing.success) {
+              console.log(`[DEV PayPal sync] Monthly plan ${monthlyPlanId} not found, creating new`);
+              monthlyPlanId = null;
+            }
+          }
+
+          if (!monthlyPlanId && plan.monthly_amount && Number(plan.monthly_amount) > 0) {
+            const result = await createPayPalBillingPlan({
+              productId: productId!,
+              name: `${plan.name} - Monthly`,
+              description: `Monthly subscription to Seencel ${plan.name} plan`,
+              billingCycles: [{
+                frequency: { interval_unit: "MONTH", interval_count: 1 },
+                tenure_type: "REGULAR",
+                sequence: 1,
+                total_cycles: 0,
+                pricing_scheme: { fixed_price: { value: String(plan.monthly_amount), currency_code: "USD" } },
+              }],
+              paymentPreferences: { auto_bill_outstanding: true, setup_fee_failure_action: "CONTINUE", payment_failure_threshold: 3 },
+            });
+            if (result.success) {
+              monthlyPlanId = result.planId;
+              created = true;
+              console.log(`[DEV PayPal sync] Created monthly plan ${monthlyPlanId} for ${plan.slug}`);
+            }
+          }
+
+          // Check/create annual plan
+          if (annualPlanId) {
+            const existing = await getPayPalBillingPlan(annualPlanId);
+            if (!existing.success) {
+              console.log(`[DEV PayPal sync] Annual plan ${annualPlanId} not found, creating new`);
+              annualPlanId = null;
+            }
+          }
+
+          if (!annualPlanId && plan.annual_amount && Number(plan.annual_amount) > 0) {
+            const result = await createPayPalBillingPlan({
+              productId: productId!,
+              name: `${plan.name} - Annual`,
+              description: `Annual subscription to Seencel ${plan.name} plan`,
+              billingCycles: [{
+                frequency: { interval_unit: "YEAR", interval_count: 1 },
+                tenure_type: "REGULAR",
+                sequence: 1,
+                total_cycles: 0,
+                pricing_scheme: { fixed_price: { value: String(plan.annual_amount), currency_code: "USD" } },
+              }],
+              paymentPreferences: { auto_bill_outstanding: true, setup_fee_failure_action: "CONTINUE", payment_failure_threshold: 3 },
+            });
+            if (result.success) {
+              annualPlanId = result.planId;
+              created = true;
+              console.log(`[DEV PayPal sync] Created annual plan ${annualPlanId} for ${plan.slug}`);
+            }
+          }
+
+          // Update DB if created
+          if (created) {
+            const updateData = isPayPalSandbox 
+              ? { paypal_product_id_sandbox: productId, paypal_plan_monthly_id_sandbox: monthlyPlanId, paypal_plan_annual_id_sandbox: annualPlanId }
+              : { paypal_product_id: productId, paypal_plan_monthly_id: monthlyPlanId, paypal_plan_annual_id: annualPlanId };
+
+            await adminClient.from("plans").update(updateData).eq("id", plan.id);
+            console.log(`[DEV PayPal sync] Updated ${plan.slug} with ${isPayPalSandbox ? 'SANDBOX' : 'PRODUCTION'} IDs`);
+          }
+
+          results.push({ planSlug: plan.slug, productId, monthlyPlanId, annualPlanId, created, mode: isPayPalSandbox ? 'sandbox' : 'production' });
+        }
+
+        return res.json({ success: true, mode: isPayPalSandbox ? 'sandbox' : 'production', results });
+      } catch (error: any) {
+        console.error("[DEV PayPal sync] Error:", error);
+        return res.status(500).json({ error: error.message });
+      }
+    });
+  }
+
   // POST /api/dev/mp/sync-plans (DEV ONLY - no auth required for testing)
   if (process.env.NODE_ENV !== 'production') {
     app.post("/api/dev/mp/sync-plans", async (req, res) => {
