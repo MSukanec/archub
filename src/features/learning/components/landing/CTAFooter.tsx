@@ -2,8 +2,8 @@ import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { useMultipleFeatureFlags } from '@/hooks/use-feature-flags';
-import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import { BlockedRestricted } from '@/components/shared/restrictions';
+import { ComingSoonCard } from '@/components/shared/restrictions/guards/ComingSoonCard';
 import type { Course } from '@shared/schema';
 
 interface CTAFooterProps {
@@ -11,11 +11,10 @@ interface CTAFooterProps {
 }
 
 export function CTAFooter({ course }: CTAFooterProps) {
-  const isAdmin = useIsAdmin();
   const { flags: featureFlags, isReady: flagsReady } = useMultipleFeatureFlags(['course_purchases_enabled'], true);
   
   const isCourseDisabled = course.is_active === false;
-  const isPurchasesDisabled = flagsReady && !featureFlags.course_purchases_enabled && !isAdmin;
+  const isPurchasesDisabled = flagsReady && !featureFlags.course_purchases_enabled;
   const isBlocked = isCourseDisabled || isPurchasesDisabled;
   
   return (
@@ -30,18 +29,20 @@ export function CTAFooter({ course }: CTAFooterProps) {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <BlockedRestricted
-              isBlocked={isBlocked}
-              title="Curso no disponible"
-              message="Este curso no está disponible para inscripción en este momento."
-            >
-              <Link href="/register">
-                <Button size="lg" className="px-8 text-lg">
-                  Inscribirme Ahora
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </Link>
-            </BlockedRestricted>
+            <ComingSoonCard status={isPurchasesDisabled ? 'maintenance' : 'available'}>
+              <BlockedRestricted
+                isBlocked={isBlocked}
+                title="Curso no disponible"
+                message="Este curso no está disponible para inscripción en este momento."
+              >
+                <Link href="/register">
+                  <Button size="lg" className="px-8 text-lg" disabled={isBlocked}>
+                    Inscribirme Ahora
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+                </Link>
+              </BlockedRestricted>
+            </ComingSoonCard>
             {course.price && (
               <div className="text-center">
                 <p className="text-3xl font-bold">${course.price}</p>

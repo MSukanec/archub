@@ -4,8 +4,8 @@ import { Progress } from '@/components/ui/progress';
 import { ArrowRight, BookOpen, Eye, Clock, CheckCircle, Lock } from 'lucide-react';
 import { useCurrentUser } from '@/features/users/hooks';
 import { useMultipleFeatureFlags } from '@/hooks/use-feature-flags';
-import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import { BlockedRestricted } from '@/components/shared/restrictions';
+import { ComingSoonCard } from '@/components/shared/restrictions/guards/ComingSoonCard';
 import { 
   useCourseLanding, 
   useCourseEnrollment,
@@ -24,7 +24,6 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
   const { data, isLoading, error } = useCourseLanding(slug);
   const { data: enrollmentData } = useCourseEnrollment(data?.course?.id, userData?.user?.id);
   const { data: progressData } = useCourseProgress(data?.course?.id);
-  const isAdmin = useIsAdmin();
   const { flags: featureFlags, isReady: flagsReady } = useMultipleFeatureFlags(['course_purchases_enabled'], true);
 
   const isEnrolled = enrollmentData?.isEnrolled || false;
@@ -61,7 +60,7 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
   const { course, modules, faqs, stats, clientGallery } = data;
 
   const isCourseDisabled = course.is_active === false;
-  const isPurchasesDisabled = flagsReady && !featureFlags.course_purchases_enabled && !isAdmin;
+  const isPurchasesDisabled = flagsReady && !featureFlags.course_purchases_enabled;
   const isCheckoutBlocked = !isEnrolled && (isCourseDisabled || isPurchasesDisabled);
 
   const handleCTAClick = () => {
@@ -132,6 +131,7 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
             onCTAClick={handleCTAClick}
             ctaButtonText={ctaButtonText}
             isCheckoutBlocked={isCheckoutBlocked}
+            isPurchasesDisabled={isPurchasesDisabled}
           />
         )}
         
@@ -140,6 +140,7 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
             onCTAClick={handleCTAClick}
             ctaButtonText={ctaButtonText}
             isCheckoutBlocked={isCheckoutBlocked}
+            isPurchasesDisabled={isPurchasesDisabled}
           />
         )}
       </div>
@@ -233,9 +234,10 @@ interface PublicCTAFooterProps {
   onCTAClick: () => void;
   ctaButtonText: string;
   isCheckoutBlocked?: boolean;
+  isPurchasesDisabled?: boolean;
 }
 
-function PublicCTAFooter({ course, isEnrolled, onCTAClick, ctaButtonText, isCheckoutBlocked = false }: PublicCTAFooterProps) {
+function PublicCTAFooter({ course, isEnrolled, onCTAClick, ctaButtonText, isCheckoutBlocked = false, isPurchasesDisabled = false }: PublicCTAFooterProps) {
   return (
     <section className="py-20 bg-gradient-to-br from-primary/10 via-primary/5 to-background rounded-lg">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -251,17 +253,19 @@ function PublicCTAFooter({ course, isEnrolled, onCTAClick, ctaButtonText, isChec
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <BlockedRestricted
-              isBlocked={isCheckoutBlocked}
-              title="Curso no disponible"
-              message="Este curso no está disponible para inscripción en este momento."
-            >
-              <Button size="lg" className="px-8 text-lg" onClick={onCTAClick} disabled={isCheckoutBlocked}>
-                {isCheckoutBlocked && !isEnrolled && <Lock className="w-4 h-4 mr-2" />}
-                {ctaButtonText}
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </BlockedRestricted>
+            <ComingSoonCard status={!isEnrolled && isPurchasesDisabled ? 'maintenance' : 'available'}>
+              <BlockedRestricted
+                isBlocked={isCheckoutBlocked}
+                title="Curso no disponible"
+                message="Este curso no está disponible para inscripción en este momento."
+              >
+                <Button size="lg" className="px-8 text-lg" onClick={onCTAClick} disabled={isCheckoutBlocked}>
+                  {isCheckoutBlocked && !isEnrolled && <Lock className="w-4 h-4 mr-2" />}
+                  {ctaButtonText}
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </BlockedRestricted>
+            </ComingSoonCard>
             {course.price && !isEnrolled && (
               <div className="text-center">
                 <p className="text-3xl font-bold">${course.price}</p>
@@ -286,22 +290,25 @@ interface DashboardCTAFooterProps {
   onCTAClick: () => void;
   ctaButtonText: string;
   isCheckoutBlocked?: boolean;
+  isPurchasesDisabled?: boolean;
 }
 
-function DashboardCTAFooter({ onCTAClick, ctaButtonText, isCheckoutBlocked = false }: DashboardCTAFooterProps) {
+function DashboardCTAFooter({ onCTAClick, ctaButtonText, isCheckoutBlocked = false, isPurchasesDisabled = false }: DashboardCTAFooterProps) {
   return (
     <div className="flex justify-center py-8">
-      <BlockedRestricted
-        isBlocked={isCheckoutBlocked}
-        title="Curso no disponible"
-        message="Este curso no está disponible para inscripción en este momento."
-      >
-        <Button size="lg" onClick={onCTAClick} className="gap-2 px-8" disabled={isCheckoutBlocked} data-testid="button-cta-footer">
-          {isCheckoutBlocked && <Lock className="w-4 h-4" />}
-          <Eye className="w-5 h-5" />
-          {ctaButtonText}
-        </Button>
-      </BlockedRestricted>
+      <ComingSoonCard status={isPurchasesDisabled ? 'maintenance' : 'available'}>
+        <BlockedRestricted
+          isBlocked={isCheckoutBlocked}
+          title="Curso no disponible"
+          message="Este curso no está disponible para inscripción en este momento."
+        >
+          <Button size="lg" onClick={onCTAClick} className="gap-2 px-8" disabled={isCheckoutBlocked} data-testid="button-cta-footer">
+            {isCheckoutBlocked && <Lock className="w-4 h-4" />}
+            <Eye className="w-5 h-5" />
+            {ctaButtonText}
+          </Button>
+        </BlockedRestricted>
+      </ComingSoonCard>
     </div>
   );
 }

@@ -6,8 +6,8 @@ import { Progress } from '@/components/ui/progress';
 import { BookOpen, Clock, CheckCircle, MessageCircle, Shield, Lock } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useMultipleFeatureFlags } from '@/hooks/use-feature-flags';
-import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import { BlockedRestricted } from '@/components/shared/restrictions';
+import { ComingSoonCard } from '@/components/shared/restrictions/guards/ComingSoonCard';
 import type { Course } from '@shared/schema';
 import type { CourseStats } from '../../types';
 
@@ -21,12 +21,11 @@ interface CourseStickyCardProps {
 export function CourseStickyCard({ course, stats, isEnrolled = false, progressPercentage = 0 }: CourseStickyCardProps) {
   const user = useAuthStore((state) => state.user);
   const [, navigate] = useLocation();
-  const isAdmin = useIsAdmin();
   const { flags: featureFlags, isReady: flagsReady } = useMultipleFeatureFlags(['course_purchases_enabled'], true);
 
-  // Block checkout if course is disabled OR feature flag is disabled (unless admin)
+  // Block checkout if course is disabled OR feature flag is disabled (FOR EVERYONE, including admins)
   const isCourseDisabled = course.is_active === false;
-  const isPurchasesDisabled = flagsReady && !featureFlags.course_purchases_enabled && !isAdmin;
+  const isPurchasesDisabled = flagsReady && !featureFlags.course_purchases_enabled;
   const isCheckoutBlocked = !isEnrolled && (isCourseDisabled || isPurchasesDisabled);
 
   // Determine button state and action
@@ -46,7 +45,7 @@ export function CourseStickyCard({ course, stats, isEnrolled = false, progressPe
       // User is not logged in - go to register
       navigate('/register');
     }
-  }, [isEnrolled, user, course.slug, navigate, course.is_active]);
+  }, [isEnrolled, user, course.slug, navigate, course.is_active, isPurchasesDisabled]);
 
   // Determine button text and variant
   const buttonText = isEnrolled ? 'CONTINUAR CURSO' : 'INSCRIBIRME';
@@ -132,23 +131,25 @@ export function CourseStickyCard({ course, stats, isEnrolled = false, progressPe
 
         {/* CTA Button - Only ONE button shown at a time */}
         <div className="pt-2">
-          <BlockedRestricted
-            isBlocked={isCheckoutBlocked}
-            title="Curso no disponible"
-            message="Este curso no está disponible para inscripción en este momento."
-          >
-            <Button 
-              size="lg" 
-              variant={buttonVariant}
-              className="w-full text-base font-semibold"
-              onClick={handleCTAClick}
-              disabled={isCheckoutBlocked}
-              data-testid={isEnrolled ? "button-continue" : "button-enroll"}
+          <ComingSoonCard status={!isEnrolled && isPurchasesDisabled ? 'maintenance' : 'available'}>
+            <BlockedRestricted
+              isBlocked={isCheckoutBlocked}
+              title="Curso no disponible"
+              message="Este curso no está disponible para inscripción en este momento."
             >
-              {isCheckoutBlocked && !isEnrolled && <Lock className="w-4 h-4 mr-2" />}
-              {buttonText}
-            </Button>
-          </BlockedRestricted>
+              <Button 
+                size="lg" 
+                variant={buttonVariant}
+                className="w-full text-base font-semibold"
+                onClick={handleCTAClick}
+                disabled={isCheckoutBlocked}
+                data-testid={isEnrolled ? "button-continue" : "button-enroll"}
+              >
+                {isCheckoutBlocked && !isEnrolled && <Lock className="w-4 h-4 mr-2" />}
+                {buttonText}
+              </Button>
+            </BlockedRestricted>
+          </ComingSoonCard>
         </div>
       </CardContent>
     </Card>
