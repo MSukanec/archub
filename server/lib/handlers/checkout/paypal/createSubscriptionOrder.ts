@@ -1,7 +1,6 @@
 import type { Request } from "express";
 import { getAuthenticatedClient } from "../shared/auth.js";
 import { verifyAdminRoleForOrganization } from "../shared/permissions.js";
-import { getUserData } from "../shared/user.js";
 import { buildURLContext } from "../shared/urls.js";
 import { createPayPalOrder } from "./api.js";
 import { createSubscription as createPayPalSubscription } from "./subscriptions-api.js";
@@ -57,11 +56,32 @@ export async function createSubscriptionOrder(
       };
     }
 
-    const user_id = user.id;
+    const auth_id = user.id;
 
+    // CRITICAL: Look up actual user ID from auth_id in users table
+    // Use admin client to bypass RLS restrictions on users table
+    const adminClient = getAdminClient();
+    const { data: userRecord, error: userLookupError } = await adminClient
+      .from('users')
+      .select('id')
+      .eq('auth_id', auth_id)
+      .single();
+    
+    if (userLookupError || !userRecord) {
+      console.error("[PayPal create-subscription-order] User lookup failed:", userLookupError);
+      return {
+        success: false,
+        error: "User not found",
+        status: 404,
+      };
+    }
+
+    const user_id = userRecord.id;
+
+    // verifyAdminRoleForOrganization expects auth_id
     const adminCheck = await verifyAdminRoleForOrganization(
       supabase,
-      user_id,
+      auth_id,
       organization_id
     );
 
@@ -120,16 +140,13 @@ export async function createSubscriptionOrder(
     if (coupon_code) {
       console.log('[PayPal create-subscription-order] Validating coupon:', coupon_code);
       
-      // Get internal user ID for per-user limit validation
-      const userData = await getUserData(supabase, user_id);
-      
       const couponResult = await validateSubscriptionCoupon({
         supabase,
         couponCode: coupon_code,
         planId: plan.id,
         price: basePrice,
         currency: 'USD',
-        userId: userData.id,
+        userId: user_id, // user_id is already the internal public.users.id
       });
 
       if (!couponResult.valid) {
@@ -145,19 +162,16 @@ export async function createSubscriptionOrder(
       if (couponResult.isFree) {
         console.log('[PayPal create-subscription-order] 100% discount coupon - creating gifted subscription');
         
-        const userData = await getUserData(supabase, user_id);
-        const adminClient = getAdminClient();
-        
         const giftedResult = await createGiftedSubscription({
           supabase: adminClient,
-          authId: user_id,
+          authId: auth_id, // auth_id for Supabase Auth reference
           organizationId: organization_id,
           planId: plan.id,
           planSlug: plan_slug,
           billingPeriod: billing_period,
           couponId: couponResult.couponId!,
           couponCode: couponResult.couponCode!,
-          userId: userData.id,
+          userId: user_id, // user_id is the internal public.users.id
           currency: 'USD',
           payerEmail: user.email ?? undefined,
         });
