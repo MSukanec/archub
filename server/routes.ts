@@ -190,7 +190,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ blocked: false, alerts: [] });
       }
 
-      const blockingAlerts = (alerts || []).filter((alert) => {
+      const relevantAlerts = (alerts || []).filter((alert) => {
         const matchesType = rules.alertTypes.some(
           (type) => alert.alert_type === type || alert.alert_type.includes(type.replace('system.', ''))
         );
@@ -203,10 +203,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return matchesType && matchesSeverity;
       });
 
+      // OpsCenter is ADVISORY ONLY - never blocks flows, just reports alerts for visibility
       return res.json({
         flow: flowKey,
-        blocked: blockingAlerts.length > 0,
-        alerts: blockingAlerts,
+        blocked: false,
+        alerts: relevantAlerts,
       });
     } catch (e: any) {
       return res.json({ blocked: false, error: e.message });

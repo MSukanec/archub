@@ -65,7 +65,7 @@ CRITICAL PERFORMANCE REQUIREMENT: System must be INSTANTANEOUS. All cache invali
 - **Internationalization (i18n) System**: Lightweight locale system in `src/lib/i18n/` with `I18nProvider`, `useI18n` hook, and typed translations.
 - **User Acquisition Tracking**: Captures UTM parameters at app load, stored in localStorage, and integrated with Supabase Auth for signup.
 - **Table Component Architecture**: Modular table system in `src/components/shared/table/` with separate components and hooks for sorting, filtering, pagination, and selection.
-- **Operations Center (Admin Ops)**: Enterprise-grade monitoring and incident management at `/admin/ops`.
+- **Operations Center (Admin Ops)**: Enterprise-grade monitoring and incident management at `/admin/ops`. ADVISORY ONLY - never blocks user flows, only reports alerts for visibility.
 - **Badge Semantic Architecture**: All badges use a semantic color system.
 - **Data Health Micro Rules Architecture**: Modular validation rule system for atomic, reusable checks.
 - **Save Engine**: Enterprise-grade saving system in `/core/save-engine/` with optimistic updates, automatic rollback, and debounced auto-save (delay ≤500ms).
