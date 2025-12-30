@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { supabaseAdmin } from "../../lib/supabase/admin.js";
 import { verifyAdminUser, HttpError } from "../../lib/auth/helpers.js";
+import { refreshPayPalModeCache } from "../../lib/handlers/checkout/paypal/config.js";
 import crypto from "crypto";
 import { 
   executeOpsRepairAction as executeRepairActionService,
@@ -1002,6 +1003,18 @@ export async function updateFeatureFlag(req: Request, res: Response) {
       return res.status(400).json({ error: "value must be a boolean" });
     }
 
+    // Fetch the flag to get its key
+    const { data: existingFlag, error: fetchError } = await supabaseAdmin
+      .from("feature_flags")
+      .select("key")
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !existingFlag) {
+      console.error("[OpsCenter] Error fetching flag:", fetchError);
+      return res.status(404).json({ error: "Flag not found" });
+    }
+
     const { data: flag, error } = await supabaseAdmin
       .from("feature_flags")
       .update({ value, updated_at: new Date().toISOString() })
@@ -1012,6 +1025,12 @@ export async function updateFeatureFlag(req: Request, res: Response) {
     if (error) {
       console.error("[OpsCenter] Error updating feature flag:", error);
       return res.status(500).json({ error: error.message });
+    }
+
+    // Refresh PayPal cache if updating paypal_test_mode flag
+    if (existingFlag.key === "paypal_test_mode") {
+      console.log("[OpsCenter] Refreshing PayPal test mode cache after flag update");
+      refreshPayPalModeCache();
     }
 
     return res.json(flag);

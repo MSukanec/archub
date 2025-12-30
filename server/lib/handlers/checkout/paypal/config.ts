@@ -18,7 +18,7 @@ async function fetchPayPalTestModeFromDB(): Promise<boolean> {
     
     const { data, error } = await supabase
       .from("feature_flags")
-      .select("is_enabled")
+      .select("value")
       .eq("key", "paypal_test_mode")
       .maybeSingle();
 
@@ -27,7 +27,7 @@ async function fetchPayPalTestModeFromDB(): Promise<boolean> {
       return false;
     }
 
-    return data?.is_enabled === true;
+    return data?.value === true;
   } catch (e) {
     console.error("[PayPal config] Exception fetching feature flag:", e);
     return false;
