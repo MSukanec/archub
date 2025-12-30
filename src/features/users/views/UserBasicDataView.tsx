@@ -207,18 +207,18 @@ export function UserBasicDataView() {
 
       // Compress image
       const compressedFile = await imageCompression(file, {
-        maxSizeMB: 1,
+        maxSizeMB: 5,
         maxWidthOrHeight: 1024,
         useWebWorker: true,
       });
 
-      // Upload to storage
-      const fileName = `${userData?.user?.id}/avatar-${Date.now()}.webp`;
+      // Upload to storage (social-assets bucket for public user avatars)
+      const fileName = `avatars/${userData?.user?.id}/avatar-${Date.now()}.webp`;
       const { error: uploadError } = await supabase
         .storage
-        .from('media_files')
+        .from('social-assets')
         .upload(fileName, compressedFile, {
-          upsert: false,
+          upsert: true,
           contentType: 'image/webp',
         });
 
@@ -235,7 +235,7 @@ export function UserBasicDataView() {
       // Get public URL
       const { data } = supabase
         .storage
-        .from('media_files')
+        .from('social-assets')
         .getPublicUrl(fileName);
 
       if (data?.publicUrl) {
