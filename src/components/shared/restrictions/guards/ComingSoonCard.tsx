@@ -62,10 +62,8 @@ export function ComingSoonCard({
       </div>
       {showBadge && status !== 'available' && (
         <Badge
-          className={cn(
-            "absolute top-3 right-3 z-10 text-xs px-2 py-1 shadow-lg pointer-events-none",
-            config.badgeClass
-          )}
+          className="absolute top-3 right-3 z-10 text-xs px-2 py-1 shadow-lg pointer-events-none"
+          style={status === 'maintenance' ? { backgroundColor: '#f97316', color: '#ffffff' } : undefined}
           data-testid={`badge-${status}`}
         >
           <Icon className="w-3 h-3 mr-1" />
