@@ -99,15 +99,26 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
         preferenceTable = "mp_course_preferences";
         const { data: prefData, error: prefError } = await supabase
           .from("mp_course_preferences")
-          .select("*, courses!inner(id, slug)")
+          .select("*")
           .eq("id", externalRef)
           .maybeSingle();
         
         if (prefData && !prefError) {
+          // Get course slug by joining with courses table separately
+          let courseSlug = null;
+          if (prefData.course_id) {
+            const { data: courseData } = await supabase
+              .from("courses")
+              .select("slug")
+              .eq("id", prefData.course_id)
+              .maybeSingle();
+            courseSlug = courseData?.slug || null;
+          }
+          
           fromDb = {
             user_id: prefData.user_id,
-            course_id: prefData.courses?.id,
-            course_slug: prefData.courses?.slug,
+            course_id: prefData.course_id,
+            course_slug: courseSlug,
             months: prefData.access_months,
             coupon_code: prefData.coupon_code,
             coupon_id: prefData.coupon_id,
