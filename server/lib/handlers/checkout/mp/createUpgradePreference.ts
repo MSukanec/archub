@@ -53,10 +53,24 @@ export async function createUpgradePreference(req: Request): Promise<CreateUpgra
     return { success: false, error: "Autenticación fallida", status: 401 };
   }
 
-  const user_id = user.id;
+  // Look up actual user ID from auth_id in users table (same pattern as PayPal)
+  const { data: userRecord, error: userLookupError } = await supabase
+    .from('users')
+    .select('id')
+    .eq('auth_id', user.id)
+    .single();
+  
+  if (userLookupError || !userRecord) {
+    console.error("[MP create-upgrade-preference] User lookup failed:", userLookupError);
+    return { success: false, error: "Usuario no encontrado", status: 404 };
+  }
+
+  const user_id = userRecord.id;
+  const auth_id = user.id;
 
   try {
-    const adminCheck = await verifyAdminRoleForOrganization(supabase, user_id, organization_id);
+    // verifyAdminRoleForOrganization expects auth_id
+    const adminCheck = await verifyAdminRoleForOrganization(supabase, auth_id, organization_id);
     
     if (!adminCheck.success) {
       return { 

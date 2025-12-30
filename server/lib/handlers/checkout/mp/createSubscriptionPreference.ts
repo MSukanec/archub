@@ -52,11 +52,25 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
     return { success: false, error: "Authentication failed", status: 401 };
   }
 
-  const user_id = user.id;
+  // Look up actual user ID from auth_id in users table (same pattern as PayPal)
+  const { data: userRecord, error: userLookupError } = await supabase
+    .from('users')
+    .select('id')
+    .eq('auth_id', user.id)
+    .single();
+  
+  if (userLookupError || !userRecord) {
+    console.error("[MP create-subscription-preference] User lookup failed:", userLookupError);
+    return { success: false, error: "Usuario no encontrado", status: 404 };
+  }
+
+  const user_id = userRecord.id;
+  const auth_id = user.id;
 
   try {
     // 5. CRÍTICO: Verificar que el usuario pertenece a la organización y es admin
-    const adminCheck = await verifyAdminRoleForOrganization(supabase, user_id, organization_id);
+    // verifyAdminRoleForOrganization expects auth_id
+    const adminCheck = await verifyAdminRoleForOrganization(supabase, auth_id, organization_id);
     
     if (!adminCheck.success) {
       return { 

@@ -59,10 +59,24 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
     return { success: false, error: "Autenticación fallida", status: 401 };
   }
 
-  const user_id = user.id;
+  // Look up actual user ID from auth_id in users table (same pattern as PayPal and MP courses)
+  const { data: userRecord, error: userLookupError } = await supabase
+    .from('users')
+    .select('id')
+    .eq('auth_id', user.id)
+    .single();
+  
+  if (userLookupError || !userRecord) {
+    console.error("[MP create-recurring-subscription] User lookup failed:", userLookupError);
+    return { success: false, error: "Usuario no encontrado", status: 404 };
+  }
+
+  const user_id = userRecord.id;
+  const auth_id = user.id; // Keep auth_id for permission checks that need it
 
   try {
-    const adminCheck = await verifyAdminRoleForOrganization(supabase, user_id, organization_id);
+    // verifyAdminRoleForOrganization expects auth_id (it does internal lookup)
+    const adminCheck = await verifyAdminRoleForOrganization(supabase, auth_id, organization_id);
     
     if (!adminCheck.success) {
       return { 
