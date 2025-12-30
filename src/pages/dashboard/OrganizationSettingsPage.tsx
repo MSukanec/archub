@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { 
   OrganizationMembersListView,
@@ -21,17 +21,35 @@ import { FEATURE_IMAGES } from '@/constants/images';
 
 type TabId = 'members' | 'permissions' | 'activity' | 'billing' | 'finances' | 'pdf';
 
+function getTabFromPath(pathname: string): TabId {
+  if (pathname.includes('/billing')) return 'billing';
+  if (pathname.includes('/permissions')) return 'permissions';
+  if (pathname.includes('/activity')) return 'activity';
+  if (pathname.includes('/finances')) return 'finances';
+  if (pathname.includes('/pdf')) return 'pdf';
+  return 'members';
+}
+
 export function OrganizationSettingsPage() {
   const { setSidebarLevel } = useNavigationStore();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
-  const [, navigate] = useLocation();
-  const [activeTab, setActiveTab] = useState<TabId>('members');
+  const [location, navigate] = useLocation();
+  
+  const initialTab = useMemo(() => getTabFromPath(location), []);
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
   const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>(undefined);
 
   useEffect(() => {
     setSidebarLevel('organization');
   }, [setSidebarLevel]);
+
+  useEffect(() => {
+    const tabFromPath = getTabFromPath(location);
+    if (tabFromPath !== activeTab) {
+      setActiveTab(tabFromPath);
+    }
+  }, [location]);
 
   const organizationId = userData?.organization?.id;
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
