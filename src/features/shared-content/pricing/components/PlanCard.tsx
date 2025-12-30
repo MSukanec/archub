@@ -79,6 +79,7 @@ export function PlanCard({
   const isBlocked = plan.is_active === false;
 
   const getButtonColor = () => {
+    if (isMaintenanceBlocked) return '#f97316'; // Naranja cuando en mantenimiento
     if (isCurrentPlan) return undefined;
     if (isFree) return '#84cc16';
     if (plan.name.toLowerCase() === 'pro') return '#0047AB';
@@ -229,7 +230,7 @@ export function PlanCard({
             disabled={isCurrentPlan || isMaintenanceBlocked}
             data-testid={`button-select-plan-${plan.name.toLowerCase()}`}
           >
-            {isMaintenanceBlocked ? 'En mantenimiento' : getButtonText()}
+            {getButtonText()}
           </Button>
         </BlockedRestricted>
 
