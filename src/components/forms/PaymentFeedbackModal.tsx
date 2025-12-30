@@ -5,10 +5,14 @@ import { Button } from "@/components/ui/button"
 
 interface PaymentFeedbackModalProps {
   modalData?: {
-    type: 'success' | 'cancelled'
+    paymentType?: 'subscription' | 'course' | 'seat'
+    paymentStatus?: 'success' | 'cancelled'
+    // Legacy support
+    type?: 'success' | 'cancelled'
     title?: string
     description?: string
     planName?: string
+    courseName?: string
     isFounder?: boolean
   }
   onClose: () => void
@@ -17,17 +21,43 @@ interface PaymentFeedbackModalProps {
 export default function PaymentFeedbackModal({ modalData, onClose }: PaymentFeedbackModalProps) {
   const { closeModal } = useGlobalModalStore()
   
-  const type = modalData?.type || 'success'
-  const isSuccess = type === 'success'
+  // Support both new and legacy props
+  const paymentStatus = modalData?.paymentStatus || modalData?.type || 'success'
+  const paymentType = modalData?.paymentType || 'subscription'
+  const isSuccess = paymentStatus === 'success'
   const isFounder = modalData?.isFounder || false
   
-  const defaultTitle = isSuccess 
-    ? '¡Suscripción Activada!' 
-    : 'Pago Cancelado'
-  
-  const defaultDescription = isSuccess
-    ? `Tu suscripción${modalData?.planName ? ` ${modalData.planName}` : ''} ha sido activada correctamente. Ya podés disfrutar de todas las funcionalidades.`
-    : 'El proceso de pago fue cancelado. No se realizó ningún cargo a tu cuenta.'
+  // Generate title and description based on payment type
+  const getTitleAndDescription = () => {
+    if (!isSuccess) {
+      return {
+        title: 'Pago Cancelado',
+        description: 'El proceso de pago fue cancelado. No se realizó ningún cargo a tu cuenta.'
+      }
+    }
+
+    if (paymentType === 'course') {
+      return {
+        title: '¡Curso Adquirido!',
+        description: `Felicidades, ya tenés acceso al curso${modalData?.courseName ? ` "${modalData.courseName}"` : ''}. Podés comenzar a aprender cuando quieras.`
+      }
+    }
+
+    if (paymentType === 'seat') {
+      return {
+        title: '¡Miembro Agregado!',
+        description: 'El nuevo miembro ha sido invitado correctamente. Ya puede acceder a la organización.'
+      }
+    }
+
+    // Default for 'subscription'
+    return {
+      title: '¡Suscripción Activada!',
+      description: `Tu suscripción${modalData?.planName ? ` ${modalData.planName}` : ''} ha sido activada correctamente. Ya podés disfrutar de todas las funcionalidades.`
+    }
+  }
+
+  const { title: defaultTitle, description: defaultDescription } = getTitleAndDescription()
 
   const title = modalData?.title || defaultTitle
   const description = modalData?.description || defaultDescription

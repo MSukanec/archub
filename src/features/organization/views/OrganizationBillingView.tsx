@@ -106,13 +106,15 @@ export function OrganizationBillingView() {
         });
         
         openModal('payment-feedback', {
-          type: 'success',
+          paymentType: 'subscription',
+          paymentStatus: 'success',
           planName: userData?.organization?.plan?.name,
           isFounder: userData?.organization?.settings?.is_founder || false,
         });
       } else if (paymentStatus === 'cancelled') {
         openModal('payment-feedback', {
-          type: 'cancelled',
+          paymentType: 'subscription',
+          paymentStatus: 'cancelled',
         });
       }
     }

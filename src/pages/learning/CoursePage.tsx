@@ -4,6 +4,7 @@ import { BookOpen, ChevronLeft, ChevronRight, CheckCircle, Lock } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/features/users/hooks';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { useGlobalModalStore } from '@/components/modal';
 import { useCourseOverview, useCourseEnrollment, useLastLessonInProgress, useCoursePlayerStore } from '@/features/learning';
 
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
@@ -19,6 +20,7 @@ export default function CourseView() {
   const { id } = useParams<{ id: string }>();
   const [location, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
+  const { openModal } = useGlobalModalStore();
   
   // Get store state
   const storeActiveTab = useCoursePlayerStore(s => s.activeTab);
@@ -101,8 +103,15 @@ export default function CourseView() {
       // Clean URL parameter
       const newUrl = window.location.pathname + (window.location.search.replace(/[?&]payment=success/, '').replace(/^\?$/, '') || '');
       window.history.replaceState({}, '', newUrl);
+      
+      // Show payment success modal for course purchase
+      openModal('payment-feedback', {
+        paymentType: 'course',
+        paymentStatus: 'success',
+        courseName: course?.title,
+      });
     }
-  }, [paymentParam, course?.id, userData?.user?.id, refetchEnrollment]);
+  }, [paymentParam, course?.id, userData?.user?.id, refetchEnrollment, openModal]);
 
   const isLoading = courseLoading || enrollmentLoading;
 
