@@ -1,19 +1,16 @@
-// FEATURE FLAG LOGIC: If _TEST variables exist, we're in TEST mode
-// This allows the feature flag to control which variables are active
-const USE_MP_TEST = !!(process.env.MP_MODE_TEST || process.env.MP_ACCESS_TOKEN_TEST);
+// Lee directo las variables de producción configuradas
+export const MP_MODE = process.env.MP_MODE!;
+export const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN!;
 
-export const isTestMode = USE_MP_TEST;
-
-// Read the appropriate variables based on whether we're in test mode
-const MP_MODE = USE_MP_TEST 
-  ? process.env.MP_MODE_TEST! 
-  : process.env.MP_MODE!;
-
-export const MP_ACCESS_TOKEN = USE_MP_TEST 
-  ? process.env.MP_ACCESS_TOKEN_TEST! 
-  : process.env.MP_ACCESS_TOKEN!;
+// Detecta si estamos en test mirando el token (si empieza con TEST- es test)
+export const isTestMode = MP_ACCESS_TOKEN?.startsWith("TEST-") || false;
 
 export const MP_WEBHOOK_SECRET = process.env.MP_WEBHOOK_SECRET || "";
+
+// Valida que las variables requeridas existan
+if (!MP_MODE || !MP_ACCESS_TOKEN) {
+  console.warn(`[MercadoPago] WARNING: MP_MODE or MP_ACCESS_TOKEN not configured`);
+}
 
 export function validateMPToken(): { valid: true } | { valid: false; error: string } {
   const isValidToken = MP_ACCESS_TOKEN && 
@@ -27,9 +24,6 @@ export function validateMPToken(): { valid: true } | { valid: false; error: stri
 }
 
 export function logMPMode(context: string): void {
-  if (isTestMode) {
-    console.log(`[MercadoPago] ${context} - MODE: TEST (via MP_MODE_TEST variables)`);
-  } else {
-    console.log(`[MercadoPago] ${context} - MODE: PRODUCTION (via MP_MODE variables)`);
-  }
+  const mode = isTestMode ? "TEST" : "PRODUCTION";
+  console.log(`[MercadoPago] ${context} - MODE: ${mode}`);
 }
