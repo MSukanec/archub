@@ -14,7 +14,7 @@ export default function MPSeatSubscriptionSuccess() {
 
     if (!preferenceId && !preapprovalId) {
       setError('Parámetros de pago no encontrados');
-      setTimeout(() => setLocation('/organization/members'), 3000);
+      setTimeout(() => setLocation('/organization/billing'), 3000);
       return;
     }
 

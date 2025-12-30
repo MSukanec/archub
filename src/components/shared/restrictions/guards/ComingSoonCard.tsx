@@ -27,7 +27,7 @@ const statusConfig = {
   maintenance: {
     icon: Clock,
     label: "En mantenimiento",
-    badgeClass: "bg-amber-500 text-white border-0",
+    badgeClass: "bg-orange-500 text-white border-0",
     isBlocking: true,
   },
 } as const;
