@@ -223,7 +223,7 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
       : `Suscripción ${billing_period === 'monthly' ? 'mensual' : 'anual'} al plan ${plan.name}`;
 
     // 8. Obtener datos del usuario
-    const userData = await getUserData(supabase, user_id);
+    const userData = await getUserData(supabase, auth_id);
 
     // 9. Validar token
     const tokenValidation = validateMPToken();

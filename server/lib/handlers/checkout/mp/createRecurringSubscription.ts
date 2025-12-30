@@ -158,7 +158,7 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
       const priceARS = Number(priceAmountUSD) * arsRate;
       
       // Get internal user ID for per-user limit validation
-      const userData = await getUserData(supabase, user_id);
+      const userData = await getUserData(supabase, auth_id);
       
       const couponResult = await validateSubscriptionCoupon({
         supabase,
@@ -182,12 +182,12 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
       if (couponResult.isFree) {
         console.log('[MP create-recurring-subscription] 100% discount coupon - creating gifted subscription');
         
-        const userData = await getUserData(supabase, user_id);
+        const userData = await getUserData(supabase, auth_id);
         const adminClient = getAdminClient();
         
         const giftedResult = await createGiftedSubscription({
           supabase: adminClient,
-          authId: user_id,
+          authId: auth_id, // Must be auth_id, not user_id
           organizationId: organization_id,
           planId: plan.id,
           planSlug: plan_slug,
@@ -307,7 +307,7 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
       transactionAmount = 1;
     }
 
-    const userData = await getUserData(supabase, user_id);
+    const userData = await getUserData(supabase, auth_id);
 
     // Use client-provided payer_email if available, otherwise fall back to user profile email
     const payerEmail = clientPayerEmail?.trim() || userData.email;

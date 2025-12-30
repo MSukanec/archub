@@ -56,6 +56,7 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
   }
 
   const user_id = userRecord.id;
+  const auth_id = user.id; // Keep auth_id for functions that need it (like getUserData)
 
   try {
     // 5. Obtener curso y precio en USD
@@ -151,8 +152,8 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
     const productDescription = course.short_description || course.title;
     const accessMonths = months;
 
-    // 8. Obtener datos del usuario
-    const userData = await getUserData(supabase, user_id);
+    // 8. Obtener datos del usuario (getUserData expects auth_id)
+    const userData = await getUserData(supabase, auth_id);
 
     // 9. Validar token
     const tokenValidation = validateMPToken();

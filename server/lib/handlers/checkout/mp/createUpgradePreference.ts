@@ -184,7 +184,7 @@ export async function createUpgradePreference(req: Request): Promise<CreateUpgra
     if (prorationAmountARS < 1) prorationAmountARS = 1;
 
     // Note: adminClient already declared above for duplicate check
-    const userData = await getUserData(supabase, user_id);
+    const userData = await getUserData(supabase, auth_id);
     const payerEmail = clientPayerEmail?.trim() || userData.email;
     
     if (!payerEmail) {

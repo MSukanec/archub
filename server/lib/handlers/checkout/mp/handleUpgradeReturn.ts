@@ -75,25 +75,43 @@ export async function handleUpgradeReturn(req: Request): Promise<HandleUpgradeRe
     return { success: false, error: "Datos incompletos en la preferencia" };
   }
 
-  // user_id from mp_subscription_preferences is the auth_id (from supabase.auth.getUser())
-  // We need to convert it to public.users.id
+  // RETROCOMPATIBILITY: user_id in mp_subscription_preferences can be either:
+  // - NEW records (after fix): public.users.id
+  // - OLD records (legacy): auth.users.id (auth_id)
+  // We try both lookups to handle both cases
   let publicUserId: string | null = null;
+  let authId: string | null = null;
+  
   if (user_id) {
-    console.log('[MP upgrade-return] Converting auth_id to user_id:', { auth_id: user_id });
-    const { data: userProfile, error: profileError } = await supabase
+    console.log('[MP upgrade-return] Resolving user_id (could be public.users.id or auth_id):', { user_id });
+    
+    // First, try to find by id (new records)
+    const { data: userById } = await supabase
       .from("users")
-      .select("id")
-      .eq("auth_id", user_id)
+      .select("id, auth_id")
+      .eq("id", user_id)
       .maybeSingle();
     
-    if (profileError || !userProfile) {
-      console.error('[MP upgrade-return] ❌ Failed to resolve auth_id to user_id:', {
-        auth_id: user_id,
-        error: profileError
-      });
+    if (userById) {
+      // New record: user_id is public.users.id
+      publicUserId = userById.id;
+      authId = userById.auth_id;
+      console.log('[MP upgrade-return] ✅ Resolved as public.users.id:', { publicUserId, authId });
     } else {
-      publicUserId = userProfile.id;
-      console.log('[MP upgrade-return] ✅ Resolved user_id:', { publicUserId });
+      // Fallback: try auth_id lookup (legacy records)
+      const { data: userByAuth } = await supabase
+        .from("users")
+        .select("id, auth_id")
+        .eq("auth_id", user_id)
+        .maybeSingle();
+      
+      if (userByAuth) {
+        publicUserId = userByAuth.id;
+        authId = userByAuth.auth_id;
+        console.log('[MP upgrade-return] ✅ Resolved as legacy auth_id:', { publicUserId, authId });
+      } else {
+        console.error('[MP upgrade-return] ❌ Failed to resolve user_id:', { user_id });
+      }
     }
   }
 
@@ -186,8 +204,8 @@ export async function handleUpgradeReturn(req: Request): Promise<HandleUpgradeRe
   });
 
   let userEmail: string | null = null;
-  if (user_id) {
-    const userData = await getUserData(supabase, user_id);
+  if (authId) {
+    const userData = await getUserData(supabase, authId);
     userEmail = userData.email;
   }
 
