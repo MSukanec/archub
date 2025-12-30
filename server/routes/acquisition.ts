@@ -23,11 +23,22 @@ export function registerAcquisitionRoutes(app: Express, deps: RouteDeps) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
 
+      // Get the actual user_id from the users table (not the auth_id)
+      const { data: userData, error: userDataError } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .single();
+
+      if (userDataError || !userData) {
+        return res.status(401).json({ error: 'User not found' });
+      }
+
       const { utm_source, utm_medium, utm_campaign, utm_content, landing_page, referrer } = req.body;
 
-      // Llamar a la función SQL para insertar el registro
+      // Call the SQL function to insert the acquisition record
       const { data, error } = await authenticatedSupabase.rpc('step_create_user_acquisition', {
-        p_user_id: user.id,
+        p_user_id: userData.id,
         p_raw_meta: {
           utm_source: utm_source || null,
           utm_medium: utm_medium || null,
