@@ -1,6 +1,8 @@
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import { useMultipleFeatureFlags } from '@/hooks/use-feature-flags';
+import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import { BlockedRestricted } from '@/components/shared/restrictions';
 import type { Course } from '@shared/schema';
 
@@ -9,7 +11,12 @@ interface CTAFooterProps {
 }
 
 export function CTAFooter({ course }: CTAFooterProps) {
-  const isBlocked = course.is_active === false;
+  const isAdmin = useIsAdmin();
+  const { flags: featureFlags, isReady: flagsReady } = useMultipleFeatureFlags(['course_purchases_enabled'], true);
+  
+  const isCourseDisabled = course.is_active === false;
+  const isPurchasesDisabled = flagsReady && !featureFlags.course_purchases_enabled && !isAdmin;
+  const isBlocked = isCourseDisabled || isPurchasesDisabled;
   
   return (
     <section className="py-20 bg-gradient-to-br from-primary/10 via-primary/5 to-background">

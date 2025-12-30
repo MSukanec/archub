@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ArrowRight, BookOpen, Eye, Clock, CheckCircle, Lock } from 'lucide-react';
 import { useCurrentUser } from '@/features/users/hooks';
+import { useMultipleFeatureFlags } from '@/hooks/use-feature-flags';
+import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import { BlockedRestricted } from '@/components/shared/restrictions';
 import { 
   useCourseLanding, 
@@ -22,6 +24,8 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
   const { data, isLoading, error } = useCourseLanding(slug);
   const { data: enrollmentData } = useCourseEnrollment(data?.course?.id, userData?.user?.id);
   const { data: progressData } = useCourseProgress(data?.course?.id);
+  const isAdmin = useIsAdmin();
+  const { flags: featureFlags, isReady: flagsReady } = useMultipleFeatureFlags(['course_purchases_enabled'], true);
 
   const isEnrolled = enrollmentData?.isEnrolled || false;
   const progressPercentage = (() => {
@@ -56,11 +60,13 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
 
   const { course, modules, faqs, stats, clientGallery } = data;
 
-  const isCheckoutBlocked = !isEnrolled && course.is_active === false;
+  const isCourseDisabled = course.is_active === false;
+  const isPurchasesDisabled = flagsReady && !featureFlags.course_purchases_enabled && !isAdmin;
+  const isCheckoutBlocked = !isEnrolled && (isCourseDisabled || isPurchasesDisabled);
 
   const handleCTAClick = () => {
-    // Block checkout if course is disabled
-    if (!isEnrolled && course.is_active === false) {
+    // Block checkout if course is disabled or purchases disabled
+    if (!isEnrolled && (course.is_active === false || isPurchasesDisabled)) {
       return;
     }
     

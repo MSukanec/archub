@@ -5,6 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { BookOpen, Clock, CheckCircle, MessageCircle, Shield, Lock } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
+import { useMultipleFeatureFlags } from '@/hooks/use-feature-flags';
+import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import { BlockedRestricted } from '@/components/shared/restrictions';
 import type { Course } from '@shared/schema';
 import type { CourseStats } from '../../types';
@@ -19,14 +21,18 @@ interface CourseStickyCardProps {
 export function CourseStickyCard({ course, stats, isEnrolled = false, progressPercentage = 0 }: CourseStickyCardProps) {
   const user = useAuthStore((state) => state.user);
   const [, navigate] = useLocation();
+  const isAdmin = useIsAdmin();
+  const { flags: featureFlags, isReady: flagsReady } = useMultipleFeatureFlags(['course_purchases_enabled'], true);
 
-  // Block checkout if course is disabled
-  const isCheckoutBlocked = !isEnrolled && course.is_active === false;
+  // Block checkout if course is disabled OR feature flag is disabled (unless admin)
+  const isCourseDisabled = course.is_active === false;
+  const isPurchasesDisabled = flagsReady && !featureFlags.course_purchases_enabled && !isAdmin;
+  const isCheckoutBlocked = !isEnrolled && (isCourseDisabled || isPurchasesDisabled);
 
   // Determine button state and action
   const handleCTAClick = useCallback(() => {
-    // Don't allow checkout if course is disabled
-    if (!isEnrolled && course.is_active === false) {
+    // Don't allow checkout if course is disabled or purchases disabled
+    if (!isEnrolled && (course.is_active === false || isPurchasesDisabled)) {
       return;
     }
     
