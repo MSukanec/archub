@@ -224,7 +224,8 @@ export function UserBasicDataView() {
       });
 
       // Upload to storage (user-avatars bucket - dedicated public bucket)
-      const fileName = `${userData?.user?.id}/avatar.webp`;
+      // Use auth_id for folder name to match Supabase RLS (auth.uid())
+      const fileName = `${userData?.user?.auth_id}/avatar.webp`;
       const { error: uploadError } = await supabase
         .storage
         .from('user-avatars')
@@ -293,7 +294,7 @@ export function UserBasicDataView() {
       
       // Delete from storage if it's a custom upload
       if (avatarUrl && avatarUrl.includes('user-avatars')) {
-        const fileName = `${userData?.user?.id}/avatar.webp`;
+        const fileName = `${userData?.user?.auth_id}/avatar.webp`;
         await supabase.storage.from('user-avatars').remove([fileName]);
       }
       
