@@ -177,7 +177,7 @@ export async function fetchCourseLandingBySlug(slug: string) {
     console.log('Testimonials table not available yet');
   }
 
-  // 6. Fetch Client Gallery images
+  // 6. Fetch Client Gallery images with fresh URLs
   let clientGallery: { id: string; url: string }[] = [];
   try {
     const { data: galleryLinks, error: galleryError } = await supabase
@@ -185,7 +185,8 @@ export async function fetchCourseLandingBySlug(slug: string) {
       .select(`
         id,
         media_files!inner (
-          file_url,
+          bucket,
+          file_path,
           is_deleted
         )
       `)
@@ -195,17 +196,36 @@ export async function fetchCourseLandingBySlug(slug: string) {
       .order('position', { ascending: true });
 
     if (!galleryError && galleryLinks) {
-      clientGallery = galleryLinks
+      // Generate fresh URLs for each gallery image
+      const galleryItems = galleryLinks
         .map((link: any) => {
           const mediaFile = Array.isArray(link.media_files) 
             ? link.media_files[0] 
             : link.media_files;
+          if (!mediaFile?.bucket || !mediaFile?.file_path) return null;
           return {
             id: link.id,
-            url: mediaFile?.file_url || null,
+            bucket: mediaFile.bucket,
+            path: mediaFile.file_path,
           };
         })
-        .filter((item: any) => item.url !== null);
+        .filter((item): item is { id: string; bucket: string; path: string } => item !== null);
+
+      // Generate URLs based on bucket type
+      for (const item of galleryItems) {
+        let url: string | null = null;
+        if (item.bucket === 'public-assets' || item.bucket === 'social-assets') {
+          // Public buckets - use direct URL
+          url = supabase.storage.from(item.bucket).getPublicUrl(item.path).data.publicUrl;
+        } else {
+          // Private buckets - generate signed URL (1 hour)
+          const { data } = await supabase.storage.from(item.bucket).createSignedUrl(item.path, 3600);
+          url = data?.signedUrl || null;
+        }
+        if (url) {
+          clientGallery.push({ id: item.id, url });
+        }
+      }
     }
   } catch {
     console.log('Client gallery fetch failed - continuing without');
