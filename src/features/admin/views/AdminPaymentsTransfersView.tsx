@@ -2,14 +2,12 @@ import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Table } from '@/components/shared/trees/Table';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle2, XCircle, Eye, AlertCircle, Inbox, Clock, TrendingUp, Search, Filter, Bell, Trash2 } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertCircle, Inbox, Clock, TrendingUp, Search, Filter, Bell, Trash2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { EmptyState } from '@/components/shared/EmptyState';
 import { Tabs } from '@/components/shared/Tabs';
 import { useGlobalModalStore } from '@/components/modal';
 import AdminPaymentTransferRow from '@/features/finances/components/admin/AdminPaymentTransferRow';
@@ -44,7 +42,7 @@ interface BankTransferPayment {
   };
 }
 
-const AdminPaymentsTransfersTab = () => {
+const AdminPaymentsTransfersView = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
   const { toast } = useToast();
   const { openModal } = useGlobalModalStore();
@@ -62,7 +60,6 @@ const AdminPaymentsTransfersTab = () => {
 
   const [searchValue, setSearchValue] = useState("");
 
-  // Sync search values between mobile and desktop
   useEffect(() => {
     if (isMobile && mobileSearchValue !== searchValue) {
       setSearchValue(mobileSearchValue);
@@ -118,7 +115,6 @@ const AdminPaymentsTransfersTab = () => {
     });
   };
 
-  // Mutation para eliminar transferencia
   const deleteMutation = useMutation({
     mutationFn: async (paymentId: string) => {
       if (!supabase) throw new Error('Supabase not available');
@@ -159,10 +155,8 @@ const AdminPaymentsTransfersTab = () => {
     });
   };
 
-  // Filter payments by status and search
   const filteredPayments = useMemo(() => {
     return payments.filter(payment => {
-      // Search filter
       if (searchValue) {
         const search = searchValue.toLowerCase();
         const userName = payment.users?.full_name?.toLowerCase() || '';
@@ -174,7 +168,6 @@ const AdminPaymentsTransfersTab = () => {
         }
       }
 
-      // Status filter
       if (statusFilter !== 'all' && payment.status !== statusFilter) {
         return false;
       }
@@ -183,7 +176,6 @@ const AdminPaymentsTransfersTab = () => {
     });
   }, [payments, searchValue, statusFilter]);
 
-  // Configure mobile action bar
   useEffect(() => {
     if (isMobile) {
       setActions({
@@ -191,31 +183,24 @@ const AdminPaymentsTransfersTab = () => {
           id: 'search',
           icon: Search,
           label: 'Buscar',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
+          onClick: () => {},
         },
         filter: {
           id: 'filter',
           icon: Filter,
           label: 'Filtros',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
+          onClick: () => {},
         },
         notifications: {
           id: 'notifications',
           icon: Bell,
           label: 'Notificaciones',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
+          onClick: () => {},
         },
       });
       setShowActionBar(true);
     }
 
-    // Cleanup when component unmounts
     return () => {
       if (isMobile) {
         clearActions();
@@ -223,7 +208,6 @@ const AdminPaymentsTransfersTab = () => {
     };
   }, [isMobile, setActions, setShowActionBar, clearActions]);
 
-  // Separate effect for filter configuration
   useEffect(() => {
     if (isMobile) {
       setFilterConfig({
@@ -256,7 +240,7 @@ const AdminPaymentsTransfersTab = () => {
       label: 'Fecha',
       width: '12%',
       render: (payment: BankTransferPayment) => (
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-muted-foreground" data-testid={`text-date-${payment.id}`}>
           {format(new Date(payment.created_at), 'dd/MM/yy HH:mm', { locale: es })}
         </span>
       ),
@@ -266,7 +250,7 @@ const AdminPaymentsTransfersTab = () => {
       label: 'Usuario',
       width: '20%',
       render: (payment: BankTransferPayment) => (
-        <div className="flex flex-col">
+        <div className="flex flex-col" data-testid={`text-user-${payment.id}`}>
           <span className="font-medium text-sm">
             {payment.users?.full_name || 'Sin nombre'}
           </span>
@@ -279,7 +263,9 @@ const AdminPaymentsTransfersTab = () => {
       label: 'Producto',
       width: '25%',
       render: (payment: BankTransferPayment) => (
-        <span className="text-sm">{payment.course_prices?.courses?.title || 'N/A'}</span>
+        <span className="text-sm" data-testid={`text-product-${payment.id}`}>
+          {payment.course_prices?.courses?.title || 'N/A'}
+        </span>
       ),
     },
     {
@@ -287,7 +273,7 @@ const AdminPaymentsTransfersTab = () => {
       label: 'Monto',
       width: '12%',
       render: (payment: BankTransferPayment) => (
-        <div className="flex flex-col">
+        <div className="flex flex-col" data-testid={`text-amount-${payment.id}`}>
           <span className="font-semibold text-sm">
             {new Intl.NumberFormat('es-AR', {
               style: 'currency',
@@ -306,7 +292,10 @@ const AdminPaymentsTransfersTab = () => {
       render: (payment: BankTransferPayment) => {
         if (payment.status === 'pending') {
           return (
-            <Badge className="bg-[hsl(var(--warning))] text-[hsl(var(--warning-text))] border-[hsl(var(--warning))]">
+            <Badge 
+              className="bg-[hsl(var(--warning))] text-[hsl(var(--warning-text))] border-[hsl(var(--warning))]"
+              data-testid={`badge-status-${payment.id}`}
+            >
               <AlertCircle className="h-3 w-3 mr-1" />
               Pendiente
             </Badge>
@@ -314,14 +303,18 @@ const AdminPaymentsTransfersTab = () => {
         }
         if (payment.status === 'approved') {
           return (
-            <Badge variant="secondary" className="bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
+            <Badge 
+              variant="secondary" 
+              className="bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400"
+              data-testid={`badge-status-${payment.id}`}
+            >
               <CheckCircle2 className="h-3 w-3 mr-1" />
               Aprobado
             </Badge>
           );
         }
         return (
-          <Badge variant="destructive">
+          <Badge variant="destructive" data-testid={`badge-status-${payment.id}`}>
             <XCircle className="h-3 w-3 mr-1" />
             Rechazado
           </Badge>
@@ -341,9 +334,8 @@ const AdminPaymentsTransfersTab = () => {
 
   return (
     <div className="space-y-6">
-      {/* KPIs - 2 columns in one row */}
       <div className="grid grid-cols-2 gap-4">
-        <StatCard>
+        <StatCard data-testid="kpi-pending-transfers">
           <div className="flex items-center justify-between">
             <StatCardTitle showArrow={false}>Pendientes de Revisión</StatCardTitle>
             <Clock className="h-5 w-5 text-accent" />
@@ -352,7 +344,7 @@ const AdminPaymentsTransfersTab = () => {
           <StatCardMeta>pagos esperando aprobación</StatCardMeta>
         </StatCard>
 
-        <StatCard>
+        <StatCard data-testid="kpi-month-total">
           <div className="flex items-center justify-between">
             <StatCardTitle showArrow={false}>Total del Mes</StatCardTitle>
             <TrendingUp className="h-5 w-5 text-blue-600" />
@@ -369,14 +361,12 @@ const AdminPaymentsTransfersTab = () => {
         </StatCard>
       </div>
 
-      {/* Filtros con Tabs */}
       <Tabs
         tabs={filterTabs}
         value={statusFilter}
         onValueChange={(value) => setStatusFilter(value as typeof statusFilter)}
       />
 
-      {/* Tabla */}
       <Table
         columns={columns}
         data={filteredPayments}
@@ -409,4 +399,4 @@ const AdminPaymentsTransfersTab = () => {
   );
 };
 
-export default AdminPaymentsTransfersTab;
+export default AdminPaymentsTransfersView;

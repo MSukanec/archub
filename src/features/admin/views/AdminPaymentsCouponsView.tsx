@@ -31,7 +31,7 @@ interface Coupon {
   total_uses?: number;
 }
 
-export default function AdminPaymentCoupons() {
+export default function AdminPaymentsCouponsView() {
   const { toast } = useToast()
   const { openModal } = useGlobalModalStore()
   const isMobile = useMobile()
@@ -49,7 +49,6 @@ export default function AdminPaymentCoupons() {
   const [filterByStatus, setFilterByStatus] = useState("all")
   const [filterByType, setFilterByType] = useState("all")
 
-  // Sync search values between mobile and desktop
   useEffect(() => {
     if (isMobile && mobileSearchValue !== searchValue) {
       setSearchValue(mobileSearchValue)
@@ -78,7 +77,6 @@ export default function AdminPaymentCoupons() {
     }
   });
 
-  // Get coupon status helper
   const getCouponStatus = (coupon: Coupon) => {
     const now = new Date()
     const isExpired = coupon.expires_at && new Date(coupon.expires_at) < now
@@ -92,10 +90,8 @@ export default function AdminPaymentCoupons() {
     return 'active'
   }
 
-  // Filter coupons
   const filteredCoupons = useMemo(() => {
     return coupons.filter(coupon => {
-      // Search filter
       if (searchValue) {
         const search = searchValue.toLowerCase()
         const code = coupon.code?.toLowerCase() || ''
@@ -105,7 +101,6 @@ export default function AdminPaymentCoupons() {
         }
       }
 
-      // Status filter
       if (filterByStatus !== "all") {
         const status = getCouponStatus(coupon)
         if (status !== filterByStatus) {
@@ -113,7 +108,6 @@ export default function AdminPaymentCoupons() {
         }
       }
 
-      // Type filter
       if (filterByType !== "all" && coupon.type !== filterByType) {
         return false
       }
@@ -133,10 +127,8 @@ export default function AdminPaymentCoupons() {
     setFilterByType("all")
   }, [setMobileSearchValue]);
 
-  // Track if mobile action bar has been configured
   const mobileConfiguredRef = useRef(false);
 
-  // Configure mobile action bar - only once when isMobile changes
   useEffect(() => {
     if (isMobile && !mobileConfiguredRef.current) {
       mobileConfiguredRef.current = true;
@@ -170,7 +162,6 @@ export default function AdminPaymentCoupons() {
       setShowActionBar(true)
     }
 
-    // Cleanup when component unmounts
     return () => {
       if (mobileConfiguredRef.current) {
         mobileConfiguredRef.current = false;
@@ -179,7 +170,6 @@ export default function AdminPaymentCoupons() {
     }
   }, [isMobile, setActions, setShowActionBar, clearActions, handleCreateCouponCallback])
 
-  // Memoize filter options to avoid re-creating on each render
   const filterStatusOptions = useMemo(() => [
     { value: 'active', label: 'Activo' },
     { value: 'inactive', label: 'Inactivo' },
@@ -193,13 +183,11 @@ export default function AdminPaymentCoupons() {
     { value: 'fixed', label: 'Monto Fijo' }
   ], []);
 
-  // Separate effect for filter configuration - use ref to track previous values
   const prevFilterValuesRef = useRef({ status: filterByStatus, type: filterByType });
   
   useEffect(() => {
     if (!isMobile) return;
     
-    // Only update if filter values actually changed
     const prevValues = prevFilterValuesRef.current;
     if (prevValues.status === filterByStatus && prevValues.type === filterByType) {
       return;
@@ -281,14 +269,16 @@ export default function AdminPaymentCoupons() {
       key: 'code',
       label: 'Código',
       render: (coupon: Coupon) => (
-        <div className="font-bold text-sm font-mono">{coupon.code}</div>
+        <div className="font-bold text-sm font-mono" data-testid={`text-code-${coupon.id}`}>
+          {coupon.code}
+        </div>
       )
     },
     {
       key: 'type',
       label: 'Tipo',
       render: (coupon: Coupon) => (
-        <div className="text-sm">
+        <div className="text-sm" data-testid={`text-type-${coupon.id}`}>
           {coupon.type === 'percent' ? 'Porcentaje' : 'Monto Fijo'}
         </div>
       )
@@ -297,7 +287,7 @@ export default function AdminPaymentCoupons() {
       key: 'amount',
       label: 'Importe del cupón',
       render: (coupon: Coupon) => (
-        <div className="text-sm font-medium">
+        <div className="text-sm font-medium" data-testid={`text-amount-${coupon.id}`}>
           {coupon.type === 'percent' ? `${coupon.amount}%` : `$${coupon.amount}`}
         </div>
       )
@@ -306,7 +296,7 @@ export default function AdminPaymentCoupons() {
       key: 'usage',
       label: 'Usos / Límite',
       render: (coupon: Coupon) => (
-        <div className="text-sm">
+        <div className="text-sm" data-testid={`text-usage-${coupon.id}`}>
           {coupon.max_redemptions 
             ? `${coupon.total_uses || 0} / ${coupon.max_redemptions}` 
             : `${coupon.total_uses || 0} / ∞`}
@@ -340,7 +330,10 @@ export default function AdminPaymentCoupons() {
         }
 
         return (
-          <Badge style={{ backgroundColor: color, color: 'white' }}>
+          <Badge 
+            style={{ backgroundColor: color, color: 'white' }}
+            data-testid={`badge-status-${coupon.id}`}
+          >
             {status}
           </Badge>
         );
@@ -350,7 +343,7 @@ export default function AdminPaymentCoupons() {
       key: 'validity',
       label: 'Fecha de caducidad',
       render: (coupon: Coupon) => (
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground" data-testid={`text-expiry-${coupon.id}`}>
           {coupon.expires_at 
             ? format(new Date(coupon.expires_at), 'dd/MM/yyyy', { locale: es })
             : 'Sin vencimiento'}

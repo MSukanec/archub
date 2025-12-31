@@ -45,7 +45,7 @@ interface Payment {
   } | null;
 }
 
-const AdminPaymentsTab = () => {
+const AdminPaymentsView = () => {
   const isMobile = useMobile();
   const { openModal } = useGlobalModalStore();
   const { toast } = useToast();
@@ -454,4 +454,4 @@ const AdminPaymentsTab = () => {
   );
 };
 
-export default AdminPaymentsTab;
+export default AdminPaymentsView;

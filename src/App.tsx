@@ -71,7 +71,7 @@ const ContactsLabPage = lazy(() => import("@/pages/lab/ContactsLabPage"));
 // Admin Pages (importados normalmente para evitar loader)
 import AdminAdministrationPage from "@/pages/admin/AdminAdministrationPage";
 import AdminSupport from "@/pages/admin/support/AdminSupport";
-import AdminPayments from "@/pages/admin/payments/AdminPayments";
+import AdminPayments from "@/pages/admin/AdminPaymentsPage";
 import AdminSubscriptions from "@/pages/admin/subscriptions/AdminSubscriptions";
 import AdminCosts from "@/pages/admin/costs/AdminCosts";
 import AdminTasks from "@/pages/admin/tasks/AdminTasks";
