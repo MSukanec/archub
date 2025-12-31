@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Table } from '@/components/shared/trees/Table';
+import { Table, type Column } from '@/components/shared/table/Table';
 import { Badge } from '@/components/ui/badge';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components';
+import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/shared/AppCard';
 import { DollarSign, TrendingUp, CreditCard, Inbox, Search, Bell, Banknote, Edit, Trash2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { supabase } from '@/lib/supabase';
@@ -61,16 +61,37 @@ const AdminPaymentsTab = () => {
 
   const [searchValue, setSearchValue] = useState("");
 
-  // Sync search values between mobile and desktop
   useEffect(() => {
     if (isMobile && mobileSearchValue !== searchValue) {
       setSearchValue(mobileSearchValue);
     }
   }, [mobileSearchValue, isMobile]);
 
+  const handleSearchChange = (value: string) => {
+    setSearchValue(value);
+    if (isMobile) {
+      setMobileSearchValue(value);
+    }
+  };
+
   const { data: payments = [], isLoading } = useQuery<Payment[]>({
     queryKey: ['/api/admin/payments/all'],
   });
+
+  const filteredPayments = useMemo(() => {
+    if (!searchValue.trim()) return payments;
+    const search = searchValue.toLowerCase();
+    return payments.filter(payment => {
+      const userName = payment.users?.full_name?.toLowerCase() || '';
+      const userEmail = payment.users?.email?.toLowerCase() || '';
+      const courseName = payment.courses?.title?.toLowerCase() || '';
+      const provider = payment.provider?.toLowerCase() || '';
+      return userName.includes(search) || 
+             userEmail.includes(search) || 
+             courseName.includes(search) ||
+             provider.includes(search);
+    });
+  }, [payments, searchValue]);
 
   const { data: exchangeRateData } = useQuery({
     queryKey: ['exchange-rate-usd-ars'],
@@ -143,22 +164,35 @@ const AdminPaymentsTab = () => {
 
     const historicalARS = payments
       .filter(p => p.currency === 'ARS')
-      .reduce((sum, p) => sum + p.amount, 0);
+      .reduce((sum, p) => sum + Number(p.amount), 0);
 
     const historicalUSD = payments
       .filter(p => p.currency === 'USD')
-      .reduce((sum, p) => sum + p.amount, 0);
+      .reduce((sum, p) => sum + Number(p.amount), 0);
 
     const monthlyARS = paymentsThisMonth
       .filter(p => p.currency === 'ARS')
-      .reduce((sum, p) => sum + p.amount, 0);
+      .reduce((sum, p) => sum + Number(p.amount), 0);
 
     const monthlyUSD = paymentsThisMonth
       .filter(p => p.currency === 'USD')
-      .reduce((sum, p) => sum + p.amount, 0);
+      .reduce((sum, p) => sum + Number(p.amount), 0);
 
-    const historicalDollarized = historicalUSD + (historicalARS / exchangeRate);
-    const monthlyDollarized = monthlyUSD + (monthlyARS / exchangeRate);
+    let historicalDollarized = historicalUSD;
+    payments
+      .filter(p => p.currency === 'ARS')
+      .forEach(p => {
+        const rate = p.exchange_rate ? Number(p.exchange_rate) : exchangeRate;
+        historicalDollarized += Number(p.amount) / rate;
+      });
+
+    let monthlyDollarized = monthlyUSD;
+    paymentsThisMonth
+      .filter(p => p.currency === 'ARS')
+      .forEach(p => {
+        const rate = p.exchange_rate ? Number(p.exchange_rate) : exchangeRate;
+        monthlyDollarized += Number(p.amount) / rate;
+      });
 
     return {
       totalPayments: payments.length,
@@ -172,25 +206,6 @@ const AdminPaymentsTab = () => {
     };
   }, [payments, exchangeRate]);
 
-  // Filter payments by search
-  const filteredPayments = useMemo(() => {
-    if (!searchValue) return payments;
-
-    const search = searchValue.toLowerCase();
-    return payments.filter(payment => {
-      const userName = payment.users?.full_name?.toLowerCase() || '';
-      const userEmail = payment.users?.email?.toLowerCase() || '';
-      const courseName = payment.courses?.title?.toLowerCase() || '';
-      const provider = payment.provider?.toLowerCase() || '';
-      
-      return userName.includes(search) || 
-             userEmail.includes(search) || 
-             courseName.includes(search) ||
-             provider.includes(search);
-    });
-  }, [payments, searchValue]);
-
-  // Configure mobile action bar
   useEffect(() => {
     if (isMobile) {
       setActions({
@@ -217,7 +232,6 @@ const AdminPaymentsTab = () => {
     };
   }, [isMobile, setActions, setShowActionBar, clearActions]);
 
-  // Filter configuration
   useEffect(() => {
     if (isMobile) {
       setFilterConfig({
@@ -230,12 +244,13 @@ const AdminPaymentsTab = () => {
     }
   }, [isMobile, setFilterConfig, setMobileSearchValue]);
 
-  const columns = [
+  const columns: Column<Payment>[] = [
     {
       key: 'created_at',
       label: 'Fecha',
-      render: (payment: Payment) => (
-        <span className="text-sm text-muted-foreground">
+      sortable: true,
+      render: (payment) => (
+        <span className="text-sm text-muted-foreground" data-testid={`text-date-${payment.id}`}>
           {format(new Date(payment.created_at), 'dd/MM/yy HH:mm', { locale: es })}
         </span>
       ),
@@ -243,8 +258,8 @@ const AdminPaymentsTab = () => {
     {
       key: 'user',
       label: 'Usuario',
-      render: (payment: Payment) => (
-        <div className="flex flex-col">
+      render: (payment) => (
+        <div className="flex flex-col" data-testid={`text-user-${payment.id}`}>
           <span className="font-medium text-sm">
             {payment.users?.full_name || 'Sin nombre'}
           </span>
@@ -255,16 +270,16 @@ const AdminPaymentsTab = () => {
     {
       key: 'product',
       label: 'Producto',
-      render: (payment: Payment) => {
+      render: (payment) => {
         if (payment.courses?.title) {
-          return <span className="text-sm">{payment.courses.title}</span>;
+          return <span className="text-sm" data-testid={`text-product-${payment.id}`}>{payment.courses.title}</span>;
         }
         const productTypeLabels: Record<string, string> = {
           'subscription': 'Suscripción',
           'course': 'Curso',
         };
         return (
-          <span className="text-sm">
+          <span className="text-sm" data-testid={`text-product-${payment.id}`}>
             {payment.product_type ? productTypeLabels[payment.product_type] || payment.product_type : 'N/A'}
           </span>
         );
@@ -273,7 +288,7 @@ const AdminPaymentsTab = () => {
     {
       key: 'provider',
       label: 'Proveedor',
-      render: (payment: Payment) => {
+      render: (payment) => {
         const providerLabels: Record<string, string> = {
           'mercadopago': 'Mercado Pago',
           'paypal': 'PayPal',
@@ -289,11 +304,8 @@ const AdminPaymentsTab = () => {
         const provider = payment.provider?.toLowerCase() || '';
         return (
           <Badge 
-            variant="outline"
-            style={{ 
-              borderColor: providerColors[provider] || '#6b7280',
-              color: providerColors[provider] || '#6b7280'
-            }}
+            variant="neutral"
+            data-testid={`badge-provider-${payment.id}`}
           >
             {providerLabels[provider] || payment.provider}
           </Badge>
@@ -303,8 +315,9 @@ const AdminPaymentsTab = () => {
     {
       key: 'amount',
       label: 'Monto',
-      render: (payment: Payment) => (
-        <div className="flex flex-col">
+      sortable: true,
+      render: (payment) => (
+        <div className="flex flex-col" data-testid={`text-amount-${payment.id}`}>
           <span className="font-semibold text-sm">
             {new Intl.NumberFormat('es-AR', {
               style: 'currency',
@@ -321,13 +334,13 @@ const AdminPaymentsTab = () => {
     {
       key: 'coupon',
       label: 'Cupón',
-      render: (payment: Payment) => {
+      render: (payment) => {
         const coupon = payment.coupon_redemptions;
         if (!coupon) {
-          return <span className="text-xs text-muted-foreground">-</span>;
+          return <span className="text-xs text-muted-foreground" data-testid={`text-coupon-${payment.id}`}>-</span>;
         }
         return (
-          <div className="flex flex-col">
+          <div className="flex flex-col" data-testid={`text-coupon-${payment.id}`}>
             <span className="font-mono text-xs font-medium">{coupon.coupon_code || 'N/A'}</span>
             <span className="text-xs text-muted-foreground">
               -{coupon.discount ? new Intl.NumberFormat('es-AR', {
@@ -343,8 +356,11 @@ const AdminPaymentsTab = () => {
     {
       key: 'status',
       label: 'Estado',
-      render: () => (
-        <Badge variant="secondary" className="bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
+      render: (payment) => (
+        <Badge 
+          variant="success"
+          data-testid={`badge-status-${payment.id}`}
+        >
           Completado
         </Badge>
       ),
@@ -367,57 +383,50 @@ const AdminPaymentsTab = () => {
 
   return (
     <div className="space-y-6">
-      {/* KPIs - 2 columns on mobile, 4 on desktop */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        <StatCard>
+        <AppCard data-testid="kpi-total-pagos">
           <div className="flex items-center justify-between">
-            <StatCardTitle showArrow={false}>Total Pagos</StatCardTitle>
+            <AppCardTitle>Total Pagos</AppCardTitle>
             <DollarSign className="h-5 w-5 text-accent" />
           </div>
-          <StatCardValue className="text-xl md:text-3xl">{stats.totalPayments}</StatCardValue>
-          <StatCardMeta>Este mes: {stats.paymentsThisMonth}</StatCardMeta>
-        </StatCard>
+          <AppCardValue>{stats.totalPayments}</AppCardValue>
+          <AppCardMeta>Este mes: {stats.paymentsThisMonth}</AppCardMeta>
+        </AppCard>
 
-        <StatCard>
+        <AppCard data-testid="kpi-total">
           <div className="flex items-center justify-between">
-            <StatCardTitle showArrow={false}>Total</StatCardTitle>
+            <AppCardTitle>Total</AppCardTitle>
             <TrendingUp className="h-5 w-5 text-green-600" />
           </div>
-          <StatCardValue className="text-xl md:text-3xl">
-            {formatUSD(stats.historicalDollarized)}
-          </StatCardValue>
-          <StatCardMeta>Este mes: {formatUSD(stats.monthlyDollarized)}</StatCardMeta>
-        </StatCard>
+          <AppCardValue>{formatUSD(stats.historicalDollarized)}</AppCardValue>
+          <AppCardMeta>{formatARS(stats.historicalARS)} + {formatUSD(stats.historicalUSD)}</AppCardMeta>
+        </AppCard>
 
-        <StatCard>
+        <AppCard data-testid="kpi-subtotal-ars">
           <div className="flex items-center justify-between">
-            <StatCardTitle showArrow={false}>Total (ARS)</StatCardTitle>
+            <AppCardTitle>Subtotal ARS</AppCardTitle>
             <Banknote className="h-5 w-5 text-blue-600" />
           </div>
-          <StatCardValue className="text-xl md:text-3xl">
-            {formatARS(stats.historicalARS)}
-          </StatCardValue>
-          <StatCardMeta>Este mes: {formatARS(stats.monthlyARS)}</StatCardMeta>
-        </StatCard>
+          <AppCardValue>{formatARS(stats.historicalARS)}</AppCardValue>
+          <AppCardMeta>Este mes: {formatARS(stats.monthlyARS)}</AppCardMeta>
+        </AppCard>
 
-        <StatCard>
+        <AppCard data-testid="kpi-subtotal-usd">
           <div className="flex items-center justify-between">
-            <StatCardTitle showArrow={false}>Total (USD)</StatCardTitle>
+            <AppCardTitle>Subtotal USD</AppCardTitle>
             <CreditCard className="h-5 w-5 text-emerald-600" />
           </div>
-          <StatCardValue className="text-xl md:text-3xl">
-            {formatUSD(stats.historicalUSD)}
-          </StatCardValue>
-          <StatCardMeta>Este mes: {formatUSD(stats.monthlyUSD)}</StatCardMeta>
-        </StatCard>
+          <AppCardValue>{formatUSD(stats.historicalUSD)}</AppCardValue>
+          <AppCardMeta>Este mes: {formatUSD(stats.monthlyUSD)}</AppCardMeta>
+        </AppCard>
       </div>
 
-      {/* Tabla */}
-      <Table
+      <Table<Payment>
         columns={columns}
         data={filteredPayments}
         isLoading={isLoading}
-        rowActions={(payment: Payment) => [
+        defaultSort={{ key: 'created_at', direction: 'desc' }}
+        rowActions={(payment) => [
           {
             icon: Edit,
             label: 'Editar',
@@ -434,6 +443,11 @@ const AdminPaymentsTab = () => {
           icon: <Inbox />,
           title: isLoading ? 'Cargando...' : 'No hay pagos',
           description: 'No se han registrado pagos completados.'
+        }}
+        topBar={{
+          showSearch: true,
+          searchValue: searchValue,
+          onSearchChange: handleSearchChange,
         }}
       />
     </div>
