@@ -498,6 +498,16 @@ export function initializeModalRegistry(): void {
   registerModal('downgrade', DowngradeModal as any, adminConfig);
   registerModal('upgrade', UpgradeModal as any, adminConfig);
   registerModal('reset-test-data', AdminResetTestDataModal as any, { ...adminConfig, size: 'md' });
+  registerModal('admin-payments', AdminPaymentsModal as any, {
+    ...adminConfig,
+    size: 'lg',
+    mapDataToProps: (data) => ({
+      modalData: {
+        payment: data?.payment,
+        isEditing: data?.isEditing || !!data?.payment,
+      },
+    }),
+  });
   
   registerModal('pdf-exporter', PDFExporterModal as any, { ...generalConfig, size: 'full' });
   

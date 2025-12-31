@@ -21,6 +21,7 @@ interface Payment {
   course_id: string;
   amount: number;
   currency: string;
+  exchange_rate: number | null;
   status: string;
   created_at: string;
   approved_at: string | null;
@@ -113,9 +114,9 @@ const AdminPaymentsTab = () => {
   });
 
   const handleEdit = (payment: Payment) => {
-    toast({
-      title: 'Función no disponible',
-      description: 'La edición de pagos no está disponible actualmente.',
+    openModal('admin-payments', {
+      payment: payment,
+      isEditing: true,
     });
   };
 
@@ -311,7 +312,9 @@ const AdminPaymentsTab = () => {
               minimumFractionDigits: 0,
             }).format(payment.amount)}
           </span>
-          <span className="text-xs text-muted-foreground">{payment.currency}</span>
+          <span className="text-xs text-muted-foreground">
+            Cot. {payment.exchange_rate ? Number(payment.exchange_rate).toFixed(2) : '1.00'}
+          </span>
         </div>
       ),
     },
