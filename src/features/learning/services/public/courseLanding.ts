@@ -10,12 +10,17 @@ export async function fetchCourseLandingBySlug(slug: string) {
     throw new Error('Supabase client not initialized');
   }
 
-  // 1. Fetch course with details (is_active check removed - handled by frontend BlockedRestricted)
+  // 1. Fetch course with details and creator info (is_active check removed - handled by frontend BlockedRestricted)
   const { data: course, error: courseError } = await supabase
     .from('courses')
     .select(`
       *,
-      course_details (*)
+      course_details (*),
+      creator:users!courses_created_by_fkey (
+        id,
+        full_name,
+        avatar_url
+      )
     `)
     .eq('slug', slug)
     .eq('visibility', 'public')
@@ -84,6 +89,11 @@ export async function fetchCourseLandingBySlug(slug: string) {
         (course as any).og_image_url = link.media_files.file_url;
       }
     });
+  }
+
+  // Fallback: Use creator's avatar if no instructor_photo_url
+  if (!(course as any).instructor_photo_url && (course as any).creator?.avatar_url) {
+    (course as any).instructor_photo_url = (course as any).creator.avatar_url;
   }
 
   // 2. Fetch modules
