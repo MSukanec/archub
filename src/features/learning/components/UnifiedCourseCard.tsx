@@ -100,21 +100,21 @@ export function UnifiedCourseCard({
         )}
         {course.badge_text && (
           <div className="absolute top-3 left-3">
-            <Badge className="px-3 py-1 shadow-md bg-accent text-white border-0">
-              <Award className="w-3 h-3 mr-1.5 inline" />
+            <span className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-semibold shadow-md bg-accent text-white">
+              <Award className="w-3 h-3" />
               {course.badge_text}
-            </Badge>
+            </span>
           </div>
         )}
         {config && StatusIcon && status !== 'available' && (
           <div className="absolute top-3 right-3">
-            <Badge 
-              className={cn("px-2 py-1 shadow-lg", config.badgeClass)}
+            <span 
+              className={cn("inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-semibold shadow-lg", config.badgeClass)}
               data-testid={`badge-status-${course.id}`}
             >
-              <StatusIcon className="w-3 h-3 mr-1" />
+              <StatusIcon className="w-3 h-3" />
               {config.label}
-            </Badge>
+            </span>
           </div>
         )}
       </div>

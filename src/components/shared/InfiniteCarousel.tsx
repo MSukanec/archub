@@ -126,12 +126,17 @@ export function InfiniteCarousel({
           <div
             key={`${item.id}-${index}`}
             className="flex-shrink-0 h-full"
+            style={{ width: `${calculatedItemWidth}px` }}
           >
             <img
               src={item.src}
               alt={item.alt || ''}
-              className="h-full w-auto object-contain"
-              loading="lazy"
+              className="h-full w-full object-cover rounded-lg"
+              loading={index < 6 ? "eager" : "lazy"}
+              onError={(e) => {
+                console.log('[Carousel] Image load error:', item.src?.substring(0, 50));
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
               data-testid={`carousel-item-${item.id}`}
             />
           </div>
