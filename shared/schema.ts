@@ -1464,6 +1464,7 @@ export const payments = pgTable("payments", {
   // Existentes
   amount: numeric("amount", { precision: 10, scale: 2 }),
   currency: text("currency").default("USD"),
+  exchange_rate: numeric("exchange_rate", { precision: 10, scale: 4 }), // Cotización del día de la transacción
   status: text("status").notNull().default("completed"),
   created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
