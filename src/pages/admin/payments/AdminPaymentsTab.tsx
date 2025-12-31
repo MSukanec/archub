@@ -146,7 +146,7 @@ const AdminPaymentsTab = () => {
       mode: 'dangerous',
       title: 'Eliminar Pago',
       description: `¿Estás seguro que deseas eliminar este pago de ${payment.users?.full_name || payment.users?.email}? Esta acción no se puede deshacer.`,
-      itemName: `${new Intl.NumberFormat('es-AR', { style: 'currency', currency: payment.currency, minimumFractionDigits: 0 }).format(payment.amount)} - ${payment.users?.full_name || payment.users?.email}`,
+      itemName: payment.users?.full_name || payment.users?.email,
       destructiveActionText: 'Eliminar Pago',
       onDelete: () => deletePaymentMutation.mutate(payment.id),
       isLoading: deletePaymentMutation.isPending,
