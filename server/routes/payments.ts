@@ -1132,34 +1132,17 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
     try {
       const { id } = req.params;
       const authHeader = req.headers.authorization;
+
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+
       const adminClient = getAdminClient();
-
-      if (!authHeader?.startsWith("Bearer ")) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
-      const token = authHeader.substring(7);
-      const authSupabase = createClient(
-        process.env.VITE_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        { auth: { persistSession: false } }
-      );
-
-      const { data: { user: authUser }, error: authError } = await authSupabase.auth.getUser(token);
-      if (authError || !authUser) {
-        return res.status(401).json({ error: "Invalid or expired token" });
-      }
-
-      // Get user from users table
-      const { data: dbUser, error: userError } = await adminClient
-        .from('users')
-        .select('id, role')
-        .eq('auth_id', authUser.id)
-        .single();
-
-      if (userError || !dbUser || dbUser.role !== 'admin') {
-        return res.status(403).json({ error: "Admin access required" });
-      }
 
       // Delete the payment
       const { error: deleteError } = await adminClient
