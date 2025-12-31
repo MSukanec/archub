@@ -296,14 +296,16 @@ const AdminPaymentsTab = () => {
           'manual': 'Manual'
         };
         const provider = payment.provider?.toLowerCase() || '';
+        const providerStyles: Record<string, React.CSSProperties> = {
+          'mercadopago': { backgroundColor: '#2563eb', color: 'white', borderColor: '#2563eb' },
+          'paypal': { backgroundColor: '#059669', color: 'white', borderColor: '#059669' },
+          'bank_transfer': { backgroundColor: '#6b7280', color: 'white', borderColor: '#6b7280' },
+          'manual': { backgroundColor: '#6b7280', color: 'white', borderColor: '#6b7280' },
+        };
         return (
           <Badge 
             data-testid={`badge-provider-${payment.id}`}
-            className={
-              provider === 'mercadopago' ? 'bg-blue-600 text-white hover:bg-blue-700' :
-              provider === 'paypal' ? 'bg-emerald-600 text-white hover:bg-emerald-700' :
-              'bg-gray-600 text-white hover:bg-gray-700'
-            }
+            style={providerStyles[provider] || providerStyles['manual']}
           >
             {providerLabels[provider] || payment.provider}
           </Badge>
