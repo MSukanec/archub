@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Table, type Column } from '@/components/shared/table/Table';
-import { Badge } from '@/components/ui/badge';
+import { Badge, type BadgeVariant } from '@/components/ui/badge';
 import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/shared/AppCard';
 import { DollarSign, TrendingUp, CreditCard, Inbox, Search, Bell, Banknote, Edit, Trash2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
@@ -295,17 +295,17 @@ const AdminPaymentsView = () => {
           'bank_transfer': 'Transferencia',
           'manual': 'Manual'
         };
-        const provider = payment.provider?.toLowerCase() || '';
-        const providerStyles: Record<string, React.CSSProperties> = {
-          'mercadopago': { backgroundColor: '#2563eb', color: 'white', borderColor: '#2563eb' },
-          'paypal': { backgroundColor: '#059669', color: 'white', borderColor: '#059669' },
-          'bank_transfer': { backgroundColor: '#6b7280', color: 'white', borderColor: '#6b7280' },
-          'manual': { backgroundColor: '#6b7280', color: 'white', borderColor: '#6b7280' },
+        const providerVariants: Record<string, BadgeVariant> = {
+          'mercadopago': 'info',
+          'paypal': 'success',
+          'bank_transfer': 'neutral',
+          'manual': 'neutral',
         };
+        const provider = payment.provider?.toLowerCase() || '';
         return (
           <Badge 
             data-testid={`badge-provider-${payment.id}`}
-            style={providerStyles[provider] || providerStyles['manual']}
+            variant={providerVariants[provider] || 'neutral'}
           >
             {providerLabels[provider] || payment.provider}
           </Badge>

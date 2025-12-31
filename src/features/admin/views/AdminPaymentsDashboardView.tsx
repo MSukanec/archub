@@ -6,7 +6,7 @@ import { MonthlyTrendChart } from '@/components/charts/line/AreaTrendChart';
 import { DonutChart } from '@/components/charts/pie/DonutChart';
 import { ActivityCard, type ActivityItem, type TrendDirection } from '@/components';
 import { calculateMonetaryKPI, calculateCountKPI } from '@/lib/kpis';
-import { Badge } from '@/components/ui/badge';
+import { Badge, type BadgeVariant } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, subDays, subMonths, subYears, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -182,16 +182,14 @@ export default function AdminPaymentsDashboardView({
       countTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% ${periodLabel}`;
     }
 
-    const avgPaymentUSD = filteredPayments.length > 0 ? totalRevenueUSD / filteredPayments.length : 0;
+    const monthlyAverageUSD = totalRevenueUSD / 12;
 
-    const previousAvgPaymentUSD = previousPeriodPayments.length > 0 
-      ? previousTotalRevenueUSD / previousPeriodPayments.length 
-      : 0;
+    const previousMonthlyAverageUSD = previousTotalRevenueUSD / 12;
 
     let avgTrend: TrendDirection = 'neutral';
     let avgTrendValue = '';
-    if (previousAvgPaymentUSD > 0) {
-      const change = ((avgPaymentUSD - previousAvgPaymentUSD) / previousAvgPaymentUSD) * 100;
+    if (previousMonthlyAverageUSD > 0) {
+      const change = ((monthlyAverageUSD - previousMonthlyAverageUSD) / previousMonthlyAverageUSD) * 100;
       avgTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
       const periodLabel = selectedPeriod === 'all' ? 'vs año anterior' : 'vs período anterior';
       avgTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% ${periodLabel}`;
@@ -223,7 +221,7 @@ export default function AdminPaymentsDashboardView({
       paymentsCount,
       countTrend,
       countTrendValue,
-      avgPaymentUSD,
+      monthlyAverageUSD,
       avgTrend,
       avgTrendValue,
       topProvider,
@@ -260,8 +258,8 @@ export default function AdminPaymentsDashboardView({
     };
 
     return Object.entries(kpis.providerCounts)
-      .map(([name, value]) => ({
-        name: providerLabels[name] || name,
+      .map(([key, value]) => ({
+        label: providerLabels[key] || key,
         value
       }))
       .sort((a, b) => b.value - a.value);
@@ -278,11 +276,11 @@ export default function AdminPaymentsDashboardView({
           'bank_transfer': 'Transferencia',
           'manual': 'Manual'
         };
-        const providerStyles: Record<string, React.CSSProperties> = {
-          'mercadopago': { backgroundColor: '#2563eb', color: 'white' },
-          'paypal': { backgroundColor: '#059669', color: 'white' },
-          'bank_transfer': { backgroundColor: '#6b7280', color: 'white' },
-          'manual': { backgroundColor: '#6b7280', color: 'white' },
+        const providerVariants: Record<string, BadgeVariant> = {
+          'mercadopago': 'info',
+          'paypal': 'success',
+          'bank_transfer': 'neutral',
+          'manual': 'neutral',
         };
         const provider = payment.provider?.toLowerCase() || 'manual';
         
@@ -299,10 +297,7 @@ export default function AdminPaymentsDashboardView({
                   minimumFractionDigits: 0,
                 }).format(payment.amount)}
               </span>
-              <Badge 
-                style={providerStyles[provider] || providerStyles['manual']}
-                className="text-xs"
-              >
+              <Badge variant={providerVariants[provider] || 'neutral'}>
                 {providerLabels[provider] || payment.provider}
               </Badge>
             </div>
@@ -371,16 +366,16 @@ export default function AdminPaymentsDashboardView({
           <AppCardMeta>transacciones completadas</AppCardMeta>
         </AppCard>
 
-        <AppCard data-testid="kpi-avg-payment">
+        <AppCard data-testid="kpi-monthly-average">
           <div className="flex items-center justify-between">
-            <AppCardTitle>Pago Promedio</AppCardTitle>
+            <AppCardTitle>Promedio Mensual</AppCardTitle>
             <TrendingUp className="h-5 w-5 text-green-600" />
           </div>
-          <AppCardValue>{formatUSD(kpis.avgPaymentUSD)}</AppCardValue>
+          <AppCardValue>{formatUSD(kpis.monthlyAverageUSD)}</AppCardValue>
           {kpis.avgTrendValue && (
             <AppCardTrend direction={kpis.avgTrend} value={kpis.avgTrendValue} />
           )}
-          <AppCardMeta>por transacción</AppCardMeta>
+          <AppCardMeta>total / 12 meses</AppCardMeta>
         </AppCard>
 
         <AppCard data-testid="kpi-top-provider">
@@ -405,7 +400,7 @@ export default function AdminPaymentsDashboardView({
             <MonthlyTrendChart 
               data={monthlyChartData} 
               height={280}
-              formatValue={(value) => formatUSD(value)}
+              valueFormatter={(value) => formatUSD(value)}
             />
           ) : (
             <div className="h-[280px] flex items-center justify-center text-muted-foreground">

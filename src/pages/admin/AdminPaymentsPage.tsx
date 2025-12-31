@@ -49,7 +49,7 @@ const AdminPaymentsPage = () => {
       },
       {
         id: 'payments',
-        label: 'Todos los Pagos',
+        label: 'Pagos',
         isActive: activeTab === 'payments'
       },
       {
