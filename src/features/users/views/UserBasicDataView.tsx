@@ -61,6 +61,7 @@ export function UserBasicDataView() {
   const [country, setCountry] = useState('');
   const [birthdate, setBirthdate] = useState<Date | undefined>(undefined);
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [googleAvatarUrl, setGoogleAvatarUrl] = useState<string | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
@@ -174,6 +175,16 @@ export function UserBasicDataView() {
     
     setAvatarUrl(userData.user?.avatar_url || '');
     
+    // Get Google avatar from Supabase Auth user_metadata
+    const fetchGoogleAvatar = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const googleAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+      if (googleAvatar) {
+        setGoogleAvatarUrl(googleAvatar);
+      }
+    };
+    fetchGoogleAvatar();
+    
     setTimeout(() => {
       setIsHydrated(true);
     }, 100);
@@ -239,13 +250,64 @@ export function UserBasicDataView() {
         .getPublicUrl(fileName);
 
       if (data?.publicUrl) {
-        setAvatarUrl(data.publicUrl);
+        // Add cache buster to force refresh
+        setAvatarUrl(`${data.publicUrl}?t=${Date.now()}`);
       }
     } catch (error: any) {
       console.error('Avatar upload error:', error);
       toast({
         title: "Error",
         description: error.message || "Error al subir la imagen.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleRestoreGoogleAvatar = async () => {
+    if (!googleAvatarUrl) return;
+    
+    try {
+      setIsUploadingAvatar(true);
+      setAvatarUrl(googleAvatarUrl);
+      
+      toast({
+        title: "Avatar restaurado",
+        description: "Se ha restaurado tu foto de Google.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "No se pudo restaurar el avatar de Google.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleDeleteAvatar = async () => {
+    try {
+      setIsUploadingAvatar(true);
+      
+      // Delete from storage if it's a custom upload
+      if (avatarUrl && avatarUrl.includes('user-avatars')) {
+        const fileName = `${userData?.user?.id}/avatar.webp`;
+        await supabase.storage.from('user-avatars').remove([fileName]);
+      }
+      
+      // Clear the avatar
+      setAvatarUrl('');
+      
+      toast({
+        title: "Avatar eliminado",
+        description: "Tu foto de perfil ha sido eliminada.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el avatar.",
         variant: "destructive",
       });
     } finally {
@@ -298,6 +360,9 @@ export function UserBasicDataView() {
                 initials={getInitials()}
                 displayName={userData.user.full_name || 'Usuario'}
                 onAvatarSelect={handleAvatarSelect}
+                onDeleteAvatar={handleDeleteAvatar}
+                onRestoreGoogleAvatar={handleRestoreGoogleAvatar}
+                hasGoogleAvatar={!!googleAvatarUrl}
                 isUploading={isUploadingAvatar}
                 className="items-center justify-center"
               />
