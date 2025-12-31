@@ -148,7 +148,7 @@ const AdminPaymentsTab = () => {
       description: `¿Estás seguro que deseas eliminar este pago de ${payment.users?.full_name || payment.users?.email}? Esta acción no se puede deshacer.`,
       itemName: payment.users?.full_name || payment.users?.email,
       destructiveActionText: 'Eliminar Pago',
-      onDelete: () => deletePaymentMutation.mutate(payment.id),
+      onConfirm: () => deletePaymentMutation.mutate(payment.id),
       isLoading: deletePaymentMutation.isPending,
     });
   };
