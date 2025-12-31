@@ -14,13 +14,13 @@ const statusConfig = {
   available: {
     icon: CheckCircle,
     label: "Disponible",
-    badgeClass: "bg-green-500 text-white border-0",
+    badgeClass: "bg-accent text-white border-0",
     isBlocking: false,
   },
   coming_soon: {
     icon: Clock,
     label: "Próximamente",
-    badgeClass: "bg-blue-500 text-white border-0",
+    badgeClass: "bg-violet-600 text-white border-0",
     isBlocking: true,
   },
   maintenance: {
@@ -100,7 +100,7 @@ export function UnifiedCourseCard({
         )}
         {course.badge_text && (
           <div className="absolute top-3 left-3">
-            <Badge variant="secondary" className="px-3 py-1 shadow-md">
+            <Badge className="px-3 py-1 shadow-md bg-accent text-white border-0">
               <Award className="w-3 h-3 mr-1.5 inline" />
               {course.badge_text}
             </Badge>
