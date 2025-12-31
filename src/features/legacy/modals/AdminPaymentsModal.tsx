@@ -25,6 +25,10 @@ const paymentSchema = z.object({
   currency: z.enum(['ARS', 'USD'], {
     required_error: 'La moneda es requerida',
   }),
+  exchange_rate: z.string().optional().refine(
+    (val) => !val || (!isNaN(Number(val)) && Number(val) > 0),
+    'La cotización debe ser un número mayor a 0'
+  ),
   provider: z.enum(['mercadopago', 'paypal', 'bank_transfer', 'manual'], {
     required_error: 'El proveedor es requerido',
   }),
@@ -89,6 +93,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
       course_id: payment?.course_id || '',
       amount: payment?.amount?.toString() || '',
       currency: payment?.currency || 'ARS',
+      exchange_rate: payment?.exchange_rate?.toString() || '',
       provider: payment?.provider || 'manual',
       provider_payment_id: payment?.provider_payment_id || '',
     }
@@ -101,6 +106,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
         course_id: payment.course_id || '',
         amount: payment.amount?.toString() || '',
         currency: payment.currency || 'ARS',
+        exchange_rate: payment.exchange_rate?.toString() || '',
         provider: payment.provider || 'manual',
         provider_payment_id: payment.provider_payment_id || '',
       });
@@ -110,6 +116,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
         course_id: '',
         amount: '',
         currency: 'ARS',
+        exchange_rate: '',
         provider: 'manual',
         provider_payment_id: '',
       });
@@ -134,6 +141,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
           course_id: data.course_id,
           amount: Number(data.amount),
           currency: data.currency,
+          exchange_rate: data.exchange_rate ? Number(data.exchange_rate) : null,
           provider: data.provider,
           provider_payment_id: data.provider_payment_id || null,
           status: 'completed',
@@ -173,6 +181,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
           course_id: data.course_id,
           amount: Number(data.amount),
           currency: data.currency,
+          exchange_rate: data.exchange_rate ? Number(data.exchange_rate) : null,
           provider: data.provider,
           provider_payment_id: data.provider_payment_id || null,
         })
@@ -264,7 +273,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <FormField
             control={form.control}
             name="amount"
@@ -301,6 +310,25 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
                     <SelectItem value="USD">USD</SelectItem>
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="exchange_rate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cotización</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    step="0.0001"
+                    placeholder="1200" 
+                    {...field} 
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
