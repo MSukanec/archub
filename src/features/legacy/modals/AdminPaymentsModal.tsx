@@ -1,4 +1,3 @@
-import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -13,11 +12,15 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useCurrentUser } from '@/features/users/hooks';
+import { useEffect, useState } from 'react';
 
-// Schema de validación
 const paymentSchema = z.object({
   user_id: z.string().min(1, 'El usuario es requerido'),
-  course_id: z.string().min(1, 'El curso es requerido'),
+  product_type: z.enum(['course', 'subscription'], {
+    required_error: 'El tipo de producto es requerido',
+  }),
+  course_id: z.string().optional(),
+  plan_id: z.string().optional(),
   amount: z.string().min(1, 'El monto es requerido').refine(
     (val) => !isNaN(Number(val)) && Number(val) > 0,
     'El monto debe ser un número mayor a 0'
@@ -33,6 +36,17 @@ const paymentSchema = z.object({
     required_error: 'El proveedor es requerido',
   }),
   provider_payment_id: z.string().optional(),
+}).refine((data) => {
+  if (data.product_type === 'course') {
+    return !!data.course_id;
+  }
+  if (data.product_type === 'subscription') {
+    return !!data.plan_id;
+  }
+  return true;
+}, {
+  message: 'Debes seleccionar un producto',
+  path: ['course_id'],
 });
 
 type PaymentFormData = z.infer<typeof paymentSchema>;
@@ -49,10 +63,9 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
   const { payment, isEditing = false } = modalData || {};
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { data: userData } = useCurrentUser();
 
-  // Fetch users for dropdown
   const { data: users = [] } = useQuery({
     queryKey: ['admin-users-list'],
     queryFn: async () => {
@@ -68,7 +81,6 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
     },
   });
 
-  // Fetch courses for dropdown
   const { data: courses = [] } = useQuery({
     queryKey: ['admin-courses-list'],
     queryFn: async () => {
@@ -86,11 +98,42 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
     },
   });
 
+  const { data: plans = [] } = useQuery({
+    queryKey: ['admin-plans-list'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not available');
+
+      const { data, error } = await supabase
+        .from('plans')
+        .select('id, name, slug')
+        .eq('is_active', true)
+        .neq('slug', 'free')
+        .order('name');
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const getInitialProductType = (): 'course' | 'subscription' => {
+    if (payment?.product_type === 'subscription') return 'subscription';
+    return 'course';
+  };
+
+  const getInitialPlanId = (): string => {
+    if (payment?.product_type === 'subscription' && payment?.product_id) {
+      return payment.product_id;
+    }
+    return '';
+  };
+
   const form = useForm<PaymentFormData>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
       user_id: payment?.user_id || '',
+      product_type: getInitialProductType(),
       course_id: payment?.course_id || '',
+      plan_id: getInitialPlanId(),
       amount: payment?.amount?.toString() || '',
       currency: payment?.currency || 'ARS',
       exchange_rate: payment?.exchange_rate?.toString() || '',
@@ -99,11 +142,15 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
     }
   });
 
-  React.useEffect(() => {
+  const productType = form.watch('product_type');
+
+  useEffect(() => {
     if (payment) {
       form.reset({
         user_id: payment.user_id || '',
+        product_type: getInitialProductType(),
         course_id: payment.course_id || '',
+        plan_id: getInitialPlanId(),
         amount: payment.amount?.toString() || '',
         currency: payment.currency || 'ARS',
         exchange_rate: payment.exchange_rate?.toString() || '',
@@ -113,7 +160,9 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
     } else {
       form.reset({
         user_id: '',
+        product_type: 'course',
         course_id: '',
+        plan_id: '',
         amount: '',
         currency: 'ARS',
         exchange_rate: '',
@@ -133,12 +182,15 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
       if (!supabase || !userData?.user?.id) {
         throw new Error('Supabase not initialized or user not found');
       }
+
+      const isCourse = data.product_type === 'course';
+      const productId = isCourse ? data.course_id : data.plan_id;
       
       const { error } = await supabase
         .from('payments')
         .insert({
           user_id: data.user_id,
-          course_id: data.course_id,
+          course_id: isCourse ? data.course_id : null,
           amount: Number(data.amount),
           currency: data.currency,
           exchange_rate: data.exchange_rate ? Number(data.exchange_rate) : null,
@@ -146,8 +198,8 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
           provider_payment_id: data.provider_payment_id || null,
           status: 'completed',
           approved_at: new Date().toISOString(),
-          product_type: 'course',
-          product_id: data.course_id,
+          product_type: data.product_type,
+          product_id: productId,
         });
       
       if (error) throw error;
@@ -173,17 +225,22 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
   const updateMutation = useMutation({
     mutationFn: async (data: PaymentFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
+
+      const isCourse = data.product_type === 'course';
+      const productId = isCourse ? data.course_id : data.plan_id;
       
       const { error } = await supabase
         .from('payments')
         .update({
           user_id: data.user_id,
-          course_id: data.course_id,
+          course_id: isCourse ? data.course_id : null,
           amount: Number(data.amount),
           currency: data.currency,
           exchange_rate: data.exchange_rate ? Number(data.exchange_rate) : null,
           provider: data.provider,
           provider_payment_id: data.provider_payment_id || null,
+          product_type: data.product_type,
+          product_id: productId,
         })
         .eq('id', payment!.id);
       
@@ -231,7 +288,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
               <FormLabel>Usuario</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="select-user">
                     <SelectValue placeholder="Selecciona un usuario" />
                   </SelectTrigger>
                 </FormControl>
@@ -250,28 +307,82 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
 
         <FormField
           control={form.control}
-          name="course_id"
+          name="product_type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Curso</FormLabel>
+              <FormLabel>Tipo de Producto</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un curso" />
+                  <SelectTrigger data-testid="select-product-type">
+                    <SelectValue placeholder="Selecciona el tipo" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {courses.map((course: any) => (
-                    <SelectItem key={course.id} value={course.id}>
-                      {course.title}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="course">Curso</SelectItem>
+                  <SelectItem value="subscription">Suscripción</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        {productType === 'course' && (
+          <FormField
+            control={form.control}
+            name="course_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Curso</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger data-testid="select-course">
+                      <SelectValue placeholder="Selecciona un curso" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {courses.map((course: any) => (
+                      <SelectItem key={course.id} value={course.id}>
+                        {course.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {productType === 'subscription' && (
+          <FormField
+            control={form.control}
+            name="plan_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Plan</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger data-testid="select-plan">
+                      <SelectValue placeholder="Selecciona un plan" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {plans.map((plan: any) => (
+                      <SelectItem key={plan.id} value={plan.id}>
+                        {plan.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Plan de suscripción (Pro, Teams, etc.)
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="grid grid-cols-3 gap-4">
           <FormField
@@ -286,6 +397,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
                     step="0.01"
                     placeholder="1000" 
                     {...field} 
+                    data-testid="input-amount"
                   />
                 </FormControl>
                 <FormMessage />
@@ -301,7 +413,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
                 <FormLabel>Moneda</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger data-testid="select-currency">
                       <SelectValue placeholder="Moneda" />
                     </SelectTrigger>
                   </FormControl>
@@ -327,6 +439,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
                     step="0.0001"
                     placeholder="1200" 
                     {...field} 
+                    data-testid="input-exchange-rate"
                   />
                 </FormControl>
                 <FormMessage />
@@ -343,7 +456,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
               <FormLabel>Proveedor de Pago</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="select-provider">
                     <SelectValue placeholder="Selecciona proveedor" />
                   </SelectTrigger>
                 </FormControl>
@@ -372,6 +485,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
                 <Input 
                   placeholder="ID de referencia del proveedor"
                   {...field} 
+                  data-testid="input-provider-payment-id"
                 />
               </FormControl>
               <FormDescription>
