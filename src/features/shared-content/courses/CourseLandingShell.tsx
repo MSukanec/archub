@@ -125,11 +125,15 @@ function ClientsSection({
   subtitle = "ALGUNOS DE NUESTROS CLIENTES",
   description = "Nuestro enfoque no es solo teórico: está basado en la práctica profesional real. En esta sección podés ver algunos de los proyectos desarrollados por nuestro estudio y por alumnos que aplicaron directamente lo aprendido en el curso. Modelados completos, documentación ejecutiva, detalles BIM y cómputos generados íntegramente en ArchiCAD."
 }: ClientsSectionProps) {
+  console.log('[ClientsSection] images received:', images.length, images.slice(0, 2));
+  
   const carouselItems = images.map((img) => ({
     id: img.id,
     src: img.url,
     alt: 'Proyecto realizado',
   }));
+  
+  console.log('[ClientsSection] carouselItems:', carouselItems.length, carouselItems[0]);
 
   return (
     <section className="py-16 sm:py-20" data-testid="section-clients">
