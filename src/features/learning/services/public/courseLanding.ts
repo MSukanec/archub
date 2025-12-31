@@ -187,6 +187,7 @@ export async function fetchCourseLandingBySlug(slug: string) {
         media_files!inner (
           bucket,
           file_path,
+          file_url,
           is_deleted
         )
       `)
@@ -195,40 +196,59 @@ export async function fetchCourseLandingBySlug(slug: string) {
       .eq('media_files.is_deleted', false)
       .order('position', { ascending: true });
 
-    if (!galleryError && galleryLinks) {
-      // Generate fresh URLs for each gallery image
-      const galleryItems = galleryLinks
-        .map((link: any) => {
-          const mediaFile = Array.isArray(link.media_files) 
-            ? link.media_files[0] 
-            : link.media_files;
-          if (!mediaFile?.bucket || !mediaFile?.file_path) return null;
-          return {
-            id: link.id,
-            bucket: mediaFile.bucket,
-            path: mediaFile.file_path,
-          };
-        })
-        .filter((item): item is { id: string; bucket: string; path: string } => item !== null);
+    console.log('[Gallery] Query result:', { 
+      count: galleryLinks?.length || 0, 
+      error: galleryError?.message,
+      sample: galleryLinks?.[0] 
+    });
 
-      // Generate URLs based on bucket type
-      for (const item of galleryItems) {
-        let url: string | null = null;
-        if (item.bucket === 'public-assets' || item.bucket === 'social-assets') {
-          // Public buckets - use direct URL
-          url = supabase.storage.from(item.bucket).getPublicUrl(item.path).data.publicUrl;
-        } else {
-          // Private buckets - generate signed URL (1 hour)
-          const { data } = await supabase.storage.from(item.bucket).createSignedUrl(item.path, 3600);
-          url = data?.signedUrl || null;
+    if (!galleryError && galleryLinks && galleryLinks.length > 0) {
+      // Generate fresh URLs for each gallery image
+      for (const link of galleryLinks) {
+        const mediaFile = Array.isArray(link.media_files) 
+          ? link.media_files[0] 
+          : link.media_files;
+        
+        if (!mediaFile) {
+          console.log('[Gallery] No media_files for link:', link.id);
+          continue;
         }
+
+        let url: string | null = null;
+        
+        // Try to generate fresh URL if we have bucket/path
+        if (mediaFile.bucket && mediaFile.file_path) {
+          try {
+            if (mediaFile.bucket === 'public-assets' || mediaFile.bucket === 'social-assets') {
+              url = supabase.storage.from(mediaFile.bucket).getPublicUrl(mediaFile.file_path).data.publicUrl;
+            } else {
+              const { data, error: signError } = await supabase.storage
+                .from(mediaFile.bucket)
+                .createSignedUrl(mediaFile.file_path, 3600);
+              if (signError) {
+                console.log('[Gallery] Sign URL error:', signError.message);
+              }
+              url = data?.signedUrl || null;
+            }
+          } catch (err) {
+            console.log('[Gallery] URL generation failed:', err);
+          }
+        }
+        
+        // Fallback to stored file_url if fresh URL generation failed
+        if (!url && mediaFile.file_url) {
+          url = mediaFile.file_url;
+        }
+        
         if (url) {
-          clientGallery.push({ id: item.id, url });
+          clientGallery.push({ id: link.id, url });
         }
       }
+      
+      console.log('[Gallery] Final count:', clientGallery.length);
     }
-  } catch {
-    console.log('Client gallery fetch failed - continuing without');
+  } catch (err) {
+    console.error('[Gallery] Fetch failed:', err);
   }
 
   return {
