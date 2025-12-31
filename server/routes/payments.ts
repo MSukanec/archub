@@ -1131,22 +1131,34 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
   app.delete("/api/admin/payments/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const authId = req.headers['x-auth-id'] as string;
+      const authHeader = req.headers.authorization;
       const adminClient = getAdminClient();
 
-      if (!authId) {
+      if (!authHeader?.startsWith("Bearer ")) {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
-      // Verify admin role
-      const { data: user, error: userError } = await adminClient
+      const token = authHeader.substring(7);
+      const authSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { persistSession: false } }
+      );
+
+      const { data: { user: authUser }, error: authError } = await authSupabase.auth.getUser(token);
+      if (authError || !authUser) {
+        return res.status(401).json({ error: "Invalid or expired token" });
+      }
+
+      // Get user from users table
+      const { data: dbUser, error: userError } = await adminClient
         .from('users')
-        .select('role')
-        .eq('auth_id', authId)
+        .select('id, role')
+        .eq('auth_id', authUser.id)
         .single();
 
-      if (userError || !user || user.role !== 'admin') {
-        return res.status(403).json({ error: "Forbidden" });
+      if (userError || !dbUser || dbUser.role !== 'admin') {
+        return res.status(403).json({ error: "Admin access required" });
       }
 
       // Delete the payment

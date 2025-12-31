@@ -295,17 +295,15 @@ const AdminPaymentsTab = () => {
           'bank_transfer': 'Transferencia',
           'manual': 'Manual'
         };
-        const providerColors: Record<string, string> = {
-          'mercadopago': '#00b3ff',
-          'paypal': '#0070ba',
-          'bank_transfer': '#6b7280',
-          'manual': '#6b7280'
-        };
         const provider = payment.provider?.toLowerCase() || '';
         return (
           <Badge 
-            variant="neutral"
             data-testid={`badge-provider-${payment.id}`}
+            className={
+              provider === 'mercadopago' ? 'bg-blue-600 text-white hover:bg-blue-700' :
+              provider === 'paypal' ? 'bg-emerald-600 text-white hover:bg-emerald-700' :
+              'bg-gray-600 text-white hover:bg-gray-700'
+            }
           >
             {providerLabels[provider] || payment.provider}
           </Badge>
