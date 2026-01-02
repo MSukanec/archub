@@ -55,39 +55,56 @@ export default function Onboarding() {
     saveOnboardingMutation.mutate();
   };
 
-  // Mutation to save all onboarding data via backend API
+  // Mutation to save all onboarding data
   const saveOnboardingMutation = useMutation({
     mutationFn: async () => {
       if (!userData?.user?.id) throw new Error('Usuario no encontrado');
       if (!supabase) throw new Error('Supabase no está configurado');
 
-      // Get the session token
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData?.session?.access_token) {
-        throw new Error('No hay sesión activa');
-      }
+      const userId = userData.user.id;
+      
+      // Debug: log the user ID being used
+      console.log('[Onboarding] Saving data for user_id:', userId);
 
-      // Call the backend API to complete onboarding
-      const response = await fetch('/api/onboarding/complete', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionData.session.access_token}`,
-        },
-        body: JSON.stringify({
+      // Update user_data table (record should already exist from signup trigger)
+      const { error: userDataError, count: userDataCount } = await supabase
+        .from('user_data')
+        .update({
           first_name: formData.first_name,
           last_name: formData.last_name,
           country: formData.country || null,
           birthdate: formData.birthdate || null,
-          theme: formData.theme,
-          organization_name: formData.organization_name || null,
-          organization_id: userData.organization?.id || null,
-        }),
-      });
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Error al guardar datos de onboarding');
+      console.log('[Onboarding] user_data update result:', { error: userDataError, count: userDataCount });
+      if (userDataError) throw userDataError;
+
+      // Update user_preferences table - do NOT set user_type here, user will choose in SelectMode
+      const { error: preferencesError, count: prefsCount } = await supabase
+        .from('user_preferences')
+        .update({
+          theme: formData.theme,
+          onboarding_completed: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId);
+
+      console.log('[Onboarding] user_preferences update result:', { error: preferencesError, count: prefsCount });
+      if (preferencesError) throw preferencesError;
+
+      // Update organization name if provided
+      if (formData.organization_name && userData.organization?.id) {
+        const { error: orgError } = await supabase
+          .from('organizations')
+          .update({
+            name: formData.organization_name,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', userData.organization.id);
+
+        if (orgError) throw orgError;
       }
 
       // Apply theme immediately
