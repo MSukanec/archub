@@ -134,7 +134,8 @@ export default function Onboarding() {
       });
     },
     onSuccess: () => {
-      // Don't set bypass flags yet - user needs to complete mode selection first
+      // Invalidate current-user to ensure organization name and other data are fresh
+      queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
       
       // Navigate to SelectMode page for user to choose their mode
       navigate('/select-mode');
