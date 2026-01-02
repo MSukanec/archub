@@ -73,6 +73,7 @@ CRITICAL PERFORMANCE REQUIREMENT: System must be INSTANTANEOUS. All cache invali
 - **View Name Translation System**: Centralized translator at `src/lib/view-name-translator.ts` for consistent page names across analytics and admin dashboard.
 - **Course Landing Pages**: Consolidated into 2 pages sharing the same view logic via `useCourseLandingView()` hook. Page-specific layouts determine presentation (public marketing layout vs. dashboard layout). Routes: `/cursos/:slug` (public) and `/learning/courses/:slug/info` (authenticated dashboard).
 - **Founders Landing Pages**: Dual-context pattern (public vs. private) using shared `FoundersContent` and `HeroSection` components from `@/features/shared-content/founders`. Routes: `/founders` (public marketing layout) and `/settings/founders` (dashboard layout). Components receive `mode="public"` or `mode="dashboard"` to control navigation behavior.
+- **Activity Logging System**: Comprehensive activity tracking via `src/utils/logActivity.ts` (frontend) and `server/lib/handlers/organization/logActivity.ts` (backend). Logs to `organization_activity_logs` table with user, action, target_table, target_id, and metadata. Covers: movements, projects, site_logs, contacts, construction_tasks, organization_members, project_clients, subcontracts, personnel, materials, material_purchases. Backfill script at `scripts/backfill-activity-logs.sql`.
 
 ## External Dependencies
 - **Supabase**: Authentication & User Acquisition tracking.

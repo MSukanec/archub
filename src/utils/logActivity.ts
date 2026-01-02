@@ -133,7 +133,8 @@ export const TARGET_TABLES = {
   MOVEMENTS: 'movements',
   SITE_LOGS: 'site_logs',
   DESIGN_DOCUMENTS: 'documents',
-  TASKS: 'tasks',
+  TASKS: 'construction_tasks', // Tareas de construcción (cómputos)
+  CONSTRUCTION_TASKS: 'construction_tasks', // Alias explícito
   KANBAN_CARDS: 'kanban_cards',
   CONTACTS: 'contacts',
   ORGANIZATION_MEMBERS: 'organization_members',
