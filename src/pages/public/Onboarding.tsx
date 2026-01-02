@@ -99,19 +99,35 @@ export default function Onboarding() {
       }
 
       // Update user_preferences table - do NOT set user_type here, user will choose in SelectMode
-      const { error: preferencesError } = await supabase
+      const { data: existingPrefs, error: checkPrefsError } = await supabase
         .from('user_preferences')
-        .update({
-          theme: formData.theme,
-          // Don't set last_user_type here - user must select mode in SelectMode page
-          onboarding_completed: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('user_id', userId);
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-      if (preferencesError) {
-        console.error('Error updating user preferences:', preferencesError);
-        throw preferencesError;
+      if (checkPrefsError) throw checkPrefsError;
+
+      const prefsPayload = {
+        theme: formData.theme,
+        onboarding_completed: true,
+        updated_at: new Date().toISOString(),
+      };
+
+      if (existingPrefs) {
+        const { error: preferencesError } = await supabase
+          .from('user_preferences')
+          .update(prefsPayload)
+          .eq('user_id', userId);
+        if (preferencesError) throw preferencesError;
+      } else {
+        const { error: preferencesError } = await supabase
+          .from('user_preferences')
+          .insert({
+            user_id: userId,
+            ...prefsPayload,
+            created_at: new Date().toISOString(),
+          });
+        if (preferencesError) throw preferencesError;
       }
 
       // Update organization name if provided
