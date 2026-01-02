@@ -650,4 +650,141 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
+  // Complete onboarding endpoint - handles all onboarding data in one transaction
+  app.post("/api/onboarding/complete", async (req, res) => {
+    try {
+      const {
+        first_name,
+        last_name,
+        country,
+        birthdate,
+        theme,
+        organization_name,
+        organization_id
+      } = req.body;
+
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Get the auth user
+      const { data: { user: authUser }, error: authError } = await authenticatedSupabase.auth.getUser();
+      if (authError || !authUser) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Get user_id from the database using auth_id
+      const { data: dbUser, error: dbUserError } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', authUser.id)
+        .maybeSingle();
+
+      if (dbUserError || !dbUser) {
+        console.error("Error finding user:", dbUserError);
+        return res.status(404).json({ error: "User not found in database" });
+      }
+
+      const userId = dbUser.id;
+
+      // 1. Handle user_data (upsert pattern)
+      const { data: existingUserData } = await authenticatedSupabase
+        .from('user_data')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      const userDataPayload: Record<string, any> = {
+        updated_at: new Date().toISOString(),
+      };
+      if (first_name !== undefined) userDataPayload.first_name = first_name;
+      if (last_name !== undefined) userDataPayload.last_name = last_name;
+      if (country !== undefined) userDataPayload.country = country || null;
+      if (birthdate !== undefined) userDataPayload.birthdate = birthdate || null;
+
+      if (existingUserData) {
+        const { error: userDataError } = await authenticatedSupabase
+          .from('user_data')
+          .update(userDataPayload)
+          .eq('user_id', userId);
+        if (userDataError) {
+          console.error("Error updating user_data:", userDataError);
+          return res.status(500).json({ error: "Failed to update user data", details: userDataError });
+        }
+      } else {
+        const { error: userDataError } = await authenticatedSupabase
+          .from('user_data')
+          .insert({
+            user_id: userId,
+            ...userDataPayload,
+            created_at: new Date().toISOString(),
+          });
+        if (userDataError) {
+          console.error("Error inserting user_data:", userDataError);
+          return res.status(500).json({ error: "Failed to insert user data", details: userDataError });
+        }
+      }
+
+      // 2. Handle user_preferences (upsert pattern)
+      const { data: existingPrefs } = await authenticatedSupabase
+        .from('user_preferences')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      const prefsPayload: Record<string, any> = {
+        onboarding_completed: true,
+        updated_at: new Date().toISOString(),
+      };
+      if (theme !== undefined) prefsPayload.theme = theme;
+
+      if (existingPrefs) {
+        const { error: prefsError } = await authenticatedSupabase
+          .from('user_preferences')
+          .update(prefsPayload)
+          .eq('user_id', userId);
+        if (prefsError) {
+          console.error("Error updating user_preferences:", prefsError);
+          return res.status(500).json({ error: "Failed to update preferences", details: prefsError });
+        }
+      } else {
+        const { error: prefsError } = await authenticatedSupabase
+          .from('user_preferences')
+          .insert({
+            user_id: userId,
+            ...prefsPayload,
+            created_at: new Date().toISOString(),
+          });
+        if (prefsError) {
+          console.error("Error inserting user_preferences:", prefsError);
+          return res.status(500).json({ error: "Failed to insert preferences", details: prefsError });
+        }
+      }
+
+      // 3. Update organization name if provided
+      if (organization_name && organization_id) {
+        const { error: orgError } = await authenticatedSupabase
+          .from('organizations')
+          .update({
+            name: organization_name,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', organization_id);
+
+        if (orgError) {
+          console.error("Error updating organization:", orgError);
+          return res.status(500).json({ error: "Failed to update organization", details: orgError });
+        }
+      }
+
+      res.json({ success: true, message: "Onboarding completed successfully" });
+    } catch (error) {
+      console.error("Error completing onboarding:", error);
+      res.status(500).json({ error: "Failed to complete onboarding" });
+    }
+  });
+
 }

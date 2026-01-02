@@ -55,95 +55,40 @@ export default function Onboarding() {
     saveOnboardingMutation.mutate();
   };
 
-  // Mutation to save all onboarding data
+  // Mutation to save all onboarding data via backend API
   const saveOnboardingMutation = useMutation({
     mutationFn: async () => {
       if (!userData?.user?.id) throw new Error('Usuario no encontrado');
-
-      const userId = userData.user.id;
-
       if (!supabase) throw new Error('Supabase no está configurado');
 
-      // Update user_data table  
-      const { data: existingUserData, error: checkError } = await supabase
-        .from('user_data')
-        .select('id')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (checkError) throw checkError;
-
-      const userDataPayload = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        country: formData.country || null,
-        birthdate: formData.birthdate || null,
-        updated_at: new Date().toISOString(),
-      };
-
-      if (existingUserData) {
-        const { error: userDataError } = await supabase
-          .from('user_data')
-          .update(userDataPayload)
-          .eq('user_id', userId);
-        if (userDataError) throw userDataError;
-      } else {
-        const { error: userDataError } = await supabase
-          .from('user_data')
-          .insert({
-            user_id: userId,
-            ...userDataPayload,
-            created_at: new Date().toISOString(),
-          });
-        if (userDataError) throw userDataError;
+      // Get the session token
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session?.access_token) {
+        throw new Error('No hay sesión activa');
       }
 
-      // Update user_preferences table - do NOT set user_type here, user will choose in SelectMode
-      const { data: existingPrefs, error: checkPrefsError } = await supabase
-        .from('user_preferences')
-        .select('id')
-        .eq('user_id', userId)
-        .maybeSingle();
+      // Call the backend API to complete onboarding
+      const response = await fetch('/api/onboarding/complete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionData.session.access_token}`,
+        },
+        body: JSON.stringify({
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          country: formData.country || null,
+          birthdate: formData.birthdate || null,
+          theme: formData.theme,
+          organization_name: formData.organization_name || null,
+          organization_id: userData.organization?.id || null,
+        }),
+      });
 
-      if (checkPrefsError) throw checkPrefsError;
-
-      const prefsPayload = {
-        theme: formData.theme,
-        onboarding_completed: true,
-        updated_at: new Date().toISOString(),
-      };
-
-      if (existingPrefs) {
-        const { error: preferencesError } = await supabase
-          .from('user_preferences')
-          .update(prefsPayload)
-          .eq('user_id', userId);
-        if (preferencesError) throw preferencesError;
-      } else {
-        const { error: preferencesError } = await supabase
-          .from('user_preferences')
-          .insert({
-            user_id: userId,
-            ...prefsPayload,
-            created_at: new Date().toISOString(),
-          });
-        if (preferencesError) throw preferencesError;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Error al guardar datos de onboarding');
       }
-
-      // Update organization name if provided
-      if (formData.organization_name && userData.organization?.id) {
-        const { error: orgError } = await supabase
-          .from('organizations')
-          .update({
-            name: formData.organization_name,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', userData.organization.id);
-
-        if (orgError) throw orgError;
-      }
-
-
 
       // Apply theme immediately
       setTheme(formData.theme === 'dark');
