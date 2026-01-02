@@ -65,18 +65,38 @@ export default function Onboarding() {
       if (!supabase) throw new Error('Supabase no está configurado');
 
       // Update user_data table  
-      const { error: userDataError } = await supabase
+      const { data: existingUserData, error: checkError } = await supabase
         .from('user_data')
-        .update({
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          country: formData.country || null,
-          birthdate: formData.birthdate || null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('user_id', userId);
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-      if (userDataError) throw userDataError;
+      if (checkError) throw checkError;
+
+      const userDataPayload = {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        country: formData.country || null,
+        birthdate: formData.birthdate || null,
+        updated_at: new Date().toISOString(),
+      };
+
+      if (existingUserData) {
+        const { error: userDataError } = await supabase
+          .from('user_data')
+          .update(userDataPayload)
+          .eq('user_id', userId);
+        if (userDataError) throw userDataError;
+      } else {
+        const { error: userDataError } = await supabase
+          .from('user_data')
+          .insert({
+            user_id: userId,
+            ...userDataPayload,
+            created_at: new Date().toISOString(),
+          });
+        if (userDataError) throw userDataError;
+      }
 
       // Update user_preferences table - do NOT set user_type here, user will choose in SelectMode
       const { error: preferencesError } = await supabase
