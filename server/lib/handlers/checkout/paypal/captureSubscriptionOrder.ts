@@ -150,25 +150,41 @@ async function handleRecurringSubscription(
   }
 
   let publicUserId: string | null = null;
-  const { data: userProfile, error: profileError } = await supabase
+  
+  // First try to find user by id (custom_id stores users.id since createSubscriptionOrder)
+  const { data: userById, error: userByIdError } = await supabase
     .from("users")
     .select("id")
-    .eq("auth_id", authId)
+    .eq("id", authId)
     .maybeSingle();
 
-  if (profileError || !userProfile) {
-    console.error("[PayPal capture-subscription] ❌ Failed to resolve auth_id to user_id:", {
-      authId,
-      error: profileError,
-    });
-    return {
-      success: true,
-      html: SUCCESS_HTML,
-      upgraded: false,
-    };
-  }
+  if (userById && !userByIdError) {
+    publicUserId = userById.id;
+    console.log("[PayPal capture-subscription] Found user by id:", publicUserId);
+  } else {
+    // Fallback: try to find by auth_id for backward compatibility
+    const { data: userByAuthId, error: authIdError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("auth_id", authId)
+      .maybeSingle();
 
-  publicUserId = userProfile.id;
+    if (userByAuthId && !authIdError) {
+      publicUserId = userByAuthId.id;
+      console.log("[PayPal capture-subscription] Found user by auth_id (fallback):", publicUserId);
+    } else {
+      console.error("[PayPal capture-subscription] ❌ Failed to resolve user:", {
+        userIdHint: authId,
+        byIdError: userByIdError,
+        byAuthIdError: authIdError,
+      });
+      return {
+        success: true,
+        html: SUCCESS_HTML,
+        upgraded: false,
+      };
+    }
+  }
 
   const billingInfo = subscription.billing_info;
   const lastPayment = billingInfo?.last_payment;
@@ -290,25 +306,41 @@ async function handleLegacyCaptureFlow(
     providerPaymentId
   ) {
     let publicUserId: string | null = null;
-    const { data: userProfile, error: profileError } = await supabase
+    
+    // First try to find user by id (custom_id stores users.id since createSubscriptionOrder)
+    const { data: userById, error: userByIdError } = await supabase
       .from("users")
       .select("id")
-      .eq("auth_id", authId)
+      .eq("id", authId)
       .maybeSingle();
 
-    if (profileError || !userProfile) {
-      console.error("[PayPal capture-subscription] ❌ Failed to resolve auth_id to user_id:", {
-        authId,
-        error: profileError,
-      });
-      return {
-        success: true,
-        html: SUCCESS_HTML,
-        upgraded: false,
-      };
+    if (userById && !userByIdError) {
+      publicUserId = userById.id;
+      console.log("[PayPal capture-subscription] Found user by id:", publicUserId);
+    } else {
+      // Fallback: try to find by auth_id for backward compatibility
+      const { data: userByAuthId, error: authIdError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("auth_id", authId)
+        .maybeSingle();
+
+      if (userByAuthId && !authIdError) {
+        publicUserId = userByAuthId.id;
+        console.log("[PayPal capture-subscription] Found user by auth_id (fallback):", publicUserId);
+      } else {
+        console.error("[PayPal capture-subscription] ❌ Failed to resolve user:", {
+          userIdHint: authId,
+          byIdError: userByIdError,
+          byAuthIdError: authIdError,
+        });
+        return {
+          success: true,
+          html: SUCCESS_HTML,
+          upgraded: false,
+        };
+      }
     }
-    
-    publicUserId = userProfile.id;
 
     await logPaymentEvent(supabase, "paypal", {
       providerEventId: providerPaymentId,

@@ -247,7 +247,100 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       const customId = resource?.custom_id;
       const subscriptionStatus = resource?.status;
 
-      console.log(`[PayPal webhook] Processing ${eventType}:`, { subscriptionId, subscriptionStatus });
+      console.log(`[PayPal webhook] Processing ${eventType}:`, { subscriptionId, subscriptionStatus, customId });
+
+      // === HANDLE SUBSCRIPTION ACTIVATED (new subscription or reactivation) ===
+      if (eventType === "BILLING.SUBSCRIPTION.ACTIVATED") {
+        // Parse custom_id: format is "user_id|plan_id|organization_id|billing_period"
+        if (!customId || !customId.includes("|")) {
+          console.error("[PayPal webhook] ❌ Missing or invalid custom_id for ACTIVATED:", customId);
+          return { success: true, processed: false, eventType };
+        }
+
+        const parts = customId.split("|");
+        if (parts.length !== 4) {
+          console.error("[PayPal webhook] ❌ Invalid custom_id format for ACTIVATED:", customId);
+          return { success: true, processed: false, eventType };
+        }
+
+        const [userIdHint, planIdHint, orgIdHint, billingPeriodHint] = parts;
+
+        if (!userIdHint || !planIdHint || !orgIdHint || !billingPeriodHint) {
+          console.error("[PayPal webhook] ❌ Missing required fields in custom_id:", { userIdHint, planIdHint, orgIdHint, billingPeriodHint });
+          return { success: true, processed: false, eventType };
+        }
+
+        // Resolve user: first try by id, then by auth_id (for backward compatibility)
+        let publicUserId: string | null = null;
+        const { data: userById } = await supabase
+          .from("users")
+          .select("id")
+          .eq("id", userIdHint)
+          .maybeSingle();
+
+        if (userById) {
+          publicUserId = userById.id;
+          console.log("[PayPal webhook] Found user by id:", publicUserId);
+        } else {
+          const { data: userByAuthId } = await supabase
+            .from("users")
+            .select("id")
+            .eq("auth_id", userIdHint)
+            .maybeSingle();
+
+          if (userByAuthId) {
+            publicUserId = userByAuthId.id;
+            console.log("[PayPal webhook] Found user by auth_id (fallback):", publicUserId);
+          }
+        }
+
+        if (!publicUserId) {
+          console.error("[PayPal webhook] ❌ Could not resolve user for ACTIVATED:", userIdHint);
+          return { success: true, processed: false, eventType };
+        }
+
+        // Get amount from billing info
+        const billingInfo = resource?.billing_info;
+        const lastPayment = billingInfo?.last_payment;
+        const amountValue = parseFloat(lastPayment?.amount?.value || "0");
+        const currencyCode = lastPayment?.amount?.currency_code || "USD";
+
+        console.log("[PayPal webhook] Calling handle_payment_subscription_success for ACTIVATED:", {
+          provider: 'paypal',
+          provider_payment_id: subscriptionId,
+          user_id: publicUserId,
+          organization_id: orgIdHint,
+          plan_id: planIdHint,
+          billing_period: billingPeriodHint,
+        });
+
+        const metadata = {
+          subscription_id: subscriptionId,
+          custom_id: customId,
+          event_type: eventType,
+          billing_info: billingInfo,
+        };
+
+        const { data: rpcResult, error: rpcError } = await supabase.rpc('handle_payment_subscription_success', {
+          p_provider: 'paypal',
+          p_provider_payment_id: subscriptionId,
+          p_user_id: publicUserId,
+          p_organization_id: orgIdHint,
+          p_plan_id: planIdHint,
+          p_billing_period: billingPeriodHint as "monthly" | "annual",
+          p_amount: amountValue,
+          p_currency: currencyCode,
+          p_metadata: metadata,
+        });
+
+        if (rpcError) {
+          console.error("[PayPal webhook] ❌ RPC error for ACTIVATED:", rpcError);
+          return { success: false, error: "rpc_error", warn: rpcError.message };
+        }
+
+        console.log("[PayPal webhook] ✅ BILLING.SUBSCRIPTION.ACTIVATED processed successfully:", rpcResult);
+        return { success: true, processed: true, eventType };
+      }
 
       if (eventType === "BILLING.SUBSCRIPTION.CANCELLED" || eventType === "BILLING.SUBSCRIPTION.SUSPENDED") {
         const metadata = {
