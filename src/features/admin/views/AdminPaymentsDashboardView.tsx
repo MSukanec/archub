@@ -1,9 +1,8 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { DollarSign, TrendingUp, CreditCard, BarChart3, PieChart, Clock } from 'lucide-react';
+import { DollarSign, TrendingUp, CreditCard, BarChart3, Clock } from 'lucide-react';
 import { AppCard, AppCardTitle, AppCardValue, AppCardMeta, AppCardTrend } from '@/components/shared/AppCard';
 import { MonthlyTrendChart } from '@/components/charts/line/AreaTrendChart';
-import { DonutChart } from '@/components/charts/pie/DonutChart';
 import { ActivityCard, type ActivityItem, type TrendDirection } from '@/components';
 import { calculateMonetaryKPI, calculateCountKPI } from '@/lib/kpis';
 import { Badge, type BadgeVariant } from '@/components/ui/badge';
@@ -249,21 +248,18 @@ export default function AdminPaymentsDashboardView({
       .sort((a, b) => a.month.localeCompare(b.month));
   }, [filteredPayments, exchangeRate]);
 
-  const providerChartData = useMemo(() => {
-    const providerLabels: Record<string, string> = {
-      'mercadopago': 'Mercado Pago',
-      'paypal': 'PayPal',
-      'bank_transfer': 'Transferencia',
-      'manual': 'Manual'
-    };
-
-    return Object.entries(kpis.providerCounts)
-      .map(([key, value]) => ({
-        label: providerLabels[key] || key,
-        value
-      }))
-      .sort((a, b) => b.value - a.value);
-  }, [kpis.providerCounts]);
+  const cumulativeChartData = useMemo(() => {
+    if (monthlyChartData.length === 0) return [];
+    
+    let runningTotal = 0;
+    return monthlyChartData.map(item => {
+      runningTotal += item.value;
+      return {
+        month: item.month,
+        value: runningTotal
+      };
+    });
+  }, [monthlyChartData]);
 
   const recentActivityItems = useMemo((): ActivityItem[] => {
     return [...filteredPayments]
@@ -392,15 +388,16 @@ export default function AdminPaymentsDashboardView({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <AppCard 
-          title="Evolución Mensual"
-          icon={<BarChart3 className="h-4 w-4" />}
-          data-testid="chart-monthly-trend"
+          title="Ingresos Totales Acumulados"
+          icon={<TrendingUp className="h-4 w-4" />}
+          data-testid="chart-cumulative-revenue"
         >
-          {monthlyChartData.length > 0 ? (
+          {cumulativeChartData.length > 0 ? (
             <MonthlyTrendChart 
-              data={monthlyChartData} 
+              data={cumulativeChartData} 
               height={280}
               valueFormatter={(value) => formatUSD(value)}
+              color="var(--chart-2)"
             />
           ) : (
             <div className="h-[280px] flex items-center justify-center text-muted-foreground">
@@ -410,14 +407,15 @@ export default function AdminPaymentsDashboardView({
         </AppCard>
 
         <AppCard 
-          title="Distribución por Proveedor"
-          icon={<PieChart className="h-4 w-4" />}
-          data-testid="chart-provider-distribution"
+          title="Evolución Mensual"
+          icon={<BarChart3 className="h-4 w-4" />}
+          data-testid="chart-monthly-trend"
         >
-          {providerChartData.length > 0 ? (
-            <DonutChart 
-              data={providerChartData} 
+          {monthlyChartData.length > 0 ? (
+            <MonthlyTrendChart 
+              data={monthlyChartData} 
               height={280}
+              valueFormatter={(value) => formatUSD(value)}
             />
           ) : (
             <div className="h-[280px] flex items-center justify-center text-muted-foreground">

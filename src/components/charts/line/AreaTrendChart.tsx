@@ -141,10 +141,7 @@ export function MonthlyTrendChart({
                   <div className="rounded-lg p-3 shadow-lg border border-border bg-popover text-popover-foreground">
                     <p className="font-medium text-sm mb-1 capitalize">{monthLabel}</p>
                     <p className="text-sm opacity-80">
-                      {new Intl.NumberFormat('es-AR', {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0
-                      }).format(payload[0].value as number)}
+                      {valueFormatter(payload[0].value as number)}
                     </p>
                   </div>
                 )
