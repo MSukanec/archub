@@ -41,12 +41,14 @@ export function useCreateProjectClient() {
       projectId,
       organizationId,
       createdBy,
+      userId,
     }: {
       projectClient: Omit<ProjectClient, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>;
       projectId: string;
       organizationId: string;
       createdBy: string;
-    }) => createProjectClient(projectClient, projectId, organizationId, createdBy),
+      userId?: string;
+    }) => createProjectClient(projectClient, projectId, organizationId, createdBy, userId),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: CLIENT_QUERY_KEYS.projectClients(data.project_id),
@@ -66,11 +68,13 @@ export function useUpdateProjectClient() {
       clientId,
       updates,
       organizationId,
+      userId,
     }: {
       clientId: string;
       updates: Partial<Omit<ProjectClient, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>>;
       organizationId: string;
-    }) => updateProjectClient(clientId, updates, organizationId),
+      userId?: string;
+    }) => updateProjectClient(clientId, updates, organizationId, userId),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: CLIENT_QUERY_KEYS.projectClients(data.project_id),
@@ -93,11 +97,13 @@ export function useDeleteProjectClient() {
       clientId,
       organizationId,
       projectId,
+      userId,
     }: {
       clientId: string;
       organizationId: string;
       projectId: string;
-    }) => deleteProjectClient(clientId, organizationId),
+      userId?: string;
+    }) => deleteProjectClient(clientId, organizationId, userId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: CLIENT_QUERY_KEYS.projectClients(variables.projectId),

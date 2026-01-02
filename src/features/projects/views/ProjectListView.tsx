@@ -23,6 +23,7 @@ import { es } from 'date-fns/locale'
 import { useActionBarMobile } from '@/layouts'
 import { useMobile } from '@/hooks/use-mobile'
 import { ProjectRow } from '@/features/projects/components/ProjectRow'
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity'
 
 export function ProjectListView() {
   const { openModal } = useGlobalModalStore()
@@ -293,7 +294,7 @@ export function ProjectListView() {
       itemDetails: itemDetails,
       itemType: 'proyecto',
       destructiveActionText: 'Eliminar',
-      onConfirm: () => deleteProject(project.id),
+      onConfirm: () => deleteProject({ projectId: project.id, projectName: project.name }),
       isLoading: isDeleting
     });
   }
@@ -435,7 +436,7 @@ export function ProjectListView() {
 
   // Delete project mutation
   const { mutate: deleteProject, isPending: isDeleting } = useOptimisticMutation({
-    mutationFn: async (projectId: string) => {
+    mutationFn: async ({ projectId, projectName }: { projectId: string; projectName: string }) => {
       // If deleting active project, find previous by last_active_at, fallback to created_at
       if (projectId === activeProjectId && projects.length > 1) {
         const otherProjects = projects
@@ -485,10 +486,22 @@ export function ProjectListView() {
         throw new Error(errorData.error || 'Failed to delete project')
       }
       
+      // Log activity after successful deletion
+      if (organizationId && userData?.user?.id) {
+        logActivity({
+          organization_id: organizationId,
+          user_id: userData.user.id,
+          action: ACTIVITY_ACTIONS.DELETE_PROJECT,
+          target_table: TARGET_TABLES.PROJECTS,
+          target_id: projectId,
+          metadata: { name: projectName }
+        });
+      }
+      
       return await response.json()
     },
     queryKey: projectsKeys.list(userData?.organization?.id),
-    optimisticUpdate: (oldData, projectId) => {
+    optimisticUpdate: (oldData, { projectId }) => {
       if (!oldData) return oldData;
       return oldData.filter((project: any) => project.id !== projectId);
     },

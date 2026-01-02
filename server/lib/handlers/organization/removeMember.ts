@@ -3,6 +3,7 @@ import { HttpError } from "../../auth/helpers.js";
 import { registerMemberEvent } from "../../billing/events.js";
 import { suspendUserBonusCourseEnrollment } from "../checkout/shared/user-enrollments.js";
 import { isPrivilegedRole, isOwnerRole } from "./roleHelpers.js";
+import { logOrganizationActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from "./logActivity.js";
 
 export interface RemoveMemberParams {
   organizationId: string;
@@ -132,6 +133,15 @@ export async function removeMember(
     wasBillable: member.is_billable,
     isBillable: false,
     performedBy: performedByUserId,
+  });
+
+  await logOrganizationActivity(supabase, {
+    organization_id: organizationId,
+    user_id: performedByUserId,
+    action: ACTIVITY_ACTIONS.REMOVE_MEMBER,
+    target_table: TARGET_TABLES.ORGANIZATION_MEMBERS,
+    target_id: member.id,
+    metadata: { removed_user_id: member.user_id }
   });
 
   console.log(`[removeMember] Member ${memberId} removed from org ${organizationId}, enrollment suspended: ${enrollmentResult.suspended}`);

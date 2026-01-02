@@ -128,6 +128,7 @@ export function ClientListView({ projectId }: ClientListViewProps) {
             clientId: client.id,
             organizationId,
             projectId: activeProjectId!,
+            userId: userData?.user?.id,
           });
           toast({
             title: 'Cliente eliminado',

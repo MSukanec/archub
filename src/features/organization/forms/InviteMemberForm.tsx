@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/features/users/hooks';
 import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
 import { organizationKeys } from '@/core/query-keys';
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -265,6 +266,21 @@ export function InviteMemberForm({
         .select();
 
       if (error) throw error;
+
+      if (effectiveOrgId && userData?.user?.id) {
+        logActivity({
+          organization_id: effectiveOrgId,
+          user_id: userData.user.id,
+          action: ACTIVITY_ACTIONS.UPDATE_MEMBER,
+          target_table: TARGET_TABLES.ORGANIZATION_MEMBERS,
+          target_id: editingMember.id,
+          metadata: { 
+            new_role_id: memberData.roleId,
+            email: editingMember.users?.email 
+          }
+        });
+      }
+
       return data;
     },
     queryKey: organizationKeys.members(effectiveOrgId),

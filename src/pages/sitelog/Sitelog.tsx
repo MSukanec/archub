@@ -12,6 +12,7 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from "@/components/modal";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
 
 import SitelogEntriesTab from './SitelogEntriesTab';
 import SitelogMedia from './SitelogMedia';
@@ -50,7 +51,7 @@ export default function Sitelog() {
 
   // Mutation para eliminar bitácora
   const deleteSiteLogMutation = useMutation({
-    mutationFn: async (siteLogId: string) => {
+    mutationFn: async ({ siteLogId, siteLogDate }: { siteLogId: string; siteLogDate?: string }) => {
       if (!supabase) throw new Error('Supabase client not available');
       
       const { error } = await supabase
@@ -59,8 +60,10 @@ export default function Sitelog() {
         .eq('id', siteLogId);
 
       if (error) throw error;
+      
+      return { siteLogId, siteLogDate };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['site-logs'] });
       queryClient.invalidateQueries({ queryKey: ['sitelog-timeline'] });
       queryClient.invalidateQueries({ queryKey: ['attendance-data'] });
@@ -69,6 +72,18 @@ export default function Sitelog() {
         title: "Entrada eliminada",
         description: "La entrada de bitácora ha sido eliminada correctamente",
       });
+      
+      // Log activity after successful deletion
+      if (currentOrganizationId && userData?.user?.id) {
+        logActivity({
+          organization_id: currentOrganizationId,
+          user_id: userData.user.id,
+          action: ACTIVITY_ACTIONS.DELETE_SITE_LOG,
+          target_table: TARGET_TABLES.SITE_LOGS,
+          target_id: data.siteLogId,
+          metadata: { date: data.siteLogDate }
+        });
+      }
     },
     onError: (error) => {
 
@@ -127,7 +142,7 @@ export default function Sitelog() {
       title: 'Eliminar entrada de bitácora',
       description: '¿Estás seguro de que quieres eliminar esta entrada de bitácora? Esta acción no se puede deshacer.',
       destructiveActionText: 'Eliminar entrada',
-      onConfirm: () => deleteSiteLogMutation.mutate(siteLog.id),
+      onConfirm: () => deleteSiteLogMutation.mutate({ siteLogId: siteLog.id, siteLogDate: siteLog.log_date }),
       isLoading: deleteSiteLogMutation.isPending
     });
   };

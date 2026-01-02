@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { ProjectClient, ProjectClientWithRelations } from '../types';
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
 
 /**
  * Obtiene todos los clientes de un proyecto con sus relaciones.
@@ -64,6 +65,7 @@ export async function getProjectClientById(
  * @param projectId - ID del proyecto
  * @param organizationId - ID de la organización
  * @param createdBy - ID del miembro de organización que crea el registro
+ * @param userId - ID del usuario para logging de actividad (opcional)
  * @returns Cliente creado con sus relaciones
  * @throws {Error} Si falla la creación
  */
@@ -71,7 +73,8 @@ export async function createProjectClient(
   projectClient: Omit<ProjectClient, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>,
   projectId: string,
   organizationId: string,
-  createdBy: string
+  createdBy: string,
+  userId?: string
 ): Promise<ProjectClientWithRelations> {
   const { data, error } = await supabase
     .from('project_clients')
@@ -127,11 +130,25 @@ export async function createProjectClient(
     throw error;
   }
 
-  return {
+  const result = {
     ...data,
     contact: data.contact && !data.contact.is_deleted ? data.contact : null,
     role: data.role && !data.role.is_deleted ? data.role : null,
   };
+
+  if (userId) {
+    const contactName = result.contact?.full_name || result.contact?.company_name || '';
+    logActivity({
+      organization_id: organizationId,
+      user_id: userId,
+      action: ACTIVITY_ACTIONS.ADD_CLIENT,
+      target_table: TARGET_TABLES.PROJECT_CLIENTS,
+      target_id: result.id,
+      metadata: { name: contactName, project_id: projectId }
+    });
+  }
+
+  return result;
 }
 
 /**
@@ -140,13 +157,15 @@ export async function createProjectClient(
  * @param clientId - ID del cliente a actualizar
  * @param updates - Campos a actualizar
  * @param organizationId - ID de la organización
+ * @param userId - ID del usuario para logging de actividad (opcional)
  * @returns Cliente actualizado con sus relaciones
  * @throws {Error} Si falla la actualización
  */
 export async function updateProjectClient(
   clientId: string,
   updates: Partial<Omit<ProjectClient, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by' | 'is_deleted' | 'deleted_at'>>,
-  organizationId: string
+  organizationId: string,
+  userId?: string
 ): Promise<ProjectClientWithRelations> {
   const { data, error } = await supabase
     .from('project_clients')
@@ -201,11 +220,25 @@ export async function updateProjectClient(
     throw error;
   }
 
-  return {
+  const result = {
     ...data,
     contact: data.contact && !data.contact.is_deleted ? data.contact : null,
     role: data.role && !data.role.is_deleted ? data.role : null,
   };
+
+  if (userId) {
+    const contactName = result.contact?.full_name || result.contact?.company_name || '';
+    logActivity({
+      organization_id: organizationId,
+      user_id: userId,
+      action: ACTIVITY_ACTIONS.UPDATE_CLIENT,
+      target_table: TARGET_TABLES.PROJECT_CLIENTS,
+      target_id: clientId,
+      metadata: { name: contactName, project_id: result.project_id }
+    });
+  }
+
+  return result;
 }
 
 /**
@@ -216,13 +249,30 @@ export async function updateProjectClient(
  * 
  * @param clientId - ID del cliente a eliminar
  * @param organizationId - ID de la organización
+ * @param userId - ID del usuario para logging de actividad (opcional)
  * @returns true si se eliminó correctamente
  * @throws {Error} Si falla la eliminación
  */
 export async function deleteProjectClient(
   clientId: string,
-  organizationId: string
+  organizationId: string,
+  userId?: string
 ): Promise<boolean> {
+  let clientData: any = null;
+  if (userId) {
+    const { data } = await supabase
+      .from('project_clients')
+      .select(`
+        id,
+        project_id,
+        contact:contacts(full_name, company_name)
+      `)
+      .eq('id', clientId)
+      .eq('organization_id', organizationId)
+      .single();
+    clientData = data;
+  }
+
   const { error } = await supabase
     .from('project_clients')
     .update({
@@ -234,6 +284,18 @@ export async function deleteProjectClient(
 
   if (error) {
     throw error;
+  }
+
+  if (userId && clientData) {
+    const contactName = clientData.contact?.full_name || clientData.contact?.company_name || '';
+    logActivity({
+      organization_id: organizationId,
+      user_id: userId,
+      action: ACTIVITY_ACTIONS.REMOVE_CLIENT,
+      target_table: TARGET_TABLES.PROJECT_CLIENTS,
+      target_id: clientId,
+      metadata: { name: contactName, project_id: clientData.project_id }
+    });
   }
 
   return true;

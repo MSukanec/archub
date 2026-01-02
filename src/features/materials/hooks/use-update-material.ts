@@ -9,14 +9,16 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateMaterial } from '../services/updateMaterial';
 import { MATERIALS_QUERY_KEYS } from '../constants';
 import { toast } from '@/hooks/use-toast';
+import { useAuthStore } from '@/stores/authStore';
 import type { UpdateMaterialData } from '../types';
 
 export function useUpdateMaterial() {
   const queryClient = useQueryClient();
+  const user = useAuthStore((state) => state.user);
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateMaterialData }) => 
-      updateMaterial(id, data),
+      updateMaterial(id, data, { organization_id: data.organization_id, user_id: user?.id }),
     onSuccess: (_, variables) => {
       // Comprehensive cache invalidation to prevent stale data
       queryClient.invalidateQueries({ queryKey: MATERIALS_QUERY_KEYS.all });

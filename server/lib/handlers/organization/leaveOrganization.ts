@@ -3,6 +3,7 @@ import { HttpError } from "../../auth/helpers.js";
 import { registerMemberEvent } from "../../billing/events.js";
 import { suspendUserBonusCourseEnrollment } from "../checkout/shared/user-enrollments.js";
 import { isPrivilegedRole, isOwnerRole } from "./roleHelpers.js";
+import { logOrganizationActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from "./logActivity.js";
 
 export interface LeaveOrganizationParams {
   organizationId: string;
@@ -98,6 +99,15 @@ export async function leaveOrganization(
     wasBillable: member.is_billable,
     isBillable: false,
     performedBy: userId,
+  });
+
+  await logOrganizationActivity(supabase, {
+    organization_id: organizationId,
+    user_id: userId,
+    action: ACTIVITY_ACTIONS.REMOVE_MEMBER,
+    target_table: TARGET_TABLES.ORGANIZATION_MEMBERS,
+    target_id: member.id,
+    metadata: { left_voluntarily: true }
   });
 
   console.log(`[leaveOrganization] User ${userId} left org ${organizationId}, enrollment suspended: ${enrollmentResult.suspended}`);

@@ -8,6 +8,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/features/users/hooks';
 import { CLIENT_QUERY_KEYS } from '@/features/clients/constants';
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -477,7 +478,7 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
         });
       }
     },
-    onSuccess: async () => {
+    onSuccess: async (response, variables) => {
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: CLIENT_QUERY_KEYS.dashboard(projectId),
@@ -498,6 +499,28 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
           })
         ] : []),
       ]);
+      
+      if (userData?.user?.id && organizationId) {
+        try {
+          const responseData = await response.json();
+          const targetId = isEditing ? clientId : responseData?.data?.id || responseData?.id;
+          const selectedContact = contacts.find((c: any) => c.id === variables.contactId);
+          const clientName = selectedContact?.full_name || selectedContact?.company_name || existingClient?.contacts?.full_name || '';
+          
+          if (targetId) {
+            logActivity({
+              organization_id: organizationId,
+              user_id: userData.user.id,
+              action: isEditing ? ACTIVITY_ACTIONS.UPDATE_CLIENT : ACTIVITY_ACTIONS.ADD_CLIENT,
+              target_table: TARGET_TABLES.PROJECT_CLIENTS,
+              target_id: targetId,
+              metadata: { name: clientName, project_id: projectId }
+            });
+          }
+        } catch (e) {
+          console.debug('Could not log client activity:', e);
+        }
+      }
       
       toast({
         title: isEditing ? 'Cliente actualizado' : 'Cliente agregado',

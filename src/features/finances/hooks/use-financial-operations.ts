@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { financesKeys } from '@/core/query-keys'
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity'
 
 export interface FinancialOperation {
   id: string
@@ -107,10 +108,19 @@ export function useCreateWalletTransfer() {
 
       return operation
     },
-    onSuccess: (_, variables) => {
+    onSuccess: async (data, variables) => {
       queryClient.invalidateQueries({ queryKey: financesKeys.operationsList(variables.organization_id) })
       queryClient.invalidateQueries({ queryKey: financesKeys.unifiedMovementsList(variables.organization_id) })
       queryClient.invalidateQueries({ queryKey: financesKeys.walletsList(variables.organization_id) })
+
+      await logActivity({
+        organization_id: variables.organization_id,
+        user_id: variables.created_by_user_id,
+        action: ACTIVITY_ACTIONS.CREATE_MOVEMENT,
+        target_table: TARGET_TABLES.MOVEMENTS,
+        target_id: data.id,
+        metadata: { amount: variables.amount, description: variables.description, type: 'wallet_transfer' }
+      })
     },
   })
 }
@@ -170,10 +180,19 @@ export function useCreateCurrencyExchange() {
 
       return operation
     },
-    onSuccess: (_, variables) => {
+    onSuccess: async (data, variables) => {
       queryClient.invalidateQueries({ queryKey: financesKeys.operationsList(variables.organization_id) })
       queryClient.invalidateQueries({ queryKey: financesKeys.unifiedMovementsList(variables.organization_id) })
       queryClient.invalidateQueries({ queryKey: financesKeys.walletsList(variables.organization_id) })
+
+      await logActivity({
+        organization_id: variables.organization_id,
+        user_id: variables.created_by_user_id,
+        action: ACTIVITY_ACTIONS.CREATE_MOVEMENT,
+        target_table: TARGET_TABLES.MOVEMENTS,
+        target_id: data.id,
+        metadata: { amount: variables.source_amount, description: variables.description, type: 'currency_exchange', exchange_rate: variables.exchange_rate }
+      })
     },
   })
 }

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
 
 // Interfaz actualizada para la vista CONSTRUCTION_TASKS_VIEW
 export interface ConstructionTaskView {
@@ -346,6 +347,14 @@ export function useCreateConstructionTask() {
       queryClient.invalidateQueries({ 
         queryKey: ['construction-materials', data.project_id] 
       });
+      logActivity({
+        organization_id: data.organization_id,
+        user_id: data.created_by,
+        action: ACTIVITY_ACTIONS.CREATE_TASK,
+        target_table: TARGET_TABLES.TASKS,
+        target_id: data.id,
+        metadata: { description: data.description }
+      });
       toast({
         title: "Cómputo agregado",
         description: "El cómputo se agregó correctamente al proyecto",
@@ -504,6 +513,14 @@ export function useUpdateConstructionTask() {
       queryClient.invalidateQueries({ 
         queryKey: ['construction-dependencies'] 
       });
+      logActivity({
+        organization_id: data.organization_id,
+        user_id: data.created_by,
+        action: ACTIVITY_ACTIONS.UPDATE_TASK,
+        target_table: TARGET_TABLES.TASKS,
+        target_id: data.id,
+        metadata: { description: data.description }
+      });
       
       // Solo mostrar toast para operaciones que no sean cost_scope
       const isOnlyCostScope = Object.keys(data).length <= 4 && 'cost_scope' in data;
@@ -644,6 +661,7 @@ export function useDeleteConstructionTask() {
       id: string;
       project_id: string;
       organization_id: string;
+      created_by?: string;
     }) => {
       if (!supabase) throw new Error('Supabase not initialized');
 
@@ -675,6 +693,16 @@ export function useDeleteConstructionTask() {
       queryClient.invalidateQueries({ 
         queryKey: ['construction-dependencies'] 
       });
+      if (data.created_by) {
+        logActivity({
+          organization_id: data.organization_id,
+          user_id: data.created_by,
+          action: ACTIVITY_ACTIONS.DELETE_TASK,
+          target_table: TARGET_TABLES.TASKS,
+          target_id: data.id,
+          metadata: {}
+        });
+      }
       toast({
         title: "Cómputo eliminado",
         description: "El cómputo se eliminó correctamente del proyecto",

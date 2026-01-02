@@ -9,12 +9,29 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteMaterial } from '../services/deleteMaterial';
 import { MATERIALS_QUERY_KEYS } from '../constants';
 import { toast } from '@/hooks/use-toast';
+import { useAuthStore } from '@/stores/authStore';
+
+interface DeleteMaterialParams {
+  id: string;
+  organization_id?: string;
+  name?: string;
+}
 
 export function useDeleteMaterial() {
   const queryClient = useQueryClient();
+  const user = useAuthStore((state) => state.user);
 
   return useMutation({
-    mutationFn: (id: string) => deleteMaterial(id),
+    mutationFn: (params: string | DeleteMaterialParams) => {
+      if (typeof params === 'string') {
+        return deleteMaterial(params);
+      }
+      return deleteMaterial(params.id, { 
+        organization_id: params.organization_id, 
+        user_id: user?.id,
+        name: params.name 
+      });
+    },
     onSuccess: () => {
       // Comprehensive cache invalidation to prevent stale data
       queryClient.invalidateQueries({ queryKey: MATERIALS_QUERY_KEYS.all });

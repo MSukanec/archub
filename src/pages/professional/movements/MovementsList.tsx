@@ -59,6 +59,7 @@ import { useMobile } from "@/hooks/use-mobile";
 import { useProjectContext } from "@/stores/projectContext";
 import { MovementKPICardsWithWallets } from "@/features/finances/components/MovementKPICardsWithWallets";
 import { exportToExcel } from "@/lib/export-utils";
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from "@/utils/logActivity";
 
 interface Movement {
   id: string;
@@ -262,7 +263,7 @@ export default function MovementsList() {
         return { isConversion: false, isTransfer: false, count: 1 };
       }
     },
-    onSuccess: (result) => {
+    onSuccess: async (result, movementOrId) => {
       // Invalidate movements queries
       queryClient.invalidateQueries({ queryKey: ["movements"] });
       
@@ -285,6 +286,21 @@ export default function MovementsList() {
             ? "La transferencia completa ha sido eliminada correctamente"
             : "El movimiento ha sido eliminado correctamente",
       });
+
+      if (organizationId && userData?.user?.id) {
+        const movementId = typeof movementOrId === 'string' ? movementOrId : movementOrId.id;
+        const movementDescription = typeof movementOrId === 'object' ? movementOrId.description : undefined;
+        const movementAmount = typeof movementOrId === 'object' ? movementOrId.amount : undefined;
+        
+        await logActivity({
+          organization_id: organizationId,
+          user_id: userData.user.id,
+          action: ACTIVITY_ACTIONS.DELETE_MOVEMENT,
+          target_table: TARGET_TABLES.MOVEMENTS,
+          target_id: movementId,
+          metadata: { amount: movementAmount, description: movementDescription, count: result.count }
+        });
+      }
     },
     onError: (error: any) => {
       toast({
@@ -305,8 +321,9 @@ export default function MovementsList() {
         .eq("organization_id", organizationId);
 
       if (error) throw error;
+      return movementIds;
     },
-    onSuccess: () => {
+    onSuccess: async (deletedIds) => {
       // Invalidate movements queries
       queryClient.invalidateQueries({ queryKey: ["movements"] });
       
@@ -322,6 +339,19 @@ export default function MovementsList() {
         title: "Movimientos eliminados",
         description: `${selectedMovements.length} movimientos han sido eliminados correctamente`,
       });
+
+      if (organizationId && userData?.user?.id && deletedIds.length > 0) {
+        for (const movementId of deletedIds) {
+          await logActivity({
+            organization_id: organizationId,
+            user_id: userData.user.id,
+            action: ACTIVITY_ACTIONS.DELETE_MOVEMENT,
+            target_table: TARGET_TABLES.MOVEMENTS,
+            target_id: movementId,
+            metadata: { bulk_delete: true, total_deleted: deletedIds.length }
+          });
+        }
+      }
     },
     onError: (error: any) => {
       toast({

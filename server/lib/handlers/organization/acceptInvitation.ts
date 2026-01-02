@@ -3,6 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { HttpError } from "../../auth/helpers.js";
 import { registerMemberEvent } from "../../billing/events.js";
 import { reactivateUserBonusCourseEnrollment } from "../checkout/shared/user-enrollments.js";
+import { logOrganizationActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from "./logActivity.js";
 
 export async function acceptInvitation(
   supabase: SupabaseClient,
@@ -91,6 +92,15 @@ export async function acceptInvitation(
         isBillable: existingMember.is_billable,
         performedBy: userId,
       });
+
+      await logOrganizationActivity(supabase, {
+        organization_id: invitation.organization_id,
+        user_id: userId,
+        action: ACTIVITY_ACTIONS.ADD_MEMBER,
+        target_table: TARGET_TABLES.ORGANIZATION_MEMBERS,
+        target_id: existingMember.id,
+        metadata: { reactivated: true }
+      });
     }
 
     // Mark invitation as accepted
@@ -155,6 +165,15 @@ export async function acceptInvitation(
     wasBillable: null,
     isBillable: newMember.is_billable,
     performedBy: userId,
+  });
+
+  await logOrganizationActivity(supabase, {
+    organization_id: invitation.organization_id,
+    user_id: userId,
+    action: ACTIVITY_ACTIONS.ADD_MEMBER,
+    target_table: TARGET_TABLES.ORGANIZATION_MEMBERS,
+    target_id: newMember.id,
+    metadata: { reactivated: false }
   });
 
   return { success: true };

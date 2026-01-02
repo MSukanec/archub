@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
+import { useAuthStore } from '@/stores/authStore';
 
 export interface MaterialPurchase {
   id: string;
@@ -92,6 +94,7 @@ export function useMaterialPurchase(
 
 export function useCreateMaterialPurchase() {
   const queryClient = useQueryClient();
+  const user = useAuthStore((state) => state.user);
 
   return useMutation({
     mutationFn: async ({
@@ -121,13 +124,27 @@ export function useCreateMaterialPurchase() {
       );
       return response.json();
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (result, variables) => {
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const key = query.queryKey[0] as string;
           return key?.includes(`/api/projects/${variables.projectId}/material-purchases`);
         }
       });
+      
+      if (variables.organizationId && user?.id && result?.data?.id) {
+        logActivity({
+          organization_id: variables.organizationId,
+          user_id: user.id,
+          action: ACTIVITY_ACTIONS.CREATE_PURCHASE,
+          target_table: TARGET_TABLES.MATERIAL_PURCHASES,
+          target_id: result.data.id,
+          metadata: { 
+            invoice_number: variables.purchaseData.invoice_number,
+            total_amount: (variables.purchaseData.subtotal || 0) + (variables.purchaseData.tax_amount || 0)
+          }
+        });
+      }
     },
   });
 }

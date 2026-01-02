@@ -1,9 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useProjectContext } from '@/stores/projectContext'
-
-// NOTE: For activity logging integration, import logActivity from '@/utils/logActivity'
-// and add logging calls in mutation onSuccess handlers as needed
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity'
 
 interface Movement {
   id: string
@@ -197,7 +195,7 @@ export function useToggleMovementFavorite() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ movementId, isFavorite }: { movementId: string, isFavorite: boolean }) => {
+    mutationFn: async ({ movementId, isFavorite, organizationId, userId }: { movementId: string, isFavorite: boolean, organizationId?: string, userId?: string }) => {
       if (!supabase) {
         throw new Error('Supabase client not initialized')
       }
@@ -211,11 +209,22 @@ export function useToggleMovementFavorite() {
         throw error
       }
 
-      return { movementId, isFavorite }
+      return { movementId, isFavorite, organizationId, userId }
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['installments'] })
+
+      if (data.organizationId && data.userId) {
+        await logActivity({
+          organization_id: data.organizationId,
+          user_id: data.userId,
+          action: ACTIVITY_ACTIONS.UPDATE_MOVEMENT,
+          target_table: TARGET_TABLES.MOVEMENTS,
+          target_id: data.movementId,
+          metadata: { is_favorite: data.isFavorite }
+        })
+      }
     }
   })
 }

@@ -163,6 +163,7 @@ export function ContactsView() {
     }
 
     const contactName = formatContactName(contact);
+    const userId = userData?.user?.id;
 
     showDeleteConfirmation({
       mode: 'dangerous',
@@ -172,7 +173,12 @@ export function ContactsView() {
       itemName: contactName,
       destructiveActionText: 'Eliminar contacto',
       onConfirm: () => {
-        deleteContactMutation.mutate({ contactId: contact.id, organizationId });
+        deleteContactMutation.mutate({ 
+          contactId: contact.id, 
+          organizationId,
+          userId,
+          contactName
+        });
       },
       isLoading: deleteContactMutation.isPending,
     });
