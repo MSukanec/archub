@@ -36,7 +36,34 @@ export function registerAcquisitionRoutes(app: Express, deps: RouteDeps) {
 
       const { utm_source, utm_medium, utm_campaign, utm_content, landing_page, referrer } = req.body;
 
-      // Call the SQL function to insert the acquisition record
+      // Check if acquisition record already exists (created by signup trigger)
+      const { data: existingAcquisition } = await authenticatedSupabase
+        .from('user_acquisition')
+        .select('id')
+        .eq('user_id', userData.id)
+        .maybeSingle();
+
+      if (existingAcquisition) {
+        // Record already exists from signup trigger, update it with UTM data if provided
+        const updateData: Record<string, any> = {};
+        if (utm_source) updateData.source = utm_source;
+        if (utm_medium) updateData.medium = utm_medium;
+        if (utm_campaign) updateData.campaign = utm_campaign;
+        if (utm_content) updateData.content = utm_content;
+        if (landing_page) updateData.landing_page = landing_page;
+        if (referrer) updateData.referrer = referrer;
+
+        if (Object.keys(updateData).length > 0) {
+          await authenticatedSupabase
+            .from('user_acquisition')
+            .update(updateData)
+            .eq('user_id', userData.id);
+        }
+
+        return res.status(200).json({ success: true, updated: true });
+      }
+
+      // Only call the RPC if no record exists (shouldn't happen normally)
       const { data, error } = await authenticatedSupabase.rpc('step_create_user_acquisition', {
         p_user_id: userData.id,
         p_raw_meta: {
