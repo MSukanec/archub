@@ -9,7 +9,7 @@ interface BootGateProps {
 
 export function BootGate({ children }: BootGateProps) {
   const { user, loading: authLoading, initialized: authInitialized } = useAuthStore();
-  const { loading: bootLoading, signupCompleted, checkSignupStatus, reset } = useAppBootStore();
+  const { loading: bootLoading, signupCompleted, checkSignupStatus, stopPolling, reset } = useAppBootStore();
 
   useEffect(() => {
     if (!authInitialized || authLoading) {
@@ -19,9 +19,10 @@ export function BootGate({ children }: BootGateProps) {
     if (user) {
       checkSignupStatus();
     } else {
+      stopPolling();
       reset();
     }
-  }, [user, authInitialized, authLoading, checkSignupStatus, reset]);
+  }, [user, authInitialized, authLoading, checkSignupStatus, stopPolling, reset]);
 
   if (!authInitialized || authLoading) {
     return (
@@ -44,7 +45,7 @@ export function BootGate({ children }: BootGateProps) {
     );
   }
 
-  if (signupCompleted === false) {
+  if (signupCompleted === false || (bootLoading && signupCompleted !== true)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background gap-4">
         <LoadingSpinner size="lg" />

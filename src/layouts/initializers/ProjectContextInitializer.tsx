@@ -2,19 +2,22 @@ import { useEffect, useRef } from 'react'
 import { useCurrentUser, useHeartbeat } from '@/features/users/hooks'
 import { useUserOrganizationPreferences } from '@/features/organization'
 import { useProjectContext } from '@/stores/projectContext'
+import { useAppBootStore } from '@/stores/appBootStore'
 import { updateProjectLastActive } from '@/features/projects'
 
 /**
  * Componente que inicializa automáticamente el proyecto correcto
  * cuando cambia la organización actual usando la nueva tabla
- * user_organization_preferences
+ * user_organization_preferences.
+ * Espera a que signup_completed sea true antes de inicializar.
  */
 export function ProjectContextInitializer() {
   const { data: userData } = useCurrentUser()
   const { currentOrganizationId, selectedProjectId, setSelectedProject } = useProjectContext()
+  const { signupCompleted } = useAppBootStore()
   
-  // Enviar heartbeat periódico para tracking de presencia
-  useHeartbeat(currentOrganizationId)
+  // Enviar heartbeat periódico para tracking de presencia (solo si signup completado)
+  useHeartbeat(signupCompleted === true ? currentOrganizationId : undefined)
   
   // Obtener las preferencias de la organización actual
   const userId = userData?.user?.id;

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useCurrentUser, usePresenceTracker } from '@/features/users/hooks';
 import { usePresenceStore } from '@/stores/presenceStore';
+import { useAppBootStore } from '@/stores/appBootStore';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -8,17 +9,19 @@ import { supabase } from '@/lib/supabase';
  * 1. Suscribe a cambios en tiempo real de user_presence
  * 2. Trackea automáticamente cambios de vista (con analytics)
  * 3. Limpia suscripciones y cierra sesiones al desloguearse
+ * 4. Espera a que signup_completed sea true antes de inicializar
  */
 export function PresenceInitializer() {
   const { data: userData } = useCurrentUser();
   const { subscribeToPresenceChanges, unsubscribe, isSubscribed } = usePresenceStore();
+  const { signupCompleted } = useAppBootStore();
   
   // Auto-track de cambios de vista (hook personalizado)
   usePresenceTracker();
 
   useEffect(() => {
-    // Solo inicializar si el usuario está autenticado
-    if (userData?.user && !isSubscribed) {
+    // Solo inicializar si el usuario está autenticado Y signup está completado
+    if (userData?.user && signupCompleted === true && !isSubscribed) {
       subscribeToPresenceChanges();
     }
 
@@ -44,7 +47,7 @@ export function PresenceInitializer() {
     };
     // ⚠️ IMPORTANTE: NO incluir isSubscribed en dependencies para evitar cleanup prematuro
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userData?.user]);
+  }, [userData?.user, signupCompleted]);
 
   // Este componente no renderiza nada
   return null;

@@ -6,18 +6,20 @@ interface AppBootState {
   signupCompleted: boolean | null;
   error: string | null;
   checkCount: number;
+  isPolling: boolean;
   checkSignupStatus: () => Promise<void>;
+  stopPolling: () => void;
   reset: () => void;
 }
 
-const MAX_RETRIES = 10;
-const RETRY_DELAY = 1000;
+const POLL_INTERVAL = 1500;
 
 export const useAppBootStore = create<AppBootState>((set, get) => ({
   loading: true,
   signupCompleted: null,
   error: null,
   checkCount: 0,
+  isPolling: false,
 
   checkSignupStatus: async () => {
     if (!supabase) {
@@ -25,16 +27,25 @@ export const useAppBootStore = create<AppBootState>((set, get) => ({
       return;
     }
 
-    set({ loading: true, error: null });
+    const state = get();
+    if (state.isPolling) {
+      return;
+    }
 
-    const checkWithRetry = async (): Promise<void> => {
-      const state = get();
+    set({ loading: true, error: null, isPolling: true, checkCount: 0 });
+
+    const poll = async (): Promise<void> => {
+      const currentState = get();
+      
+      if (!currentState.isPolling) {
+        return;
+      }
       
       try {
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
-          set({ loading: false, signupCompleted: null, error: null });
+          set({ loading: false, signupCompleted: null, error: null, isPolling: false });
           return;
         }
 
@@ -44,52 +55,34 @@ export const useAppBootStore = create<AppBootState>((set, get) => ({
           .eq('auth_id', user.id)
           .maybeSingle();
 
+        if (data?.signup_completed === true) {
+          set({ loading: false, signupCompleted: true, error: null, checkCount: 0, isPolling: false });
+          return;
+        }
+
         if (error) {
-          if (state.checkCount < MAX_RETRIES) {
-            set({ checkCount: state.checkCount + 1 });
-            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-            return checkWithRetry();
-          }
-          set({ loading: false, signupCompleted: false, error: error.message });
-          return;
+          set({ loading: false, signupCompleted: false, checkCount: currentState.checkCount + 1, error: error.message });
+        } else {
+          set({ loading: false, signupCompleted: false, checkCount: currentState.checkCount + 1, error: null });
         }
-
-        if (!data) {
-          if (state.checkCount < MAX_RETRIES) {
-            set({ checkCount: state.checkCount + 1 });
-            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-            return checkWithRetry();
-          }
-          set({ loading: false, signupCompleted: false, error: "User record not found after retries" });
-          return;
-        }
-
-        if (data.signup_completed === true) {
-          set({ loading: false, signupCompleted: true, error: null, checkCount: 0 });
-          return;
-        }
-
-        if (state.checkCount < MAX_RETRIES) {
-          set({ checkCount: state.checkCount + 1 });
-          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-          return checkWithRetry();
-        }
-
-        set({ loading: false, signupCompleted: false, error: "Signup not completed after retries" });
+        
+        await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
+        return poll();
       } catch (err: any) {
-        if (state.checkCount < MAX_RETRIES) {
-          set({ checkCount: state.checkCount + 1 });
-          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-          return checkWithRetry();
-        }
-        set({ loading: false, signupCompleted: false, error: err.message || "Unknown error" });
+        set({ loading: false, signupCompleted: false, checkCount: currentState.checkCount + 1, error: err.message || "Unknown error" });
+        await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
+        return poll();
       }
     };
 
-    await checkWithRetry();
+    await poll();
+  },
+
+  stopPolling: () => {
+    set({ isPolling: false });
   },
 
   reset: () => {
-    set({ loading: true, signupCompleted: null, error: null, checkCount: 0 });
+    set({ loading: true, signupCompleted: null, error: null, checkCount: 0, isPolling: false });
   },
 }));
