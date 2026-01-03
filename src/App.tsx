@@ -131,7 +131,7 @@ import CapitalPage from "@/pages/dashboard/CapitalPage";
 
 import NotFound from "@/pages/public/NotFound";
 import { ModalProvider } from "@/components/modal";
-import { PresenceInitializer, ProjectContextInitializer, InactivityLogoutInitializer } from "@/layouts/initializers";
+import { PresenceInitializer, ProjectContextInitializer, InactivityLogoutInitializer, BootGate } from "@/layouts/initializers";
 import { LoadingSpinner } from "@/components/shared/layout/LoadingSpinner";
 
 function LazyLoadFallback() {
@@ -460,12 +460,14 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ActionBarMobileProvider>
-          <InactivityLogoutInitializer />
-          <ProjectContextInitializer />
-          <PresenceInitializer />
-          <Toaster />
-          <Router />
-          <ModalProvider />
+          <BootGate>
+            <InactivityLogoutInitializer />
+            <ProjectContextInitializer />
+            <PresenceInitializer />
+            <Toaster />
+            <Router />
+            <ModalProvider />
+          </BootGate>
         </ActionBarMobileProvider>
       </TooltipProvider>
     </QueryClientProvider>

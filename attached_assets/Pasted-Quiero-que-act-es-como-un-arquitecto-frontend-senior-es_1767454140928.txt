@@ -1,0 +1,63 @@
+Quiero que actúes como un arquitecto frontend senior especializado en React + Supabase + Zustand.
+
+CONTEXTO IMPORTANTE (leer todo):
+
+Estoy desarrollando una app SaaS. El proceso de signup NO termina cuando Supabase Auth devuelve una sesión.
+El backend (Supabase) tiene un trigger complejo que crea múltiples tablas (users, organizations, preferences, etc.).
+
+Para garantizar consistencia, el backend marca el fin real del signup con:
+users.signup_completed = true
+
+Hasta que ese campo sea TRUE:
+- El frontend NO debe ejecutar ninguna lógica
+- NO debe llamar presence
+- NO debe llamar heartbeat
+- NO debe consultar preferencias
+- NO debe consultar organización
+- NO debe montar queries automáticas
+
+El frontend debe esperar explícitamente a que signup_completed sea true.
+
+STACK OBLIGATORIO:
+- React
+- Zustand
+- Supabase JS client
+- SPA
+NO usar Redux
+NO usar Context API para esto
+
+OBJETIVO DEL PASO 3:
+Implementar un “gate global de arranque” del frontend basado en users.signup_completed.
+
+LO QUE NECESITO QUE HAGAS:
+
+1) Crear un store global con Zustand (por ejemplo appBootStore o similar) que:
+   - Tenga estados:
+     - loading
+     - signupCompleted
+     - error
+   - Tenga una función async checkSignupStatus()
+   - Esa función debe consultar la tabla public.users y traer el campo signup_completed
+   - Debe usar supabase.from('users').select('signup_completed').single()
+
+2) Integrar este store en el punto más alto posible de la app (App.tsx o layout principal):
+   - Cuando hay sesión de Supabase (SIGNED_IN), llamar UNA SOLA VEZ a checkSignupStatus
+   - Mientras loading === true, mostrar una pantalla de “Inicializando cuenta” (placeholder simple)
+   - Si signupCompleted === false, mantener el loading (no renderizar la app)
+   - SOLO cuando signupCompleted === true:
+       - Renderizar el resto de la aplicación
+       - Permitir que se activen presence, heartbeat y demás hooks
+
+3) NO modificar backend
+4) NO inventar endpoints nuevos
+5) NO hacer polling agresivo (un check inicial + reintento suave si querés)
+6) NO ejecutar queries dependientes de organización hasta que signupCompleted sea true
+
+IMPORTANTE:
+Este gate es obligatorio y es la única fuente de verdad para saber si el usuario está listo.
+No asumir que Auth == usuario creado.
+
+ENTREGABLE:
+- Código del store Zustand
+- Código de integración en App.tsx (o archivo raíz)
+- Explicación breve de dónde se enchufa el gate

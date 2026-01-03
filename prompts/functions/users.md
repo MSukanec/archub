@@ -1,15 +1,17 @@
 # Detalle de las funciones de Supabase:
 
-# Funciones "PADRE:
+# Funciones "PADRE":
 
 ## Funcion handle_new_user:
-
 
 declare
   v_user_id uuid;
   v_org_id uuid;
   v_admin_role_id uuid;
   v_avatar_source public.avatar_source_t := 'email';
+  v_avatar_url text;
+  v_full_name text;
+  v_provider text;
 begin
   ----------------------------------------------------------------
   -- 🔒 GUARD: evitar doble ejecución del signup
@@ -23,13 +25,42 @@ begin
   END IF;
 
   ----------------------------------------------------------------
+  -- 🧠 Provider real (fuente confiable)
+  ----------------------------------------------------------------
+  v_provider := coalesce(
+    NEW.raw_app_meta_data->>'provider',
+    NEW.raw_user_meta_data->>'provider',
+    'email'
+  );
+
+  ----------------------------------------------------------------
   -- Avatar source
   ----------------------------------------------------------------
-  IF NEW.raw_user_meta_data->>'provider' = 'google' THEN
+  IF v_provider = 'google' THEN
     v_avatar_source := 'google';
-  ELSIF NEW.raw_user_meta_data->>'provider' = 'discord' THEN
+  ELSIF v_provider = 'discord' THEN
     v_avatar_source := 'discord';
+  ELSE
+    v_avatar_source := 'email';
   END IF;
+
+  ----------------------------------------------------------------
+  -- Avatar URL (defensivo)
+  ----------------------------------------------------------------
+  v_avatar_url := coalesce(
+    NEW.raw_user_meta_data->>'avatar_url',
+    NEW.raw_user_meta_data->>'picture',
+    NULL
+  );
+
+  ----------------------------------------------------------------
+  -- Full name (defensivo)
+  ----------------------------------------------------------------
+  v_full_name := coalesce(
+    NEW.raw_user_meta_data->>'full_name',
+    NEW.raw_user_meta_data->>'name',
+    split_part(NEW.email, '@', 1)
+  );
 
   ----------------------------------------------------------------
   -- 1) User
@@ -37,14 +68,14 @@ begin
   v_user_id := public.step_create_user(
     NEW.id,
     lower(NEW.email),
-    NEW.raw_user_meta_data->>'full_name',
-    NEW.raw_user_meta_data->>'avatar_url',
+    v_full_name,
+    v_avatar_url,
     v_avatar_source,
     'e6cc68d2-fc28-421b-8bd3-303326ef91b8'
   );
 
   ----------------------------------------------------------------
-  -- 1.1) 📈 User acquisition (NUEVO)
+  -- 1.1) 📈 User acquisition (idempotente recomendado)
   ----------------------------------------------------------------
   PERFORM public.step_create_user_acquisition(
     v_user_id,
@@ -61,7 +92,7 @@ begin
   ----------------------------------------------------------------
   v_org_id := public.step_create_organization(
     v_user_id,
-    'Organización de ' || coalesce(NEW.raw_user_meta_data->>'full_name', 'Usuario'),
+    'Organización de ' || v_full_name,
     '015d8a97-6b6e-4aec-87df-5d1e6b0e4ed2'
   );
 
@@ -71,7 +102,7 @@ begin
   PERFORM public.step_create_organization_data(v_org_id);
 
   ----------------------------------------------------------------
-  -- 5) Organization roles (asegurar existencia)
+  -- 5) Organization roles
   ----------------------------------------------------------------
   PERFORM public.step_create_organization_roles(v_org_id);
 
@@ -100,7 +131,7 @@ begin
   );
 
   ----------------------------------------------------------------
-  -- 8) 🔐 Asignar permisos DECLARATIVOS a TODOS los roles
+  -- 8) Permisos
   ----------------------------------------------------------------
   PERFORM public.step_assign_org_role_permissions(v_org_id);
 
@@ -132,6 +163,15 @@ begin
   ----------------------------------------------------------------
   PERFORM public.step_create_user_preferences(v_user_id, v_org_id);
 
+  ----------------------------------------------------------------
+  -- ✅ MARCAR SIGNUP COMO COMPLETADO (ÚNICA FUENTE DE VERDAD)
+  ----------------------------------------------------------------
+  UPDATE public.users
+  SET
+    signup_completed = true,
+    updated_at = now()
+  WHERE id = v_user_id;
+
   RETURN NEW;
 
 exception
@@ -149,6 +189,7 @@ exception
     );
     raise;
 end;
+
 
 ## Funcion handle_new_organization:
 
@@ -270,7 +311,6 @@ END;
 
 ## Funcion step_create_user:
 
-
 DECLARE
   v_user_id uuid := gen_random_uuid();
 BEGIN
@@ -302,19 +342,18 @@ END;
 
 ## Funcion step_create_user_acquisition:
 
-
 declare
   v_source text;
 begin
-  -- ---------------------------------------------
+  ----------------------------------------------------------------
   -- Fuente (fallback a direct)
-  -- ---------------------------------------------
+  ----------------------------------------------------------------
   v_source := coalesce(
     p_raw_meta->>'utm_source',
     'direct'
   );
 
-  insert into public.user_acquisition (
+  INSERT INTO public.user_acquisition (
     user_id,
     source,
     medium,
@@ -323,7 +362,7 @@ begin
     landing_page,
     referrer
   )
-  values (
+  VALUES (
     p_user_id,
     v_source,
     p_raw_meta->>'utm_medium',
@@ -331,28 +370,31 @@ begin
     p_raw_meta->>'utm_content',
     p_raw_meta->>'landing_page',
     p_raw_meta->>'referrer'
-  );
-end;
-
-## Funcion step_create_user_data:
-
-
-BEGIN
-  INSERT INTO public.user_data (id, user_id, created_at)
-  VALUES (gen_random_uuid(), p_user_id, now());
+  )
+  ON CONFLICT (user_id) DO UPDATE SET
+    source = EXCLUDED.source,
+    medium = EXCLUDED.medium,
+    campaign = EXCLUDED.campaign,
+    content = EXCLUDED.content,
+    landing_page = EXCLUDED.landing_page,
+    referrer = EXCLUDED.referrer;
 
 EXCEPTION
   WHEN OTHERS THEN
     PERFORM public.log_system_error(
       'trigger',
-      'step_create_user_data',
+      'step_create_user_acquisition',
       'signup',
       SQLERRM,
-      jsonb_build_object('user_id', p_user_id),
+      jsonb_build_object(
+        'user_id', p_user_id,
+        'raw_meta', p_raw_meta
+      ),
       'critical'
     );
     RAISE;
-END;
+end;
+
 
 ## Funcion step_create_organization
 
