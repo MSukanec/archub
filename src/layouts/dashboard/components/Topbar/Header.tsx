@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ExpandableAvatarGroup } from "@/components/shared/layout/ExpandableAvatarGroup";
 import { ContextSelector } from "./ContextSelector";
+import { PlanRestricted } from "@/components/shared/restrictions";
+import { useProjectsCount } from "@/features/projects";
 
 interface Tab {
   id: string;
@@ -50,6 +52,8 @@ export function Header({
   showMembers = true,
   showProjectSelector = false
 }: HeaderProps) {
+  const { data: projectsCount = 0 } = useProjectsCount(organizationId || undefined);
+
   return (
     <div className={cn(
       "w-full bg-[var(--layout-bg)]",
@@ -146,19 +150,38 @@ export function Header({
           {/* Right: Action Buttons */}
           {actions.length > 0 && (
             <div className="flex items-center gap-2 py-2">
-              {actions.map((action) => (
-                <Button
-                  key={action.id}
-                  onClick={action.onClick}
-                  variant={action.variant || "default"}
-                  size="sm"
-                  disabled={action.disabled}
-                  className="h-8"
-                >
-                  {action.icon && <span className="mr-2">{action.icon}</span>}
-                  {action.label}
-                </Button>
-              ))}
+              {actions.map((action) => {
+                const isNewProject = action.label === "Nuevo Proyecto";
+                const button = (
+                  <Button
+                    key={action.id}
+                    onClick={action.onClick}
+                    variant={action.variant || "default"}
+                    size="sm"
+                    disabled={action.disabled}
+                    className="h-8"
+                  >
+                    {action.icon && <span className="mr-2">{action.icon}</span>}
+                    {action.label}
+                  </Button>
+                );
+
+                if (isNewProject) {
+                  return (
+                    <PlanRestricted
+                      key={action.id}
+                      feature="max_projects"
+                      current={projectsCount}
+                      useUpgradeModal={true}
+                      modalImage="/features/ft-projects-512.webp"
+                    >
+                      {button}
+                    </PlanRestricted>
+                  );
+                }
+
+                return button;
+              })}
             </div>
           )}
           </div>

@@ -7,7 +7,9 @@ import { useGlobalModalStore } from '@/components/modal';
 import { ProjectActivesView } from '@/features/projects/views/ProjectActivesView';
 import { ProjectListView } from '@/features/projects/views/ProjectListView';
 import { ProjectSettingsView } from '@/features/projects/views/ProjectSettingsView';
+import { useProjectsCount } from '@/features/projects';
 import { Button } from '@/components/ui/button';
+import { PlanRestricted } from '@/components/shared/restrictions';
 
 const PROJECTS_TABS = [
   { id: 'actives', label: 'Proyectos Activos' },
@@ -20,6 +22,7 @@ export default function OrganizationProjectsPage() {
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const organizationId = userData?.organization?.id;
+  const { data: projectsCount = 0 } = useProjectsCount(organizationId || undefined);
   
   const layoutPreference = userData?.preferences?.layout || 'experimental';
   const isLabLayout = layoutPreference === 'lab';
@@ -44,14 +47,21 @@ export default function OrganizationProjectsPage() {
   const secondaryRightContent = (
     <div className="flex items-center gap-3">
       {(activeTab === 'actives' || activeTab === 'list') && (
-        <Button
-          size="sm"
-          onClick={handleNewProject}
-          data-testid="button-add-project"
+        <PlanRestricted
+          feature="max_projects"
+          current={projectsCount}
+          useUpgradeModal={true}
+          modalImage="/features/ft-projects-512.webp"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          Nuevo Proyecto
-        </Button>
+          <Button
+            size="sm"
+            onClick={handleNewProject}
+            data-testid="button-add-project"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nuevo Proyecto
+          </Button>
+        </PlanRestricted>
       )}
     </div>
   );
