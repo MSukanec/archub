@@ -57,6 +57,7 @@ export default function OrganizationProjectsPage() {
             size="sm"
             onClick={handleNewProject}
             data-testid="button-add-project"
+            className="relative"
           >
             <Plus className="w-4 h-4 mr-2" />
             Nuevo Proyecto

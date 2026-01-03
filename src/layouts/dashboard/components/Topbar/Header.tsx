@@ -168,15 +168,16 @@ export function Header({
 
                 if (isNewProject) {
                   return (
-                    <PlanRestricted
-                      key={action.id}
-                      feature="max_projects"
-                      current={projectsCount}
-                      useUpgradeModal={true}
-                      modalImage="/features/ft-projects-512.webp"
-                    >
-                      {button}
-                    </PlanRestricted>
+                    <div key={action.id} className="relative inline-flex">
+                      <PlanRestricted
+                        feature="max_projects"
+                        current={projectsCount}
+                        useUpgradeModal={true}
+                        modalImage="/features/ft-projects-512.webp"
+                      >
+                        {button}
+                      </PlanRestricted>
+                    </div>
                   );
                 }
 
