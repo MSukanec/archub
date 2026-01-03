@@ -158,15 +158,10 @@ export function PlanCard({
             <>
               <div className="flex items-baseline gap-1">
                 <span className={cn(
-                  "text-sm",
-                  isPopular ? "text-gray-400" : "text-[var(--text-muted)]"
-                )}>
-                  DESDE $
-                </span>
-                <span className={cn(
-                  "text-5xl font-bold tracking-tight",
+                  "text-5xl font-bold tracking-tight flex items-baseline gap-1",
                   isPopular ? "text-white" : "text-[var(--text-default)]"
                 )}>
+                  <span className="text-2xl font-normal">$</span>
                   {monthlyPrice}
                 </span>
                 <span className={cn(
