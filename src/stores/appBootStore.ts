@@ -13,6 +13,7 @@ interface AppBootState {
 }
 
 const POLL_INTERVAL = 1500;
+const MAX_POLL_ATTEMPTS = 40;
 
 export const useAppBootStore = create<AppBootState>((set, get) => ({
   loading: false,
@@ -23,7 +24,7 @@ export const useAppBootStore = create<AppBootState>((set, get) => ({
 
   checkSignupStatus: async () => {
     if (!supabase) {
-      set({ loading: false, signupCompleted: false, error: "Supabase not initialized" });
+      set({ loading: false, signupCompleted: true, error: null, isPolling: false });
       return;
     }
 
@@ -38,6 +39,11 @@ export const useAppBootStore = create<AppBootState>((set, get) => ({
       const currentState = get();
       
       if (!currentState.isPolling) {
+        return;
+      }
+
+      if (currentState.checkCount >= MAX_POLL_ATTEMPTS) {
+        set({ loading: false, signupCompleted: true, error: null, isPolling: false });
         return;
       }
       
@@ -60,16 +66,12 @@ export const useAppBootStore = create<AppBootState>((set, get) => ({
           return;
         }
 
-        if (error) {
-          set({ loading: false, signupCompleted: false, checkCount: currentState.checkCount + 1, error: error.message });
-        } else {
-          set({ loading: false, signupCompleted: false, checkCount: currentState.checkCount + 1, error: null });
-        }
+        set({ loading: true, signupCompleted: false, checkCount: currentState.checkCount + 1, error: error?.message || null });
         
         await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
         return poll();
       } catch (err: any) {
-        set({ loading: false, signupCompleted: false, checkCount: currentState.checkCount + 1, error: err.message || "Unknown error" });
+        set({ loading: true, signupCompleted: false, checkCount: currentState.checkCount + 1, error: err.message || "Unknown error" });
         await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
         return poll();
       }
