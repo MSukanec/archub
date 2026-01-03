@@ -15,8 +15,8 @@ interface AppBootState {
 const POLL_INTERVAL = 1500;
 
 export const useAppBootStore = create<AppBootState>((set, get) => ({
-  loading: true,
-  signupCompleted: null,
+  loading: false,
+  signupCompleted: true,
   error: null,
   checkCount: 0,
   isPolling: false,
@@ -42,10 +42,10 @@ export const useAppBootStore = create<AppBootState>((set, get) => ({
       }
       
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
         
-        if (!user) {
-          set({ loading: false, signupCompleted: null, error: null, isPolling: false });
+        if (userError || !user) {
+          set({ loading: false, signupCompleted: true, error: null, isPolling: false });
           return;
         }
 
@@ -83,6 +83,6 @@ export const useAppBootStore = create<AppBootState>((set, get) => ({
   },
 
   reset: () => {
-    set({ loading: true, signupCompleted: null, error: null, checkCount: 0, isPolling: false });
+    set({ loading: false, signupCompleted: true, error: null, checkCount: 0, isPolling: false });
   },
 }));
